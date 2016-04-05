@@ -33,9 +33,7 @@ If the result is false,
 the packet is ignored.
 
 The main benefit of using filters is performance.
-Applying a filter to a packet is much more time efficient than processing the packet information.
-The more restrictive filter produces a smaller dataset.
-The result is faster processing for each iteration.
+Applying a filter to a packet produces a smaller dataset, resulting in faster processing time for each iteration. 
 
 Two strategies for developing effective filters:
 

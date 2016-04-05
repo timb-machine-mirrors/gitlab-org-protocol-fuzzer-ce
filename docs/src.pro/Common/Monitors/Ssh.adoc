@@ -4,90 +4,130 @@
 
 *Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
 
-The _SshCommand_ monitor connects to a remote host over SSH (Secure Shell), runs a command,
-and waits for the command to complete. The output from the process is logged when a fault
-is detected. This monitor can operate as a fault detector, data collector, and automation
-module depending on configuration. All major forms of SSH authentication are supported.
+The _SshCommand_ monitor connects to a remote host over SSH (Secure Shell),
+runs a command,
+and waits for the command to complete.
+The output from the process is logged when a fault is detected.
+This monitor can operate as a fault detector,
+data collector,
+and automation module depending on configuration.
 
-To increase the speed of operation, the monitor holds open the SSH connection to the remote
-machine. This removes the cost of authenticating every time the command is executed.
-If multiple _SshCommand_ monitors are configured against the same remote host, multiple
-SSH connections are created and held open.
+_SshCommand_ supports password, keyboard, and private key authentication methods.
+
+To increase the speed of operation,
+the monitor holds open the SSH connection to the remote machine across test iterations.
+This removes the cost of authenticating every time the command is executed.
+If multiple _SshCommand_ monitors are configured against the same remote host,
+multiple SSH connections are created and held open.
 
 *Fault Detection*
 
-This monitor can perform fault detection by matching output from the executed command with
-a regular expression. Set the +FaultOnMatch+ parameter to +true+ (this is the default and
-the original use of this monitor), then provide a regular expression to match the
-+CheckValue+ parameter to enable the fault detection.
+This monitor can perform fault detection depending on the configuration of the 'FaultOnMatch' and 'CheckValue' parameters.
+The following table describes the behavior of these parameters:
+[options="header",halign="center"]
+|==========================================================
+|FaultOnMatch      | CheckValue match  | Behavior
+|`true`            | yes               | Fault detection
+|`true`            | no                | Data collection
+|`false`           | yes               | Data collection
+|`false`           | no                | Fault detection
+|==========================================================
 
 This monitor will also automatically detect link:https://github.com/google/sanitizers/wiki/AddressSanitizer[AddressSanitizer] crash information and generate a fault if found.
 
 *Data Collection*
 
-The monitor always collects the output from the executed command and reports it for logging
-when a fault is detected.
+The monitor always collects the output from the executed command and reports it for logging when a fault is detected.
 
 *Automation*
 
-This monitor can run commands on remote machines to perform automation tasks. Interesting points to wait during a fuzzing session include the following:
+The _SshCommand_ monitor can run the specified command at various points in time during a fuzzing session:
 
 * At the start or end of a fuzzing run
 * At the start or end of each test iteration
+* While detecting a fault
 * After detecting a fault
 * At the start of an iteration that immediately follows a fault
-* When called from the StateModel
+* When a specified call is received from the state model
 
 === Parameters
 
 _Required:_
 
-Host:: Remote Host for the SSH connection; the connection target.
+Host::
+Remote hostname or IP address for the SSH connection.
 
-Username:: Username for ssh.
+Username::
+Username for authentication with the remote host.
 
-Command:: Command to check for fault.
+Command::
+The command to execute on the remote host.
 
 _Optional:_
 
-Password:: Password for SSH account, defaults to "".
+Password::
+Password for authentication with the remote host.
+Defaults to `""`.
+Either the 'Password' or the 'KeyPath' parameter must be set.
 
-KeyPath:: Path to SSH key, defaults to "".
+KeyPath::
+A local path to the private part of an SSH key-pair to be used for authentication with the remote host.
+Defaults to `""`.
+Either the 'Password' or the 'KeyPath' parameter must be set.
 
-CheckValue:: A regular expression to match the command response, defaults to "".
+CheckValue::
+A regular expression to match the command output.
+Defaults to `""`.
 
-FaultOnMatch:: Trigger a fault if the CheckValue regular expression matches, defaults to false.
+FaultOnMatch::
+Trigger a fault if 'FaultOnMatch' is `true` and the 'CheckValue' regular expression matches,
+or 'FaultOnMatch' is `false` and the 'CheckValue' regular expression does not match.
+Defaults to `false`.
 
-StartOnCall:: Run when signaled by the state machine.
+StartOnCall::
+Run the specified command after the monitor receives the specified call from the state machine.
+This value is used only when the 'When' parameter is set to `OnCall`.
 
-When:: Period when the command should be run. Defaults to +DetectFault+. +
+When::
++
+Specify one of the following values to determine when to run the specified command:
++
 [cols="1,2" options="header",halign="center"]
 |==========================================================
 |'When' Value                 |Description
-|+DetectFault+                |Run the command to check for the faulting condition. Requires a regular expression in the +CheckValue+ parameter. Default mode of operation.
-|+OnStart+                    |Run the command when fuzzing session starts. Command runs once per session.
-|+OnEnd+                      |Run the command when fuzzing session stops. Command runs run once per session.
-|+OnIterationStart+           |Run the command at start of each iteration.
-|+OnIterationEnd+             |Run the command at end of each iteration.
-|+OnFault+                    |Run the command when Peach detects a fault.
-|+OnIterationStartAfterFault+ |Run the command at start of an iteration that immediately follows a fault detection.
-|+OnCall+                     |Trigger the command to run from the state model. The command runs when the _StartOnCall_ message is received.
+|+DetectFault+                |
+Run the command to perform fault detection.
+Requires a regular expression to be specified in the 'CheckValue' parameter.
+This is the default setting.
+|+OnStart+                    |
+Run the command when fuzzing session starts.
+This occurs once per session.
+|+OnEnd+                      |
+Run the command when fuzzing session stops.
+This occurs once per session.
+|+OnIterationStart+           |
+Run the command at the start of each iteration.
+|+OnIterationEnd+             |
+Run the command at the end of each iteration.
+|+OnFault+                    |
+Run the command when any monitor detects a fault.
+|+OnIterationStartAfterFault+ |
+Run the command at the start of an iteration that immediately follows a fault detection.
+|+OnCall+                     |
+Run the command upon receipt of the call specified by the 'WaitOnCall' parameter from the state model.
 |==========================================================
 +
-.When Choices for Running a Command
+.When Choices
 image::{images}/Common/Monitors/Timings_SSH.png[scalewidth="75%"]
 
 === Examples
 
 ifdef::peachug[]
 
-.Check for core dump files +
+.Fault Detection example
 ====================
-
-This parameter example is from a setup that connects to the target machine using SSH at the end of each iteration
-to check core files. If no core files exist, a fault occurs.
-
-To run this example, specify a valid Host, Username, and Password.
+This example connects to the target machine using SSH during the fault detection phase of a test iteration.
+A fault occurs if any core files exist.
 
 [cols="2,4" options="header",halign="center"]
 |==========================================================
@@ -103,88 +143,17 @@ To run this example, specify a valid Host, Username, and Password.
 
 endif::peachug[]
 
-
 ifndef::peachug[]
-
 
 .Checking for core dump files
 ==========
-This example connects to the target Linux machine using SSH at the end of each iteration to check if any core files exist. If no core files exist, a fault occurs.
-
-To run this example, specify a valid Host, Username, and Password.
+This example connects to the target machine using SSH during the fault detection phase of a test iteration.
+A fault occurs if any core files exist.
 
 [source,xml]
 ----
-<?xml version="1.0" encoding="utf-8"?>
-<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-
-  <DataModel name="TheDataModel">
-    <Number size="32" signed="false" value="31337" />
-  </DataModel>
-
-  <StateModel name="State" initialState="Initial" >
-    <State name="Initial">
-      <Action type="output">
-          <DataModel ref="TheDataModel"/>
-      </Action>
-    </State>
-  </StateModel>
-
-  <Agent name="Local">
-    <Monitor class="Ssh">
-      <Param name="Host" value="my.target.com" />
-      <Param name="Username" value="tester" />
-      <Param name="Password" value="Password!" />
-      <Param name="Command" value="ls /var/cores/*.core" />
-      <Param name="CheckValue" value="target.*?.core" />
-      <Param name="FaultOnMatch" value="true" />
-    </Monitor>
-  </Agent>
-
-  <Test name="Default">
-    <StateModel ref="State"/>
-
-    <Agent ref="Local" />
-
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
-</Peach>
+include::Ssh_Example.xml[]
 ----
-
-Output for this example.
-
-----
->peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
-[*] Test 'Default' starting with random seed 63850.
-Peach.Core.Agent.Agent StartMonitor: Monitor Ssh
-Peach.Core.Agent.Agent SessionStarting: Monitor
-
-[R1,-,-] Performing iteration
-Peach.Core.Engine runTest: Performing recording iteration.
-Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
-Peach.Core.Dom.Action ActionType.Output
-Peach.Core.Publishers.ConsolePublisher start()
-Peach.Core.Publishers.ConsolePublisher open()
-Peach.Core.Publishers.ConsolePublisher output(4 bytes)
-00000000   69 7A 00 00                                        iz??
-Peach.Core.Publishers.ConsolePublisher close()
-Peach.Core.Engine runTest: context.config.singleIteration == true
-Peach.Core.Publishers.ConsolePublisher stop()
-Peach.Core.Agent.Agent SessionFinished: Monitor
-
-[*] Test 'Default' finished.
-----
-
-To verify that Peach is checking for a file on the remote machine, create a file named target.testing.core in /var/cores. When Peach logs in and finds that file, a fault occurs.
-
 ==========
 
 endif::peachug[]

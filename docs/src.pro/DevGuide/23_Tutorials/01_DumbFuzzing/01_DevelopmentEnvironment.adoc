@@ -9,7 +9,7 @@ A good XML editor is definitely a must.  A good free XML editor for Windows is h
 
 === Latest Peach
 
-Always stay up to date on the version of Peach you are using to get the latest bug fixes.
+Always stay up to date on the version of Peach to ensure you have the latest bug fixes.
 
 ===  Debugger and support tools
 

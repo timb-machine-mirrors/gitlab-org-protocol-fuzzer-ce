@@ -17,9 +17,7 @@ By default, all processes are monitored.
 [IMPORTANT]
 ======
 Before fuzzing,
-make sure to disable the Apple crash report dialog window,
-and when the fuzzing session ends,
-make sure to enable the crash report dialog window.
+make sure to disable the Apple crash report dialog window. When the fuzzing session ends, reenable the crash report dialog window.
 Commands to disable and enable the crash report dialog window follow:
 
 * Disable the crash report dialog:

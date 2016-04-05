@@ -37,6 +37,6 @@ In the final "call" action, notice that we have configured an attribute called "
 This attribute causes this action to send a "call" message to any configured Agent (see the next page) with the message "LaunchViewer".
 This is how the debugger monitor knows to launch the process.
 
-Sweet!  We are all set!  Next we just need to configure our debugger and publishers!
+We are all set!  Next we just need to configure our debugger and publishers.
 
 // end

@@ -139,6 +139,7 @@ namespace Peach.Core
 			"pf_node.exe", 
 			"PitTester.exe",
 			"pitc.exe",
+			"komodo.dll",
 		};
 
 		#endregion

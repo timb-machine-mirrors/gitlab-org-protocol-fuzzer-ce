@@ -10,10 +10,8 @@ using Microsoft.Owin;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Microsoft.Owin.FileSystems;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using Peach.Core;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
@@ -159,19 +157,7 @@ namespace Peach.Pro.WebApi2
 		{
 			var cfg = new HttpConfiguration();
 
-			var json = cfg.Formatters.JsonFormatter.SerializerSettings;
-
-			json.ContractResolver = new CamelCasePropertyNamesContractResolver
-			{
-				IgnoreSerializableAttribute = true
-			};
-
-			json.NullValueHandling = NullValueHandling.Ignore;
-			json.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-			// NOTE: Don't ignore default values so integers and booleans get included in json
-
-			json.Converters.Insert(0, new StringEnumConverter { CamelCaseText = true });
-			json.Converters.Insert(0, new TimeSpanJsonConverter());
+			cfg.Formatters.JsonFormatter.SerializerSettings = JsonUtilties.GetSettings();
 
 			cfg.MapHttpAttributeRoutes();
 
@@ -194,7 +180,6 @@ namespace Peach.Pro.WebApi2
 				c.OperationFilter<CommonResponseFilter>();
 				c.SchemaFilter<RequiredParameterFilter>();
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
-
 			}).EnableSwaggerUi();
 
 			app.UseWebApi(cfg);
@@ -204,7 +189,8 @@ namespace Peach.Pro.WebApi2
 
 			AddStaticContent(app, "", "public");
 
-			AddStaticContent(app, "/docs", "docs/webhelp");
+			AddStaticContent(app, "/docs/user", "docs/webhelp");
+			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp");
 
 			// TODO: Replace this with dependency injection
 			cfg.Properties["WebContext"] = _context;

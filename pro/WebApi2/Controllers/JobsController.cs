@@ -181,7 +181,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 				var events = db.GetTestEventsByJob(id).ToList();
 
-				var isActive = events.Any(x => x.Status == TestStatus.Active);
+				var isActive = (events.Count == 0) || events.Any(x => x.Status == TestStatus.Active);
 				var isFail = events.Any(x => x.Status == TestStatus.Fail);
 
 				var sb = new StringBuilder();
@@ -559,6 +559,15 @@ namespace Peach.Pro.WebApi2.Controllers
 				Iterations = MakeUrl(id, "metrics", "iterations"),
 				Fields = MakeUrl(id, "metrics", "fields"),
 			};
+
+			// If the job points to a non-existant pit, remove the pitUrl from the job record
+			// so that the client can disable the Edit Configuration and Replay Job buttons.
+			if (!string.IsNullOrEmpty(job.PitUrl))
+			{
+				var pit = PitDatabase.GetPitDetailByUrl(job.PitUrl);
+				if (pit == null)
+					job.PitUrl = null;
+			}
 
 			return job;
 		}

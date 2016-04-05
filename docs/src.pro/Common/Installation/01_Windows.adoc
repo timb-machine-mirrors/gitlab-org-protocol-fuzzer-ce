@@ -1,21 +1,28 @@
 [[InstallOnWindows]]
 === Windows
 
-Peach is supported on Windows(R) Operating Systems, version XP and newer, including server editions. Peach may run on pre-XP versions of Windows, but are not officially supported.
+Peach is supported on Windows(R) Operating Systems,
+version XP and newer,
+including server editions.
+Peach may run on pre-XP versions of Windows,
+but are not officially supported.
+This section provides instructions for installing Peach on supported Windows systems.
 
-The only required software is the Microsoft.NET v4 Runtime. For the most robust results, install Windows Debugging Tools and Wireshark. This allows Peach to attach a debugger to the target and to take network captures.
+The only required software is the Microsoft .NET Framework v4.5+.
+For the most robust results,
+install Windows Debugging Tools and Wireshark.
+This allows Peach to attach a debugger to targets and to take network captures.
 
-. Install the Microsoft.NET v4 Runtime.
-** Download the installer from http://www.microsoft.com/en-us/download/details.aspx?id=17718[Microsoft.NET v4 Runtime].
-. Install Microsoft Debugging Tools for Windows (optional).
+. Download and install the https://www.microsoft.com/en-us/download/details.aspx?id=42643[Microsoft .NET Framework v4.5.2 (Web Installer)].
+. Install the https://msdn.microsoft.com/en-us/library/windows/hardware/ff551063(v=vs.85).aspx[Microsoft Debugging Tools for Windows] (optional).
 ** This component is used by two monitors: xref:Monitors_WindowsDebugger[WindowsDebugger] and xref:Monitors_PageHeap[PageHeap].
 ** Follow the instructions for your version of Windows.
 ** The most recent versions of the Debugging Tools are distributed as part of the Microsoft Windows SDK.
 ** Download the installer from http://msdn.microsoft.com/en-us/library/windows/hardware/ff551063(v=vs.85).aspx[Debugging Tools for Windows].
-. Install Wireshark (optional).
+. Install https://www.wireshark.org/#download[Wireshark] (optional).
 ** This component is used by the xref:Monitors_NetworkCapture[NetworkCapture] monitor when taking a network capture.
 ** Download the installer from http://wireshark.org[Wireshark] or http://www.winpcap.org/[Winpcap].
 . Unzip the Peach binary distribution to a working folder.
-** Install Peach to the appropriate folder, such as +C:\peach+.
+** Install Peach to the appropriate folder, such as `C:\peach`.
 
 // end
