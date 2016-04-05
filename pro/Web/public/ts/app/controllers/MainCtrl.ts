@@ -179,7 +179,7 @@ namespace Peach {
 		}
 
 		public OnHelp() {
-			this.$window.open('/docs', '_blank');
+			this.$window.open('/docs/user', '_blank');
 		}
 
 		public get ShowLicenseWarning(): boolean {
