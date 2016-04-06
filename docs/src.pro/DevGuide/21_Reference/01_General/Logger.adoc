@@ -1,0 +1,30 @@
+[[Logger]]
+== Loggers
+
+A logger records the fuzzing run (including any faults) and data collected by monitors.
+
+IMPORTANT: If a logger is not configured, this information will not be stored.
+
+{product} includes a file system logger. The logging system is extensible, allowing you to add custom loggers by writing  plug-ins.
+
+[[Loggers_File]]
+=== File
+
+The file system logger needs a specified path.  Peach creates a folder containing the run name and time stamp.  Inside of this folder are the actual logs.  Until the first fault emerges, Peach logs very little information to conserve disk space.
+
+[source,xml]
+----
+<Logger class="File">
+    <Param name="Path" value="logfolder" />
+</Logger>
+----
+
+==== Parameters
+
+_Required:_
+
+Path:: The relative or absolute path to create log files.
+
+_Optional:_
+
+None.

@@ -230,23 +230,47 @@
 					</li>
 
 					<li>
-						<a href="/docs"
-						   target="_blank">
+						<a href="#"
+						   ng-click="vm.OnSubClick($event, 'help')">
 							<i class="fa fa-question"></i>
 							<span class="menu-text">
 								Help
 							</span>
+							<b class="arrow fa fa-angle-down"></b>
 						</a>
-					</li>
 
-					<li>
-						<a href="https://forums.peachfuzzer.com"
-						   target="_blank">
-							<i class="fa fa-comment"></i>
-							<span class="menu-text">
-								Forums
-							</span>
-						</a>
+						<ul class="submenu"
+								uib-collapse="vm.IsCollapsed('help')">
+							<li>
+								<a href="/docs/user" target="_blank">
+									<span class="menu-text">
+										User Guide
+									</span>
+								</a>
+							</li>
+							<li>
+								<a href="/docs/dev" target="_blank">
+									<span class="menu-text">
+										Developer Guide
+									</span>
+								</a>
+							</li>
+							<li>
+								<a href="/swagger" target="_blank">
+									<span class="menu-text">
+										REST API
+									</span>
+								</a>
+							</li>
+							<li>
+								<a href="https://forums.peachfuzzer.com"
+									 target="_blank">
+									<span class="menu-text">
+										Forums
+									</span>
+								</a>
+							</li>
+						</ul>
 					</li>
 
 				</ul>

@@ -1,0 +1,47 @@
+Bundler.require(:default)
+
+def load_properties(filename)
+	props = {}
+	File.open(filename, 'r') do |file|
+		file.read.each_line do |line|
+			line.strip!
+			if (line[0] != ?# and line[0] != ?=)
+				parts = line.split('=')
+				name = parts[0].strip
+				value = parts[1].strip
+				props[name] = value
+			end
+		end 
+	end
+	props
+end
+
+props = load_properties('../jenkins.properties')
+parts = props['RELEASE_VERSION'].split('.')
+major = parts[0]
+minor = parts[1]
+
+guard :bundler do
+	watch('Gemfile')
+end
+
+guard :shell do
+	watch(/^.+\.adoc$/) {|m|
+		puts m[0] + " has changed."
+		%x(
+			asciidoctor \
+				src.pro/DevGuide/DevGuide.adoc \
+				src.pro/UserGuide/UserGuide.adoc \
+				-a images=#{Dir.pwd}/src.pro/images \
+				-a BUILDTAG=#{major}.#{minor}.0.0 \
+				-a VER_MAJOR=#{major} \
+				-a VER_MINOR=#{minor} \
+				-a VER_BUILD=0 \
+				-a VER_BRANCH=0
+		) 
+	}
+end
+
+guard :livereload do
+	watch(%r{^.+\.(css|js|html)$})
+end

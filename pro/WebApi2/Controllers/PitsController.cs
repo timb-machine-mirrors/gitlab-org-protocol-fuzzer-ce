@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
@@ -6,9 +7,11 @@ using System.Web.Http.Description;
 using Peach.Pro.Core.WebServices.Models;
 using Swashbuckle.Swagger.Annotations;
 using Peach.Pro.Core.WebServices;
+using Peach.Pro.WebApi2.Utility;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[RestrictedApi]
 	[RoutePrefix(Prefix)]
 	public class PitsController : BaseController
 	{
@@ -29,7 +32,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Route("")]
 		public IEnumerable<LibraryPit> Get()
 		{
-			return PitDatabase.Entries;
+			return PitDatabase.LibraryPits;
 		}
 
 		/// <summary>
@@ -46,25 +49,20 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			try
 			{
-				PitDetail pit;
+				Tuple<Pit, PitDetail> tuple;
 				if (!string.IsNullOrEmpty(data.LegacyPitUrl))
 				{
-					pit = PitDatabase.MigratePit(
-						data.LegacyPitUrl,
-						data.PitUrl,
-						data.Name,
-						data.Description
-					);
+					tuple = PitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
 				}
 				else
 				{
-					pit = PitDatabase.CopyPit(
+					tuple = PitDatabase.CopyPit(
 						data.PitUrl,
 						data.Name,
 						data.Description
 					);
 				}
-				return Ok(pit.Pit);
+				return Ok(tuple.Item1);
 			}
 			catch (KeyNotFoundException)
 			{

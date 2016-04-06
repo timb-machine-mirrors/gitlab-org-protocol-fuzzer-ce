@@ -14,6 +14,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public List<PitField> Fields { get; set; }
 	}
 
+	[Serializable]
 	public class PitWeight 
 	{
 		public string Id { get; set; }
@@ -31,8 +32,6 @@ namespace Peach.Pro.Core.WebServices.Models
 	public class Pit : LibraryPit
 	{
 		public List<PeachVersion> Peaches { get; set; }
-
-		public string OriginalPit { get; set; }
 
 		public string User { get; set; }
 

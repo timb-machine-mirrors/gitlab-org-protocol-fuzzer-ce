@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -9,10 +10,8 @@ using Microsoft.Owin;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Microsoft.Owin.FileSystems;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using Peach.Core;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
@@ -57,6 +56,17 @@ namespace Peach.Pro.WebApi2
 				try
 				{
 					_server = WebApp.Start(url, OnStartup);
+
+					// Owin adds a TextWriterTraceListener during startup
+					// we need to remove it to avoid spewing to console
+					for (var cnt = 0; cnt < Trace.Listeners.Count; cnt++)
+					{
+						if (Trace.Listeners[cnt] is TextWriterTraceListener)
+						{
+							Trace.Listeners.RemoveAt(cnt);
+							break;
+						}
+					}
 
 					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
 				}
@@ -147,19 +157,7 @@ namespace Peach.Pro.WebApi2
 		{
 			var cfg = new HttpConfiguration();
 
-			var json = cfg.Formatters.JsonFormatter.SerializerSettings;
-
-			json.ContractResolver = new CamelCasePropertyNamesContractResolver
-			{
-				IgnoreSerializableAttribute = true
-			};
-
-			json.NullValueHandling = NullValueHandling.Ignore;
-			json.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-			// NOTE: Don't ignore default values so integers and booleans get included in json
-
-			json.Converters.Insert(0, new StringEnumConverter { CamelCaseText = true });
-			json.Converters.Insert(0, new TimeSpanJsonConverter());
+			cfg.Formatters.JsonFormatter.SerializerSettings = JsonUtilties.GetSettings();
 
 			cfg.MapHttpAttributeRoutes();
 
@@ -182,7 +180,6 @@ namespace Peach.Pro.WebApi2
 				c.OperationFilter<CommonResponseFilter>();
 				c.SchemaFilter<RequiredParameterFilter>();
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
-
 			}).EnableSwaggerUi();
 
 			app.UseWebApi(cfg);
@@ -192,14 +189,11 @@ namespace Peach.Pro.WebApi2
 
 			AddStaticContent(app, "", "public");
 
-			AddStaticContent(app, "/docs", "docs/webhelp");
+			AddStaticContent(app, "/docs/user", "docs/webhelp");
+			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp");
 
 			// TODO: Replace this with dependency injection
 			cfg.Properties["WebContext"] = _context;
-
-			// TODO: Do we need to redirect / to /{version}/ to fix caching issues still?
-			// TODO: For /version/index.html response, verify caching. With NancyFX we needed to:
-			// TODO: Ensure Response.Headers["Cache-Control"] = "no-cache, must-revalidate";
 		}
 
 		private static void AddStaticContent(IAppBuilder app, string requestPath, string fileSystem)
@@ -209,13 +203,26 @@ namespace Peach.Pro.WebApi2
 			if (!Directory.Exists(fullPath))
 				return;
 
-			app.UseFileServer(new FileServerOptions
+			var opts = new FileServerOptions
 			{
 				RequestPath = new PathString(requestPath),
 				FileSystem = new PhysicalFileSystem(fullPath),
 				EnableDefaultFiles = true,
 				EnableDirectoryBrowsing = false,
-			});
+			};
+
+			// We want to tell the client to always revalidate all static assets.
+			// This should work now that ETags are being properly generated.
+			// The client should get a 304 if nothing has changed, otherwise they get new content.
+			// This prevents stale assets from being invalidated when new server content is available,
+			// like when a new version of Peach Fuzzer is installed.
+
+			opts.StaticFileOptions.OnPrepareResponse = ctx =>
+			{
+				ctx.OwinContext.Response.Headers.Add("Cache-Control", new[] { "no-cache" });
+			};
+
+			app.UseFileServer(opts);
 		}
 
 		private static string GetLocalIp()

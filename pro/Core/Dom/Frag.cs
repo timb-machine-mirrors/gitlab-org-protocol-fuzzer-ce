@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -33,12 +34,14 @@ namespace Peach.Pro.Core.Dom
 		public Frag()
 			: base()
 		{
+			InputModel = false;
 			Add(new FragSequence("Rendering"));
 		}
 
 		public Frag(string name)
 			: base(name)
 		{
+			InputModel = false;
 			Add(new FragSequence("Rendering"));
 		}
 
@@ -72,6 +75,8 @@ namespace Peach.Pro.Core.Dom
 		/// Template to use for fragments
 		/// </summary>
 		public DataElement Template { get; set; }
+
+		public bool InputModel { get; set; }
 
 		public bool PayloadOptional { get; set; }
 
@@ -180,7 +185,7 @@ namespace Peach.Pro.Core.Dom
 			pit.WriteEndElement();
 		}
 
-		protected override IEnumerable<DataElement> Children()
+		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			// Make sure we re-generate if needed
 			if (!viewPreRendering)
@@ -207,7 +212,6 @@ namespace Peach.Pro.Core.Dom
 		{
 			if (item.Name == "Payload")
 			{
-				Logger.Debug(">>OnInsertItem");
 				var payload = this["Payload"];
 				if(payload != null)
 					payload.Invalidated -= OnPayloadInvalidated;
@@ -249,9 +253,14 @@ namespace Peach.Pro.Core.Dom
 			if (Template == null)
 			{
 				Template = this["Template"];
+
 				Remove(Template, false);
+				Template.parent = this;
 
 				viewPreRendering = false;
+
+				var value = Template.Value;
+				Debug.Assert(value != null);
 			}
 
 			if (!_childrenDict.ContainsKey("Payload") ||
@@ -261,12 +270,12 @@ namespace Peach.Pro.Core.Dom
 			}
 
 			// Only perform regeneration if payload is invalidated
-			if (_payloadInvalidated || !_generatedFragments)
+			if (!InputModel && (_payloadInvalidated || !_generatedFragments))
 			{
 				_generatedFragments = true;
 				_payloadInvalidated = false;
 
-				Logger.Debug("Generating fragments...");
+				Logger.Debug("Generating fragments: ", fullName);
 				FragmentAlg.Fragment(Template, this["Payload"], this["Rendering"] as Sequence);
 			}
 

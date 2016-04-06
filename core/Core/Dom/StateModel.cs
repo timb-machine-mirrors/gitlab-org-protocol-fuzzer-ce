@@ -267,8 +267,8 @@ namespace Peach.Core.Dom
 
 						if (action.outputData.Any(
 							actionData => actionData.dataModel
-								.DisplayTraverse()
-								.Any(e => !string.IsNullOrEmpty(e.FieldId))
+								.TuningTraverse(true, true)
+								.Any(e => !string.IsNullOrEmpty(e.Key))
 							))
 						{
 							return true;
@@ -294,7 +294,7 @@ namespace Peach.Core.Dom
 
 					foreach (var actionData in action.outputData)
 					{
-						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds))
+						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds, false))
 						{
 							var key = element.Key;
 							if (!string.IsNullOrEmpty(element.Key) && !string.IsNullOrEmpty(prefix))

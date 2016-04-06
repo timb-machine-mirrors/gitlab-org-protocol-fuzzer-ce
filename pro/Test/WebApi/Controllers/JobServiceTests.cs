@@ -44,7 +44,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				}
 			}
 
-			public bool IsControlable { get { return true; } }
+			public bool IsControllable { get { return true; } }
 
 			public Job GetJob()
 			{

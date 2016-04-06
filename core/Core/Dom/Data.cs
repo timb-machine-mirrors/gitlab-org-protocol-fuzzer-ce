@@ -80,11 +80,11 @@ namespace Peach.Core.Dom
 		public void Apply(Action action, DataModel model)
 		{
 			DataElement parent = model;
-			foreach (var elem in DataField.EnumerateElements(action, model, Name, true))
+			foreach (var elem in DataField.EnumerateElements(action, model, Name, true, false))
 			{
 				var choice = parent as Choice;
-				if (choice != null && !choice.MaskedElements.ContainsKey(elem.Name))
-					choice.MaskedElements.Add(elem);
+				if (choice != null)
+					choice.MaskedElements.Add(elem.Name);
 
 				parent = elem;
 			}
@@ -211,7 +211,7 @@ namespace Peach.Core.Dom
 
 		protected static void ApplyField(Action action, DataElementContainer model, string field, Variant value)
 		{
-			var elem = EnumerateElements(action, model, field, false).Last();
+			var elem = EnumerateElements(action, model, field, false, true).Last();
 			if (elem == null)
 				return;
 
@@ -231,7 +231,8 @@ namespace Peach.Core.Dom
 			Action action,
 			DataElementContainer model, 
 			string field,
-			bool skipArray)
+			bool skipArray,
+			bool selectChoice)
 		{
 			var parts = field.Split('.');
 			var container = model;
@@ -259,7 +260,7 @@ namespace Peach.Core.Dom
 					name = m.Groups[1].Value;
 					var index = int.Parse(m.Groups[2].Value);
 
-					if (!container.TryGetValue(name, out elem))
+					if (container == null || !container.TryGetValue(name, out elem))
 						throw new PeachException(resolutionError);
 
 					var seq = elem as Sequence;
@@ -320,9 +321,16 @@ namespace Peach.Core.Dom
 					if (!choice.choiceElements.TryGetValue(name, out elem))
 						throw new PeachException(resolutionError);
 
-					container = elem as DataElementContainer;
+					if (selectChoice)
+					{
+						choice.SelectElement(elem);
 
-					choice.SelectedElement = elem;
+						// Selecting a choice element gives us a new element instance
+						// to descend from
+						elem = choice.SelectedElement;
+					}
+
+					container = elem as DataElementContainer;
 				}
 				else
 				{

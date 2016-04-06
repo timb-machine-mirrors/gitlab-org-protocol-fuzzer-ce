@@ -28,14 +28,6 @@ namespace Peach {
 			return this.pit;
 		}
 
-		public LoadLicense(): ng.IPromise<ILicense> {
-			const promise = this.$http.get(C.Api.License);
-			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
-			});
-			return StripHttpPromise(this.$q, promise);
-		}
-
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
 			const promise = this.$http.get(C.Api.Libraries);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
@@ -137,6 +129,19 @@ namespace Peach {
 				name: pit.name,
 				description: pit.description
 			};
+			return this.DoNewPit(request);
+		}
+
+		public MigratePit(legacyPit: IPit, originalPit: IPit): ng.IHttpPromise<IPit> {
+			const request: IPitCopy = {
+				legacyPitUrl: legacyPit.pitUrl,
+				pitUrl: originalPit.pitUrl
+			};
+			console.log('MigratePit', legacyPit, originalPit, request);
+			return this.DoNewPit(request);
+		}
+
+		private DoNewPit(request: IPitCopy): ng.IHttpPromise<IPit> {
 			const promise = this.$http.post(C.Api.Pits, request);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {

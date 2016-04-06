@@ -14,7 +14,7 @@
 		Configurations
 	</dt>
 	<dd>
-		Saved pit configurations
+		Ready to use, saved Pit configurations
 	</dd>
 
 	<dt>
@@ -42,21 +42,21 @@
 <div class="page-header"
 	ng-repeat="lib in vm.Libs">
 	<h3>{{lib.Name}}</h3>
-<p>{{lib.Text}}</p>
-<uib-accordion close-others="false">
-	<uib-accordion-group ng-repeat="cat in lib.Categories | filter: filterCategory(search)"
-									 heading="{{cat.Name}}"
-									 is-open="true">
-		<div class="peach-library">
-			<ul class="list-inline">
-				<li ng-repeat="entry in cat.Pits | filter: { Pit: { name: search } }">
-					<a href=""
-						ng-click="vm.OnSelectPit(entry)">
-							{{entry.Pit.name | peachPitName}}
-						</a>
-				</li>
-			</ul>
-		</div>
-	</uib-accordion-group>
-</uib-accordion>
+	<p>{{lib.Text}}</p>
+	<uib-accordion close-others="false">
+		<uib-accordion-group ng-repeat="cat in lib.Categories | filter: vm.filterCategory(search)"
+										 heading="{{cat.Name}}"
+										 is-open="true">
+			<div class="peach-library">
+				<ul class="list-inline">
+					<li ng-repeat="entry in cat.Pits | filter: { Pit: { name: search } }">
+						<a href=""
+							ng-click="vm.OnSelectPit(entry)">
+								{{entry.Pit.name | peachPitName}}
+							</a>
+					</li>
+				</ul>
+			</div>
+		</uib-accordion-group>
+	</uib-accordion>
 </div>

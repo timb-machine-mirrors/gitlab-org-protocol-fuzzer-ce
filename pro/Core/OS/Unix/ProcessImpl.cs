@@ -228,14 +228,21 @@ namespace Peach.Pro.Core.OS.Unix
 			_logger.Debug("CreateProcess(): \"{0} {1}\"", executable, arguments);
 			var process = SysProcess.Start(si);
 
-			DebuggerServer(listener);
+			var task = listener.AcceptTcpClientAsync();
+			while (!task.Wait(TimeSpan.FromMilliseconds(100)))
+			{
+				if (process.HasExited)
+					throw new PeachException("Failed to start with exit code: {0}".Fmt(process.ExitCode));
+			}
+
+			DebuggerServer(task.Result);
 
 			return MakeOwnedProcess(process);
 		}
 
-		private void DebuggerServer(TcpListener listener)
+		private void DebuggerServer(TcpClient tcp)
 		{
-			using (var tcp = listener.AcceptTcpClient())
+			using (tcp)
 			using (var stream = tcp.GetStream())
 			{
 				var handshake = new byte[13]; // "DWP handshake"

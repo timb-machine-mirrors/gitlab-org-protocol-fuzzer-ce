@@ -92,7 +92,7 @@ namespace Peach {
 	export interface IPitCopy {
 		legacyPitUrl?: string;
 		pitUrl: string;
-		name: string;
-		description: string;
+		name?: string;
+		description?: string;
 	}
 }

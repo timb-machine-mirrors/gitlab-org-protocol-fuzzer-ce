@@ -134,7 +134,7 @@ namespace Peach.Core.Dom
 			return child != OriginalElement;
 		}
 
-		protected override IEnumerable<DataElement> Children()
+		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			// If we have entries, just return them
 			if (Expanded)
@@ -146,15 +146,6 @@ namespace Peach.Core.Dom
 
 			// Mutation might have removed our original element
 			return new DataElement[0];
-		}
-
-		/// <summary>
-		/// Returns an enumeration of children that are diplayed to the user.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<DataElement> DisplayChildren()
-		{
-			return OriginalElement.DisplayChildren();
 		}
 
 		/// <summary>
@@ -356,17 +347,29 @@ namespace Peach.Core.Dom
 			return array;
 		}
 
+		private bool CanShallowCopy()
+		{
+			if (OriginalElement is Choice)
+				return true;
+
+			var block = OriginalElement as Block;
+
+			return block != null && block.Count == 1 && block[0] is Choice;
+		}
+
 		private DataElement MakeElement(int index)
 		{
 			var clone = OriginalElement;
 
-			clone = clone.Clone("{0}_{1}".Fmt(clone.Name, index));
+			clone = CanShallowCopy()
+				? clone.ShallowClone(this, "{0}_{1}".Fmt(clone.Name, index))
+				: clone.Clone("{0}_{1}".Fmt(clone.Name, index));
 
 			return clone;
 		}
 
 		[OnCloning]
-		private bool OnCloning(object context)
+		private void OnCloning(object context)
 		{
 			CloneContext ctx = context as CloneContext;
 
@@ -377,8 +380,6 @@ namespace Peach.Core.Dom
 				if (ctx.rename.Contains(this) && OriginalElement != null)
 					ctx.rename.Add(OriginalElement);
 			}
-
-			return true;
 		}
 
 		/// <summary>

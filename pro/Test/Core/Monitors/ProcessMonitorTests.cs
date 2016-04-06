@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Test;
+using Peach.Pro.Core.Agent.Monitors;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
@@ -372,6 +374,50 @@ namespace Peach.Pro.Test.Core.Monitors
 					}
 				}
 			}
+		}
+
+		[Test]
+		public void TestAsanRegex()
+		{
+			const string example = @"==13983==ERROR: AddressSanitizer: SEGV on unknown address 0x00002f10b7d6 (pc 0x0000004ee255 bp 0x7ffc0abb72d0 sp 0x7ffc0abb72d0 T0)
+    #0 0x4ee254 in decode_tag_number /home/peach/bacnet-stack-0.8.3/lib/../src/bacdcode.c:313:9
+    #1 0x4ee4e2 in decode_tag_number_and_value /home/peach/bacnet-stack-0.8.3/lib/../src/bacdcode.c:379:11
+    #2 0x519191 in awf_decode_service_request /home/peach/bacnet-stack-0.8.3/lib/../src/awf.c:130:17
+    #3 0x50fd31 in handler_atomic_write_file /home/peach/bacnet-stack-0.8.3/lib/../demo/handler/h_awf.c:114:11
+    #4 0x4ed71f in apdu_handler /home/peach/bacnet-stack-0.8.3/lib/../src/apdu.c:477:21
+    #5 0x50a2e3 in npdu_handler /home/peach/bacnet-stack-0.8.3/lib/../demo/handler/h_npdu.c:88:17
+    #6 0x4c4662 in main /home/peach/bacnet-stack-0.8.3/demo/server/main.c:188:13
+    #7 0x7f1926df3ec4 in __libc_start_main /build/eglibc-3GlaMS/eglibc-2.19/csu/libc-start.c:287
+    #8 0x4c442c in _start (/home/peach/bacnet-stack-0.8.3/bin/bacserv+0x4c442c)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/peach/bacnet-stack-0.8.3/lib/../src/bacdcode.c:313 decode_tag_number
+==13983==ABORTING";
+
+
+			var title = RunCommand.AsanTitle.Match(example);
+			var bucket = RunCommand.AsanBucket.Match(example);
+			var desc = RunCommand.AsanMessage.Match(example);
+
+			var data = new MonitorData
+			{
+				Data = new Dictionary<string, Stream>(),
+				Title = title.Groups[1].Value,
+				Fault = new MonitorData.Info
+				{
+					Description = example.Substring(desc.Index, desc.Length),
+					MajorHash = Monitor2.Hash(bucket.Groups[3].Value),
+					MinorHash = Monitor2.Hash(bucket.Groups[2].Value),
+					Risk = bucket.Groups[1].Value,
+				}
+			};
+
+			Assert.AreEqual("SEGV on unknown address 0x00002f10b7d6 (pc 0x0000004ee255 bp 0x7ffc0abb72d0 sp 0x7ffc0abb72d0 T0)", data.Title);
+			Assert.AreEqual("SEGV", data.Fault.Risk);
+			Assert.AreEqual(example, data.Fault.Description);
+			Assert.AreEqual("EB7CE44C", data.Fault.MajorHash);
+			Assert.AreEqual("2E409A3D", data.Fault.MinorHash);
+
 		}
 	}
 }

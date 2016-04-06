@@ -37,6 +37,7 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Test;
+using Array = Peach.Core.Dom.Array;
 
 namespace Peach.Pro.Test.Core.CrackingTests
 {
@@ -945,41 +946,36 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			bs.Position = 0;
 			new DataCracker().CrackData(dm, bs);
 
-			// After cracking top level model, non-selected choices should be removed
-			Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
-			Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+			// After cracking top level model, non-selected choices should not be removed
+			Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(5, dm[1].relations.Of<Relation>().Count());
+
+			// NOTE: There are 5 Of relations, one for each choice option
+			// and one for the currently selected choice
 
 			dm = dom.stateModels[0].states[0].actions[0].dataModel;
 			bs.Position = 0;
 			new DataCracker().CrackData(dm, bs);
 
-			// After cracking input model, non-selected choices should be removed
-			Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
-			Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+			// After cracking input model, non-selected choices should not be removed
+			Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(5, dm[1].relations.Of<Relation>().Count());
 
 			dm = dom.stateModels[0].states[0].actions[1].dataModel;
 			bs.Position = 0;
 			new DataCracker().CrackData(dm, bs);
 
-			// After cracking output model, non-selected choices should be removed if we are 32-bit
-			if (IntPtr.Size == 8)
-			{
-				Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
-				Assert.AreEqual(4, dm[1].relations.Of<Relation>().Count());
-			}
-			else
-			{
-				Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
-				Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
-			}
+			// After cracking output model, non-selected choices should not be removed
+			Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(5, dm[1].relations.Of<Relation>().Count());
 
 			dm = dom.stateModels[0].states[0].actions[2].dataModel;
 			bs.Position = 0;
 			new DataCracker().CrackData(dm, bs);
 
-			// After cracking getProperty model, non-selected choices should be removed
-			Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
-			Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
+			// After cracking getProperty model, non-selected choices should not be removed
+			Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(5, dm[1].relations.Of<Relation>().Count());
 
 			dm = dom.stateModels[0].states[0].actions[1].dataModel;
 			bs.Position = 0;
@@ -989,17 +985,9 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			bs.Position = 0;
 			new DataCracker().CrackData(dm, bs);
 
-			// After cracking setProperty model, non-selected choices should be removed if we are 32-bit
-			if (IntPtr.Size == 8)
-			{
-				Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
-				Assert.AreEqual(4, dm[1].relations.Of<Relation>().Count());
-			}
-			else
-			{
-				Assert.AreEqual(1, ((Choice)dm[0]).choiceElements.Count);
-				Assert.AreEqual(1, dm[1].relations.Of<Relation>().Count());
-			}
+			// After cracking setProperty model, non-selected choices should not be removed
+			Assert.AreEqual(4, ((Choice)dm[0]).choiceElements.Count);
+			Assert.AreEqual(5, dm[1].relations.Of<Relation>().Count());
 		}
 
 		[Test]
@@ -1084,6 +1072,123 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			CollectionAssert.AreEqual(expected, visited);
 		}
 
+		[Test]
+		public void TestShallowClone()
+		{
+			using (var tmp = new TempFile())
+			{
+				File.WriteAllText(tmp.Path, "2222444411113333");
+
+				var xml = @"
+<Peach>
+	<!-- choice w/ nested choice -->
+	<DataModel name='DM1'>
+		<Choice name='C1'>
+			<String name='S' value='1111' token='true' />
+			<Blob name='B'  value='2222' token='true' />
+			<Choice name='C2'>
+				<Block name='BA'>
+					<String name='Inner' value='3333' token='true' />
+				</Block>
+				<Block name='BB' />
+			</Choice>
+		</Choice>
+	</DataModel>
+
+	<!-- Derived model with overridden choice -->
+	<DataModel name='DM2' ref='DM1'>
+		<Block name='C1.C2.BB'>
+			<String name='Inner' value='4444' token='true' />
+		</Block>
+	</DataModel>
+
+	<!-- Encapsulate choice in array -->
+	<DataModel name='DM3'>
+		<Block name='A' ref='DM2' minOccurs='0' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM3' />
+				<Data fileName='{0}'>
+					<!-- Change selected element from 2222 to 3333 -->
+					<Field name='A[0].C1.C2.BA' value='' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Publisher class='Null' />
+		<StateModel ref='SM' />
+	</Test>
+</Peach>
+".Fmt(tmp.Path);
+
+				var dom = DataModelCollector.ParsePit(xml);
+				var cfg = new RunConfiguration { singleIteration = true };
+				var e = new Engine(null);
+
+				e.startFuzzing(dom, cfg);
+
+				var dm = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+				var final = dm.Value.ToArray();
+
+				Assert.AreEqual("3333444411113333", Encoding.ASCII.GetString(final, 0, final.Length));
+
+				var a = (Array)dm[0];
+
+				Assert.NotNull(a.OriginalElement);
+				Assert.AreEqual(4, a.Count);
+
+				var dm2 = (DataElementContainer)a.OriginalElement;
+				var choice = (Choice)dm2[0];
+
+				var innerChoice = (Choice)choice.choiceElements[2];
+
+				foreach (var item in a.Cast<DataElementContainer>())
+				{
+					var child = (Choice)item[0];
+
+					// For the instantiated array entries, the choice options should all point
+					// to the same list of available choices
+					Assert.True(choice.choiceElements.GetHashCode() == child.choiceElements.GetHashCode(), "Choice options should be the same");
+
+					var innerChild = (Choice)child.choiceElements[2];
+
+					Assert.True(innerChoice.choiceElements.GetHashCode() == innerChild.choiceElements.GetHashCode(), "Choice options should be the same");
+
+				}
+
+				var elemNames = dm.Walk().Select(i => i.fullName).ToArray();
+				var expected = new[]
+				{
+					"DM3",
+					"DM3.A",
+					"DM3.A.A_0",
+					"DM3.A.A_0.C1",
+					"DM3.A.A_0.C1.C2",
+					"DM3.A.A_0.C1.C2.BA",
+					"DM3.A.A_0.C1.C2.BA.Inner",
+					"DM3.A.A_1",
+					"DM3.A.A_1.C1",
+					"DM3.A.A_1.C1.C2",
+					"DM3.A.A_1.C1.C2.BB",
+					"DM3.A.A_1.C1.C2.BB.Inner",
+					"DM3.A.A_2",
+					"DM3.A.A_2.C1",
+					"DM3.A.A_2.C1.S",
+					"DM3.A.A_3",
+					"DM3.A.A_3.C1",
+					"DM3.A.A_3.C1.C2",
+					"DM3.A.A_3.C1.C2.BA",
+					"DM3.A.A_3.C1.C2.BA.Inner"
+				};
+
+				CollectionAssert.AreEqual(expected, elemNames);
+			}
+		}
 
 		[Test]
 		[Ignore("See PF-270")]
@@ -1126,6 +1231,79 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var actual = dom.dataModels[0].PreOrderTraverse().Select(e => e.fullName).ToList();
 
 			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void TestRelationMaintained()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Items' minOccurs='0'>
+			<Number name='Type' size='8' />
+			<Choice name='Kind'>
+				<Number name='L8' size='8' constraint='int(Type)==1)'>
+					<Relation type='size' of='Value' />
+				</Number>
+				<Number name='L16' size='8'>
+					<Relation type='size' of='Value' />
+				</Number>
+			</Choice>
+			<Blob name='Value' />
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var array = (Array)dom.dataModels[0][0];
+
+			array.ExpandTo(1);
+
+			var block = (Block)array[0];
+
+			// Thge 0th blob should have two relations
+			Assert.AreEqual(2, block[2].relations.Count);
+
+			// The relations should point to the choice in the 0th element
+			Assert.AreEqual("DM.Items.Items_0.Kind.L8", block[2].relations[0].From.fullName);
+			Assert.AreEqual("DM.Items.Items_0.Kind.L16", block[2].relations[1].From.fullName);
+		}
+
+		[Test]
+		public void TestShallowCopy()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Block name='Items' minOccurs='0'>
+			<Choice name='Kind'>
+				<Blob name='B1' />
+			</Choice>
+		</Block>
+	</DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var array = (Array)dom.dataModels[0][0];
+			var ch = ((Choice)((Block)array.OriginalElement)[0]).choiceElements[0];
+			array.ExpandTo(5);
+
+			Assert.AreEqual(5, array.Count);
+
+			foreach (var item in array.Cast<Block>())
+			{
+				var choice = (Choice)item[0];
+
+				Assert.True(choice.choiceElements[0].GetHashCode() == ch.GetHashCode());
+			}
 		}
 	}
 }

@@ -32,7 +32,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Newtonsoft.Json;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
@@ -53,6 +52,7 @@ namespace Peach.Pro.Core.Runtime
 	/// </summary>
 	public class ConsoleProgram : Program
 	{
+		private static readonly string PitLibraryPath = "PitLibraryPath";
 		public static ConsoleColor DefaultForground = Console.ForegroundColor;
 
 		/// <summary>
@@ -63,7 +63,7 @@ namespace Peach.Pro.Core.Runtime
 		/// <summary>
 		/// List of key,value pairs of extra defines to use
 		/// </summary>
-		protected List<KeyValuePair<string, string>> _definedValues = new List<KeyValuePair<string, string>>();
+		protected Dictionary<string, string> _definedValues = new Dictionary<string, string>();
 
 		/// <summary>
 		/// Configuration options for the engine
@@ -80,11 +80,10 @@ namespace Peach.Pro.Core.Runtime
 		private bool _test;
 		private Uri _webUri;
 		private string _pitLibraryPath;
+		private string _defPitLibraryPath;
 		private bool _noweb;
 		private bool _nobrowser;
 		private static volatile bool _shouldStop;
-		private string _jsonFile;
-		private PitConfig _jsonConfig;
 		private bool _polite;
 
 		#region Public Properties
@@ -246,23 +245,6 @@ namespace Peach.Pro.Core.Runtime
 				"Specifies port web interface runs on.",
 				(int v) => _webPort = v
 			);
-
-			// automated execution
-			options.Add(
-				"json=",
-				"Specify a configuration file for a pit",
-				ParseJsonConfig
-			);
-		}
-
-		private void ParseJsonConfig(string filename)
-		{
-			_jsonFile = filename;
-			using (var textReader = File.OpenText(filename))
-			using (var jsonReader = new JsonTextReader(textReader))
-			{
-				_jsonConfig = JsonSerializer.CreateDefault().Deserialize<PitConfig>(jsonReader);
-			}
 		}
 
 		protected override bool VerifyCompatibility()
@@ -375,7 +357,7 @@ namespace Peach.Pro.Core.Runtime
 		/// <summary>
 		/// Create an engine and run the fuzzing job
 		/// </summary>
-		protected virtual void RunEngine(Peach.Core.Dom.Dom dom)
+		protected virtual void RunEngine(Peach.Core.Dom.Dom dom, PitConfig pitConfig)
 		{
 			// Ensure the database has been migrated prior to
 			// creating the Job, as it will insert itself.
@@ -389,6 +371,18 @@ namespace Peach.Pro.Core.Runtime
 
 			if (!dom.tests.TryGetValue(_config.runName, out test))
 				throw new PeachException("Unable to locate test named '{0}'.".Fmt(_config.runName));
+
+			if (pitConfig != null && pitConfig.Weights != null)
+			{
+				foreach (var item in pitConfig.Weights)
+				{
+					test.weights.Add(new SelectWeight
+					{
+						Name = item.Id, 
+						Weight = (ElementWeight)item.Weight
+					});
+				}
+			}
 
 			Job job = null;
 			var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
@@ -478,26 +472,48 @@ namespace Peach.Pro.Core.Runtime
 		/// <param name="extra">Extra command line options</param>
 		protected virtual void OnRunJob(bool test, List<string> extra)
 		{
+			if (!string.IsNullOrEmpty(_pitLibraryPath) && !string.IsNullOrEmpty(_defPitLibraryPath))
+			{
+				if (_pitLibraryPath != _defPitLibraryPath)
+					throw new PeachException("--pits and -DPitLibraryPath should both specify the same path.");
+			}
+
+			if (string.IsNullOrEmpty(_pitLibraryPath))
+				_pitLibraryPath = _defPitLibraryPath;
+
 			if (extra.Count > 0)
 			{
 				// Pit was specified on the command line, do normal behavior
 				// Ensure the EULA has been accepted before running a job
 				// on the command line.  The WebUI will present a EULA
 				// in the later case.
-
 				if (!License.EulaAccepted)
 					ShowEula();
 
 				_config.shouldStop = () => _shouldStop;
 				Console.CancelKeyPress += Console_CancelKeyPress;
 
+				string pitPath = null;
+				PitConfig pitConfig = null;
+
 				if (extra.Count > 0)
-					_config.pitFile = extra[0];
+				{
+					pitPath = _config.pitFile = extra[0];
+					if (Path.GetExtension(pitPath) == ".peach")
+					{
+						// Ensure pit library exists
+						_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
+						_definedValues[PitLibraryPath] = _pitLibraryPath;
+
+						pitConfig = PitDatabase.LoadPitConfig(pitPath);
+						pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
+					}
+				}
 
 				if (extra.Count > 1)
 					_config.runName = extra[1];
 
-				var defs = ParseDefines(extra[0] + ".config");
+				var defs = ParseDefines(pitPath + ".config", pitConfig);
 
 				var parserArgs = new Dictionary<string, object>();
 				parserArgs[PitParser.DEFINED_VALUES] = defs;
@@ -507,29 +523,24 @@ namespace Peach.Pro.Core.Runtime
 				if (test)
 				{
 					InteractiveConsoleWatcher.WriteInfoMark();
-					Console.Write("Validating file [" + _config.pitFile + "]... ");
-					parser.asParserValidation(parserArgs, _config.pitFile);
+					Console.Write("Validating file [" + pitPath + "]... ");
+					parser.asParserValidation(parserArgs, pitPath);
 					Console.WriteLine("No Errors Found.");
 				}
 				else
 				{
-					var dom = parser.asParser(parserArgs, _config.pitFile);
+					var dom = parser.asParser(parserArgs, pitPath);
 
-					if (_jsonConfig != null)
-					{
-						Console.WriteLine("Using agents defined in {0}", _jsonFile);
-						PitInjector.InjectAgents(_jsonConfig, defs, dom);
-					}
+					if (pitConfig != null)
+						PitInjector.InjectAgents(pitConfig, defs, dom);
 
-					RunEngine(dom);
+					RunEngine(dom, pitConfig);
 				}
 			}
 			else if (!_noweb && CreateWeb != null)
 			{
-				// Ensure pit library exists
-				var pits = FindPitLibrary(_pitLibraryPath);
-
-				RunWeb(pits, !_nobrowser, new InternalJobMonitor());
+				_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
+				RunWeb(_pitLibraryPath, !_nobrowser, new InternalJobMonitor());
 			}
 		}
 
@@ -538,12 +549,12 @@ namespace Peach.Pro.Core.Runtime
 		/// Command line arguments override any .config file's defines
 		/// </summary>
 		/// <returns></returns>
-		protected virtual List<KeyValuePair<string, string>> ParseDefines(string pitConfig)
+		protected virtual IEnumerable<KeyValuePair<string, string>> ParseDefines(string xmlConfig, PitConfig pitConfig)
 		{
 			// Parse pit.xml.config to poopulate system defines and add
 			// -D command line overrides.
 			// This will succeed even if pitConfig doesn't exist.
-			var defs = PitDefines.ParseFile(pitConfig, _definedValues);
+			var defs = PitDefines.ParseFile(xmlConfig, _definedValues);
 
 			foreach (var item in _configFiles)
 			{
@@ -560,11 +571,8 @@ namespace Peach.Pro.Core.Runtime
 
 			var ret = defs.Evaluate();
 
-			if (_jsonConfig != null)
-			{
-				Console.WriteLine("Using defines from {0}", _jsonFile);
-				PitInjector.InjectDefines(_jsonConfig, defs, ret);
-			}
+			if (pitConfig != null)
+				PitInjector.InjectDefines(pitConfig, defs, ret);
 
 			return ret;
 		}
@@ -762,8 +770,10 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 			var value = parts[1];
 
 			// Allow command line options to override others
-			_definedValues.RemoveAll(i => i.Key == key);
-			_definedValues.Add(new KeyValuePair<string, string>(key, value));
+			_definedValues[key] = value;
+
+			if (key == PitLibraryPath)
+				_defPitLibraryPath = value;
 		}
 
 		#endregion
@@ -876,7 +886,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 			}
 		}
 
-		public bool IsControlable { get { return false; } }
+		public bool IsControllable { get { return false; } }
 
 		public Job GetJob()
 		{

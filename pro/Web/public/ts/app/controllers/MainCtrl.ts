@@ -8,6 +8,7 @@ namespace Peach {
 			C.Angular.$state,
 			C.Angular.$uibModal,
 			C.Angular.$window,
+			C.Services.Eula,
 			C.Services.Pit,
 			C.Services.Wizard
 		];
@@ -17,6 +18,7 @@ namespace Peach {
 			private $state: ng.ui.IStateService,
 			private $modal: ng.ui.bootstrap.IModalService,
 			private $window: ng.IWindowService,
+			private eulaService: EulaService,
 			private pitService: PitService,
 			private wizardService: WizardService
 		) {
@@ -31,8 +33,7 @@ namespace Peach {
 				});
 			});
 
-			const promise = pitService.LoadLicense();
-			promise.then((license: ILicense) => {
+			this.eulaService.Verify().then((license : ILicense) => {
 				this.license = license;
 			});
 		}
@@ -83,7 +84,8 @@ namespace Peach {
 		private subMenus = [
 			{ state: C.States.JobMetrics, collapsed: true },
 			{ state: C.States.PitWizard, collapsed: true },
-			{ state: C.States.PitAdvanced, collapsed: true }
+			{ state: C.States.PitAdvanced, collapsed: true },
+			{ state: 'help', collapsed: true }
 		];
 
 		public IsCollapsed(state): boolean {
@@ -177,7 +179,7 @@ namespace Peach {
 		}
 
 		public OnHelp() {
-			this.$window.open('/docs', '_blank');
+			this.$window.open('/docs/user', '_blank');
 		}
 
 		public get ShowLicenseWarning(): boolean {

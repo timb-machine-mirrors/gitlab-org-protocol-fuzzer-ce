@@ -1,0 +1,57 @@
+[[InstallOnOSX]]
+=== OS X
+
+To install on OS X, first install the latest stable Mono .NET runtime, then Peach.
+To enable support for the xref:Monitors_CrashWrangler[CrashWrangler] monitor,
+install CrashWrangler and Xcode.
+Note that installing CrashWrangler is optional;
+it is only needed when running the target locally.
+
+. Install the http://www.go-mono.com/mono-downloads/download.html[Mono package].
++
+Peach Fuzzer, LLC,
+recommends using Mono .NET runtime version 4 from the mono project.
+
+. Unzip the Peach distribution to an appropriate folder.
+The file is a zip file with the extension `.zip`.
+Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
+such as `peach-pro-{BUILDTAG}-osx_release.zip`.
+
+. Install CrashWrangler.
++
+CrashWrangler *MUST* be compiled on each OS X machine.
+Peach includes the CrashWrangler source files in the peach distribution.
+Here are instructions to install and compile CrashWrangler from the peach zip.
+
+.. Ensure XCode is installed.
+.. Open `Terminal.app`.
+.. Navigate to the folder where you extracted peach-pro-{BUILDTAG}-osx_release.zip.
+.. Finish installing CrashWrangler using the following commands.
++
+----
+# Navigate to the folder containing CrashWrangler distribution
+cd CrashWrangler
+
+# Extract CrashWrangler sources
+unzip 52607_crashwrangler.zip
+
+# Navigate to the folder containing the extracted CrashWrangler sources
+cd crashwrangler
+
+# Compile CrashWrangler
+$ make
+
+# Ensure installation directory exists
+sudo mkdir -p /usr/local/bin
+
+# Install CrashWrangler
+sudo cp exc_handler /usr/local/bin
+
+# Navigate to the folder containing peach
+cd ../../
+
+# Verify CrashWrangler can run
+exc_handler
+----
+
+// end

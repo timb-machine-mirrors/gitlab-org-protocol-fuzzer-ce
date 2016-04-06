@@ -1,0 +1,159 @@
+[[InstallOnLinux]]
+=== Linux
+
+Peach is supported on three distributions of Linux;
+Peach may run on other Linux distributions,
+but are not officially supported.
+This section provides instructions for installing Peach on the following supported Linux systems,
+and includes a checklist for installing Peach on other Linux systems:
+
+* Ubuntu/Debian Linux
+* Redhat Enterprise Linux (RHEL and CentOS)
+* SUSE Enterprise Linux (SLES)
+
+
+==== Ubuntu/Debian Linux
+
+When installing Peach on an Ubuntu or Debian Linux system,
+the operating system is ready for Peach without modification.
+The installation starts with the Mono .NET runtime, then Peach.
+If you want to attach a debugger to a target process,
+install GDB when the Mono installation completes.
+
+[NOTE]
+====
+Peach Fuzzer, LLC,
+recommends using Ubuntu Linux version 14.04 LTS,
+and Mono .NET runtime version 4 from the mono project.
+The mono project has `apt` packages for Ubuntu.
+
+Some Linux kernel versions have known issues with the Mono runtime.
+When using Ubuntu 14.04 LTS,
+avoid using kernel versions 3.13.0-48 through 3.13.0-54 inclusive.
+Version 14.04 LTS might require that you update the Linux kernel.
+If so, perform the following to update the kernel: `sudo apt-get install linux-image-generic`.
+
+The Peach installer checks for compatibility and alerts the user if an incompatibility has been detected.
+====
+
+The following steps will prepare Peach to run properly:
+
+. Install the latest `mono-complete` package.
++
+----
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys  3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+
+echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
+
+sudo apt-get update
+
+sudo apt-get install mono-complete
+
+----
+. Optionally, install the GNU Debugger (GDB) to enable debugging of local processes.
+. Unzip the Peach distribution to the appropriate folder.
+The file is a zip file with the extension `.zip`.
+Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
+such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+
+==== Redhat Enterprise Linux (RHEL and CentOS)
+
+Installing Peach on a RHEL CentOS platform requires additional steps.
+Begin by installing Extra Packages for Enterprise Linux (EPEL),
+followed by the Mono package and Peach.
+
+NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
+The mono project has `yum` packages for RHEL and CentOS distributions.
+
+
+The following steps provide the needed details:
+
+. Install `yum-utils` using the following command:
++
+----
+sudo yum install yum-utils
+----
+
+. Install Extra Packages for Enterprise Linux (EPEL) using the following command:
++
+----
+sudo yum install epel-release
+----
+
+. Import the GPG signing key for the mono package using the following command. Note the long search key:
++
+----
+sudo rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+----
+
+. Add and enable the mono project repository for CentOS using the yum configuration manager:
++
+----
+sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/
+----
+
+.	Install the latest version of Mono using the following command:
++
+----
+sudo yum install mono-complete
+----
+
+. Unzip the Peach distribution to the appropriate folder.
+The file is a zip file with the extension `.zip`.
+Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
+such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+
+
+[NOTE]
+============
+For more information, see the following web locations:
+
+* http://www.mono-project.com/docs/getting-started/install/linux/#centos-fedora-and-derivatives +
+* https://fedoraproject.org/wiki/EPEL#How_can_I_use_these_extra_packages.3F
+============
+
+==== SUSE Enterprise Linux (SLES)
+
+To install Peach on a SUSE Enterprise Linux platform,
+use the 1-click SUSE mono-complete installation file.
+If you want to attach a debugger to a target process,
+install GDB when the Mono installation completes.
+
+NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
+The mono project has packages for SLES distributions.
+
+. Install Mono using One-Click install file
++
+From a web browser on SLES, browse to:
++
+----
+http://download.mono-project.com/repo/mono-complete.ymp
+----
++
+Or, from the command line run:
++
+----
+/sbin/OCICLI http://download.mono-project.com/repo/mono-complete.ymp
+----
++
+. Optionally, install the GNU Debugger (GDB) for debugging local processes.
+. Unzip the Peach binary distribution to the appropriate folder.
+The file is a zip file with the extension `.zip`.
+Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
+such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+
+
+==== Other Linux Distributions
+
+For other Linux versions,
+the installation steps are a checklist,
+not specific commands.
+The checklist follows:
+
+. Install the latest Mono runtime. Version 4 or greater is recommended.
+. Unzip the Peach distribution to an appropriate folder.
+The file is a zip file with the extension `.zip`.
+Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
+such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+
+// end

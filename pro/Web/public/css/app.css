@@ -164,6 +164,18 @@ td div.peach-parameter-input .input-group {
 	}
 }
 
+.peach-migrate-pit {
+	max-height: 600px;
+	overflow-y: auto;
+}
+
+@media only screen and (max-height: 1000px) {
+	.peach-migrate-pit {
+		max-height: 250px;
+		overflow-y: auto;
+	}
+}
+
 #loading-bar .bar {
 	background: orange;
 }
@@ -333,5 +345,10 @@ noscript {
 .dirty-search {
 	border-color: red !important;
 	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(255, 0, 0, .6) !important;
+}
+
+.peach-eula-body {
+	max-height: calc(100vh - 240px);
+	overflow-y: auto;
 }
 

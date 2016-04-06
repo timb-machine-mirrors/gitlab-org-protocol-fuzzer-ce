@@ -1,0 +1,20 @@
+[[GeneralConfiguration]]
+=== General
+
+This section documents general elements used in creating a fuzzing definition.
+
+:leveloffset: 2
+include::Data.adoc[]
+include::Defaults.adoc[]
+include::Import.adoc[]
+include::Include.adoc[]
+include::Logger.adoc[]
+include::MutationStrategies.adoc[]
+include::Param.adoc[]
+include::PythonPath.adoc[]
+include::Test.adoc[]
+include::Test_Exclude.adoc[]
+include::Test_Include.adoc[]
+include::Test_Mutators.adoc[]
+
+// end

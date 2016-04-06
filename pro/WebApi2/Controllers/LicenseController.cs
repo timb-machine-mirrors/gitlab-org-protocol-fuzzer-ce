@@ -5,10 +5,19 @@ using Lic = Peach.Pro.Core.License;
 namespace Peach.Pro.WebApi2.Controllers
 {
 	[RoutePrefix(Prefix)]
-	public class LicenseController : ApiController
+	public class LicenseController : BaseController
 	{
 		public const string Prefix = "p/license";
 
+		public LicenseController()
+			: base(null)
+		{
+		}
+
+		/// <summary>
+		/// Gets information about the current peach license.
+		/// </summary>
+		/// <returns></returns>
 		[Route("")]
 		public License Get()
 		{
@@ -20,8 +29,21 @@ namespace Peach.Pro.WebApi2.Controllers
 				IsExpired = Lic.IsExpired,
 				ErrorText = Lic.ErrorText,
 				Expiration = Lic.Expiration,
-				Version = Lic.Version
+				Version = Lic.Version,
+				EulaAccepted = Lic.EulaAccepted,
 			};
+		}
+
+		/// <summary>
+		/// Accepts the end user licensing agreement.
+		/// </summary>
+		/// <returns></returns>
+		[Route("")]
+		public License Post()
+		{
+			Lic.EulaAccepted = true;
+
+			return Get();
 		}
 	}
 }

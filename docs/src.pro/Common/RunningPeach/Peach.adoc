@@ -1,0 +1,266 @@
+[[Program_Peach]]
+== The {peachcomd}
+
+Peach can be run as a command line process with a console text based interface (the {peachcomd}).
+
+=== Syntax
+
+----
+peach -a channel
+peach -c peach_xml_file [test_name]
+peach [--skipto #] peach_xml_flie [test_name]
+peach -p 10,2 [--skipto #] peach_xml_file [test_name]
+peach --range 100,200 peach_xml_file [test_name]
+peach -t peach_xml_file
+----
+
+=== Parameters
+
+-1:: Perform a single iteration. Used in debugging and validation. The iteration performed does not have any mutations.
+-a --agent _CHANNEL_::
++
+Launch Peach as an agent process using specified _CHANNEL_ protocol.  
+In most cases the channel protocol should be +tcp+.
+By default the +tcp+ channel will start listening on port 9001.
+
+--analyzer _ANALYZER_::
++
+Run an analyzer from command line (if supported by analyzer).
++
+.XML Analyzer Example
+====
+peach --analyzer Json example.json generated_pit.xml
+====
+
+-c --count _pit_:: 
++
+For deterministic strategies, this returns a total iteration count.
++
+NOTE: This argument will not work with the default strategy.
+
+-D --define=_KEY_=_VALUE_::
++
+Define a config value that is replaced in the pit. This overrides values loaded from the configuration file.
++
+.Define example
+====
+peach HTTP_Server.xml -DTargetIPv4=192.168.48.128 -DTargetPort=8080
+====
+
+--debug::
++
+Enable debug messages.
+This is used to debug or verify pit files.
++
+See also the +--trace+ argument.
+
+--duration _DURATION_::
++
+Duration of fuzzing run.  Peach will run for _DURATION_ length of time.  Commonly integrating Peach into an automated test cycle or continuous integration environment. Argument format is +DD.HH:MM:SS+.
++
+.Duration of 12 days
+=====
+--duration 12
+=====
++
+.Duration of 20 minutes
+=====
+--duration 0:20
+=====
++
+.Duration of 5 hours
+=====
+--duration 5:00
+=====
++
+.Duration of 1 day, 5 hours
+=====
+--duration 1.5:00
+=====
+
+--config=_CONFIG_:: Specify a configuration file to use. _CONFIG_ is the configuration file.
+--makexsd::
++
+Generate XML Schema file (peach.xsd).
+This file is used for pit file validation and also intelliSense in XML editors.
+The XSD only needs to be generated if custom extensions are added to Peach.
+
+-p --parallel _M_,_N_::
++
+Setup for parallel fuzzing.
+This is only useful for deterministic strategies.
+_M_ is the total number of running instances.
+_N_ is the current instance.
++
+NOTE: When using the default fuzzing strategy, this argument is not useful.
+
+--parseonly:: Perform a simple parsing of the pit file, then exit.
+
+--range _START_,_STOP_:: Perform a specific range of iterations. _START_ is starting iteration, _STOP_ is iteration to stop at.
+
+--seed _SEED_:: Use a specific seed for fuzzing run. This should only be used when reproducing results.
+
+--showenv:: Display a list of all elements found along with parameters and basic documentation.
+
+--showdevices:: Show a list of network devices found on the system.
+
+--skipto _N_:: Skip to a specific iteration number. _N_ is the iteration to skip to.
+
+-t --test _pit_:: Perform XML validation of pit
+
+--trace::
++
+Enable verbose trace messages.
+Primarily used when reporting potential bugs in Peach.
++
+See also +--debug+.
+
+=== Examples
+
+.Running a Pit
+======================
+This example shows how to run a fuzzing definition. The following command line launches Peach and fuzzes using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file.
+
+----
+> peach pit.xml
+----
+======================
+
+.Single Iteration with Debug Output
+======================
+When testing a definition, we recommend running a single non-mutating iteration with debug output. 
+
+The following command line launches Peach and fuzzes using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file. The command line combines the +-1+ and +--debug+ arguments to run a single iteration; the debugging information is included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
+
+----
+> peach -1 --debug samples\DebuggerWindows.xml
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Test 'Default' starting with random seed 27886.
+Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger
+Peach.Core.Agent.Agent StartMonitor: Monitor_1 PageHeap
+Peach.Core.Agent.Agent StartMonitor: Monitor_2 NetworkCapture
+Peach.Core.Agent.Agent SessionStarting: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionStarting
+Peach.Core.Agent.Agent SessionStarting: Monitor_1
+Establishing the listener...
+Waiting for a connection...
+Peach.Core.Agent.Agent SessionStarting: Monitor_2
+
+[R1,-,-] Performing iteration
+Peach.Core.Engine runTest: Performing recording iteration.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher start()
+Peach.Core.Publishers.TcpClientPublisher open()
+Accepted connection from 127.0.0.1:51466.
+Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
+
+Received 12 bytes from client.
+Peach.Core.Dom.Action Run: Adding action to controlRecordingActionsExecuted
+Peach.Core.Dom.Action ActionType.Output
+Peach.Core.Publishers.TcpClientPublisher output(12 bytes)
+Peach.Core.Publishers.TcpClientPublisher
+
+00000000   48 65 6C 6C 6F 20 57 6F  72 6C 64 21               Hello World!
+
+Received 12 bytes from client.
+Peach.Core.Publishers.TcpClientPublisher close()
+Peach.Core.Publishers.TcpClientPublisher Shutting down connection to 127.0.0.1:4
+244
+Connection closed by peer.
+Shutting connection down...
+Connection is down.
+Peach.Core.Publishers.TcpClientPublisher Read 0 bytes from 127.0.0.1:4244, closing client connection.
+Waiting for a connection...
+Peach.Core.Publishers.TcpClientPublisher Closing connection to 127.0.0.1:4244
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault()
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid DetectedFault() - No fault detected
+Peach.Core.Engine runTest: context.config.singleIteration == true
+Peach.Core.Publishers.TcpClientPublisher stop()
+Peach.Core.Agent.Agent SessionFinished: Monitor_2
+Peach.Core.Agent.Agent SessionFinished: Monitor_1
+Peach.Core.Agent.Agent SessionFinished: Monitor
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid SessionFinished
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _FinishDebugger
+Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
+
+[*] Test 'Default' finished.
+----
+======================
+
+.Replay Existing Test Sequence
+======================
+Once you find a faulting condition, you may want to replicate the exact test (or sequence of tests) to recreate the issue. Peach can reproduce exact test sequences given the following information:
+
+. Exact version of Peach. This is found in the log file +status.txt+.
+. Seed number used. This is also found in the log file +status.txt+.
+. Same/similar pit file. Data and state models must be the same.
+
+.status.txt
+----
+Peach Fuzzing Run
+=================
+
+Date of run: 3/20/2014 1:58:58 PM
+Peach Version: 3.1.40.1              <1>
+Seed: 51816                          <2>
+Command line: samples\DebuggerWindows.xml
+Pit File: samples\DebuggerWindows.xml
+. Test starting: Default
+
+----
+<1> Version of Peach used. Must match when reproducing.
+<2> Seed used. Must match when reproducing.
+
+We can use the first command line to skip directly to a specific iteration and start fuzzing. This lets you run a series of iterations starting from a certain point. 
+
+TIP: The +--seed+ argument matches the value from the +status.txt+ file.
+
+----
+> peach --seed 51816 --skipto 37566
+----
+
+We can use the second command line to perform either a specific iteration or a small number of iterations.
+
+----
+> peach --seed 51816 --range 37566,37566
+----
+======================
+
+.Starting a Peach Agent Process
+======================
+Agents are long running processes used by the Peach engine core during a fuzzing session. 
+
+The following command line starts a Peach agent using the _tcp_ channel protocol:
+
+----
+> peach -a tcp
+
+[[ Peach Pro v3.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+[*] Starting agent server
+ -- Press ENTER to quit agent --
+----
+======================
+
+.Regenerating the Peach Schema File
+======================
+The Peach schema file, _peach.xsd_, provides intelliSense in supported editors (like Visual Studio and oXygen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
+
+----
+> peach --makexsd
+----
+
+The output of this command is a new _peach.xsd_ file that contains any custom extensions.
+
+======================

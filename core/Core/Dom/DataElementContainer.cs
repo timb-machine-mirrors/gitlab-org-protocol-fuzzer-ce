@@ -222,16 +222,7 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		protected override IEnumerable<DataElement> Children()
-		{
-			return this;
-		}
-
-		/// <summary>
-		/// Returns an enumeration of children that are diplayed to the user.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<DataElement> DisplayChildren()
+		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			return this;
 		}

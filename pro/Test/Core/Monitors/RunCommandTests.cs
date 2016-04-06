@@ -602,5 +602,27 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			RegexShouldFault("foo", "foo", "foo");
 		}
+
+		[Test]
+		public void TestInvalidWorkingDirectory()
+		{
+			var args = string.Join(" ", "when", _outputFile, "OnStart");
+			var dir = "/this/path/does/not/exist";
+			var runner = new MonitorRunner("RunCommand", new Dictionary<string, string> {
+				{ "Command", _scriptFile },
+				{ "Arguments", args },
+				{ "When", "OnStart" },
+				{ "WorkingDirectory", dir },
+			});
+
+			var ex = Assert.Throws<PeachException>(() => runner.Run());
+
+			var expected = "RunCommand (Mon_0) failed to run command: '{0} {1}'. Specified WorkingDirectory does not exist: '{2}'.".Fmt(
+				_scriptFile,
+				args,
+				dir
+			);
+			Assert.AreEqual(expected, ex.Message);
+		}
 	}
 }

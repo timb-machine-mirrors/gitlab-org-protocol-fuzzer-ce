@@ -214,10 +214,13 @@ namespace Peach.Core.Dom
 
 		public class CloneContext
 		{
-			public CloneContext(DataElement root, string name)
+			public CloneContext(DataElement root, DataElementContainer parent, string name, bool shallow)
 			{
 				this.root = root;
 				this.name = name;
+
+				Parent = parent;
+				Shallow = shallow;
 
 				rename = new List<DataElement>();
 
@@ -238,6 +241,18 @@ namespace Peach.Core.Dom
 			}
 
 			public List<DataElement> rename
+			{
+				get;
+				private set;
+			}
+
+			public bool Shallow
+			{
+				get;
+				private set;
+			}
+
+			public DataElementContainer Parent
 			{
 				get;
 				private set;
@@ -270,7 +285,7 @@ namespace Peach.Core.Dom
 		/// Creates a deep copy of the DataElement, and updates the appropriate Relations.
 		/// </summary>
 		/// <returns>Returns a copy of the DataElement.</returns>
-		public virtual DataElement Clone()
+		public DataElement Clone()
 		{
 			// If we have a parent, we need a CloneContext
 			if (parent != null)
@@ -285,13 +300,39 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Creates a deep copy of the DataElement, and updates the appropriate Relations.
 		/// </summary>
-		/// <param name="name">What name to set on the cloned DataElement</param>
+		/// <param name="newParent">The new parent of the cloned element</param>
 		/// <returns>Returns a copy of the DataElement.</returns>
-		public virtual DataElement Clone(string name)
+		public DataElement ShallowClone(DataElementContainer newParent)
 		{
-			var ret = ObjectCopier.Clone(this, new CloneContext(this, name));
+			return DoClone(newParent, Name, true);
+		}
 
-			if (Name != name)
+		/// <summary>
+		/// Creates a deep copy of the DataElement, and updates the appropriate Relations.
+		/// </summary>
+		/// <param name="newName">What name to set on the cloned DataElement</param>
+		/// <returns>Returns a copy of the DataElement.</returns>
+		public DataElement Clone(string newName)
+		{
+			return DoClone(parent, newName, false);
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the DataElement, and updates the appropriate Relations.
+		/// </summary>
+		/// <param name="newParent">The new parent of the cloned element</param>
+		/// <param name="newName">What name to set on the cloned DataElement</param>
+		/// <returns>Returns a copy of the DataElement.</returns>
+		public DataElement ShallowClone(DataElementContainer newParent, string newName)
+		{
+			return DoClone(newParent, newName, true);
+		}
+
+		private DataElement DoClone(DataElementContainer newParent, string newName, bool shallow)
+		{
+			var ret = ObjectCopier.Clone(this, new CloneContext(this, newParent, newName, shallow));
+
+			if (Name != newName)
 			{
 				if (ret.parent == null)
 					ret.fullName = ret.Name;
@@ -302,6 +343,8 @@ namespace Peach.Core.Dom
 					item.fullName = item.parent.fullName + "." + item.Name;
 			}
 
+			ret.parent = newParent;
+
 			return ret;
 		}
 
@@ -311,32 +354,10 @@ namespace Peach.Core.Dom
 
 		/// <summary>
 		/// Performs pre-order traversal starting with this node.
-		/// Returns only children we want to display to the user.
-		/// Each element controls the children to return by
-		/// overriding the DisplayChildren function.
+		/// If forDisplay is true, returns only children we want to display to the user.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<DataElement> DisplayTraverse()
-		{
-			var toVisit = new List<DataElement> { null };
-
-			var elem = this;
-
-			while (elem != null)
-			{
-				yield return elem;
-
-				var index = toVisit.Count;
-				foreach (var item in elem.DisplayChildren())
-					toVisit.Insert(index, item);
-
-				index = toVisit.Count - 1;
-				elem = toVisit[index];
-				toVisit.RemoveAt(index);
-			}
-		}
-
-		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool useFieldIds)
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool useFieldIds, bool forDisplay)
 		{
 			var key = useFieldIds ? FullFieldId : fullName;
 			var toVisit = new List<KeyValuePair<string, DataElement>>
@@ -353,7 +374,7 @@ namespace Peach.Core.Dom
 				yield return node;
 
 				index = toVisit.Count;
-				foreach (var child in node.Value.Children())
+				foreach (var child in node.Value.Children(forDisplay))
 				{
 					key = useFieldIds ? 
 						child.FullFieldId : 
@@ -511,7 +532,7 @@ namespace Peach.Core.Dom
 			yield return skip;
 		}
 
-		protected virtual IEnumerable<DataElement> Children()
+		public virtual IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			return new DataElement[0];
 		}
@@ -1414,9 +1435,10 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		/// <summary>
-		/// Get the Internal Value of this data element
-		/// </summary>
+        /// <summary>
+        /// Get the Internal Value of this data element
+        /// </summary>
+		[DebuggerDisplay("{InternalValueDebugName}")]
 		public Variant InternalValue
 		{
 			get
@@ -1463,6 +1485,14 @@ namespace Peach.Core.Dom
 			}
 		}
 
+		private string InternalValueDebugName
+		{
+			get
+			{
+				return _internalValue != null ? _internalValue.ToString() : null;
+			}
+		}
+
 		/// <summary>
 		/// Returns the final value without any transformers being applied
 		/// </summary>
@@ -1483,9 +1513,10 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		/// <summary>
-		/// Get the final Value of this data element
-		/// </summary>
+        /// <summary>
+        /// Get the final Value of this data element
+        /// </summary>
+		[DebuggerDisplay("{ValueDebugName}")]
 		public BitwiseStream Value
 		{
 			get
@@ -1525,6 +1556,14 @@ namespace Peach.Core.Dom
 					_writeValueCache = oldWriteCache;
 					_readValueCache = oldReadCache;
 				}
+			}
+		}
+
+		private string ValueDebugName
+		{
+			get
+			{
+				return _value != null ? _value.ToString() : null;
 			}
 		}
 
@@ -1905,8 +1944,8 @@ namespace Peach.Core.Dom
 			return MoveTo(parent, offset);
 		}
 
-		[OnCloning]
-		private bool OnCloning(object context)
+		[ShouldClone]
+		private bool ShouldClone(object context)
 		{
 			var ctx = context as CloneContext;
 

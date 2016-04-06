@@ -138,7 +138,9 @@ namespace Peach {
 			const promise = this.$http.get(C.Api.Jobs, { params: params });
 			promise.success((jobs: IJob[]) => this.jobs = jobs);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
-				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				if (reason.status !== 401 && reason.status !== 402) {
+					this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				}
 			});
 			return StripHttpPromise(this.$q, promise);
 		}
@@ -172,7 +174,9 @@ namespace Peach {
 		public Delete(job: IJob): ng.IPromise<any> {
 			return this.$http.delete(job.jobUrl)
 				.then(() => { return this.GetJobs(); })
-			;
+				.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
+					this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
+				});
 		}
 		
 		public Continue(): void {

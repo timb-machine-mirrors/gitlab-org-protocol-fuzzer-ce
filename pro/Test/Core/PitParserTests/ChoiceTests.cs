@@ -368,12 +368,13 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			var choice = dom.dataModels[0][0] as Choice;
 			Assert.AreEqual(null, choice.SelectedElement);
-			choice.SelectedElement = choice.choiceElements[0];
+			choice.SelectElement(choice.choiceElements[0]);
 			Assert.AreEqual(1, choice.Count);
 
 			var blob = dom.dataModels[0][1] as Blob;
 			Assert.NotNull(blob);
-			Assert.AreEqual(3, blob.relations.Of<SizeRelation>().Count());
+			Assert.AreEqual(4, blob.relations.Of<SizeRelation>().Count());
+			// 4 relations, 1 for each choice and 1 for chosen item
 
 			// Remove the chosen element
 			choice.Remove(choice[0]);
