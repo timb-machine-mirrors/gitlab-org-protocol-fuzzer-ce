@@ -147,5 +147,20 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			Assert.IsTrue(blob.lengthType == LengthType.Bits);
 		}
+
+		[Test]
+		public void TestComments()
+		{
+			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<Defaults>
+		<!-- This should work! -->
+		<Blob lengthType='bits'/>
+	</Defaults>
+</Peach>
+";
+
+			Assert.DoesNotThrow(() => DataModelCollector.ParsePit(xml));
+		}
 	}
 }

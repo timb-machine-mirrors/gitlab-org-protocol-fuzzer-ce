@@ -580,8 +580,10 @@ namespace Peach.Core.Analyzers
 		{
 			foreach (XmlNode child in node.ChildNodes)
 			{
-				Dictionary<string, string> args = new Dictionary<string, string>();
+				if (child is XmlComment)
+					continue;
 
+				var args = new Dictionary<string, string>();
 				switch (child.Name)
 				{
 					case "Number":
