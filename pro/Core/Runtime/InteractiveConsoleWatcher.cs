@@ -18,6 +18,7 @@ namespace Peach.Pro.Core.Runtime
 		RunContext _context;
 		uint _currentIteration;
 		uint _totalIterations;
+		uint _iterationCount = 1;
 		readonly List<Fault> _faults = new List<Fault>();
 		readonly Dictionary<string, int> _majorFaultCount = new Dictionary<string, int>();
 		DateTime _started = DateTime.Now;
@@ -87,6 +88,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
 		{
+			_iterationCount++;
 		}
 
 		protected override void Engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -208,38 +210,16 @@ namespace Peach.Pro.Core.Runtime
 				Console.CursorVisible = false;
 
 				// Display iterations
-
-				Console.SetCursorPosition(1, 5);
-				DisplayStaticText("Iteration: ");
-				Console.Write(_currentIteration);
-				if (_totalIterations > 0 && _totalIterations < UInt32.MaxValue)
-					Console.Write(" of " + _totalIterations);
+				DisplayIteration();
 
 				// Display status
-
-				Console.SetCursorPosition(4, 6);
-				DisplayStaticText("Status: ");
-				Console.Write(_status);
-				Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
+				DisplayStatus();
 
 				// Display running
-
-				var runSpan = (DateTime.Now - _started);
-
-				Console.SetCursorPosition(36, 3);
-				DisplayStaticText("Running: ");
-				if (runSpan.Days > 0)
-					Console.Write(runSpan.ToString(@"d\.hh\:mm\:ss"));
-				else
-					Console.Write(runSpan.ToString(@"hh\:mm\:ss"));
+				var runSpan = DisplayRunning();
 
 				// Display speed
-
-				Console.SetCursorPosition(38, 4);
-				DisplayStaticText("Speed: ");
-				Console.Write((int)((_currentIteration / runSpan.TotalSeconds) * 3600));
-				Console.Write("/hr");
-				Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
+				DisplaySpeed(runSpan);
 
 				Console.SetCursorPosition(0, 9);
 			}
@@ -309,22 +289,10 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write(_started.ToShortDateString());
 
 				// Display running
-
-				var runSpan = (DateTime.Now - _started);
-
-				Console.SetCursorPosition(36, 3);
-				DisplayStaticText("Running: ");
-				if (runSpan.Days > 0)
-					Console.Write(runSpan.ToString(@"d\.hh\:mm\:ss"));
-				else
-					Console.Write(runSpan.ToString(@"hh\:mm\:ss"));
+				var runSpan = DisplayRunning();
 
 				// Display speed
-
-				Console.SetCursorPosition(38, 4);
-				DisplayStaticText("Speed: ");
-				Console.Write((int)((_currentIteration / (DateTime.Now - _started).TotalSeconds) * 3600));
-				Console.Write("/hr     ");
+				DisplaySpeed(runSpan);
 
 				if (!string.IsNullOrEmpty(_eta))
 				{
@@ -336,22 +304,10 @@ namespace Peach.Pro.Core.Runtime
 				}
 
 				// Display iterations
-
-				Console.SetCursorPosition(1, 5);
-				DisplayStaticText("Iteration: ");
-				Console.Write(_currentIteration);
-				if (_totalIterations > 0 && _totalIterations < UInt32.MaxValue)
-					Console.Write(" of " + _totalIterations);
+				DisplayIteration();
 
 				// Display status
-
-				Console.SetCursorPosition(4, 6);
-				DisplayStaticText("Status: ");
-				Console.Write(_status);
-
-				// Clear rest of line
-				for (var i = Console.CursorLeft; i < Console.WindowLeft; i++)
-					Console.Write(' ');
+				DisplayStatus();
 
 				// Display faults
 
@@ -393,6 +349,46 @@ namespace Peach.Pro.Core.Runtime
 			{
 				Console.CursorVisible = true;
 			}
+		}
+
+		private void DisplaySpeed(TimeSpan runSpan)
+		{
+			Console.SetCursorPosition(38, 4);
+			DisplayStaticText("Speed: ");
+			var sec = runSpan.Ticks/TimeSpan.TicksPerSecond;
+			var speed = (sec == 0) ? 0 : (_iterationCount*3600)/sec;
+			Console.Write(speed);
+			Console.Write("/hr     ");
+		}
+
+		private TimeSpan DisplayRunning()
+		{
+			var runSpan = (DateTime.Now - _started);
+
+			Console.SetCursorPosition(36, 3);
+			DisplayStaticText("Running: ");
+			if (runSpan.Days > 0)
+				Console.Write(runSpan.ToString(@"d\.hh\:mm\:ss"));
+			else
+				Console.Write(runSpan.ToString(@"hh\:mm\:ss"));
+			return runSpan;
+		}
+
+		private void DisplayIteration()
+		{
+			Console.SetCursorPosition(1, 5);
+			DisplayStaticText("Iteration: ");
+			Console.Write(_currentIteration);
+			if (_totalIterations > 0 && _totalIterations < UInt32.MaxValue)
+				Console.Write(" of " + _totalIterations);
+		}
+
+		private void DisplayStatus()
+		{
+			Console.SetCursorPosition(4, 6);
+			DisplayStaticText("Status: ");
+			Console.Write(_status);
+			Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft));
 		}
 
 		public static void WriteInfoMark()
