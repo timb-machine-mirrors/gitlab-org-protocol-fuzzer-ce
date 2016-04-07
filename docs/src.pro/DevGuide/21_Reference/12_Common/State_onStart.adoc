@@ -4,20 +4,23 @@
 
 == State onStart Attribute
 
-The _onStart_ attribute is a python scripting statement that is evaluated prior to performing the actions in a xref:State[State] model.
-The scripting statement can be used to increment a counter or to perform other functions defined in separate files included with the xref:Import[Import] element.
+The _onStart_ attribute is a python expression that is evaluated prior to performing the actions in a xref:State[State].
+This expression can be used to increment a counter or to call some other function defined in a separate file included with the xref:Import[Import] element.
 
 TIP:  _xref:State_onComplete[onComplete]_ is the sibling attribute.
 
 .Keeping State
 ****
-State bags are defined as _Dictionary<string, object>_ in C#. If you use one of two state bags exposed through the RunContext instance, you can store state during the lifetime of the current iteration or for the entire fuzzing session.
+State bags are defined as _Dictionary<string, object>_ in C#.
+If you use one of two state bags exposed through the RunContext instance,
+you can store state during the lifetime of the current iteration or for the entire fuzzing session.
 
 A full example of using the iteration state bag is provided in the examples section.
 
 _Using the Session State:_
 
-This state stored in this state bag persists for the entire fuzzing session, from the point of creation to the end of the session.
+This state stored in this state bag persists for the entire fuzzing session,
+from the point of creation to the end of the session.
 
 [source,python]
 ----
@@ -66,24 +69,24 @@ This example prints a message when the _onStart_ statement is run.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-  
+
   <DataModel name="File1Model">
     <String value="Data for the file" />
   </DataModel>
-  
+
   <StateModel name="State" initialState="Initial">
     <State name="Initial" onStart="print 'Hello from onStart!'">
-      
+
       <Action type="output">
         <DataModel ref="File1Model" />
       </Action>
-      
+
     </State>
   </StateModel>
-  
+
   <Test name="Default">
     <StateModel ref="State"/>
-    
+
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt" />
     </Publisher>
@@ -92,7 +95,7 @@ This example prints a message when the _onStart_ statement is run.
       <Param name="Path" value="logtest" />
     </Logger>
   </Test>
-  
+
 </Peach>
 ----
 
@@ -133,17 +136,17 @@ This example uses the iteration state bag to simulate a for loop.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
-  
+
   <DataModel name="TheDataModel">
     <String value="Looping!\n" />
   </DataModel>
-  
+
   <StateModel name="State" initialState="Initial">
     <State name="Initial" onStart="context.iterationStateStore['count'] = 0">
-	  
+
 	  <!-- Initialize our counter -->
 	  <Action type="changeState" ref="Loop" />
-	
+
 	</State>
 
 	<State name="Loop" onStart="context.iterationStateStore['count'] = context.iterationStateStore['count'] + 1">
@@ -152,24 +155,24 @@ This example uses the iteration state bag to simulate a for loop.
       <Action type="output">
         <DataModel ref="TheDataModel" />
       </Action>
-      
+
 	  <!-- Loop until our counter is greater than 3 -->
 	  <Action type="changeState" ref="Loop" when="context.iterationStateStore['count'] &lt; 3" />
 
     </State>
 
   </StateModel>
-  
+
   <Test name="Default">
     <StateModel ref="State"/>
-    
+
     <Publisher class="Console"/>
 
     <Logger class="File">
       <Param name="Path" value="logtest" />
     </Logger>
   </Test>
-  
+
 </Peach>
 ----
 
