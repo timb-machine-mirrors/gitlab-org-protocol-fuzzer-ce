@@ -19,7 +19,7 @@ IMPORTANT: Assumptions/Givens in this recipe are that a Pit is ready to use, Pea
 In this scenario, Peach runs on a host computer; the network server runs in a
 Virtual Machine (VM) on the host. With Peach running on the host, it controls the
 environment. If the network server crashes, the worst thing that happens is that
-the virtual machine has to restart. Peach recover the data if the network
+the virtual machine has to restart. Peach recovers the data if the network
 server crashes.
 
 ==== Workflow for the Fuzzing Session
