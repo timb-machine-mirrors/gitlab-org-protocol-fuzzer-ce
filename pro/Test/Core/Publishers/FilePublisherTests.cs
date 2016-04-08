@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Publishers
@@ -11,49 +10,71 @@ namespace Peach.Pro.Test.Core.Publishers
 	[Peach]
 	class FilePublisherTests
 	{
-		[Test]
-		public void Test1()
-		{
-			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+		private string _xml = @"<?xml version='1.0' encoding='utf-8'?>
 				<Peach>
-				   <DataModel name=""TheDataModel"">
-				       <String value=""Hello""/>
+				   <DataModel name='TheDataModel'>
+				       <String value='Hello'/>
 				   </DataModel>
 
-				   <StateModel name=""TheStateModel"" initialState=""InitialState"">
-				       <State name=""InitialState"">
-				           <Action name=""Action1"" type=""output"">
-				               <DataModel ref=""TheDataModel""/>
+				   <StateModel name='TheStateModel' initialState='InitialState'>
+				       <State name='InitialState'>
+				           <Action name='Action1' type='output'>
+				               <DataModel ref='TheDataModel'/>
 				           </Action>
 				       </State>
 				   </StateModel>
 
-				   <Test name=""Default"">
-				       <StateModel ref=""TheStateModel""/>
-				       <Publisher class=""File"">
-				           <Param name=""FileName"" value=""{0}""/>
+				   <Test name='Default'>
+				       <StateModel ref='TheStateModel'/>
+				       <Publisher class='File'>
+				           <Param name='FileName' value='{0}'/>
 				       </Publisher>
 				   </Test>
 
 				</Peach>";
 
-			string tempFile = Path.GetTempFileName();
+		[Test]
+		public void Test1()
+		{
+			using (var tmp = new TempFile())
+			{
+				var xml = _xml.Fmt(tmp.Path);
 
-			xml = string.Format(xml, tempFile);
+				var dom = DataModelCollector.ParsePit(xml);
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var config = new RunConfiguration { singleIteration = true };
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
 
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
+				var output = File.ReadAllLines(tmp.Path);
 
-			string[] output = File.ReadAllLines(tempFile);
+				Assert.AreEqual(1, output.Length);
+				Assert.AreEqual("Hello", output[0]);
+			}
+		}
 
-			Assert.AreEqual(1, output.Length);
-			Assert.AreEqual("Hello", output[0]);
+		[Test]
+		public void TestCreateDirectory()
+		{
+			using (var tmpDir = new TempDirectory())
+			{
+				var tmpFile = Path.Combine(tmpDir.Path, "Some", "Dir", "File.xml");
+
+				var xml = _xml.Fmt(tmpFile);
+
+				var dom = DataModelCollector.ParsePit(xml);
+
+				var config = new RunConfiguration { singleIteration = true };
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
+
+				var output = File.ReadAllLines(tmpFile);
+
+				Assert.AreEqual(1, output.Length);
+				Assert.AreEqual("Hello", output[0]);
+			}
 		}
 	}
 }

@@ -26,8 +26,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;
@@ -50,53 +50,48 @@ namespace Peach.Pro.Core.Publishers
 		public bool Overwrite { get; protected set; }
 		public bool Append { get; protected set; }
 
-		private static int maxOpenAttempts = 10;
-		private FileMode fileMode = FileMode.OpenOrCreate;
+		private const int maxOpenAttempts = 10;
+		private readonly FileMode fileMode;
 
 		public FilePublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 			if (Overwrite && Append)
 				throw new PeachException("File publisher does not support Overwrite and Append being enabled at once.");
-			else if (Overwrite)
+
+			if (Overwrite)
 				fileMode = FileMode.Create;
 			else if (Append)
-				fileMode = FileMode.Append | FileMode.OpenOrCreate;
+				fileMode = FileMode.OpenOrCreate | FileMode.Append;
 			else
 				fileMode = FileMode.OpenOrCreate;
 		}
 
 		protected override void OnOpen()
 		{
-			System.Diagnostics.Debug.Assert(stream == null);
+			Debug.Assert(stream == null);
 
-			int i = 0;
+			var dir = Path.GetDirectoryName(FileName);
+			if (!Directory.Exists(dir))
+				Directory.CreateDirectory(dir);
 
-			while (true)
+			try
 			{
-				try
+				Retry.Execute(() =>
 				{
-					stream = System.IO.File.Open(FileName, fileMode);
-					return;
-				}
-				catch (Exception ex)
-				{
-					if (++i < maxOpenAttempts)
-					{
-						Thread.Sleep(200);
-					}
-					else
-					{
-						Logger.Error("Could not open file '{0}' after {1} attempts.  {2}", FileName, maxOpenAttempts, ex.Message);
-						throw new SoftException(ex);
-					}
-				}
+					stream = File.Open(FileName, fileMode);
+				}, TimeSpan.FromMilliseconds(200), maxOpenAttempts);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Could not open file '{0}' after {1} attempts.  {2}", FileName, maxOpenAttempts, ex.Message);
+				throw new SoftException(ex);
 			}
 		}
 
 		protected override void OnClose()
 		{
-			System.Diagnostics.Debug.Assert(stream != null);
+			Debug.Assert(stream != null);
 
 			try
 			{
@@ -116,5 +111,3 @@ namespace Peach.Pro.Core.Publishers
 		}
 	}
 }
-
-// END
