@@ -100,11 +100,18 @@ class zip(Task.Task):
 
 		for src, dest, attr in self.generator.zip_inputs:
 			dest = os.path.normpath(dest).replace('\\', '/')
+			fullSrc = src.abspath()
 
-			z.write(src.abspath(), dest)
-
-			zi = z.getinfo(dest)
-			zi.external_attr = attr
+			if os.path.islink(fullSrc):
+				zi = zipfile.ZipInfo(dest)
+				zi.create_system = 3
+				zi.external_attr = 2716663808L
+				# '0xA1ED0000L' is symlink attr magic
+				z.writestr(zi, os.readlink(fullSrc))
+			else:
+				z.write(fullSrc, dest)
+				zi = z.getinfo(dest)
+				zi.external_attr = attr
 
 		z.close()
 
