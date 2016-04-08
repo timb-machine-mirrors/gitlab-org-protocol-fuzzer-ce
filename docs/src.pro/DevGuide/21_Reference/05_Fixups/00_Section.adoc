@@ -19,6 +19,7 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_HMACFixup[Hmac]||X||
 |xref:Fixups_IcmpChecksumFixup[Icmp Checksum]|X|||
 |xref:Fixups_IcmpV6ChecksumFixup[IcmpV6 Checksum]|X|||
+|xref:Fixups_IsoFletcher16ChecksumFixup[IsoFletcher16 Checksum]|X|||
 |xref:Fixups_LRCFixup[Lrc]|X|||
 |xref:Fixups_MD5Fixup[Md5] ||X||
 |xref:Fixups_ScriptFixup[Script]|||X|
@@ -44,6 +45,7 @@ include::FillValueFixup.adoc[]
 include::FromFileFixup.adoc[]
 include::IcmpChecksumFixup.adoc[]
 include::IcmpV6ChecksumFixup.adoc[]
+include::IsoFletcher16ChecksumFixup.adoc[]
 include::LRCFixup.adoc[]
 include::HMACFixup.adoc[]
 include::MD5Fixup.adoc[]
