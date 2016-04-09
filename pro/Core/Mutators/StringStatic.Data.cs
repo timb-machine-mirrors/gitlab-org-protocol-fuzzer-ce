@@ -82,6 +82,7 @@ namespace Peach.Pro.Core.Mutators
 			"COM1:",
 			"COM2:",
 			"AUX:",
+			"NULL",
 			"\\\\peach\x0coo\x0coo.txt",
 			"\\\\\\",
 			"..\\..\\..\\..\\..\\..\\..\\..\\",
