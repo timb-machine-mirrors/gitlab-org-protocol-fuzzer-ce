@@ -35,7 +35,7 @@ Transformers are different than Fixups:
 </DataModel>
 ----
 
-The output of the above data model is 0x01<len(b64(Data))><b64(Data)>.
+The output of the above data model is `0x01<len(b64(Data))><b64(Data)>`.
 
 .Peach Transformers
 [options="header"]
@@ -65,6 +65,7 @@ The output of the above data model is 0x01<len(b64(Data))><b64(Data)>.
 |xref:Transformers_Sha256Transformer[Sha256] ||X|
 |xref:Transformers_SidStringToBytesTransformer[SidStringToBytes]|||X
 |xref:Transformers_TripleDesTransformer[TripleDes]||X|
+|xref:Transformers_TruncateTransformer[Truncate]|||
 |xref:Transformers_UnixMd5CryptTransformer[UnixMd5Crypt]||X|
 |xref:Transformers_UrlEncodeTransformer[UrlEncode]|||X
 |===================================================
@@ -95,6 +96,7 @@ include::SHA1Transformer.adoc[]
 include::Sha256Transformer.adoc[]
 include::SidStringToBytesTransformer.adoc[]
 include::TripleDesTransformer.adoc[]
+include::TruncateTransformer.adoc[]
 include::UnixMd5CryptTransformer.adoc[]
 include::UrlEncodeTransformer.adoc[]
 

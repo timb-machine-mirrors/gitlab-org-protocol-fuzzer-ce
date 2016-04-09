@@ -2,7 +2,7 @@
 [[Transformers_UnixMd5CryptTransformer]]
 == UnixMd5Crypt
 
-	// Reviewed:
+// Reviewed:
 //  - 02/19/2014: Seth & Adam: Outlined
 // TODO:
 // Verify parameters expand parameter description
