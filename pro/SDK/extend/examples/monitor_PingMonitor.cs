@@ -11,7 +11,7 @@ using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor2;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
-namespace Peach.Pro.Core.Agent.Monitors
+namespace MyExtensions
 {
 	[Monitor("PingExample")]
 	[Description("Uses ICMP to verify whether a device is functional")]

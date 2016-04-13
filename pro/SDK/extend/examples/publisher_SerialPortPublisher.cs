@@ -35,6 +35,8 @@ using System.IO;
 using System.Threading;
 using System.IO.Ports;
 using NLog;
+using Peach.Core;
+using Peach.Core.Publishers;
 
 namespace MyExtensions
 {

@@ -33,14 +33,14 @@ namespace MyExtensions
 	// Zero or more parameters can be defined.  Parameters without a default are considered
 	// required.
 	[Parameter("RequiredString", typeof(string), "This parameter is required")]
-	[Parameter("OptionalInt", typeof(int), "This parameter is optional", 3000)]
+	[Parameter("OptionalInt", typeof(int), "This parameter is optional", "3000")]
 	// Transformers must be marked as Serializable
 	[Serializable]
 	public class Base64Encode : Transformer
 	{
 		// Properties automatically get populated with parameters defined above
 		public string RequiredString { get; set; }
-		public string OptionalInt { get; set; }
+		public int OptionalInt { get; set; }
 
 		public Base64Encode(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
