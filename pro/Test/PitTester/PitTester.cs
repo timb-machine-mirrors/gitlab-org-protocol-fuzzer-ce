@@ -16,6 +16,7 @@ using Peach.Pro.Core.MutationStrategies;
 using Action = Peach.Core.Dom.Action;
 using Ionic.Zip;
 using StateModel = Peach.Core.Dom.StateModel;
+using Peach.Core.Cracker;
 
 namespace PitTester
 {
@@ -27,7 +28,7 @@ namespace PitTester
 			{
 				Console.WriteLine("Extracting {0} to {1}", pack, dir);
 		
-				zip.ExtractProgress += (sender, e) => 
+				zip.ExtractProgress += (sender, e) =>
 				{
 					if (e.EventType == ZipProgressEventType.Extracting_BeforeExtractEntry)
 					{
@@ -68,7 +69,13 @@ namespace PitTester
 				Console.Write(".");
 		}
 
-		public static void TestPit(string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
+		public static void TestPit(
+			string libraryPath,
+			string pitFile,
+			bool singleIteration,
+			uint? seed,
+			bool keepGoing,
+			uint stop = 500)
 		{
 			var testFile = pitFile + ".test";
 			if (!File.Exists(testFile))
@@ -98,7 +105,14 @@ namespace PitTester
 			}
 		}
 
-		private static void DoTestPit(TestData testData, string libraryPath, string pitFile, bool singleIteration, uint? seed, bool keepGoing, uint stop = 500)
+		private static void DoTestPit(
+			TestData testData,
+			string libraryPath,
+			string pitFile,
+			bool singleIteration,
+			uint? seed,
+			bool keepGoing,
+			uint stop = 500)
 		{
 			if (testData.Tests.Any(x => x.SingleIteration))
 				singleIteration = true;
@@ -200,15 +214,13 @@ namespace PitTester
 			{
 				foreach (var t in dom.tests.Where(t => t.strategy is RandomStrategy))
 				{
-					t.strategy = new RandomStrategy(new Dictionary<string, Variant>
-					{
+					t.strategy = new RandomStrategy(new Dictionary<string, Variant> {
 						{ "SwitchCount", new Variant(int.MaxValue.ToString(CultureInfo.InvariantCulture)) },
 					});
 				}
 			}
 
-			var config = new RunConfiguration
-			{
+			var config = new RunConfiguration {
 				range = true,
 				rangeStart = 0,
 				rangeStop = stop,
@@ -258,9 +270,9 @@ namespace PitTester
 			catch (Exception ex)
 			{
 				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
-					num,
-					config.randomSeed,
-					ex.Message);
+					          num,
+					          config.randomSeed,
+					          ex.Message);
 				errors.Add(new PeachException(msg, ex));
 			}
 
@@ -453,7 +465,7 @@ namespace PitTester
 					catch (Exception ex)
 					{
 						throw new PeachException(string.Format("Error cracking data file '{0}' to '{1}.{2}.{3}.{4}'.",
-							((DataFile) data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
+							((DataFile)data).FileName, test.Name, state.Name, action.Name, actionData.dataModel.Name), ex);
 					}
 
 					// SHould we skip verifying bytes?
@@ -466,7 +478,7 @@ namespace PitTester
 					bs.CopyTo(value);
 					value.Seek(0, SeekOrigin.Begin);
 
-					var dataFileBytes = File.ReadAllBytes(((DataFile) data).FileName);
+					var dataFileBytes = File.ReadAllBytes(((DataFile)data).FileName);
 
 					// Verify all bytes match
 					for (var i = 0; i < dataFileBytes.Length && i < value.Length; i++)
@@ -477,7 +489,7 @@ namespace PitTester
 							throw new PeachException(
 								string.Format(
 									"Error: Data did not match at {0}.  Got {1:x2} expected {2:x2}. Data file '{3}' to '{4}.{5}.{6}.{7}'.",
-									i, b, dataFileBytes[i], ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+									i, b, dataFileBytes[i], ((DataFile)data).FileName, test.Name, state.Name, action.Name,
 									actionData.dataModel.Name));
 						}
 					}
@@ -487,7 +499,7 @@ namespace PitTester
 						throw new PeachException(
 							string.Format(
 								"Error: Data size mismatch. Got {0} bytes, expected {1}. Data file '{2}' to '{3}.{4}.{5}.{6}'.",
-								value.Length, dataFileBytes.Length, ((DataFile) data).FileName, test.Name, state.Name, action.Name,
+								value.Length, dataFileBytes.Length, ((DataFile)data).FileName, test.Name, state.Name, action.Name,
 								actionData.dataModel.Name));
 				}
 				else if (data is DataField)
@@ -508,6 +520,73 @@ namespace PitTester
 			{
 				sb.AppendLine(ಠ_ಠ.Message);
 			}
+		}
+
+		public static void Crack(string pitLibraryPath, string pitPath, string dataModelName, string samplePath)
+		{
+			var pitc = new PitCompiler(pitLibraryPath, pitPath);
+
+			Console.WriteLine("Parsing: '{0}'", pitPath);
+			var dom = pitc.Parse(false, false);
+
+			Console.WriteLine("Looking for data model: '{0}'", dataModelName);
+			var dm = FindDataModel(dom, dataModelName);
+
+			if (dm == null)
+				throw new PeachException("Data model not found: '{0}'".Fmt(dataModelName));
+
+			using (var sin = new FileStream(samplePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+			{
+				var cracker = new DataCracker();
+				cracker.CrackData(dm, new BitStream(sin));
+				foreach (var item in dm.PreOrderTraverse())
+				{
+					var sep = '-';
+					if (item is DataElementContainer)
+						sep = '+';
+					
+					var depth = item.fullName.Count(x => x == '.');
+					var prefix = string.Concat(Enumerable.Repeat(" |", depth));
+
+					var valuePart = "";
+					if (item.DefaultValue != null)
+					{
+						var vt = item.DefaultValue.GetVariantType();
+
+						string value;
+						if (vt == Variant.VariantType.Int || vt == Variant.VariantType.Long)
+							value = "{0} (0x{1:X})".Fmt(item.DefaultValue, (long)item.DefaultValue);
+						else if (vt == Variant.VariantType.ULong)
+							value = "{0} (0x{1:X})".Fmt(item.DefaultValue, (ulong)item.DefaultValue);
+						else
+							value = item.DefaultValue.ToString();
+
+						if (!string.IsNullOrEmpty(value))
+							valuePart = "[{0}]".Fmt(value);
+					}
+
+					Console.WriteLine("{0}-{1} {2} '{3}' {4}", prefix, sep, item.elementType, item.Name, valuePart);
+				}
+			}
+		}
+
+		private static DataModel FindDataModel(Peach.Core.Dom.Dom dom, string dataModelName)
+		{
+			foreach (var dm in dom.dataModels)
+			{
+				var name = "{0}:{1}".Fmt(dom.Name, dm.Name);
+				if (name == dataModelName)
+					return dm;
+			}
+
+			foreach (var ns in dom.ns)
+			{
+				var dm = FindDataModel(ns, dataModelName);
+				if (dm != null)
+					return dm;
+			}
+
+			return null;
 		}
 	}
 }
