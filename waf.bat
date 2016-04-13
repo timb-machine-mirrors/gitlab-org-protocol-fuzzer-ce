@@ -33,11 +33,8 @@ set REGPATH=
 for %%i in (3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0 2.7 2.6 2.5 2.4 2.3) do (
 for %%j in (HKCU HKLM) do (
 for %%k in (SOFTWARE\Wow6432Node SOFTWARE) do (
-for %%l in (Python\PythonCore IronPython) do (
+for %%l in (Python\PythonCore) do (
 set REG_PYTHON_EXE=python.exe
-if "%%l"=="IronPython" (
-set REG_PYTHON_EXE=ipy.exe
-)
 
 @echo on
 
