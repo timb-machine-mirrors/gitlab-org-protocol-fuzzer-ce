@@ -262,7 +262,7 @@ namespace Peach.Core.Analysis
 					}
 					catch (Exception ex)
 					{
-						Logger.Debug("Failed to generate trace.\n{0}", ex);
+						Logger.Debug("Failed to generate trace.\n{0}", ex.Message);
 						OnTraceFaled(sampleFile, i + 1, sampleFiles.Length);
 					}
 				}
