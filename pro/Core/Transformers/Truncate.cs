@@ -57,7 +57,7 @@ namespace Peach.Pro.Core.Transformers
 			try
 			{
 				var ret = new BitStream();
-				data.CopyTo(ret, BitStream.BlockCopySize, Offset, Length);
+				data.CopyTo(ret, Offset, Length);
 				ret.Seek(0, SeekOrigin.Begin);
 				return ret;
 			}

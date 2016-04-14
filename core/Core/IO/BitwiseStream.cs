@@ -91,6 +91,11 @@ namespace Peach.Core.IO
 			destination.WriteBits(bits, nread);
 		}
 
+		public void CopyTo(BitwiseStream destination, int offset, int count)
+		{
+			CopyTo(destination, (int)Math.Min(Length + 1, BlockCopySize), offset, count);
+		}
+
 		public void CopyTo(BitwiseStream destination, int bufferSize, int offset, int count)
 		{
 			if (destination == null)
