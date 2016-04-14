@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Action = Peach.Core.Dom.Action;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.MutationStrategies
@@ -15,37 +14,46 @@ namespace Peach.Pro.Core.MutationStrategies
 	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{
-		protected class DataSetTracker
+		class DataFileMutator : Mutator
 		{
-			public DataSetTracker(string ModelName, List<Data> Options)
+			private readonly string _name;
+
+			public DataFileMutator(DataFile file)
+				: base((StateModel)null)
 			{
-				this.ModelName = ModelName;
-				this.Options = Options;
-				this.Iteration = 1;
+				_name = Path.GetFileName(file.FileName);
 			}
 
-			public string ModelName { get; private set; }
-			public List<Data> Options { get; private set; }
-			public uint Iteration { get; set; }
-		}
-
-		protected class DataSets : KeyedCollection<string, DataSetTracker>
-		{
-			protected override string GetKeyForItem(DataSetTracker item)
+			public override string Name
 			{
-				return item.ModelName;
+				get { return _name; }
+			}
+
+			public override int count
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public override uint mutation
+			{
+				get { throw new NotImplementedException(); }
+				set { throw new NotImplementedException(); }
+			}
+
+			public override void sequentialMutation(DataElement obj)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override void randomMutation(DataElement obj)
+			{
+				throw new NotImplementedException();
 			}
 		}
 
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
-		DataSets _dataSets;
-
-		int _dataSetsIndex = 0;
-		int _optionsIndex = 0;
-
-		uint _count = 0;
-		uint _iteration;
+		private Dictionary<ActionData, List<DataSet>> _dataSets;
+		private string _actionData;
+		private List<DataFile> _mutations;
 
 		public ReplayStrategy(Dictionary<string, Variant> args)
 			: base(args)
@@ -56,176 +64,123 @@ namespace Peach.Pro.Core.MutationStrategies
 		{
 			base.Initialize(context, engine);
 
-			context.ActionStarting += ActionStarting;
-			context.StateStarting += StateStarting;
-			engine.IterationStarting += engine_IterationStarting;
-		}
+			_dataSets = new Dictionary<ActionData,List<DataSet>>();
+			_actionData = null;
+			_mutations = new List<DataFile>();
 
-		void engine_IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
-		{
-			if (context.controlIteration && context.controlRecordingIteration)
+			foreach (var state in context.test.stateModel.states)
 			{
-				_dataSets = new DataSets();
+				foreach (var action in state.actions)
+				{
+					foreach (var actionData in action.outputData)
+					{
+						// Squirrel away the data sets on each action and then clear
+						// the list so that when the state model runs we don't try
+						// and apply them to the data model.
+						_dataSets.Add(actionData, actionData.dataSets.ToList());
+						actionData.dataSets.Clear();
+					}
+				}
 			}
-			else
-			{
-				// Switch data model!
-			}
+
+			context.ActionStarting += ActionStarting;
 		}
 
 		public override void Finalize(RunContext context, Engine engine)
 		{
+			context.ActionStarting -= ActionStarting;
+
+			foreach (var state in context.test.stateModel.states)
+			{
+				foreach (var action in state.actions)
+				{
+					foreach (var actionData in action.outputData)
+					{
+						// Put back the data sets we saved off!
+						_dataSets[actionData].ForEach(i => actionData.dataSets.Add(i));
+						_dataSets.Remove(actionData);
+					}
+				}
+			}
+
 			base.Finalize(context, engine);
-
-			context.ActionStarting += ActionStarting;
-			context.StateStarting += StateStarting;
-			engine.IterationStarting -= engine_IterationStarting;
-		}
-
-		private uint GetSwitchIteration()
-		{
-			return _iteration;
 		}
 
 		public override bool UsesRandomSeed
 		{
-			get
-			{
-				return false;
-			}
+			get { return false; }
 		}
 
 		public override bool IsDeterministic
 		{
-			get
-			{
-				return true;
-			}
+			get { return true; }
+		}
+
+		public override uint Count
+		{
+			get { return (uint)_mutations.Count; }
 		}
 
 		public override uint Iteration
 		{
-			get
-			{
-				return _iteration;
-			}
-			set
-			{
-				_iteration = value;
-
-				if (!Context.controlIteration)
-				{
-					if (_dataSetsIndex < 0)
-					{
-						_dataSetsIndex = 0;
-					}
-					else
-					{
-						_optionsIndex++;
-
-						if (_optionsIndex >= _dataSets[_dataSetsIndex].Options.Count)
-						{
-							_dataSetsIndex++;
-							_optionsIndex = 0;
-
-							if (_dataSetsIndex >= _dataSets.Count)
-								throw new ApplicationException("Out of data sets!");
-						}
-					}
-				}
-			}
+			get;
+			set;
 		}
 
-		void ActionStarting(RunContext ctx, Peach.Core.Dom.Action action)
+		private void ActionStarting(RunContext context, Action action)
 		{
 			// Is this a supported action?
 			if (!(action.outputData.Any()))
 				return;
 
-			if(Context.controlRecordingIteration)
-				RecordDataSet(action);
-			else if(!Context.controlIteration)
-				SyncDataSet(action);
-		}
-
-		void StateStarting(RunContext ctx, State state)
-		{
-		}
-
-		private void SyncDataSet(Peach.Core.Dom.Action action)
-		{
-			System.Diagnostics.Debug.Assert(_iteration != 0);
-
-			foreach (var item in action.outputData)
+			if (context.controlRecordingIteration)
 			{
-				// Note: use the model name, not the instance name so
-				// we only set the data set once for re-enterant states.
-				var modelName = item.modelName;
+				foreach (var ad in action.outputData)
+				{
+					var dataSets = _dataSets[ad];
 
-				if (!_dataSets.Contains(modelName))
+					// Only consider actions with data sets
+					if (dataSets.Count == 0)
+						continue;
+
+					// Only allow a single output
+					if (_actionData != null)
+						throw new PeachException("Error, the Replay strategy only supports state models with data sets on a single action.");
+
+					// Save off each data set option as an available mutation
+					_actionData = ad.outputName;
+					_mutations = dataSets.SelectMany(d => d.OfType<DataFile>()).ToList();
+				}
+			}
+			else if (!context.controlIteration)
+			{
+				foreach (var ad in action.outputData)
+				{
+					if (_actionData != ad.outputName)
+						continue;
+
+					var data = _mutations[(int)Iteration - 1];
+
+					BitStream bs;
+
+					try
+					{
+						bs = new BitStream(File.OpenRead(data.FileName));
+					}
+					catch (Exception ex)
+					{
+						throw new SoftException(ex);
+					}
+
+					context.OnDataMutating(ad, ad.dataModel, new DataFileMutator(data));
+
+					ad.dataModel.mutationFlags = MutateOverride.TypeTransform;
+					ad.dataModel.MutatedValue = new Variant(bs);
+
 					return;
-
-				var val = _dataSets[modelName];
-				var opt = val.Options[_optionsIndex];
-
-				// Don't try cracking files, just overwrite the entire data model
-				var fileOpt = opt as DataFile;
-				if (fileOpt != null)
-				{
-					try
-					{
-						var bs = new BitStream(File.OpenRead(fileOpt.FileName));
-
-						item.dataModel.MutatedValue = new Variant(bs);
-						item.dataModel.mutationFlags = MutateOverride.TypeTransform;
-					}
-					catch (IOException ex)
-					{
-						logger.Debug(ex.Message);
-						logger.Debug("Unable to apply data from '{0}', ignoring.", fileOpt.FileName);
-					}
 				}
-				else
-				{
-					try
-					{
-						item.Apply(opt);
-					}
-					catch (PeachException ex)
-					{
-						logger.Debug(ex.Message);
-						logger.Debug("Unable to apply data '{0}', ignoring.", opt.Name);
-					}
-				}
-			}
-		}
-
-		private void RecordDataSet(Peach.Core.Dom.Action action)
-		{
-			foreach (var item in action.outputData)
-			{
-				var options = item.allData.ToList();
-
-				if (options.Count > 0)
-				{
-					// Don't use the instance name here, we only pick the data set
-					// once per state, not each time the state is re-entered.
-					var rec = new DataSetTracker(item.modelName, options);
-
-					if (!_dataSets.Contains(item.modelName))
-						_dataSets.Add(rec);
-				}
-			}
-		}
-
-		public override uint Count
-		{
-			get
-			{
-				return _count-1;
 			}
 		}
 	}
 }
 
-// end
