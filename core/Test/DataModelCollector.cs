@@ -40,16 +40,18 @@ namespace Peach.Core.Test
 			Assert.AreEqual(expected, actual);
 		}
 
-		protected void RunEngine(string xml)
+		protected void RunEngine(string xml, bool singleIteration = false)
 		{
-			RunEngine(ParsePit(xml));
+			RunEngine(ParsePit(xml), singleIteration);
 		}
 
-		protected void RunEngine(Dom.Dom dom)
+		protected void RunEngine(Dom.Dom dom, bool singleIteration)
 		{
 			var e = new Engine(this);
 
 			var cfg = new RunConfiguration();
+			if (singleIteration)
+				cfg.singleIteration = true;
 
 			e.startFuzzing(dom, cfg);
 		}

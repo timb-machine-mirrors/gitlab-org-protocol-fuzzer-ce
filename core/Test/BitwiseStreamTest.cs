@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Peach.Core.IO;
 using NUnit.Framework;
 using System.IO;
@@ -106,11 +107,98 @@ namespace Peach.Core.Test
 
 			Assert.AreEqual(5, dst.Length);
 			Assert.AreEqual(5, dst.Position);
-			dst.Seek(0, SeekOrigin.Begin);
-			var rdr = new StreamReader(dst);
-			var final = rdr.ReadToEnd();
 
-			Assert.AreEqual("Hello", final);
+			dst.Seek(0, SeekOrigin.Begin);
+			var actual = Encoding.ASCII.GetString(dst.ToArray());
+			Assert.AreEqual("Hello", actual);
+		}
+
+		[Test]
+		public void CopyToBufferSize()
+		{
+			var bs1 = new BitStream();
+			bs1.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);
+			bs1.WriteBits(0x2, 4);
+			bs1.SeekBits(0, SeekOrigin.Begin);
+
+			Assert.AreEqual(5, bs1.Length);
+			Assert.AreEqual(44, bs1.LengthBits);
+			Assert.AreEqual(0, bs1.Position);
+			Assert.AreEqual(0, bs1.PositionBits);
+
+			var dst = new BitStream();
+			bs1.CopyTo(dst, 1);
+
+			Assert.AreEqual(5, dst.Length);
+			Assert.AreEqual(5, dst.Position);
+
+			dst.Seek(0, SeekOrigin.Begin);
+			var actual = BitConverter.ToString(dst.ToArray());
+			Assert.AreEqual("48-65-6C-6C-6F-20", actual);
+		}
+
+		[TestCase("", "", 1, 1, 1, "65")]
+		[TestCase("", "", 1, 1, 3, "65-6C-6C")]
+		[TestCase("", "", 1, 1, 4, "65-6C-6C-6F")]
+		[TestCase("", "", 1, 0, 3, "48-65-6C")]
+		[TestCase("", "", 1, 0, 5, "48-65-6C-6C-6F")]
+		[TestCase("", "", 1, 0, 10, "48-65-6C-6C-6F")]
+		[TestCase("", "", 2, 1, 1, "65")]
+		[TestCase("", "", 2, 1, 3, "65-6C-6C")]
+		[TestCase("", "", 2, 1, 4, "65-6C-6C-6F")]
+		[TestCase("", "", 2, 0, 3, "48-65-6C")]
+		[TestCase("", "", 2, 0, 5, "48-65-6C-6C-6F")]
+		[TestCase("", "", 2, 0, 10, "48-65-6C-6C-6F")]
+		[TestCase("", "", 3, 1, 1, "65")]
+		[TestCase("", "", 3, 1, 3, "65-6C-6C")]
+		[TestCase("", "", 3, 1, 4, "65-6C-6C-6F")]
+		[TestCase("", "", 3, 0, 3, "48-65-6C")]
+		[TestCase("", "", 3, 0, 5, "48-65-6C-6C-6F")]
+		[TestCase("", "", 3, 0, 10, "48-65-6C-6C-6F")]
+		[TestCase("", "", 20, 1, 1, "65")]
+		[TestCase("", "", 20, 1, 3, "65-6C-6C")]
+		[TestCase("", "", 20, 1, 4, "65-6C-6C-6F")]
+		[TestCase("", "", 20, 0, 3, "48-65-6C")]
+		[TestCase("", "", 20, 0, 5, "48-65-6C-6C-6F")]
+		[TestCase("", "", 20, 0, 10, "48-65-6C-6C-6F")]
+		[TestCase("0010", "", 20, 0, 1, "24")]
+		[TestCase("0010", "", 20, 1, 2, "86-56")]
+		[TestCase("0010", "", 20, 1, 5, "86-56-C6-C6-F0")]
+		[TestCase("0010", "", 20, 0, 5, "24-86-56-C6-C6")]
+		[TestCase("0010", "", 20, 0, 10, "24-86-56-C6-C6-F0")]
+		[TestCase("", "0010", 20, 0, 1, "48")]
+		[TestCase("", "0010", 20, 1, 2, "65-6C")]
+		[TestCase("", "0010", 20, 1, 5, "65-6C-6C-6F-20")]
+		[TestCase("", "0010", 20, 0, 5, "48-65-6C-6C-6F")]
+		[TestCase("", "0010", 20, 0, 10, "48-65-6C-6C-6F-20")]
+		[TestCase("0010", "0010", 20, 0, 1, "24")]
+		[TestCase("0010", "0010", 20, 1, 2, "86-56")]
+		[TestCase("0010", "0010", 20, 0, 5, "24-86-56-C6-C6")]
+		[TestCase("0010", "0010", 20, 1, 5, "86-56-C6-C6-F2")]
+		[TestCase("0010", "0010", 20, 0, 10, "24-86-56-C6-C6-F2")]
+		public void CopyToBufferSizeOffsetCount(
+			string preBits,
+			string postBits,
+			int bufferSize,
+			int offset,
+			int count,
+			string expected)
+		{
+			var input = "Hello";
+			var bs1 = new BitStream();
+			foreach (var bit in preBits)
+				bs1.WriteBit(bit == '1' ? 1 : 0);
+			bs1.Write(Encoding.ASCII.GetBytes(input), 0, input.Length);
+			foreach (var bit in postBits)
+				bs1.WriteBit(bit == '1' ? 1 : 0);
+			bs1.Seek(0, SeekOrigin.Begin);
+
+			var dst = new BitStream();
+			bs1.CopyTo(dst, bufferSize, offset, count);
+
+			dst.Seek(0, SeekOrigin.Begin);
+			var actual = BitConverter.ToString(dst.ToArray());
+			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
