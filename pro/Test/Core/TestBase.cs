@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -13,7 +12,7 @@ using SysProcess = System.Diagnostics.Process;
 namespace Peach.Pro.Test.Core
 {
 	[SetUpFixture]
-	class TestBase : SetUpFixture
+	internal class TestBase : SetUpFixture
 	{
 		TempDirectory _tmpDir;
 
@@ -55,24 +54,45 @@ namespace Peach.Pro.Test.Core
 			}
 		}
 
-		protected override void OnSetUp()
+		[SetUp]
+		public void SetUp()
 		{
+			DoSetUp();
+
 			Program.LoadPlatformAssembly();
 
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
 		}
 
-		protected override void OnTearDown()
+		[TearDown]
+		public void TearDown()
 		{
 			_tmpDir.Dispose();
+
+			DoTearDown();
 		}
 	}
 
 	[TestFixture]
 	[Quick]
-	class CommonTests : TestFixture
+	internal class CommonTests : TestFixture
 	{
-		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
+		public CommonTests()
+			: base(Assembly.GetExecutingAssembly())
+		{
+		}
+
+		[Test]
+		public void AssertWorks()
+		{
+			DoAssertWorks();
+		}
+
+		[Test]
+		public void NoMissingAttributes()
+		{
+			DoNoMissingAttributes();
+		}
 	}
 }
