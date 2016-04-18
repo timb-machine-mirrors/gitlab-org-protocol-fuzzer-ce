@@ -36,7 +36,7 @@ namespace Peach.Pro.Test.Core.Mutators
 			var val3 = "18446744073709551664";
 			var val4 = "10";
 
-			Assert.AreEqual(1659, vals.Length);
+			Assert.AreEqual(1660, vals.Length);
 
 			// Ensure all items are strings
 			foreach (var item in vals)

@@ -1127,9 +1127,9 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			// StringStatic has 1659, StringCaseLower has 1
 			// Default is log10(x) scaling so with the adjusted weight
-			// in 4000 iterations, it should run 20% of the time
+			// in 4000 iterations, it should run ~20% of the time
 
-			Assert.LessOrEqual(numLower, 4000 / 5);
+			Assert.LessOrEqual(numLower, 4000 / 4.5);
 			Assert.AreEqual(4000 - numLower, numStatic);
 		}
 

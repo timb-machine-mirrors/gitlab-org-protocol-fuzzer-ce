@@ -364,7 +364,7 @@ namespace Peach.Pro.Test.Core
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(1660, dataModels.Count);
+			Assert.AreEqual(1661, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
@@ -424,7 +424,7 @@ namespace Peach.Pro.Test.Core
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(3319, dataModels.Count);
+			Assert.AreEqual(3321, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
@@ -487,7 +487,7 @@ namespace Peach.Pro.Test.Core
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(3319, dataModels.Count);
+			Assert.AreEqual(3321, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
@@ -552,7 +552,7 @@ namespace Peach.Pro.Test.Core
 			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(3319, dataModels.Count);
+			Assert.AreEqual(3321, dataModels.Count);
 
 			foreach (var dm in dataModels)
 			{
