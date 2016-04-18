@@ -68,7 +68,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement("Godel")]
 		[DefaultValue(null)]
-		public Peach.Core.Xsd.Godel schemaGodel { get; set; }
+		public Xsd.Godel schemaGodel
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// The name of this state.
