@@ -23,7 +23,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement]
 		[DefaultValue(null)]
-		public Peach.Core.Xsd.DataModel schemaModel { get; set; }
+		public Xsd.DataModel schemaModel
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// Constructor
