@@ -61,10 +61,10 @@ namespace Peach.Pro.Test.Core.Mutators
 			var str = new Peach.Core.Dom.String("String") { DefaultValue = new Variant("Hello") };
 			str.stringType = StringType.utf16;
 
-			var m = runner.Sequential(str);
+			var m = runner.Sequential(str).ToList();
 
 			// Count is same as StringStatic
-			Assert.AreEqual(1659, m.Count());
+			Assert.AreEqual(1660, m.Count);
 
 			var tokenBE = new BitStream(Encoding.BigEndianUnicode.ByteOrderMark);
 			var tokenLE = new BitStream(Encoding.Unicode.ByteOrderMark);
