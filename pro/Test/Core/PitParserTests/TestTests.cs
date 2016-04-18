@@ -583,7 +583,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var ex = Assert.Throws<PeachException>(() =>
 				DataModelCollector.ParsePit(xml.Fmt("targetLifetime='foo'"))
 			);
-			Assert.That(ex.Message, Is.StringStarting("Error, Pit file failed to validate"));
+			StringAssert.StartsWith("Error, Pit file failed to validate", ex.Message);
 		}
 
 		[Test]

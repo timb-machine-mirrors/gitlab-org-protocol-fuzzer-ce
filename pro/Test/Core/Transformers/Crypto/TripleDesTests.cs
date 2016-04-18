@@ -24,52 +24,28 @@ namespace Peach.Pro.Test.Core.Transformers.Crypto
             RunTest("ae1234567890aeaffeda214354647586", "aeaeaeaeaeaeaeae", new byte[] { 0x95, 0x4d, 0x29, 0x9a, 0xbc, 0x9d, 0x07, 0x5e });
         }
 
-        [Test, ExpectedException(typeof(PeachException))]
+        [Test]
         public void WrongSizedKeyTest()
         {
-            string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is not a valid size for this algorithm.";
-
-            try
-            {
-                RunTest("aaaa", "aeaeaeaeaeaeaeae", new byte[]{});
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(msg, ex.Message);
-                throw;
-            }
+            const string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is not a valid size for this algorithm.";
+            var ex = Assert.Throws<PeachException>(() => RunTest("aaaa", "aeaeaeaeaeaeaeae", new byte[]{}));
+            Assert.AreEqual(msg, ex.Message);
         }
 
-        [Test, ExpectedException(typeof(PeachException))]
+        [Test]
         public void WeakKeyTest()
         {
-            string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is a known weak key for 'TripleDES' and cannot be used.";
-
-            try
-            {
-                RunTest("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aeaeaeaeaeaeaeae", new byte[] { });
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(msg, ex.Message);
-                throw;
-            }
+            const string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified key is a known weak key for 'TripleDES' and cannot be used.";
+            var ex = Assert.Throws<PeachException>(() => RunTest("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aeaeaeaeaeaeaeae", new byte[] { }));
+            Assert.AreEqual(msg, ex.Message);
         }
 
-        [Test, ExpectedException(typeof(PeachException))]
+        [Test]
         public void WrongSizedIV()
         {
-            string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified initialization vector (IV) does not match the block size for this algorithm.";
-
-            try
-            {
-                RunTest("ae1234567890aeaffeda214354647586", "aaaa", new byte[] { });
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(msg, ex.Message);
-                throw;
-            }
+            const string msg = "Error, unable to create instance of 'Transformer' named 'TripleDes'.\nExtended error: Exception during object creation: Specified initialization vector (IV) does not match the block size for this algorithm.";
+            var ex = Assert.Throws<PeachException>(() => RunTest("ae1234567890aeaffeda214354647586", "aaaa", new byte[] { }));
+            Assert.AreEqual(msg, ex.Message);
         }
 
         public void RunTest(string key, string iv, byte[] expected)

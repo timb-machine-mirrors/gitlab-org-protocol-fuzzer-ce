@@ -322,7 +322,6 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		}
 
 		[Test]
-		[ExpectedException("Peach.Core.Cracker.CrackingFailure")]
 		public void CrackMissingToken()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -338,7 +337,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0}", "Hello World");
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
 		}
 
 		public Peach.Core.Dom.Dom TokenAfterArrayToken(string value)
@@ -574,10 +573,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			return dom;
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.str1' failed to crack. Element is unsized.")]
+		[Test]
 		public void CrackTokenArrayZero()
 		{
-			DoCrackTokenArray("HelloWorld");
+			var ex = Assert.Throws<CrackingFailure>(() => DoCrackTokenArray("HelloWorld"));
+			Assert.AreEqual("String 'TheDataModel.str1' failed to crack. Element is unsized.", ex.Message);
 		}
 
 		[Test]

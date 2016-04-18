@@ -57,7 +57,7 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			Assert.AreEqual(precalcResult, values[0].ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, can't transform IP to bytes, '3ffe:1900:4545:3:200:f8ff:fe21' is not a valid IP address.")]
+		[Test]
 		public void InvalidIPAdressTest()
 		{
 
@@ -92,7 +92,8 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			config.singleIteration = true;
 
 			Engine e = new Engine(this);
-			e.startFuzzing(dom, config);
+			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+			Assert.AreEqual("Error, can't transform IP to bytes, '3ffe:1900:4545:3:200:f8ff:fe21' is not a valid IP address.", ex.Message);
 		}
 
 		[Test]
@@ -146,7 +147,7 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][1].DefaultValue);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, can't transform bytes to IP, expected 16 bytes but got 13 bytes.")]
+		[Test]
 		public void NotEnoughDataCrackingTest()
 		{
 			string xml = @"
@@ -164,10 +165,11 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			var data = Bits.Fmt("{0}", new byte[] { 0x3F, 0xFE, 0x19, 0x00, 0x45, 0x45, 0x00, 0x03, 0x02, 0x00, 0xF8, 0xFF, 0xFE });
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<PeachException>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Error, can't transform bytes to IP, expected 16 bytes but got 13 bytes.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, can't transform bytes to IP, expected 16 bytes but got 18 bytes.")]
+		[Test]
 		public void TooMuchDataCrackingTest()
 		{
 			string xml = @"
@@ -185,7 +187,8 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			var data = Bits.Fmt("{0}", new byte[] { 0x3F, 0xFE, 0x19, 0x00, 0x45, 0x45, 0x00, 0x03, 0x02, 0x00, 0xF8, 0xFF, 0xFE, 0x21, 0x67, 0xCF, 0xFF, 0xFF });
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<PeachException>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Error, can't transform bytes to IP, expected 16 bytes but got 18 bytes.", ex.Message);
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			string xml = string.Format(template, elem, units, lengthType, length);
 
 			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			var data = Bits.Fmt("{0}", new byte[] { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC });
 
 			DataCracker cracker = new DataCracker();
@@ -70,10 +70,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			return Crack(cont_template, elem, units, lengthType, length);
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void BlobChars()
 		{
-			CrackElement("Blob", "chars", "length", "5");
+			Assert.Throws<PeachException>(() =>
+				CrackElement("Blob", "chars", "length", "5"));
 		}
 
 		[Test]
@@ -90,10 +91,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(new byte[] { 0x11, 0x22, 0x33, 0x44, 0x50 }, bs.ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void BlockChars()
 		{
-			CrackContainer("Block", "chars", "length", "5");
+			Assert.Throws<PeachException>(() =>
+				CrackContainer("Block", "chars", "length", "5"));
 		}
 
 		[Test]
@@ -110,10 +112,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(new byte[] { 0x11, 0x22, 0x33, 0x44, 0x50 }, bs.ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void ChoiceChars()
 		{
-			CrackContainer("Choice", "chars", "length", "5");
+			Assert.Throws<PeachException>(() =>
+				CrackContainer("Choice", "chars", "length", "5"));
 		}
 
 		[Test]
@@ -130,22 +133,25 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(new byte[] { 0x11, 0x22, 0x33, 0x44, 0x50 }, bs.ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void FlagsChars()
 		{
-			CrackContainer("Flags", "chars", "length", "2");
+			Assert.Throws<PeachException>(() =>
+				CrackContainer("Flags", "chars", "length", "2"));
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void FlagsBytes()
 		{
-			CrackElement("Flags", "bytes", "length", "2");
+			Assert.Throws<PeachException>(() =>
+				CrackElement("Flags", "bytes", "length", "2"));
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void FlagsBits()
 		{
-			CrackElement("Flags", "bits", "length", "16");
+			Assert.Throws<PeachException>(() =>
+				CrackElement("Flags", "bits", "length", "16"));
 		}
 
 		[Test]

@@ -29,36 +29,20 @@ namespace Peach.Pro.Test.Core.Transformers.Crypto
                 new byte[] { 0x2f, 0x1b, 0xe1, 0x64, 0xf7, 0x58, 0xe7, 0xe5, 0x0d, 0x73, 0x2e, 0x01, 0x38, 0x39, 0x1c, 0x2d });
         }
 
-        [Test, ExpectedException(typeof(PeachException))]
+        [Test]
         public void WrongSizedKeyTest()
         {
-            string msg = "Error, unable to create instance of 'Transformer' named 'Aes128'.\nExtended error: Exception during object creation: Specified key is not a valid size for this algorithm.";
-
-            try
-            {
-                RunTest("aaaa", "aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae", new byte[] { });
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(msg, ex.Message);
-                throw;
-            }
+            const string msg = "Error, unable to create instance of 'Transformer' named 'Aes128'.\nExtended error: Exception during object creation: Specified key is not a valid size for this algorithm.";
+            var ex = Assert.Throws<PeachException>(() => RunTest("aaaa", "aeaeaeaeaeaeaeaeaeaeaeaeaeaeaeae", new byte[] { }));
+            Assert.AreEqual(msg, ex.Message);
         }
 
-        [Test, ExpectedException(typeof(PeachException))]
+        [Test]
         public void WrongSizedIV()
         {
-            string msg = "Error, unable to create instance of 'Transformer' named 'Aes128'.\nExtended error: Exception during object creation: Specified initialization vector (IV) does not match the block size for this algorithm.";
-
-            try
-            {
-                RunTest("ae1234567890aeaffeda214354647586", "aaaa", new byte[] { });
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(msg, ex.Message);
-                throw;
-            }
+            const string msg = "Error, unable to create instance of 'Transformer' named 'Aes128'.\nExtended error: Exception during object creation: Specified initialization vector (IV) does not match the block size for this algorithm.";
+            var ex = Assert.Throws<PeachException>(() => RunTest("ae1234567890aeaffeda214354647586", "aaaa", new byte[] { }));
+            Assert.AreEqual(msg, ex.Message);
         }
 
         public void RunTest(string key, string iv, byte[] expected)
