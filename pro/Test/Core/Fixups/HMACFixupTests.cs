@@ -108,10 +108,10 @@ namespace Peach.Pro.Test.Core.Fixups
             Assert.AreEqual(precalcChecksum, values[0].ToArray());
         }
 
-        [Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, unable to create instance of 'Fixup' named 'HMAC'.\nExtended error: Exception during object creation: The truncate length is greater than the hash size for the specified algorithm.")]
+        [Test]
         public void LengthGreaterThanHashSizeTest()
         {
-            string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+            const string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
                 "<Peach>" +
                 "   <DataModel name=\"TheDataModel\">" +
                 "       <Blob name=\"Checksum\">" +
@@ -139,18 +139,11 @@ namespace Peach.Pro.Test.Core.Fixups
                 "   </Test>" +
                 "</Peach>";
 
-            PitParser parser = new PitParser();
-
-            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-            RunConfiguration config = new RunConfiguration();
-            config.singleIteration = true;
-
-            Engine e = new Engine(this);
-            e.startFuzzing(dom, config);
+            var ex = Assert.Throws<PeachException>(() => ParsePit(xml));
+            Assert.AreEqual("Error, unable to create instance of 'Fixup' named 'HMAC'.\nExtended error: Exception during object creation: The truncate length is greater than the hash size for the specified algorithm.", ex.Message);
         }
 
-        [Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, unable to create instance of 'Fixup' named 'HMAC'.\nExtended error: Exception during object creation: The truncate length must be greater than or equal to 0.")]
+        [Test]
         public void LengthLessThanZeroTest()
         {
             string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
@@ -181,15 +174,8 @@ namespace Peach.Pro.Test.Core.Fixups
                 "   </Test>" +
                 "</Peach>";
 
-            PitParser parser = new PitParser();
-
-            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-            RunConfiguration config = new RunConfiguration();
-            config.singleIteration = true;
-
-            Engine e = new Engine(this);
-            e.startFuzzing(dom, config);
+            var ex = Assert.Throws<PeachException>(() => ParsePit(xml));
+            Assert.AreEqual("Error, unable to create instance of 'Fixup' named 'HMAC'.\nExtended error: Exception during object creation: The truncate length must be greater than or equal to 0.", ex.Message);
         }
 
 		[Test]

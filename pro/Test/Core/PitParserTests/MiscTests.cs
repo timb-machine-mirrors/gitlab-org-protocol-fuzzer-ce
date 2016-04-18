@@ -61,7 +61,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the value of Blob 'DM.blob' contains invalid hex characters: Helloworld")]
+		[Test]
 		public void TestBadHex()
 		{
 			// Verify good error message when parsing bad hex value
@@ -71,8 +71,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		<Blob name=""blob"" valueType=""hex"" value=""Helloworld""/>
 	</DataModel>
 </Peach>";
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, the value of Blob 'DM.blob' contains invalid hex characters: Helloworld", ex.Message);
 		}
 
 	}

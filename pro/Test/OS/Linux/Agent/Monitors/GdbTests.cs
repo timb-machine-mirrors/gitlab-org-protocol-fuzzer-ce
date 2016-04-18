@@ -40,7 +40,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.IsTrue(fault.Data.ContainsKey("stdout.log"), "Fault should contain stdout.log");
 			Assert.IsTrue(fault.Data.ContainsKey("stderr.log"), "Fault should contain stderr.log");
 			Assert.Greater(fault.Data["StackTrace.txt"].Length, 0);
-			Assert.That(fault.Fault.Description, Is.StringContaining("PossibleStackCorruption"));
+			StringAssert.Contains("PossibleStackCorruption", fault.Fault.Description);
 			m.SessionFinished();
 			m.StopMonitor();
 		}

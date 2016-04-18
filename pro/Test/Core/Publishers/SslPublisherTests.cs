@@ -365,7 +365,6 @@ qLk0TB3QXaoHknsz7EhRnw==
 	{
 		[Test]
 		[Ignore("Need to finish implementation")]
-		[ExpectedException(typeof(PeachException))]
 		public void Test()
 		{
 			const string xml = @"
@@ -401,7 +400,7 @@ qLk0TB3QXaoHknsz7EhRnw==
 				// Changing the time TlsListener calls sleep before doing _protocol.Close()
 				// causes a variety of different exceptions and messages.
 
-				e.startFuzzing(dom, cfg);
+				 Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
 			}
 		}
 

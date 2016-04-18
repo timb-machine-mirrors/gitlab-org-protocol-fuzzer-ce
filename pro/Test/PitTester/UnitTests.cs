@@ -288,8 +288,8 @@ namespace PitTester
 			});
 			var err = sb.ToString();
 
-			Assert.That(err, Is.StringStarting("Encountered an unhandled exception on iteration 1, seed "));
-			Assert.That(err, Is.StringContaining("Missing record in test data"));
+			StringAssert.StartsWith("Encountered an unhandled exception on iteration 1, seed ", err);
+			StringAssert.Contains("Missing record in test data", err);
 		}
 
 		[Test]

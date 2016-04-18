@@ -302,7 +302,7 @@ namespace Peach.Pro.Test.Core
 	<ChildOne name='one'/>
 </Root>"));
 
-			Assert.That(ex.Message, Is.StringContaining("failed to validate"));
+			StringAssert.Contains("failed to validate", ex.Message);
 		}
 
 		[Test]

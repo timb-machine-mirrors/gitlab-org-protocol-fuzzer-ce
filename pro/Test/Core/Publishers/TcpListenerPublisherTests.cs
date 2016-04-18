@@ -94,7 +94,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error on data input, the buffer is not initalized.")]
+		[Test]
 		public void FailingInputTest1()
 		{
 			string xml = @"
@@ -130,10 +130,11 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Engine e = new Engine(this);
 
-			e.startFuzzing(dom, config);
+			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+			Assert.AreEqual("Error on data input, the buffer is not initalized.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error on data output, the client is not initalized.")]
+		[Test]
 		public void FailingOutputTest1()
 		{
 			string xml = @"
@@ -169,7 +170,8 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Engine e = new Engine(this);
 
-			e.startFuzzing(dom, config);
+			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+			Assert.AreEqual("Error on data output, the client is not initalized.", ex.Message);
 		}
 
 		[Test]

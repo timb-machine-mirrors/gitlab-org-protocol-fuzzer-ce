@@ -83,7 +83,7 @@ namespace Peach.Pro.Test.Core
 		/// <summary>
 		/// Reported by Sirus
 		/// </summary>
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'GeneratedModel.0.2' failed to crack. Read 64 of 5381942480 bits but buffer only has 40 bits left.")]
+		[Test]
 		public void CrackExplode()
 		{
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -120,7 +120,8 @@ namespace Peach.Pro.Test.Core
 			data.SeekBits(0, SeekOrigin.Begin);
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Block 'GeneratedModel.0.2' failed to crack. Read 64 of 5381942480 bits but buffer only has 40 bits left.", ex.Message);
 		}
 
 		/// <summary>
@@ -175,7 +176,7 @@ namespace Peach.Pro.Test.Core
 		/// <summary>
 		/// Reported by Sirus
 		/// </summary>
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'GeneratedModel.0.1' failed to crack. Length is 8 bits but already read 64 bits.")]
+		[Test]
 		public void CrackExplode2()
 		{
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -210,7 +211,8 @@ namespace Peach.Pro.Test.Core
 			data.SeekBits(0, SeekOrigin.Begin);
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Block 'GeneratedModel.0.1' failed to crack. Length is 8 bits but already read 64 bits.", ex.Message);
 		}
 
 
