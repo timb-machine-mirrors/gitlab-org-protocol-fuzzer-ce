@@ -364,7 +364,7 @@ qLk0TB3QXaoHknsz7EhRnw==
 	class SslPublisherTests
 	{
 		[Test]
-		[Ignore]
+		[Ignore("Need to finish implementation")]
 		[ExpectedException(typeof(PeachException))]
 		public void Test()
 		{
@@ -406,7 +406,7 @@ qLk0TB3QXaoHknsz7EhRnw==
 		}
 
 		[Test]
-		[Ignore]
+		[Ignore("Requires openssl to exist and be running")]
 		public void TestOpenssl()
 		{
 			// openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes

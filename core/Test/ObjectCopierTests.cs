@@ -423,7 +423,7 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
-		[Ignore]
+		[Ignore("Figure out why we are ignoring this!")]
 		public void EnsureSerializable()
 		{
 			var fails = (
