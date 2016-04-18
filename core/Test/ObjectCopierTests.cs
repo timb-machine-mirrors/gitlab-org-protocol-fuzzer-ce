@@ -399,7 +399,8 @@ namespace Peach.Core.Test
 			sw.Stop();
 			Assert.NotNull(copy);
 			Assert.AreEqual(copy.Count, list2.Count);
-			Assert.LessOrEqual(sw.ElapsedMilliseconds, list1Elaps*list1Elaps);
+			var min = Math.Max(4000, list1Elaps * list1Elaps);
+			Assert.LessOrEqual(sw.ElapsedMilliseconds, min);
 		}
 
 		bool VerifyField(FieldInfo field, Type type)
