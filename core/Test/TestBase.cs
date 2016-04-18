@@ -35,8 +35,7 @@ namespace Peach.Core.Test
 			}
 		}
 
-		[SetUp]
-		public void SetUp()
+		protected void DoSetUp()
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
@@ -80,25 +79,12 @@ namespace Peach.Core.Test
 
 				LogManager.Configuration = config;
 			}
-
-			OnSetUp();
 		}
 
-		[TearDown]
-		public void TearDown()
+		protected void DoTearDown()
 		{
-			OnTearDown();
-
 			LogManager.Flush();
 			LogManager.Configuration = null;
-		}
-
-		protected virtual void OnSetUp()
-		{
-		}
-
-		protected virtual void OnTearDown()
-		{
 		}
 	}
 
@@ -108,8 +94,7 @@ namespace Peach.Core.Test
 
 		protected TestFixture(Assembly asm) { _asm = asm; }
 
-		[Test]
-		public void AssertWorks()
+		protected void DoAssertWorks()
 		{
 #if DEBUG
 			Assert.Throws<AssertionException>(() => Debug.Assert(false));
@@ -118,8 +103,7 @@ namespace Peach.Core.Test
 #endif
 		}
 
-		[Test]
-		public void NoMissingAttributes()
+		protected void DoNoMissingAttributes()
 		{
 			var missing = new List<string>();
 
@@ -145,14 +129,40 @@ namespace Peach.Core.Test
 	}
 
 	[SetUpFixture]
-	class TestBase : SetUpFixture
+	internal class TestBase : SetUpFixture
 	{
+		[SetUp]
+		public void SetUp()
+		{
+			DoSetUp();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			DoTearDown();
+		}
 	}
 
 	[TestFixture]
 	[Quick]
-	class CommonTests : TestFixture
+	internal class CommonTests : TestFixture
 	{
-		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
+		public CommonTests()
+			: base(Assembly.GetExecutingAssembly())
+		{
+		}
+
+		[Test]
+		public void AssertWorks()
+		{
+			DoAssertWorks();
+		}
+
+		[Test]
+		public void NoMissingAttributes()
+		{
+			DoNoMissingAttributes();
+		}
 	}
 }

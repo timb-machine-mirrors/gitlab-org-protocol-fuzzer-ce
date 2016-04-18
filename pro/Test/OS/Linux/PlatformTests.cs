@@ -12,7 +12,6 @@ namespace Peach.Pro.Test.OS.Linux
 {
 	[TestFixture]
 	[Quick]
-	[Peach]
 	public class PlatformTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

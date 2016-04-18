@@ -1,73 +1,49 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
+﻿using System.Reflection;
 using NUnit.Framework;
 using Peach.Core;
-using System;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Windows
 {
 	[SetUpFixture]
-	class TestBase
+	internal class TestBase : SetUpFixture
 	{
 		[SetUp]
-		public void Initialize()
+		public void SetUp()
 		{
 			// NUnit [Platform] attribute doesn't differentiate MacOSX/Linux
 			if (Platform.GetOS() != Platform.OS.Windows)
 				Assert.Ignore("Only supported on Windows");
 
-			var consoleTarget = new ColoredConsoleTarget
-			{
-				Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
-			};
+			DoSetUp();
+		}
 
-			var config = new LoggingConfiguration();
-			config.AddTarget("console", consoleTarget);
-
-			var logLevel = LogLevel.Debug;
-			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
-			if (peachTrace == "1")
-				logLevel = LogLevel.Trace;
-
-			var rule = new LoggingRule("*", logLevel, consoleTarget);
-			config.LoggingRules.Add(rule);
-
-			LogManager.Configuration = config;
+		[TearDown]
+		public void TearDown()
+		{
+			DoTearDown();
 		}
 	}
 
 	[TestFixture]
 	[Quick]
-	class CategoryTest
+	internal class CommonTests : TestFixture
 	{
-		[Test]
-		public void NoneMissing()
+		public CommonTests()
+			: base(Assembly.GetExecutingAssembly())
 		{
-			var missing = new List<string>();
+		}
 
-			foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
-			{
-				if (!type.GetAttributes<TestFixtureAttribute>().Any())
-					continue;
+		[Test]
+		public void AssertWorks()
+		{
+			DoAssertWorks();
+		}
 
-				foreach (var attr in type.GetCustomAttributes(true))
-				{
-					if (attr is QuickAttribute || attr is SlowAttribute)
-						goto Found;
-				}
-
-				missing.Add(type.FullName);
-
-			Found:
-				{ }
-			}
-
-			Assert.That(missing, Is.Empty);
+		[Test]
+		public void NoMissingAttributes()
+		{
+			DoNoMissingAttributes();
 		}
 	}
 }
