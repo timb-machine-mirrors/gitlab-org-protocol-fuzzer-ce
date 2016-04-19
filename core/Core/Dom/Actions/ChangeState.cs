@@ -1,6 +1,7 @@
 using System;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -28,5 +29,11 @@ namespace Peach.Core.Dom.Actions
 			logger.Debug("Changing to state: {0}", reference);
 			throw new ActionChangeStateException(newState);
 		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+			pit.WriteAttributeString("ref", reference);
+		}
+
 	}
 }

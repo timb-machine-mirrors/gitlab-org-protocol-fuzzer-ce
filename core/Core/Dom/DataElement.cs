@@ -867,7 +867,8 @@ namespace Peach.Core.Dom
 		/// Write out common data element children such as relations
 		/// </summary>
 		/// <param name="pit"></param>
-		public void WritePitCommonChildren(XmlWriter pit)
+		/// <param name="excludeTypeTransformHint"></param>
+		public void WritePitCommonChildren(XmlWriter pit, bool excludeTypeTransformHint = false)
 		{
 			foreach (var obj in relations.From<Relation>())
 				obj.WritePit(pit);
@@ -878,7 +879,7 @@ namespace Peach.Core.Dom
 			if (transformer != null)
 				transformer.WritePit(pit);
 
-			foreach (var obj in hints.Values.Where(c => c.Name != "NumericalString"))
+			foreach (var obj in hints.Values.Where(c => (c.Name != "NumericalString" && (!excludeTypeTransformHint || c.Name != "Peach.TypeTransform"))))
 				obj.WritePit(pit);
 
 			if (analyzer != null)

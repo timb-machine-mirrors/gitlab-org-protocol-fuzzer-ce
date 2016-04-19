@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using System.Linq;
+using System.Xml;
 using Peach.Core.Dom.XPath;
 
 namespace Peach.Core.Dom
@@ -392,5 +393,66 @@ namespace Peach.Core.Dom
 				}
 			}
 		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Test");
+
+			pit.WriteAttributeString("name", Name);
+
+			if(!string.IsNullOrEmpty(description))
+				pit.WriteAttributeString("description", description);
+
+			if(waitTime != 0.0)
+				pit.WriteAttributeString("waitTime", waitTime.ToString());
+
+			if(faultWaitTime != 2.0)
+				pit.WriteAttributeString("faultWaitTime", faultWaitTime.ToString());
+
+			if(controlIteration != 0)
+				pit.WriteAttributeString("controlIteration", controlIteration.ToString());
+
+			if(nonDeterministicActions)
+				pit.WriteAttributeString("nonDeterministicActions", nonDeterministicActions.ToString().ToLower());
+
+			if (maxOutputSize != 500000000)
+				pit.WriteAttributeString("maxOutputSize", maxOutputSize.ToString());
+
+			if(TargetLifetime != Lifetime.Session)
+				pit.WriteAttributeString("targetLifetime", TargetLifetime.ToString());
+
+			if(MaxBackSearch != 80)
+				pit.WriteAttributeString("maxBackSearch", MaxBackSearch.ToString());
+
+			//foreach (var obj in publishers)
+			//	obj.WritePit(pit);
+
+			//foreach (var obj in weights)
+			//	obj.WritePit(pit);
+
+			//foreach (var obj in includedMutators)
+			//	obj.WritePit(pit);
+
+
+			if (agentRef != null)
+			{
+				foreach (var agent in agentRef)
+				{
+					pit.WriteStartElement("Agent");
+					pit.WriteAttributeString("ref", agent.refName);
+					pit.WriteEndElement();
+				}
+			}
+
+			if (stateModelRef != null)
+			{
+				pit.WriteStartElement("StateModel");
+				pit.WriteAttributeString("ref", stateModelRef.refName);
+				pit.WriteEndElement();
+			}
+
+			pit.WriteEndElement();
+		}
+
 	}
 }
