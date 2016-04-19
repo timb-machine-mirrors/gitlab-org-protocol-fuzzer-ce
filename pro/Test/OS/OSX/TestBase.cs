@@ -8,8 +8,6 @@ namespace Peach.Pro.Test.OS.OSX
 	[SetUpFixture]
 	internal class TestBase : SetUpFixture
 	{
-		SingleInstance _si;
-
 		[SetUp]
 		public void SetUp()
 		{
@@ -18,21 +16,11 @@ namespace Peach.Pro.Test.OS.OSX
 				Assert.Ignore("Only supported on MacOSX");
 
 			DoSetUp();
-
-			// Ensure only 1 instance of the platform tests runs at a time
-			_si = SingleInstance.CreateInstance(Assembly.GetExecutingAssembly().FullName);
-			_si.Lock();
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			if (_si != null)
-			{
-				_si.Dispose();
-				_si = null;
-			}
-
 			DoTearDown();
 		}
 	}

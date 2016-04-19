@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -13,6 +14,26 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 	[Peach]
 	public class CrashReporterTest
 	{
+		SingleInstance _si;
+
+		[SetUp]
+		public void SetUp()
+		{
+			// Ensure only 1 instance of the platform tests runs at a time
+			_si = SingleInstance.CreateInstance(Assembly.GetExecutingAssembly().FullName);
+			_si.Lock();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			if (_si != null)
+			{
+				_si.Dispose();
+				_si = null;
+			}
+		}
+
 		static string CrashingProcess
 		{
 			get { return Utilities.GetAppResourcePath("CrashingProgram"); }
