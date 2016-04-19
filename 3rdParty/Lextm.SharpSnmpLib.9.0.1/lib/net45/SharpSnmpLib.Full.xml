@@ -11,30 +11,23 @@
         </member>
         <member name="M:Lextm.SharpSnmpLib.Helper.ToIPAddress(Lextm.SharpSnmpLib.IP)">
             <summary>
-            Converts <see cref="T:Lextm.SharpSnmpLib.IP"/> to <see cref="T:System.Net.IPAddress"/>.
+            Converts <see cref="T:Lextm.SharpSnmpLib.IP" /> to <see cref="T:System.Net.IPAddress" />.
             </summary>
-            <param name="ip">The <see cref="T:Lextm.SharpSnmpLib.IP"/> object.</param>
-            <returns>The <see cref="T:System.Net.IPAddress"/> object.</returns>
+            <param name="ip">The <see cref="T:Lextm.SharpSnmpLib.IP" /> object.</param>
+            <returns>The <see cref="T:System.Net.IPAddress" /> object.</returns>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Helper.ToPhysicalAddress(Lextm.SharpSnmpLib.OctetString)">
             <summary>
-            Converts <see cref="T:Lextm.SharpSnmpLib.OctetString"/> to <see cref="T:System.Net.NetworkInformation.PhysicalAddress"/>.
+            Converts <see cref="T:Lextm.SharpSnmpLib.OctetString" /> to <see cref="T:System.Net.NetworkInformation.PhysicalAddress" />.
             </summary>
-            <param name="address">The <see cref="T:Lextm.SharpSnmpLib.OctetString"/> object that holds the address.</param>
-            <returns>The <see cref="T:System.Net.NetworkInformation.PhysicalAddress"/> object.</returns>
+            <param name="address">The <see cref="T:Lextm.SharpSnmpLib.OctetString" /> object that holds the address.</param>
+            <returns>The <see cref="T:System.Net.NetworkInformation.PhysicalAddress" /> object.</returns>
             <exception cref="T:System.InvalidCastException"><paramref name="address"/> length is not equal to 6.</exception>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.AgentFoundEventArgs">
             <summary>
             Event arguments for agent found event.
             </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.AgentFoundEventArgs.#ctor(System.Net.IPEndPoint,Lextm.SharpSnmpLib.Variable)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Messaging.AgentFoundEventArgs"/> class.
-            </summary>
-            <param name="agent">The agent.</param>
-            <param name="variable">The variable.</param>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.AgentFoundEventArgs.Agent">
             <summary>
@@ -49,25 +42,17 @@
             <value>The variable.</value>
             <remarks>If the agent is SNMP v3, this is <c>null</c>.</remarks>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.AgentFoundEventArgs.#ctor(System.Net.IPEndPoint,Lextm.SharpSnmpLib.Variable)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Messaging.AgentFoundEventArgs"/> class.
+            </summary>
+            <param name="agent">The agent.</param>
+            <param name="variable">The variable.</param>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.Discoverer">
             <summary>
             Discoverer class to discover SNMP agents in the same network.
             </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.Messaging.Discoverer.WSAECONNRESET">
-            <summary>
-            http://msdn.microsoft.com/en-us/library/ms740668(VS.85).aspx
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.Discoverer.Discover(Lextm.SharpSnmpLib.VersionCode,System.Net.IPEndPoint,Lextm.SharpSnmpLib.OctetString,System.Int32)">
-            <summary>
-            Discovers agents of the specified version in a specific time interval.
-            </summary>
-            <param name="version">The version.</param>
-            <param name="broadcastAddress">The broadcast address.</param>
-            <param name="community">The community.</param>
-            <param name="interval">The discovering time interval, in milliseconds.</param>
-            <remarks><paramref name="broadcastAddress"/> must be an IPv4 address. IPv6 is not yet supported here.</remarks>
         </member>
         <member name="E:Lextm.SharpSnmpLib.Messaging.Discoverer.AgentFound">
             <summary>
@@ -79,6 +64,16 @@
             Occurs when an exception is raised.
             </summary>
             <remarks>The exception is typical <see cref="T:System.Net.Sockets.SocketException"/> here.</remarks>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.Discoverer.Discover(Lextm.SharpSnmpLib.VersionCode,System.Net.IPEndPoint,Lextm.SharpSnmpLib.OctetString,System.Int32)">
+            <summary>
+            Discovers agents of the specified version in a specific time interval.
+            </summary>
+            <param name="version">The version.</param>
+            <param name="broadcastAddress">The broadcast address.</param>
+            <param name="community">The community.</param>
+            <param name="interval">The discovering time interval, in milliseconds.</param>
+            <remarks><paramref name="broadcastAddress"/> must be an IPv4 address. IPv6 is not yet supported here.</remarks>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.Discovery">
             <summary>
@@ -141,44 +136,9 @@
             Error exception of #SNMP. Raised when an error message is received.
             </summary>
         </member>
-        <member name="T:Lextm.SharpSnmpLib.OperationException">
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ErrorException.Body">
             <summary>
-            Operation exception of #SNMP.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.OperationException.#ctor">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> instance.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.OperationException.#ctor(System.String)">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> instance with a specific <see cref="T:System.String"/>.
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.OperationException.#ctor(System.String,System.Exception)">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> instance with a specific <see cref="T:System.String"/> and an <see cref="T:System.Exception"/>.
-            </summary>
-            <param name="message"></param>
-            <param name="inner"></param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.OperationException.Create(System.String,System.Net.IPAddress)">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> with a specific <see cref="T:System.Net.IPAddress"/>.
-            </summary>
-            <param name="message">Message</param>
-            <param name="agent">Agent address</param>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.OperationException.Agent">
-            <summary>
-            Agent address.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.OperationException.Details">
-            <summary>
-            Details on operation.
+            Message body.
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.ErrorException.#ctor">
@@ -199,6 +159,11 @@
             <param name="message">Message</param>
             <param name="inner">Inner exception</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ErrorException.Details">
+            <summary>
+            Details on error.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.ErrorException.Create(System.String,System.Net.IPAddress,Lextm.SharpSnmpLib.Messaging.ISnmpMessage)">
             <summary>
             Creates a <see cref="T:Lextm.SharpSnmpLib.Messaging.ErrorException"/>.
@@ -207,16 +172,6 @@
             <param name="agent">Agent address.</param>
             <param name="body">Error message body.</param>
             <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ErrorException.Body">
-            <summary>
-            Message body.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ErrorException.Details">
-            <summary>
-            Details on error.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.ExceptionRaisedEventArgs">
             <summary>
@@ -238,46 +193,6 @@
             <summary>
             GETBULK request message.
             </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage">
-            <summary>
-            SNMP message.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.ToBytes">
-            <summary>
-            Converts to the bytes.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Header">
-            <summary>
-            Gets the header.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Parameters">
-            <summary>
-            Gets the parameters.
-            </summary>
-            <value>The parameters.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Scope">
-            <summary>
-            Gets the scope.
-            </summary>
-            <value>The scope.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Version">
-            <summary>
-            Gets the version.
-            </summary>
-            <value>The version.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Privacy">
-            <summary>
-            Gets the privacy provider.
-            </summary>
-            <value>The privacy provider.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.#ctor(System.Int32,Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.OctetString,System.Int32,System.Int32,System.Collections.Generic.IList{Lextm.SharpSnmpLib.Variable})">
             <summary>
@@ -319,18 +234,6 @@
             <param name="maxMessageSize">Size of the max message.</param>
             <param name="report">The report.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage"/>.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.Header">
             <summary>
             Gets the header.
@@ -341,6 +244,12 @@
             Gets the privacy provider.
             </summary>
             <value>The privacy provider.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.Parameters">
             <summary>
@@ -359,6 +268,12 @@
             Gets the version.
             </summary>
             <value>The version.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.GetBulkRequestMessage"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage">
             <summary>
@@ -399,18 +314,6 @@
             <param name="maxMessageSize">Size of the max message.</param>
             <param name="report">The report.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage"/>.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage.Header">
             <summary>
             Gets the header.
@@ -421,6 +324,12 @@
             Gets the privacy provider.
             </summary>
             <value>The privacy provider.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage.Parameters">
             <summary>
@@ -439,6 +348,12 @@
             Gets the version.
             </summary>
             <value>The version.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.GetNextRequestMessage"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.GetRequestMessage">
             <summary>
@@ -479,18 +394,6 @@
             <param name="maxMessageSize">Size of the max message.</param>
             <param name="report">The report.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.GetRequestMessage.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.GetRequestMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.GetRequestMessage"/>.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.GetRequestMessage.Header">
             <summary>
             Gets the header.
@@ -507,6 +410,12 @@
             Version.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.GetRequestMessage.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.GetRequestMessage.Parameters">
             <summary>
             Gets the parameters.
@@ -518,6 +427,12 @@
             Gets the scope.
             </summary>
             <value>The scope.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.GetRequestMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.GetRequestMessage"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.IListenerBinding">
             <summary>
@@ -583,27 +498,6 @@
             <param name="maxMessageSize">Size of the max message.</param>
             <param name="report">The report.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.InformRequestMessage"/>.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.ToString(Lextm.SharpSnmpLib.IObjectRegistry)">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <param name="objects">The objects.</param>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.Privacy">
             <summary>
             Gets the privacy provider.
@@ -632,6 +526,12 @@
             Gets the header.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.Parameters">
             <summary>
             Gets the parameters.
@@ -643,6 +543,52 @@
             Gets the scope.
             </summary>
             <value>The scope.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.InformRequestMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.InformRequestMessage"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage">
+            <summary>
+            SNMP message.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Header">
+            <summary>
+            Gets the header.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Parameters">
+            <summary>
+            Gets the parameters.
+            </summary>
+            <value>The parameters.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Scope">
+            <summary>
+            Gets the scope.
+            </summary>
+            <value>The scope.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.ToBytes">
+            <summary>
+            Converts to the bytes.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Version">
+            <summary>
+            Gets the version.
+            </summary>
+            <value>The version.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ISnmpMessage.Privacy">
+            <summary>
+            Gets the privacy provider.
+            </summary>
+            <value>The privacy provider.</value>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.Listener">
             <summary>
@@ -681,6 +627,18 @@
             </summary>
             <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.Listener.Users">
+            <summary>
+            Gets or sets the users.
+            </summary>
+            <value>The users.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.Listener.Active">
+            <summary>
+            Gets or sets a value indicating whether this <see cref="T:Lextm.SharpSnmpLib.Messaging.Listener"/> is active.
+            </summary>
+            <value><c>true</c> if active; otherwise, <c>false</c>.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.Listener.Stop">
             <summary>
             Stops this instance.
@@ -691,6 +649,22 @@
             Starts this instance.
             </summary>
             <exception cref="T:Lextm.SharpSnmpLib.Messaging.PortInUseException"/>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.Listener.Bindings">
+            <summary>
+            Gets or sets the bindings.
+            </summary>
+            <value>The bindings.</value>
+        </member>
+        <member name="E:Lextm.SharpSnmpLib.Messaging.Listener.ExceptionRaised">
+            <summary>
+            Occurs when an exception is raised.
+            </summary>
+        </member>
+        <member name="E:Lextm.SharpSnmpLib.Messaging.Listener.MessageReceived">
+            <summary>
+            Occurs when a message is received.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.Listener.AddBinding(System.Net.IPEndPoint)">
             <summary>
@@ -709,47 +683,9 @@
             Clears the bindings.
             </summary>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Listener.Users">
-            <summary>
-            Gets or sets the users.
-            </summary>
-            <value>The users.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Listener.Active">
-            <summary>
-            Gets or sets a value indicating whether this <see cref="T:Lextm.SharpSnmpLib.Messaging.Listener"/> is active.
-            </summary>
-            <value><c>true</c> if active; otherwise, <c>false</c>.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Listener.Bindings">
-            <summary>
-            Gets or sets the bindings.
-            </summary>
-            <value>The bindings.</value>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Messaging.Listener.ExceptionRaised">
-            <summary>
-            Occurs when an exception is raised.
-            </summary>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Messaging.Listener.MessageReceived">
-            <summary>
-            Occurs when a message is received.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.ListenerBinding">
             <summary>
             Binding class for <see cref="T:Lextm.SharpSnmpLib.Messaging.Listener"/>.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.Messaging.ListenerBinding.WSAECONNRESET">
-            <summary>
-            http://msdn.microsoft.com/en-us/library/ms740668(VS.85).aspx
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.Messaging.ListenerBinding.WSAEADDRINUSE">
-            <summary>
-            http://msdn.microsoft.com/en-us/library/ms740668(VS.85).aspx
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.ListenerBinding.#ctor(Lextm.SharpSnmpLib.Security.UserRegistry,System.Net.IPEndPoint)">
@@ -776,6 +712,17 @@
             Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
             </summary>
         </member>
+        <member name="E:Lextm.SharpSnmpLib.Messaging.ListenerBinding.ExceptionRaised">
+            <summary>
+            Occurs when an exception is raised.
+            </summary>
+            <remarks>The exception can be both <see cref="T:System.Net.Sockets.SocketException"/> and <see cref="T:Lextm.SharpSnmpLib.SnmpException"/>.</remarks>
+        </member>
+        <member name="E:Lextm.SharpSnmpLib.Messaging.ListenerBinding.MessageReceived">
+            <summary>
+            Occurs when a message is received.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.ListenerBinding.SendResponse(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.Net.EndPoint)">
             <summary>
             Sends a response message.
@@ -784,6 +731,12 @@
             A <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage"/>.
             </param>
             <param name="receiver">Receiver.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.ListenerBinding.Endpoint">
+            <summary>
+            Gets or sets the endpoint.
+            </summary>
+            <value>The endpoint.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.ListenerBinding.Start">
             <summary>
@@ -802,23 +755,6 @@
             Returns a <see cref="T:System.String"/> that represents a <see cref="T:Lextm.SharpSnmpLib.Messaging.Listener"/>.
             </summary>
             <returns></returns>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Messaging.ListenerBinding.ExceptionRaised">
-            <summary>
-            Occurs when an exception is raised.
-            </summary>
-            <remarks>The exception can be both <see cref="T:System.Net.Sockets.SocketException"/> and <see cref="T:Lextm.SharpSnmpLib.SnmpException"/>.</remarks>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Messaging.ListenerBinding.MessageReceived">
-            <summary>
-            Occurs when a message is received.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.ListenerBinding.Endpoint">
-            <summary>
-            Gets or sets the endpoint.
-            </summary>
-            <value>The endpoint.</value>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.MalformedMessage">
             <summary>
@@ -839,20 +775,6 @@
             <param name="messageId">The message id.</param>
             <param name="user">The user.</param>
             <param name="data">The data encrypted.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.MalformedMessage.ToBytes">
-            <summary>
-            Converts to the bytes.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.MalformedMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.MalformedMessage.EncryptedScope">
             <summary>
@@ -877,6 +799,12 @@
             Gets the header.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.MalformedMessage.ToBytes">
+            <summary>
+            Converts to the bytes.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.MalformedMessage.Version">
             <summary>
             Gets the version.
@@ -888,6 +816,14 @@
             Gets the privacy provider.
             </summary>
             <value>The privacy provider.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.MalformedMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/> that represents this instance.
+            </returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.Manager">
             <summary>
@@ -902,6 +838,18 @@
             <summary>
             Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Messaging.Manager"/> class.
             </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.DefaultVersion">
+            <summary>
+            Default protocol version for operations.
+            </summary>
+            <remarks>By default, the value is SNMP v1.</remarks>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.Timeout">
+            <summary>
+            Timeout value.
+            </summary>
+            <remarks>By default, the value is 5,000-milliseconds (5 seconds).</remarks>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.Manager.GetSingle(System.Net.IPEndPoint,System.String,Lextm.SharpSnmpLib.Variable)">
             <summary>
@@ -1020,6 +968,12 @@
             <param name="table">Table OID.</param>
             <returns></returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.MaxRepetitions">
+            <summary>
+            Gets or sets the max repetitions for GET BULK operations.
+            </summary>
+            <value>The max repetitions.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.Manager.GetTable(System.Net.IPAddress,System.String,Lextm.SharpSnmpLib.ObjectIdentifier)">
             <summary>
             Gets a table of variables.
@@ -1043,31 +997,6 @@
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.Manager"/>.
             </summary>
             <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.DefaultVersion">
-            <summary>
-            Default protocol version for operations.
-            </summary>
-            <remarks>By default, the value is SNMP v1.</remarks>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.Timeout">
-            <summary>
-            Timeout value.
-            </summary>
-            <remarks>By default, the value is 5,000-milliseconds (5 seconds).</remarks>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.Objects">
-            <summary>
-            Gets or sets the objects.
-            </summary>
-            <value>The objects.</value>
-            <remarks>Changed from 2.0: it will return null if not set.</remarks>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.Manager.MaxRepetitions">
-            <summary>
-            Gets or sets the max repetitions for GET BULK operations.
-            </summary>
-            <value>The max repetitions.</value>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.MessageFactory">
             <summary>
@@ -1153,12 +1082,6 @@
             <param name="message">The message received.</param>
             <param name="binding">The binding.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.MessageReceivedEventArgs.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this object.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.MessageReceivedEventArgs.Message">
             <summary>
             The received message.
@@ -1175,13 +1098,19 @@
             </summary>
             <value>The binding.</value>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.MessageReceivedEventArgs.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this object.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.Messenger">
             <summary>
             Messenger class contains all static helper methods you need to send out SNMP messages.
             Static methods in Manager or Agent class will be removed in the future.
             </summary>
             <remarks>
-            SNMP v3 is not supported by this class. Please use <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage"/> derived classes directly
+            SNMP v3 is not supported by this class. Please use <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage" /> derived classes directly
             if you want to do v3 operations.
             </remarks>
         </member>
@@ -1302,7 +1231,7 @@
             <param name="privacy">The privacy provider.</param>
             <param name="report">The report.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.GetTable(Lextm.SharpSnmpLib.VersionCode,System.Net.IPEndPoint,Lextm.SharpSnmpLib.OctetString,Lextm.SharpSnmpLib.ObjectIdentifier,System.Int32,System.Int32,Lextm.SharpSnmpLib.IObjectRegistry)">
+        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.GetTable(Lextm.SharpSnmpLib.VersionCode,System.Net.IPEndPoint,Lextm.SharpSnmpLib.OctetString,Lextm.SharpSnmpLib.ObjectIdentifier,System.Int32,System.Int32)">
             <summary>
             Gets a table of variables.
             </summary>
@@ -1312,40 +1241,7 @@
             <param name="table">Table OID.</param>
             <param name="timeout">The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.</param>
             <param name="maxRepetitions">The max repetitions.</param>
-            <param name="registry">The registry.</param>
             <returns></returns>
-            <remarks><paramref name="registry"/> can be null, which also disables table validation.</remarks>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.GetNextDiscovery(Lextm.SharpSnmpLib.SnmpType)">
-            <summary>
-            Returns a new discovery request.
-            </summary>
-            <param name="type">Message type.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.BulkHasNext(Lextm.SharpSnmpLib.VersionCode,System.Net.IPEndPoint,Lextm.SharpSnmpLib.OctetString,Lextm.SharpSnmpLib.Variable,System.Int32,System.Int32,System.Collections.Generic.IList{Lextm.SharpSnmpLib.Variable}@,Lextm.SharpSnmpLib.Security.IPrivacyProvider,Lextm.SharpSnmpLib.Messaging.ISnmpMessage@)">
-            <summary>
-            Determines whether the specified seed has next item.
-            </summary>
-            <param name="version">The version.</param>
-            <param name="receiver">The receiver.</param>
-            <param name="community">The community.</param>
-            <param name="seed">The seed.</param>
-            <param name="timeout">The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.</param>
-            <param name="maxRepetitions">The max repetitions.</param>
-            <param name="next">The next.</param>
-            <param name="privacy">The privacy provider.</param>
-            <param name="report">The report.</param>
-            <returns>
-            <c>true</c> if the specified seed has next item; otherwise, <c>false</c>.
-            </returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.GetErrorMessage(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Returns error message for the specific <see cref="T:Lextm.SharpSnmpLib.ObjectIdentifier"/>.
-            </summary>
-            <param name="id">The OID.</param>
-            <returns>Error message.</returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.Messenger.NextRequestId">
             <summary>
@@ -1433,6 +1329,37 @@
             module.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.GetNextDiscovery(Lextm.SharpSnmpLib.SnmpType)">
+            <summary>
+            Returns a new discovery request.
+            </summary>
+            <param name="type">Message type.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.BulkHasNext(Lextm.SharpSnmpLib.VersionCode,System.Net.IPEndPoint,Lextm.SharpSnmpLib.OctetString,Lextm.SharpSnmpLib.Variable,System.Int32,System.Int32,System.Collections.Generic.IList{Lextm.SharpSnmpLib.Variable}@,Lextm.SharpSnmpLib.Security.IPrivacyProvider,Lextm.SharpSnmpLib.Messaging.ISnmpMessage@)">
+            <summary>
+            Determines whether the specified seed has next item.
+            </summary>
+            <param name="version">The version.</param>
+            <param name="receiver">The receiver.</param>
+            <param name="community">The community.</param>
+            <param name="seed">The seed.</param>
+            <param name="timeout">The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.</param>
+            <param name="maxRepetitions">The max repetitions.</param>
+            <param name="next">The next.</param>
+            <param name="privacy">The privacy provider.</param>
+            <param name="report">The report.</param>
+            <returns>
+            <c>true</c> if the specified seed has next item; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.Messenger.GetErrorMessage(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Returns error message for the specific <see cref="T:Lextm.SharpSnmpLib.ObjectIdentifier"/>.
+            </summary>
+            <param name="id">The OID.</param>
+            <returns>Error message.</returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.NumberGenerator">
             <summary>
             A counter that generates ID.
@@ -1448,7 +1375,7 @@
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.NumberGenerator.NextId">
             <summary>
-            Returns next ID.
+            Returns next ID. This method is thread-safe within this instance of NumberGenerator.
             </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.PortInUseException">
@@ -1474,16 +1401,16 @@
             <param name="message">Message</param>
             <param name="inner">Inner exception</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.PortInUseException.Endpoint">
+            <summary>
+            The endpoint already in use.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.PortInUseException.ToString">
             <summary>
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.PortInUseException"/>.
             </summary>
             <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.PortInUseException.Endpoint">
-            <summary>
-            The endpoint already in use.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.ReportMessage">
             <summary>
@@ -1500,18 +1427,6 @@
             <param name="scope">The scope.</param>
             <param name="privacy">The privacy provider.</param>
             <param name="length">The length bytes.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.ReportMessage.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.ReportMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.ReportMessage"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.ReportMessage.Header">
             <summary>
@@ -1535,11 +1450,23 @@
             </summary>
             <value>The version.</value>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.ReportMessage.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.ReportMessage.Privacy">
             <summary>
             Gets the privacy provider.
             </summary>
             <value>The privacy provider.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.ReportMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.ReportMessage"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.ResponseMessage">
             <summary>
@@ -1568,18 +1495,6 @@
             <param name="privacy">The privacy provider.</param>
             <param name="needAuthentication">if set to <c>true</c>, authentication is needed.</param>
             <param name="length">The length bytes.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.ResponseMessage.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.ResponseMessage.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.ResponseMessage"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.ResponseMessage.Header">
             <summary>
@@ -1620,6 +1535,18 @@
             </summary>
             <value>The scope.</value>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.ResponseMessage.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.ResponseMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.ResponseMessage"/>.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.SetRequestMessage">
             <summary>
             SET request message.
@@ -1659,6 +1586,17 @@
             <param name="maxMessageSize">Size of the max message.</param>
             <param name="report">The report.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.SetRequestMessage.Header">
+            <summary>
+            Gets the header.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.SetRequestMessage.Privacy">
+            <summary>
+            Gets the privacy provider.
+            </summary>
+            <value>The privacy provider.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.SetRequestMessage.ToString">
             <summary>
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Messaging.SetRequestMessage"/>.
@@ -1670,17 +1608,6 @@
             Converts to byte format.
             </summary>
             <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.SetRequestMessage.Header">
-            <summary>
-            Gets the header.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.SetRequestMessage.Privacy">
-            <summary>
-            Gets the privacy provider.
-            </summary>
-            <value>The privacy provider.</value>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.SetRequestMessage.Parameters">
             <summary>
@@ -1703,11 +1630,6 @@
         <member name="T:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension">
             <summary>
             Extension methods for <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage"/>.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.WSAETIMEDOUT">
-            <summary>
-            http://msdn.microsoft.com/en-us/library/ms740668(VS.85).aspx
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.TypeCode(Lextm.SharpSnmpLib.Messaging.ISnmpMessage)">
@@ -1819,6 +1741,16 @@
             <param name="registry">The user registry.</param>
             <returns></returns>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.GetResponseAsync(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.Net.IPEndPoint,Lextm.SharpSnmpLib.Security.UserRegistry,System.Net.Sockets.Socket)">
+            <summary>
+            Sends an <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage"/> and handles the response from agent.
+            </summary>
+            <param name="request">The <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage"/>.</param>
+            <param name="receiver">Agent.</param>
+            <param name="udpSocket">The UDP <see cref="T:System.Net.Sockets.Socket"/> to use to send/receive.</param>
+            <param name="registry">The user registry.</param>
+            <returns></returns>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.EndGetResponse(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.IAsyncResult)">
             <summary>
             Ends a pending asynchronous read.
@@ -1839,6 +1771,12 @@
             <param name="state">The state object.</param>
             <returns></returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.IsRunningOnMono">
+            <summary>
+            Tests if running on Mono.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.PackMessage(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.Byte[])">
             <summary>
             Packs up the <see cref="T:Lextm.SharpSnmpLib.Messaging.ISnmpMessage"/>.
@@ -1847,15 +1785,14 @@
             <param name="length">The length bytes.</param>
             <returns></returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.SnmpMessageExtension.IsRunningOnMono">
-            <summary>
-            Tests if running on Mono.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.TimeoutException">
             <summary>
             Timeout exception type of #SNMP.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Messaging.TimeoutException.Timeout">
+            <summary>
+            The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Messaging.TimeoutException.#ctor">
@@ -1890,11 +1827,6 @@
             <param name="timeout">Timeout</param>
             <returns></returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Messaging.TimeoutException.Timeout">
-            <summary>
-            The time-out value, in milliseconds. The default value is 0, which indicates an infinite time-out period. Specifying -1 also indicates an infinite time-out period.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.TrapV1Message">
             <summary>
             Trap message.
@@ -1918,35 +1850,6 @@
             Creates a <see cref="T:Lextm.SharpSnmpLib.Messaging.TrapV1Message"/> instance with a message body.
             </summary>
             <param name="body">Message body</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.ToBytes">
-            <summary>
-            To byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents the current <see cref="T:Lextm.SharpSnmpLib.Messaging.TrapV1Message"/>.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.ToString(Lextm.SharpSnmpLib.IObjectRegistry)">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <param name="objects">The objects.</param>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.PackMessage(Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.ISnmpData[])">
-            <summary>
-            Packs the message.
-            </summary>
-            <param name="version">The version.</param>
-            <param name="data">The data.</param>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.TrapV1Message.TimeStamp">
             <summary>
@@ -1993,6 +1896,12 @@
             Gets the privacy provider.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.ToBytes">
+            <summary>
+            To byte format.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.TrapV1Message.Parameters">
             <summary>
             Gets the parameters.
@@ -2006,6 +1915,20 @@
             </summary>
             <value>The scope.</value>
             <remarks><see cref="T:Lextm.SharpSnmpLib.Messaging.TrapV1Message"/> returns null here.</remarks>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents the current <see cref="T:Lextm.SharpSnmpLib.Messaging.TrapV1Message"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV1Message.PackMessage(Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.ISnmpData[])">
+            <summary>
+            Packs the message.
+            </summary>
+            <param name="version">The version.</param>
+            <param name="data">The data.</param>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.TrapV2Message">
             <summary>
@@ -2040,27 +1963,6 @@
             <param name="engineBoots">The engine boots.</param>
             <param name="engineTime">The engine time.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV2Message.ToBytes">
-            <summary>
-            Converts to byte format.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV2Message.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents the current <see cref="T:Lextm.SharpSnmpLib.Messaging.TrapV2Message"/>.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV2Message.ToString(Lextm.SharpSnmpLib.IObjectRegistry)">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <param name="objects">The objects.</param>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.TrapV2Message.Header">
             <summary>
             Gets the header.
@@ -2084,6 +1986,12 @@
             </summary>
             <value>The scope.</value>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV2Message.ToBytes">
+            <summary>
+            Converts to byte format.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Messaging.TrapV2Message.Enterprise">
             <summary>
             Enterprise.
@@ -2099,6 +2007,12 @@
             Gets the version.
             </summary>
             <value>The version.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Messaging.TrapV2Message.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents the current <see cref="T:Lextm.SharpSnmpLib.Messaging.TrapV2Message"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Messaging.WalkMode">
             <summary>
@@ -2167,100 +2081,6 @@
             <summary>
             ifAdminStatus object.
             </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject">
-            <summary>
-            Scalar object interface.
-            </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.SnmpObjectBase">
-            <summary>
-            SNMP basic object.
-            </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.ISnmpObject">
-            <summary>
-            SNMP object.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpObject.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET NEXT criteria.
-            </summary>
-            <param name="id">The ID in GET NEXT message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpObject.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET criteria.
-            </summary>
-            <param name="id">The ID in GET message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpObjectBase.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET NEXT criteria.
-            </summary>
-            <param name="id">The ID in GET NEXT message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpObjectBase.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET criteria.
-            </summary>
-            <param name="id">The ID in GET message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.#ctor(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject"/> class.
-            </summary>
-            <param name="id">The ID.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject"/> class.
-            </summary>
-            <param name="dots">The ID string.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.#ctor(System.String,System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject"/> class.
-            </summary>
-            <param name="dots">The ID string.</param>
-            <param name="index">The index.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET NEXT criteria.
-            </summary>
-            <param name="id">The ID in GET NEXT message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET criteria.
-            </summary>
-            <param name="id">The ID in GET message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.ScalarObject.Variable">
-            <summary>
-            Gets the variable.
-            </summary>
-            <value>The variable.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.ScalarObject.Data">
-            <summary>
-            Gets or sets the data.
-            </summary>
-            <value>The data.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.ScalarObject.Id">
-            <summary>
-            Gets the ID.
-            </summary>
-            <value>The ID.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Objects.IfAdminStatus.#ctor(System.Int32,System.Net.NetworkInformation.NetworkInterface)">
             <summary>
@@ -2719,31 +2539,6 @@
             ifTable object.
             </summary>
         </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.TableObject">
-            <summary>
-            Object that represents a table.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.TableObject.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET NEXT criteria.
-            </summary>
-            <param name="id">The ID in GET NEXT message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.TableObject.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Matches the GET criteria.
-            </summary>
-            <param name="id">The ID in GET message.</param>
-            <returns><c>null</c> if it does not match.</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.TableObject.Objects">
-            <summary>
-            Gets the objects in the table.
-            </summary>
-            <value>The objects.</value>
-        </member>
         <member name="M:Lextm.SharpSnmpLib.Objects.IfTable.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Objects.IfTable"/> class.
@@ -2922,6 +2717,46 @@
             </summary>
             <value>The data.</value>
         </member>
+        <member name="T:Lextm.SharpSnmpLib.OperationException">
+            <summary>
+            Operation exception of #SNMP.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.OperationException.Agent">
+            <summary>
+            Agent address.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.OperationException.#ctor">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> instance.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.OperationException.#ctor(System.String)">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> instance with a specific <see cref="T:System.String"/>.
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.OperationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> instance with a specific <see cref="T:System.String"/> and an <see cref="T:System.Exception"/>.
+            </summary>
+            <param name="message"></param>
+            <param name="inner"></param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.OperationException.Details">
+            <summary>
+            Details on operation.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.OperationException.Create(System.String,System.Net.IPAddress)">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.OperationException"/> with a specific <see cref="T:System.Net.IPAddress"/>.
+            </summary>
+            <param name="message">Message</param>
+            <param name="agent">Agent address</param>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.AccessFailureException">
             <summary>
             Access failure exception. 
@@ -2948,13 +2783,6 @@
             <param name="message">Message</param>
             <param name="inner">Inner exception</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.AccessFailureException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.Pipeline.AccessFailureException"/> instance.
-            </summary>
-            <param name="info">Info</param>
-            <param name="context">Context</param>
-        </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.AccessFailureException.ToString">
             <summary>
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Pipeline.AccessFailureException"/>.
@@ -2965,18 +2793,6 @@
             <summary>
             Composed membership provider, who owns internal providers. If the request is authenticated by any of the internal providers, it is considered as authenticated.
             </summary>    
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.IMembershipProvider">
-            <summary>
-            Membership provider interface.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.IMembershipProvider.AuthenticateRequest(Lextm.SharpSnmpLib.Pipeline.ISnmpContext)">
-            <summary>
-            Authenticates the request.
-            </summary>
-            <param name="context">The context.</param>
-            <returns></returns>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.ComposedMembershipProvider.#ctor(Lextm.SharpSnmpLib.Pipeline.IMembershipProvider[])">
             <summary>
@@ -3000,17 +2816,6 @@
             <summary>
             Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.EngineGroup"/> class.
             </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.EngineGroup.IsInTime(System.Int32[],System.Int32,System.Int32)">
-            <summary>
-            Verifies if the request comes in time.
-            </summary>
-            <param name="currentTimeData">The current time data.</param>
-            <param name="pastReboots">The past reboots.</param>
-            <param name="pastTime">The past time.</param>
-            <returns>
-              <c>true</c> if the request is in time window; otherwise, <c>false</c>.
-            </returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Pipeline.EngineGroup.EngineId">
             <summary>
@@ -3037,6 +2842,17 @@
             <value>
             The engine time data. [0] is engine boots, [1] is engine time.
             </value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.EngineGroup.IsInTime(System.Int32[],System.Int32,System.Int32)">
+            <summary>
+            Verifies if the request comes in time.
+            </summary>
+            <param name="currentTimeData">The current time data.</param>
+            <param name="pastReboots">The past reboots.</param>
+            <param name="pastTime">The past time.</param>
+            <returns>
+              <c>true</c> if the request is in time window; otherwise, <c>false</c>.
+            </returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Pipeline.EngineGroup.NotInTimeWindow">
             <summary>
@@ -3078,19 +2894,6 @@
             <summary>
             GET BULK message handler.
             </summary>    
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.IMessageHandler">
-            <summary>
-            Message handler interface.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.IMessageHandler.Handle(Lextm.SharpSnmpLib.Pipeline.ISnmpContext,Lextm.SharpSnmpLib.Pipeline.ObjectStore)">
-            <summary>
-            Handles the specified message.
-            </summary>
-            <param name="context">The context.</param>
-            <param name="store">The object store.</param>
-            <returns></returns>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.GetBulkMessageHandler.Handle(Lextm.SharpSnmpLib.Pipeline.ISnmpContext,Lextm.SharpSnmpLib.Pipeline.ObjectStore)">
             <summary>
@@ -3186,6 +2989,12 @@
             <param name="type">The type.</param>
             <param name="assembly">The assembly.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.HandlerMapping.Handler">
+            <summary>
+            Gets the handler.
+            </summary>
+            <value>The handler.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.HandlerMapping.CanHandle(Lextm.SharpSnmpLib.Messaging.ISnmpMessage)">
             <summary>
             Determines whether this instance can handle the specified message.
@@ -3194,12 +3003,6 @@
             <returns>
                 <c>true</c> if this instance can handle the specified message; otherwise, <c>false</c>.
             </returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.HandlerMapping.Handler">
-            <summary>
-            Gets the handler.
-            </summary>
-            <value>The handler.</value>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.ILogger">
             <summary>
@@ -3211,6 +3014,31 @@
             Logs an entry.
             </summary>
             <param name="context">Message context.</param>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.IMembershipProvider">
+            <summary>
+            Membership provider interface.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.IMembershipProvider.AuthenticateRequest(Lextm.SharpSnmpLib.Pipeline.ISnmpContext)">
+            <summary>
+            Authenticates the request.
+            </summary>
+            <param name="context">The context.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.IMessageHandler">
+            <summary>
+            Message handler interface.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.IMessageHandler.Handle(Lextm.SharpSnmpLib.Pipeline.ISnmpContext,Lextm.SharpSnmpLib.Pipeline.ObjectStore)">
+            <summary>
+            Handles the specified message.
+            </summary>
+            <param name="context">The context.</param>
+            <param name="store">The object store.</param>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.InformRequestMessageHandler">
             <summary>
@@ -3225,16 +3053,16 @@
             <param name="store">The object store.</param>
             <returns></returns>
         </member>
+        <member name="E:Lextm.SharpSnmpLib.Pipeline.InformRequestMessageHandler.MessageReceived">
+            <summary>
+            Occurs when a message is received.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.InformRequestMessageHandler.InvokeMessageReceived(Lextm.SharpSnmpLib.Pipeline.InformRequestMessageReceivedEventArgs)">
             <summary>
             Invokes the message received.
             </summary>
             <param name="e">The <see cref="T:Lextm.SharpSnmpLib.Pipeline.InformRequestMessageReceivedEventArgs"/> instance containing the event data.</param>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Pipeline.InformRequestMessageHandler.MessageReceived">
-            <summary>
-            Occurs when a message is received.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.InformRequestMessageReceivedEventArgs">
             <summary>
@@ -3285,22 +3113,6 @@
             <param name="status">The status.</param>
             <param name="index">The index.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.SendResponse">
-            <summary>
-            Sends out response message.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.HandleMembership">
-            <summary>
-            Handles the membership authentication.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.GenerateTooBig">
-            <summary>
-            Generates too big message.
-            </summary>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.Binding">
             <summary>
             Gets or sets the binding.
@@ -3337,6 +3149,41 @@
             </summary>
             <value><c>true</c> if the response is too big; otherwise, <c>false</c>.</value>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.SendResponse">
+            <summary>
+            Sends out response message.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.HandleMembership">
+            <summary>
+            Handles the membership authentication.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpContext.GenerateTooBig">
+            <summary>
+            Generates too big message.
+            </summary>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.ISnmpObject">
+            <summary>
+            SNMP object.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpObject.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET NEXT criteria.
+            </summary>
+            <param name="id">The ID in GET NEXT message.</param>
+            <returns><c>null</c> if it does not match.</returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ISnmpObject.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET criteria.
+            </summary>
+            <param name="id">The ID in GET message.</param>
+            <returns><c>null</c> if it does not match.</returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.MessageHandlerFactory">
             <summary>
             Message handler factory.
@@ -3359,98 +3206,6 @@
             <summary>
             Normal SNMP context class. It is v1 and v2c specific.
             </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase">
-            <summary>
-            SNMP context.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.#ctor(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.Net.IPEndPoint,Lextm.SharpSnmpLib.Security.UserRegistry,Lextm.SharpSnmpLib.Pipeline.EngineGroup,Lextm.SharpSnmpLib.Messaging.IListenerBinding)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase"/> class.
-            </summary>
-            <param name="request">The request.</param>
-            <param name="sender">The sender.</param>
-            <param name="users">The users.</param>
-            <param name="group">The engine core group.</param>
-            <param name="binding">The binding.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.SendResponse">
-            <summary>
-            Sends out response message.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.GenerateResponse(System.Collections.Generic.IList{Lextm.SharpSnmpLib.Variable})">
-            <summary>
-            Generates the response.
-            </summary>
-            <param name="variables">The variables.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.CopyRequest(Lextm.SharpSnmpLib.ErrorCode,System.Int32)">
-            <summary>
-            Copies the request variable bindings to response.
-            </summary>
-            <param name="status">The status.</param>
-            <param name="index">The index.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.HandleMembership">
-            <summary>
-            Handles the membership authentication.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.GenerateTooBig">
-            <summary>
-            Generates too big message.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Binding">
-            <summary>
-            Gets or sets the binding.
-            </summary>
-            <value>The binding.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.CreatedTime">
-            <summary>
-            Gets the created time.
-            </summary>
-            <value>The created time.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Request">
-            <summary>
-            Gets the request.
-            </summary>
-            <value>The request.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Users">
-            <summary>
-            Gets the users.
-            </summary>
-            <value>The users.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Response">
-            <summary>
-            Gets the response.
-            </summary>
-            <value>The response.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Sender">
-            <summary>
-            Gets the sender.
-            </summary>
-            <value>The sender.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Group">
-            <summary>
-            Gets or sets the objects.
-            </summary>
-            <value>The objects.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.TooBig">
-            <summary>
-            Gets a value indicating whether [too big].
-            </summary>
-            <value><c>true</c> if the response is too big; otherwise, <c>false</c>.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.NormalSnmpContext.#ctor(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.Net.IPEndPoint,Lextm.SharpSnmpLib.Security.UserRegistry,Lextm.SharpSnmpLib.Messaging.IListenerBinding)">
             <summary>
@@ -3522,6 +3277,62 @@
             Adds the specified <see cref="T:Lextm.SharpSnmpLib.Pipeline.ISnmpObject"/>.
             </summary>
             <param name="newObject">The object.</param>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject">
+            <summary>
+            Scalar object interface.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.#ctor(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject"/> class.
+            </summary>
+            <param name="id">The ID.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject"/> class.
+            </summary>
+            <param name="dots">The ID string.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.#ctor(System.String,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.ScalarObject"/> class.
+            </summary>
+            <param name="dots">The ID string.</param>
+            <param name="index">The index.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.ScalarObject.Variable">
+            <summary>
+            Gets the variable.
+            </summary>
+            <value>The variable.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.ScalarObject.Data">
+            <summary>
+            Gets or sets the data.
+            </summary>
+            <value>The data.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.ScalarObject.Id">
+            <summary>
+            Gets the ID.
+            </summary>
+            <value>The ID.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET NEXT criteria.
+            </summary>
+            <param name="id">The ID in GET NEXT message.</param>
+            <returns><c>null</c> if it does not match.</returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.ScalarObject.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET criteria.
+            </summary>
+            <param name="id">The ID in GET message.</param>
+            <returns><c>null</c> if it does not match.</returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.SecureSnmpContext">
             <summary>
@@ -3618,16 +3429,6 @@
             </summary>
             <param name="context">The context.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpApplication.Process">
-            <summary>
-            Processes an incoming request.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpApplication.CompleteProcessing">
-            <summary>
-            Completes the processing.
-            </summary>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpApplication.Context">
             <summary>
             Gets the context.
@@ -3639,6 +3440,16 @@
             Gets a value indicating whether processing is finished.
             </summary>
             <value><c>true</c> if processing is finished; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpApplication.Process">
+            <summary>
+            Processes an incoming request.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpApplication.CompleteProcessing">
+            <summary>
+            Completes the processing.
+            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.SnmpApplicationFactory">
             <summary>
@@ -3674,6 +3485,98 @@
             Reuses the specified pipeline.
             </summary>
             <param name="application">The application.</param>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase">
+            <summary>
+            SNMP context.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.#ctor(Lextm.SharpSnmpLib.Messaging.ISnmpMessage,System.Net.IPEndPoint,Lextm.SharpSnmpLib.Security.UserRegistry,Lextm.SharpSnmpLib.Pipeline.EngineGroup,Lextm.SharpSnmpLib.Messaging.IListenerBinding)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase"/> class.
+            </summary>
+            <param name="request">The request.</param>
+            <param name="sender">The sender.</param>
+            <param name="users">The users.</param>
+            <param name="group">The engine core group.</param>
+            <param name="binding">The binding.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Binding">
+            <summary>
+            Gets or sets the binding.
+            </summary>
+            <value>The binding.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.CreatedTime">
+            <summary>
+            Gets the created time.
+            </summary>
+            <value>The created time.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Request">
+            <summary>
+            Gets the request.
+            </summary>
+            <value>The request.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Users">
+            <summary>
+            Gets the users.
+            </summary>
+            <value>The users.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Response">
+            <summary>
+            Gets the response.
+            </summary>
+            <value>The response.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Sender">
+            <summary>
+            Gets the sender.
+            </summary>
+            <value>The sender.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.Group">
+            <summary>
+            Gets or sets the objects.
+            </summary>
+            <value>The objects.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.TooBig">
+            <summary>
+            Gets a value indicating whether [too big].
+            </summary>
+            <value><c>true</c> if the response is too big; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.SendResponse">
+            <summary>
+            Sends out response message.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.GenerateResponse(System.Collections.Generic.IList{Lextm.SharpSnmpLib.Variable})">
+            <summary>
+            Generates the response.
+            </summary>
+            <param name="variables">The variables.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.CopyRequest(Lextm.SharpSnmpLib.ErrorCode,System.Int32)">
+            <summary>
+            Copies the request variable bindings to response.
+            </summary>
+            <param name="status">The status.</param>
+            <param name="index">The index.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.HandleMembership">
+            <summary>
+            Handles the membership authentication.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpContextBase.GenerateTooBig">
+            <summary>
+            Generates too big message.
+            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.SnmpContextFactory">
             <summary>
@@ -3721,6 +3624,12 @@
             </summary>
             <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpEngine.Listener">
+            <summary>
+            Gets or sets the listener.
+            </summary>
+            <value>The listener.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpEngine.Start">
             <summary>
             Starts the engine.
@@ -3730,12 +3639,6 @@
             <summary>
             Stops this instance.
             </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpEngine.Listener">
-            <summary>
-            Gets or sets the listener.
-            </summary>
-            <value>The listener.</value>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Pipeline.SnmpEngine.Active">
             <summary>
@@ -3747,6 +3650,50 @@
             <summary>
             Occurs when an exception is raised.
             </summary>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.SnmpObjectBase">
+            <summary>
+            SNMP basic object.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpObjectBase.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET NEXT criteria.
+            </summary>
+            <param name="id">The ID in GET NEXT message.</param>
+            <returns><c>null</c> if it does not match.</returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.SnmpObjectBase.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET criteria.
+            </summary>
+            <param name="id">The ID in GET message.</param>
+            <returns><c>null</c> if it does not match.</returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Pipeline.TableObject">
+            <summary>
+            Object that represents a table.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Pipeline.TableObject.Objects">
+            <summary>
+            Gets the objects in the table.
+            </summary>
+            <value>The objects.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.TableObject.MatchGetNext(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET NEXT criteria.
+            </summary>
+            <param name="id">The ID in GET NEXT message.</param>
+            <returns><c>null</c> if it does not match.</returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Pipeline.TableObject.MatchGet(Lextm.SharpSnmpLib.ObjectIdentifier)">
+            <summary>
+            Matches the GET criteria.
+            </summary>
+            <param name="id">The ID in GET message.</param>
+            <returns><c>null</c> if it does not match.</returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.TrapV1MessageHandler">
             <summary>
@@ -3761,16 +3708,16 @@
             <param name="store">The object store.</param>
             <returns></returns>
         </member>
+        <member name="E:Lextm.SharpSnmpLib.Pipeline.TrapV1MessageHandler.MessageReceived">
+            <summary>
+            Occurs when a message is received.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.TrapV1MessageHandler.InvokeMessageReceived(Lextm.SharpSnmpLib.Pipeline.TrapV1MessageReceivedEventArgs)">
             <summary>
             Invokes the message received event handler.
             </summary>
             <param name="e">The <see cref="T:Lextm.SharpSnmpLib.Messaging.MessageReceivedEventArgs"/> instance containing the event data.</param>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Pipeline.TrapV1MessageHandler.MessageReceived">
-            <summary>
-            Occurs when a message is received.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.TrapV1MessageReceivedEventArgs">
             <summary>
@@ -3816,16 +3763,16 @@
             <param name="store">The object store.</param>
             <returns></returns>
         </member>
+        <member name="E:Lextm.SharpSnmpLib.Pipeline.TrapV2MessageHandler.MessageReceived">
+            <summary>
+            Occurs when a message is received.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Pipeline.TrapV2MessageHandler.InvokeMessageReceived(Lextm.SharpSnmpLib.Pipeline.TrapV2MessageReceivedEventArgs)">
             <summary>
             Invokes the message received event handler.
             </summary>
             <param name="e">The <see cref="T:Lextm.SharpSnmpLib.Messaging.MessageReceivedEventArgs"/> instance containing the event data.</param>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.Pipeline.TrapV2MessageHandler.MessageReceived">
-            <summary>
-            Occurs when a message is received.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Pipeline.TrapV2MessageReceivedEventArgs">
             <summary>
@@ -3924,6 +3871,11 @@
             <param name="phrase">The phrase.</param>
             <param name="auth">The authentication provider.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.AuthenticationProvider">
+            <summary>
+            Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.Encrypt(System.Byte[],System.Byte[],System.Int32,System.Int32,System.Byte[])">
             <summary>
             Encrypt scoped PDU using DES encryption protocol
@@ -3952,33 +3904,6 @@
             <exception cref="T:System.ArgumentOutOfRangeException">Thrown when encryption key length is less then 32 byte or if privacy parameters
             argument is null or length other then 8 bytes</exception>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
-            <summary>
-            Decrypts the specified data.
-            </summary>
-            <param name="data">The data.</param>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.Encrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
-            <summary>
-            Encrypts the specified scope.
-            </summary>
-            <param name="data">The scope data.</param>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.ToString">
-            <summary>
-            Returns a string that represents this object.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.AuthenticationProvider">
-            <summary>
-            Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
-            </summary>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.PrivacyParametersLength">
             <summary>
             Returns the length of privacyParameters USM header field. For AES, field length is 8.
@@ -4000,11 +3925,33 @@
             encryption IV. For encryption itself, first 8 bytes of the key are used.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
+            <summary>
+            Decrypts the specified data.
+            </summary>
+            <param name="data">The data.</param>
+            <param name="parameters">The parameters.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.Encrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
+            <summary>
+            Encrypts the specified scope.
+            </summary>
+            <param name="data">The scope data.</param>
+            <param name="parameters">The parameters.</param>
+            <returns></returns>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.Salt">
             <summary>
             Gets the salt.
             </summary>
             <value>The salt.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.AESPrivacyProvider.ToString">
+            <summary>
+            Returns a string that represents this object.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Security.DESPrivacyProvider">
             <summary>
@@ -4018,6 +3965,11 @@
             </summary>
             <param name="phrase">The phrase.</param>
             <param name="auth">The authentication provider.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.AuthenticationProvider">
+            <summary>
+            Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.Encrypt(System.Byte[],System.Byte[],System.Byte[])">
             <summary>
@@ -4060,27 +4012,6 @@
             <param name="privacyPassword">16 byte privacy password</param>
             <returns>8 byte DES encryption password</returns>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
-            <summary>
-            Decrypts the specified data.
-            </summary>
-            <param name="data">The data.</param>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.Encrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
-            <summary>
-            Encrypts the specified scope.
-            </summary>
-            <param name="data">The scope data.</param>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.AuthenticationProvider">
-            <summary>
-            Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
-            </summary>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.PrivacyParametersLength">
             <summary>
             Returns the length of privacyParameters USM header field. For DES, field length is 8.
@@ -4101,6 +4032,22 @@
             DES protocol itself requires an 8 byte key. Additional 8 bytes are used for generating the
             encryption IV. For encryption itself, first 8 bytes of the key are used.
             </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
+            <summary>
+            Decrypts the specified data.
+            </summary>
+            <param name="data">The data.</param>
+            <param name="parameters">The parameters.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.Encrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
+            <summary>
+            Encrypts the specified scope.
+            </summary>
+            <param name="data">The scope data.</param>
+            <param name="parameters">The parameters.</param>
+            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Security.DESPrivacyProvider.Salt">
             <summary>
@@ -4127,6 +4074,12 @@
             <param name="engineId">The engine ID.</param>
             <returns></returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.MD5AuthenticationProvider.CleanDigest">
+            <summary>
+            Gets the clean digest.
+            </summary>
+            <value>The clean digest.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Security.MD5AuthenticationProvider.ComputeHash(Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.ISegment,Lextm.SharpSnmpLib.SecurityParameters,Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.Security.IPrivacyProvider,System.Byte[])">
             <summary>
             Computes the hash.
@@ -4147,12 +4100,6 @@
             A <see cref="T:System.String"/> that represents this instance.
             </returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.MD5AuthenticationProvider.CleanDigest">
-            <summary>
-            Gets the clean digest.
-            </summary>
-            <value>The clean digest.</value>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Security.SHA1AuthenticationProvider">
             <summary>
             Authentication provider using SHA-1.
@@ -4171,6 +4118,12 @@
             <param name="password">The user password.</param>
             <param name="engineId">The engine ID.</param>
             <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.SHA1AuthenticationProvider.CleanDigest">
+            <summary>
+            Gets the clean digest.
+            </summary>
+            <value>The clean digest.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Security.SHA1AuthenticationProvider.ComputeHash(Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.ISegment,Lextm.SharpSnmpLib.SecurityParameters,Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.Security.IPrivacyProvider,System.Byte[])">
             <summary>
@@ -4191,12 +4144,6 @@
             <returns>
             A <see cref="T:System.String"/> that represents this instance.
             </returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.SHA1AuthenticationProvider.CleanDigest">
-            <summary>
-            Gets the clean digest.
-            </summary>
-            <value>The clean digest.</value>
         </member>
     </members>
 </doc>

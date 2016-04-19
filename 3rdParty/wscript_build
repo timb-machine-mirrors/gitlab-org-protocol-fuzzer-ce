@@ -25,8 +25,6 @@ subdirs = [
 	'TotalPhase/komodo',
 	'Managed.AndroidDebugBridge',
 	'VMware-VIX-1.13.0-1295980',
-	'SuperSocket',
-	'SuperWebSocket',
 	'SocketHttpListener/SocketHttpListener',
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
@@ -60,11 +58,3 @@ bld(
 		nunit_tools : nunit_tools.ant_glob('**/*'),
 	}
 )
-
-if bld.env.REFERENCE_ASSEMBLIES_FACADES:
-	refs = [
-		'System.Runtime.dll',
-	]
-
-	for x in refs:
-		bld.read_csshlib(x, paths=[bld.env.REFERENCE_ASSEMBLIES_FACADES])

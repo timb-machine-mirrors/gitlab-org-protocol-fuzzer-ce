@@ -42,33 +42,11 @@
             <param name="header">Header.</param>
             <param name="parameters">Security parameters.</param>
             <param name="data">Scope data.</param>
-            <returns>The <see cref="T:Lextm.SharpSnmpLib.Sequence"/> object that represents the message body.</returns>
+            <returns>The <see cref="T:Lextm.SharpSnmpLib.Sequence" /> object that represents the message body.</returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Counter32">
             <summary>
             Counter32 type.
-            </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.ISnmpData">
-            <summary>
-            SNMP data entity.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ISnmpData.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ISnmpData.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this object.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.ISnmpData.TypeCode">
-            <summary>
-            Type code
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Counter32.#ctor(System.Byte[])">
@@ -95,6 +73,11 @@
             </summary>
             <param name="length">The length.</param>
             <param name="stream">The stream.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Counter32.TypeCode">
+            <summary>
+            Type code.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Counter32.AppendBytesTo(System.IO.Stream)">
             <summary>
@@ -169,11 +152,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Counter32.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Counter64">
             <summary>
             Counter64 type.
@@ -197,6 +175,11 @@
             </summary>
             <param name="length">The length.</param>
             <param name="stream">The stream.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Counter64.TypeCode">
+            <summary>
+            Type code.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Counter64.AppendBytesTo(System.IO.Stream)">
             <summary>
@@ -271,11 +254,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Counter64.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.DataFactory">
             <summary>
             Factory that creates <see cref="T:Lextm.SharpSnmpLib.ISnmpData"/> instances.
@@ -311,41 +289,6 @@
             </summary>
             <param name="stream">Stream</param>
             <returns></returns>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.DefinitionType">
-            <summary>
-            Definition type.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.DefinitionType.Unknown">
-            <summary>
-            Unknown type.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.DefinitionType.OidValueAssignment">
-            <summary>
-            OID value assignment.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.DefinitionType.Scalar">
-            <summary>
-            Scalar OID.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.DefinitionType.Table">
-            <summary>
-            Table OID.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.DefinitionType.Entry">
-            <summary>
-            Table entry OID.
-            </summary>
-        </member>
-        <member name="F:Lextm.SharpSnmpLib.DefinitionType.Column">
-            <summary>
-            Table column OID.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.EndOfMibView">
             <summary>
@@ -404,6 +347,11 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.EndOfMibView.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.EndOfMibView.AppendBytesTo(System.IO.Stream)">
             <summary>
             Appends the bytes to <see cref="T:System.IO.Stream"/>.
@@ -424,11 +372,6 @@
             <param name="right">Right <see cref="T:Lextm.SharpSnmpLib.EndOfMibView"/> object</param>
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.EndOfMibView.TypeCode">
-            <summary>
-            Type code.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.ErrorCode">
             <summary>
@@ -560,6 +503,11 @@
             <param name="length">The length.</param>
             <param name="stream">The stream.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Gauge32.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Gauge32.AppendBytesTo(System.IO.Stream)">
             <summary>
             Appends the bytes to <see cref="T:System.IO.Stream"/>.
@@ -627,11 +575,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Gauge32.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.GenericCode">
             <summary>
             Generic trap code.
@@ -677,34 +620,6 @@
             GETBULK request PDU.
             </summary>
         </member>
-        <member name="T:Lextm.SharpSnmpLib.ISnmpPdu">
-            <summary>
-            SNMP PDU.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.RequestId">
-            <summary>
-            Gets the request ID.
-            </summary>
-            <value>The request ID.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.ErrorStatus">
-            <summary>
-            Gets the error status.
-            </summary>
-            <value>The error status.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.ErrorIndex">
-            <summary>
-            Gets the index of the error.
-            </summary>
-            <value>The index of the error.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.Variables">
-            <summary>
-            Variable bindings.
-            </summary>
-        </member>
         <member name="M:Lextm.SharpSnmpLib.GetBulkRequestPdu.#ctor(System.Int32,System.Int32,System.Int32,System.Collections.Generic.IList{Lextm.SharpSnmpLib.Variable})">
             <summary>
             Creates a <see cref="T:Lextm.SharpSnmpLib.GetBulkRequestPdu"/> with all contents.
@@ -720,18 +635,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.GetBulkRequestPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.GetBulkRequestPdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.GetBulkRequestPdu"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.GetBulkRequestPdu.RequestId">
             <summary>
@@ -761,6 +664,18 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.GetBulkRequestPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.GetBulkRequestPdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.GetBulkRequestPdu"/>.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.GetNextRequestPdu">
             <summary>
             GETNEXT request PDU.
@@ -788,18 +703,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.GetNextRequestPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.GetNextRequestPdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.GetNextRequestPdu"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.GetNextRequestPdu.RequestId">
             <summary>
@@ -829,6 +732,18 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.GetNextRequestPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.GetNextRequestPdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.GetNextRequestPdu"/>.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.GetRequestPdu">
             <summary>
             GET request PDU.
@@ -856,18 +771,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.GetRequestPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.GetRequestPdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.GetRequestPdu"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.GetRequestPdu.RequestId">
             <summary>
@@ -897,28 +800,22 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.GetRequestPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.GetRequestPdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.GetRequestPdu"/>.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Header">
             <summary>
             Header segment.
             </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.ISegment">
-            <summary>
-            Segment interface.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ISegment.GetData(Lextm.SharpSnmpLib.VersionCode)">
-            <summary>
-            Gets the data.
-            </summary>
-            <param name="version">The version.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ISegment.ToSequence">
-            <summary>
-            Converts to <see cref="T:Lextm.SharpSnmpLib.Sequence"/> object.
-            </summary>
-            <returns></returns>
         </member>
         <member name="F:Lextm.SharpSnmpLib.Header.MaxMessageSize">
             <summary>
@@ -950,6 +847,22 @@
             <param name="securityLevel">The security level.</param>
             <remarks>If you want an empty header, please use <see cref="P:Lextm.SharpSnmpLib.Header.Empty"/>.</remarks>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Header.Empty">
+            <summary>
+            Empty header.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Header.SecurityLevel">
+            <summary>
+            Security flags.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Header.MessageId">
+            <summary>
+            Gets the message ID.
+            </summary>
+            <value>The message ID.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Header.ToSequence">
             <summary>
             Converts to <see cref="T:Lextm.SharpSnmpLib.Sequence"/> object.
@@ -971,183 +884,11 @@
             A <see cref="T:System.String"/> that represents this instance.
             </returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Header.Empty">
-            <summary>
-            Empty header.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Header.SecurityLevel">
-            <summary>
-            Security flags.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Header.MessageId">
-            <summary>
-            Gets the message ID.
-            </summary>
-            <value>The message ID.</value>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Header.MaxSize">
             <summary>
             Gets or sets the size of the max.
             </summary>
             <value>The size of the max.</value>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.IConstruct">
-            <summary>
-            Construct interface.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IConstruct.Name">
-            <summary>
-            Name.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IConstruct.Line">
-            <summary>
-            Gets the line number.
-            </summary>
-            <value>
-            The line.
-            </value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IConstruct.CharPositionInLine">
-            <summary>
-            Gets the char position in line.
-            </summary>
-            <value>
-            The char position in line.
-            </value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IConstruct.Module">
-            <summary>
-            Gets or sets the module.
-            </summary>
-            <value>
-            The module.
-            </value>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.IDefinition">
-            <summary>
-            Definition interface.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IDefinition.GetChildAt(System.UInt32)">
-            <summary>
-            Indexer.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IDefinition.GetNumericalForm">
-            <summary>
-            Gets the numerical form.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IDefinition.Append(Lextm.SharpSnmpLib.IDefinition)">
-            <summary>
-            Appends the specified child.
-            </summary>
-            <param name="child">The child.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IDefinition.Clear">
-            <summary>
-            Clears this instance.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.Children">
-            <summary>
-            Children definitions.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.ParentDefinition">
-            <summary>
-            Parent definition.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.Type">
-            <summary>
-            Type.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.Entity">
-            <summary>
-            The base entity of this definition/
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.Module">
-            <summary>
-            Gets the module.
-            </summary>
-            <value>
-            The module.
-            </value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.Name">
-            <summary>
-            Gets the name.
-            </summary>
-            <value>
-            The name.
-            </value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IDefinition.Value">
-            <summary>
-            Gets the value.
-            </summary>
-            <value>
-            The value.
-            </value>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.IEntity">
-            <summary>
-            Entity interface.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IEntity.Parent">
-            <summary>
-            Parent.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IEntity.ParentModule">
-            <summary>
-            Gets or sets the parent module.
-            </summary>
-            <value>
-            The parent module.
-            </value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IEntity.Value">
-            <summary>
-            Value.
-            </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.IModule">
-            <summary>
-            MIB Module interface.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IModule.Name">
-            <summary>
-            Module name.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IModule.Objects">
-            <summary>
-            Objects.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IModule.Entities">
-            <summary>
-            Entities.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IModule.FileName">
-            <summary>
-            Gets the name of the file.
-            </summary>
-            <value>
-            The name of the file.
-            </value>
         </member>
         <member name="T:Lextm.SharpSnmpLib.InformRequestPdu">
             <summary>
@@ -1175,18 +916,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.InformRequestPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.InformRequestPdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.InformRequestPdu"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.InformRequestPdu.RequestId">
             <summary>
@@ -1227,6 +956,18 @@
             Gets the time stamp.
             </summary>
             <value>The time stamp.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.InformRequestPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.InformRequestPdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.InformRequestPdu"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Integer32">
             <summary>
@@ -1274,6 +1015,11 @@
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Integer32"/>.
             </summary>
             <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Integer32.TypeCode">
+            <summary>
+            Type code.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Integer32.AppendBytesTo(System.IO.Stream)">
             <summary>
@@ -1330,140 +1076,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Integer32.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.IObjectRegistry">
-            <summary>
-            Object registry interface.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.CreateVariable(System.String)">
-            <summary>
-            Creates a variable.
-            </summary>
-            <param name="textual">The textual ID.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.CreateVariable(System.String,Lextm.SharpSnmpLib.ISnmpData)">
-            <summary>
-            Creates a variable.
-            </summary>
-            <param name="textual">The textual ID.</param>
-            <param name="data">The data.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.Translate(System.String)">
-            <summary>
-            Gets numercial form from textual form.
-            </summary>
-            <param name="textual">Textual</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.Translate(System.String,System.String)">
-            <summary>
-            Gets numerical form from textual form.
-            </summary>
-            <param name="moduleName">Module name.</param>
-            <param name="name">Object name.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.Translate(System.UInt32[])">
-            <summary>
-            Gets textual form from numerical form.
-            </summary>
-            <param name="numerical">Numerical form</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.ValidateTable(Lextm.SharpSnmpLib.ObjectIdentifier)">
-            <summary>
-            Validates the table.
-            </summary>
-            <param name="identifier">The identifier.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.Refresh">
-            <summary>
-            Refreshes this instance.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectRegistry.Import(System.Collections.Generic.IEnumerable{Lextm.SharpSnmpLib.IModule})">
-            <summary>
-            Imports the specified modules.
-            </summary>
-            <param name="modules">The modules.</param>
-        </member>
-        <member name="E:Lextm.SharpSnmpLib.IObjectRegistry.OnChanged">
-            <summary>
-            This event occurs when new documents are loaded.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IObjectRegistry.Tree">
-            <summary>
-            Object tree.
-            </summary>        
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.IObjectTree">
-            <summary>
-            Object tree interface.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectTree.Find(System.String,System.String)">
-            <summary>
-            Finds an <see cref="T:Lextm.SharpSnmpLib.IDefinition"/>.
-            </summary>
-            <param name="moduleName"></param>
-            <param name="name"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectTree.Remove(System.String)">
-            <summary>
-            Removes a module.
-            </summary>
-            <param name="moduleName"></param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectTree.Import(System.Collections.Generic.IEnumerable{Lextm.SharpSnmpLib.IModule})">
-            <summary>
-            Imports the specified enumerable.
-            </summary>
-            <param name="modules">The modules.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectTree.Refresh">
-            <summary>
-            Refreshes this instance.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectTree.Search(System.UInt32[])">
-            <summary>
-            Searches for the specified OID.
-            </summary>
-            <param name="id">The OID.</param>
-            <returns></returns>
-            <remarks>This method performs best matching.</remarks>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.IObjectTree.Unload(System.String)">
-            <summary>
-            Unloads the specified module.
-            </summary>
-            <param name="name">The name.</param>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IObjectTree.Root">
-            <summary>
-            Root definition.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IObjectTree.LoadedModules">
-            <summary>
-            Loaded MIB modules.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.IObjectTree.PendingModules">
-            <summary>
-            Pending MIB modules.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.IP">
             <summary>
             IPAddress type.
@@ -1474,7 +1086,7 @@
             Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.IP"/> class.
             </summary>
             <param name="ip">The IP bytes.</param>
-            <exception cref="T:System.ArgumentNullException"><paramref name="ip"/> is <c>null</c>.</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="ip" /> is <c>null</c>.</exception>
         </member>
         <member name="M:Lextm.SharpSnmpLib.IP.#ctor(System.String)">
             <summary>
@@ -1500,6 +1112,11 @@
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.IP"/>.
             </summary>
             <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.IP.TypeCode">
+            <summary>
+            Type code.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.IP.AppendBytesTo(System.IO.Stream)">
             <summary>
@@ -1556,14 +1173,72 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.IP.TypeCode">
+        <member name="T:Lextm.SharpSnmpLib.ISegment">
             <summary>
-            Type code.
+            Segment interface.
             </summary>
         </member>
-        <member name="T:Lextm.SharpSnmpLib.ITypeAssignment">
+        <member name="M:Lextm.SharpSnmpLib.ISegment.GetData(Lextm.SharpSnmpLib.VersionCode)">
             <summary>
-            Type assignment interface.
+            Gets the data.
+            </summary>
+            <param name="version">The version.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.ISegment.ToSequence">
+            <summary>
+            Converts to <see cref="T:Lextm.SharpSnmpLib.Sequence"/> object.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.ISnmpData">
+            <summary>
+            SNMP data entity.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.ISnmpData.TypeCode">
+            <summary>
+            Type code
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.ISnmpData.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.ISnmpData.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this object.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.ISnmpPdu">
+            <summary>
+            SNMP PDU.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.RequestId">
+            <summary>
+            Gets the request ID.
+            </summary>
+            <value>The request ID.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.ErrorStatus">
+            <summary>
+            Gets the error status.
+            </summary>
+            <value>The error status.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.ErrorIndex">
+            <summary>
+            Gets the index of the error.
+            </summary>
+            <value>The index of the error.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.ISnmpPdu.Variables">
+            <summary>
+            Variable bindings.
             </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Levels">
@@ -1591,25 +1266,17 @@
             Malformed PDU class. Many things are not implemented as they are not in use.
             </summary>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.MalformedPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.MalformedPdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.MalformedPdu.TypeCode">
             <summary>
             Type code.
             </summary>
             <value>Returns <see cref="T:Lextm.SharpSnmpLib.SnmpType"/> unknown type.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.MalformedPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
         </member>
         <member name="P:Lextm.SharpSnmpLib.MalformedPdu.RequestId">
             <summary>
@@ -1634,6 +1301,14 @@
             Variable bindings.
             </summary>
             <value>Returns an empty list.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.MalformedPdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/> that represents this instance.
+            </returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.NoSuchInstance">
             <summary>
@@ -1692,6 +1367,11 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.NoSuchInstance.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.NoSuchInstance.AppendBytesTo(System.IO.Stream)">
             <summary>
             Appends the bytes to <see cref="T:System.IO.Stream"/>.
@@ -1712,11 +1392,6 @@
             <param name="right">Right <see cref="T:Lextm.SharpSnmpLib.NoSuchInstance"/> object</param>
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.NoSuchInstance.TypeCode">
-            <summary>
-            Type code.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.NoSuchObject">
             <summary>
@@ -1775,6 +1450,11 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.NoSuchObject.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.NoSuchObject.AppendBytesTo(System.IO.Stream)">
             <summary>
             Appends the bytes to <see cref="T:System.IO.Stream"/>.
@@ -1796,11 +1476,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.NoSuchObject.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Null">
             <summary>
             Null type.
@@ -1816,6 +1491,11 @@
         <member name="M:Lextm.SharpSnmpLib.Null.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Null"/> class.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Null.TypeCode">
+            <summary>
+            Type code.
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Null.AppendBytesTo(System.IO.Stream)">
@@ -1878,11 +1558,6 @@
             <param name="right">Right <see cref="T:Lextm.SharpSnmpLib.Null"/> object</param>
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Null.TypeCode">
-            <summary>
-            Type code.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.ObjectIdentifier">
             <summary>
@@ -1980,6 +1655,11 @@
             </summary>
             <param name="stream">The stream.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.ObjectIdentifier.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.ObjectIdentifier.Equals(System.Object)">
             <summary>
             Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:Lextm.SharpSnmpLib.ObjectIdentifier"/>.
@@ -2065,15 +1745,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.ObjectIdentifier.ToString(Lextm.SharpSnmpLib.IObjectRegistry)">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <param name="objects">The objects.</param>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
         <member name="M:Lextm.SharpSnmpLib.ObjectIdentifier.Create(System.UInt32[],System.UInt32)">
             <summary>
             Creates a new <see cref="T:Lextm.SharpSnmpLib.Variable"/> instance.
@@ -2089,11 +1760,6 @@
             <param name="original">The original array.</param>
             <param name="extra">The extra.</param>
             <returns></returns>       
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.ObjectIdentifier.TypeCode">
-            <summary>
-            Type code.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.OctetString">
             <summary>
@@ -2132,11 +1798,22 @@
             </summary>
             <param name="level"></param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.OctetString.Encoding">
+            <summary>
+            Encoding of this <see cref="T:Lextm.SharpSnmpLib.OctetString"/>
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.OctetString.GetRaw">
             <summary>
             Gets raw bytes.
             </summary>
             <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.OctetString.Empty">
+            <summary>
+            Gets the empty string.
+            </summary>
+            <value>The empty.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.OctetString.ToLevels">
             <summary>
@@ -2162,6 +1839,11 @@
             Returns a <see cref="T:System.String"/> in UTF-16 that represents this <see cref="T:Lextm.SharpSnmpLib.OctetString"/>.
             </summary>
             <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.OctetString.TypeCode">
+            <summary>
+            Type code.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.OctetString.AppendBytesTo(System.IO.Stream)">
             <summary>
@@ -2209,6 +1891,11 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.OctetString.DefaultEncoding">
+            <summary>
+            Default encoding of <see cref="T:Lextm.SharpSnmpLib.OctetString"/> type.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.OctetString.Equals(Lextm.SharpSnmpLib.OctetString,Lextm.SharpSnmpLib.OctetString)">
             <summary>
             The comparison.
@@ -2220,31 +1907,10 @@
         </member>
         <member name="M:Lextm.SharpSnmpLib.OctetString.IsNullOrEmpty(Lextm.SharpSnmpLib.OctetString)">
             <summary>
-            Indicates whether the specified <see cref="T:Lextm.SharpSnmpLib.OctetString"/> object is a null reference (<c>Nothing</c> in Visual Basic) or an <see cref="P:Lextm.SharpSnmpLib.OctetString.Empty"/> string.
+            Indicates whether the specified <see cref="T:Lextm.SharpSnmpLib.OctetString" /> object is a null reference (<c>Nothing</c> in Visual Basic) or an <see cref="P:Lextm.SharpSnmpLib.OctetString.Empty" /> string.
             </summary>
-            <param name="value">A <see cref="T:Lextm.SharpSnmpLib.OctetString"/> reference.</param>
+            <param name="value">A <see cref="T:Lextm.SharpSnmpLib.OctetString" /> reference.</param>
             <returns><c>true</c> if the <paramref name="value"/> parameter is a null reference (<c>Nothing</c> in Visual Basic) or an empty string (""); otherwise, <c>false</c>.</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.OctetString.Encoding">
-            <summary>
-            Encoding of this <see cref="T:Lextm.SharpSnmpLib.OctetString"/>
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.OctetString.Empty">
-            <summary>
-            Gets the empty string.
-            </summary>
-            <value>The empty.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.OctetString.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.OctetString.DefaultEncoding">
-            <summary>
-            Default encoding of <see cref="T:Lextm.SharpSnmpLib.OctetString"/> type.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Opaque">
             <summary>
@@ -2270,6 +1936,11 @@
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Opaque"/>.
             </summary>
             <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Opaque.TypeCode">
+            <summary>
+            Type code.
+            </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Opaque.AppendBytesTo(System.IO.Stream)">
             <summary>
@@ -2332,11 +2003,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Opaque.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.ReportPdu">
             <summary>
             Report PDU.
@@ -2357,18 +2023,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ReportPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ReportPdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.ReportPdu"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.ReportPdu.RequestId">
             <summary>
@@ -2398,6 +2052,18 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.ReportPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.ReportPdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.ReportPdu"/>.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.ResponsePdu">
             <summary>
             Response PDU.
@@ -2418,18 +2084,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ResponsePdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.ResponsePdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.ResponsePdu"/>/
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.ResponsePdu.RequestId">
             <summary>
@@ -2457,6 +2111,18 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.ResponsePdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.ResponsePdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.ResponsePdu"/>/
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Scope">
             <summary>
             Scope segment.
@@ -2482,24 +2148,18 @@
             </summary>
             <param name="pdu">The PDU.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Scope.Pdu">
+            <summary>
+            Gets the PDU.
+            </summary>
+            <value>The PDU.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Scope.GetData(Lextm.SharpSnmpLib.VersionCode)">
             <summary>
             Gets the data.
             </summary>
             <param name="version">The version.</param>
             <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Scope.ToSequence">
-            <summary>
-            Converts to <see cref="T:Lextm.SharpSnmpLib.Sequence"/> object.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Scope.Pdu">
-            <summary>
-            Gets the PDU.
-            </summary>
-            <value>The PDU.</value>
         </member>
         <member name="P:Lextm.SharpSnmpLib.Scope.ContextName">
             <summary>
@@ -2513,52 +2173,52 @@
             </summary>
             <value>The context engine id.</value>
         </member>
-        <member name="T:Lextm.SharpSnmpLib.SearchResult">
+        <member name="M:Lextm.SharpSnmpLib.Scope.ToSequence">
             <summary>
-            Search result.
+            Converts to <see cref="T:Lextm.SharpSnmpLib.Sequence"/> object.
             </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SearchResult.#ctor(Lextm.SharpSnmpLib.IDefinition)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.SearchResult"/> class.
-            </summary>
-            <param name="definition">The definition.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SearchResult.#ctor(Lextm.SharpSnmpLib.IDefinition,System.UInt32[])">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.SearchResult"/> class.
-            </summary>
-            <param name="definition">The definition.</param>
-            <param name="remaining">The remaining.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SearchResult.GetRemaining">
-            <summary>
-            Gets the remaining.
-            </summary>
-            <value>The remaining.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SearchResult.Definition">
-            <summary>
-            Gets the definition.
-            </summary>
-            <value>The definition.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SearchResult.Text">
-            <summary>
-            Gets the textual form.
-            </summary>
-            <value></value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SearchResult.AlternativeText">
-            <summary>
-            Gets the alternative textual form.
-            </summary>
-            <value></value>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.SecurityParameters">
             <summary>
             Description of SecurityParameters.
             </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.EngineId">
+            <summary>
+            Gets the engine ID.
+            </summary>
+            <value>The engine ID.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.EngineBoots">
+            <summary>
+            Gets the boot count.
+            </summary>
+            <value>The boot count.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.EngineTime">
+            <summary>
+            Gets the engine time.
+            </summary>
+            <value>The engine time.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.UserName">
+            <summary>
+            Gets the user name.
+            </summary>
+            <value>The user name.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.AuthenticationParameters">
+            <summary>
+            Gets the authentication parameters.
+            </summary>
+            <value>The authentication parameters.</value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.PrivacyParameters">
+            <summary>
+            Gets the privacy parameters.
+            </summary>
+            <value>The privacy parameters.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.SecurityParameters.#ctor(Lextm.SharpSnmpLib.OctetString)">
             <summary>
@@ -2606,42 +2266,6 @@
             A <see cref="T:System.String"/> that represents this instance.
             </returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.EngineId">
-            <summary>
-            Gets the engine ID.
-            </summary>
-            <value>The engine ID.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.EngineBoots">
-            <summary>
-            Gets the boot count.
-            </summary>
-            <value>The boot count.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.EngineTime">
-            <summary>
-            Gets the engine time.
-            </summary>
-            <value>The engine time.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.UserName">
-            <summary>
-            Gets the user name.
-            </summary>
-            <value>The user name.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.AuthenticationParameters">
-            <summary>
-            Gets the authentication parameters.
-            </summary>
-            <value>The authentication parameters.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SecurityParameters.PrivacyParameters">
-            <summary>
-            Gets the privacy parameters.
-            </summary>
-            <value>The privacy parameters.</value>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.SecurityParameters.IsInvalid">
             <summary>
             Gets a value that indicates whether the hashes are invalid.
@@ -2687,6 +2311,11 @@
             <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
             <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.Cache`2.Count">
+            <summary>
+            Gets the number of key/value pairs contained in the Cache.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Security.Cache`2.#ctor(System.Int32)">
             <summary>
             Caching class for improving performance. Oldest elements are removed as the 
@@ -2712,6 +2341,17 @@
             <param name="key">The key to locate in the Cache</param>
             <returns>true if the Cache contains an element with the specified key; otherwise, false.</returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.Cache`2.Item(`0)">
+            <summary>
+            Gets the value associated with the specified key.
+            </summary>
+            <param name="key">The key of the value to get</param>
+            <exception cref="T:System.ArgumentNullException"> key is null.</exception> 
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">The property is retrieved and key does not exist in the collection.</exception>
+            <returns>The value associated with the specified key.
+             If the specified key is not found, a get operation throws a System.Collections.Generic.KeyNotFoundException,
+             and a set operation creates a new element with the specified key.</returns>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Security.Cache`2.Add(`0,`1)">
             <summary>
             Adds the specified key and value to the dictionary. If the cache has reached 
@@ -2733,22 +2373,6 @@
             </summary>
             <returns>True if reached capacity false otherwise</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.Cache`2.Count">
-            <summary>
-            Gets the number of key/value pairs contained in the Cache.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.Cache`2.Item(`0)">
-            <summary>
-            Gets the value associated with the specified key.
-            </summary>
-            <param name="key">The key of the value to get</param>
-            <exception cref="T:System.ArgumentNullException"> key is null.</exception> 
-            <exception cref="T:System.Collections.Generic.KeyNotFoundException">The property is retrieved and key does not exist in the collection.</exception>
-            <returns>The value associated with the specified key.
-             If the specified key is not found, a get operation throws a System.Collections.Generic.KeyNotFoundException,
-             and a set operation creates a new element with the specified key.</returns>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Security.CryptoKeyCache">
             <summary>
             Class for holding computed crypto values which are referenced by password/engineId combination
@@ -2759,38 +2383,6 @@
             <summary>
             Number of elements that Cache will hold before deleting old elements
             </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.#ctor(System.Int32)">
-            <summary>
-            Ctor
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.TryGetCachedValue(System.Byte[],System.Byte[],System.Byte[]@)">
-            <summary>
-            Get the cached value if it exists in the cache
-            </summary>
-            <param name="password">password associated with cached value</param>
-            <param name="engineId">engine id associated with cached value</param>
-            <param name="cachedValue">cached value, if no cache exists for specified password/engine id 
-            combination default value is assigned to cachedValue </param>
-            <returns>True if value exists in cache for specified password/engine id combination, false otherwise</returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.AddValueToCache(System.Byte[],System.Byte[],System.Byte[])">
-            <summary>
-            Adds computed value to the cache
-            </summary>
-            <param name="password">password to associate cached value with </param>
-            <param name="engineId">engine id to associate cached value with</param>
-            <param name="valueToCache">value being cached</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.Stringanize(System.Byte[])">
-            <summary>
-            Converts an array of bytes into a string this way we can use
-            string.GetHashCode and string.Equals to allow the array of bytes 
-            be the key in a hash table
-            </summary>
-            <param name="bytes"></param>
-            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Security.CryptoKeyCache.EngineIdCache">
             <summary>
@@ -2828,43 +2420,41 @@
             <param name="engineId">engine id associated with the value</param>
             <param name="valueToCache">value to cache</param>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.#ctor(System.Int32)">
+            <summary>
+            Ctor
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.TryGetCachedValue(System.Byte[],System.Byte[],System.Byte[]@)">
+            <summary>
+            Get the cached value if it exists in the cache
+            </summary>
+            <param name="password">password associated with cached value</param>
+            <param name="engineId">engine id associated with cached value</param>
+            <param name="cachedValue">cached value, if no cache exists for specified password/engine id 
+            combination default value is assigned to cachedValue </param>
+            <returns>True if value exists in cache for specified password/engine id combination, false otherwise</returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.AddValueToCache(System.Byte[],System.Byte[],System.Byte[])">
+            <summary>
+            Adds computed value to the cache
+            </summary>
+            <param name="password">password to associate cached value with </param>
+            <param name="engineId">engine id to associate cached value with</param>
+            <param name="valueToCache">value being cached</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.CryptoKeyCache.Stringanize(System.Byte[])">
+            <summary>
+            Converts an array of bytes into a string this way we can use
+            string.GetHashCode and string.Equals to allow the array of bytes 
+            be the key in a hash table
+            </summary>
+            <param name="bytes"></param>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Security.DecryptionException">
             <summary>
             Decryption exception.
-            </summary>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.SnmpException">
-            <summary>
-            Base exception type of #SNMP.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SnmpException.#ctor">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.SnmpException"/>.
-            </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SnmpException.#ctor(System.String)">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.SnmpException"/> instance with a specific <see cref="T:System.String"/>.
-            </summary>
-            <param name="message">Message</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SnmpException.#ctor(System.String,System.Exception)">
-            <summary>
-            Creates a <see cref="T:Lextm.SharpSnmpLib.SnmpException"/> instance with a specific <see cref="T:System.String"/> and an <see cref="T:System.Exception"/>.
-            </summary>
-            <param name="message">Message</param>
-            <param name="inner">Inner exception</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.SnmpException.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.SnmpException"/>.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.SnmpException.Details">
-            <summary>
-            Details on operation.
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Security.DecryptionException.#ctor">
@@ -2907,10 +2497,113 @@
             Default authentication provider.
             </summary>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.Instance">
+            <summary>
+            Gets the instance.
+            </summary>
+            <value>The instance.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.ComputeHash(Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.ISegment,Lextm.SharpSnmpLib.SecurityParameters,Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.Security.IPrivacyProvider,System.Byte[])">
+            <summary>
+            Computes the hash.
+            </summary>
+            <param name="version">The version.</param>
+            <param name="header">The header.</param>
+            <param name="parameters">The parameters.</param>
+            <param name="data">The scope data.</param>
+            <param name="privacy">The privacy provider.</param>
+            <param name="length">The length bytes.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.ComputeHash(System.Byte[],Lextm.SharpSnmpLib.OctetString)">
+            <summary>
+            Computes the hash.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.CleanDigest">
+            <summary>
+            Gets the clean digest.
+            </summary>
+            <value>The clean digest.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.PasswordToKey(System.Byte[],System.Byte[])">
+            <summary>
+            Converts password to key.
+            </summary>
+            <param name="password"></param>
+            <param name="engineId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/> that represents this instance.
+            </returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider">
+            <summary>
+            Default privacy provider.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.DefaultPair">
+            <summary>
+            Default privacy provider with default authentication provider.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.#ctor(Lextm.SharpSnmpLib.Security.IAuthenticationProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider"/> class.
+            </summary>
+            <param name="authentication">Authentication provider.</param>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.AuthenticationProvider">
+            <summary>
+            Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
+            <summary>
+            Decrypts the specified data.
+            </summary>
+            <param name="data">The data.</param>
+            <param name="parameters">The parameters.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.Encrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
+            <summary>
+            Encrypts the specified scope.
+            </summary>
+            <param name="data">The scope data.</param>
+            <param name="parameters">The parameters.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.Salt">
+            <summary>
+            Gets the salt.
+            </summary>
+            <value>The salt.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/> that represents this instance.
+            </returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider">
             <summary>
             Authentication provider interface.
             </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.IAuthenticationProvider.CleanDigest">
+            <summary>
+            Gets the clean digest.
+            </summary>
+            <value>The clean digest.</value>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Security.IAuthenticationProvider.PasswordToKey(System.Byte[],System.Byte[])">
             <summary>
@@ -2932,63 +2625,6 @@
             <param name="length">The length bytes.</param>
             <returns></returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.IAuthenticationProvider.CleanDigest">
-            <summary>
-            Gets the clean digest.
-            </summary>
-            <value>The clean digest.</value>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.ComputeHash(Lextm.SharpSnmpLib.VersionCode,Lextm.SharpSnmpLib.ISegment,Lextm.SharpSnmpLib.SecurityParameters,Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.Security.IPrivacyProvider,System.Byte[])">
-            <summary>
-            Computes the hash.
-            </summary>
-            <param name="version">The version.</param>
-            <param name="header">The header.</param>
-            <param name="parameters">The parameters.</param>
-            <param name="data">The scope data.</param>
-            <param name="privacy">The privacy provider.</param>
-            <param name="length">The length bytes.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.ComputeHash(System.Byte[],Lextm.SharpSnmpLib.OctetString)">
-            <summary>
-            Computes the hash.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.PasswordToKey(System.Byte[],System.Byte[])">
-            <summary>
-            Converts password to key.
-            </summary>
-            <param name="password"></param>
-            <param name="engineId"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.Instance">
-            <summary>
-            Gets the instance.
-            </summary>
-            <value>The instance.</value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.DefaultAuthenticationProvider.CleanDigest">
-            <summary>
-            Gets the clean digest.
-            </summary>
-            <value>The clean digest.</value>
-        </member>
-        <member name="T:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider">
-            <summary>
-            Default privacy provider.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.Security.IPrivacyProvider">
             <summary>
             Privacy provider interface.
@@ -3002,6 +2638,12 @@
             <param name="parameters">The parameters.</param>
             <returns></returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.IPrivacyProvider.Salt">
+            <summary>
+            Gets the salt.
+            </summary>
+            <value>The salt.</value>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Security.IPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
             <summary>
             Decrypts the specified data.
@@ -3010,62 +2652,10 @@
             <param name="parameters">The parameters.</param>
             <returns></returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.IPrivacyProvider.Salt">
-            <summary>
-            Gets the salt.
-            </summary>
-            <value>The salt.</value>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Security.IPrivacyProvider.AuthenticationProvider">
             <summary>
             Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
             </summary>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.#ctor(Lextm.SharpSnmpLib.Security.IAuthenticationProvider)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider"/> class.
-            </summary>
-            <param name="authentication">Authentication provider.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.Decrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
-            <summary>
-            Decrypts the specified data.
-            </summary>
-            <param name="data">The data.</param>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.Encrypt(Lextm.SharpSnmpLib.ISnmpData,Lextm.SharpSnmpLib.SecurityParameters)">
-            <summary>
-            Encrypts the specified scope.
-            </summary>
-            <param name="data">The scope data.</param>
-            <param name="parameters">The parameters.</param>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.DefaultPair">
-            <summary>
-            Default privacy provider with default authentication provider.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.AuthenticationProvider">
-            <summary>
-            Corresponding <see cref="T:Lextm.SharpSnmpLib.Security.IAuthenticationProvider"/>.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.DefaultPrivacyProvider.Salt">
-            <summary>
-            Gets the salt.
-            </summary>
-            <value>The salt.</value>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Security.PrivacyProviderExtension">
             <summary>
@@ -3098,7 +2688,7 @@
             Salt generator.
             </summary>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.SaltGenerator.NextSalt">
+        <member name="P:Lextm.SharpSnmpLib.Security.SaltGenerator.NextSalt">
             <summary>
             Get next salt <see cref="T:System.Int64"/> value. Used internally to encrypt data.
             </summary>
@@ -3130,14 +2720,6 @@
             <param name="name">The name.</param>
             <param name="privacy">The privacy provider.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.Security.User.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.Security.User.Name">
             <summary>
             Gets the name.
@@ -3149,6 +2731,14 @@
             Gets the privacy provider.
             </summary>
             <value>The provider.</value>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.Security.User.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/> that represents this instance.
+            </returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Security.UserRegistry">
             <summary>
@@ -3164,6 +2754,11 @@
         <member name="M:Lextm.SharpSnmpLib.Security.UserRegistry.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:Lextm.SharpSnmpLib.Security.UserRegistry"/> class.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Security.UserRegistry.Count">
+            <summary>
+            Returns the user count.
             </summary>
         </member>
         <member name="M:Lextm.SharpSnmpLib.Security.UserRegistry.Add(Lextm.SharpSnmpLib.OctetString,Lextm.SharpSnmpLib.Security.IPrivacyProvider)">
@@ -3193,11 +2788,6 @@
             <returns>
             A <see cref="T:System.String"/> that represents this instance.
             </returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Security.UserRegistry.Count">
-            <summary>
-            Returns the user count.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Sequence">
             <summary>
@@ -3231,6 +2821,22 @@
             <param name="length">The length.</param>
             <param name="stream">The stream.</param>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Sequence.Length">
+            <summary>
+            Item count in this <see cref="T:Lextm.SharpSnmpLib.Sequence"/>.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Sequence.Item(System.Int32)">
+            <summary>
+            Gets the <see cref="T:Lextm.SharpSnmpLib.ISnmpData"/> at the specified index.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Sequence.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Sequence.AppendBytesTo(System.IO.Stream)">
             <summary>
             Appends the bytes to <see cref="T:System.IO.Stream"/>.
@@ -3248,22 +2854,6 @@
             Gets the length bytes.
             </summary>
             <returns>System.Byte[].</returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Sequence.Length">
-            <summary>
-            Item count in this <see cref="T:Lextm.SharpSnmpLib.Sequence"/>.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Sequence.Item(System.Int32)">
-            <summary>
-            Gets the <see cref="T:Lextm.SharpSnmpLib.ISnmpData"/> at the specified index.
-            </summary>
-            <value></value>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Sequence.TypeCode">
-            <summary>
-            Type code.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.SetRequestPdu">
             <summary>
@@ -3299,12 +2889,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.SetRequestPdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.SetRequestPdu.RequestId">
             <summary>
             Gets the request ID.
@@ -3333,6 +2917,12 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.SetRequestPdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.SnmpDataExtension">
             <summary>
             <see cref="T:Lextm.SharpSnmpLib.ISnmpData"/> extension class.
@@ -3343,6 +2933,40 @@
             Converts to byte format.
             </summary>
             <returns></returns>
+        </member>
+        <member name="T:Lextm.SharpSnmpLib.SnmpException">
+            <summary>
+            Base exception type of #SNMP.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.SnmpException.#ctor">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.SnmpException"/>.
+            </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.SnmpException.#ctor(System.String)">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.SnmpException"/> instance with a specific <see cref="T:System.String"/>.
+            </summary>
+            <param name="message">Message</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.SnmpException.#ctor(System.String,System.Exception)">
+            <summary>
+            Creates a <see cref="T:Lextm.SharpSnmpLib.SnmpException"/> instance with a specific <see cref="T:System.String"/> and an <see cref="T:System.Exception"/>.
+            </summary>
+            <param name="message">Message</param>
+            <param name="inner">Inner exception</param>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.SnmpException.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.SnmpException"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.SnmpException.Details">
+            <summary>
+            Details on operation.
+            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.SnmpType">
             <summary>
@@ -3407,6 +3031,11 @@
         <member name="F:Lextm.SharpSnmpLib.SnmpType.Counter64">
             <summary>
             Counter64 type. (SMIv2)
+            </summary>
+        </member>
+        <member name="F:Lextm.SharpSnmpLib.SnmpType.Unsigned32">
+            <summary>
+            Unsigned32 type. (Use this code in RFC 1442)
             </summary>
         </member>
         <member name="F:Lextm.SharpSnmpLib.SnmpType.NoSuchObject">
@@ -3522,6 +3151,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.TimeTicks.TypeCode">
+            <summary>
+            Type code.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.TimeTicks.Equals(System.Object)">
             <summary>
             Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:Lextm.SharpSnmpLib.TimeTicks"/>.
@@ -3583,11 +3217,6 @@
             <returns>
             Returns <c>true</c> if the values of its operands are not equal, <c>false</c> otherwise.</returns>
         </member>
-        <member name="P:Lextm.SharpSnmpLib.TimeTicks.TypeCode">
-            <summary>
-            Type code.
-            </summary>
-        </member>
         <member name="T:Lextm.SharpSnmpLib.TrapV1Pdu">
             <summary>
             Trap v1 PDU.
@@ -3623,27 +3252,6 @@
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
         </member>
-        <member name="M:Lextm.SharpSnmpLib.TrapV1Pdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.TrapV1Pdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.TrapV1Pdu"/>.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.TrapV1Pdu.ToString(Lextm.SharpSnmpLib.IObjectRegistry)">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <param name="objects">The objects.</param>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
         <member name="P:Lextm.SharpSnmpLib.TrapV1Pdu.RequestId">
             <summary>
             Gets the request ID.
@@ -3666,6 +3274,12 @@
             <summary>
             Type code.
             </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.TrapV1Pdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
         </member>
         <member name="P:Lextm.SharpSnmpLib.TrapV1Pdu.Enterprise">
             <summary>
@@ -3697,6 +3311,12 @@
             Variable binds.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.TrapV1Pdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.TrapV1Pdu"/>.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Lextm.SharpSnmpLib.TrapV2Pdu">
             <summary>
             TRAP v2 PDU.
@@ -3717,18 +3337,6 @@
             </summary>
             <param name="length">The length data.</param>
             <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.TrapV2Pdu.AppendBytesTo(System.IO.Stream)">
-            <summary>
-            Appends the bytes to <see cref="T:System.IO.Stream"/>.
-            </summary>
-            <param name="stream">The stream.</param>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.TrapV2Pdu.ToString">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.TrapV2Pdu"/>.
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:Lextm.SharpSnmpLib.TrapV2Pdu.Variables">
             <summary>
@@ -3758,6 +3366,12 @@
             Type code.
             </summary>
         </member>
+        <member name="M:Lextm.SharpSnmpLib.TrapV2Pdu.AppendBytesTo(System.IO.Stream)">
+            <summary>
+            Appends the bytes to <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="stream">The stream.</param>
+        </member>
         <member name="P:Lextm.SharpSnmpLib.TrapV2Pdu.Enterprise">
             <summary>
             Enterprise.
@@ -3767,6 +3381,12 @@
             <summary>
             Time stamp.
             </summary>
+        </member>
+        <member name="M:Lextm.SharpSnmpLib.TrapV2Pdu.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.TrapV2Pdu"/>.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Lextm.SharpSnmpLib.Variable">
             <summary>
@@ -3804,6 +3424,16 @@
             <param name="data">Data</param>
             <remarks>If you set <c>null</c> to <paramref name="data"/>, you get a <see cref="T:Lextm.SharpSnmpLib.Variable"/> instance whose <see cref="P:Lextm.SharpSnmpLib.Variable.Data"/> is a <see cref="T:Lextm.SharpSnmpLib.Null"/> instance.</remarks>
         </member>
+        <member name="P:Lextm.SharpSnmpLib.Variable.Id">
+            <summary>
+            Variable object identifier.
+            </summary>
+        </member>
+        <member name="P:Lextm.SharpSnmpLib.Variable.Data">
+            <summary>
+            Variable data.
+            </summary>
+        </member>
         <member name="M:Lextm.SharpSnmpLib.Variable.Transform(Lextm.SharpSnmpLib.Sequence)">
             <summary>
             Converts variable binds section to variable binds list.
@@ -3823,25 +3453,6 @@
             Returns a <see cref="T:System.String"/> that represents this <see cref="T:Lextm.SharpSnmpLib.Variable"/>.
             </summary>
             <returns></returns>
-        </member>
-        <member name="M:Lextm.SharpSnmpLib.Variable.ToString(Lextm.SharpSnmpLib.IObjectRegistry)">
-            <summary>
-            Returns a <see cref="T:System.String"/> that represents this instance.
-            </summary>
-            <param name="objects">The objects.</param>
-            <returns>
-            A <see cref="T:System.String"/> that represents this instance.
-            </returns>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Variable.Id">
-            <summary>
-            Variable object identifier.
-            </summary>
-        </member>
-        <member name="P:Lextm.SharpSnmpLib.Variable.Data">
-            <summary>
-            Variable data.
-            </summary>
         </member>
         <member name="T:Lextm.SharpSnmpLib.VersionCode">
             <summary>
