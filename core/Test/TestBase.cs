@@ -8,6 +8,8 @@ using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using System;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Peach.Core.Test
 {
@@ -17,6 +19,44 @@ namespace Peach.Core.Test
 
 	public class SetUpFixture
 	{
+		public static ushort MakePort(ushort min, ushort max)
+		{
+			var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+			var seed = Environment.TickCount * pid;
+			var rng = new Random((uint)seed);
+
+			while (true)
+			{
+				var ret = (ushort)rng.Next(min, max);
+
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+				{
+					try
+					{
+						s.Bind(new IPEndPoint(IPAddress.Any, ret));
+					}
+					catch
+					{
+						continue;
+					}
+				}
+
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+				{
+					try
+					{
+						s.Bind(new IPEndPoint(IPAddress.Any, ret));
+					}
+					catch
+					{
+						continue;
+					}
+				}
+
+				return ret;
+			}
+		}
+
 		class AssertTestFail : TraceListener
 		{
 			public override void Write(string message)
