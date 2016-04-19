@@ -54,7 +54,7 @@ namespace Peach.Pro.Test.Core
 			}
 		}
 
-		[SetUp]
+		[OneTimeSetUp]
 		public void SetUp()
 		{
 			DoSetUp();
@@ -65,7 +65,7 @@ namespace Peach.Pro.Test.Core
 			Configuration.LogRoot = _tmpDir.Path;
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public void TearDown()
 		{
 			_tmpDir.Dispose();

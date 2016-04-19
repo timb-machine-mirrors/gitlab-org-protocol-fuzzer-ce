@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 	[TestFixture]
 	[Peach]
 	[Quick]
+	[Platform("Win")]
 	public class PopupWatcherTest
 	{
 		class LameWindow : NativeWindow, IDisposable

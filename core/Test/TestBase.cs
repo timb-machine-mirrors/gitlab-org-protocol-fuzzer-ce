@@ -131,13 +131,13 @@ namespace Peach.Core.Test
 	[SetUpFixture]
 	internal class TestBase : SetUpFixture
 	{
-		[SetUp]
+		[OneTimeSetUp]
 		public void SetUp()
 		{
 			DoSetUp();
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public void TearDown()
 		{
 			DoTearDown();

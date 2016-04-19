@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("MacOSX")]
 	public class CrashReporterTest
 	{
 		SingleInstance _si;
