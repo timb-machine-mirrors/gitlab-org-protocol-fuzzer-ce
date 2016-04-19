@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -12,5 +13,10 @@ namespace Peach.Core.Dom.Actions
 			publisher.open();
 			publisher.accept();
 		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+		}
+
 	}
 }
