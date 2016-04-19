@@ -13,6 +13,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Win")]
 	public class WindowsDebuggerHybridTest
 	{
 		Fault[] faults = null;

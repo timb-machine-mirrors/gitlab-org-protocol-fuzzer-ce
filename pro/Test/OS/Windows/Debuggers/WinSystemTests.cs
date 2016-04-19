@@ -42,6 +42,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Win")]
 	class WinSystemTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

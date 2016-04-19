@@ -11,6 +11,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Win")]
 	class PageHeapTests
 	{
 		const string Monitor = "PageHeap";

@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using NUnit.Framework;
-using Peach.Core;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Linux
@@ -8,17 +7,13 @@ namespace Peach.Pro.Test.OS.Linux
 	[SetUpFixture]
 	internal class TestBase : SetUpFixture
 	{
-		[SetUp]
+		[OneTimeSetUp]
 		public void SetUp()
 		{
-			// NUnit [Platform] attribute doesn't differentiate MacOSX/Linux
-			if (Platform.GetOS() != Platform.OS.Linux)
-				Assert.Ignore("Only supported on Linux");
-
 			DoSetUp();
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public void TearDown()
 		{
 			DoTearDown();

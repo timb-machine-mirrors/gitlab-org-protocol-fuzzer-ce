@@ -10,6 +10,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Linux")]
 	class LinuxCoreFileTests
 	{
 		[Test]

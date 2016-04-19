@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Linux")]
 	public class GdbTests
 	{
 		[Test]
