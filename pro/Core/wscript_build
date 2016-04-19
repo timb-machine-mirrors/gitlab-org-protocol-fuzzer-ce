@@ -36,10 +36,6 @@ deps = [
 	
 	'Renci.SshNet.dll',
 	'Newtonsoft.Json.dll',
-	'SuperSocket.Common.dll',
-	'SuperSocket.SocketBase.dll',
-	'SuperSocket.SocketEngine.dll',
-	'SuperWebSocket.dll',
 
 	'Peach.Core.dll',
 
