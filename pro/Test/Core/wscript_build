@@ -34,6 +34,9 @@ deps = [
 	'FlxClientCommon.dll',
 ]
 
+top = bld.path.parent.parent.parent
+flexnet = 'flexnet_client-2016.03.0'
+
 bld(
 	features = 'cs test',
 	use = deps,
@@ -42,4 +45,8 @@ bld(
 	resource = bld.path.ant_glob('Resources/**/*'),
 	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer CrashTest',
 	namespace = 'Peach.Pro.Test.Core',
+	install_644 = {
+		top.find_or_declare('/'.join(['3rdParty', flexnet, bld.env.BASENAME])) :
+		top.ant_glob('/'.join(['3rdParty', flexnet, bld.env.BASENAME, '**']))
+	}
 )
