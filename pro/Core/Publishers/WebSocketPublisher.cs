@@ -1,38 +1,20 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;
-using SuperSocket.SocketBase;
-using SuperWebSocket;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using vtortola.WebSockets;
+
+#pragma warning disable 4014
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -48,10 +30,13 @@ namespace Peach.Pro.Core.Publishers
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
-		WebSocketServer _socketServer;
-		WebSocketSession _session;
-		AutoResetEvent _evaluated = new AutoResetEvent(false);
-		AutoResetEvent _msgReceived = new AutoResetEvent(false);
+		readonly WebSocketListener _socketServer;
+		readonly BufferBlock<string> _msgQueue = new BufferBlock<string>();
+
+		readonly AutoResetEvent _evaluated = new AutoResetEvent(false);
+		readonly AutoResetEvent _msgReceived = new AutoResetEvent(false);
+
+		private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
 
 		public int Port { get; protected set; }
 		public string Template { get; protected set; }
@@ -59,42 +44,123 @@ namespace Peach.Pro.Core.Publishers
 		public string DataToken { get; protected set; }
 		public int Timeout { get; protected set; }
 
-		string _template;
+		string _template = null;
 
 		public WebSocketPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-			_socketServer = new WebSocketServer();
-			_socketServer.Setup(Port);
-			_socketServer.NewMessageReceived += new SessionHandler<WebSocketSession, string>(appServer_NewMessageReceived);
-			_socketServer.NewSessionConnected += _socketServer_NewSessionConnected;
+			_socketServer = new WebSocketListener(new IPEndPoint(IPAddress.Any, Port));
+			var rfc6455 = new vtortola.WebSockets.Rfc6455.WebSocketFactoryRfc6455(_socketServer);
+			_socketServer.Standards.RegisterStandard(rfc6455);
 
-			_template = System.IO.File.ReadAllText(Template);
+			_template = File.ReadAllText(Template);
 		}
 
-		void _socketServer_NewSessionConnected(WebSocketSession session)
+		static async Task AcceptWebSocketClientAsync(WebSocketListener server, CancellationToken token, 
+			BufferBlock<string> queue,
+			AutoResetEvent msgReceived, AutoResetEvent evaluated)
 		{
-			logger.Debug("NewSessionConnection");
-			_session = session;
+			Task task = null;
+			var cancelSource = new CancellationTokenSource();
+
+			while (!token.IsCancellationRequested)
+			{
+				try
+				{
+					var ws = await server.AcceptWebSocketAsync(token).ConfigureAwait(false);
+					if (ws == null) continue;
+
+					if (task != null)
+					{
+						logger.Debug("New web socket connection. Closing down existing connection.");
+
+						cancelSource.Cancel();
+						//cancelSource = new CancellationTokenSource();
+					}
+					else
+						logger.Debug("New web socket connection");
+
+					task = Task.Run(() => HandleConnectionAsync(ws, cancelSource.Token, msgReceived, evaluated));
+					Task.Run(() => HandleSendQueueAsync(ws, cancelSource.Token, queue));
+				}
+				catch (Exception aex)
+				{
+					logger.Debug("Error Accepting clients: {0}", aex.GetBaseException().Message);
+				}
+			}
+
+			cancelSource.Cancel();
+			logger.Debug("Server Stop accepting clients");
+		}
+
+		static async Task HandleConnectionAsync(WebSocket ws, CancellationToken cancellation, AutoResetEvent msgReceived, AutoResetEvent evaluated)
+		{
+			try
+			{
+				while (ws.IsConnected && !cancellation.IsCancellationRequested)
+				{
+					var msg = await ws.ReadStringAsync(cancellation).ConfigureAwait(false);
+					if (msg != null)
+					{
+						logger.Debug("NewMessageReceived: " + msg);
+						msgReceived.Set();
+
+						var json = JObject.Parse(msg);
+						if (((string)json["msg"]) == "Evaluation complete" || ((string)json["msg"]) == "Client ready")
+							evaluated.Set();
+					}
+				}
+			}
+			catch (Exception aex)
+			{
+				logger.Debug("Error Handling connection: {0}", aex.GetBaseException().Message);
+				try { ws.Close(); }
+				catch { }
+			}
+			finally
+			{
+				ws.Dispose();
+			}
+		}
+
+		static async Task HandleSendQueueAsync(WebSocket ws, CancellationToken cancellation, BufferBlock<string> queue)
+		{
+			try
+			{
+				while (ws.IsConnected && !cancellation.IsCancellationRequested)
+				{
+					var msg = await queue.ReceiveAsync(cancellation);
+					if (msg == null) continue;
+
+					logger.Debug("Dequeued and sending message");
+					ws.WriteString(msg);
+				}
+			}
+			catch (Exception aex)
+			{
+				logger.Debug("Error handling queue: {0}", aex.GetBaseException().Message);
+				try { ws.Close(); }
+				catch { }
+			}
+			finally
+			{
+				ws.Dispose();
+			}
 		}
 
 		protected override void OnStart()
 		{
 			base.OnStart();
 
-			logger.Debug("Starting WebSocketServer");
-			if (!_socketServer.Start())
-				throw new PeachException("Error, web socket server failed to start.");
-
-			logger.Debug("Waiting for WebSocket connection");
-			_msgReceived.WaitOne();
-			logger.Debug("Connection was received");
+			_socketServer.Start();
+			Task.Run(() => AcceptWebSocketClientAsync(_socketServer, _cancellation.Token, _msgQueue, _msgReceived, _evaluated));
 		}
 
 		protected override void OnStop()
 		{
 			base.OnStop();
 
+			_cancellation.Cancel();
 			_socketServer.Stop();
 		}
 
@@ -104,9 +170,12 @@ namespace Peach.Pro.Core.Publishers
 			{
 				logger.Debug(">> OnOutput");
 				logger.Debug("Waiting for evaluated or client ready msg");
+				
 				_evaluated.WaitOne(Timeout);
 				_evaluated.Reset();
-				_session.Send(BuildMessage(data));
+
+				_msgQueue.Post(BuildMessage(data));
+
 				logger.Debug("<< OnOutput");
 			}
 			catch (Exception ex)
@@ -150,18 +219,9 @@ namespace Peach.Pro.Core.Publishers
 
 			return ret.ToString();
 		}
-
-		void appServer_NewMessageReceived(WebSocketSession session, string message)
-		{
-			logger.Debug("NewMessageReceived: " + message);
-
-			_msgReceived.Set();
-
-			var json = JObject.Parse(message);
-			if (((string)json["msg"]) == "Evaluation complete" || ((string)json["msg"]) == "Client ready")
-				_evaluated.Set();
-		}
 	}
 }
+
+#pragma warning restore 4014
 
 // end

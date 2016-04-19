@@ -53,6 +53,11 @@ deps = [
 	'websocket-sharp.dll',
 	'Dapper.dll',
 	'Aspose.Words.dll',
+	
+	'vtortola.WebSockets.dll',
+	'vtortola.WebSockets.Rfc6455.dll',
+	'System.Threading.Tasks.Dataflow.dll',
+	'System.Runtime',
 ]
 
 if bld.env.TARGET in ['win']:
