@@ -383,7 +383,6 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0}", new byte[] { 0, 0, 0, 2 });
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
 			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
 			Assert.AreEqual("Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.", ex.Message);
 		}

@@ -186,7 +186,6 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			var data = Bits.Fmt("{0}", new byte[] { 0x3F, 0xFE, 0x19, 0x3F, 0xFE, 0x19, 0xFF });
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
 			var ex = Assert.Throws<PeachException>(() => cracker.CrackData(dom.dataModels[0], data));
 			Assert.AreEqual("Error, can't transform bytes to IP, expected 4 bytes but got 7 bytes.", ex.Message);
 		}
