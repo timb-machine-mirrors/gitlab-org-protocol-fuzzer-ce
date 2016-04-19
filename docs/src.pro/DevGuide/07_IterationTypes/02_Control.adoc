@@ -18,7 +18,7 @@ Control iterations are configured on the xref:Test[_Test_ element] using the _co
 .Syntax example
 [source,xml]
 ----
-<Test name="TheTest" controlIterations="1"> .... </Test>
+<Test name="TheTest" controlIteration="1"> .... </Test>
 ----
 
 A second attribute, _nonDeterministicActions_, allows Peach to continue fuzzing when
@@ -40,7 +40,7 @@ the execution flow sequence. If a control iteration state flow differs from the 
 .Syntax example
 [source,xml]
 ----
-<Test name="TheTest" controlIterations="1" nonDeterministicActions="true"> .... </Test>
+<Test name="TheTest" controlIteration="1" nonDeterministicActions="true"> .... </Test>
 ----
 
 See also xref:Iteration_control[control iterations] and xref:Iteration_fuzzing[fuzzing iterations].
