@@ -58,12 +58,3 @@ bld(
 		nunit_tools : nunit_tools.ant_glob('**/*'),
 	}
 )
-
-if bld.env.REFERENCE_ASSEMBLIES_FACADES:
-	refs = [
-		'System.Runtime.dll',
-		'System.Threading.Tasks.dll',
-	]
-
-	for x in refs:
-		bld.read_csshlib(x, paths=[bld.env.REFERENCE_ASSEMBLIES_FACADES])
