@@ -109,6 +109,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		protected string _pitConfigPath;
 		protected string _pitXmlFailPath;
 		protected string _pitConfigFailPath;
+		protected bool _oldAsync;
+		protected string _oldLogRoot;
 
 		[SetUp]
 		public void SetUp()
@@ -116,6 +118,9 @@ namespace Peach.Pro.Test.Core.WebServices
 			Logger.Trace(">>> Setup");
 
 			_tmpDir = new TempDirectory();
+
+			_oldAsync = Configuration.UseAsyncLogging;
+			_oldLogRoot = Configuration.LogRoot;
 
 			Configuration.UseAsyncLogging = false;
 			Configuration.LogRoot = _tmpDir.Path;
@@ -152,9 +157,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			Logger.Trace(">>> TearDown");
 
 			_monitor.Dispose();
+			_monitor = null;
 			_tmpDir.Dispose();
-			
-			Configuration.UseAsyncLogging = true;
+			_tmpDir = null;
+
+			Configuration.UseAsyncLogging = _oldAsync;
+			Configuration.LogRoot = _oldLogRoot;
 
 			Logger.Trace("<<< TearDown");
 		}
@@ -505,6 +513,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		protected string _pitConfigPath;
 		protected string _pitXmlCrashPath;
 		protected string _pitConfigCrashPath;
+		protected bool _oldAsync;
+		protected string _oldLogRoot;
 
 		protected const string PitXmlCrash =
 @"<?xml version='1.0' encoding='utf-8'?>
@@ -544,13 +554,16 @@ namespace Peach.Pro.Test.Core.WebServices
 	'Weights': []
 }
 ";
-		
+
 		[SetUp]
 		public void SetUp()
 		{
 			Logger.Trace(">>> Setup");
 
 			_tmpDir = new TempDirectory();
+
+			_oldAsync = Configuration.UseAsyncLogging;
+			_oldLogRoot = Configuration.LogRoot;
 
 			Configuration.UseAsyncLogging = false;
 			Configuration.LogRoot = _tmpDir.Path;
@@ -586,9 +599,12 @@ namespace Peach.Pro.Test.Core.WebServices
 			Logger.Trace(">>> TearDown");
 
 			_monitor.Dispose();
+			_monitor = null;
 			_tmpDir.Dispose();
+			_tmpDir = null;
 
-			Configuration.UseAsyncLogging = true;
+			Configuration.UseAsyncLogging = _oldAsync;
+			Configuration.LogRoot = _oldLogRoot;
 
 			Logger.Trace("<<< TearDown");
 		}
