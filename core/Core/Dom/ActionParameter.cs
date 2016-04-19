@@ -41,7 +41,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement]
 		[DefaultValue(null)]
-		public List<Peach.Core.Xsd.Data> Data { get; set; }
+		public List<Xsd.Data> Data
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// Full input name of this parameter.

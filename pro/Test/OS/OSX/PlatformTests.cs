@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.OS.OSX
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("MacOSX")]
 	public class PlatformTests
 	{
 		[Test]

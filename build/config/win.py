@@ -111,6 +111,7 @@ def prepare(conf):
 	env['TARGET_FRAMEWORK'] = 'v4.5.1'
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4.5.1'
 	env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])
+	env['REFERENCE_ASSEMBLIES_FACADES'] = j(env['REFERENCE_ASSEMBLIES'], 'Facades')
 
 def configure(conf):
 	env = conf.env

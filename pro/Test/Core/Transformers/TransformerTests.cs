@@ -1,7 +1,5 @@
-using System.IO;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Test;
 
@@ -12,10 +10,10 @@ namespace Peach.Pro.Test.Core.Transformers
 	[Peach]
 	class TransformerTests
 	{
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, multiple transformers are defined on element 'str'.")]
+		[Test]
 		public void TwoTransformers()
 		{
-			string xml = @"
+			const string xml = @"
 				<Peach>
 					<DataModel name='TheDataModel'>
 						<String name='str' value='Hello World'>
@@ -25,15 +23,14 @@ namespace Peach.Pro.Test.Core.Transformers
 					</DataModel>
 				</Peach>";
 
-			PitParser parser = new PitParser();
-
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, multiple transformers are defined on element 'str'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, multiple nested transformers are defined on element 'str'.")]
+		[Test]
 		public void BadNestedTransformers()
 		{
-			string xml = @"
+			const string xml = @"
 				<Peach>
 					<DataModel name='TheDataModel'>
 						<String name='str' value='127.0.0.1'>
@@ -45,16 +42,14 @@ namespace Peach.Pro.Test.Core.Transformers
 					</DataModel>
 				</Peach>";
 
-			PitParser parser = new PitParser();
-
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, multiple nested transformers are defined on element 'str'.", ex.Message);
 		}
 
 		[Test]
 		public void NestedTransformers()
 		{
-			string xml = @"
+			const string xml = @"
 				<Peach>
 					<DataModel name='TheDataModel'>
 						<String name='str' value='127.0.0.1'>
@@ -67,17 +62,14 @@ namespace Peach.Pro.Test.Core.Transformers
 					</DataModel>
 				</Peach>";
 
-			PitParser parser = new PitParser();
-
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
+			var dom = DataModelCollector.ParsePit(xml);
 			var actual = dom.dataModels[0].Value.ToArray();
 			var expected = Encoding.ASCII.GetBytes("7f000001"); // 127.0.0.1
 			Assert.AreEqual(expected, actual);
 
 			var data = Bits.Fmt("{0}", Encoding.ASCII.GetBytes("0a01ff02")); //10.1.55.2
 
-			DataCracker cracker = new DataCracker();
+			var cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
 			var value = (string)dom.dataModels[0][0].DefaultValue;

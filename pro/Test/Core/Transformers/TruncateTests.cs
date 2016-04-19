@@ -129,10 +129,10 @@ namespace Peach.Pro.Test.Core.Transformers
 			Assert.AreEqual(expected, values[0].ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void MissingParam()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String>
@@ -142,17 +142,11 @@ namespace Peach.Pro.Test.Core.Transformers
 </Peach>
 ";
 
-			var dom = ParsePit(xml);
-
-			var data = Bits.Fmt("{0}", (byte)'0');
-
-			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var ex = Assert.Throws<PeachException>(() => ParsePit(xml));
+			StringAssert.StartsWith("Error, Transformer 'Truncate' is missing required parameter 'Length'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(System.NotImplementedException), ExpectedMessage = "The method or operation is not implemented.")]
+		[Test]
 		public void CrackTest()
 		{
 			string xml = @"
@@ -168,16 +162,12 @@ namespace Peach.Pro.Test.Core.Transformers
 ";
 
 			var dom = ParsePit(xml);
-
 			var data = Bits.Fmt("{0}", (byte)'0');
-
-			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var cracker = new DataCracker();
+			Assert.Throws<NotImplementedException>(() => cracker.CrackData(dom.dataModels[0], data));
 		}
 
-		[Test, ExpectedException(typeof(SoftException), ExpectedMessage = "Hex decode failed, invalid length.")]
+		[Test]
 		public void CrackBadLengthTest()
 		{
 			string xml = @"
@@ -190,13 +180,10 @@ namespace Peach.Pro.Test.Core.Transformers
 ";
 
 			var dom = ParsePit(xml);
-
 			var data = Bits.Fmt("{0}", (byte)'0');
-
-			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var cracker = new DataCracker();
+			var ex = Assert.Throws<SoftException>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Hex decode failed, invalid length.", ex.Message);
 		}
 	}
 }

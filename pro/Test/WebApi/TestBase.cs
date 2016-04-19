@@ -5,14 +5,40 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.WebApi
 {
 	[SetUpFixture]
-	class TestBase : SetUpFixture
+	internal class TestBase : SetUpFixture
 	{
+		[OneTimeSetUp]
+		public void SetUp()
+		{
+			DoSetUp();
+		}
+
+		[OneTimeTearDown]
+		public void TearDown()
+		{
+			DoTearDown();
+		}
 	}
 
 	[TestFixture]
 	[Quick]
-	class CommonTests : TestFixture
+	internal class CommonTests : TestFixture
 	{
-		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
+		public CommonTests()
+			: base(Assembly.GetExecutingAssembly())
+		{
+		}
+
+		[Test]
+		public void AssertWorks()
+		{
+			DoAssertWorks();
+		}
+
+		[Test]
+		public void NoMissingAttributes()
+		{
+			DoNoMissingAttributes();
+		}
 	}
 }

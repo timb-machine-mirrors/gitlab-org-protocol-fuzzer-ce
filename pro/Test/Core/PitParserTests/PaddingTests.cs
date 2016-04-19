@@ -165,7 +165,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Assert.AreEqual(8, ((BitStream)padding.DefaultValue).LengthBits);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, unable to resolve alignedTo 'missing'.")]
+		[Test]
 		public void PaddingTest6()
 		{
 			string xml = @"
@@ -176,8 +176,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</DataModel>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, unable to resolve alignedTo 'missing'.", ex.Message);
 		}
 
 		[Test]

@@ -665,7 +665,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <DataModel> element named 'DM' already exists.")]
+		[Test]
 		public void TestDupeModelNames()
 		{
 			string xml = @"
@@ -680,11 +680,11 @@ namespace Peach.Pro.Test.Core.PitParserTests
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <DataModel> element named 'DM' already exists.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the hex value of Blob 'DM.blob' must contain an even number of characters: 00a")]
+		[Test]
 		public void TestBadHexValueType1()
 		{
 			string xml = @"
@@ -695,11 +695,11 @@ namespace Peach.Pro.Test.Core.PitParserTests
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, the hex value of Blob 'DM.blob' must contain an even number of characters: 00a", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, the value of Blob 'DM.blob' contains invalid hex characters: 00aq")]
+		[Test]
 		public void TestBadHexValueType2()
 		{
 			string xml = @"
@@ -710,8 +710,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, the value of Blob 'DM.blob' contains invalid hex characters: 00aq", ex.Message);
 		}
 
 		[Test]

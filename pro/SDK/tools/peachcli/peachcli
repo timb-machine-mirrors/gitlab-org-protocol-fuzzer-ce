@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Peach Multi-Node CLI
@@ -15,8 +15,7 @@ Installation:
   1. Install Python 2.7
   2. Install dependencies
 
-    easy_install requests
-    easy_install cmd2
+    pip install -r requirements.txt
   
   3. Populate instances.py
   
@@ -41,11 +40,23 @@ Syntax:
 
 """
 
-from instances import INSTANCES
-import cmd2, json, requests, os, shlex
-import datetime, dateutil
-from urlparse import urlparse
+try:
+    import cmd2
+    import requests
+except:
+    print "Error, missing dependencies."
+    print "Use 'pip install -r requirements.txt'"
+    exit(-1)
+
+import cmd2
+import json
+import os
+import shlex
 import zipfile
+from datetime import datetime
+from urlparse import urlparse
+
+from instances import INSTANCES
 
 class App(cmd2.Cmd):
     
@@ -60,7 +71,7 @@ class App(cmd2.Cmd):
         return shlex.split(arg)
     
     def findPitFromConfig(self, masterUrl, nodeUrl, config):
-        """Return pitUrl for origional pit basid on config"""
+        """Return pitUrl for original pit based on config"""
         
         self.debug(">>findPitFromConfig")
         
@@ -303,9 +314,9 @@ class App(cmd2.Cmd):
                 elif status == "paused":
                     paused += 1
                 
-                jobStartDate = datetime.datetime.strptime(jobStartDate, "%Y-%m-%dT%H:%M:%SZ")
+                jobStartDate = datetime.strptime(jobStartDate, "%Y-%m-%dT%H:%M:%SZ")
                 if jobStopDate:
-                    jobStopDate = datetime.datetime.strptime(jobStopDate, "%Y-%m-%dT%H:%M:%SZ")
+                    jobStopDate = datetime.strptime(jobStopDate, "%Y-%m-%dT%H:%M:%SZ")
                 
                 if not startDate or startDate > jobStartDate:
                     startDate = jobStartDate
@@ -530,28 +541,15 @@ class App(cmd2.Cmd):
         
         for key in sorted(INSTANCES.keys()):
             print key
-        
 
-if __name__ == '__main__':
-    
+def main():        
     print ""
     print "| Peach CLI v0.1"
     print "| Copyright (c) Peach Fuzzer, LLC"
     print ""
-    
-    try:
-        import cmd2
-    except:
-        print "Error, missing dependency Cmd2."
-        print "easy_install cmd2"
-        exit(-1)
-    
-    try:
-        import requests
-    except:
-        print "Error, missing dependency requests."
-        print "easy_install requests"
-        exit(-1)
-    
+
     app = App()
     app.cmdloop()
+
+if __name__ == '__main__':
+    main()

@@ -40,7 +40,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 	[Peach]
 	public class OffsetRelationTests
 	{
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' failed to crack. Offset is 160 bits but buffer only has 96 bits.")]
+		[Test]
 		public void TooBigOffset()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -58,10 +58,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0:L8}{1}", 20, "Hello World");
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("String 'TheDataModel.Data' failed to crack. Offset is 160 bits but buffer only has 96 bits.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' failed to crack. Offset is 0 bits but already read 8 bits.")]
+		[Test]
 		public void TooSmallOffset()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -79,7 +80,8 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0:L8}{1}", 0, "Hello World");
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("String 'TheDataModel.Data' failed to crack. Offset is 0 bits but already read 8 bits.", ex.Message);
 		}
 
 		[Test]
@@ -193,7 +195,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(target, (string)dom.dataModels[0][3].DefaultValue);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.Data' failed to crack. Offset is 16 bits but must be at least 40 bits.")]
+		[Test]
 		public void BadOffset()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
@@ -216,7 +218,8 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0:L8}{1}{2}{3}", 3, offsetdata, sizeddata, target);
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("String 'TheDataModel.Data' failed to crack. Offset is 16 bits but must be at least 40 bits.", ex.Message);
 		}
 
 
@@ -255,7 +258,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual("Hello World", (string)dom.dataModels[0].find("block.Data").DefaultValue);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "String 'TheDataModel.block.Data' failed to crack. Offset is 224 bits but buffer only has 168 bits.")]
+		[Test]
 		public void BadOffsetInSizedBlock()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
@@ -284,9 +287,8 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0:L8}{1:L8}{2}{3}", 30, 1 + offsetdata.Length + payload.Length, offsetdata, payload);
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello World", (string)dom.dataModels[0].find("block.Data").DefaultValue);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("String 'TheDataModel.block.Data' failed to crack. Offset is 224 bits but buffer only has 168 bits.", ex.Message);
 		}
 
 		[Test]

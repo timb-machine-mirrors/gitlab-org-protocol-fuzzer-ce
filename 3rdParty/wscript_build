@@ -50,7 +50,7 @@ if bld.env.BASENAME == 'osx':
 	)
 
 
-nunit_tools = bld.path.find_node('NUnit.Console.3.0.1/tools')
+nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.0/tools')
 
 bld(
 	name='nunit-console',
@@ -60,3 +60,11 @@ bld(
 		nunit_tools : nunit_tools.ant_glob('**/*'),
 	}
 )
+
+if bld.env.REFERENCE_ASSEMBLIES_FACADES:
+	refs = [
+		'System.Runtime.dll',
+	]
+
+	for x in refs:
+		bld.read_csshlib(x, paths=[bld.env.REFERENCE_ASSEMBLIES_FACADES])

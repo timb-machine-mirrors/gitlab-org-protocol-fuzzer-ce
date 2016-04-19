@@ -10,6 +10,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Win")]
 	[Ignore("This requires an interactive windows session")]
 	class ButtonClickerTests
 	{

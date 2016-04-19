@@ -128,10 +128,10 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
 		}
 
-		[Test, ExpectedException(typeof(SoftException), ExpectedMessage = "Hex decode failed, invalid length.")]
+		[Test]
 		public void CrackBadLengthTest()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String/>
@@ -140,15 +140,12 @@ namespace Peach.Pro.Test.Core.Transformers.Encode
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
+			var dom = ParsePit(xml);
 			var data = Bits.Fmt("{0}", (byte)'0');
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var ex = Assert.Throws<SoftException>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Hex decode failed, invalid length.", ex.Message);
 		}
 	}
 }
