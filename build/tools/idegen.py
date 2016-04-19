@@ -406,6 +406,8 @@ class vsnode_cs_target(msvs.vsnode_project):
 			try:
 				y = get(x)
 			except Errors.WafError:
+				if asm_name.startswith('Facades/'):
+					asm_name = asm_name[8:]
 				r = reference(self.base, asm_name, None)
 				self.references[r.key] = r
 				continue
