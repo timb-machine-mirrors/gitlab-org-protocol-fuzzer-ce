@@ -64,6 +64,7 @@ bld(
 if bld.env.REFERENCE_ASSEMBLIES_FACADES:
 	refs = [
 		'System.Runtime.dll',
+		'System.Threading.Tasks.dll',
 	]
 
 	for x in refs:
