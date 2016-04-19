@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -32,5 +34,17 @@ namespace Peach.Core.Dom.Actions
 
 			publisher.output(data.dataModel);
 		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+			if (allData.Any() && dataModel != null)
+			{
+				pit.WriteStartElement("DataModel");
+				pit.WriteAttributeString("ref", dataModel.Name);
+				pit.WriteEndElement();
+			}
+
+		}
+
 	}
 }

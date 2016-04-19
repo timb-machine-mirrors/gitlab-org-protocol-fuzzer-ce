@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -124,6 +125,23 @@ namespace Peach.Core.Dom.Actions
 			finally
 			{
 				_result.Seek(0, SeekOrigin.Begin);
+			}
+		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+			pit.WriteAttributeString("method", method);
+
+			foreach (var param in parameters)
+				param.WritePit(pit);
+
+			if (result != null)
+			{
+				pit.WriteStartElement("Result");
+					pit.WriteStartElement("DataModel");
+						pit.WriteAttributeString("ref", result.dataModel.Name);
+					pit.WriteEndElement();
+				pit.WriteEndElement();
 			}
 		}
 	}
