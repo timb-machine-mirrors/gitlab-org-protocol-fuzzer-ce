@@ -22,6 +22,8 @@ def prepare_nunit_test(self):
 	opts = self.generator.bld.options
 	if opts.testcase:
 		self.ut_exec.append('--test=%s' % opts.testcase)
+	if opts.where:
+		self.ut_exec.append('--where=%s' % opts.where)
 
 	self.ut_exec.extend([ x.name for x in self.inputs ])
 
@@ -127,6 +129,7 @@ class utest(Task.Task):
 
 def options(opt):
 	opt.add_option('--testcase', action='store', help='Name of test case/fixture to execute')
+	opt.add_option('--where', action='store', help="NUnit --where filter (see https://github.com/nunit/docs/wiki/Test-Selection-Language)")
 	opt.add_option('--trace', action='store_true', help='Enable trace log level')
 	opt.add_option('--mono_debug', action='store_true', help='Enable mono debug logging')
 
