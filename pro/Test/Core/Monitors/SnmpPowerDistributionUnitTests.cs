@@ -8,7 +8,7 @@ using Peach.Pro.Core.Agent.Monitors;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
-	class MockSnmpAgent : ISnmpAgent
+	class FakeSnmpAgent : ISnmpAgent
 	{
 		Dictionary<SnmpOid, int> _state = new Dictionary<SnmpOid, int>();
 
@@ -24,11 +24,13 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 	}
 
-	class MockSnmpAgentReadOnly : ISnmpAgent
+	class FakeSnmpAgentReadOnly : ISnmpAgent
 	{
+		int _unrecognizedSwitchState = -1;
+
 		public int Get(SnmpOid oid)
 		{
-			return -1;  // TODO: change API to ensure this decodes to PowerState.Unknown
+			return _unrecognizedSwitchState;
 		}
 
 		public int Set(SnmpOid oid, int code)
@@ -46,11 +48,11 @@ namespace Peach.Pro.Test.Core.Monitors
 			new SnmpOid(".1.3.6.1.4.1.318.1.1.4.4.2.1.3.8"),
 		};
 
-		#region MockedSnmpAgent
+		#region FakedSnmpAgent
 		[Test]
 		public void TurnOffSnmpPdu()
 		{
-			var spdu = new SnmpPowerDistributionUnit(new MockSnmpAgent(), oids);
+			var spdu = new SnmpPowerDistributionUnit(new FakeSnmpAgent(), oids);
 			spdu.Switch(SwitchState.Off);
 			Assert.AreEqual(SwitchState.Off, spdu.CurrentState());
 		}
@@ -58,7 +60,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TurnOnSnmpPdu()
 		{
-			var spdu = new SnmpPowerDistributionUnit(new MockSnmpAgent(), oids);
+			var spdu = new SnmpPowerDistributionUnit(new FakeSnmpAgent(), oids);
 			spdu.Switch(SwitchState.On);
 			Assert.AreEqual(SwitchState.On, spdu.CurrentState());
 		}
@@ -66,7 +68,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void ResetSnmpPdu()
 		{
-			var spdu = new SnmpPowerDistributionUnit(new MockSnmpAgent(), oids);
+			var spdu = new SnmpPowerDistributionUnit(new FakeSnmpAgent(), oids);
 			spdu.Reset();
 			Assert.AreEqual(SwitchState.On, spdu.CurrentState());
 		}
@@ -74,14 +76,15 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestFailedStateChangeEvent()
 		{
-			var readOnlySpdu = new SnmpPowerDistributionUnit(new MockSnmpAgentReadOnly(), oids);
+			var readOnlySpdu = new SnmpPowerDistributionUnit(new FakeSnmpAgentReadOnly(), oids);
 
 			var enteredHandler = false;
-			readOnlySpdu.FailedStateChange += (object sender, FailedStateChangeArgs e) => {
+			readOnlySpdu.StateChangeAttempt += (object sender, StateChangeAttemptArgs e) => {
 				enteredHandler = true;
 
 				Assert.AreEqual(SwitchState.Off, e.TargetState);
 				Assert.AreEqual(SwitchState.Unknown, e.CurrentState);
+				Assert.IsFalse(e.Successful);
 			};
 
 			readOnlySpdu.Switch(SwitchState.Off);
@@ -107,10 +110,17 @@ namespace Peach.Pro.Test.Core.Monitors
 					"private"),
 				oids);
 
-			spdu.FailedStateChange += (object sender, FailedStateChangeArgs e) => {
-				Assert.Fail("Failed to change to state {0}. Currently in state {1}.",
-					e.TargetState,
-					e.CurrentState);
+			spdu.StateChangeAttempt += (object sender, StateChangeAttemptArgs e) => {
+				if (e.Successful)
+				{
+					Assert.AreEqual(e.TargetState, e.CurrentState);
+				}
+				else
+				{
+					Assert.Fail("Failed to change to state {0}. Currently in state {1}.",
+						e.TargetState,
+						e.CurrentState);
+				}
 			};
 
 			spdu.Switch(SwitchState.On);
