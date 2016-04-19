@@ -25,8 +25,6 @@ subdirs = [
 	'TotalPhase/komodo',
 	'Managed.AndroidDebugBridge',
 	'VMware-VIX-1.13.0-1295980',
-	'SuperSocket',
-	'SuperWebSocket',
 	'SocketHttpListener/SocketHttpListener',
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
