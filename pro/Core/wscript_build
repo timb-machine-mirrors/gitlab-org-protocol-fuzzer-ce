@@ -57,7 +57,8 @@ deps = [
 	'vtortola.WebSockets.dll',
 	'vtortola.WebSockets.Rfc6455.dll',
 	'System.Threading.Tasks.Dataflow.dll',
-	'System.Runtime',
+	'System.Runtime.dll',
+	'System.Threading.Tasks.dll',
 ]
 
 if bld.env.TARGET in ['win']:
