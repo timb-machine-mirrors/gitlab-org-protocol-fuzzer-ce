@@ -36,7 +36,7 @@ namespace Peach.Pro.Core.Publishers
 		readonly AutoResetEvent _evaluated = new AutoResetEvent(false);
 		readonly AutoResetEvent _msgReceived = new AutoResetEvent(false);
 
-		private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
+		private readonly CancellationTokenSource _cancelAccept = new CancellationTokenSource();
 
 		public int Port { get; protected set; }
 		public string Template { get; protected set; }
@@ -56,12 +56,13 @@ namespace Peach.Pro.Core.Publishers
 			_template = File.ReadAllText(Template);
 		}
 
-		static async Task AcceptWebSocketClientAsync(WebSocketListener server, CancellationToken token, 
+		static async Task AcceptWebSocketClientAsync(WebSocketListener server, CancellationToken token,
 			BufferBlock<string> queue,
 			AutoResetEvent msgReceived, AutoResetEvent evaluated)
 		{
-			Task task = null;
-			var cancelSource = new CancellationTokenSource();
+			CancellationTokenSource cancelConnection = null;
+			Task reader = null;
+			Task writer = null;
 
 			while (!token.IsCancellationRequested)
 			{
@@ -70,18 +71,27 @@ namespace Peach.Pro.Core.Publishers
 					var ws = await server.AcceptWebSocketAsync(token).ConfigureAwait(false);
 					if (ws == null) continue;
 
-					if (task != null)
+					if (cancelConnection != null)
 					{
 						logger.Debug("New web socket connection. Closing down existing connection.");
 
-						cancelSource.Cancel();
-						//cancelSource = new CancellationTokenSource();
+						cancelConnection.Cancel();
+
+						if (reader != null)
+							reader.Wait(1000);
+
+						if (writer != null)
+							writer.Wait(1000);
 					}
 					else
+					{
 						logger.Debug("New web socket connection");
+					}
 
-					task = Task.Run(() => HandleConnectionAsync(ws, cancelSource.Token, msgReceived, evaluated));
-					Task.Run(() => HandleSendQueueAsync(ws, cancelSource.Token, queue));
+					cancelConnection = new CancellationTokenSource();
+
+					reader = Task.Run(() => HandleConnectionAsync(ws, cancelConnection.Token, msgReceived, evaluated));
+					writer = Task.Run(() => HandleSendQueueAsync(ws, cancelConnection.Token, queue));
 				}
 				catch (Exception aex)
 				{
@@ -89,7 +99,9 @@ namespace Peach.Pro.Core.Publishers
 				}
 			}
 
-			cancelSource.Cancel();
+			if(cancelConnection != null)
+				cancelConnection.Cancel();
+
 			logger.Debug("Server Stop accepting clients");
 		}
 
@@ -97,6 +109,9 @@ namespace Peach.Pro.Core.Publishers
 		{
 			try
 			{
+				if(cancellation.IsCancellationRequested)
+					logger.Debug("HandleConnectionAsync, IsCancellationRequested == true");
+
 				while (ws.IsConnected && !cancellation.IsCancellationRequested)
 				{
 					var msg = await ws.ReadStringAsync(cancellation).ConfigureAwait(false);
@@ -153,30 +168,38 @@ namespace Peach.Pro.Core.Publishers
 			base.OnStart();
 
 			_socketServer.Start();
-			Task.Run(() => AcceptWebSocketClientAsync(_socketServer, _cancellation.Token, _msgQueue, _msgReceived, _evaluated));
+			Task.Run(() => AcceptWebSocketClientAsync(_socketServer, _cancelAccept.Token, 
+				_msgQueue, _msgReceived, _evaluated));
 		}
 
 		protected override void OnStop()
 		{
 			base.OnStop();
 
-			_cancellation.Cancel();
+			_cancelAccept.Cancel();
 			_socketServer.Stop();
+		}
+
+		protected override void OnClose()
+		{
+			base.OnClose();
+
+			IList<string> msgs;
+			_msgQueue.TryReceiveAll(out msgs);
 		}
 
 		protected override void OnOutput(BitwiseStream data)
 		{
 			try
 			{
-				logger.Debug(">> OnOutput");
 				logger.Debug("Waiting for evaluated or client ready msg");
-				
-				_evaluated.WaitOne(Timeout);
+
+				if (!_evaluated.WaitOne(Timeout))
+					throw new SoftException("Timeout waiting for WebSocket evaluated.");
+
 				_evaluated.Reset();
 
 				_msgQueue.Post(BuildMessage(data));
-
-				logger.Debug("<< OnOutput");
 			}
 			catch (Exception ex)
 			{
