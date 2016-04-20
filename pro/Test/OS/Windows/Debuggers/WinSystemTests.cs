@@ -115,36 +115,35 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 			dbg.MainLoop();
 		}
 
-		public bool HandleAccessViolation(UnsafeMethods.DEBUG_EVENT e)
+		public bool HandleAccessViolation(SystemDebugger.ExceptionEvent evt)
 		{
 			do
 			{
-				if (e.u.Exception.dwFirstChance != 0)
+				if (evt.FirstChance != 0)
 				{
 					// If ignoring first chance, return true
 					if (!firstChance)
 						return true;
 
 					// Guard page or illegal op
-					if (e.u.Exception.ExceptionRecord.ExceptionCode == 0x80000001 ||
-						e.u.Exception.ExceptionRecord.ExceptionCode == 0xC000001D)
+					if (evt.Code == 0x80000001 ||
+						evt.Code == 0xC000001D)
 					{
 						// Internesting!
 						logger.Debug("HandleAccessViolation: First chance guard page or illegal op");
 						break;
 					}
 
-					if (e.u.Exception.ExceptionRecord.ExceptionCode == 0xC0000005)
+					if (evt.Code == 0xC0000005)
 					{
-						if (e.u.Exception.ExceptionRecord.ExceptionInformation[0].ToInt64() == 1 &&
-							e.u.Exception.ExceptionRecord.ExceptionInformation[1].ToInt64() != 0)
+						if (evt.Info[0] == 1 && evt.Info[1] != 0)
 						{
 							// is write a/v?
 							logger.Debug("HandleAccessViolation: First chance write a/v");
 							break;
 						}
 
-						if (e.u.Exception.ExceptionRecord.ExceptionInformation[0].ToInt64() == 0)
+						if (evt.Info[0] == 0)
 						{
 							// is DEP?
 							logger.Debug("HandleAccessViolation: First chance DEP");
@@ -160,7 +159,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				logger.Debug("HandleAccessViolation: Second chance exception, w00t");
 			} while (false);
 
-			caughtException = e.u.Exception.dwFirstChance == 0 ? "SecondChance" : "FirstChance";
+			caughtException = evt.FirstChance == 0 ? "SecondChance" : "FirstChance";
 
 			return false;
 		}

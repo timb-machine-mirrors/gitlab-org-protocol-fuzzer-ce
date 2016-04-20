@@ -33,7 +33,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using NLog;
 using Peach.Core;
-using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
@@ -49,95 +48,104 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 	/// </remarks>
 	public class SystemDebugger
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		#region Constants
+		// ReSharper disable UnusedMember.Local
 
-		public const int ERROR_SEM_TIMEOUT = 0x00000079;
+		private const int ERROR_SEM_TIMEOUT = 0x00000079;
 
-		public const uint DEBUG_ONLY_THIS_PROCESS = 0x00000002;
-		public const uint DEBUG_PROCESS = 0x00000001;
-		public const uint INFINITE = 0;
-		public const uint DBG_CONTINUE = 0x00010002;
-		public const uint DBG_EXCEPTION_NOT_HANDLED = 0x80010001;
+		private const uint DEBUG_ONLY_THIS_PROCESS = 0x00000002;
+		private const uint DEBUG_PROCESS = 0x00000001;
+		private const uint INFINITE = 0;
+		private const uint DBG_CONTINUE = 0x00010002;
+		private const uint DBG_EXCEPTION_NOT_HANDLED = 0x80010001;
 
-		public const uint STATUS_GUARD_PAGE_VIOLATION = 0x80000001;
-		public const uint STATUS_DATATYPE_MISALIGNMENT = 0x80000002;
-		public const uint STATUS_BREAKPOINT = 0x80000003;
-		public const uint STATUS_SINGLE_STEP = 0x80000004;
-		public const uint STATUS_LONGJUMP = 0x80000026;
-		public const uint STATUS_UNWIND_CONSOLIDATE = 0x80000029;
-		public const uint STATUS_ACCESS_VIOLATION = 0xC0000005;
-		public const uint STATUS_IN_PAGE_ERROR = 0xC0000006;
-		public const uint STATUS_INVALID_HANDLE = 0xC0000008;
-		public const uint STATUS_INVALID_PARAMETER = 0xC000000D;
-		public const uint STATUS_NO_MEMORY = 0xC0000017;
-		public const uint STATUS_ILLEGAL_INSTRUCTION = 0xC000001D;
-		public const uint STATUS_NONCONTINUABLE_EXCEPTION = 0xC0000025;
-		public const uint STATUS_INVALID_DISPOSITION = 0xC0000026;
-		public const uint STATUS_ARRAY_BOUNDS_EXCEEDED = 0xC000008C;
-		public const uint STATUS_FLOAT_DENORMAL_OPERAND = 0xC000008D;
-		public const uint STATUS_FLOAT_DIVIDE_BY_ZERO = 0xC000008E;
-		public const uint STATUS_FLOAT_INEXACT_RESULT = 0xC000008F;
-		public const uint STATUS_FLOAT_INVALID_OPERATION = 0xC0000090;
-		public const uint STATUS_FLOAT_OVERFLOW = 0xC0000091;
-		public const uint STATUS_FLOAT_STACK_CHECK = 0xC0000092;
-		public const uint STATUS_FLOAT_UNDERFLOW = 0xC0000093;
-		public const uint STATUS_INTEGER_DIVIDE_BY_ZERO = 0xC0000094;
-		public const uint STATUS_INTEGER_OVERFLOW = 0xC0000095;
-		public const uint STATUS_PRIVILEGED_INSTRUCTION = 0xC0000096;
-		public const uint STATUS_STACK_OVERFLOW = 0xC00000FD;
-		public const uint STATUS_DLL_NOT_FOUND = 0xC0000135;
-		public const uint STATUS_ORDINAL_NOT_FOUND = 0xC0000138;
-		public const uint STATUS_ENTRYPOINT_NOT_FOUND = 0xC0000139;
-		public const uint STATUS_CONTROL_C_EXIT = 0xC000013A;
-		public const uint STATUS_DLL_INIT_FAILED = 0xC0000142;
-		public const uint STATUS_FLOAT_MULTIPLE_FAULTS = 0xC00002B4;
-		public const uint STATUS_FLOAT_MULTIPLE_TRAPS = 0xC00002B5;
-		public const uint STATUS_REG_NAT_CONSUMPTION = 0xC00002C9;
-		public const uint STATUS_STACK_BUFFER_OVERRUN = 0xC0000409;
-		public const uint STATUS_INVALID_CRUNTIME_PARAMETER = 0xC0000417;
-		public const uint STATUS_POSSIBLE_DEADLOCK = 0xC0000194;
+		private const uint STATUS_GUARD_PAGE_VIOLATION = 0x80000001;
+		private const uint STATUS_DATATYPE_MISALIGNMENT = 0x80000002;
+		private const uint STATUS_BREAKPOINT = 0x80000003;
+		private const uint STATUS_SINGLE_STEP = 0x80000004;
+		private const uint STATUS_LONGJUMP = 0x80000026;
+		private const uint STATUS_UNWIND_CONSOLIDATE = 0x80000029;
+		private const uint STATUS_ACCESS_VIOLATION = 0xC0000005;
+		private const uint STATUS_IN_PAGE_ERROR = 0xC0000006;
+		private const uint STATUS_INVALID_HANDLE = 0xC0000008;
+		private const uint STATUS_INVALID_PARAMETER = 0xC000000D;
+		private const uint STATUS_NO_MEMORY = 0xC0000017;
+		private const uint STATUS_ILLEGAL_INSTRUCTION = 0xC000001D;
+		private const uint STATUS_NONCONTINUABLE_EXCEPTION = 0xC0000025;
+		private const uint STATUS_INVALID_DISPOSITION = 0xC0000026;
+		private const uint STATUS_ARRAY_BOUNDS_EXCEEDED = 0xC000008C;
+		private const uint STATUS_FLOAT_DENORMAL_OPERAND = 0xC000008D;
+		private const uint STATUS_FLOAT_DIVIDE_BY_ZERO = 0xC000008E;
+		private const uint STATUS_FLOAT_INEXACT_RESULT = 0xC000008F;
+		private const uint STATUS_FLOAT_INVALID_OPERATION = 0xC0000090;
+		private const uint STATUS_FLOAT_OVERFLOW = 0xC0000091;
+		private const uint STATUS_FLOAT_STACK_CHECK = 0xC0000092;
+		private const uint STATUS_FLOAT_UNDERFLOW = 0xC0000093;
+		private const uint STATUS_INTEGER_DIVIDE_BY_ZERO = 0xC0000094;
+		private const uint STATUS_INTEGER_OVERFLOW = 0xC0000095;
+		private const uint STATUS_PRIVILEGED_INSTRUCTION = 0xC0000096;
+		private const uint STATUS_STACK_OVERFLOW = 0xC00000FD;
+		private const uint STATUS_DLL_NOT_FOUND = 0xC0000135;
+		private const uint STATUS_ORDINAL_NOT_FOUND = 0xC0000138;
+		private const uint STATUS_ENTRYPOINT_NOT_FOUND = 0xC0000139;
+		private const uint STATUS_CONTROL_C_EXIT = 0xC000013A;
+		private const uint STATUS_DLL_INIT_FAILED = 0xC0000142;
+		private const uint STATUS_FLOAT_MULTIPLE_FAULTS = 0xC00002B4;
+		private const uint STATUS_FLOAT_MULTIPLE_TRAPS = 0xC00002B5;
+		private const uint STATUS_REG_NAT_CONSUMPTION = 0xC00002C9;
+		private const uint STATUS_STACK_BUFFER_OVERRUN = 0xC0000409;
+		private const uint STATUS_INVALID_CRUNTIME_PARAMETER = 0xC0000417;
+		private const uint STATUS_POSSIBLE_DEADLOCK = 0xC0000194;
 
-		public const uint DBG_CONTROL_C = 0x40010005;
-		public const uint EXCEPTION_ACCESS_VIOLATION = STATUS_ACCESS_VIOLATION;
-		public const uint EXCEPTION_DATATYPE_MISALIGNMENT = STATUS_DATATYPE_MISALIGNMENT;
-		public const uint EXCEPTION_BREAKPOINT = STATUS_BREAKPOINT;
-		public const uint EXCEPTION_SINGLE_STEP = STATUS_SINGLE_STEP;
-		public const uint EXCEPTION_ARRAY_BOUNDS_EXCEEDED = STATUS_ARRAY_BOUNDS_EXCEEDED;
-		public const uint EXCEPTION_FLT_DENORMAL_OPERAND = STATUS_FLOAT_DENORMAL_OPERAND;
-		public const uint EXCEPTION_FLT_DIVIDE_BY_ZERO = STATUS_FLOAT_DIVIDE_BY_ZERO;
-		public const uint EXCEPTION_FLT_INEXACT_RESULT = STATUS_FLOAT_INEXACT_RESULT;
-		public const uint EXCEPTION_FLT_INVALID_OPERATION = STATUS_FLOAT_INVALID_OPERATION;
-		public const uint EXCEPTION_FLT_OVERFLOW = STATUS_FLOAT_OVERFLOW;
-		public const uint EXCEPTION_FLT_STACK_CHECK = STATUS_FLOAT_STACK_CHECK;
-		public const uint EXCEPTION_FLT_UNDERFLOW = STATUS_FLOAT_UNDERFLOW;
-		public const uint EXCEPTION_INT_DIVIDE_BY_ZERO = STATUS_INTEGER_DIVIDE_BY_ZERO;
-		public const uint EXCEPTION_INT_OVERFLOW = STATUS_INTEGER_OVERFLOW;
-		public const uint EXCEPTION_PRIV_INSTRUCTION = STATUS_PRIVILEGED_INSTRUCTION;
-		public const uint EXCEPTION_IN_PAGE_ERROR = STATUS_IN_PAGE_ERROR;
-		public const uint EXCEPTION_ILLEGAL_INSTRUCTION = STATUS_ILLEGAL_INSTRUCTION;
-		public const uint EXCEPTION_NONCONTINUABLE_EXCEPTION = STATUS_NONCONTINUABLE_EXCEPTION;
-		public const uint EXCEPTION_STACK_OVERFLOW = STATUS_STACK_OVERFLOW;
-		public const uint EXCEPTION_INVALID_DISPOSITION = STATUS_INVALID_DISPOSITION;
-		public const uint EXCEPTION_GUARD_PAGE = STATUS_GUARD_PAGE_VIOLATION;
-		public const uint EXCEPTION_INVALID_HANDLE = STATUS_INVALID_HANDLE;
-		public const uint EXCEPTION_POSSIBLE_DEADLOCK = STATUS_POSSIBLE_DEADLOCK;
+		private const uint DBG_CONTROL_C = 0x40010005;
+		private const uint EXCEPTION_ACCESS_VIOLATION = STATUS_ACCESS_VIOLATION;
+		private const uint EXCEPTION_DATATYPE_MISALIGNMENT = STATUS_DATATYPE_MISALIGNMENT;
+		private const uint EXCEPTION_BREAKPOINT = STATUS_BREAKPOINT;
+		private const uint EXCEPTION_SINGLE_STEP = STATUS_SINGLE_STEP;
+		private const uint EXCEPTION_ARRAY_BOUNDS_EXCEEDED = STATUS_ARRAY_BOUNDS_EXCEEDED;
+		private const uint EXCEPTION_FLT_DENORMAL_OPERAND = STATUS_FLOAT_DENORMAL_OPERAND;
+		private const uint EXCEPTION_FLT_DIVIDE_BY_ZERO = STATUS_FLOAT_DIVIDE_BY_ZERO;
+		private const uint EXCEPTION_FLT_INEXACT_RESULT = STATUS_FLOAT_INEXACT_RESULT;
+		private const uint EXCEPTION_FLT_INVALID_OPERATION = STATUS_FLOAT_INVALID_OPERATION;
+		private const uint EXCEPTION_FLT_OVERFLOW = STATUS_FLOAT_OVERFLOW;
+		private const uint EXCEPTION_FLT_STACK_CHECK = STATUS_FLOAT_STACK_CHECK;
+		private const uint EXCEPTION_FLT_UNDERFLOW = STATUS_FLOAT_UNDERFLOW;
+		private const uint EXCEPTION_INT_DIVIDE_BY_ZERO = STATUS_INTEGER_DIVIDE_BY_ZERO;
+		private const uint EXCEPTION_INT_OVERFLOW = STATUS_INTEGER_OVERFLOW;
+		private const uint EXCEPTION_PRIV_INSTRUCTION = STATUS_PRIVILEGED_INSTRUCTION;
+		private const uint EXCEPTION_IN_PAGE_ERROR = STATUS_IN_PAGE_ERROR;
+		private const uint EXCEPTION_ILLEGAL_INSTRUCTION = STATUS_ILLEGAL_INSTRUCTION;
+		private const uint EXCEPTION_NONCONTINUABLE_EXCEPTION = STATUS_NONCONTINUABLE_EXCEPTION;
+		private const uint EXCEPTION_STACK_OVERFLOW = STATUS_STACK_OVERFLOW;
+		private const uint EXCEPTION_INVALID_DISPOSITION = STATUS_INVALID_DISPOSITION;
+		private const uint EXCEPTION_GUARD_PAGE = STATUS_GUARD_PAGE_VIOLATION;
+		private const uint EXCEPTION_INVALID_HANDLE = STATUS_INVALID_HANDLE;
+		private const uint EXCEPTION_POSSIBLE_DEADLOCK = STATUS_POSSIBLE_DEADLOCK;
 
 		// Win32 x86 Emulation Exceptions
-		public const uint STATUS_WX86_UNSIMULATE = 0x4000001C;
-		public const uint STATUS_WX86_CONTINUE = 0x4000001D;
-		public const uint STATUS_WX86_SINGLE_STEP = 0x4000001E;
-		public const uint STATUS_WX86_BREAKPOINT = 0x4000001F;
-		public const uint STATUS_WX86_EXCEPTION_CONTINUE = 0x40000020;
-		public const uint STATUS_WX86_EXCEPTION_LASTCHANCE = 0x40000021;
-		public const uint STATUS_WX86_EXCEPTION_CHAIN = 0x40000022;
+		private const uint STATUS_WX86_UNSIMULATE = 0x4000001C;
+		private const uint STATUS_WX86_CONTINUE = 0x4000001D;
+		private const uint STATUS_WX86_SINGLE_STEP = 0x4000001E;
+		private const uint STATUS_WX86_BREAKPOINT = 0x4000001F;
+		private const uint STATUS_WX86_EXCEPTION_CONTINUE = 0x40000020;
+		private const uint STATUS_WX86_EXCEPTION_LASTCHANCE = 0x40000021;
+		private const uint STATUS_WX86_EXCEPTION_CHAIN = 0x40000022;
 
 		// Exception code for a c++ exception
 		// http://support.microsoft.com/kb/185294
-		public const uint C_PLUS_PLUS_EXCEPTION = 0xE06D7363;
+		private const uint C_PLUS_PLUS_EXCEPTION = 0xE06D7363;
 
+		// ReSharper restore UnusedMember.Local
 		#endregion
+
+		public class ExceptionEvent
+		{
+			public uint FirstChance { get; set; }
+			public uint Code { get; set; }
+			public long[] Info { get; set; }
+		}
 
 		/// <summary>
 		/// Callback to handle an A/V exception
@@ -145,45 +153,53 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		/// <returns>
 		/// true to keep debugging, false to stop debugging
 		/// </returns>
-		/// <param name="e"></param>
-		public delegate bool DebugEvent(UnsafeMethods.DEBUG_EVENT e);
-		public DebugEvent HandleAccessViolation = null;
+		public Func<ExceptionEvent, bool> HandleAccessViolation = e => true;
 
-		public delegate void ProcessEvent();
-		public ProcessEvent ProcessCreated = null;
+		public Action ProcessCreated = () => {};
+
+		public int ProcessId { get; private set; }
+
+		private readonly List<IntPtr> processHandles = new List<IntPtr>();
+		private readonly Dictionary<uint, IntPtr> openHandles = new Dictionary<uint, IntPtr>();
+		private readonly object mutex = new object();
+
+		private SystemDebugger(int dwProcessId)
+		{
+			ProcessId = dwProcessId;
+		}
 
 		public static SystemDebugger CreateProcess(string command)
 		{
 			// CreateProcess
-			UnsafeMethods.STARTUPINFO startUpInfo = new UnsafeMethods.STARTUPINFO();
-			UnsafeMethods.PROCESS_INFORMATION processInformation = new UnsafeMethods.PROCESS_INFORMATION();
+			var si = new UnsafeMethods.STARTUPINFO();
+			UnsafeMethods.PROCESS_INFORMATION pi;
 
 			if (!UnsafeMethods.CreateProcess(
-					null,			// lpApplicationName 
-					command,		// lpCommandLine 
-					0,				// lpProcessAttributes 
-					0,				// lpThreadAttributes 
-					false,			// bInheritHandles 
-					DEBUG_PROCESS,	// dwCreationFlags, DEBUG_PROCESS
-					IntPtr.Zero,	// lpEnvironment 
-					null,			// lpCurrentDirectory 
-					ref startUpInfo, // lpStartupInfo 
-					out processInformation)) // lpProcessInformation 
+					null,          // lpApplicationName 
+					command,       // lpCommandLine 
+					0,             // lpProcessAttributes 
+					0,             // lpThreadAttributes 
+					false,         // bInheritHandles 
+					DEBUG_PROCESS, // dwCreationFlags, DEBUG_PROCESS
+					IntPtr.Zero,   // lpEnvironment 
+					null,          // lpCurrentDirectory 
+					ref si,        // lpStartupInfo 
+					out pi))       // lpProcessInformation 
 			{
 				var ex = new Win32Exception(Marshal.GetLastWin32Error());
 				throw new PeachException("System debugger could not start process '" + command + "'.  " + ex.Message, ex);
 			}
 
-			UnsafeMethods.CloseHandle(processInformation.hProcess);
-			UnsafeMethods.CloseHandle(processInformation.hThread);
+			UnsafeMethods.CloseHandle(pi.hProcess);
+			UnsafeMethods.CloseHandle(pi.hThread);
 			UnsafeMethods.DebugSetProcessKillOnExit(true);
 
-			return new SystemDebugger(processInformation.dwProcessId);
+			return new SystemDebugger(pi.dwProcessId);
 		}
 
 		public static SystemDebugger AttachToProcess(int dwProcessId)
 		{
-			using (var priv = new Privilege(Privilege.SeDebugPrivilege))
+			using (new Privilege(Privilege.SeDebugPrivilege))
 			{
 				// DebugActiveProcess
 				if (!UnsafeMethods.DebugActiveProcess((uint)dwProcessId))
@@ -198,25 +214,14 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			return new SystemDebugger(dwProcessId);
 		}
 
-		public int ProcessId { get; private set; }
-
-		List<IntPtr> processHandles = new List<IntPtr>();
-		Dictionary<uint, IntPtr> openHandles = new Dictionary<uint, IntPtr>();
-		object mutex = new object();
-
-		private SystemDebugger(int dwProcessId)
-		{
-			ProcessId = dwProcessId;
-		}
-
 		public void MainLoop()
 		{
 			try
 			{
-				UnsafeMethods.DEBUG_EVENT debug_event;
-
 				do
 				{
+					UnsafeMethods.DEBUG_EVENT debug_event;
+
 					if (!UnsafeMethods.WaitForDebugEvent(out debug_event, 1000))
 					{
 						var err = new Win32Exception(Marshal.GetLastWin32Error());
@@ -228,7 +233,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 						throw ex;
 					}
 
-					uint dwContinueStatus = ProcessDebugEvent(ref debug_event);
+					var dwContinueStatus = ProcessDebugEvent(ref debug_event);
 
 					for (; ; )
 					{
@@ -247,7 +252,6 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 						catch (SEHException)
 						{
 							logger.Trace("SEH when continuing debugging. Trying again...");
-							continue;
 						}
 					}
 				}
@@ -350,7 +354,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 					// Display a message that the DLL has been unloaded. 
 
 					logger.Trace("UNLOAD_DLL_DEBUG_EVENT");
-					dwContinueStatus = OnUnloadDllDebugEvent(DebugEv);
+					dwContinueStatus = OnUnloadDllDebugEvent();
 					break;
 
 				case UnsafeMethods.DebugEventType.OUTPUT_DEBUG_STRING_EVENT:
@@ -362,7 +366,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 
 				case UnsafeMethods.DebugEventType.RIP_EVENT:
 					logger.Trace("RIP_EVENT");
-					dwContinueStatus = OnRipEvent(DebugEv);
+					dwContinueStatus = OnRipEvent();
 					break;
 
 				default:
@@ -373,7 +377,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			return dwContinueStatus;
 		}
 
-		private uint OnRipEvent(UnsafeMethods.DEBUG_EVENT DebugEv)
+		private uint OnRipEvent()
 		{
 			return DBG_CONTINUE;
 		}
@@ -403,12 +407,9 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 				}
 				else
 				{
-					string str;
-
-					if (DebugString.fUnicode != 0)
-						str = Marshal.PtrToStringUni(lpBuf, (int)len);
-					else
-						str = Marshal.PtrToStringAnsi(lpBuf, (int)len);
+					var str = DebugString.fUnicode != 0
+						? Marshal.PtrToStringUni(lpBuf, (int)len)
+						: Marshal.PtrToStringAnsi(lpBuf, (int)len);
 
 					logger.Trace("  {0}", str);
 				}
@@ -421,7 +422,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			return DBG_CONTINUE;
 		}
 
-		private uint OnUnloadDllDebugEvent(UnsafeMethods.DEBUG_EVENT DebugEv)
+		private uint OnUnloadDllDebugEvent()
 		{
 			return DBG_CONTINUE;
 		}
@@ -498,7 +499,16 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 					return DBG_CONTINUE;
 			}
 
-			bool stop = HandleAccessViolation == null ? false : !HandleAccessViolation(DebugEv);
+			var stop = !HandleAccessViolation(new ExceptionEvent
+			{
+				FirstChance = DebugEv.u.Exception.dwFirstChance,
+				Code = DebugEv.u.Exception.ExceptionRecord.ExceptionCode,
+				Info = new[]
+				{
+					DebugEv.u.Exception.ExceptionRecord.ExceptionInformation[0].ToInt64(),
+					DebugEv.u.Exception.ExceptionRecord.ExceptionInformation[1].ToInt64()
+				}
+			});
 
 			// If 1st chance, only stop if HandleAccessViolation returns false
 			// If 2nd chance, always stop
@@ -514,10 +524,10 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			return DBG_EXCEPTION_NOT_HANDLED;
 		}
 
-		static bool ReadProcessMemory(IntPtr hProc, IntPtr lpBaseAddress, IntPtr lpBuffer, ref uint len)
+		private static bool ReadProcessMemory(IntPtr hProc, IntPtr lpBaseAddress, IntPtr lpBuffer, ref uint len)
 		{
-			uint lenIn = len;
-			uint lenOut = 0;
+			var lenIn = len;
+			uint lenOut;
 
 			if (!UnsafeMethods.ReadProcessMemory(hProc, lpBaseAddress, lpBuffer, lenIn, out lenOut))
 				return false;
@@ -526,50 +536,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			return true;
 		}
 
-		static string GetFileNameFromHandle(IntPtr hFile)
-		{
-			StringBuilder pszFilename = new StringBuilder(256);
-			IntPtr hFileMap;
-
-			// Get the file size.
-			uint dwFileSizeHi = 0;
-			uint dwFileSizeLo = UnsafeMethods.GetFileSize(hFile, ref dwFileSizeHi);
-
-			if (dwFileSizeLo == 0 && dwFileSizeHi == 0)
-			{
-				return null;
-			}
-
-			// Create a file mapping object.
-			hFileMap = UnsafeMethods.CreateFileMapping(hFile,
-				IntPtr.Zero,
-				UnsafeMethods.FileMapProtection.PageReadonly,
-				0,
-				1,
-				null);
-
-			if (hFileMap != IntPtr.Zero)
-			{
-				// Create a file mapping to get the file name.
-				IntPtr pMem = UnsafeMethods.MapViewOfFile(hFileMap, UnsafeMethods.FileMapAccess.FileMapRead, 0, 0, 1);
-
-				if (pMem != IntPtr.Zero)
-				{
-					uint maxSize = 256;
-					UnsafeMethods.GetMappedFileName(
-						UnsafeMethods.GetCurrentProcess(),
-						pMem, ref pszFilename, maxSize);
-
-					UnsafeMethods.UnmapViewOfFile(pMem);
-				}
-
-				UnsafeMethods.CloseHandle(hFileMap);
-			}
-
-			return pszFilename.ToString();
-		}
-
-		static string ExceptionToString(UnsafeMethods.EXCEPTION_DEBUG_INFO Exception)
+		private static string ExceptionToString(UnsafeMethods.EXCEPTION_DEBUG_INFO Exception)
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.Append(ExceptionCodeToString(Exception.ExceptionRecord.ExceptionCode));
@@ -583,7 +550,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			return sb.ToString();
 		}
 
-		static string ExceptionCodeToString(uint code)
+		private static string ExceptionCodeToString(uint code)
 		{
 			switch (code)
 			{

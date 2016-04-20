@@ -28,7 +28,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
@@ -36,25 +35,25 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 	/// Contains definitions for marshaled method calls and related
 	/// types.
 	/// </summary>
-	public class UnsafeMethods
+	internal static class UnsafeMethods
 	{
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 		public struct STARTUPINFO
 		{
-			public Int32 cb;
+			public int cb;
 			public string lpReserved;
 			public string lpDesktop;
 			public string lpTitle;
-			public Int32 dwX;
-			public Int32 dwY;
-			public Int32 dwXSize;
-			public Int32 dwYSize;
-			public Int32 dwXCountChars;
-			public Int32 dwYCountChars;
-			public Int32 dwFillAttribute;
-			public Int32 dwFlags;
-			public Int16 wShowWindow;
-			public Int16 cbReserved2;
+			public int dwX;
+			public int dwY;
+			public int dwXSize;
+			public int dwYSize;
+			public int dwXCountChars;
+			public int dwYCountChars;
+			public int dwFillAttribute;
+			public int dwFlags;
+			public short wShowWindow;
+			public short cbReserved2;
 			public IntPtr lpReserved2;
 			public IntPtr hStdInput;
 			public IntPtr hStdOutput;
@@ -78,33 +77,8 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			public int bInheritHandle;
 		}
 
-		[Flags()]
-		public enum ProcessAccess : int
+		public enum SECURITY_IMPERSONATION_LEVEL
 		{
-			/// <summary>Specifies all possible access flags for the process object.</summary>
-			AllAccess = CreateThread | DuplicateHandle | QueryInformation | SetInformation | Terminate | VMOperation | VMRead | VMWrite | Synchronize,
-			/// <summary>Enables usage of the process handle in the CreateRemoteThread function to create a thread in the process.</summary>
-			CreateThread = 0x2,
-			/// <summary>Enables usage of the process handle as either the source or target process in the DuplicateHandle function to duplicate a handle.</summary>
-			DuplicateHandle = 0x40,
-			/// <summary>Enables usage of the process handle in the GetExitCodeProcess and GetPriorityClass functions to read information from the process object.</summary>
-			QueryInformation = 0x400,
-			/// <summary>Enables usage of the process handle in the SetPriorityClass function to set the priority class of the process.</summary>
-			SetInformation = 0x200,
-			/// <summary>Enables usage of the process handle in the TerminateProcess function to terminate the process.</summary>
-			Terminate = 0x1,
-			/// <summary>Enables usage of the process handle in the VirtualProtectEx and WriteProcessMemory functions to modify the virtual memory of the process.</summary>
-			VMOperation = 0x8,
-			/// <summary>Enables usage of the process handle in the ReadProcessMemory function to' read from the virtual memory of the process.</summary>
-			VMRead = 0x10,
-			/// <summary>Enables usage of the process handle in the WriteProcessMemory function to write to the virtual memory of the process.</summary>
-			VMWrite = 0x20,
-			/// <summary>Enables usage of the process handle in any of the wait functions to wait for the process to terminate.</summary>
-			Synchronize = 0x100000
-		}
-
-		public enum SECURITY_IMPERSONATION_LEVEL : int
-		{ 
 			SecurityAnonymous = 0,
 			SecurityIdentification = 1,
 			SecurityImpersonation = 2,
@@ -121,9 +95,9 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		[StructLayout(LayoutKind.Sequential)]
 		public struct TOKEN_PRIVILEGES
 		{
-			public UInt32 PrivilegeCount;
+			public uint PrivilegeCount;
 			public LUID Luid;
-			public UInt32 Attributes;
+			public uint Attributes;
 		}
 
 		// OpenThreadToken DesiredAccess
@@ -138,17 +112,17 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		public const uint TOKEN_ADJUST_GROUPS = 0x0040;
 		public const uint TOKEN_ADJUST_DEFAULT = 0x0080;
 		public const uint TOKEN_ADJUST_SESSIONID = 0x0100;
-		public const uint TOKEN_READ = (STANDARD_RIGHTS_READ | TOKEN_QUERY);
-		public const uint TOKEN_ALL_ACCESS = (STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY |
+		public const uint TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY;
+		public const uint TOKEN_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY |
 			TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE |
 			TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT |
-			TOKEN_ADJUST_SESSIONID);
+			TOKEN_ADJUST_SESSIONID;
 
 		// TOKEN_PRIVILEGES Attributes
-		public const UInt32 SE_PRIVILEGE_ENABLED_BY_DEFAULT = 0x00000001;
-		public const UInt32 SE_PRIVILEGE_ENABLED = 0x00000002;
-		public const UInt32 SE_PRIVILEGE_REMOVED = 0x00000004;
-		public const UInt32 SE_PRIVILEGE_USED_FOR_ACCESS = 0x80000000;
+		public const uint SE_PRIVILEGE_ENABLED_BY_DEFAULT = 0x00000001;
+		public const uint SE_PRIVILEGE_ENABLED = 0x00000002;
+		public const uint SE_PRIVILEGE_REMOVED = 0x00000004;
+		public const uint SE_PRIVILEGE_USED_FOR_ACCESS = 0x80000000;
 
 		public const int ERROR_NO_TOKEN = 1008; //From VC\PlatformSDK\Include\WinError.h
 		public const int ERROR_NOT_ALL_ASSIGNED = 1300;
@@ -177,17 +151,6 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		public static extern bool ImpersonateSelf(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		static extern IntPtr OpenProcess(ProcessAccess dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
-
-		//[DllImport("kernel32.dll")]
-		//public static extern bool CreateProcess(string lpApplicationName,
-		//   string lpCommandLine, ref SECURITY_ATTRIBUTES lpProcessAttributes,
-		//   ref SECURITY_ATTRIBUTES lpThreadAttributes, bool bInheritHandles,
-		//   uint dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory,
-		//   [In] ref STARTUPINFO lpStartupInfo,
-		//   out PROCESS_INFORMATION lpProcessInformation);
-
-		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool CreateProcess(
 			string lpApplicationName,
 			string lpCommandLine, 
@@ -201,20 +164,10 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			out PROCESS_INFORMATION lpProcessInformation);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] buffer, UInt32 size, out uint lpNumberOfBytesRead);
-
-		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] IntPtr lpBuffer, UInt32 size, out uint lpNumberOfBytesRead);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out uint lpNumberOfBytesWritten);
-
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool FlushInstructionCache(IntPtr hProcess, IntPtr lpBaseAddress, uint dwSize);
-
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool ContinueDebugEvent(uint dwProcessId, uint dwThreadId,
-		   uint dwContinueStatus);
+		public static extern bool ContinueDebugEvent(uint dwProcessId, uint dwThreadId, uint dwContinueStatus);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern IntPtr GetCurrentThread();
@@ -223,138 +176,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
 
 		[DllImport("kernel32.dll")]
-		public static extern int GetProcessId(int hProcess);
-
-		[DllImport("kernel32.dll")]
 		public static extern bool DebugSetProcessKillOnExit(bool KillOnExit);
-
-		[DllImport("kernel32.dll")]
-		public static extern uint GetFileSize(IntPtr hFile, ref uint lpFileSizeHigh);
-		
-		[DllImport("kernel32.dll")]
-		public static extern uint GetMappedFileName(IntPtr hProcess, IntPtr lpv, ref StringBuilder lpFilename, uint nSize);
-
-		[DllImport("kernel32.dll")]
-		public static extern IntPtr GetCurrentProcess();
-
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
-
-		[DllImport("kernel32.dll")]
-		public static extern IntPtr GetModuleHandle(string moduleName);
-
-		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-		public static extern IntPtr CreateFileMapping(
-			IntPtr hFile,
-			IntPtr lpFileMappingAttributes,
-			FileMapProtection flProtect,
-			uint dwMaximumSizeHigh,
-			uint dwMaximumSizeLow,
-			[MarshalAs(UnmanagedType.LPTStr)] string lpName);
-
-		[DllImport("kernel32.dll")]
-		public static extern bool GetThreadContext(IntPtr hThread, ref CONTEXT lpContext);
-
-		[DllImport("kernel32.dll")]
-		public static extern bool SetThreadContext(IntPtr hThread, [In] ref CONTEXT lpContext);
-
-		public enum CONTEXT_FLAGS : uint
-		{
-			CONTEXT_i386 = 0x10000,
-			CONTEXT_i486 = 0x10000,   //  same as i386
-			CONTEXT_CONTROL = CONTEXT_i386 | 0x01, // SS:SP, CS:IP, FLAGS, BP
-			CONTEXT_INTEGER = CONTEXT_i386 | 0x02, // AX, BX, CX, DX, SI, DI
-			CONTEXT_SEGMENTS = CONTEXT_i386 | 0x04, // DS, ES, FS, GS
-			CONTEXT_FLOATING_POINT = CONTEXT_i386 | 0x08, // 387 state
-			CONTEXT_DEBUG_REGISTERS = CONTEXT_i386 | 0x10, // DB 0-3,6,7
-			CONTEXT_EXTENDED_REGISTERS = CONTEXT_i386 | 0x20, // cpu specific extensions
-			CONTEXT_FULL = CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS,
-			CONTEXT_ALL = CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS | CONTEXT_EXTENDED_REGISTERS
-		}
-
-		public struct FLOATING_SAVE_AREA
-		{
-			public uint ControlWord;
-			public uint StatusWord;
-			public uint TagWord;
-			public uint ErrorOffset;
-			public uint ErrorSelector;
-			public uint DataOffset;
-			public uint DataSelector;
-			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 80)]
-			public byte[] RegisterArea;
-			public uint Cr0NpxState;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct CONTEXT
-		{
-
-			public uint ContextFlags; //set this to an appropriate value
-			// Retrieved by CONTEXT_DEBUG_REGISTERS
-			public uint Dr0;
-			public uint Dr1;
-			public uint Dr2;
-			public uint Dr3;
-			public uint Dr6;
-			public uint Dr7;
-			// Retrieved by CONTEXT_FLOATING_POINT
-			public FLOATING_SAVE_AREA FloatSave;
-			// Retrieved by CONTEXT_SEGMENTS
-			public uint SegGs;
-			public uint SegFs;
-			public uint SegEs;
-			public uint SegDs;
-			// Retrieved by CONTEXT_INTEGER
-			public uint Edi;
-			public uint Esi;
-			public uint Ebx;
-			public uint Edx;
-			public uint Ecx;
-			public uint Eax;
-			// Retrieved by CONTEXT_CONTROL
-			public uint Ebp;
-			public uint Eip;
-			public uint SegCs;
-			public uint EFlags;
-			public uint Esp;
-			public uint SegSs;
-			// Retrieved by CONTEXT_EXTENDED_REGISTERS
-			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
-			public byte[] ExtendedRegisters;
-
-		} 
-
-		[Flags]
-		public enum FileMapProtection : uint
-		{
-			PageReadonly = 0x02,
-			PageReadWrite = 0x04,
-			PageWriteCopy = 0x08,
-			PageExecuteRead = 0x20,
-			PageExecuteReadWrite = 0x40,
-			SectionCommit = 0x8000000,
-			SectionImage = 0x1000000,
-			SectionNoCache = 0x10000000,
-			SectionReserve = 0x4000000,
-		}
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern IntPtr MapViewOfFile(
-			IntPtr hFileMappingObject,
-			FileMapAccess dwDesiredAccess,
-			uint dwFileOffsetHigh,
-			uint dwFileOffsetLow,
-			uint dwNumberOfBytesToMap);
-
-		[Flags]
-		public enum FileMapAccess : uint
-		{
-			FileMapCopy = 0x0001,
-			FileMapWrite = 0x0002,
-			FileMapRead = 0x0004,
-			FileMapAllAccess = 0x001f,
-			FileMapExecute = 0x0020,
-		}
 
 		public enum DebugEventType : uint
 		{
@@ -478,17 +300,17 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		}
 
 		// Inner union of structs must me aligned on IntPtr boundary
-		private static int DEBUG_EVENT_OFFSET = 12 + (12 % IntPtr.Size);
+		private static readonly int DEBUG_EVENT_OFFSET = 12 + (12 % IntPtr.Size);
 
-		private static int DEBUG_EVENT_SIZE = Marshal.SizeOf(typeof(EXCEPTION_DEBUG_INFO)) + DEBUG_EVENT_OFFSET;
+		private static readonly int DEBUG_EVENT_SIZE = Marshal.SizeOf(typeof(EXCEPTION_DEBUG_INFO)) + DEBUG_EVENT_OFFSET;
 
 		public static bool WaitForDebugEvent(out DEBUG_EVENT debug_event, uint dwMilliseconds)
 		{
 			debug_event = new DEBUG_EVENT();
-			int len = DEBUG_EVENT_SIZE;
-			IntPtr buf = Marshal.AllocHGlobal(len);
+			var len = DEBUG_EVENT_SIZE;
+			var buf = Marshal.AllocHGlobal(len);
 			RtlZeroMemory(buf, IntPtr.Zero + len);
-			bool ret = WaitForDebugEvent(buf, dwMilliseconds);
+			var ret = WaitForDebugEvent(buf, dwMilliseconds);
 
 			if (ret)
 			{
@@ -496,7 +318,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 				debug_event.dwProcessId = (uint)Marshal.ReadInt32(buf, 4);
 				debug_event.dwThreadId = (uint)Marshal.ReadInt32(buf, 8);
 
-				IntPtr offset = buf + DEBUG_EVENT_OFFSET;
+				var offset = buf + DEBUG_EVENT_OFFSET;
 
 				switch (debug_event.dwDebugEventCode)
 				{
@@ -527,8 +349,6 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 					case DebugEventType.RIP_EVENT:
 						debug_event.u.RipInfo = (RIP_INFO)Marshal.PtrToStructure(offset, typeof(RIP_INFO));
 						break;
-					default:
-						break;
 				}
 			}
 
@@ -557,6 +377,6 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		public static extern bool CloseHandle(IntPtr hObject);
 
 		[DllImport("Kernel32.dll", SetLastError = false)]
-		static extern void RtlZeroMemory(IntPtr dest, IntPtr size);
+		private static extern void RtlZeroMemory(IntPtr dest, IntPtr size);
 	}
 }
