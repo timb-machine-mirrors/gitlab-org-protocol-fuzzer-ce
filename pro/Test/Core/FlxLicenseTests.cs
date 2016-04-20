@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using FlxDotNetClient;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using System.IO;
 
 namespace Peach.Pro.Test.Core
 {
@@ -18,9 +20,9 @@ namespace Peach.Pro.Test.Core
 			// Initialize ILicensing interface with identity data using memory-based trusted 
 			// storage and the hard-coded string hostid "1234567890".
 			using (var licensing = LicensingFactory.GetLicensing(
-				IdentityData,
-				null,
-				"1234567890"))
+				                       IdentityData,
+				                       null,
+				                       "1234567890"))
 			{
 				// add a Buffer license source
 				licensing.LicenseManager.AddBufferLicenseSource(License, "BasicClientLicenseSource");
@@ -40,21 +42,32 @@ namespace Peach.Pro.Test.Core
 		}
 
 		[Test]
-		//[Ignore("This fails with a signature failure")]
 		public void TestCapabilityRequest()
 		{
+			string hostId;
+			using (var licensing = LicensingFactory.GetLicensing(IdentityClient))
+			{
+				var baseFeature = licensing.LicenseManager.GetFeatureCollection(BaseLicense)
+					.Single(x => x.Name == "Encryption_Throughput");
+				hostId = baseFeature.HostIds.Single(x => x.Key == HostIdEnum.FLX_HOSTID_TYPE_STRING).Value.First();
+			}
+			
 			using (var tmpDir = new TempDirectory())
 			using (var licensing = LicensingFactory.GetLicensing(
-				IdentityClient,
-				tmpDir.Path))
+				                       IdentityClient,
+				                       tmpDir.Path,
+				                       hostId))
 			{
 				licensing.LicenseManager.AddBufferLicenseSource(BaseLicense, "BaseLicense");
 				licensing.LicenseManager.AddTrustedStorageLicenseSource();
 				licensing.LicenseManager.AddTrialLicenseSource();
 
-				var options = licensing.LicenseManager.CreateCapabilityRequestOptions();
-				options.Incremental = true;
+				foreach (var file in Directory.EnumerateFiles(tmpDir.Path))
+				{
+					Console.WriteLine(file);
+				}
 
+				var options = licensing.LicenseManager.CreateCapabilityRequestOptions();
 				var request = licensing.LicenseManager.CreateCapabilityRequest(options);
 				var binRequest = request.ToArray();
 
@@ -65,14 +78,6 @@ namespace Peach.Pro.Test.Core
 					.SendBinaryMessage(binRequest, out binResponse);
 
 				var response = licensing.LicenseManager.ProcessCapabilityResponse(binResponse);
-
-				Console.WriteLine("VirtualMachineType: {0}", response.VirtualMachineType);
-
-				Console.WriteLine("VendorDictionary");
-				foreach (var item in response.VendorDictionary)
-				{
-					Console.WriteLine("  {0}: {1}", item.Key, item.Value);
-				}
 
 				Console.WriteLine("Status Items");
 				foreach (var item in response.Status)
@@ -93,13 +98,6 @@ namespace Peach.Pro.Test.Core
 
 				Console.WriteLine("---LicenseManager---");
 
-				Console.WriteLine("HostType: {0}", licensing.LicenseManager.HostType);
-				Console.WriteLine("HostIdType: {0}", licensing.LicenseManager.HostIdType);
-				Console.WriteLine("HostId: {0}", licensing.LicenseManager.HostId);
-				Console.WriteLine("HostName: {0}", licensing.LicenseManager.HostName);
-				Console.WriteLine("DeviceType: {0}", licensing.LicenseManager.DeviceType);
-				Console.WriteLine("DeviceName: {0}", licensing.LicenseManager.DeviceName);
-
 				Console.WriteLine("Features");
 				foreach (var features in licensing.LicenseManager.GetFeatureCollection())
 				{
@@ -110,46 +108,55 @@ namespace Peach.Pro.Test.Core
 					}
 				}
 
-				var lic1 = licensing.LicenseManager.Acquire("Encryption_Throughput");
-				Console.WriteLine("Acquired {0} v{1}", lic1.Name, lic1.Version);
-				Assert.AreEqual("Encryption_Throughput", lic1.Name);
-				Assert.AreEqual("1.0", lic1.Version);
-				lic1.ReleaseLicense();
+				try
+				{
+					var lic1 = licensing.LicenseManager.Acquire("Encryption_Throughput");
+					Console.WriteLine("Acquired {0} v{1}", lic1.Name, lic1.Version);
+					Assert.AreEqual("Encryption_Throughput", lic1.Name);
+					Assert.AreEqual("1.0", lic1.Version);
 
-				var lic2 = licensing.LicenseManager.Acquire("Redundancy");
-				Console.WriteLine("Acquired {0} v{1}", lic2.Name, lic2.Version);
-				Assert.AreEqual("Redundancy", lic2.Name);
-				Assert.AreEqual("1.0", lic2.Version);
-				lic2.ReleaseLicense();
+					var lic2 = licensing.LicenseManager.Acquire("Redundancy");
+					Console.WriteLine("Acquired {0} v{1}", lic2.Name, lic2.Version);
+					Assert.AreEqual("Redundancy", lic2.Name);
+					Assert.AreEqual("1.0", lic2.Version);
 
-				var lic3 = licensing.LicenseManager.Acquire("SimultaneousUsers");
-				Console.WriteLine("Acquired {0} v{1}", lic3.Name, lic3.Version);
-				Assert.AreEqual("SimultaneousUsers", lic3.Name);
-				Assert.AreEqual("1.0", lic3.Version);
-				lic3.ReleaseLicense();
+					var lic3 = licensing.LicenseManager.Acquire("SimultaneousUsers");
+					Console.WriteLine("Acquired {0} v{1}", lic3.Name, lic3.Version);
+					Assert.AreEqual("SimultaneousUsers", lic3.Name);
+					Assert.AreEqual("1.0", lic3.Version);
+				}
+				finally
+				{
+					licensing.LicenseManager.ReturnAllLicenses();
+				}
+
+				foreach (var file in Directory.EnumerateFiles(tmpDir.Path))
+				{
+					Console.WriteLine(file);
+				}
+
 			}
 		}
 
 		internal static readonly byte[] License = Utilities.LoadBinaryResource(
-			Assembly.GetExecutingAssembly(),
-			"Peach.Pro.Test.Core.Resources.license.bin"
-		).ToArray();
+			                                          Assembly.GetExecutingAssembly(),
+			                                          "Peach.Pro.Test.Core.Resources.license.bin"
+		                                          ).ToArray();
 
 		internal static readonly byte[] BaseLicense = Utilities.LoadBinaryResource(
-			Assembly.GetExecutingAssembly(),
-			"Peach.Pro.Test.Core.Resources.BaseLicense.bin"
-		).ToArray();
+			                                              Assembly.GetExecutingAssembly(),
+			                                              "Peach.Pro.Test.Core.Resources.BaseLicense.bin"
+		                                              ).ToArray();
 
 		internal static readonly byte[] IdentityClient = Utilities.LoadBinaryResource(
-			Assembly.GetExecutingAssembly(),
-			"Peach.Pro.Test.Core.Resources.IdentityClient.bin"
-		).ToArray();
+			                                                 Assembly.GetExecutingAssembly(),
+			                                                 "Peach.Pro.Test.Core.Resources.IdentityClient.bin"
+		                                                 ).ToArray();
 
 		const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/deviceservices";
 		//const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/instances/D2TW8ES08Z6V/request";
 
-		internal static readonly byte[] IdentityData =
-		{
+		internal static readonly byte[] IdentityData = {
 			0x00, 0x00, 0x19, 0x73, 0x00, 0x00, 0x29, 0x43, 0xff, 0xff,
 			0xff, 0xff, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x72, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x80, 0x02,
