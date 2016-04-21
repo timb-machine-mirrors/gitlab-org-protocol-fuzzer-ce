@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from waflib import Errors
+from waflib import Task
 
 deps = [
 	'NLog.dll',
@@ -114,10 +114,15 @@ internal = common + [
 	'CrashTestDummy.exe',
 ]
 
+peach_xsd = top.make_node(bld.env.BINDIR).find_or_declare('peach.xsd')
+
 bld(
 	features = 'zip',
 	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, bld.variant ]),
 	use = peach_pro,
+	zip_extras = [
+		(peach_xsd, 'peach.xsd', Utils.O644 << 16L)
+	]
 )
 
 internal_variant = bld.variant \
@@ -128,4 +133,7 @@ bld(
 	features = 'zip',
 	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, internal_variant ]),
 	use = internal,
+	zip_extras = [
+		(peach_xsd, 'peach.xsd', Utils.O644 << 16L)
+	]
 )
