@@ -4,7 +4,6 @@ subdirs = [
 	'ComContainer',
 	'Compiler',
 	'Core',
-	'FuzzBang',
 	'LinuxCrashHandler',
 	'NetworkFuzzer',
 	'OS/Linux',

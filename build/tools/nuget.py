@@ -3,8 +3,8 @@ import xml.sax.handler
 from waflib.Configure import conf
 
 class PackageHandler(xml.sax.handler.ContentHandler):
-	def __init__(self, ctx, excl, mapping):
-		self.ctx = ctx
+	def __init__(self, bld, excl, mapping):
+		self.bld = bld
 		self.excl = excl
 		self.mapping = mapping
 
@@ -12,16 +12,16 @@ class PackageHandler(xml.sax.handler.ContentHandler):
 		if name != 'package':
 			return
 
-		ctx = self.ctx
+		bld = self.bld
 		name = str(attrs['id'])
 		version = str(attrs['version'])
 		target = str(attrs['targetFramework'])
-		path = ctx.path.find_dir(['%s.%s' % (name, version)])
+		path = bld.path.find_dir(['%s.%s' % (name, version)])
 
 		if not path:
 			return
 
-		basename = self.ctx.env.BASENAME
+		basename = bld.env.BASENAME
 		if self.mapping and basename != self.mapping.get(name, basename):
 			return
 
@@ -34,11 +34,11 @@ class PackageHandler(xml.sax.handler.ContentHandler):
 			nodes = path.ant_glob(pat, ignorecase=True)
 
 		for n in nodes:
-			ctx.read_csshlib(n.name, paths = [ n.parent ])
+			bld.read_csshlib(n.name, paths = [ n.parent ])
 
 		content = path.find_dir('content')
 		if content:
-			self.ctx(name=name, path=content, content=content.ant_glob('**/*'))
+			bld(name=name, path=content, content=content.ant_glob('**/*'))
 
 @conf
 def read_nuget(self, config, excl=None, mapping=None):

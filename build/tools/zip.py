@@ -74,6 +74,10 @@ def apply_zip_srcs(self):
 		for tsk in getattr(y, 'install_extras', []):
 			self.get_zip_src(tsk)
 
+	zip_extras = getattr(self, 'zip_extras', [])
+	for y in zip_extras:
+		self.zip_inputs.append(y)
+
 	if self.zip_inputs:
 		self.zip_inputs = sorted(self.zip_inputs, key=lambda x: x[1])
 		srcs = [ x[0] for x in self.zip_inputs ]

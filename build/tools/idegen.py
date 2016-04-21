@@ -4,7 +4,7 @@ import sys
 import re
 import random
 
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 from waflib.extras import msvs
 from waflib.Build import BuildContext
@@ -83,6 +83,16 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
     ${for k, v in props.properties.iteritems()}
     <${k}>${str(v)}</${k}>
     ${endfor}
+    ${if props.custom_cmds}
+    <CustomCommands>
+      <CustomCommands>
+        ${for cmd in props.custom_cmds}
+        <Command type="${cmd.type}" command="${cmd.command}" workingdir="${cmd.workingdir}" />
+        ${endfor}
+      </CustomCommands>
+    </CustomCommands>
+    ${endif}
+
   </PropertyGroup>
   ${endfor}
 
@@ -644,11 +654,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		config = self.ctx.get_config(tg.bld, tg.env)
 
 		out_node = base.make_node(['bin', '%s_%s' % (config, platform)])
-
-		if getattr(tg, 'ide_aspnet', False):
-			out = 'bin'
-		else:
-			out = out_node.path_from(self.base)
+		out = out_node.path_from(self.base)
 
 		# Order matters!
 		g['ProjectGuid'] = '{%s}' % self.uuid
@@ -990,6 +996,10 @@ class idegen(msvs.msvs_generator):
 					prop.configuration_bld = config
 					prop.sources = []
 					prop.post_build = getattr(p, 'post_build', None)
+					prop.custom_cmds = map(
+						lambda x: namedtuple('CustomCommand', x.keys())(*x.values()),
+						getattr(p.tg, 'ide_custom_commands', [])
+					)
 
 					# Ensure all files are accounted for
 					if main != p:

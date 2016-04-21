@@ -1,17 +1,33 @@
 #!/usr/bin/env python
 
+import os
+from waflib import Task
+
 deps = [
 	'NLog.dll',
-	'SharpPcap.dll',
 	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.WebApi.dll',
 	'Peach.Pro.WebApi2.dll',
+	'SharpPcap.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
 ]
+
+top = bld.path.parent.parent
+
+def glob_from(*parts):
+	path = os.path.join(*parts)
+	return (
+		top.find_or_declare(path),
+		top.ant_glob(os.path.join(path, '**'))
+	)
+
+python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.4', 'content')
+
+makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
 
 app = bld(
 	features = 'cs',
@@ -20,8 +36,13 @@ app = bld(
 	name = 'Peach.exe',
 #	mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
-	install_644 = 'peach.xsd',
+	install_644 = {
+		python_stdlib[0] : python_stdlib[1],
+	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
+	ide_custom_commands = [
+		dict(type='AfterBuild', command=makexsd, workingdir='${TargetDir}'),
+	]
 )
 
 # samples folder is installed to output dir by ../SDK/wscript_build
@@ -56,9 +77,7 @@ common = [
 	'Peach.Pro.ComContainer.exe',
 	'Peach.Pro.WindowsDebugInstance.exe',
 
-	'IronPython.StdLib', # Python Standard Library
-	'VMware-VIX',        # VMWare VIX API
-	'CrashWrangler',     # CrashWrangler
+	'CrashWrangler',
 ]
 
 peach_pro = common + [
@@ -66,7 +85,6 @@ peach_pro = common + [
 
 	# Helper Programs
 	'PeachValidator.exe',
-	'PeachFuzzBang.exe',
 	'PeachMinset.exe',
 	'PeachSampleNinja.exe',
 
@@ -96,10 +114,15 @@ internal = common + [
 	'CrashTestDummy.exe',
 ]
 
+peach_xsd = top.make_node(bld.env.BINDIR).find_or_declare('peach.xsd')
+
 bld(
 	features = 'zip',
 	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, bld.variant ]),
 	use = peach_pro,
+	zip_extras = [
+		(peach_xsd, 'peach.xsd', Utils.O644 << 16L)
+	]
 )
 
 internal_variant = bld.variant \
@@ -110,4 +133,7 @@ bld(
 	features = 'zip',
 	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, internal_variant ]),
 	use = internal,
+	zip_extras = [
+		(peach_xsd, 'peach.xsd', Utils.O644 << 16L)
+	]
 )

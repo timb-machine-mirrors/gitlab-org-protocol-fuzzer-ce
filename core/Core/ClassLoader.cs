@@ -126,7 +126,6 @@ namespace Peach.Core
 			"Peach.exe", 
 			"PeachAssemblyFuzzer.exe", 
 			"PeachFarm.Reporting.Service.exe", 
-			"PeachFuzzBang.exe", 
 			"PeachHooker.exe", 
 			"PeachLinuxCrashHandler.exe", 
 			"PeachMinset.exe", 
