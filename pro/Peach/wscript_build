@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from waflib import Errors
 
 deps = [
 	'NLog.dll',
@@ -48,8 +49,13 @@ app = bld(
 	]
 )
 
+def run_makexsd(ctx):
+	ret = ctx.exec_command(makexsd, cwd=bld.env.BINDIR, env={'TERM': 'xterm'})
+	if ret:
+		raise Errors.WafError('makexsd returned %s' % str(ret))
+
 if bld.is_install:
-	bld.add_post_fun(lambda ctx: ctx.exec_command(makexsd, cwd=bld.env.BINDIR, env={'TERM': 'xterm'}))
+	bld.add_post_fun(run_makexsd)
 
 # samples folder is installed to output dir by ../SDK/wscript_build
 
