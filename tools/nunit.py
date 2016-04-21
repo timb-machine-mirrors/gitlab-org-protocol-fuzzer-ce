@@ -199,7 +199,7 @@ def main():
 	xml_root = ET.parse(tmp.name).getroot()
 
 	for asm in xml_root.findall('test-suite[@type="Assembly"]'):
-		path = asm.attrib['name']
+		path = asm.attrib['fullname']
 
 		for fixture in asm.findall('.//test-suite[@type="TestFixture"]'):
 			run_nunit(args, path, fixture, outdir)
