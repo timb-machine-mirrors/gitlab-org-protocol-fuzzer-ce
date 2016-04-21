@@ -80,7 +80,6 @@ peach_pro = common + [
 
 	# Helper Programs
 	'PeachValidator.exe',
-	'PeachFuzzBang.exe',
 	'PeachMinset.exe',
 	'PeachSampleNinja.exe',
 
