@@ -83,6 +83,8 @@ def prepare(conf):
 	env['ASAN_CC'] = 'clang'
 	env['ASAN_CXX'] = 'clang++'
 
+	env['RUN_NETFX'] = 'mono'
+
 	env.append_value('supported_features', [
 		'peach',
 		'linux',

@@ -27,11 +27,7 @@ def glob_from(*parts):
 
 python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.4', 'content')
 
-netfx = ''
-if Utils.unversioned_sys_platform() != 'win32':
-	netfx = 'mono '
-
-makexsd = '%sPeach.exe --makexsd' % netfx
+makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
 
 app = bld(
 	features = 'cs',
@@ -48,14 +44,6 @@ app = bld(
 		dict(type='AfterBuild', command=makexsd, workingdir='${TargetDir}'),
 	]
 )
-
-def run_makexsd(ctx):
-	ret = ctx.exec_command(makexsd, cwd=bld.env.BINDIR, env={'TERM': 'xterm'})
-	if ret:
-		raise Errors.WafError('makexsd returned %s' % str(ret))
-
-if bld.is_install:
-	bld.add_post_fun(run_makexsd)
 
 # samples folder is installed to output dir by ../SDK/wscript_build
 

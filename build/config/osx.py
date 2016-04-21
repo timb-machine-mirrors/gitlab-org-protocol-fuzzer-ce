@@ -115,6 +115,8 @@ def prepare(conf):
 	env['ASAN_CC'] = 'clang-3.6'
 	env['ASAN_CXX'] = 'clang++-3.6'
 
+	env['RUN_NETFX'] = 'mono'
+
 def configure(conf):
 	env = conf.env
 
