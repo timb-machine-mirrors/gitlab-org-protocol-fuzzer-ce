@@ -205,7 +205,9 @@ def verify_external(bld):
 def run_makexsd(bld):
 	if bld.cmd == 'install' and bld.variant != 'doc':
 		makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
-		ret = bld.exec_command(makexsd, cwd=bld.env.BINDIR, env={'TERM': 'xterm'})
+		env = os.environ.copy()
+		env['TERM'] = 'xterm'
+		ret = bld.exec_command(makexsd, cwd=bld.env.BINDIR, env=env)
 		if ret:
 			raise Errors.WafError('makexsd returned %s' % str(ret))
 
