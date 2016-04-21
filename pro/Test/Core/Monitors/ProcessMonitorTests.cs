@@ -1265,11 +1265,78 @@ SUMMARY: AddressSanitizer: SEGV /home/peach/bacnet-stack-0.8.3/lib/../src/bacdco
 			Assert.IsTrue(Asan.CheckForAsanFault(example));
 			var data = Asan.AsanToMonitorData(example);
 
-			Assert.AreEqual("SEGV on unknown address 0x00002f10b7d6 (pc 0x0000004ee255 bp 0x7ffc0abb72d0 sp 0x7ffc0abb72d0 T0)", data.Title);
-			Assert.AreEqual("SEGV", data.Fault.Risk);
+			Assert.AreEqual("Failed to allocate 0x41417000 (1094807552) bytes of LargeMmapAllocator: 12", data.Title);
+			Assert.AreEqual("Out of Memory", data.Fault.Risk);
 			Assert.AreEqual(example, data.Fault.Description);
-			Assert.AreEqual("EB7CE44C", data.Fault.MajorHash);
-			Assert.AreEqual("2E409A3D", data.Fault.MinorHash);
+			Assert.AreEqual("F0C8A045", data.Fault.MajorHash);
+			Assert.AreEqual("75A7437C", data.Fault.MinorHash);
+		}
+		[Test]
+		public void TestAsanOOMGccRegex()
+		{
+			const string example = @"==36536== ERROR: AddressSanitizer failed to allocate 0x100002000 (4294975488) bytes of LargeMmapAllocator: Cannot allocate memory
+==36536== Process memory map follows:
+        0x000000400000-0x000000401000   /home/mike/asan/oom
+        0x000000600000-0x000000601000   /home/mike/asan/oom
+        0x000000601000-0x000000602000   /home/mike/asan/oom
+        0x00007fff7000-0x00008fff7000
+        0x00008fff7000-0x02008fff7000
+        0x02008fff7000-0x10007fff8000
+        0x600000000000-0x610000000000
+        0x610000000000-0x610000005000
+        0x7efd5761e000-0x7eff57622000
+        0x7eff57622000-0x7eff57638000   /lib/x86_64-linux-gnu/libgcc_s.so.1
+        0x7eff57638000-0x7eff57837000   /lib/x86_64-linux-gnu/libgcc_s.so.1
+        0x7eff57837000-0x7eff57838000   /lib/x86_64-linux-gnu/libgcc_s.so.1
+        0x7eff57838000-0x7eff5783b000   /lib/x86_64-linux-gnu/libdl-2.19.so
+        0x7eff5783b000-0x7eff57a3a000   /lib/x86_64-linux-gnu/libdl-2.19.so
+        0x7eff57a3a000-0x7eff57a3b000   /lib/x86_64-linux-gnu/libdl-2.19.so
+        0x7eff57a3b000-0x7eff57a3c000   /lib/x86_64-linux-gnu/libdl-2.19.so
+        0x7eff57a3c000-0x7eff57a55000   /lib/x86_64-linux-gnu/libpthread-2.19.so
+        0x7eff57a55000-0x7eff57c54000   /lib/x86_64-linux-gnu/libpthread-2.19.so
+        0x7eff57c54000-0x7eff57c55000   /lib/x86_64-linux-gnu/libpthread-2.19.so
+        0x7eff57c55000-0x7eff57c56000   /lib/x86_64-linux-gnu/libpthread-2.19.so
+        0x7eff57c56000-0x7eff57c5a000
+        0x7eff57c5a000-0x7eff57e15000   /lib/x86_64-linux-gnu/libc-2.19.so
+        0x7eff57e15000-0x7eff58015000   /lib/x86_64-linux-gnu/libc-2.19.so
+        0x7eff58015000-0x7eff58019000   /lib/x86_64-linux-gnu/libc-2.19.so
+        0x7eff58019000-0x7eff5801b000   /lib/x86_64-linux-gnu/libc-2.19.so
+        0x7eff5801b000-0x7eff58020000
+        0x7eff58020000-0x7eff58048000   /usr/lib/x86_64-linux-gnu/libasan.so.0.0.0
+        0x7eff58048000-0x7eff58248000   /usr/lib/x86_64-linux-gnu/libasan.so.0.0.0
+        0x7eff58248000-0x7eff58249000   /usr/lib/x86_64-linux-gnu/libasan.so.0.0.0
+        0x7eff58249000-0x7eff5824a000   /usr/lib/x86_64-linux-gnu/libasan.so.0.0.0
+        0x7eff5824a000-0x7eff5afaf000
+        0x7eff5afaf000-0x7eff5afd2000   /lib/x86_64-linux-gnu/ld-2.19.so
+        0x7eff5b1aa000-0x7eff5b1be000
+        0x7eff5b1c7000-0x7eff5b1c9000
+        0x7eff5b1cb000-0x7eff5b1d1000
+        0x7eff5b1d1000-0x7eff5b1d2000   /lib/x86_64-linux-gnu/ld-2.19.so
+        0x7eff5b1d2000-0x7eff5b1d3000   /lib/x86_64-linux-gnu/ld-2.19.so
+        0x7eff5b1d3000-0x7eff5b1d4000
+        0x7fffa8133000-0x7fffa8154000   [stack]
+        0x7fffa81fe000-0x7fffa8200000   [vdso]
+        0xffffffffff600000-0xffffffffff601000   [vsyscall]
+==36536== End of process memory map.
+==36536== AddressSanitizer CHECK failed: ../../../../src/libsanitizer/sanitizer_common/sanitizer_posix.cc:70 ""((""unable to mmap"" && 0)) != (0)"" (0x0, 0x0)
+    #0 0x7eff5803231d (/usr/lib/x86_64-linux-gnu/libasan.so.0.0.0+0x1231d)
+    #1 0x7eff58039133 (/usr/lib/x86_64-linux-gnu/libasan.so.0.0.0+0x19133)
+    #2 0x7eff5803b6d3 (/usr/lib/x86_64-linux-gnu/libasan.so.0.0.0+0x1b6d3)
+    #3 0x7eff58029078 (/usr/lib/x86_64-linux-gnu/libasan.so.0.0.0+0x9078)
+    #4 0x7eff58035442 (/usr/lib/x86_64-linux-gnu/libasan.so.0.0.0+0x15442)
+    #5 0x4006fe (/home/mike/asan/oom+0x4006fe)
+    #6 0x7eff57c7bec4 (/lib/x86_64-linux-gnu/libc-2.19.so+0x21ec4)
+    #7 0x400628 (/home/mike/asan/oom+0x400628)
+";
+
+			Assert.IsTrue(Asan.CheckForAsanFault(example));
+			var data = Asan.AsanToMonitorData(example);
+
+			Assert.AreEqual("Failed to allocate 0x100002000 (4294975488) bytes of LargeMmapAllocator: Cannot allocate memory", data.Title);
+			Assert.AreEqual("Out of Memory", data.Fault.Risk);
+			Assert.AreEqual(example, data.Fault.Description);
+			Assert.AreEqual("F0C8A045", data.Fault.MajorHash);
+			Assert.AreEqual("9FBE9B75", data.Fault.MinorHash);
 		}
 	}
 }

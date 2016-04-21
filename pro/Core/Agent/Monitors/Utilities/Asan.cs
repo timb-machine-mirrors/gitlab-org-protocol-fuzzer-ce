@@ -13,11 +13,11 @@ namespace Peach.Pro.Core.Agent.Monitors.Utilities
 	{
 		// NOTE: Output from GCC can be slightly different than CLANG
 		//       These regexes have been updated to work with both.
-		private static readonly Regex AsanMatch = new Regex(@"==\d+==\s*ERROR: AddressSanitizer:");
+		private static readonly Regex AsanMatch = new Regex(@"==\d+==\s*ERROR: AddressSanitizer:?");
 		private static readonly Regex AsanBucket = new Regex(@"==\d+==\s*ERROR: AddressSanitizer: ([^\s]+) on.*?address ([0-9a-z]+) .*?pc ([0-9a-z]+)");
 		private static readonly Regex AsanMessage = new Regex(@"(==\d+==\s*ERROR: AddressSanitizer:.*==\d+==\s*ABORTING)", RegexOptions.Singleline);
 		private static readonly Regex AsanTitle = new Regex(@"==\d+==\s*ERROR: AddressSanitizer: ([^\r\n]+)");
-//		private static readonly Regex AsanOom = new Regex(@"==\d+==\s*ERROR: AddressSanitizer failed to allocate (0x[^\s]+) \((.*)\) bytes of (\w+):\s(\d+)");
+		private static readonly Regex AsanOom = new Regex(@"==\d+==\s*ERROR: AddressSanitizer failed to allocate (0x[^\s]+) \((.*)\) bytes of (\w+):\s([^\r\n]+)");
 
 		/// <summary>
 		/// Check string for ASAN output
@@ -41,16 +41,20 @@ namespace Peach.Pro.Core.Agent.Monitors.Utilities
 			var title = AsanTitle.Match(stderr);
 
 			// failed to allocate ASAN message is different from others
-			if (title.Groups[1].Value.StartsWith("failed to allocate"))
+			if (!title.Success)
 			{
-				//var oom = AsanOom.Match(stderr);
+				var oom = AsanOom.Match(stderr);
+				if (!oom.Success)
+					throw new ApplicationException("Error: Expected AsanTitle or AsanOom to match");
 
-				data.Title = title.Groups[1].Value;
+				data.Title = string.Format("Failed to allocate {0} ({1}) bytes of {2}: {3}",
+					oom.Groups[1].Value, oom.Groups[2].Value, oom.Groups[3].Value, oom.Groups[4].Value);
+
 				data.Fault = new MonitorData.Info
 				{
-					Description = stderr.Substring(title.Index),
-					MajorHash = Monitor2.Hash("TODO1"),
-					MinorHash = Monitor2.Hash("TODO2"),
+					Description = stderr.Substring(oom.Index),
+					MajorHash = Monitor2.Hash("ASAN Failed to allocate"),
+					MinorHash = Monitor2.Hash(oom.Groups[1].Value),
 					Risk = "Out of Memory",
 				};
 
