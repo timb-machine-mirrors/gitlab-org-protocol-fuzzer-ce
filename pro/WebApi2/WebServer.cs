@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -10,6 +9,7 @@ using Microsoft.Owin;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Microsoft.Owin.FileSystems;
+using Microsoft.Owin.Hosting.Tracing;
 using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
@@ -45,6 +45,14 @@ namespace Peach.Pro.WebApi2
 				Start(8888, true);
 		}
 
+		class NullTraceOutputFactory : ITraceOutputFactory
+		{
+			public TextWriter Create(string outputFile)
+			{
+				return StreamWriter.Null;
+			}
+		}
+
 		public void Start(int port, bool keepGoing)
 		{
 			var added = false;
@@ -55,18 +63,15 @@ namespace Peach.Pro.WebApi2
 
 				try
 				{
-					_server = WebApp.Start(url, OnStartup);
-
 					// Owin adds a TextWriterTraceListener during startup
-					// we need to remove it to avoid spewing to console
-					for (var cnt = 0; cnt < Trace.Listeners.Count; cnt++)
-					{
-						if (Trace.Listeners[cnt] is TextWriterTraceListener)
-						{
-							Trace.Listeners.RemoveAt(cnt);
-							break;
-						}
-					}
+					// we need to replace it to avoid spewing to console
+
+					var options = new StartOptions(url);
+					options.Settings.Add(
+						typeof(ITraceOutputFactory).FullName,
+						typeof(NullTraceOutputFactory).AssemblyQualifiedName
+					);
+					_server = WebApp.Start(options, OnStartup);
 
 					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
 				}
