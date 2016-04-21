@@ -5,6 +5,7 @@ using System.Text;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Pro.Core.Agent.Monitors.Utilities;
 using Monitor = Peach.Core.Agent.Monitor2;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
@@ -63,7 +64,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				{
 					lock (sb)
 					{
-						if (sb.Length > 0 || RunCommand.AsanMatch.IsMatch(line))
+						if (sb.Length > 0 || Asan.CheckForAsanFault(line))
 						{
 							sb.AppendLine(line);
 						}
@@ -96,23 +97,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			lock (_asanResult)
 			{
-				var stderr = _asanResult.ToString();
-				var title = RunCommand.AsanTitle.Match(stderr);
-				var bucket = RunCommand.AsanBucket.Match(stderr);
-				var desc = RunCommand.AsanMessage.Match(stderr);
-
-				_data = new MonitorData
-				{
-					Data = new Dictionary<string, Stream>(),
-					Title = title.Groups[1].Value,
-					Fault = new MonitorData.Info
-					{
-						Description = stderr.Substring(desc.Index, desc.Length),
-						MajorHash = Hash(bucket.Groups[3].Value),
-						MinorHash = Hash(bucket.Groups[2].Value),
-						Risk = bucket.Groups[1].Value,
-					}
-				};
+				_data = Asan.AsanToMonitorData(_asanResult.ToString());
 			}
 
 			return true;
