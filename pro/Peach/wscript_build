@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+
 deps = [
 	'NLog.dll',
 	'SharpPcap.dll',
@@ -13,6 +15,17 @@ deps = [
 	'System.Xml.dll',
 ]
 
+top = bld.path.parent.parent
+
+def glob_from(*parts):
+	path = os.path.join(*parts)
+	return (
+		top.find_or_declare(path),
+		top.ant_glob(os.path.join(path, '**'))
+	)
+
+python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.4', 'content')
+
 app = bld(
 	features = 'cs',
 	use = deps,
@@ -20,7 +33,10 @@ app = bld(
 	name = 'Peach.exe',
 #	mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
-	install_644 = 'peach.xsd',
+	install_644 = {
+		bld.path : 'peach.xsd',
+		python_stdlib[0] : python_stdlib[1],
+	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
 )
 
@@ -56,8 +72,6 @@ common = [
 	'Peach.Pro.ComContainer.exe',
 	'Peach.Pro.WindowsDebugInstance.exe',
 
-	'IronPython.StdLib', # Python Standard Library
-	'VMware-VIX',        # VMWare VIX API
 	'CrashWrangler',     # CrashWrangler
 ]
 

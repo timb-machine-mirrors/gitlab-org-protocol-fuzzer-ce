@@ -644,11 +644,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		config = self.ctx.get_config(tg.bld, tg.env)
 
 		out_node = base.make_node(['bin', '%s_%s' % (config, platform)])
-
-		if getattr(tg, 'ide_aspnet', False):
-			out = 'bin'
-		else:
-			out = out_node.path_from(self.base)
+		out = out_node.path_from(self.base)
 
 		# Order matters!
 		g['ProjectGuid'] = '{%s}' % self.uuid

@@ -69,7 +69,6 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 	embed = embed,
-	content = 'IronPython.StdLib',
 	ide_content = 'WebServices/Models/Model.cd',
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
