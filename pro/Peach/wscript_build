@@ -4,12 +4,12 @@ import os
 
 deps = [
 	'NLog.dll',
-	'SharpPcap.dll',
 	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.WebApi.dll',
 	'Peach.Pro.WebApi2.dll',
+	'SharpPcap.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
@@ -26,6 +26,12 @@ def glob_from(*parts):
 
 python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.4', 'content')
 
+netfx = ''
+if Utils.unversioned_sys_platform() != 'win32':
+	netfx = 'mono '
+
+makexsd = '%sPeach.exe --makexsd' % netfx
+
 app = bld(
 	features = 'cs',
 	use = deps,
@@ -34,11 +40,16 @@ app = bld(
 #	mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = {
-		bld.path : 'peach.xsd',
 		python_stdlib[0] : python_stdlib[1],
 	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
+	ide_custom_commands = [
+		dict(type='AfterBuild', command=makexsd, workingdir='${TargetDir}'),
+	]
 )
+
+if bld.is_install:
+	bld.add_post_fun(lambda ctx: ctx.exec_command(makexsd, cwd=bld.env.BINDIR, env={'TERM': 'xterm'}))
 
 # samples folder is installed to output dir by ../SDK/wscript_build
 
@@ -72,7 +83,7 @@ common = [
 	'Peach.Pro.ComContainer.exe',
 	'Peach.Pro.WindowsDebugInstance.exe',
 
-	'CrashWrangler',     # CrashWrangler
+	'CrashWrangler',
 ]
 
 peach_pro = common + [
