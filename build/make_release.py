@@ -109,7 +109,10 @@ def extract_pkg():
 								continue
 						print ' - %s' % item
 						shutil.copy(os.path.join(path, item), reldir)
-						pkgs.append(os.path.join(reldir, item))
+						pkgs.append((
+							os.path.join(reldir, item),
+							os.path.join(path, 'peach.xsd')
+						))
 
 		return pkgs
 
@@ -175,7 +178,7 @@ def extract_pits():
 
 	return (files, packs, archives)
 
-def update_pkg(pkg, docs):
+def update_pkg(pkg, xsd, docs):
 	# Add all files in docs to pkg zip
 
 	print ''
@@ -197,6 +200,8 @@ def update_pkg(pkg, docs):
 
 			zi = z.getinfo(dst)
 			zi.external_attr = mode << 16L
+
+		z.write(xsd, 'peach.xsd')
 
 	sha1sum(pkg)
 
@@ -267,13 +272,13 @@ if __name__ == "__main__":
 
 	toAdd = filter_docs(docs, peach_docs)
 
-	for x in pkgs:
-		if 'internal' not in x:
-			update_pkg(x, toAdd)
+	for pkg, xsd in pkgs:
+		if 'internal' not in pkg:
+			update_pkg(pkg, xsd, toAdd)
 
 	d = datetime.datetime.now()
 
-	names = [ os.path.basename(x) for x in pkgs ]
+	names = [ os.path.basename(x) for x, y in pkgs ]
 
 	for r in releases:
 		dirname = r['dirname'] % c.__dict__
