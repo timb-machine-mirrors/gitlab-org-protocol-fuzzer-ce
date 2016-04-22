@@ -735,6 +735,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 			# We might not have run collect_sources() yet
 			if not hasattr(y, 'uuid'):
 				y = self.ctx.make_project(y)
+				if not y and not self.ctx.enable_cproj:
+					continue
+
 				if not hasattr(y, 'uuid'):
 					self.tg.bld.fatal('cs tgen link task has no uuid for ide_use %r' % self.tg)
 
@@ -764,6 +767,7 @@ class idegen(msvs.msvs_generator):
 	depth = 0
 	copy_cmd = 'copy'
 	cmd = 'msvs2010'
+	enable_cproj = True
 
 	def init(self):
 		msvs.msvs_generator.init(self)
@@ -783,8 +787,8 @@ class idegen(msvs.msvs_generator):
 			self.get_ide_use = self.get_ide_use_mono
 			idegen.copy_cmd = 'cp'
 
-		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_target = vsnode_target
+		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_web_target = vsnode_web_target
 
 	def get_config(self, bld, env):
@@ -1052,7 +1056,7 @@ class idegen(msvs.msvs_generator):
 	def make_project(self, tg):
 		if 'fake_lib' in getattr(tg, 'features', ''):
 			return None
-		elif hasattr(tg, 'link_task'):
+		elif hasattr(tg, 'link_task') and self.enable_cproj:
 			return self.vsnode_target(self, tg)
 		elif hasattr(tg, 'cs_task') or hasattr(tg, 'tsc'):
 			return self.vsnode_cs_target(self, tg)
@@ -1101,6 +1105,19 @@ class idegen2012(idegen):
 		self.vsver  = '2012'
 		self.platform_toolset = 'v110'
 		self.vsnode_cs_target = vsnode_cs_target2012
+
+class idegen_xamarin6(idegen):
+	'''generates a solution for Xamarin Studio/MonoDevelop 6'''
+	cmd = 'xamarin6'
+	fun = idegen.fun
+
+	def init(self):
+		idegen.init(self)
+		self.numver = '12.00'
+		self.vsver  = '2012'
+		self.platform_toolset = 'v110'
+		self.vsnode_cs_target = vsnode_cs_target2012
+		self.enable_cproj = False
 
 def options(ctx):
 	"""
