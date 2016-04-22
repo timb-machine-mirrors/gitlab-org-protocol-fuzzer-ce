@@ -200,7 +200,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   <PropertyGroup>
     ${for p in project.build_properties}
     ${if p.post_build}
-    <PostBuildEvent Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform_tgt}' ">${p.post_build}</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)|$(Platform)' == '${p.configuration}|${p.platform_tgt}' ">${p.post_build}</PostBuildEvent>
     ${endif}
     ${endfor}
   </PropertyGroup>
@@ -773,7 +773,7 @@ class idegen(msvs.msvs_generator):
 		self.solution_name = self.env.APPNAME + '.sln'
 
 		# Make monodevelop csproj
-		if (Utils.unversioned_sys_platform() != 'win32'):
+		if Utils.unversioned_sys_platform() != 'win32':
 			msvs.PROJECT_TEMPLATE = MONO_PROJECT_TEMPLATE
 			msvs.vsnode_project.VS_GUID_VCPROJ = '2857B73E-F847-4B02-9238-064979017E93'
 			vsnode_target.get_waf = vsnode_target.get_waf_mono
@@ -995,11 +995,19 @@ class idegen(msvs.msvs_generator):
 					prop.properties = p.properties
 					prop.configuration_bld = config
 					prop.sources = []
-					prop.post_build = getattr(p, 'post_build', None)
+
+					# for MonoDevelop support
 					prop.custom_cmds = map(
 						lambda x: namedtuple('CustomCommand', x.keys())(*x.values()),
 						getattr(p.tg, 'ide_custom_commands', [])
 					)
+
+					# for MSVS support, convert custom commands into post build events
+					post_builds = []
+					for x in prop.custom_cmds:
+						if x.type == 'AfterBuild':
+							post_builds.append('cd %s && %s' % (x.workingdir, x.command))
+					prop.post_build = ' && '.join(post_builds).replace('&', '&amp;')
 
 					# Ensure all files are accounted for
 					if main != p:
