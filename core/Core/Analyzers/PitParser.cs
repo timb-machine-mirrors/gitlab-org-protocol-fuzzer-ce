@@ -78,6 +78,9 @@ namespace Peach.Core.Analyzers
 		static Dictionary<string, Type> dataModelPitParsable = new Dictionary<string, Type>();
 		static readonly string[] dataElementCommon = { "Relation", "Fixup", "Transformer", "Hint", "Analyzer", "Placement" };
 
+		// Cache of XmlSchema for pits
+		static XmlSchema pitSchema;
+
 		static PitParser()
 		{
 			populatePitParsable();
@@ -314,16 +317,18 @@ namespace Peach.Core.Analyzers
 		/// <param name="sourceName">Name of pit file</param>
 		private XmlDocument validatePit(string xmlData, string sourceName)
 		{
+			if (pitSchema == null)
+			{
+				var builder = new Peach.Core.Xsd.SchemaBuilder(typeof(Peach.Core.Xsd.Dom));
+				pitSchema = builder.Compile();
+			}
+
 			// Collect the errors
 			var errors = new StringBuilder();
 
 			// Load the schema
 			var set = new XmlSchemaSet();
-			var xsd = Utilities.GetAppResourcePath("peach.xsd");
-			using (var tr = XmlReader.Create(xsd))
-			{
-				set.Add(PEACH_NAMESPACE_URI, tr);
-			}
+			set.Add(pitSchema);
 
 			var settings = new XmlReaderSettings
 			{
