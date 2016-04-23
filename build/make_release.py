@@ -332,7 +332,7 @@ if __name__ == "__main__":
 	if os.path.isdir(tmpdir):
 		shutil.rmtree(tmpdir)
 
-	for x in pkgs:
+	for x, y in pkgs:
 		if 'internal' in x:
 			path = os.path.join(reldir, buildtag)
 			shutil.copy(x, path)
