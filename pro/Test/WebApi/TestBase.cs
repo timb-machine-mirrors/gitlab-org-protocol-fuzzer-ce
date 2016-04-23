@@ -54,61 +54,6 @@ namespace Peach.Pro.Test.WebApi
 
 	abstract class ControllerTestsBase
 	{
-		protected class TestJobMonitor : IJobMonitor
-		{
-			readonly int _pid = Utilities.GetCurrentProcessId();
-
-			public void Dispose()
-			{
-			}
-
-			public int Pid { get { return _pid; } }
-
-			public bool IsTracking(Job job)
-			{
-				lock (this)
-				{
-					return RunningJob != null && RunningJob.Guid == job.Guid;
-				}
-			}
-
-			public bool IsControllable { get { return true; } }
-
-			public Job GetJob()
-			{
-				return RunningJob;
-			}
-
-			public Job RunningJob { get; set; }
-
-			public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Pause()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Continue()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Stop()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Kill()
-			{
-				throw new NotImplementedException();
-			}
-
-			public EventHandler InternalEvent { set { } }
-		}
-
 		protected TempDirectory _tmpDir;
 		protected HttpServer _server;
 		protected HttpMessageInvoker _client;
