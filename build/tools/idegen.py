@@ -1009,8 +1009,9 @@ class idegen(msvs.msvs_generator):
 					# for MSVS support, convert custom commands into post build events
 					post_builds = []
 					for x in prop.custom_cmds:
+						workingdir = x.workingdir.replace('{', '(').replace('}', ')')
 						if x.type == 'AfterBuild':
-							post_builds.append('cd %s && %s' % (x.workingdir, x.command))
+							post_builds.append('cd %s && %s' % (workingdir, x.command))
 					prop.post_build = ' && '.join(post_builds).replace('&', '&amp;')
 
 					# Ensure all files are accounted for

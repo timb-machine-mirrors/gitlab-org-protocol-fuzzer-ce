@@ -84,6 +84,7 @@ def prepare(conf):
 	env['ASAN_CXX'] = 'clang++'
 
 	env['RUN_NETFX'] = 'mono'
+	env['PEACH_PLATFORM_DLL'] = 'Peach.Pro.OS.Linux.dll'
 
 	env.append_value('supported_features', [
 		'peach',

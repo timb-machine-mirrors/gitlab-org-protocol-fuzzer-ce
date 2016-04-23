@@ -113,6 +113,7 @@ def prepare(conf):
 	env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])
 
 	env['RUN_NETFX'] = ''
+	env['PEACH_PLATFORM_DLL'] = 'Peach.Pro.OS.Windows.dll'
 
 def configure(conf):
 	env = conf.env

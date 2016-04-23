@@ -20,6 +20,7 @@ tools = [
 optional_tools = [
 	'tools.asan',
 	'tools.mdoc',
+	'tools.mkbundle',
 	'tools.test',
 	'tools.tsc',
 	'tools.zip',
@@ -115,7 +116,12 @@ def prepare(conf):
 	env['ASAN_CC'] = 'clang-3.6'
 	env['ASAN_CXX'] = 'clang++-3.6'
 
+	env['MKBUNDLE_AS'] = 'as -arch i386'
+	env['MKBUNDLE_CC'] = 'cc -arch i386 -framework CoreFoundation -lobjc -liconv'
+	env['MKBUNDLE_PKG_CONFIG_PATH'] = '/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig'
+
 	env['RUN_NETFX'] = 'mono'
+	env['PEACH_PLATFORM_DLL'] = 'Peach.Pro.OS.OSX.dll'
 
 def configure(conf):
 	env = conf.env
