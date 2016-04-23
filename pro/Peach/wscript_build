@@ -8,7 +8,6 @@ deps = [
 	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
-	'Peach.Pro.WebApi.dll',
 	'Peach.Pro.WebApi2.dll',
 	'SharpPcap.dll',
 	'System.dll',
@@ -34,14 +33,14 @@ app = bld(
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.exe',
-#	mkbundle = True,
+	# mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = {
 		python_stdlib[0] : python_stdlib[1],
 	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
 	ide_custom_commands = [
-		dict(type='AfterBuild', command=makexsd, workingdir='$(TargetDir)'),
+		dict(type='AfterBuild', command=makexsd, workingdir='${TargetDir}'),
 	]
 )
 
@@ -59,7 +58,7 @@ common = [
 	'Peach.Pro.OS.Windows.dll',
 	'Peach.Pro.OS.Linux.dll',
 	'Peach.Pro.OS.OSX.dll',
-
+	
 	# Include sample programs so sample pits work
 	'SimpleHttpServer',
 	'CrashableServer',

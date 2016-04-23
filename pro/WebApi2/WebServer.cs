@@ -17,6 +17,8 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Application;
 using Swashbuckle.Swagger;
+using SimpleInjector;
+using SimpleInjector.Integration.WebApi;
 
 namespace Peach.Pro.WebApi2
 {
@@ -29,12 +31,14 @@ namespace Peach.Pro.WebApi2
 		private const int ERROR_ALREADY_EXISTS = 183;
 		// ReSharper restore InconsistentNaming
 
-		readonly WebContext _context;
+		readonly IWebContext _context;
+		readonly IJobMonitor _jobMonitor;
 		IDisposable _server;
 
 		public WebServer(string pitLibraryPath, IJobMonitor jobMonitor)
 		{
-			_context = new WebContext(pitLibraryPath, jobMonitor);
+			_context = new WebContext(pitLibraryPath);
+			_jobMonitor = jobMonitor;
 		}
 
 		public void Start(int? port)
@@ -154,15 +158,19 @@ namespace Peach.Pro.WebApi2
 			if (_server != null)
 				_server.Dispose();
 
-			if (_context != null)
-				_context.Dispose();
+			if (_jobMonitor != null)
+				_jobMonitor.Dispose();
 		}
 
-		private void OnStartup(IAppBuilder app)
+		internal static HttpConfiguration CreateHttpConfiguration(
+			IWebContext context,
+			ILicense license,
+			IPitDatabase pitDatabase,
+			IJobMonitor jobMonitor)
 		{
 			var cfg = new HttpConfiguration();
 
-			cfg.Formatters.JsonFormatter.SerializerSettings = JsonUtilties.GetSettings();
+			cfg.Formatters.JsonFormatter.SerializerSettings = JsonUtilities.GetSettings();
 
 			cfg.MapHttpAttributeRoutes();
 
@@ -187,6 +195,32 @@ namespace Peach.Pro.WebApi2
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
 			}).EnableSwaggerUi();
 
+			var container = new Container();
+			container.Options.DefaultScopedLifestyle = new WebApiRequestLifestyle();
+
+			container.RegisterSingleton(context);
+			container.RegisterSingleton(license);
+			container.RegisterSingleton(pitDatabase);
+			container.RegisterSingleton(jobMonitor);
+
+			container.RegisterWebApiControllers(cfg);
+
+			container.Verify();
+
+			cfg.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);
+
+			return cfg;
+		}
+
+		private void OnStartup(IAppBuilder app)
+		{
+			var cfg = CreateHttpConfiguration(
+				_context,
+				Core.License.Instance,
+				new PitDatabase(_context.PitLibraryPath),
+				_jobMonitor
+			);
+
 			app.UseWebApi(cfg);
 
 			// We don't need to do any favicon.ico specific stuff.
@@ -196,9 +230,6 @@ namespace Peach.Pro.WebApi2
 
 			AddStaticContent(app, "/docs/user", "docs/webhelp");
 			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp");
-
-			// TODO: Replace this with dependency injection
-			cfg.Properties["WebContext"] = _context;
 		}
 
 		private static void AddStaticContent(IAppBuilder app, string requestPath, string fileSystem)
@@ -237,7 +268,7 @@ namespace Peach.Pro.WebApi2
 				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
 				{
 					s.Connect(new IPAddress(0x01010101), 1);
-					
+
 					return ((IPEndPoint)s.LocalEndPoint).Address.ToString();
 				}
 			}

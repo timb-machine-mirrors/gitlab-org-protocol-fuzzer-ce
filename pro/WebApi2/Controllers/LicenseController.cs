@@ -1,17 +1,21 @@
 using System.Web.Http;
-using Peach.Pro.Core.WebServices.Models;
-using Lic = Peach.Pro.Core.License;
+using Peach.Pro.Core;
+using Peach.Pro.WebApi2.Utility;
+using LicenseModel = Peach.Pro.Core.WebServices.Models.License;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[NoCache]
 	[RoutePrefix(Prefix)]
-	public class LicenseController : BaseController
+	public class LicenseController : ApiController
 	{
 		public const string Prefix = "p/license";
 
-		public LicenseController()
-			: base(null)
+		ILicense _license;
+
+		public LicenseController(ILicense license)
 		{
+			_license = license;
 		}
 
 		/// <summary>
@@ -19,18 +23,18 @@ namespace Peach.Pro.WebApi2.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[Route("")]
-		public License Get()
+		public LicenseModel Get()
 		{
-			return new License
+			return new LicenseModel
 			{
-				IsValid = Lic.IsValid,
-				IsInvalid = Lic.IsInvalid,
-				IsMissing = Lic.IsMissing,
-				IsExpired = Lic.IsExpired,
-				ErrorText = Lic.ErrorText,
-				Expiration = Lic.Expiration,
-				Version = Lic.Version,
-				EulaAccepted = Lic.EulaAccepted,
+				IsValid = _license.IsValid,
+				IsInvalid = _license.IsInvalid,
+				IsMissing = _license.IsMissing,
+				IsExpired = _license.IsExpired,
+				ErrorText = _license.ErrorText,
+				Expiration = _license.Expiration,
+				Version = _license.Version,
+				EulaAccepted = _license.EulaAccepted,
 			};
 		}
 
@@ -39,9 +43,9 @@ namespace Peach.Pro.WebApi2.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[Route("")]
-		public License Post()
+		public LicenseModel Post()
 		{
-			Lic.EulaAccepted = true;
+			_license.EulaAccepted = true;
 
 			return Get();
 		}

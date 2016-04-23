@@ -253,7 +253,7 @@ namespace Peach.Pro.Core.Runtime
 
 				// Optionally display license expiration warning
 
-				if (License.IsNearingExpiration)
+				if (License.Instance.IsNearingExpiration)
 				{
 					Console.ForegroundColor = ConsoleColor.Black;
 					Console.BackgroundColor = ConsoleColor.Yellow;
@@ -264,7 +264,7 @@ namespace Peach.Pro.Core.Runtime
 
 					var center = (Console.WindowWidth / 2) - (License.ExpirationWarning.Length / 2);
 					Console.SetCursorPosition(center, 1);
-					Console.Write(License.ExpirationWarning, License.ExpirationInDays);
+					Console.Write(License.ExpirationWarning, License.Instance.ExpirationInDays);
 				}
 
 				Console.ForegroundColor = ConsoleColor.Gray;

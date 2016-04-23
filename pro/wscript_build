@@ -31,7 +31,6 @@ subdirs = [
 	'Test/WebApi',
 	'Validator',
 	'Web',
-	'WebApi',
 	'WebApi2',
 	'WindowsDebugInstance',
 	'Worker',

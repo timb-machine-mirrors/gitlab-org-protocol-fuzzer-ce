@@ -1,24 +1,37 @@
-using Nancy;
-using Nancy.Testing;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using NUnit.Framework;
 using Peach.Core.Test;
-using Peach.Pro.WebApi;
 
 namespace Peach.Pro.Test.WebApi.Controllers
 {
 	[TestFixture]
 	[Quick]
-	class EulaServiceTests
+	class EulaServiceTests : ControllerTestsBase
 	{
+		[SetUp]
+		public void SetUp()
+		{
+			_license.Setup(x => x.IsValid).Returns(true);
+
+			DoSetUp();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			DoTearDown();
+		}
+
 		[Test]
 		public void NoEula()
 		{
-			var bootstrapper = new Bootstrapper(null);
-			var browser = new Browser(bootstrapper);
-
-			var result = browser.Get("/", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.SeeOther, result.StatusCode);
+			using (var request = new HttpRequestMessage(HttpMethod.Get, "/p/jobs"))
+			using (var response = _client.SendAsync(request, CancellationToken.None).Result)
+			{
+				Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+			}
 		}
 	}
 	

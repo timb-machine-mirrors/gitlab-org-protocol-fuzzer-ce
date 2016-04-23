@@ -10,47 +10,68 @@ using Portable.Licensing.Validation;
 
 namespace Peach.Pro.Core
 {
-	public static class License
+	public enum LicenseFeature
+	{
+		Enterprise,
+		Distributed,
+		ProfessionalWithConsulting,
+		Professional,
+		TrialAllPits,
+		Trial,
+		Academic,
+		TestSuites,
+		Studio,
+		Developer,
+		Unknown,
+	}
+
+	public interface ILicense
+	{
+		string ErrorText { get; }
+		LicenseFeature Version { get; }
+		DateTime Expiration { get; }
+		bool IsMissing { get; }
+		bool IsExpired { get; }
+		bool IsInvalid { get; }
+		bool IsNearingExpiration { get; }
+		int ExpirationInDays { get; }
+		bool IsValid { get; }
+		bool EulaAccepted { get; set; }
+		string EulaText();
+		string EulaText(LicenseFeature version);
+	}
+
+	public class License : ILicense
 	{
 		public const string ExpirationWarning = "Warning: Peach expires in {0} days";
-		static readonly string EulaConfig = "eulaAccepted";
-		static bool? eulaAccepted;
-		static bool valid;
-		static readonly object mutex = new object();
+		readonly string EulaConfig = "eulaAccepted";
+		bool? eulaAccepted;
+		bool valid;
+		readonly object mutex = new object();
 
-		public enum Feature
-		{
-			Enterprise,
-			Distributed,
-			ProfessionalWithConsulting,
-			Professional,
-			TrialAllPits,
-			Trial,
-			Academic,
-			TestSuites,
-			Studio,
-			Developer,
-			Unknown,
-		}
-
-		static License()
+		public License()
 		{
 			Verify();
 		}
 
-		public static string ErrorText { get; private set; }
-		public static Feature Version { get; private set; }
-		public static DateTime Expiration { get; private set; }
-		public static bool IsMissing { get; private set; }
-		public static bool IsExpired { get; private set; }
-		public static bool IsInvalid { get; private set; }
+		public static ILicense Instance
+		{
+			get { return new License(); }
+		}
 
-		public static bool IsNearingExpiration
+		public string ErrorText { get; private set; }
+		public LicenseFeature Version { get; private set; }
+		public DateTime Expiration { get; private set; }
+		public bool IsMissing { get; private set; }
+		public bool IsExpired { get; private set; }
+		public bool IsInvalid { get; private set; }
+
+		public bool IsNearingExpiration
 		{
 			get { return IsValid && Expiration < DateTime.Now.AddDays(30); }
 		}
 
-		public static int ExpirationInDays
+		public int ExpirationInDays
 		{
 			get
 			{
@@ -59,7 +80,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public static bool IsValid
+		public bool IsValid
 		{
 			get
 			{
@@ -74,7 +95,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public static bool EulaAccepted
+		public bool EulaAccepted
 		{
 			get
 			{
@@ -115,12 +136,12 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		public static string EulaText()
+		public string EulaText()
 		{
 			return EulaText(Version);
 		}
 
-		public static string EulaText(Feature version)
+		public string EulaText(LicenseFeature version)
 		{
 			var res = "Peach.Pro.Core.Resources.Eula.{0}.txt".Fmt(version);
 			return Utilities.LoadStringResource(Assembly.GetExecutingAssembly(), res);
@@ -133,7 +154,7 @@ namespace Peach.Pro.Core
 			public Exception Exception { get; set; }
 		}
 
-		static LicFile Read(string path)
+		LicFile Read(string path)
 		{
 			var ret = new LicFile { FileName = path };
 
@@ -160,7 +181,7 @@ namespace Peach.Pro.Core
 			return ret;
 		}
 
-		static LicFile Read(out string licenseFile)
+		LicFile Read(out string licenseFile)
 		{
 			// Try several different filenames
 			// this reduces the number of support calls.
@@ -237,18 +258,18 @@ namespace Peach.Pro.Core
 				if (inner is FileNotFoundException || inner is DirectoryNotFoundException)
 					continue;
 
-				ex = (Exception) Activator.CreateInstance(inner.GetType(), inner.Message, inner);
+				ex = (Exception)Activator.CreateInstance(inner.GetType(), inner.Message, inner);
 			}
 
-			if(ex == null)
+			if (ex == null)
 				throw new FileNotFoundException("Unable to locate license file 'Peach.license'.");
 
 			throw ex;
 		}
 
-		static bool Verify()
+		bool Verify()
 		{
-			Version = Feature.Unknown;
+			Version = LicenseFeature.Unknown;
 			Expiration = DateTime.MinValue;
 			IsInvalid = false;
 			IsExpired = false;
@@ -283,13 +304,13 @@ namespace Peach.Pro.Core
 				}
 				else if (!failures.Any())
 				{
-					var ver = Enum.GetNames(typeof(Feature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
+					var ver = Enum.GetNames(typeof(LicenseFeature)).FirstOrDefault(n => license.ProductFeatures.Contains(n));
 					if (string.IsNullOrEmpty(ver))
 						ver = "Unknown";
 
-					Version = (Feature)Enum.Parse(typeof(Feature), ver);
+					Version = (LicenseFeature)Enum.Parse(typeof(LicenseFeature), ver);
 
-					if (Version != Feature.Unknown)
+					if (Version != LicenseFeature.Unknown)
 						return true;
 
 					IsInvalid = true;

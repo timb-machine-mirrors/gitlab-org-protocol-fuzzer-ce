@@ -4,7 +4,6 @@ using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
-using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core
 {
