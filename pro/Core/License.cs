@@ -49,6 +49,9 @@ namespace Peach.Pro.Core
 		bool valid;
 		readonly object mutex = new object();
 
+		private static readonly object instanceLock = new object();
+		private static License instance;
+
 		public License()
 		{
 			Verify();
@@ -56,7 +59,13 @@ namespace Peach.Pro.Core
 
 		public static ILicense Instance
 		{
-			get { return new License(); }
+			get
+			{
+				lock (instanceLock)
+				{
+					return instance ?? (instance = new License());
+				}
+			}
 		}
 
 		public string ErrorText { get; private set; }
