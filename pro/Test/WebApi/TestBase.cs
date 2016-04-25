@@ -9,7 +9,6 @@ using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices;
-using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2;
 
 namespace Peach.Pro.Test.WebApi
@@ -61,11 +60,6 @@ namespace Peach.Pro.Test.WebApi
 		protected Mock<ILicense> _license = new Mock<ILicense>();
 		protected Mock<IPitDatabase> _pitDatabase = new Mock<IPitDatabase>();
 		protected Mock<IJobMonitor> _jobMonitor = new Mock<IJobMonitor>();
-
-		public ControllerTestsBase()
-		{
-			_license = new Mock<ILicense>();
-		}
 
 		public void DoSetUp()
 		{
