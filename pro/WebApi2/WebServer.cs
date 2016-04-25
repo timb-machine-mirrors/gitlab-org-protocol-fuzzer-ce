@@ -165,8 +165,8 @@ namespace Peach.Pro.WebApi2
 		internal static HttpConfiguration CreateHttpConfiguration(
 			IWebContext context,
 			ILicense license,
-			IPitDatabase pitDatabase,
-			IJobMonitor jobMonitor)
+			IJobMonitor jobMonitor,
+			Func<IPitDatabase> pitDatabaseCreator)
 		{
 			var cfg = new HttpConfiguration();
 
@@ -200,8 +200,8 @@ namespace Peach.Pro.WebApi2
 
 			container.RegisterSingleton(context);
 			container.RegisterSingleton(license);
-			container.RegisterSingleton(pitDatabase);
 			container.RegisterSingleton(jobMonitor);
+			container.Register(pitDatabaseCreator, Lifestyle.Scoped);
 
 			container.RegisterWebApiControllers(cfg);
 
@@ -217,8 +217,14 @@ namespace Peach.Pro.WebApi2
 			var cfg = CreateHttpConfiguration(
 				_context,
 				Core.License.Instance,
-				new PitDatabase(_context.PitLibraryPath),
-				_jobMonitor
+				_jobMonitor,
+				() =>
+				{
+					var pitdb = new PitDatabase();
+					if (!string.IsNullOrEmpty(_context.PitLibraryPath))
+						pitdb.Load(_context.PitLibraryPath);
+					return pitdb;
+				}
 			);
 
 			app.UseWebApi(cfg);

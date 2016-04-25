@@ -72,8 +72,8 @@ namespace Peach.Pro.Test.WebApi
 			var config = WebServer.CreateHttpConfiguration(
 				_context, 
 				_license.Object,
-				_pitDatabase.Object,
-				_jobMonitor.Object
+				_jobMonitor.Object,
+				() => _pitDatabase.Object
 			);
 
 			_server = new HttpServer(config);

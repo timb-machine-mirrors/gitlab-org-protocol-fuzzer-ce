@@ -304,24 +304,13 @@ namespace Peach.Pro.Core.WebServices
 
 		#endregion
 
-		public PitDatabase()
-		{
-			_entries = new NamedCollection<PitDetail>();
-			_libraries = new NamedCollection<LibraryDetail>();
-		}
-
-		public PitDatabase(string libraryPath)
-		{
-			Load(libraryPath);
-		}
-
 		internal static readonly string LegacyDir = "User";
 		internal static readonly string ConfigsDir = "Configs";
 
 		private string _pitLibraryPath;
 
-		private NamedCollection<PitDetail> _entries;
-		private NamedCollection<LibraryDetail> _libraries;
+		private NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
+		private NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
 		LibraryDetail _configsLib;
 
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
