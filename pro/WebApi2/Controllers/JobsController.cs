@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Swagger.Annotations;
@@ -22,20 +23,27 @@ namespace Peach.Pro.WebApi2.Controllers
 	/// <remarks>
 	/// Contains all functionality needed to control jobs
 	/// </remarks>
+	[NoCache]
 	[RestrictedApi]
 	[RoutePrefix(Prefix)]
-	public class JobsController : BaseController
+	public class JobsController : ApiController
 	{
 		public const string Prefix = "p/jobs";
+
+		private IWebContext _context;
+		private IPitDatabase _pitDatabase;
+		private IJobMonitor _jobMonitor;
 
 		public static string MakeUrl(params string[] args)
 		{
 			return string.Join("/", "", Prefix, string.Join("/", args));
 		}
 
-		public JobsController()
-			: base(null)
+		public JobsController(IWebContext context, IPitDatabase pitDatabase, IJobMonitor jobMonitor)
 		{
+			_context = context;
+			_pitDatabase = pitDatabase;
+			_jobMonitor = jobMonitor;
 		}
 
 		#region Create / Read / Delete
@@ -94,15 +102,15 @@ namespace Peach.Pro.WebApi2.Controllers
 			if (string.IsNullOrEmpty(request.PitUrl))
 				return BadRequest();
 
-			var pit = PitDatabase.GetPitDetailByUrl(request.PitUrl);
+			var pit = _pitDatabase.GetPitDetailByUrl(request.PitUrl);
 			if (pit == null)
 				return NotFound();
 
-			var job = JobMonitor.Start(PitLibraryPath, pit.Path, request);
+			var job = _jobMonitor.Start(_context.PitLibraryPath, pit.Path, request);
 			if (job == null)
-				return Forbidden();
+				return StatusCode(HttpStatusCode.Forbidden);
 
-			return Ok(LoadJob(JobMonitor.GetJob()));
+			return Ok(LoadJob(_jobMonitor.GetJob()));
 		}
 
 		[Route("{id}")]
@@ -129,12 +137,12 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult Delete(Guid id)
 		{
-			var liveJob = JobMonitor.GetJob();
+			var liveJob = _jobMonitor.GetJob();
 			if (liveJob != null &&
 				liveJob.Guid == id &&
 				liveJob.Status != JobStatus.Stopped)
 			{
-				JobMonitor.Kill();
+				_jobMonitor.Kill();
 			}
 
 			using (var db = new NodeDatabase())
@@ -164,7 +172,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return WithActiveJob(id, () => Ok(new[]
 			{
-				NodesController.MakeUrl(NodeGuid)
+				NodesController.MakeUrl(_context.NodeGuid)
 			}));
 		}
 
@@ -201,7 +209,7 @@ namespace Peach.Pro.WebApi2.Controllers
 						: isFail ? TestStatus.Fail : TestStatus.Pass,
 					Events = events,
 					Log = sb.ToString(),
-					LogUrl = MakeUrl(id.ToString(), "nodes", NodeGuid, "log"),
+					LogUrl = MakeUrl(id.ToString(), "nodes", _context.NodeGuid, "log"),
 				};
 
 				return Ok(result);
@@ -405,8 +413,8 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetPauseJob(Guid id)
 		{
-			return WithActiveJob(id, () => JobMonitor.Pause() ?
-				(IHttpActionResult)Ok() : Forbidden());
+			return WithActiveJob(id, () => _jobMonitor.Pause() ?
+				(IHttpActionResult)Ok() : StatusCode(HttpStatusCode.Forbidden));
 		}
 
 		[Route("{id}/continue")]
@@ -414,8 +422,8 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetContinueJob(Guid id)
 		{
-			return WithActiveJob(id, () => JobMonitor.Continue() ?
-				(IHttpActionResult)Ok() : Forbidden());
+			return WithActiveJob(id, () => _jobMonitor.Continue() ?
+				(IHttpActionResult)Ok() : StatusCode(HttpStatusCode.Forbidden));
 		}
 
 		[Route("{id}/stop")]
@@ -423,8 +431,8 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetStopJob(Guid id)
 		{
-			return WithActiveJob(id, () => JobMonitor.Stop() ?
-				(IHttpActionResult)Ok() : Forbidden());
+			return WithActiveJob(id, () => _jobMonitor.Stop() ?
+				(IHttpActionResult)Ok() : StatusCode(HttpStatusCode.Forbidden));
 		}
 
 		[Route("{id}/kill")]
@@ -432,8 +440,8 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Job state doesn't allow operation")]
 		public IHttpActionResult GetKillJob(Guid id)
 		{
-			return WithActiveJob(id, () => JobMonitor.Kill() ?
-				(IHttpActionResult)Ok() : Forbidden());
+			return WithActiveJob(id, () => _jobMonitor.Kill() ?
+				(IHttpActionResult)Ok() : StatusCode(HttpStatusCode.Forbidden));
 		}
 
 		#endregion
@@ -484,7 +492,7 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		private IHttpActionResult WithActiveJob(Guid id, Func<IHttpActionResult> fn)
 		{
-			var job = JobMonitor.GetJob();
+			var job = _jobMonitor.GetJob();
 			if (job == null || job.Guid != id)
 				return NotFound();
 			return fn();
@@ -536,7 +544,7 @@ namespace Peach.Pro.WebApi2.Controllers
 			//PeachUrl = "",
 			//PackageFileUrl = "",
 
-			if (JobMonitor.IsControllable && JobMonitor.IsTracking(job))
+			if (_jobMonitor.IsControllable && _jobMonitor.IsTracking(job))
 			{
 				job.Commands = new JobCommands
 				{
@@ -564,7 +572,7 @@ namespace Peach.Pro.WebApi2.Controllers
 			// so that the client can disable the Edit Configuration and Replay Job buttons.
 			if (!string.IsNullOrEmpty(job.PitUrl))
 			{
-				var pit = PitDatabase.GetPitDetailByUrl(job.PitUrl);
+				var pit = _pitDatabase.GetPitDetailByUrl(job.PitUrl);
 				if (pit == null)
 					job.PitUrl = null;
 			}
@@ -583,7 +591,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			LoadFaultSummary(job, fault);
 			fault.PitUrl = job.PitUrl;
-			fault.NodeUrl = NodesController.MakeUrl(NodeGuid);
+			fault.NodeUrl = NodesController.MakeUrl(_context.NodeGuid);
 			//PeachUrl = "",
 			//TargetConfigUrl = "",
 			//TargetUrl = "",
@@ -607,9 +615,9 @@ namespace Peach.Pro.WebApi2.Controllers
 			if (job.Status == JobStatus.Stopped)
 				return job;
 
-			if (job.Pid == JobMonitor.Pid)
+			if (job.Pid == _jobMonitor.Pid)
 			{
-				if (!JobMonitor.IsTracking(job))
+				if (!_jobMonitor.IsTracking(job))
 					MarkStale(db, job);
 			}
 			else

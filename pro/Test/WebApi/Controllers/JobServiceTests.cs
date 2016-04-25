@@ -1,100 +1,23 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using Nancy;
-using Nancy.Testing;
-using Newtonsoft.Json.Linq;
+using System.Linq;
+using Moq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Storage;
-using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
-using Peach.Pro.WebApi;
+using Peach.Pro.WebApi2.Controllers;
 using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.WebApi.Controllers
 {
 	[TestFixture]
 	[Quick]
-	class JobServiceTests
+	class JobServiceTests : ControllerTestsBase
 	{
-		class TestJobMonitor : IJobMonitor
-		{
-			readonly JobServiceTests _owner;
-			readonly int _pid = Utilities.GetCurrentProcessId();
-
-			public TestJobMonitor(JobServiceTests owner)
-			{
-				_owner = owner;
-			}
-
-			public void Dispose()
-			{
-			}
-
-			public int Pid { get { return _pid; } }
-
-			public bool IsTracking(Job job)
-			{
-				lock (this)
-				{
-					return _owner._runningJob != null && _owner._runningJob.Guid == job.Guid;
-				}
-			}
-
-			public bool IsControllable { get { return true; } }
-
-			public Job GetJob()
-			{
-				return _owner._runningJob;
-			}
-
-			public Job Start(string pitLibraryPath, string pitFile, JobRequest jobRequest)
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Pause()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Continue()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Stop()
-			{
-				throw new NotImplementedException();
-			}
-
-			public bool Kill()
-			{
-				throw new NotImplementedException();
-			}
-
-			public EventHandler InternalEvent { set { } }
-		}
-
-		class TestBootstrapper : Bootstrapper
-		{
-			public TestBootstrapper(IJobMonitor jobMonitor)
-				: base(new WebContext("pits", jobMonitor))
-			{
-			}
-
-			protected override bool EulaAccepted
-			{
-				get { return true; }
-			}
-		}
-
-		Job _runningJob;
-		Browser _browser;
-		TempDirectory _tmpDir;
 		SysProcess _process;
 
 		static string CrashableServer
@@ -109,11 +32,11 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[SetUp]
 		public void SetUp()
 		{
-			_runningJob = null;
-			_tmpDir = new TempDirectory();
-			_browser = new Browser(new TestBootstrapper(new TestJobMonitor(this)));
+			_license.Setup(x => x.IsValid).Returns(true);
+			_license.Setup(x => x.EulaAccepted).Returns(true);
+			_jobMonitor.Setup(x => x.Pid).Returns(Utilities.GetCurrentProcessId());
 
-			Configuration.LogRoot = _tmpDir.Path;
+			DoSetUp();
 
 			_process = new SysProcess()
 			{
@@ -134,7 +57,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[TearDown]
 		public void TearDown()
 		{
-			_tmpDir.Dispose();
+			DoTearDown();
 
 			_process.Kill();
 			_process.WaitForExit();
@@ -144,20 +67,15 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[Test]
 		public void NoJobs()
 		{
-			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<Job[]>();
-
-			Assert.NotNull(jobs);
-			Assert.AreEqual(0, jobs.Length);
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get();
+			CollectionAssert.IsEmpty(jobs);
 		}
 
 		[Test]
 		public void TwoStopped()
 		{
-			// When jobs are running, their status should ne pulled from the job database
+			// When jobs are running, their status should be pulled from the job database
 
 			var j1 = new Job(new JobRequest(), "pit1.xml");
 			Assert.AreEqual(j1.Status, JobStatus.Starting);
@@ -169,18 +87,13 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			j1.IterationCount = 100;
 			j2.Status = JobStatus.Stopped;
 
-
 			using (var db = new NodeDatabase())
 			{
 				db.UpdateJob(j1);
 				db.UpdateJob(j2);
 			}
-
-			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<Job[]>();
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get().ToArray();
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(2, jobs.Length);
@@ -205,31 +118,30 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			j1.Pid = _process.Id;
 			File.Create(j1.DatabasePath);
 
-			_runningJob = new Job(new JobRequest(), "pit2.xml");
+			var runningJob = new Job(new JobRequest(), "pit2.xml");
+			_jobMonitor.Setup(x => x.GetJob()).Returns(runningJob);
+			_jobMonitor.Setup(x => x.IsTracking(It.Is<Job>(job => job.Guid == runningJob.Guid))).Returns(true);
 
 			var dir2 = Path.Combine(Configuration.LogRoot, "pit2");
 			Directory.CreateDirectory(dir2);
-			_runningJob.LogPath = dir2;
-			_runningJob.Status = JobStatus.Running;
-			File.Create(_runningJob.DatabasePath);
+			runningJob.LogPath = dir2;
+			runningJob.Status = JobStatus.Running;
+			File.Create(runningJob.DatabasePath);
 
 			j1.IterationCount = 100;
 			j1.FaultCount = 5;
 
-			_runningJob.IterationCount = 10;
-			_runningJob.FaultCount = 3;
+			runningJob.IterationCount = 10;
+			runningJob.FaultCount = 3;
 
 			using (var db = new NodeDatabase())
 			{
 				db.UpdateJob(j1);
-				db.UpdateJob(_runningJob);
+				db.UpdateJob(runningJob);
 			}
 
-			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<Job[]>();
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get().ToArray();
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(2, jobs.Length);
@@ -242,7 +154,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Assert.AreEqual(100, jobs[0].IterationCount);
 			Assert.AreEqual(5, jobs[0].FaultCount);
 
-			Assert.AreEqual(_runningJob.Id, jobs[1].Id);
+			Assert.AreEqual(runningJob.Id, jobs[1].Id);
 			Assert.AreEqual(JobStatus.Running, jobs[1].Status);
 			Assert.AreEqual(10, jobs[1].IterationCount);
 			Assert.AreEqual(3, jobs[1].FaultCount);
@@ -259,7 +171,9 @@ namespace Peach.Pro.Test.WebApi.Controllers
 
 			Assert.AreEqual(j1.Status, JobStatus.Starting);
 
-			_runningJob = new Job(new JobRequest(), "pit2.xml");
+			var runningJob = new Job(new JobRequest(), "pit2.xml");
+			_jobMonitor.Setup(x => x.GetJob()).Returns(runningJob);
+			_jobMonitor.Setup(x => x.IsTracking(It.Is<Job>(job => job.Guid == runningJob.Guid))).Returns(true);
 
 			var j2 = new Job(new JobRequest(), "pit2.xml") { Pid = -1 };
 
@@ -269,17 +183,14 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				db.UpdateJob(j2);
 			}
 
-			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<Job[]>();
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get().ToArray();
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(3, jobs.Length);
 			Assert.AreEqual(j1.Id, jobs[0].Id);
 			Assert.AreEqual(JobStatus.Starting, jobs[0].Status);
-			Assert.AreEqual(_runningJob.Id, jobs[1].Id);
+			Assert.AreEqual(runningJob.Id, jobs[1].Id);
 			Assert.AreEqual(JobStatus.Starting, jobs[1].Status);
 			Assert.AreEqual(j2.Id, jobs[2].Id);
 			Assert.AreEqual(JobStatus.Stopped, jobs[2].Status);
@@ -322,23 +233,20 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				db.UpdateJob(j3);
 			}
 
-			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<JArray>();
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get().ToArray();
 
 			Assert.NotNull(jobs);
-			Assert.AreEqual(3, jobs.Count);
+			Assert.AreEqual(3, jobs.Length);
 
-			Assert.AreEqual(j1.Id, jobs[0].Value<string>("id"));
-			Assert.IsTrue(jobs[0].Value<bool>("hasMetrics"));
+			Assert.AreEqual(j1.Id, jobs[0].Id);
+			Assert.IsTrue(jobs[0].HasMetrics);
 
-			Assert.AreEqual(j2.Id, jobs[1].Value<string>("id"));
-			Assert.IsFalse(jobs[1].Value<bool>("hasMetrics"));
+			Assert.AreEqual(j2.Id, jobs[1].Id);
+			Assert.IsFalse(jobs[1].HasMetrics);
 
-			Assert.AreEqual(j3.Id, jobs[2].Value<string>("id"));
-			Assert.IsFalse(jobs[2].Value<bool>("hasMetrics"));
+			Assert.AreEqual(j3.Id, jobs[2].Id);
+			Assert.IsFalse(jobs[2].HasMetrics);
 		}
 
 		[Test]
@@ -390,16 +298,19 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			};
 
 			// Running job with late heartbeat
-			_runningJob = new Job(new JobRequest(), "pit5.xml")
+			var runningJob = new Job(new JobRequest(), "pit5.xml")
 			{
 				StartDate = now - TimeSpan.FromHours(1),
 				HeartBeat = now - TimeSpan.FromHours(1),
 				Status = JobStatus.Running
 			};
 
-			var jobs = new[] { j1, j2, j3, j4, _runningJob };
+			_jobMonitor.Setup(x => x.GetJob()).Returns(runningJob);
+			_jobMonitor.Setup(x => x.IsTracking(It.Is<Job>(job => job.Guid == runningJob.Guid))).Returns(true);
 
-			foreach (var j in jobs)
+			var prepareJobs = new[] { j1, j2, j3, j4, runningJob };
+
+			foreach (var j in prepareJobs)
 			{
 				j.LogPath = Path.Combine(Configuration.LogRoot, j.PitFile);
 				Directory.CreateDirectory(j.LogPath);
@@ -407,13 +318,10 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			}
 
 			using (var db = new NodeDatabase())
-				db.UpdateJobs(jobs);
+				db.UpdateJobs(prepareJobs);
 
-			var result = _browser.Get("/p/jobs", with => with.HttpRequest());
-
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			jobs = result.DeserializeJson<Job[]>();
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get().ToArray();
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(5, jobs.Length);
@@ -430,7 +338,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			Assert.AreEqual(j4.Id, jobs[3].Id);
 			Assert.AreEqual(JobStatus.Stopped, jobs[3].Status);
 
-			Assert.AreEqual(_runningJob.Id, jobs[4].Id);
+			Assert.AreEqual(runningJob.Id, jobs[4].Id);
 			Assert.AreEqual(JobStatus.Running, jobs[4].Status);
 		}
 
@@ -444,31 +352,26 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			j1.IterationCount = 100;
 			j1.Status = JobStatus.Stopped;
 
-			_runningJob = new Job(new JobRequest(), "pit2.xml");
+			var runningJob = new Job(new JobRequest(), "pit2.xml");
+			_jobMonitor.Setup(x => x.GetJob()).Returns(runningJob);
+			_jobMonitor.Setup(x => x.IsTracking(It.Is<Job>(job => job.Guid == runningJob.Guid))).Returns(true);
 
 			var dir2 = Path.Combine(Configuration.LogRoot, "pit2");
 			Directory.CreateDirectory(dir2);
-			_runningJob.LogPath = dir2;
-			_runningJob.Status = JobStatus.Running;
-			File.Create(_runningJob.DatabasePath);
+			runningJob.LogPath = dir2;
+			runningJob.Status = JobStatus.Running;
+			File.Create(runningJob.DatabasePath);
 
 			using (var db = new NodeDatabase())
 			{
 				db.UpdateJob(j1);
-				db.UpdateJob(_runningJob);
+				db.UpdateJob(runningJob);
 			}
 
-			var result = _browser.Get("/p/jobs", with =>
-			{
-				with.Query("running", query);
-				with.HttpRequest();
-			});
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get(running: true).ToArray();
 
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<Job[]>();
 			Assert.NotNull(jobs);
-
 			Assert.AreEqual(1, jobs.Length);
 		}
 
@@ -494,17 +397,10 @@ namespace Peach.Pro.Test.WebApi.Controllers
 				db.UpdateJob(j2);
 			}
 
-			var result = _browser.Get("/p/jobs", with =>
-			{
-				with.Query("dryrun", query);
-				with.HttpRequest();
-			});
+			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
+			var jobs = ctrl.Get(dryrun: true).ToArray();
 
-			Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-
-			var jobs = result.DeserializeJson<Job[]>();
 			Assert.NotNull(jobs);
-
 			Assert.AreEqual(1, jobs.Length);
 		}
 	}

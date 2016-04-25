@@ -1,4 +1,3 @@
-using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 
@@ -8,7 +7,7 @@ namespace PeachWorker
 	{
 		static int Main(string[] args)
 		{
-			if (!License.IsValid)
+			if (!License.Instance.IsValid)
 				return -1;
 
 			return new Worker().Run(args);
