@@ -52,7 +52,7 @@ namespace Peach {
 	}
 	
 	export function MakeLowerEnum(obj: any) {
-		Object.keys(obj).map(key => obj[key] = key.toLowerCase());
+		Object.keys(obj).map(key => obj[key] = key[0].toLowerCase() + key.substr(1));
 	}
 	
 	export function onlyWith<T, R>(obj: T, fn: (T) => R): R {
