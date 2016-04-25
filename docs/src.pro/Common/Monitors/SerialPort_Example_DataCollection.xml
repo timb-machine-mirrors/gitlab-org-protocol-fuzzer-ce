@@ -15,7 +15,7 @@
   </StateModel>
 
   <Agent name="Local">
-    <Monitor class="Serial">
+    <Monitor class="SerialPort">
       <Param name="Port" value="COM1" />
     </Monitor>
   </Agent>
