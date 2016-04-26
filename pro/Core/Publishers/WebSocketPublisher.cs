@@ -61,8 +61,7 @@ namespace Peach.Pro.Core.Publishers
 		}
 
 		static async Task AcceptWebSocketClientAsync(WebSocketListener server, CancellationToken token,
-			BufferBlock<string> queue,
-			EventWaitHandle clientReady, EventWaitHandle evaluated)
+			BufferBlock<string> queue, EventWaitHandle clientReady, EventWaitHandle evaluated)
 		{
 			CancellationTokenSource cancelConnection = null;
 			Task reader = null;
@@ -80,6 +79,10 @@ namespace Peach.Pro.Core.Publishers
 						logger.Debug("New web socket connection. Closing down existing connection.");
 
 						cancelConnection.Cancel();
+
+						// Wait to see if our task threads will exit okay.
+						// We want to avoid having an old reader thread that sets clientReady or evaluated.
+						// Also avoid our writer thread de-queuing from queue.
 
 						if (reader != null)
 							reader.Wait(1000);
@@ -119,16 +122,24 @@ namespace Peach.Pro.Core.Publishers
 				while (ws.IsConnected && !cancellation.IsCancellationRequested)
 				{
 					var msg = await ws.ReadStringAsync(cancellation).ConfigureAwait(false);
-					if (msg != null)
-					{
-						logger.Debug("NewMessageReceived: " + msg);
-						clientReady.Set();
+					if (msg == null) continue;
 
-						var json = JObject.Parse(msg);
-						if ((string)json["msg"] == "Client ready")
-							clientReady.Set();
-						if ((string)json["msg"] == "Evaluation complete")
-							evaluated.Set();
+					logger.Trace("NewMessageReceived: {0}", msg);
+
+					var json = JObject.Parse(msg);
+					if ((string) json["msg"] == "Client ready")
+					{
+						logger.Debug("Client ready message received");
+						clientReady.Set();
+					}
+					else if ((string) json["msg"] == "Evaluation complete")
+					{
+						logger.Debug("Evaluated message received");
+						evaluated.Set();
+					}
+					else
+					{
+						logger.Debug("Unknown message received: {0}", msg);
 					}
 				}
 			}
@@ -154,7 +165,7 @@ namespace Peach.Pro.Core.Publishers
 					var msg = await queue.ReceiveAsync(cancellation);
 					if (msg == null) continue;
 
-					logger.Debug("Dequeued and sending message");
+					logger.Trace("Dequeued and sending message");
 					ws.WriteString(msg);
 				}
 			}
@@ -191,41 +202,32 @@ namespace Peach.Pro.Core.Publishers
 		{
 			base.OnOpen();
 
+			IList<string> msgs;
+			_msgQueue.TryReceiveAll(out msgs);
 			_evaluated.Reset();
 
 			if (!_clientReady.WaitOne(Timeout))
 				throw new SoftException("Timeout waiting for web socket connection.");
 		}
 
-		protected override void OnClose()
-		{
-			base.OnClose();
-
-			IList<string> msgs;
-			_msgQueue.TryReceiveAll(out msgs);
-			_evaluated.Reset();
-		}
-
 		protected override void OnOutput(BitwiseStream data)
 		{
-			try
+			_jsonTemplateMessage["content"] = BuildTemplate(data);
+			var msg = _jsonTemplateMessage.ToString(Newtonsoft.Json.Formatting.None) + "\n";
+
+			_msgQueue.Post(msg);
+
+			var startTime = DateTime.Now;
+			while ((DateTime.Now - startTime).TotalMilliseconds < Timeout)
 			{
-				_jsonTemplateMessage["content"] = BuildTemplate(data);
-				var msg = _jsonTemplateMessage.ToString(Newtonsoft.Json.Formatting.None) + "\n";
+				if (!_clientReady.WaitOne(0))
+					throw new SoftException("Web socket connection lost.");
 
-				_msgQueue.Post(msg);
-
-				logger.Debug("Waiting for evaluated or client ready msg");
-				if (!_evaluated.WaitOne(Timeout))
-					throw new SoftException("Timeout waiting for WebSocket evaluated.");
-
-				_evaluated.Reset();
+				if (_evaluated.WaitOne(200))
+					return;
 			}
-			catch (Exception ex)
-			{
-				logger.Debug(ex.ToString());
-				throw;
-			}
+
+			throw new SoftException("Timeout waiting for WebSocket evaluated.");
 		}
 
 		protected string BuildTemplate(BitwiseStream data)
