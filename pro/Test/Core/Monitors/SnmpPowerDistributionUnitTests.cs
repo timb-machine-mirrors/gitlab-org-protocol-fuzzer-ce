@@ -9,6 +9,9 @@ using System.Diagnostics;
 using Peach.Core.Test;
 using System.Collections.Concurrent;
 using Peach.Core;
+using System.Net.NetworkInformation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Peach.Pro.Test.Core.Monitors
 {
@@ -47,10 +50,17 @@ namespace Peach.Pro.Test.Core.Monitors
 	class SnmpPowerDistributionUnitTests
 	{
 		static IReadOnlyList<string> OIDs = new List<string>() {
-			".1.3.6.1.4.1.318.1.1.4.4.2.1.3.1",
-			".1.3.6.1.4.1.318.1.1.4.4.2.1.3.2",
-			".1.3.6.1.4.1.318.1.1.4.4.2.1.3.3",
+			".1.3.6.1.4.1.318.1.1.4.4.2.1.3.1",  // outlet 1
+			".1.3.6.1.4.1.318.1.1.4.4.2.1.3.2",  // outlet 2
+			".1.3.6.1.4.1.318.1.1.4.4.2.1.3.3",  // outlet 3
 		}.AsReadOnly();
+
+		static IReadOnlyList<IPAddress> DeviceAddresses = new List<IPAddress>() {
+			IPAddress.Parse("10.0.1.121"),  // powered by outlet 1
+			IPAddress.Parse("10.0.1.122"),  // powered by outlet 2
+			IPAddress.Parse("10.0.1.123"),  // powered by outlet 3
+		}.AsReadOnly();
+
 		const int OnCode = 1;
 		const int OffCode = 2;
 
@@ -129,8 +139,57 @@ namespace Peach.Pro.Test.Core.Monitors
 
 
 		#region RealSnmpAgent
+		private bool PingSucceeds(IEnumerable<IPAddress> ips, int maxAttempts=5, int retrySleep=1000)
+		{
+			var result = Parallel.ForEach(ips, (ip, loopState) => {
+				var hasSucceeded = false;
+				Exception latestException = null;
+				IPStatus? latestStatus = null;
+//				var clock = new Stopwatch();
+//				clock.Start();
+
+				for (var attempt = 0; !hasSucceeded && attempt < maxAttempts; attempt++)
+				{
+					if (loopState.ShouldExitCurrentIteration) {
+						loopState.Break();
+					}
+
+					try
+					{
+//						Console.WriteLine("Pinging {0}: attempt {1} (t={2}ms)", ip, attempt, clock.ElapsedMilliseconds);
+						var ping = new Ping();
+						var reply = ping.Send(ip);
+
+						if (reply != null) {
+							latestStatus = reply.Status;
+						} else {
+							continue;
+						}
+
+						hasSucceeded = (latestStatus == IPStatus.Success);
+					}
+					catch (Exception e)
+					{
+						latestException = e;
+					}
+					Thread.Sleep(retrySleep);
+				}
+				if (!hasSucceeded)
+				{
+					if (latestException != null)
+						Console.WriteLine("Ping to IP {0} failed with status {1}: {2}",
+							ip, latestStatus, latestException.Message);
+					if (latestStatus.HasValue)
+						Console.WriteLine("Ping reply status: {0}", latestStatus);
+
+					loopState.Stop();
+				}
+			});
+
+			return result.IsCompleted;
+		}
+
 		[Test]
-		[Ignore("APC Power Distribution Unit must be set up for test")]
 		/*
 		 * Directions for setting up test device:
 		 *
@@ -149,7 +208,21 @@ namespace Peach.Pro.Test.Core.Monitors
 			var agent = new SnmpAgent("10.0.1.101",	161, "public", "private", 1000);
 			var apc = new SnmpPowerDistributionUnit(agent, OIDs, OnCode, OffCode);
 
+			var maxAttemptsFromBoot = 60;
+			var retryDelayDuringBoot = 1000;
+
+			// ensure power is on and devices are awake
+			apc.Switch(OutletState.On);
+			Assert.IsTrue(PingSucceeds(DeviceAddresses, maxAttemptsFromBoot, retryDelayDuringBoot));
+
+			// power cycle the outlets
 			Assert.DoesNotThrow(() => apc.SanityCheck(timeout: 3000));
+
+			// immediately after power cut, ensure devices aren't responding to ping
+			Assert.IsFalse(PingSucceeds(DeviceAddresses, maxAttempts: 1));
+
+			// keep pinging for up to a minute to ensure all devices revive
+			Assert.IsTrue(PingSucceeds(DeviceAddresses, maxAttemptsFromBoot, retryDelayDuringBoot));
 		}
 		#endregion
 	}
@@ -196,7 +269,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
-		[Ignore("APC Power Distribution Unit must be set up for test")]
+//		[Ignore("APC Power Distribution Unit must be set up for test")]
 		/* See directions above for TestApcSwitchedRackPowerDistributionUnit */
 		public void TestSnmpPowerBasic()
 		{
