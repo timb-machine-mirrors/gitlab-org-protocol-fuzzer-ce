@@ -7,7 +7,6 @@ using System.Net;
 using Peach.Pro.Core.Agent.Monitors;
 using System.Diagnostics;
 using Peach.Core.Test;
-using System.Collections.Concurrent;
 using Peach.Core;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -31,6 +30,14 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 	}
 
+	class FakeException : Exception
+	{
+		public FakeException(string msg)
+			: base(msg)
+		{
+		}
+	}
+
 	class FakeSnmpAgentReadOnly : ISnmpAgent
 	{
 		int _unrecognizedSwitchState = -1;
@@ -42,7 +49,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 		public int Set(string oid, int code)
 		{
-			throw new Exception("Expected failure; agent is read-only for testing");
+			throw new FakeException("Expected failure; agent is read-only for testing");
 		}
 	}
 
@@ -133,7 +140,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			var readOnlySpdu = new SnmpPowerDistributionUnit(new FakeSnmpAgentReadOnly(), OIDs, OnCode, OffCode);
 
-			Assert.Throws<Exception>(() => readOnlySpdu.Switch(OutletState.Off));
+			Assert.Throws<FakeException>(() => readOnlySpdu.Switch(OutletState.Off));
 		}
 		#endregion
 
@@ -202,6 +209,11 @@ namespace Peach.Pro.Test.Core.Monitors
 		 *   5. If the test fails at this point, install APC's powernet417.mib and try:
 		 *        $ snmpwalk -v 1 -c public 10.0.1.101 enterprises.318
 		 *   6. Confirm 'PowerNet-MIB::sPDUOutletCtl.1 = INTEGER:' is in the output.
+		 *   7. Plug in devices that automatically boot when their power source is turned on (e.g. Raspberry Pis)
+		 *   8. Set up the devices with the following IPs
+		 *        - outlet 1: 10.0.1.121
+		 *        - outlet 2: 10.0.1.122
+		 *        - outlet 3: 10.0.1.123
 		 */
 		public void TestApcSwitchedRackPowerDistributionUnit()
 		{
@@ -230,7 +242,7 @@ namespace Peach.Pro.Test.Core.Monitors
 	[TestFixture]
 	class SnmpPowerMonitorTests
 	{
-		private ConcurrentQueue<string> _history = new ConcurrentQueue<string>();
+		private Queue<string> _history = new Queue<string>();
 
 		private MonitorRunner SnmpPowerRunner(Dictionary<string, string> args)
 		{
@@ -269,7 +281,6 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
-//		[Ignore("APC Power Distribution Unit must be set up for test")]
 		/* See directions above for TestApcSwitchedRackPowerDistributionUnit */
 		public void TestSnmpPowerBasic()
 		{
@@ -284,7 +295,7 @@ namespace Peach.Pro.Test.Core.Monitors
 					"On",
 				};
 
-			Assert.That(_history.ToArray(), Is.EqualTo(expected), "History mismatch");
+			CollectionAssert.AreEqual(expected, _history, "History mismatch");
 		}
 
 		[Test]
