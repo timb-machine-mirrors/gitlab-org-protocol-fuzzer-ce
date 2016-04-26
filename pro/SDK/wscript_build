@@ -8,7 +8,7 @@ bld(
 	install_path = '${BINDIR}/sdk',
 	install_755 = {
 		bld.path : bld.path.ant_glob('**/*', excl='wscript_build'),
-		peach    : peach.ant_glob('samples/*'),
+		peach    : peach.ant_glob('samples/**'),
 	}
 )
 
