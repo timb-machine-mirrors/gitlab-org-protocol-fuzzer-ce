@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -19,6 +21,14 @@ namespace Peach.Pro.Core
 	public class ProPitParser : PitParser
 	{
 		static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		Assembly _pitsAssembly;
+		string _pitsNamespace;
+
+		public ProPitParser(Assembly pitsAssembly = null, string pitsNamespace = "")
+		{
+			_pitsAssembly = pitsAssembly;
+			_pitsNamespace = pitsNamespace;
+		}
 
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
@@ -28,6 +38,52 @@ namespace Peach.Pro.Core
 		protected override Peach.Core.Dom.StateModel CreateStateModel()
 		{
 			return new StateModel();
+		}
+
+		protected override void handleInclude(Peach.Core.Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
+		{
+			var ns = child.getAttrString("ns");
+			var src = child.getAttrString("src");
+			var uri = new UriBuilder(src);
+
+			Stream stream;
+			if (uri.Scheme == "file" || string.IsNullOrEmpty(uri.Scheme))
+			{
+				var normalized = Path.GetFullPath(uri.Path);
+				if (!File.Exists(normalized))
+				{
+					normalized = Path.GetFullPath(Utilities.GetAppResourcePath(uri.Path));
+					if (!File.Exists(normalized))
+						throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(normalized));
+				}
+				stream = new FileStream(normalized, FileMode.Open, FileAccess.Read);
+			}
+			else if (uri.Scheme == "asm")
+			{
+				var resourceName = string.Join(".", _pitsNamespace, uri.Path);
+				stream = _pitsAssembly.GetManifestResourceStream(resourceName);
+			}
+			else
+			{
+				throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(uri.Scheme));
+			}
+
+			var dataName = Path.GetFileNameWithoutExtension(uri.Path);
+			var newDom = asParser(args, new StreamReader(stream), dataName, true);
+			newDom.Name = ns;
+			dom.ns.Add(newDom);
+
+			foreach (var item in newDom.Python.Paths)
+				dom.Python.AddSearchPath(item);
+
+			foreach (var item in newDom.Python.Modules)
+				dom.Python.ImportModule(item);
+
+			foreach (var item in newDom.Ruby.Paths)
+				dom.Ruby.AddSearchPath(item);
+
+			foreach (var item in newDom.Ruby.Modules)
+				dom.Ruby.ImportModule(item);
 		}
 
 		protected override void handlePeach(Peach.Core.Dom.Dom dom, XmlNode node, Dictionary<string, object> args)

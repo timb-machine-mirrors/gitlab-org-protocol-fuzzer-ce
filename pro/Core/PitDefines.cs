@@ -114,8 +114,8 @@ namespace Peach.Pro.Core
 		public class Group : Collection
 		{
 			[XmlAttribute("name")]
-			public string NameAttr 
-			{ 
+			public string NameAttr
+			{
 				get { return Name; }
 				set { Name = value; }
 			}
@@ -145,32 +145,32 @@ namespace Peach.Pro.Core
 		public abstract class PrimitiveDefine : Define
 		{
 			[XmlAttribute("name")]
-			public string NameAttr 
-			{ 
+			public string NameAttr
+			{
 				get { return Name; }
-				set { Name = value; } 
+				set { Name = value; }
 			}
 
 			[XmlAttribute("key")]
-			public string KeyAttr 
-			{ 
+			public string KeyAttr
+			{
 				get { return Key; }
-				set { Key = value; } 
+				set { Key = value; }
 			}
 
 			[XmlAttribute("value")]
-			public string ValueAttr 
-			{ 
+			public string ValueAttr
+			{
 				get { return Value; }
-				set { Value = value; } 
+				set { Value = value; }
 			}
 
 			[XmlAttribute("description")]
 			[DefaultValue("")]
-			public string DescriptionAttr 
-			{ 
+			public string DescriptionAttr
+			{
 				get { return Description; }
-				set { Description = value; } 
+				set { Description = value; }
 			}
 		}
 
@@ -189,8 +189,8 @@ namespace Peach.Pro.Core
 		{
 			[XmlAttribute("optional")]
 			[DefaultValue(false)]
-			public bool OptionalAttr 
-			{ 
+			public bool OptionalAttr
+			{
 				get { return Optional; }
 				set { Optional = value; }
 			}
@@ -305,7 +305,7 @@ namespace Peach.Pro.Core
 		{
 			[XmlIgnore]
 			public Type EnumType { get; protected set; }
-			
+
 			[XmlAttribute("enumType")]
 			public string EnumTypeName
 			{
@@ -521,16 +521,54 @@ namespace Peach.Pro.Core
 		}
 
 		private static PitDefines ParseFile(
-			string fileName, 
-			string pitLibraryPath, 
+			string fileName,
+			string pitLibraryPath,
 			IEnumerable<KeyValuePair<string, string>> overrides,
 			bool includeSystemDefs = true)
 		{
-			var defs = File.Exists(fileName) ? XmlTools.Deserialize<PitDefines> (fileName) : new PitDefines();
+			var defs = File.Exists(fileName) ? XmlTools.Deserialize<PitDefines>(fileName) : new PitDefines();
 
 			if (includeSystemDefs)
 			{
-				defs.SystemDefines.AddRange(new Define[] {
+				AddSystemDefines(pitLibraryPath, defs);
+			}
+
+			if (overrides != null)
+			{
+				defs.SystemDefines.AddRange(
+					overrides.Select(kv => new SystemDefine
+					{
+						Name = kv.Key,
+						Key = kv.Key,
+						Value = kv.Value
+					})
+				);
+			}
+
+			return defs;
+		}
+
+		public static PitDefines Parse(Stream stream, IEnumerable<KeyValuePair<string, string>> overrides)
+		{
+			var defs = stream != null ? XmlTools.Deserialize<PitDefines>(stream) : new PitDefines();
+			AddSystemDefines(Utilities.ExecutionDirectory, defs);
+			if (overrides != null)
+			{
+				defs.SystemDefines.AddRange(
+					overrides.Select(kv => new SystemDefine
+					{
+						Name = kv.Key,
+						Key = kv.Key,
+						Value = kv.Value
+					})
+				);
+			}
+			return defs;
+		}
+
+		static void AddSystemDefines(string pitLibraryPath, PitDefines defs)
+		{
+			defs.SystemDefines.AddRange(new Define[] {
 					new SystemDefine {
 						Key = "Peach.OS",
 						Name = "Peach OS",
@@ -562,21 +600,6 @@ namespace Peach.Pro.Core
 						Value = pitLibraryPath ?? Environment.CurrentDirectory,
 					}
 				});
-			}
-
-			if (overrides != null)
-			{
-				defs.SystemDefines.AddRange(
-					overrides.Select(kv => new SystemDefine
-					{
-						Name = kv.Key,
-						Key = kv.Key,
-						Value = kv.Value
-					})
-				);
-			}
-
-			return defs;
 		}
 
 		public static List<KeyValuePair<string, string>> ParseFileWithDefaults(string pitLibraryPath, string fileName)
@@ -670,7 +693,7 @@ namespace Peach.Pro.Core
 
 			var re = new Regex("##(\\w+?)##");
 
-			var evaluator = new MatchEvaluator(delegate(Match m)
+			var evaluator = new MatchEvaluator(delegate (Match m)
 			{
 				var key = m.Groups[1].Value;
 				var val = ret.Where(x => x.Key == key).Select(x => x.Value).FirstOrDefault();
@@ -678,12 +701,12 @@ namespace Peach.Pro.Core
 				return val ?? m.Groups[0].Value;
 			});
 
-			for (var i = 0; i < ret.Count; )
+			for (var i = 0; i < ret.Count;)
 			{
 				var oldVal = ret[i].Value;
 				if (oldVal == null)
 					throw new PeachException("Undefined PitDefine: \"{0}\"".Fmt(ret[i].Key));
-				
+
 				var newVal = re.Replace(oldVal, evaluator);
 
 				if (oldVal != newVal)

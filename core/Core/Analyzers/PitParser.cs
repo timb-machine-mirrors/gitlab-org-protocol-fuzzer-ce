@@ -88,10 +88,6 @@ namespace Peach.Core.Analyzers
 			Analyzer.defaultParser = new PitParser();
 		}
 
-		public PitParser()
-		{
-		}
-
 		[Obsolete("This method is obsolete and should not be used.")]
 		public static List<KeyValuePair<string, string>> parseDefines(string definedValuesFile)
 		{
@@ -193,7 +189,7 @@ namespace Peach.Core.Analyzers
 
 		public Dom.Dom asParser(Dictionary<string, object> args, TextReader data)
 		{
-			return asParser(args,data, string.Empty, true);
+			return asParser(args, data, string.Empty, true);
 		}
 
 		public override Dom.Dom asParser(Dictionary<string, object> args, Stream data)
@@ -229,7 +225,7 @@ namespace Peach.Core.Analyzers
 			return new Dom.StateModel();
 		}
 
-		protected virtual Dom.Dom asParser(Dictionary<string, object> args, TextReader data, string dataName, bool parse)
+		public virtual Dom.Dom asParser(Dictionary<string, object> args, TextReader data, string dataName, bool parse)
 		{
 			// Reset the data element auto-name suffix back to zero
 			Resetter.Reset();
@@ -336,7 +332,7 @@ namespace Peach.Core.Analyzers
 				Schemas = set,
 				NameTable = new NameTable()
 			};
-			settings.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
+			settings.ValidationEventHandler += delegate (object sender, ValidationEventArgs e)
 			{
 				var ex = e.Exception;
 
@@ -419,36 +415,7 @@ namespace Peach.Core.Analyzers
 				switch (child.Name)
 				{
 					case "Include":
-						string ns = child.getAttrString("ns");
-						string fileName = child.getAttrString("src");
-						fileName = fileName.Replace("file:", "");
-						string normalized = Path.GetFullPath(fileName);
-
-						if (!File.Exists(normalized))
-						{
-							string newFileName = Utilities.GetAppResourcePath(fileName);
-							normalized = Path.GetFullPath(newFileName);
-							if (!File.Exists(normalized))
-								throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
-							fileName = newFileName;
-						}
-
-						var newDom = asParser(args, fileName);
-						newDom.Name = ns;
-						dom.ns.Add(newDom);
-
-						foreach (var item in newDom.Python.Paths)
-							dom.Python.AddSearchPath(item);
-
-						foreach (var item in newDom.Python.Modules)
-							dom.Python.ImportModule(item);
-
-						foreach (var item in newDom.Ruby.Paths)
-							dom.Ruby.AddSearchPath(item);
-
-						foreach (var item in newDom.Ruby.Modules)
-							dom.Ruby.ImportModule(item);
-
+						handleInclude(dom, args, child);
 						break;
 
 					case "Require":
@@ -577,6 +544,39 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
+		protected virtual void handleInclude(Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
+		{
+			var ns = child.getAttrString("ns");
+			var fileName = child.getAttrString("src");
+			fileName = fileName.Replace("file:", "");
+			var normalized = Path.GetFullPath(fileName);
+
+			if (!File.Exists(normalized))
+			{
+				string newFileName = Utilities.GetAppResourcePath(fileName);
+				normalized = Path.GetFullPath(newFileName);
+				if (!File.Exists(normalized))
+					throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
+				fileName = newFileName;
+			}
+
+			var newDom = asParser(args, fileName);
+			newDom.Name = ns;
+			dom.ns.Add(newDom);
+
+			foreach (var item in newDom.Python.Paths)
+				dom.Python.AddSearchPath(item);
+
+			foreach (var item in newDom.Python.Modules)
+				dom.Python.ImportModule(item);
+
+			foreach (var item in newDom.Ruby.Paths)
+				dom.Ruby.AddSearchPath(item);
+
+			foreach (var item in newDom.Ruby.Modules)
+				dom.Ruby.ImportModule(item);
+		}
+
 		#endregion
 
 		#region Defaults
@@ -649,7 +649,7 @@ namespace Peach.Core.Analyzers
 				location = node.getAttr("location", null),
 				password = node.getAttr("password", null)
 			};
-			
+
 			if (agent.location == null)
 				agent.location = "local://";
 
@@ -1529,7 +1529,7 @@ namespace Peach.Core.Analyzers
 			action.Name = name;
 			action.parent = parent;
 			action.FieldId = node.getAttr("fieldId", null);
-			action.when = node.getAttr("when",null);
+			action.when = node.getAttr("when", null);
 			action.publisher = node.getAttr("publisher", null);
 			action.onStart = node.getAttr("onStart", null);
 			action.onComplete = node.getAttr("onComplete", null);
@@ -1672,7 +1672,7 @@ namespace Peach.Core.Analyzers
 						fieldData.Fields.Remove(name);
 						fieldData.Fields.Add(new DataField.Field
 						{
-							Name = name, 
+							Name = name,
 							Value = tmp.DefaultValue
 						});
 					}
