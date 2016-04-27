@@ -49,9 +49,6 @@ common = [
 	# Common side-process helpers
 	'PeachTrampoline.exe',
 
-	# Linux side-process helpers
-	'PeachLinuxCrashHandler.exe',
-
 	# Windows side-process helpers
 	'Peach.Pro.ComContainer.exe',
 	'Peach.Pro.WindowsDebugInstance.exe',

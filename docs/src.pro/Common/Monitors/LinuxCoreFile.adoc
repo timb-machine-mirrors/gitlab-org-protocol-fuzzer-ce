@@ -26,6 +26,9 @@ and the minor bucket is a constant value based on the string "CORE".
 At the end of the session,
 _LinuxCoreFile_ restores the saved state and removes the logging folder.
 
+Because the _LinuxCoreFile_ monitor registers a custom core file handler with the Linux kernel,
+only one instance of the monitor is allowed to run on a host at any given time.
+
 .*Setup Requirements*
 This monitor has the following setup requirements:
 
@@ -92,10 +95,6 @@ defaults to all processes.
 LogFolder::
 Folder with log files,
 defaults to `/var/peachcrash`.
-
-Mono::
-Full path an executable for mono runtime,
-defaults to `/usr/bin/mono`.
 
 === Examples
 
