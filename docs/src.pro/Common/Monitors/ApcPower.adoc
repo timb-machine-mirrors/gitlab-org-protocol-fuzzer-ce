@@ -1,14 +1,14 @@
 <<<
-[[Monitors_SnmpPower]]
-== SNMP Power Monitor
+[[Monitors_ApcPower]]
+== APC Power Monitor
 
 *Monitor Categories*: *Automation*
 
-The _SNMP Power_ monitor switches outlets on a power distribution unit (PDU) on and off via SNMP.
+The _APC Power_ monitor switches outlets on a power distribution unit (PDU) on and off via SNMPv1.
 This monitor is useful for automatically power cycling devices during a fuzzing session.
 APC's Switched Rack Power Distribution Unit (AC7900) is known to work with this monitor.
 
-Each _SNMP Power_ monitor switches one or more of a PDU's outlets, according to the configuration.
+Each _APC Power_ monitor switches one or more of a PDU's outlets, according to the configuration.
 All affected outlets are given the same commands, so turning some outlets on and others off would require another monitor.
 The monitor can reset the power outlets at the following points in time:
 
@@ -31,11 +31,13 @@ _Required:_
 Host::
 IP address of the switched power distribution unit
 
-OIDs::
-Comma-separated list of SNMP OIDs for the power outlets.
-To determine the OIDs, start by installing the SNMP MIB provided by the device manufacturer.
-Use a utility like `snmptranslate` to lookup numeric OID associate with the OID name of an outlet.
-For example, `snmptranslate -On PowerNet-MIB::sPDUOutletCtl.1` indicates `.1.3.6.1.4.1.318.1.1.4.4.2.1.3.1` is the OID to use for outlet 1 on an APC Switched Power Distribution Unit (AC7900).
+Outlets::
+Comma-separated list of APC outlet numbers to power cycle.
+For APC devices that control outlets in groups, configure `OutletGroups` instead.
+
+OutletGroups::
+Comma-separated list of APC outlet group numbers to power cycle.
+For APC devices that control individual outlets, configure `Outlets` instead.
 
 
 _Optional:_
@@ -43,17 +45,11 @@ _Optional:_
 Port::
 SNMP port on the switched power distribution unit. Default is `161`.
 
-OnCode::
-On indicator used by outlet OIDs. Default is `1`, the value commonly used on APC PDUs.
-
-OffCode::
-Off indicator used by outlet OIDs. Default is `2`, the value commonly used on APC PDUs.
-
 ReadCommunity::
-SNMP community string to use when reading the state of outlet OIDs. Default is `public`.
+SNMP community string to use when reading the state of the outlets. Default is `public`.
 
 WriteCommunity::
-SNMP community string to use when modifying the state of outlet OIDs. Default is `private`.
+SNMP community string to use when modifying the state of the outlets. Default is `private`.
 
 RequestTimeout::
 Maximum duration in millseconds to block when sending an SNMP request to the PDU. Default is `1000`.
@@ -75,7 +71,7 @@ PowerOnOffPause::
 Pause in milliseconds between power off/power on, default is `500`.
 
 When::
-When to reset power on the specified outlet OIDs. Default is `OnFault`.
+When to reset power on the specified outlets or outlet groups. Default is `OnFault`.
 +
 [cols="1,2" options="header",halign="center"]
 |==========================================================
@@ -114,7 +110,7 @@ ifndef::peachug[]
 ========================
 [source,xml]
 ----
-include::SnmpPower_Example.xml[]
+include::ApcPower_Example.xml[]
 ----
 ========================
 

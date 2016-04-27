@@ -22,8 +22,8 @@ The monitor can toggle power on an outlet at the following points in time:
 
 image::{images}/Common/Monitors/IpPower9258.png[scalewidth="75%"]
 
-TIP: Peach also supports networked power switches that can be
-controlled using SNMP (see xref:Monitors_SnmpPower[SNMP Power
+TIP: Peach also supports APC power distribution units that can be
+controlled using SNMP (see xref:Monitors_ApcPower[APC Power
 Monitor]). For controlling power to a device by wiring through a
 relay, Peach provides a monitor for the
 xref:Monitors_CanaKitRelay[CanaKit 4-Port USB Relay Controller].
