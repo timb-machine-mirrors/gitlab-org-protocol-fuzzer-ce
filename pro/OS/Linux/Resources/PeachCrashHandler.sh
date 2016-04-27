@@ -104,7 +104,7 @@ do
 done
 
 EXE=$(basename ${PROG})
-FILE="${LOG}/${EXE}_${PID}"
+FILE="${LOG}/${EXE}.${PID}"
 OUTDIR=$(dirname ${FILE})
 INFO="${FILE}.info"
 CORE="${FILE}.core"
@@ -130,7 +130,6 @@ EXE: ${PROG}
 UID: ${UID}
 GID: ${GID}
 SIG: ${SIG}
-
 Host: ${HOST}
 Date: ${PRETTY_TIME}
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Peach.Core;
+using Peach.Core.Agent;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
@@ -104,7 +105,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.AreEqual(1, faults.Length);
 
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("Crash dump detected.", faults[0].Title);
+			Assert.AreEqual("aaa core dumped", faults[0].Title);
 			Assert.AreEqual("Crash Description", faults[0].Fault.Description);
 
 			Assert.AreEqual(2, faults[0].Data.Keys.Count);
@@ -139,7 +140,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.AreEqual(1, faults.Length);
 
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("Crash dump detected.", faults[0].Title);
+			Assert.AreEqual("aaa core dumped", faults[0].Title);
 			Assert.AreEqual("Crash Description", faults[0].Fault.Description);
 
 			Assert.AreEqual(1, faults[0].Data.Keys.Count);
@@ -174,7 +175,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.AreEqual(1, faults.Length);
 
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("aaa crash dump detected.", faults[0].Title);
+			Assert.AreEqual("aaa core dumped", faults[0].Title);
 			Assert.AreEqual("Crash Description", faults[0].Fault.Description);
 
 			Assert.AreEqual(2, faults[0].Data.Keys.Count);
@@ -241,7 +242,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.AreEqual(1, faults.Length);
 
 			Assert.NotNull(faults[0].Fault);
-			Assert.AreEqual("Crash dump detected.", faults[0].Title);
+			Assert.AreEqual("CrashingFileConsumer core dumped", faults[0].Title);
 			StringAssert.Contains("Linux Crash Handler -- Crash Information", faults[0].Fault.Description);
 
 			Console.WriteLine(faults[0].Fault.Description);
@@ -252,8 +253,11 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			Assert.AreEqual(2, keys.Count);
 
-			StringAssert.IsMatch("CrashingFileConsumer_\\d+\\.core", keys[0]);
-			StringAssert.IsMatch("CrashingFileConsumer_\\d+\\.info", keys[1]);
+			StringAssert.IsMatch("CrashingFileConsumer\\.\\d+\\.core", keys[0]);
+			StringAssert.IsMatch("CrashingFileConsumer\\.\\d+\\.info", keys[1]);
+
+			Assert.AreEqual(Monitor2.Hash("LinuxCoreFile.CrashingFileConsumer"), faults[0].Fault.MajorHash);
+			Assert.AreEqual(Monitor2.Hash("CORE"), faults[0].Fault.MinorHash);
 		}
 
 		[Test]
