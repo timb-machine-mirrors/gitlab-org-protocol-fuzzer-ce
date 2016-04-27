@@ -548,10 +548,13 @@ namespace Peach.Pro.Core
 			return defs;
 		}
 
-		public static PitDefines Parse(Stream stream, IEnumerable<KeyValuePair<string, string>> overrides)
+		public static PitDefines Parse(
+			Stream stream, 
+			string pitLibraryPath, 
+			IEnumerable<KeyValuePair<string, string>> overrides)
 		{
 			var defs = stream != null ? XmlTools.Deserialize<PitDefines>(stream) : new PitDefines();
-			AddSystemDefines(Utilities.ExecutionDirectory, defs);
+			AddSystemDefines(pitLibraryPath, defs);
 			if (overrides != null)
 			{
 				defs.SystemDefines.AddRange(

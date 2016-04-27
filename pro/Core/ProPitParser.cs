@@ -20,9 +20,9 @@ namespace Peach.Pro.Core
 	/// </summary>
 	public class ProPitParser : PitParser
 	{
-		static readonly Logger logger = LogManager.GetCurrentClassLogger();
-		Assembly _pitsAssembly;
-		string _pitsNamespace;
+		public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		readonly Assembly _pitsAssembly;
+		readonly string _pitsNamespace;
 
 		public ProPitParser(Assembly pitsAssembly = null, string pitsNamespace = "")
 		{
@@ -46,26 +46,31 @@ namespace Peach.Pro.Core
 			var src = child.getAttrString("src");
 			var uri = new UriBuilder(src);
 
-			Stream stream;
+			Stream stream = null;
 			if (uri.Scheme == "file" || string.IsNullOrEmpty(uri.Scheme))
 			{
 				var normalized = Path.GetFullPath(uri.Path);
 				if (!File.Exists(normalized))
 				{
 					normalized = Path.GetFullPath(Utilities.GetAppResourcePath(uri.Path));
-					if (!File.Exists(normalized))
-						throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(normalized));
+					if (File.Exists(normalized))
+						stream = new FileStream(normalized, FileMode.Open, FileAccess.Read);
 				}
-				stream = new FileStream(normalized, FileMode.Open, FileAccess.Read);
 			}
 			else if (uri.Scheme == "asm")
 			{
-				var resourceName = string.Join(".", _pitsNamespace, uri.Path);
+				var resourceName = _pitsNamespace + uri.Path.Replace("/", ".");
+				Console.WriteLine("Resource: {0}", resourceName);
 				stream = _pitsAssembly.GetManifestResourceStream(resourceName);
 			}
 			else
 			{
 				throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(uri.Scheme));
+			}
+
+			if (stream == null)
+			{
+				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
 			}
 
 			var dataName = Path.GetFileNameWithoutExtension(uri.Path);

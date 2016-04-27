@@ -15,6 +15,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	[Peach]
 	public class EmbeddedTests
 	{
+		private const string PitsResourcePrefix = "Peach.Pro.Test.Core.Resources.Pits";
+
 		[Test]
 		public void BasicTest()
 		{
@@ -22,22 +24,21 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var uri = new UriBuilder("asm:Net.DNP3_Master.xml");
 			var fileName = Path.GetFileNameWithoutExtension(uri.Path);
 
-			var pitsNamespace = "Peach.Pro.Test.Core.Resources.Pits";
-			var pitResName = string.Join(".", pitsNamespace, uri.Path);
-			var configResName = string.Join(".", pitsNamespace, fileName, "config", "xml");
+			var pitResName = string.Join(".", PitsResourcePrefix, uri.Path);
+			var configResName = string.Join(".", PitsResourcePrefix, fileName, "config", "xml");
 
 			PitDefines defs;
 			using (var stream = asm.GetManifestResourceStream(configResName))
 			{
 				Assert.NotNull(stream);
-				defs = PitDefines.Parse(stream, null);
+				defs = PitDefines.Parse(stream, "asm:", null);
 			}
 
 			var args = new Dictionary<string, object> {
 				{ PitParser.DEFINED_VALUES, defs.Evaluate() }
 			};
 
-			var parser = new ProPitParser(asm, pitsNamespace);
+			var parser = new ProPitParser(asm, PitsResourcePrefix);
 			Peach.Core.Dom.Dom dom;
 			using (var stream = asm.GetManifestResourceStream(pitResName))
 			using (var reader = new StreamReader(stream))
@@ -48,7 +49,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			var config = new RunConfiguration()
 			{
-				singleIteration = true
+				singleIteration = true,
+				PitsAssembly = asm,
+				PitsResourcePrefix = PitsResourcePrefix
 			};
 		
 			var e = new Engine(null);

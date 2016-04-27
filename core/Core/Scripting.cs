@@ -35,21 +35,149 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
+using System.Reflection;
+using IronRuby;
 using Peach.Core.IO;
 
 namespace Peach.Core
 {
+	class ResourceAwarePlatformAdapationLayer : PlatformAdaptationLayer
+	{
+		private static readonly char Seperator = Path.DirectorySeparatorChar;
+
+		private readonly string _prefix; 
+		private readonly Assembly _asm;
+		private readonly Dictionary<string, string> _resourceFiles = new Dictionary<string, string>();
+
+		public ResourceAwarePlatformAdapationLayer(Assembly asm, string prefix)
+		{
+			_asm = asm;
+			_prefix = prefix;
+
+			CreateResourceFileSystemEntries();
+		}
+
+		private void CreateResourceFileSystemEntries()
+		{
+			foreach (var name in _asm.GetManifestResourceNames())
+			{
+				if (!name.EndsWith(".py"))
+					continue;
+
+				var filename = name.Substring(_prefix.Length);
+				filename = filename.Substring(0, filename.Length - 3); // Remove .py
+				filename = filename.Replace('.', Seperator);
+				_resourceFiles.Add(filename + ".py", name);
+			}
+		}
+		
+		private Stream OpenResourceInputStream(string path)
+		{
+			string resourceName;
+			if (_resourceFiles.TryGetValue(RemoveCurrentDir(path), out resourceName))
+			{
+				return _asm.GetManifestResourceStream(resourceName);
+			}
+			return null;
+		}
+
+		private bool ResourceDirectoryExists(string path)
+		{
+			return _resourceFiles.Keys.Any(f => f.StartsWith(RemoveCurrentDir(path) + Seperator));
+		}
+
+		private bool ResourceFileExists(string path)
+		{
+			return _resourceFiles.ContainsKey(RemoveCurrentDir(path));
+		}
+
+		private static string RemoveCurrentDir(string path)
+		{
+			return path
+				.Replace(Directory.GetCurrentDirectory() + Seperator, "")
+				.Replace("." + Seperator, "");
+		}
+
+		public override bool FileExists(string path)
+		{
+			return ResourceFileExists(path) || base.FileExists(path);
+		}
+
+		public override string[] GetFileSystemEntries(string path, string searchPattern, bool includeFiles, bool includeDirectories)
+		{
+			var fullPath = Path.Combine(path, searchPattern);
+			if (ResourceFileExists(fullPath) || ResourceDirectoryExists(fullPath))
+				return new[] { fullPath };
+
+			if (!ResourceDirectoryExists(path))
+				return base.GetFileSystemEntries(path, searchPattern, includeFiles, includeDirectories);
+	
+			return new string[0]; 
+		}
+
+		public override bool DirectoryExists(string path)
+		{
+			return ResourceDirectoryExists(path) || base.DirectoryExists(path);
+		}
+
+		public override Stream OpenInputFileStream(string path)
+		{
+			return OpenResourceInputStream(path) ?? base.OpenInputFileStream(path);
+		}
+
+		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+		{
+			return OpenResourceInputStream(path) ?? base.OpenInputFileStream(path, mode, access, share);
+		}
+
+		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize)
+		{
+			return OpenResourceInputStream(path) ?? base.OpenInputFileStream(path, mode, access, share, bufferSize);
+		}
+	}
+
+	class ResourceAwareScriptHost : ScriptHost
+	{
+		readonly PlatformAdaptationLayer _pal ;
+
+		public ResourceAwareScriptHost(Assembly asm, string prefix)
+		{
+			_pal = new ResourceAwarePlatformAdapationLayer(asm, prefix);
+		}
+
+		public override PlatformAdaptationLayer PlatformAdaptationLayer
+		{
+			get { return _pal; }
+		}
+	}
+
 	public class PythonScripting : Scripting
 	{
+		private readonly Assembly _asm;
+		private readonly string _prefix;
+
+		public PythonScripting(Assembly asm = null, string prefix = "")
+		{
+			_asm = asm;
+			_prefix = prefix;
+		}
+
 		protected override ScriptEngine GetEngine()
 		{
+			var setup = Python.CreateRuntimeSetup(null);
+			if (_asm != null)
+			{
+				setup.HostType = typeof(ResourceAwareScriptHost);
+				setup.HostArguments = new object[] { _asm, _prefix };
+			}
+
+			var runtime = new ScriptRuntime(setup);
+			var engine = Python.GetEngine(runtime);
+
 			// Need to add python stdlib to search path
-			var engine = IronPython.Hosting.Python.CreateEngine();
 			var paths = engine.GetSearchPaths();
-
-			foreach (string path in ClassLoader.SearchPaths)
+			foreach (var path in ClassLoader.SearchPaths)
 				paths.Add(Path.Combine(path, "Lib"));
-
 			engine.SetSearchPaths(paths);
 
 			return engine;
@@ -60,7 +188,7 @@ namespace Peach.Core
 	{
 		protected override ScriptEngine GetEngine()
 		{
-			return IronRuby.Ruby.CreateEngine();
+			return Ruby.CreateEngine();
 		}
 	}
 
@@ -324,18 +452,6 @@ namespace Peach.Core
 			Apply(scope, localScope);
 
 			return scope;
-		}
-
-		/// <summary>
-		/// Clear out our scope object. This is very slow!
-		/// </summary>
-		/// <param name="scope"></param>
-		private void CleanupScope(ScriptScope scope)
-		{
-			// Clean up any internal state created by the scope
-			var names = scope.GetVariableNames().ToList();
-			foreach (var name in names)
-				scope.RemoveVariable(name);
 		}
 
 		/// <summary>
