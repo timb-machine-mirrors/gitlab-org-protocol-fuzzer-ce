@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Peach.Core
+namespace Peach.Core.Agent
 {
 	public interface IStartStopRestart
 	{
