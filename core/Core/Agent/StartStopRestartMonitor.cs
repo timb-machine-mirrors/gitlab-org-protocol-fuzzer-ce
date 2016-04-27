@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Peach.Core.Agent
 {
@@ -8,46 +9,54 @@ namespace Peach.Core.Agent
 		public virtual bool StopOnEnd { get; set; }
 		public virtual string RestartOnCall { get; set; }
 
-		protected IStartStopRestart Control { get; set; }
+		private IStartStopRestart _control;
 
 		protected StartStopRestartMonitor(string name)
 			: base(name)
 		{
 		}
 
+		protected abstract IStartStopRestart CreateStartStopControl();
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			base.StartMonitor(args);
+			_control = CreateStartStopControl();
+		}
+
 		public override void SessionStarting()
 		{
-			Control.Start();
+			_control.Start();
 
 			if (When.HasFlag(MonitorWhen.OnStart))
-				Control.Restart();
+				_control.Restart();
 		}
 
 		public override void SessionFinished()
 		{
 			if (When.HasFlag(MonitorWhen.OnEnd))
-				Control.Restart();
+				_control.Restart();
 
 			if (StopOnEnd)
-				Control.Stop();
+				_control.Stop();
 		}
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			if (When.HasFlag(MonitorWhen.OnIterationStart) ||
 			    (args.LastWasFault && When.HasFlag(MonitorWhen.OnIterationStartAfterFault)))
-				Control.Restart();
+				_control.Restart();
 		}
 
 		public override void IterationFinished()
 		{
 			if (When.HasFlag(MonitorWhen.OnIterationEnd))
-				Control.Restart();
+				_control.Restart();
 		}
 
 		public override bool DetectedFault()
 		{
 			if (When.HasFlag(MonitorWhen.DetectFault))
-				Control.Restart();
+				_control.Restart();
 
 			return false;
 		}
@@ -55,7 +64,7 @@ namespace Peach.Core.Agent
 		public override MonitorData GetMonitorData()
 		{
 			if (When.HasFlag(MonitorWhen.OnFault))
-				Control.Restart();
+				_control.Restart();
 
 			return null;
 		}
@@ -63,7 +72,7 @@ namespace Peach.Core.Agent
 		public override void Message(string msg)
 		{
 			if (When.HasFlag(MonitorWhen.OnCall) && RestartOnCall == msg)
-				Control.Restart();
+				_control.Restart();
 		}
 	}
 }
