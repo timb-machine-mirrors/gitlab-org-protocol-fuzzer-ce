@@ -5,6 +5,8 @@ namespace Peach.Core.Agent
 	public abstract class StartStopRestartMonitor : Monitor2
 	{
 		public MonitorWhen When { get; set; }
+		public virtual bool StopOnEnd { get; set; }
+		public virtual string RestartOnCall { get; set; }
 
 		protected IStartStopRestart Control { get; set; }
 
@@ -21,14 +23,12 @@ namespace Peach.Core.Agent
 				Control.Restart();
 		}
 
-		public abstract bool StopOnEnd();
-
 		public override void SessionFinished()
 		{
 			if (When.HasFlag(MonitorWhen.OnEnd))
 				Control.Restart();
 
-			if (StopOnEnd())
+			if (StopOnEnd)
 				Control.Stop();
 		}
 		public override void IterationStarting(IterationStartingArgs args)
@@ -60,11 +60,9 @@ namespace Peach.Core.Agent
 			return null;
 		}
 
-		public abstract string RestartOnCall();
-
 		public override void Message(string msg)
 		{
-			if (When.HasFlag(MonitorWhen.OnCall) && RestartOnCall() == msg)
+			if (When.HasFlag(MonitorWhen.OnCall) && RestartOnCall == msg)
 				Control.Restart();
 		}
 	}
