@@ -32,13 +32,11 @@ _Required:_
 Host::
 IP address of the switched power distribution unit.
 
-Outlets::
-Comma-separated list of APC outlet numbers to power cycle.
-For APC devices that control outlets in groups, configure `OutletGroups` instead.
+OutletGrouping::
+Whether outlets on the PDU are identified individually (`Outlet`) or in groups (`OutletGroup`). Default is `Outlet`.
 
-OutletGroups::
-Comma-separated list of APC outlet group numbers to power cycle.
-For APC devices that control individual outlets, configure `Outlets` instead.
+Outlets::
+Comma-separated list of numeric identifiers for outlets or outlet groups to control.
 
 
 _Optional:_
