@@ -85,8 +85,9 @@ You can see the port assignment by looking at the `Ports(COM and LPT)` entry in 
 The Device Manager is available from the System applet in the Control Panel.
 
 NOTE: For controlling power to devices using 3-prong outlets, Peach
-provides the xref:Monitors_IpPower9258[IpPower9258] and
-xref:Monitors_ApcPower[ApcPower] monitors.
+provides the xref:Monitors_IpPower9258[IpPower9258],
+xref:Monitors_ApcPower[ApcPower], and
+xref:Monitors_SnmpPower[SnmpPower] monitors.
 
 === Parameters
 

@@ -38,6 +38,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |
 |xref:Monitors_SaveFile[Save File]               |    |X   |    |
 |xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
+|xref:Monitors_SnmpMonitor[SNMP Power]           |    |    |X   |
 |xref:Monitors_Socket[Socket Listener]           |X   |X   |    |
 |xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |
 |xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |    |
