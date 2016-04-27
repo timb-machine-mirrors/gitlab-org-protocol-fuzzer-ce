@@ -6,8 +6,8 @@ namespace Peach.Core.Agent
 	public abstract class StartStopRestartMonitor : Monitor2
 	{
 		public MonitorWhen When { get; set; }
-		public virtual bool StopOnEnd { get; set; }
-		public virtual string RestartOnCall { get; set; }
+		public abstract bool StopOnEnd { get; }
+		public abstract string RestartOnCall { get; }
 
 		private IStartStopRestart _control;
 
