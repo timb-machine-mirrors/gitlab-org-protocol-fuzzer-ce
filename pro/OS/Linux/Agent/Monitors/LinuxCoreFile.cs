@@ -152,11 +152,16 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 				Logger.Debug("Detected Fault '{0}'", file);
 
+				// Format is /path/to/file.PID.info
+				var exe = Path.GetFileName(file) ?? ".info";
+				exe = exe.Substring(0, exe.Length - 5);
+				var idx = exe.LastIndexOf('.');
+				if (idx != -1)
+					exe = exe.Substring(0, idx);
+
 				_fault = new MonitorData
 				{
-					Title = string.IsNullOrEmpty(Executable)
-						? "Crash dump detected."
-						: "{0} crash dump detected.".Fmt(Executable),
+					Title = "{0} core dumped".Fmt(exe),
 					Data = new Dictionary<string, Stream>
 					{
 						{ Path.GetFileName(file), new MemoryStream(File.ReadAllBytes(file)) }
@@ -164,7 +169,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 					Fault = new MonitorData.Info
 					{
 						Description = File.ReadAllText(file),
-						MajorHash = Hash(Class + Executable),
+						MajorHash = Hash(Class + "." + exe),
 						MinorHash = Hash("CORE"),
 						Risk = "UNKNOWN"
 					}
