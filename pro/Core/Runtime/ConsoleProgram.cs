@@ -384,10 +384,11 @@ namespace Peach.Pro.Core.Runtime
 				}
 			}
 
-			Job job = null;
-			var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
-			if (userLogger != null || !_noweb)
-				job = new Job(_config);
+			// Add the JobLogger as necessary
+			if (!test.loggers.OfType<JobLogger>().Any())
+				test.loggers.Insert(0, new JobLogger());
+
+			var job = new Job(_config);
 
 			if (_noweb || CreateWeb == null)
 			{
@@ -404,10 +405,6 @@ namespace Peach.Pro.Core.Runtime
 
 				InteractiveConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
-
-				// Add the JobLogger as necessary
-				if (userLogger == null)
-					test.loggers.Insert(0, new JobLogger());
 
 				var e = new Engine(GetUIWatcher());
 				e.startFuzzing(dom, _config);
