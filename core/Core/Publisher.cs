@@ -103,6 +103,16 @@ namespace Peach.Core
 			set;
 		}
 
+		/// <summary>
+		/// RunContext instance. Can be null is Publisher is remote.
+		/// </summary>
+		/// <remarks>
+		/// This property is only available for local publishers.  If a Publisher
+		/// is remoted to an agent this property will be NULL. Publishers SHOULD
+		/// work with or without this property.
+		/// </remarks>
+		public RunContext Context { get; set; }
+
 		#endregion
 
 		#region Implementation Functions
@@ -292,6 +302,7 @@ namespace Peach.Core
 		public Publisher(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
+			Context = null;
 		}
 
 		#endregion
