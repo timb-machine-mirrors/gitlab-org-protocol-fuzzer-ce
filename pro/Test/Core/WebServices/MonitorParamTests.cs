@@ -27,7 +27,9 @@ namespace Peach.Pro.Test.Core.WebServices
 			var sb = new StringBuilder();
 			var m = new MonitorMetadata();
 
-			m.ErrorEventHandler += (s, e) => sb.AppendLine(e.GetException().Message);
+			m.ErrorEventHandler += (s, e) => {
+				sb.AppendLine (e.GetException ().Message);
+			};
 
 			var details = m.Load(new List<string>());
 
