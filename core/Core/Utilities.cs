@@ -258,7 +258,7 @@ namespace Peach.Core
 	}
 
 	/// <summary>
-	/// Some utility methods that be usefull
+	/// Some utility methods that can be useful
 	/// </summary>
 	public class Utilities
 	{
@@ -375,7 +375,7 @@ namespace Peach.Core
 
 		/// <summary>
 		/// Returns the name of the currently running executable.
-		/// Equavilant to argv[0] in C/C++.
+		/// Equivalent to argv[0] in C/C++.
 		/// </summary>
 		public static string ExecutableName
 		{
@@ -390,11 +390,9 @@ namespace Peach.Core
 		public static string LoadStringResource(Assembly asm, string fullName)
 		{
 			using (var stream = asm.GetManifestResourceStream(fullName))
+			using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
 			{
-				using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
-				{
-					return reader.ReadToEnd();
-				}
+				return reader.ReadToEnd();
 			}
 		}
 
@@ -413,11 +411,9 @@ namespace Peach.Core
 		{
 			var path = Path.Combine(ExecutionDirectory, targetFile);
 			using (var sout = new FileStream(path, FileMode.Create))
+			using (var sin = asm.GetManifestResourceStream(fullName))
 			{
-				using (var sin = asm.GetManifestResourceStream(fullName))
-				{
-					sin.CopyTo(sout);
-				}
+				sin.CopyTo(sout);
 			}
 		}
 

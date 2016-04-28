@@ -35,144 +35,60 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
-using System.Reflection;
+using IronPython.Runtime;
 using IronRuby;
 using Peach.Core.IO;
 
 namespace Peach.Core
 {
-	class ResourceAwarePlatformAdapationLayer : PlatformAdaptationLayer
+	public interface IPythonMetaPathImporter
 	{
-		private static readonly char Seperator = Path.DirectorySeparatorChar;
+		//
+		// Constructor(Uri path)
+		//
 
-		private readonly string _prefix; 
-		private readonly Assembly _asm;
-		private readonly Dictionary<string, string> _resourceFiles = new Dictionary<string, string>();
+		/// <summary>
+		/// find_module(fullname, path=None) -> self or None.
+		/// 
+		/// Search for a module specified by 'fullname'. 'fullname' must be the
+		/// fully qualified (dotted) module name. It returns the importer
+		/// instance itself if the module was found, or None if it wasn't.
+		/// The optional 'path' argument is ignored -- it's there for compatibility
+		/// with the importer protocol.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="fullname"></param>
+		/// <param name="args"></param>
+		/// <returns></returns>
+		object find_module(CodeContext context, string fullname, params object[] args);
 
-		public ResourceAwarePlatformAdapationLayer(Assembly asm, string prefix)
-		{
-			_asm = asm;
-			_prefix = prefix;
-
-			CreateResourceFileSystemEntries();
-		}
-
-		private void CreateResourceFileSystemEntries()
-		{
-			foreach (var name in _asm.GetManifestResourceNames())
-			{
-				if (!name.EndsWith(".py"))
-					continue;
-
-				var filename = name.Substring(_prefix.Length);
-				filename = filename.Substring(0, filename.Length - 3); // Remove .py
-				filename = filename.Replace('.', Seperator);
-				_resourceFiles.Add(filename + ".py", name);
-			}
-		}
-		
-		private Stream OpenResourceInputStream(string path)
-		{
-			string resourceName;
-			if (_resourceFiles.TryGetValue(RemoveCurrentDir(path), out resourceName))
-			{
-				return _asm.GetManifestResourceStream(resourceName);
-			}
-			return null;
-		}
-
-		private bool ResourceDirectoryExists(string path)
-		{
-			return _resourceFiles.Keys.Any(f => f.StartsWith(RemoveCurrentDir(path) + Seperator));
-		}
-
-		private bool ResourceFileExists(string path)
-		{
-			return _resourceFiles.ContainsKey(RemoveCurrentDir(path));
-		}
-
-		private static string RemoveCurrentDir(string path)
-		{
-			return path
-				.Replace(Directory.GetCurrentDirectory() + Seperator, "")
-				.Replace("." + Seperator, "");
-		}
-
-		public override bool FileExists(string path)
-		{
-			return ResourceFileExists(path) || base.FileExists(path);
-		}
-
-		public override string[] GetFileSystemEntries(string path, string searchPattern, bool includeFiles, bool includeDirectories)
-		{
-			var fullPath = Path.Combine(path, searchPattern);
-			if (ResourceFileExists(fullPath) || ResourceDirectoryExists(fullPath))
-				return new[] { fullPath };
-
-			if (!ResourceDirectoryExists(path))
-				return base.GetFileSystemEntries(path, searchPattern, includeFiles, includeDirectories);
-	
-			return new string[0]; 
-		}
-
-		public override bool DirectoryExists(string path)
-		{
-			return ResourceDirectoryExists(path) || base.DirectoryExists(path);
-		}
-
-		public override Stream OpenInputFileStream(string path)
-		{
-			return OpenResourceInputStream(path) ?? base.OpenInputFileStream(path);
-		}
-
-		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, FileShare share)
-		{
-			return OpenResourceInputStream(path) ?? base.OpenInputFileStream(path, mode, access, share);
-		}
-
-		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize)
-		{
-			return OpenResourceInputStream(path) ?? base.OpenInputFileStream(path, mode, access, share, bufferSize);
-		}
+		/// <summary>
+		/// load_module(fullname) -> module.
+		/// 
+		/// Load the module specified by 'fullname'. 'fullname' must be the
+		/// fully qualified (dotted) module name. It returns the imported
+		/// module, or raises ResourceImportError if it wasn't found.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="fullname"></param>
+		/// <returns></returns>
+		object load_module(CodeContext context, string fullname);
 	}
 
-	class ResourceAwareScriptHost : ScriptHost
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+	public class PythonMetaPathImporterAttribute : PluginAttribute
 	{
-		readonly PlatformAdaptationLayer _pal ;
-
-		public ResourceAwareScriptHost(Assembly asm, string prefix)
+		public PythonMetaPathImporterAttribute(string name)
+			: base(typeof(IPythonMetaPathImporter), name, true)
 		{
-			_pal = new ResourceAwarePlatformAdapationLayer(asm, prefix);
-		}
-
-		public override PlatformAdaptationLayer PlatformAdaptationLayer
-		{
-			get { return _pal; }
 		}
 	}
 
 	public class PythonScripting : Scripting
 	{
-		private readonly Assembly _asm;
-		private readonly string _prefix;
-
-		public PythonScripting(Assembly asm = null, string prefix = "")
-		{
-			_asm = asm;
-			_prefix = prefix;
-		}
-
 		protected override ScriptEngine GetEngine()
 		{
-			var setup = Python.CreateRuntimeSetup(null);
-			if (_asm != null)
-			{
-				setup.HostType = typeof(ResourceAwareScriptHost);
-				setup.HostArguments = new object[] { _asm, _prefix };
-			}
-
-			var runtime = new ScriptRuntime(setup);
-			var engine = Python.GetEngine(runtime);
+			var engine = Python.CreateEngine();
 
 			// Need to add python stdlib to search path
 			var paths = engine.GetSearchPaths();
@@ -200,17 +116,17 @@ namespace Peach.Core
 	{
 		#region Private Members
 
-		private Dictionary<string, object> modules;
-		private ScriptEngine engine;
+		private readonly Dictionary<string, object> _modules = new Dictionary<string, object>();
+		private readonly ScriptEngine _engine;
+		private List<string> _paths = new List<string>(); 
 
 		#endregion
 
 		#region Constructor
 
-		public Scripting()
+		protected Scripting()
 		{
-			modules = new Dictionary<string, object>();
-			engine = GetEngine();
+			_engine = GetEngine();
 		}
 
 		#endregion
@@ -225,16 +141,13 @@ namespace Peach.Core
 
 		public void ImportModule(string module)
 		{
-			if (!modules.ContainsKey(module))
-				modules.Add(module, engine.ImportModule(module));
+			if (!_modules.ContainsKey(module))
+				_modules.Add(module, _engine.ImportModule(module));
 		}
 
 		public IEnumerable<string> Modules
 		{
-			get
-			{
-				return modules.Keys;
-			}
+			get { return _modules.Keys; }
 		}
 
 		#endregion
@@ -243,21 +156,37 @@ namespace Peach.Core
 
 		public void AddSearchPath(string path)
 		{
-			var paths = engine.GetSearchPaths();
-
-			if (!paths.Contains(path))
+			var uri = new Uri(new Uri(Environment.CurrentDirectory), path);
+			if (uri.Scheme == Uri.UriSchemeFile)
 			{
-				paths.Add(path);
-				engine.SetSearchPaths(paths);
+				var paths = _engine.GetSearchPaths();
+				if (!paths.Contains(path))
+				{
+					paths.Add(path);
+					_engine.SetSearchPaths(paths);
+				}
 			}
+			else if (uri.Scheme == "asm")
+			{
+				var type = ClassLoader.FindPluginByName<PythonMetaPathImporterAttribute>(uri.Host);
+				var importer = (IPythonMetaPathImporter)Activator.CreateInstance(type, uri);
+
+				var sys = _engine.GetSysModule();
+				var metaPath = sys.GetVariable<List>("meta_path");
+				metaPath.Add(importer);
+				sys.SetVariable("meta_path", metaPath);
+			}
+			else
+			{
+				throw new PeachException("Invalid uri scheme for <PythonPath>: {0}".Fmt(path));
+			}
+
+			_paths.Add(path);
 		}
 
 		public IEnumerable<string> Paths
 		{
-			get
-			{
-				return engine.GetSearchPaths();
-			}
+			get { return _paths; }
 		}
 
 		#endregion
@@ -324,7 +253,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Global scope for this instance of scripting
 		/// </summary>
-		ScriptScope _scope = null;
+		ScriptScope _scope;
 
 		/// <summary>
 		/// Create the global scope, or return existing one
@@ -334,9 +263,9 @@ namespace Peach.Core
 		{
 			if (_scope == null)
 			{
-				_scope = engine.CreateScope();
+				_scope = _engine.CreateScope();
 
-				Apply(_scope, modules);
+				Apply(_scope, _modules);
 			}
 
 			return _scope;
@@ -469,8 +398,8 @@ namespace Peach.Core
 		{
 			foreach (var item in vars)
 			{
-				string name = item.Key;
-				object value = item.Value;
+				var name = item.Key;
+				var value = item.Value;
 
 				var bs = value as BitwiseStream;
 				if (bs != null)
@@ -479,7 +408,7 @@ namespace Peach.Core
 					var offset = 0;
 					var count = buffer.Length;
 
-					bs.Seek(0, System.IO.SeekOrigin.Begin);
+					bs.Seek(0, SeekOrigin.Begin);
 
 					int nread;
 					while ((nread = bs.Read(buffer, offset, count)) != 0)

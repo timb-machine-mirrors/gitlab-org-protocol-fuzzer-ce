@@ -63,10 +63,7 @@ namespace Peach.Core.Dom
 
 		public Scripting Python
 		{
-			get
-			{
-				return _python ?? (_python = new PythonScripting(context.config.PitsAssembly));
-			}
+			get { return _python ?? (_python = new PythonScripting()); }
 		}
 
 		Scripting _ruby;

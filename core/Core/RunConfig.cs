@@ -168,16 +168,6 @@ namespace Peach.Core
 
 		private uint _randomSeed = (uint)DateTime.Now.Ticks & 0x0000FFFF;
 		private Guid? _id;
-
-		/// <summary>
-		/// An assembly that contains pits stored as resources
-		/// </summary>
-		public Assembly PitsAssembly = null;
-
-		/// <summary>
-		/// The prefix for resources to find pits in an assembly
-		/// </summary>
-		public string PitsResourcePrefix = "";
 	}
 }
 

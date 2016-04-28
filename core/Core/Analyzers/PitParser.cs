@@ -332,7 +332,7 @@ namespace Peach.Core.Analyzers
 				Schemas = set,
 				NameTable = new NameTable()
 			};
-			settings.ValidationEventHandler += delegate (object sender, ValidationEventArgs e)
+			settings.ValidationEventHandler += delegate(object sender, ValidationEventArgs e)
 			{
 				var ex = e.Exception;
 
@@ -547,20 +547,36 @@ namespace Peach.Core.Analyzers
 		protected virtual void handleInclude(Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
 		{
 			var ns = child.getAttrString("ns");
-			var fileName = child.getAttrString("src");
-			fileName = fileName.Replace("file:", "");
-			var normalized = Path.GetFullPath(fileName);
+			var src = child.getAttrString("src");
+			var uri = new Uri(new Uri(Environment.CurrentDirectory), src);
 
-			if (!File.Exists(normalized))
+			Stream stream = null;
+			if (uri.Scheme == Uri.UriSchemeFile)
 			{
-				string newFileName = Utilities.GetAppResourcePath(fileName);
-				normalized = Path.GetFullPath(newFileName);
-				if (!File.Exists(normalized))
-					throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
-				fileName = newFileName;
+				if (!File.Exists(uri.AbsolutePath))
+					uri = new Uri(new Uri(Utilities.ExecutionDirectory), src);
+
+				if (File.Exists(uri.AbsolutePath))
+					stream = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+			}
+			else if (uri.Scheme == "asm")
+			{
+				var type = ClassLoader.FindPluginByName<ResourceLoaderAttribute>(uri.Host);
+				var loader = (IResourceLoader)Activator.CreateInstance(type);
+				stream = loader.GetResource(uri.AbsolutePath);
+			}
+			else
+			{
+				throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(src));
 			}
 
-			var newDom = asParser(args, fileName);
+			if (stream == null)
+			{
+				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
+			}
+
+			var dataName = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
+			var newDom = asParser(args, new StreamReader(stream), dataName, true);
 			newDom.Name = ns;
 			dom.ns.Add(newDom);
 
@@ -1562,7 +1578,7 @@ namespace Peach.Core.Analyzers
 
 			if (node.hasAttr("ref"))
 			{
-				string refName = node.getAttrString("ref");
+				var refName = node.getAttrString("ref");
 
 				var other = dom.getRef(refName, a => a.datas);
 				if (other == null)
