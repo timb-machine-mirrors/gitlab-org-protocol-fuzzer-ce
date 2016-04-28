@@ -67,7 +67,7 @@ namespace Peach.Core.Dom.Actions
 					yield return new BitStream(item.dataModel.Value) { Name = item.inputName };
 				}
 
-				if (result != null)
+				if (result != null && _result != null)
 					yield return _result;
 			}
 		}

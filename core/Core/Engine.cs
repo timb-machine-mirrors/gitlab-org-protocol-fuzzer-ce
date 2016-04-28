@@ -257,6 +257,10 @@ namespace Peach.Core
 			_context.dom = dom;
 			_context.dom.context = _context;
 
+			// Set Context on local publishers
+			foreach (var pub in _context.test.publishers)
+				pub.Context = _context;
+
 			try
 			{
 				// Initialize any watchers and loggers

@@ -50,6 +50,8 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("CookiesAcrossIterations", typeof(bool), "Track cookies across iterations (defaults to false)", "false")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
 	[Parameter("IgnoreCertErrors", typeof(bool), "Allow https regardless of cert status (defaults to true)", "true")]
+	[Parameter("FailureStatusCodes", typeof(string), "Comma separated list of status codes that are failures causing current test case to stop.", "400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,500,501,502,503,504,505")]
+	[Parameter("FaultOnStatusCodes", typeof(string), "Comma separated list of status codes that are faults. Defaults to none.", "")]
 	public class HttpPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -61,9 +63,14 @@ namespace Peach.Pro.Core.Publishers
 		public string Password { get; protected set; }
 		public string Domain { get; protected set; }
 		public string BaseUrl { get; protected set; }
+		public string FaultOnStatusCodes { get; protected set; }
+		public string FailureStatusCodes { get; protected set; }
 		public bool Cookies { get; protected set; }
 		public bool CookiesAcrossIterations { get; protected set; }
 		public bool IgnoreCertErrors { get; protected set; }
+
+		protected List<int> FaultingStatusCodes = new List<int>();
+		protected List<int> SoftExceptionStatusCodes = new List<int>();
 
 		protected CookieContainer CookieJar = new CookieContainer();
 		protected HttpWebResponse Response { get; set; }
@@ -96,6 +103,20 @@ namespace Peach.Pro.Core.Publishers
 			{
 				logger.Info("Ignoring Certificate Validation Check Errors");
 				ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+			}
+
+			if (!string.IsNullOrEmpty(FaultOnStatusCodes))
+			{
+				var codes = FaultOnStatusCodes.Split(',');
+				foreach (var code in codes)
+					FaultingStatusCodes.Add(int.Parse(code));
+			}
+
+			if (!string.IsNullOrEmpty(FailureStatusCodes))
+			{
+				var codes = FailureStatusCodes.Split(',');
+				foreach (var code in codes)
+					SoftExceptionStatusCodes.Add(int.Parse(code));
 			}
 		}
 
@@ -369,7 +390,56 @@ namespace Peach.Pro.Core.Publishers
 				request.ContentLength = 0;
 			}
 
-			Response = (HttpWebResponse)request.GetResponse();
+			WebException exception = null;
+
+			try
+			{
+				Response = (HttpWebResponse)request.GetResponse();
+			}
+			catch (WebException wex)
+			{
+				exception = wex;
+				Response = (HttpWebResponse) wex.Response;
+
+				if (Response == null)
+					throw;
+			} 
+
+			if (Context != null && FaultingStatusCodes.Contains((int) Response.StatusCode))
+			{
+				// throw fault
+				var fault = new Fault();
+				fault.title = string.Format("Fault on status code {0} ({1})", (int) Response.StatusCode, Response.StatusCode);
+				fault.description = string.Format("Publisher has been configured to fault when one or more HTTP status codes are detected. "+
+					"During this test case the status code {0} ({1}) was detected causing this fault.",
+					(int) Response.StatusCode, Response.StatusCode);
+				fault.agentName = "Publisher";
+				fault.detectionSource = "HttpPublisher";
+				fault.exploitability = "Unknown";
+				fault.majorHash = "";
+				fault.minorHash = "";
+				fault.type = FaultType.Fault;
+
+				Context.faults.Add(fault);
+
+				if (exception != null)
+					throw new SoftException(string.Format("Faulting status code {0} ({1}) found.", (int)Response.StatusCode, Response.StatusCode), exception);
+
+				throw new SoftException(string.Format("Faulting status code {0} ({1}) found.", (int)Response.StatusCode, Response.StatusCode));
+			}
+			
+			if (Context == null && FaultingStatusCodes.Count > 0)
+			{
+				throw new SoftException("Error, FaultOnStatusCodes publisher parameter does not work with remote publishers!");
+			}
+
+			if (SoftExceptionStatusCodes.Contains((int) Response.StatusCode))
+			{
+				if(exception != null)
+					throw new SoftException(string.Format("Failure status code {0} ({1}) found.", (int)Response.StatusCode, Response.StatusCode), exception);
+
+				throw new SoftException(string.Format("Failure status code {0} ({1}) found.", (int)Response.StatusCode, Response.StatusCode));
+			}
 
 			return Response.GetResponseStream();
 		}
