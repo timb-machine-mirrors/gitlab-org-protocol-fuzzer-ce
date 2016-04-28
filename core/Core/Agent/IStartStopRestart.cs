@@ -2,7 +2,7 @@
 
 namespace Peach.Core.Agent
 {
-	public interface IStartStopRestart
+	public interface IStartStopRestart : IDisposable
 	{
 		void Stop();
 
