@@ -30,6 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NLog;
 
 namespace Peach.Core
@@ -40,11 +41,11 @@ namespace Peach.Core
 	/// </summary>
 	public static class ClassLoader
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		public static Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
-		static Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
-		static Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
-		static string[] searchPath = GetSearchPath();
+		static readonly Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
+		static readonly Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
+		static readonly string[] searchPath = GetSearchPath();
 		static readonly string pluginsPath = GetPluginsPath();
 
 		#region Exclude List
@@ -166,6 +167,9 @@ namespace Peach.Core
 		{
 			foreach (var path in searchPath)
 			{
+				if (Debugger.IsAttached && path.Contains("ReSharper"))
+					continue;
+
 				foreach (var file in Directory.GetFiles(path))
 				{
 					if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
