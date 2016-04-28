@@ -16,10 +16,12 @@ class PackageHandler(xml.sax.handler.ContentHandler):
 		name = str(attrs['id'])
 		version = str(attrs['version'])
 		target = str(attrs['targetFramework'])
-		path = bld.path.find_dir(['%s.%s' % (name, version)])
+
+		expected_dir = '%s.%s' % (name, version)
+		path = bld.path.find_dir([expected_dir])
 
 		if not path:
-			return
+			raise Exception("Unable to find package directory '%s'; verify package 'id' and 'version' attributes in 'packages.config'." % expected_dir)
 
 		basename = bld.env.BASENAME
 		if self.mapping and basename != self.mapping.get(name, basename):
