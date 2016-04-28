@@ -19,10 +19,10 @@
       <Param name="Host" value="10.0.1.101" />
       <Param name="Outlets" value="1,2" />
 
-      <!-- For APC devices that manage groups of outlets, use
-           OutletGroups instead of Outlets -->
+      <!-- For APC devices that manage groups of outlets, be sure to
+           set OutletGrouping. -->
 
-      <!-- <Param name="OutletGroups" value="2" /> -->
+      <!-- <Param name="OutletGrouping" value="OutletGroup" /> -->
     </Monitor>
   </Agent>
 
