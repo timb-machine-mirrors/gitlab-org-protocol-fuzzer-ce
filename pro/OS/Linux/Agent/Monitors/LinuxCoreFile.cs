@@ -29,10 +29,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
+using Mono.Unix;
+using Mono.Unix.Native;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = Peach.Core.Agent.Monitor2;
@@ -45,159 +47,145 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Description("Detect when a process crashes and collect its resulting core file")]
 	[Parameter("Executable", typeof(string), "Target executable used to filter crashes.", "")]
 	[Parameter("LogFolder", typeof(string), "Folder with log files. Defaults to /var/peachcrash", "/var/peachcrash")]
-	[Parameter("Mono", typeof(string), "Full path and executable for mono runtime. Defaults to /usr/bin/mono.", "/usr/bin/mono")]
 	public class LinuxCoreFile : Monitor
 	{
-		protected string corePattern = "|{0} {1} -p=%p -u=%u -g=%g -s=%s -t=%t -h=%h -e=%e";
-		protected string origionalCorePattern = null;
-		protected string origionalSuidDumpable = null;
-		protected string linuxCrashHandlerExe = "PeachLinuxCrashHandler.exe";
-		protected bool logFolderCreated = false;
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		protected string data = null;
-		protected List<string> startingFiles = new List<string>();
+		private const string Handler = "PeachCrashHandler.sh";
+		private const string CorePattern = "|{0}/{1} -p=%p -u=%u -g=%g -s=%s -t=%t -h=%h -e=%e -E=%E";
 
-		public string LogFolder { get; private set; }
-		public string Executable { get; private set; }
-		public string Mono { get; private set; }
+		private readonly Stack<IDisposable> _cleanup = new Stack<IDisposable>();
+		private MonitorData _fault;
+
+		public string LogFolder { get; set; }
+		public string Executable { get; set; }
 
 		public LinuxCoreFile(string name)
 			: base(name)
 		{
-			// TODO
-			// 1) Remove dependency on PeachLinuxCrashHandler.exe
-			// 2) Use embedded resource PeachCrashHandler.sh
-			// 3) Maybe move the install/uninstall logic into the script
+		}
+
+		public override void SessionStarting()
+		{
+			// NOTE: Do all this in SessionStarting() so StopMonitor() will get called
+
+			// The core_pattern has a max length of 128 bytes, so LogFolder must be <60 bytes
+			if (LogFolder.Length >= 60)
+				throw new PeachException("The specified log folder is too long, it must be less than 60 characters.");
+
+			// 1) Ensure only one monitor exists...
+			var si = SingleInstance.CreateInstance("LinuxCoreFile");
+			if (!si.TryLock())
+				throw new PeachException("Only a single running instance of the core file monitor is allowed on a host at any time.");
+			_cleanup.Push(si);
+
+			// 2) Create log folder
+			if (!Directory.Exists(LogFolder))
+			{
+				try
+				{
+					Directory.CreateDirectory(LogFolder);
+					Logger.Trace("Created directory '{0}'", LogFolder);
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Failed to create log folder '{0}', {1}.".Fmt(LogFolder, ex.Message), ex);
+				}
+			}
+
+			// 3) Extract PeachCrashHandler.sh
+			var script = Path.Combine(LogFolder, Handler);
+			try
+			{
+				Utilities.ExtractEmbeddedResource(
+					Assembly.GetExecutingAssembly(),
+					"Peach.Pro.OS.Linux.Resources.PeachCrashHandler.sh",
+					script);
+				Logger.Trace("Extracted core handler '{0}'", script);
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Failed to save the core handler '{0}', {1}.".Fmt(script, ex.Message), ex);
+			}
+
+			// 4) Ensure PeachCrashHandler.sh is chmod 755
+			try
+			{
+				var ret = Syscall.chmod(script, (FilePermissions)Convert.ToInt32("755", 8));
+				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+			}
+			catch (Exception ex)
+			{
+				throw new PeachException("Failed to set the core handler '{0}' as executable, {1}.".Fmt(script, ex.Message), ex);
+			}
+
+			// 5) Set the core pattern
+			_cleanup.Push(new ProcSetter("/proc/sys/kernel/core_pattern", CorePattern.Fmt(LogFolder, Handler)));
+
+			// 6) Enable core files for suid programs
+			_cleanup.Push(new ProcSetter("/proc/sys/fs/suid_dumpable", "1"));
+
+			// 7) Set max core file size
+			_cleanup.Push(new UlimitUnlimited());
+
+			// 8) Ensure all .info files are gone from the LogsFolder
+			foreach (var file in GetInfoFiles())
+				TryDelete(file);
+
+			Logger.Debug("Registered core handler '{0}'", script);
 		}
 
 		public override void  StopMonitor()
 		{
-			// Cleanup
-			SessionFinished();
-		}
-
-		public override void  SessionStarting()
-		{
-			// Ensure the crash handler has been installed at the right place
-			string handler = Path.DirectorySeparatorChar + linuxCrashHandlerExe;
-			if (!File.Exists(handler))
-				throw new PeachException("Error, LinuxCoreFile did not find crash handler located at '" + handler + "'.");
-
-            try
-            {
-                origionalCorePattern = File.ReadAllText("/proc/sys/kernel/core_pattern", System.Text.Encoding.ASCII);
-            }
-            catch(UnauthorizedAccessException ae)
-            {
-                throw new PeachException("Error, Peach does not have permissions to access core_pattern: re-run Peach as root or elevated user", ae);
-            }
-            catch(Exception ex)
-            {
-                throw new PeachException("Error, accessing core_pattern failed",ex);
-            }
-
-		    if (origionalCorePattern.IndexOf(linuxCrashHandlerExe) == -1)
-			{
-				// Register our crash handler via proc file system
-
-				var corePat = string.Format(corePattern,
-					Mono,
-					linuxCrashHandlerExe);
-
-				File.WriteAllText(
-					"/proc/sys/kernel/core_pattern",
-					corePat,
-					System.Text.Encoding.ASCII);
-
-				var checkWrite = File.ReadAllText("/proc/sys/kernel/core_pattern", System.Text.Encoding.ASCII);
-				if (checkWrite.IndexOf(linuxCrashHandlerExe) == -1)
-					throw new PeachException("Error, LinuxCoreFile was unable to update /proc/sys/kernel/core_pattern.");
-			}
-			else
-				origionalCorePattern = null;
-
-			origionalSuidDumpable = File.ReadAllText("/proc/sys/fs/suid_dumpable");
-			if (!origionalSuidDumpable.StartsWith("1"))
-			{
-				// Enable core files for all binaries, regardless of suid or protections
-				File.WriteAllText(
-					"/proc/sys/fs/suid_dumpable",
-					"1",
-					System.Text.Encoding.ASCII);
-
-				var checkWrite = File.ReadAllText("/proc/sys/fs/suid_dumpable", System.Text.Encoding.ASCII);
-				if (!checkWrite.StartsWith("1"))
-					throw new PeachException("Error, LinuxCoreFile was unable to update /proc/sys/fs/suid_dumpable.");
-			}
-			else
-				origionalSuidDumpable = null;
-
-			if (Directory.Exists(LogFolder))
-				DeleteLogFolder();
-
-			try
-			{
-				Directory.CreateDirectory(LogFolder);
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Error, LinuxCoreFile was unable to create the log directory.  " + ex.Message, ex);
-			}
-
-			logFolderCreated = true;
-
-			// Enable core files
-			UlimitUnlimited();
-		}
-
-		public override void  SessionFinished()
-		{
-			// only replace core_pattern if we updated it.
-			if (origionalCorePattern != null)
-			{
-				File.WriteAllText("/proc/sys/kernel/core_pattern", origionalCorePattern, System.Text.Encoding.ASCII);
-			}
-
-			// only replace suid_dumpable if we updated it.
-			if (origionalSuidDumpable != null)
-			{
-				File.WriteAllText("/proc/sys/fs/suid_dumpable", origionalSuidDumpable, System.Text.Encoding.ASCII);
-			}
-
-			// Remove folder
-			if (logFolderCreated)
-				DeleteLogFolder();
-
-			logFolderCreated = false;
-		}
-
-		private void DeleteLogFolder()
-		{
-			try
-			{
-				Directory.Delete(LogFolder, true);
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Error, LinuxCoreFile was unable to clear the log directory.  " + ex.Message, ex);
-			}
+			while (_cleanup.Count > 0)
+				_cleanup.Pop().Dispose();
 		}
 
 		public override bool DetectedFault()
 		{
-			Thread.Sleep (250);
-			
-			foreach (var file in Directory.GetFiles(LogFolder))
+			_fault = null;
+
+			foreach (var file in GetInfoFiles())
 			{
-				if (Executable != null)
+				if (Executable != null && !file.Contains(Executable))
+					continue;
+
+				Logger.Debug("Detected Fault '{0}'", file);
+
+				// Format is /path/to/file.PID.info
+				var exe = Path.GetFileName(file) ?? ".info";
+				exe = exe.Substring(0, exe.Length - 5);
+				var idx = exe.LastIndexOf('.');
+				if (idx != -1)
+					exe = exe.Substring(0, idx);
+
+				_fault = new MonitorData
 				{
-					if (file.IndexOf(Executable) != -1)
+					Title = "{0} core dumped".Fmt(exe),
+					Data = new Dictionary<string, Stream>
 					{
-						return true;
+						{ Path.GetFileName(file), new MemoryStream(File.ReadAllBytes(file)) }
+					},
+					Fault = new MonitorData.Info
+					{
+						Description = File.ReadAllText(file),
+						MajorHash = Hash(Class + "." + exe),
+						MinorHash = Hash("CORE"),
+						Risk = "UNKNOWN"
 					}
+				};
+
+				var core = file.Substring(0, file.Length - 5) + ".core";
+				if (File.Exists(core))
+				{
+					Logger.Debug("Saving core '{0}'", core);
+					_fault.Data.Add(Path.GetFileName(core), new MemoryStream(File.ReadAllBytes(core)));
+					TryDelete(core);
 				}
-				else
-					return true;
+
+				TryDelete(file);
+
+				return true;
 			}
 
 			return false;
@@ -205,112 +193,170 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 		public override MonitorData GetMonitorData()
 		{
-			var title = string.IsNullOrEmpty(Executable)
-				? "Crash dump found."
-				: "{0} crash dump found.".Fmt(Executable);
+			return _fault;
+		}
 
-			var ret = new MonitorData
+		private IEnumerable<string> GetInfoFiles()
+		{
+			return Directory.GetFiles(LogFolder, "*.info", SearchOption.TopDirectoryOnly);
+		}
+
+		private static void TryDelete(string fileName)
+		{
+			try
 			{
-				Title = title,
-				Data = new Dictionary<string, Stream>(),
-				Fault = new MonitorData.Info
-				{
-					MajorHash = Hash(Class + Executable),
-					MinorHash = Hash("CORE"),
-				}
-			};
-
-			foreach (var file in Directory.GetFiles(LogFolder))
-			{
-				if(startingFiles.Contains(file))
-					continue;
-
-				try
-				{
-					if (Executable != null)
-					{
-						if (file.IndexOf(Executable) != -1)
-						{
-							var key = Path.GetFileName(file);
-							Debug.Assert(key != null);
-							ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
-							File.Delete(file);
-							break;
-						}
-					}
-					else
-					{
-						// Support multiple crash files
-						var key = Path.GetFileName(file);
-						Debug.Assert(key != null);
-						ret.Data.Add(key, new MemoryStream(File.ReadAllBytes(file)));
-						File.Delete(file);
-					}
-				}
-				catch (UnauthorizedAccessException ex)
-				{
-					throw new PeachException("Error, LinuxCoreFile was unable to read the crash log.  " + ex.Message, ex);
-				}
+				File.Delete(fileName);
 			}
-
-			return ret;
+			catch (Exception ex)
+			{
+				Logger.Trace("Failed to delete {0}, {1}.", fileName, ex.Message);
+			}
 		}
 
 		#region Ulimit
 
-		private static void UlimitUnlimited()
+		private class UlimitUnlimited : IDisposable
 		{
-			rlimit rlim = new rlimit();
-
-			if (0 != getrlimit(rlimit_resource.RLIMIT_CORE, ref rlim))
+			[StructLayout(LayoutKind.Sequential)]
+			private struct rlimit
 			{
-				int err = Marshal.GetLastWin32Error();
-				Win32Exception ex = new Win32Exception(err);
-				throw new PeachException("Error, LinuxCrashHandler could not query the core size resource limit.  " + ex.Message, ex);
+				public IntPtr rlim_curr;
+				public IntPtr rlim_max;
 			}
 
-			rlim.rlim_curr = rlim.rlim_max;
+			private const int RLIMIT_CORE = 4;
 
-			if (0 != setrlimit(rlimit_resource.RLIMIT_CORE, ref rlim))
+			[DllImport("libc", SetLastError = true)]
+			private static extern int getrlimit(int resource, ref rlimit rlim);
+
+			[DllImport("libc", EntryPoint = "getrlimit", SetLastError = true)]
+			private static extern int setrlimit(int resource, ref rlimit rlim);
+
+			private readonly rlimit _initial;
+			private readonly bool _reset;
+
+			public UlimitUnlimited()
 			{
-				int err = Marshal.GetLastWin32Error();
-				Win32Exception ex = new Win32Exception(err);
-				throw new PeachException("Error, LinuxCrashHandler could not set the core size resource limit.  " + ex.Message, ex);
+				_initial = new rlimit();
+
+				if (0 != getrlimit(RLIMIT_CORE, ref _initial))
+				{
+					var err = Marshal.GetLastWin32Error();
+					var ex = new Win32Exception(err);
+					throw new PeachException("Error, could not query the core size resource limit.  " + ex.Message, ex);
+				}
+
+				var rlim = new rlimit { rlim_curr = _initial.rlim_max, rlim_max = _initial.rlim_max };
+
+				if (0 != setrlimit(RLIMIT_CORE, ref rlim))
+				{
+					var err = Marshal.GetLastWin32Error();
+					var ex = new Win32Exception(err);
+					throw new PeachException("Error, could not set the core size resource limit.  " + ex.Message, ex);
+				}
+
+				_reset = true;
+			}
+
+			public void Dispose()
+			{
+				if (!_reset)
+					return;
+
+				var rlim = new rlimit { rlim_curr = _initial.rlim_curr, rlim_max = _initial.rlim_max };
+				if (0 != setrlimit(RLIMIT_CORE, ref rlim))
+					Logger.Trace("Failed to restore the rlimit to {0}", _initial.rlim_curr);
 			}
 		}
 
-		enum rlimit_resource : int
-		{
-			RLIMIT_CPU = 0,
-			RLIMIT_FSIZE = 1,
-			RLIMIT_DATA = 2,
-			RLIMIT_STACK = 3,
-			RLIMIT_CORE = 4,
-			RLIMIT_RSS = 5,
-			RLIMIT_NPROC = 6,
-			RLIMIT_NOFILE = 7,
-			RLIMIT_MEMLOCK = 8,
-			RLIMIT_AS = 9,
-			RLIMIT_LOCKS = 10,
-			RLIMIT_SIGPENDING = 11,
-			RLIMIT_MSGQUEUE = 12,
-			RLIMIT_NICE = 13,
-			RLIMIT_RTPRIO = 14,
-			RLIMIT_RTTIME = 15,
-			RLIMIT_NLIMITS = 16,
-		};
+		#endregion
 
-		struct rlimit
+		#region Proc Setter
+
+		private class ProcSetter : IDisposable
 		{
-			public IntPtr rlim_curr;
-			public IntPtr rlim_max;
+			private readonly string _path;
+			private readonly string _initial;
+
+			public ProcSetter(string path, string value)
+			{
+				string tmp1;
+
+				try
+				{
+					// Check the current value
+					tmp1 = File.ReadAllText(path);
+				}
+				catch (UnauthorizedAccessException ex)
+				{
+					throw new PeachException("Read access denied. {0}".Fmt(ex.Message), ex);
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Read fail. {0}".Fmt(ex.Message), ex);
+				}
+
+				if (tmp1 == value)
+				{
+					Logger.Trace("{0} is already '{1}', not changing", path, value);
+					return;
+				}
+
+				try
+				{
+					// Write the new value
+					File.WriteAllText(path, value);
+				}
+				catch (UnauthorizedAccessException ex)
+				{
+					throw new PeachException("Write access denied. {0}".Fmt(ex.Message), ex);
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Write fail. {0}".Fmt(ex.Message), ex);
+				}
+
+				string tmp2;
+
+				try
+				{
+					// Ensure the new value took effect
+					tmp2 = File.ReadAllText(path).Trim();
+				}
+				catch (UnauthorizedAccessException ex)
+				{
+					throw new PeachException("Verify Access denied. {0}".Fmt(ex.Message), ex);
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Verify fail. {0}".Fmt(ex.Message), ex);
+				}
+
+				if (tmp2 != value)
+					throw new PeachException("Set fail. Expected '{0}' but is actually '{1}'.".Fmt(value, tmp2));
+
+				_initial = tmp1;
+				_path = path;
+
+				Logger.Trace("Changed {0} to '{1}'", path, value);
+			}
+
+			public void Dispose()
+			{
+				if (_path != null)
+				{
+					try
+					{
+						File.WriteAllText(_path, _initial);
+						Logger.Trace("Restored {0} to '{1}'", _path, _initial);
+					}
+					catch (Exception ex)
+					{
+						Logger.Trace("Failed to restored {0} to '{1}'. {2}.", _path, _initial, ex.Message);
+					}
+				}
+			}
 		}
-
-		[DllImport("libc", SetLastError = true)]
-		private static extern int getrlimit(rlimit_resource resource, ref rlimit rlim);
-
-		[DllImport("libc", EntryPoint = "getrlimit", SetLastError = true)]
-		private static extern int setrlimit(rlimit_resource resource, ref rlimit rlim);
 
 		#endregion
 	}
