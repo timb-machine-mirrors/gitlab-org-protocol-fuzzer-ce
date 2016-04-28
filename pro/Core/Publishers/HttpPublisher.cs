@@ -400,6 +400,9 @@ namespace Peach.Pro.Core.Publishers
 			{
 				exception = wex;
 				Response = (HttpWebResponse) wex.Response;
+
+				if (Response == null)
+					throw;
 			} 
 
 			if (Context != null && FaultingStatusCodes.Contains((int) Response.StatusCode))
