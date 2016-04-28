@@ -41,6 +41,7 @@
     {
       "Name": "Automation",
       "Items": [
+        "ApcPower",
         "ButtonClicker",
         "CanaKitRelay",
         "CleanupFolder",
@@ -50,6 +51,7 @@
         "ProcessKiller",
         "RunCommand",
         "SerialPort",
+        "SnmpPower",
         "SshCommand",
         "Syslog",
         "TcpPort",
@@ -133,6 +135,39 @@
           "FaultRegex",
           "IgnoreRegex",
           "MustStopRegex"
+        ]
+      }
+    ],
+    "ApcPower": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "OutletGrouping",
+          "Outlets",
+          "",
+          "Host",
+          "Port",
+          "ReadCommunity",
+          "WriteCommunity",
+          "RequestTimeout"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "When",
+          "ResetOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "PowerOffOnEnd",
+          "PowerOnOffPause",
+          "",
+          "SanityCheckOnStart",
+          "SanityCheckWaitTimeout"
         ]
       }
     ],
@@ -473,6 +508,40 @@
           "",
           "MaxBufferSize"
          ]
+      }
+    ],
+    "SnmpPower": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "OIDs",
+          "OnCode",
+          "OffCode",
+          "",
+          "Host",
+          "Port",
+          "ReadCommunity",
+          "WriteCommunity",
+          "RequestTimeout"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "When",
+          "ResetOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "PowerOffOnEnd",
+          "PowerOnOffPause",
+          "",
+          "SanityCheckOnStart",
+          "SanityCheckWaitTimeout"
+        ]
       }
     ],
     "Socket": [
