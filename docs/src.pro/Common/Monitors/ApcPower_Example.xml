@@ -15,11 +15,14 @@
   </StateModel>
 
   <Agent name="Local">
-    <Monitor class="IpPower9258">
-      <Param name="Host" value="192.168.1.1:8080" />
-      <Param name="Port" value="1" />
-      <Param name="User" value="peach" />
-      <Param name="Password" value="power" />
+    <Monitor class="ApcPower">
+      <Param name="Host" value="10.0.1.101" />
+      <Param name="Outlets" value="1,2" />
+
+      <!-- For APC devices that manage groups of outlets, be sure to
+           set OutletGrouping. -->
+
+      <!-- <Param name="OutletGrouping" value="OutletGroup" /> -->
     </Monitor>
   </Agent>
 

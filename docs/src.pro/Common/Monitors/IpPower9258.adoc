@@ -22,20 +22,12 @@ The monitor can toggle power on an outlet at the following points in time:
 
 image::{images}/Common/Monitors/IpPower9258.png[scalewidth="75%"]
 
-
-[NOTE]
-===============================
-
-IP Power 9258 is the only networked power switch that Peach supports.
-If you wish to fuzz another networked power controller or switch,
-you will need to write your own monitor.
-
-You can purchase "IP Power 9258" Remote Network (or Network AC) Power Controllers from a variety of online retailers.
-
-===============================
-
-TIP: For controlling power to a device by wiring through a relay,
-Peach provides a monitor for the xref:Monitors_CanaKitRelay[CanaKit 4-Port USB Relay Controller].
+TIP: Peach also supports power distribution units that can be
+controlled using SNMPv1. For APC PDUs use the
+xref:Monitors_ApcPower[APC Power Monitor], and for others try the
+xref:Monitors_SnmpPower[SNMP Power Monitor]. To control power to a
+device by wiring through a relay, Peach provides the
+xref:Monitors_CanaKitRelay[CanaKit 4-Port USB Relay Monitor].
 
 === Parameters
 
