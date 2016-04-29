@@ -147,7 +147,7 @@ ifdef::peachug[]
 
 .Data Collection example
 ====================
-This parameter example is from a setup that uses the default settings for the Serial monitor,
+This parameter example is from a setup that uses the default settings for the _Serial Port_ monitor,
 resulting in the monitor performing data collection of the data received over `COM1` when a fault is detected by another monitor.
 Other than the mandatory 'Port' declaration, the setup uses default values.
 

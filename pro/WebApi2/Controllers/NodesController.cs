@@ -4,26 +4,32 @@ using System.Net;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Swagger.Annotations;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[NoCache]
 	[RestrictedApi]
 	[RoutePrefix(Prefix)]
-	public class NodesController : BaseController
+	public class NodesController : ApiController
 	{
 		public const string Prefix = "p/nodes";
+
+		private IWebContext _context;
+		private IJobMonitor _jobMonitor;
 
 		public static string MakeUrl(params string[] args)
 		{
 			return string.Join("/", "", Prefix, string.Join("/", args));
 		}
 
-		public NodesController()
-			: base(null)
+		public NodesController(IWebContext context, IJobMonitor jobMonitor)
 		{
+			_context = context;
+			_jobMonitor = jobMonitor;
 		}
 
 		[Route("")]
@@ -37,7 +43,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified node does not exist")]
 		public IHttpActionResult Get(string id)
 		{
-			if (id != NodeGuid)
+			if (id != _context.NodeGuid)
 				return NotFound();
 
 			return Ok(MakeNode());
@@ -45,11 +51,11 @@ namespace Peach.Pro.WebApi2.Controllers
 
 		Node MakeNode()
 		{
-			var job = JobMonitor.GetJob();
+			var job = _jobMonitor.GetJob();
 
 			return new Node
 			{
-				NodeUrl = MakeUrl(NodeGuid),
+				NodeUrl = MakeUrl(_context.NodeGuid),
 				Name = Environment.MachineName,
 				Mac = "00:00:00:00:00:00",
 				Ip = "0.0.0.0",

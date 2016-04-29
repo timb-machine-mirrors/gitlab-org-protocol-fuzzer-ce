@@ -2,21 +2,25 @@ using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Swagger.Annotations;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[NoCache]
 	[RestrictedApi]
 	[RoutePrefix(Prefix)]
-	public class LibrariesController : BaseController
+	public class LibrariesController : ApiController
 	{
 		public const string Prefix = "p/libraries";
 
-		public LibrariesController()
-			:base(null)
+		private IPitDatabase _pitDatabase;
+
+		public LibrariesController(IPitDatabase pitDatabase)
 		{
+			_pitDatabase = pitDatabase;
 		}
 
 		/// <summary>
@@ -32,7 +36,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Route("")]
 		public IEnumerable<Library> Get()
 		{
-			return PitDatabase.Libraries;
+			return _pitDatabase.Libraries;
 		}
 
 		/// <summary>
@@ -51,7 +55,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified library does not exist")]
 		public IHttpActionResult Get(string id)
 		{
-			var lib = PitDatabase.GetLibraryById(id);
+			var lib = _pitDatabase.GetLibraryById(id);
 			if (lib == null)
 				return NotFound();
 

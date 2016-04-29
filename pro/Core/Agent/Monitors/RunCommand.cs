@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Pro.Core.Agent.Monitors.Utilities;
 using Monitor = Peach.Core.Agent.Monitor2;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
@@ -35,13 +36,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public bool FaultOnExitCode { get; set; }
 		public string FaultOnRegex { get; set; }
 		public string WorkingDirectory { get; set; }
-
-		// NOTE: Output from GCC can be slightly different than CLANG
-		//       These regexes have been updated to work with both.
-		internal static readonly Regex AsanMatch = new Regex(@"==\d+==\s*ERROR: AddressSanitizer:");
-		internal static readonly Regex AsanBucket = new Regex(@"==\d+==\s*ERROR: AddressSanitizer: ([^\s]+) on.*?address ([0-9a-z]+) .*?pc ([0-9a-z]+)");
-		internal static readonly Regex AsanMessage = new Regex(@"(==\d+==\s*ERROR: AddressSanitizer:.*==\d+==\s*ABORTING)", RegexOptions.Singleline);
-		internal static readonly Regex AsanTitle = new Regex(@"==\d+==\s*ERROR: AddressSanitizer: ([^\r\n]+)");
 
 		private Regex _faultOnRegex;
 		private MonitorData _data;
@@ -85,20 +79,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Data.Add("stdout", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
 				_data.Data.Add("stderr", new MemoryStream(Encoding.UTF8.GetBytes(stderr)));
 
-				if (AsanMatch.IsMatch(stderr))
+				if (Asan.CheckForAsanFault(stderr))
 				{
-					var title = AsanTitle.Match(stderr);
-					var bucket = AsanBucket.Match(stderr);
-					var desc = AsanMessage.Match(stderr);
-
-					_data.Title = title.Groups[1].Value;
-					_data.Fault = new MonitorData.Info
-					{
-						Description = stderr.Substring(desc.Index, desc.Length),
-						MajorHash = Hash(bucket.Groups[3].Value),
-						MinorHash = Hash(bucket.Groups[2].Value),
-						Risk = bucket.Groups[1].Value,
-					};
+					_data = Asan.AsanToMonitorData(stderr);
 				}
 				else if (_faultOnRegex != null)
 				{

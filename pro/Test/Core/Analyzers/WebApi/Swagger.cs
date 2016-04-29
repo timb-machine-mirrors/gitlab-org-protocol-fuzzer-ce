@@ -62,7 +62,7 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 				}
 
 				Console.WriteLine(Encoding.UTF8.GetString(sout.ToArray()));
-				File.WriteAllText(@"c:\temp\webapi.xml", Encoding.UTF8.GetString(sout.ToArray()));
+				//File.WriteAllText(@"c:\temp\webapi.xml", Encoding.UTF8.GetString(sout.ToArray()));
 			}
 		}
 

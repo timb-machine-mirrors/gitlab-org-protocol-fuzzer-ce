@@ -11,15 +11,18 @@ using Peach.Pro.WebApi2.Utility;
 
 namespace Peach.Pro.WebApi2.Controllers
 {
+	[NoCache]
 	[RestrictedApi]
 	[RoutePrefix(Prefix)]
-	public class PitsController : BaseController
+	public class PitsController : ApiController
 	{
 		public const string Prefix = "p/pits";
 
-		public PitsController()
-			: base(null)
+		private IPitDatabase _pitDatabase;
+
+		public PitsController(IPitDatabase pitDatabase)
 		{
+			_pitDatabase = pitDatabase;
 		}
 
 		/// <summary>
@@ -32,7 +35,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[Route("")]
 		public IEnumerable<LibraryPit> Get()
 		{
-			return PitDatabase.LibraryPits;
+			return _pitDatabase.LibraryPits;
 		}
 
 		/// <summary>
@@ -52,11 +55,11 @@ namespace Peach.Pro.WebApi2.Controllers
 				Tuple<Pit, PitDetail> tuple;
 				if (!string.IsNullOrEmpty(data.LegacyPitUrl))
 				{
-					tuple = PitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
+					tuple = _pitDatabase.MigratePit(data.LegacyPitUrl, data.PitUrl);
 				}
 				else
 				{
-					tuple = PitDatabase.CopyPit(
+					tuple = _pitDatabase.CopyPit(
 						data.PitUrl,
 						data.Name,
 						data.Description
@@ -70,7 +73,7 @@ namespace Peach.Pro.WebApi2.Controllers
 			}
 			catch (UnauthorizedAccessException)
 			{
-				return Forbidden();
+				return StatusCode(HttpStatusCode.Forbidden);
 			}
 			catch (ArgumentException)
 			{
@@ -91,7 +94,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit does not exist")]
 		public IHttpActionResult Get(string id)
 		{
-			var pit = PitDatabase.GetPitById(id);
+			var pit = _pitDatabase.GetPitById(id);
 			if (pit == null)
 				return NotFound();
 
@@ -116,7 +119,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			try
 			{
-				var pit = PitDatabase.UpdatePitById(id, config);
+				var pit = _pitDatabase.UpdatePitById(id, config);
 				return Ok(pit);
 			}
 			catch (KeyNotFoundException)
@@ -125,7 +128,7 @@ namespace Peach.Pro.WebApi2.Controllers
 			}
 			catch (UnauthorizedAccessException)
 			{
-				return Forbidden();
+				return StatusCode(HttpStatusCode.Forbidden);
 			}
 			catch (ArgumentException)
 			{

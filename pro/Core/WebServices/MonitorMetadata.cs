@@ -175,10 +175,20 @@ namespace Peach.Pro.Core.WebServices
 				var rdr = new JsonTextReader(strm);
 				var s = new JsonSerializer();
 
-				try
-				{
-					return s.Deserialize<GroupInfo>(rdr) ?? new GroupInfo { Groups = new List<NamedItem>(), Parameters = new Dictionary<string, List<NamedItem>>() };
+				try {
+					var result = s.Deserialize<GroupInfo>(rdr);
+					if (result != null)
+						return result;
+					else
+						return new GroupInfo { Groups = new List<NamedItem> (), Parameters = new Dictionary<string, List<NamedItem>> () };
 				}
+				catch (JsonReaderException ex)
+				{
+					if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Unable to parse monitor metadata resource. See line {0}, position {1}".Fmt(ex.LineNumber, ex.LinePosition), ex)));
+
+					return null;
+				} 
 				catch (Exception ex)
 				{
 					if (ErrorEventHandler != null)

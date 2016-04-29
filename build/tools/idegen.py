@@ -4,7 +4,7 @@ import sys
 import re
 import random
 
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 from waflib.extras import msvs
 from waflib.Build import BuildContext
@@ -83,6 +83,16 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
     ${for k, v in props.properties.iteritems()}
     <${k}>${str(v)}</${k}>
     ${endfor}
+    ${if props.custom_cmds}
+    <CustomCommands>
+      <CustomCommands>
+        ${for cmd in props.custom_cmds}
+        <Command type="${cmd.type}" command="${cmd.command}" workingdir="${cmd.workingdir}" />
+        ${endfor}
+      </CustomCommands>
+    </CustomCommands>
+    ${endif}
+
   </PropertyGroup>
   ${endfor}
 
@@ -190,7 +200,7 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
   <PropertyGroup>
     ${for p in project.build_properties}
     ${if p.post_build}
-    <PostBuildEvent Condition=" '$(Configuration)|$(Platform)' == '${props.configuration}|${props.platform_tgt}' ">${p.post_build}</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)|$(Platform)' == '${p.configuration}|${p.platform_tgt}' ">${p.post_build}</PostBuildEvent>
     ${endif}
     ${endfor}
   </PropertyGroup>
@@ -644,11 +654,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		config = self.ctx.get_config(tg.bld, tg.env)
 
 		out_node = base.make_node(['bin', '%s_%s' % (config, platform)])
-
-		if getattr(tg, 'ide_aspnet', False):
-			out = 'bin'
-		else:
-			out = out_node.path_from(self.base)
+		out = out_node.path_from(self.base)
 
 		# Order matters!
 		g['ProjectGuid'] = '{%s}' % self.uuid
@@ -729,6 +735,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 			# We might not have run collect_sources() yet
 			if not hasattr(y, 'uuid'):
 				y = self.ctx.make_project(y)
+				if not y and not self.ctx.enable_cproj:
+					continue
+
 				if not hasattr(y, 'uuid'):
 					self.tg.bld.fatal('cs tgen link task has no uuid for ide_use %r' % self.tg)
 
@@ -758,6 +767,7 @@ class idegen(msvs.msvs_generator):
 	depth = 0
 	copy_cmd = 'copy'
 	cmd = 'msvs2010'
+	enable_cproj = True
 
 	def init(self):
 		msvs.msvs_generator.init(self)
@@ -767,7 +777,7 @@ class idegen(msvs.msvs_generator):
 		self.solution_name = self.env.APPNAME + '.sln'
 
 		# Make monodevelop csproj
-		if (Utils.unversioned_sys_platform() != 'win32'):
+		if Utils.unversioned_sys_platform() != 'win32':
 			msvs.PROJECT_TEMPLATE = MONO_PROJECT_TEMPLATE
 			msvs.vsnode_project.VS_GUID_VCPROJ = '2857B73E-F847-4B02-9238-064979017E93'
 			vsnode_target.get_waf = vsnode_target.get_waf_mono
@@ -777,8 +787,8 @@ class idegen(msvs.msvs_generator):
 			self.get_ide_use = self.get_ide_use_mono
 			idegen.copy_cmd = 'cp'
 
-		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_target = vsnode_target
+		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_web_target = vsnode_web_target
 
 	def get_config(self, bld, env):
@@ -989,7 +999,20 @@ class idegen(msvs.msvs_generator):
 					prop.properties = p.properties
 					prop.configuration_bld = config
 					prop.sources = []
-					prop.post_build = getattr(p, 'post_build', None)
+
+					# for MonoDevelop support
+					prop.custom_cmds = map(
+						lambda x: namedtuple('CustomCommand', x.keys())(*x.values()),
+						getattr(p.tg, 'ide_custom_commands', [])
+					)
+
+					# for MSVS support, convert custom commands into post build events
+					post_builds = []
+					for x in prop.custom_cmds:
+						workingdir = x.workingdir.replace('{', '(').replace('}', ')')
+						if x.type == 'AfterBuild':
+							post_builds.append('cd %s && %s' % (workingdir, x.command))
+					prop.post_build = ' && '.join(post_builds).replace('&', '&amp;')
 
 					# Ensure all files are accounted for
 					if main != p:
@@ -1034,7 +1057,7 @@ class idegen(msvs.msvs_generator):
 	def make_project(self, tg):
 		if 'fake_lib' in getattr(tg, 'features', ''):
 			return None
-		elif hasattr(tg, 'link_task'):
+		elif hasattr(tg, 'link_task') and self.enable_cproj:
 			return self.vsnode_target(self, tg)
 		elif hasattr(tg, 'cs_task') or hasattr(tg, 'tsc'):
 			return self.vsnode_cs_target(self, tg)
@@ -1083,6 +1106,19 @@ class idegen2012(idegen):
 		self.vsver  = '2012'
 		self.platform_toolset = 'v110'
 		self.vsnode_cs_target = vsnode_cs_target2012
+
+class idegen_xamarin6(idegen):
+	'''generates a solution for Xamarin Studio/MonoDevelop 6'''
+	cmd = 'xamarin6'
+	fun = idegen.fun
+
+	def init(self):
+		idegen.init(self)
+		self.numver = '12.00'
+		self.vsver  = '2012'
+		self.platform_toolset = 'v110'
+		self.vsnode_cs_target = vsnode_cs_target2012
+		self.enable_cproj = False
 
 def options(ctx):
 	"""

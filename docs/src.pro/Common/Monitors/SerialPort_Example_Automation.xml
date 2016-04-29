@@ -16,13 +16,13 @@
 
   <Agent name="Local">
     <!-- Waits at the start of fuzzing for message -->
-    <Monitor class="Serial">
+    <Monitor class="SerialPort">
       <Param name="Port" value="COM1" />
       <Param name="WaitForRegex" value="Boot up completed" />
     </Monitor>
 
     <!-- Fault when "ERROR" is found, and also wait for boot message after fault. -->
-    <Monitor class="Serial">
+    <Monitor class="SerialPort">
       <Param name="Port" value="COM1" />
       <Param name="FaultRegex" value="ERROR" />
       <Param name="WaitRegex" value="Boot up completed" />

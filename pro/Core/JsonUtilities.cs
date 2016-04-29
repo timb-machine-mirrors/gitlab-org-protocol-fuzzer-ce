@@ -27,7 +27,7 @@ namespace Peach.Pro.Core
 		}
 	}
 
-	public static class JsonUtilties
+	public static class JsonUtilities
 	{
 		public static JsonSerializerSettings GetSettings()
 		{

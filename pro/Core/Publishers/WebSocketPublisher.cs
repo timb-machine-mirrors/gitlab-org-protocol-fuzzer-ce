@@ -34,9 +34,9 @@ namespace Peach.Pro.Core.Publishers
 		readonly BufferBlock<string> _msgQueue = new BufferBlock<string>();
 
 		readonly AutoResetEvent _evaluated = new AutoResetEvent(false);
-		readonly AutoResetEvent _msgReceived = new AutoResetEvent(false);
+		readonly ManualResetEvent _clientReady = new ManualResetEvent(false);
 
-		private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
+		private readonly CancellationTokenSource _cancelAccept = new CancellationTokenSource();
 
 		public int Port { get; protected set; }
 		public string Template { get; protected set; }
@@ -45,6 +45,8 @@ namespace Peach.Pro.Core.Publishers
 		public int Timeout { get; protected set; }
 
 		string _template = null;
+		readonly JObject _jsonTemplateMessage = new JObject();
+
 
 		public WebSocketPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -54,14 +56,16 @@ namespace Peach.Pro.Core.Publishers
 			_socketServer.Standards.RegisterStandard(rfc6455);
 
 			_template = File.ReadAllText(Template);
+
+			_jsonTemplateMessage["type"] = "template";
 		}
 
-		static async Task AcceptWebSocketClientAsync(WebSocketListener server, CancellationToken token, 
-			BufferBlock<string> queue,
-			AutoResetEvent msgReceived, AutoResetEvent evaluated)
+		static async Task AcceptWebSocketClientAsync(WebSocketListener server, CancellationToken token,
+			BufferBlock<string> queue, EventWaitHandle clientReady, EventWaitHandle evaluated)
 		{
-			Task task = null;
-			var cancelSource = new CancellationTokenSource();
+			CancellationTokenSource cancelConnection = null;
+			Task reader = null;
+			Task writer = null;
 
 			while (!token.IsCancellationRequested)
 			{
@@ -70,18 +74,31 @@ namespace Peach.Pro.Core.Publishers
 					var ws = await server.AcceptWebSocketAsync(token).ConfigureAwait(false);
 					if (ws == null) continue;
 
-					if (task != null)
+					if (cancelConnection != null)
 					{
 						logger.Debug("New web socket connection. Closing down existing connection.");
 
-						cancelSource.Cancel();
-						//cancelSource = new CancellationTokenSource();
+						cancelConnection.Cancel();
+
+						// Wait to see if our task threads will exit okay.
+						// We want to avoid having an old reader thread that sets clientReady or evaluated.
+						// Also avoid our writer thread de-queuing from queue.
+
+						if (reader != null)
+							reader.Wait(1000);
+
+						if (writer != null)
+							writer.Wait(1000);
 					}
 					else
+					{
 						logger.Debug("New web socket connection");
+					}
 
-					task = Task.Run(() => HandleConnectionAsync(ws, cancelSource.Token, msgReceived, evaluated));
-					Task.Run(() => HandleSendQueueAsync(ws, cancelSource.Token, queue));
+					cancelConnection = new CancellationTokenSource();
+
+					reader = Task.Run(() => HandleConnectionAsync(ws, cancelConnection.Token, clientReady, evaluated));
+					writer = Task.Run(() => HandleSendQueueAsync(ws,  cancelConnection.Token, queue));
 				}
 				catch (Exception aex)
 				{
@@ -89,25 +106,40 @@ namespace Peach.Pro.Core.Publishers
 				}
 			}
 
-			cancelSource.Cancel();
+			if(cancelConnection != null)
+				cancelConnection.Cancel();
+
 			logger.Debug("Server Stop accepting clients");
 		}
 
-		static async Task HandleConnectionAsync(WebSocket ws, CancellationToken cancellation, AutoResetEvent msgReceived, AutoResetEvent evaluated)
+		static async Task HandleConnectionAsync(WebSocket ws, CancellationToken cancellation, EventWaitHandle clientReady, EventWaitHandle evaluated)
 		{
 			try
 			{
+				if(cancellation.IsCancellationRequested)
+					logger.Debug("HandleConnectionAsync, IsCancellationRequested == true");
+
 				while (ws.IsConnected && !cancellation.IsCancellationRequested)
 				{
 					var msg = await ws.ReadStringAsync(cancellation).ConfigureAwait(false);
-					if (msg != null)
-					{
-						logger.Debug("NewMessageReceived: " + msg);
-						msgReceived.Set();
+					if (msg == null) continue;
 
-						var json = JObject.Parse(msg);
-						if (((string)json["msg"]) == "Evaluation complete" || ((string)json["msg"]) == "Client ready")
-							evaluated.Set();
+					logger.Trace("NewMessageReceived: {0}", msg);
+
+					var json = JObject.Parse(msg);
+					if ((string) json["msg"] == "Client ready")
+					{
+						logger.Debug("Client ready message received");
+						clientReady.Set();
+					}
+					else if ((string) json["msg"] == "Evaluation complete")
+					{
+						logger.Debug("Evaluated message received");
+						evaluated.Set();
+					}
+					else
+					{
+						logger.Debug("Unknown message received: {0}", msg);
 					}
 				}
 			}
@@ -119,6 +151,7 @@ namespace Peach.Pro.Core.Publishers
 			}
 			finally
 			{
+				clientReady.Reset();
 				ws.Dispose();
 			}
 		}
@@ -132,7 +165,7 @@ namespace Peach.Pro.Core.Publishers
 					var msg = await queue.ReceiveAsync(cancellation);
 					if (msg == null) continue;
 
-					logger.Debug("Dequeued and sending message");
+					logger.Trace("Dequeued and sending message");
 					ws.WriteString(msg);
 				}
 			}
@@ -153,36 +186,48 @@ namespace Peach.Pro.Core.Publishers
 			base.OnStart();
 
 			_socketServer.Start();
-			Task.Run(() => AcceptWebSocketClientAsync(_socketServer, _cancellation.Token, _msgQueue, _msgReceived, _evaluated));
+			Task.Run(() => AcceptWebSocketClientAsync(_socketServer, _cancelAccept.Token, 
+				_msgQueue, _clientReady, _evaluated));
 		}
 
 		protected override void OnStop()
 		{
 			base.OnStop();
 
-			_cancellation.Cancel();
+			_cancelAccept.Cancel();
 			_socketServer.Stop();
+		}
+
+		protected override void OnOpen()
+		{
+			base.OnOpen();
+
+			IList<string> msgs;
+			_msgQueue.TryReceiveAll(out msgs);
+			_evaluated.Reset();
+
+			if (!_clientReady.WaitOne(Timeout))
+				throw new SoftException("Timeout waiting for web socket connection.");
 		}
 
 		protected override void OnOutput(BitwiseStream data)
 		{
-			try
-			{
-				logger.Debug(">> OnOutput");
-				logger.Debug("Waiting for evaluated or client ready msg");
-				
-				_evaluated.WaitOne(Timeout);
-				_evaluated.Reset();
+			_jsonTemplateMessage["content"] = BuildTemplate(data);
+			var msg = _jsonTemplateMessage.ToString(Newtonsoft.Json.Formatting.None) + "\n";
 
-				_msgQueue.Post(BuildMessage(data));
+			_msgQueue.Post(msg);
 
-				logger.Debug("<< OnOutput");
-			}
-			catch (Exception ex)
+			var startTime = DateTime.Now;
+			while ((DateTime.Now - startTime).TotalMilliseconds < Timeout)
 			{
-				logger.Debug(ex.ToString());
-				throw;
+				if (!_clientReady.WaitOne(0))
+					throw new SoftException("Web socket connection lost.");
+
+				if (_evaluated.WaitOne(200))
+					return;
 			}
+
+			throw new SoftException("Timeout waiting for WebSocket evaluated.");
 		}
 
 		protected string BuildTemplate(BitwiseStream data)
@@ -197,27 +242,6 @@ namespace Peach.Pro.Core.Publishers
 			}
 
 			return _template.Replace(DataToken, value);
-		}
-
-		protected string BuildMessage(BitwiseStream data)
-		{
-			var ret = new StringBuilder();
-			var msg = new JObject();
-
-			msg["type"] = "template";
-			msg["content"] = BuildTemplate(data);
-
-			ret.Append(msg.ToString(Newtonsoft.Json.Formatting.None));
-			ret.Append("\n");
-
-			// Compatability with older usage
-			msg["type"] = "msg";
-			msg["content"] = "evaluate";
-
-			ret.Append(msg.ToString(Newtonsoft.Json.Formatting.None));
-			ret.Append("\n");
-
-			return ret.ToString();
 		}
 	}
 }

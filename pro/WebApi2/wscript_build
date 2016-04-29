@@ -30,6 +30,10 @@ deps = [
 	'Newtonsoft.Json.dll',
 
 	'Ionic.Zip.dll',
+
+	'SimpleInjector.dll',
+	'SimpleInjector.Integration.WebApi.dll',
+	'SimpleInjector.Extensions.ExecutionContextScoping.dll',
 ]
 
 bld(

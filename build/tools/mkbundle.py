@@ -45,18 +45,23 @@ def cs_bundle(self):
 	exe = self.cs_task.outputs[0]
 	srcs = [ exe ]
 
-	for y in self.bundle_use:
-		tsk = getattr(y, 'cs_task', None) or getattr(y, 'link_task', None)
-		srcs.append(tsk.outputs[0])
+	# for y in self.bundle_use:
+	# 	tsk = getattr(y, 'cs_task', None) or getattr(y, 'link_task', None)
+	# 	srcs.append(tsk.outputs[0])
 
-	mkbundle = self.create_task('mkbundle', srcs, exe.change_ext('.bundle'))
+	mkbundle = self.create_task('mkbundle', srcs, exe.change_ext(''))
+	mkbundle.env.env = {
+		'AS'              : self.env['MKBUNDLE_AS'],
+		'CC'              : self.env['MKBUNDLE_CC'],
+		'PKG_CONFIG_PATH' : self.env['MKBUNDLE_PKG_CONFIG_PATH'],
+	}
 
 	inst_to = getattr(self, 'install_path', '${BINDIR}')
 
 	self.install_files(inst_to, mkbundle.outputs, chmod=Utils.O755)
 
 class mkbundle(Task.Task):
-	run_str = '${MKBUNDLE} --deps -o ${TGT} ${SRC} ${ASSEMBLIES}'
+	run_str = '${MKBUNDLE} --static -z -o ${TGT} ${SRC} ${ASSEMBLIES}'
 
 	def exec_command(self, cmd, **kw):
 		# Can only run one at a time

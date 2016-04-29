@@ -15,7 +15,7 @@
   </StateModel>
 
   <Agent name="Local">
-   	<Monitor class="IpPower9258">
+    <Monitor class="IpPower9258">
       <Param name="Host" value="192.168.1.1:8080" />
       <Param name="Port" value="1" />
       <Param name="User" value="peach" />
