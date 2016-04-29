@@ -29,8 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
+using System.Linq;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -44,47 +43,53 @@ namespace Peach.Pro.OS.Windows.Publishers
 	[Parameter("clsid", typeof(string), "COM CLSID of object")]
 	public class ComPublisher : Publisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		protected override NLog.Logger Logger { get { return logger; } }
+		private static readonly NLog.Logger ClassLogger = LogManager.GetCurrentClassLogger();
+		protected override NLog.Logger Logger { get { return ClassLogger; } }
 
 		public string clsid { get; protected set; }
 
-		private IComContainer _proxy = null;
+		private IComContainer _container;
 
 		public ComPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
 		}
 
-		protected void startTcpRemoting()
+		private Variant Try(Func<Variant> action)
 		{
-			if (_proxy != null)
-				return;
-
 			try
 			{
-				ChannelServices.RegisterChannel(new IpcChannel(), false);
-			}
-			catch
-			{
-			}
+				if (_container == null)
+				{
+					var logLevel = Logger.IsTraceEnabled ? 2 : (Logger.IsDebugEnabled ? 1 : 0);
+					var server = (ComContainerServer)Activator.GetObject(
+						typeof(ComContainerServer),
+						"ipc://Peach_Com_Container/PeachComContainer");
 
-			_proxy = (IComContainer)Activator.GetObject(typeof(IComContainer),
-				"ipc://Peach_Com_Container/PeachComContainer");
+					_container = server.GetComContainer(logLevel, clsid);
+				}
 
-			try
+				try
+				{
+					return action();
+				}
+				catch (Exception ex)
+				{
+					// Errors using the com object should be treated as recoverable
+					throw new SoftException(ex);
+				}
+			}
+			catch (SoftException)
 			{
-				_proxy.Intialize(clsid);
+				throw;
 			}
 			catch (Exception ex)
 			{
+				OnStop();
+
+				// Errors constructing the com object should be treated as fatal
 				throw new PeachException("Error, ComPublisher was unable to create object.  " + ex.Message, ex);
 			}
-		}
-
-		protected void stopTcpRemoting()
-		{
-			_proxy = null;
 		}
 
 		protected static object GetObj(Variant v)
@@ -108,10 +113,14 @@ namespace Peach.Pro.OS.Windows.Publishers
 					return (string)v;
 				case Variant.VariantType.ULong:
 					return (ulong)v;
-				case Variant.VariantType.Unknown:
 				default:
 					throw new NotImplementedException();
 			}
+		}
+
+		protected override void OnStop()
+		{
+			_container = null;
 		}
 
 		protected override Variant OnCall(string method, List<BitwiseStream> args)
@@ -122,64 +131,43 @@ namespace Peach.Pro.OS.Windows.Publishers
 			throw new NotSupportedException();
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		protected override Variant OnCall(string method, List<ActionParameter> parameters)
 		{
-			try
+			var args = parameters.Select(i => GetObj(i.dataModel[0].InternalValue)).ToArray();
+
+			return Try(() =>
 			{
-				startTcpRemoting();
+				var ret = _container.CallMethod(method, args);
 
-				List<object> parameters = new List<object>();
+				if (ret != null)
+					return new Variant(ret.ToString());
 
-				foreach(ActionParameter arg in args)
-					parameters.Add(GetObj(arg.dataModel[0].InternalValue));
-
-				object value = _proxy.CallMethod(method, parameters.ToArray());
-
-				if (value != null)
-					return new Variant(value.ToString());
-			}
-			catch(Exception ex)
-			{
-				stopTcpRemoting();
-				throw new SoftException(ex);
-			}
-
-			return null;
+				return null;
+			});
 		}
 
 		protected override void OnSetProperty(string property, Variant value)
 		{
-			try
-			{
-				startTcpRemoting();
+			var arg = GetObj(value);
 
-				_proxy.SetProperty(property, GetObj(value));
-			}
-			catch (Exception ex)
+			Try(() =>
 			{
-				stopTcpRemoting();
-				throw new SoftException(ex);
-			}
+				_container.SetProperty(property, arg);
+				return null;
+			});
 		}
 
 		protected override Variant OnGetProperty(string property)
 		{
-			try
+			return Try(() =>
 			{
-				startTcpRemoting();
+				var ret = _container.GetProperty(property);
 
-				object value = _proxy.GetProperty(property);
+				if (ret != null)
+					return new Variant(ret.ToString());
 
-				if (value != null)
-					return new Variant(value.ToString());
-			}
-			catch (Exception ex)
-			{
-				stopTcpRemoting();
-				throw new SoftException(ex);
-			}
-
-			return null;
+				return null;
+			});
 		}
 	}
 }
