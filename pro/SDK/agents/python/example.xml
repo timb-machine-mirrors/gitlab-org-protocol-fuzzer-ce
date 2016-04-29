@@ -28,13 +28,18 @@
 						<String value="Parameter 2" />
 					</DataModel>
 				</Param>
+				<Result>
+					<DataModel name="Result">
+						<String name="Value" />
+					</DataModel>
+				</Result>
 			</Action>
 		</State>
 
 	</StateModel>
 
-	<Agent name="TheAgent" location="http://127.0.0.1:9980">
- 		<Monitor class="windowsdebugger">
+	<Agent name="TheAgent" location="http://127.0.0.1:8080">
+<!-- 		<Monitor class="windowsdebugger">
 			<Param name="commandline" value="mspaint.exe fuzzed.png" />
 			<Param name="windbgpath" value="c:\program files (x86)\debugging tools for windows (x86)" />
 			<Param name="startoncall" value="scoobysnacks"/>
@@ -43,7 +48,7 @@
 			<Param name="executable" value="mspaint.exe"/>
 			<Param name="windbgpath" value="c:\program files (x86)\debugging tools for windows (x86)" />
 		</Monitor>
- 	</Agent>
+--> 	</Agent>
 
 	<Test name="Default">
 		<Agent ref="TheAgent"/>
