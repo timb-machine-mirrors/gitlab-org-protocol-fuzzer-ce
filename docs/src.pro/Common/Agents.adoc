@@ -232,7 +232,7 @@ GET /Agent/Publisher/close
 
 POST /Agent/Publisher/call
 >> {"method":"ScoobySnacks","args":[{"name":"p1","data":"SGVsbG8gV29ybGQ=","type":0}]}
-<< { "error":"false", "errorString":null }
+<< {"value":null,error":"false", "errorString":null }
 
 GET /Agent/IterationFinished
 << { "Status":"true" }
@@ -297,7 +297,7 @@ GET /Agent/Publisher/close
 
 POST /Agent/Publisher/call
 >> {"method":"ScoobySnacks","args":[{"name":"p1","data":"SGVsbG8gV29ybGQ=","type":0}]}
-<< { "error":"false", "errorString":null }
+<< { "value":null, "error":"false", "errorString":null }
 
 GET /Agent/IterationFinished
 << { "Status":"true" }
