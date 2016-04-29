@@ -1022,6 +1022,8 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			public readonly List<byte[]> outputs = new List<byte[]>();
 
+			public Action<Publisher> Output;
+
 			public TestPub()
 				: base(new Dictionary<string, Variant>())
 			{
@@ -1052,6 +1054,9 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			protected override void OnOutput(BitwiseStream data)
 			{
+				if (Output != null)
+					Output(this);
+
 				outputs.Add(data.ToArray());
 			}
 
@@ -1065,6 +1070,72 @@ namespace Peach.Pro.Test.Core.Loggers
 						item.Crack(new BitStream(Encoding.ASCII.GetBytes(item.Name)));
 				}
 				return new Variant(new BitStream(Encoding.ASCII.GetBytes("Result!")));
+			}
+		}
+
+		[Test]
+		public void SoftExceptionMetrics()
+		{
+			var theXml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Number size='32' />
+		<Blob length='16' />
+		<String />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' faultWaitTime='0'>
+		<Publisher class='Null'/>
+		<StateModel ref='SM'/>
+		<Logger class='File'>
+			<Param name='Path' value='{0}'/>
+		</Logger>
+	</Test>
+</Peach>".Fmt(Configuration.LogRoot);
+
+			var dom = DataModelCollector.ParsePit(theXml);
+
+			dom.tests[0].publishers[0] = new TestPub
+			{
+				Output = pub =>
+				{
+					if (!pub.IsControlIteration)
+						throw new SoftException("Simulated error");
+				}
+			};
+
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 100,
+				pitFile = "UnitTest"
+			};
+
+			var e = new Engine(null);
+
+			e.startFuzzing(dom, config);
+
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(config.id);
+				
+				using (var jobDb = new JobDatabase(job.DatabasePath))
+				{
+					var mutations = jobDb.LoadTable<MutatorMetric>().ToList();
+					Assert.Greater(mutations.Count, 10);
+
+					var sum = mutations.Select(m => m.IterationCount).Sum();
+					Assert.Greater(sum, 100);
+				}
 			}
 		}
 	}
