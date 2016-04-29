@@ -105,13 +105,50 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public List<Record> Faults { get; set; }
 	}
 
+	public enum ExceptionType
+	{
+		SoftException,
+		PeachException,
+		FaultException,
+		Exception
+	}
+
 	internal class ExceptionResponse
 	{
+		public ExceptionResponse()
+		{
+			ExceptionType = ExceptionType.Exception;
+		}
+
 		[JsonProperty("message")]
 		public string Message { get; set; }
 
 		[JsonProperty("stackTrace")]
 		public string StackTrace { get; set; }
+
+		[JsonProperty("exceptionType")]
+		public ExceptionType ExceptionType { get; set; }
+
+		[JsonProperty("faultTitle")]
+		public string FaultTitle { get; set; }
+
+		[JsonProperty("faultDescription")]
+		public string FaultDescription { get; set; }
+
+		[JsonProperty("faultMajorHash")]
+		public string FaultMajorHash { get; set; }
+
+		[JsonProperty("faultMinorHash")]
+		public string FaultMinorHash { get; set; }
+
+		[JsonProperty("faultExploitability")]
+		public string FaultExploitability { get; set; }
+
+		[JsonProperty("faultDetectionSource")]
+		public string FaultDetectionSource { get; set; }
+
+		[JsonProperty("faultDetectionName")]
+		public string FaultDetectionName { get; set; }
 	}
 
 	internal class PublisherRequest

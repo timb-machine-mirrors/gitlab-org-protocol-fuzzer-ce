@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
@@ -102,16 +103,6 @@ namespace Peach.Core
 			get;
 			set;
 		}
-
-		/// <summary>
-		/// RunContext instance. Can be null is Publisher is remote.
-		/// </summary>
-		/// <remarks>
-		/// This property is only available for local publishers.  If a Publisher
-		/// is remoted to an agent this property will be NULL. Publishers SHOULD
-		/// work with or without this property.
-		/// </remarks>
-		public RunContext Context { get; set; }
 
 		#endregion
 
@@ -302,7 +293,6 @@ namespace Peach.Core
 		public Publisher(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
-			Context = null;
 		}
 
 		#endregion
@@ -366,8 +356,20 @@ namespace Peach.Core
 		/// <seealso cref="OnAccept"/>
 		public void accept()
 		{
-			Logger.Debug("accept()");
-			OnAccept();
+			try
+			{
+				Logger.Debug("accept()");
+				OnAccept();
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName= Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -383,13 +385,25 @@ namespace Peach.Core
 		/// <seealso cref="close"/>
 		public void open()
 		{
-			if (_isOpen)
-				return;
+			try
+			{
+				if (_isOpen)
+					return;
 
-			Logger.Debug("open()");
-			OnOpen();
+				Logger.Debug("open()");
+				OnOpen();
 
-			_isOpen = true;
+				_isOpen = true;
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -406,13 +420,25 @@ namespace Peach.Core
 		/// <seealso cref="open"/>
 		public void close()
 		{
-			if (!_isOpen)
-				return;
+			try
+			{
+				if (!_isOpen)
+					return;
 
-			Logger.Debug("close()");
-			OnClose();
+				Logger.Debug("close()");
+				OnClose();
 
-			_isOpen = false;
+				_isOpen = false;
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -429,8 +455,20 @@ namespace Peach.Core
 		/// <returns>Returns resulting data</returns>
 		public Variant call(string method, List<BitwiseStream> args)
 		{
-			Logger.Debug("call({0}) BitwiseStream Count: {1}", method, args.Count);
-			return OnCall(method, args);
+			try
+			{
+				Logger.Debug("call({0}) BitwiseStream Count: {1}", method, args.Count);
+				return OnCall(method, args);
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -447,8 +485,20 @@ namespace Peach.Core
 		/// <param name="value">Value to set on property</param>
 		public void setProperty(string property, Variant value)
 		{
-			Logger.Debug("setProperty({0}, {1})", property, value);
-			OnSetProperty(property, value);
+			try
+			{
+				Logger.Debug("setProperty({0}, {1})", property, value);
+				OnSetProperty(property, value);
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -465,8 +515,20 @@ namespace Peach.Core
 		/// <returns>Returns value of property</returns>
 		public Variant getProperty(string property)
 		{
-			Logger.Debug("getProperty({0})", property);
-			return OnGetProperty(property);
+			try
+			{
+				Logger.Debug("getProperty({0})", property);
+				return OnGetProperty(property);
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -482,11 +544,26 @@ namespace Peach.Core
 		/// <param name="data">Data to send/write</param>
 		public void output(BitwiseStream data)
 		{
-			data = data.PadBits();
-			data.Seek(0, SeekOrigin.Begin);
+			try
+			{
+				data = data.PadBits();
+				data.Seek(0, SeekOrigin.Begin);
 
-			Logger.Debug("output({0} bytes)", data.Length);
-			OnOutput(data);
+				Logger.Debug("output({0} bytes)", data.Length);
+				OnOutput(data);
+			}
+			catch (FaultException fe)
+			{
+				if (this is RemotePublisher)
+					throw;
+
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -501,8 +578,20 @@ namespace Peach.Core
 		/// <seealso cref="!:Peach.Core.Publisher.output(Peach.Core.IO.BitwiseStream)"/>
 		public void input()
 		{
-			Logger.Debug("input()");
-			OnInput();
+			try
+			{
+				Logger.Debug("input()");
+				OnInput();
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -568,8 +657,20 @@ namespace Peach.Core
 		/// <returns>Returns resulting data</returns>
 		public Variant call(string method, List<ActionParameter> args)
 		{
-			Logger.Debug("call({0}) ActionParameter Count: {1}", method, args.Count);
-			return OnCall(method, args);
+			try
+			{
+				Logger.Debug("call({0}) ActionParameter Count: {1}", method, args.Count);
+				return OnCall(method, args);
+			}
+			catch (FaultException fe)
+			{
+				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
+
+				fe.DetectionSource = attribute.Name;
+				fe.DetectionName = Name;
+
+				throw;
+			}
 		}
 
 		#endregion

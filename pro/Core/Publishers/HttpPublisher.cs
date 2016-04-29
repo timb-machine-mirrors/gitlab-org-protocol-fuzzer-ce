@@ -238,6 +238,10 @@ namespace Peach.Pro.Core.Publishers
 					{
 						_client = TryCreateClient(url, data);
 					}
+					catch (FaultException)
+					{
+						throw;
+					}
 					catch (SoftException ex)
 					{
 						caught = ex;
@@ -403,36 +407,21 @@ namespace Peach.Pro.Core.Publishers
 
 				if (Response == null)
 					throw;
-			} 
+			}
 
-			if (Context != null && FaultingStatusCodes.Contains((int) Response.StatusCode))
+			if (FaultingStatusCodes.Contains((int) Response.StatusCode))
 			{
-				// throw fault
-				var fault = new Fault();
-				fault.title = string.Format("Fault on status code {0} ({1})", (int) Response.StatusCode, Response.StatusCode);
-				fault.description = string.Format("Publisher has been configured to fault when one or more HTTP status codes are detected. "+
-					"During this test case the status code {0} ({1}) was detected causing this fault.",
-					(int) Response.StatusCode, Response.StatusCode);
-				fault.agentName = "Publisher";
-				fault.detectionSource = "HttpPublisher";
-				fault.exploitability = "Unknown";
-				fault.majorHash = "";
-				fault.minorHash = "";
-				fault.type = FaultType.Fault;
+				var majorHash = FaultException.Hash(Response.StatusCode.ToString());
+				var minorHash = FaultException.Hash(string.Format("{0} {1} {2}", request.Method, request.RequestUri, Response.StatusCode));
 
-				Context.faults.Add(fault);
-
-				if (exception != null)
-					throw new SoftException(string.Format("Faulting status code {0} ({1}) found.", (int)Response.StatusCode, Response.StatusCode), exception);
-
-				throw new SoftException(string.Format("Faulting status code {0} ({1}) found.", (int)Response.StatusCode, Response.StatusCode));
+				throw new FaultException(
+					string.Format("Fault on status code {0} ({1})", (int) Response.StatusCode, Response.StatusCode),
+					string.Format("Publisher has been configured to fault when one or more HTTP status codes are detected. \n" +
+					              "During this test case the status code {0} ({1}) was detected causing this fault.",
+						(int) Response.StatusCode, Response.StatusCode),
+					majorHash, minorHash, "Unknown");
 			}
 			
-			if (Context == null && FaultingStatusCodes.Count > 0)
-			{
-				throw new SoftException("Error, FaultOnStatusCodes publisher parameter does not work with remote publishers!");
-			}
-
 			if (SoftExceptionStatusCodes.Contains((int) Response.StatusCode))
 			{
 				if(exception != null)
@@ -460,6 +449,5 @@ namespace Peach.Pro.Core.Publishers
 			Query = null;
 			Headers.Clear();
 		}
-
 	}
 }
