@@ -33,7 +33,7 @@
 
 	</StateModel>
 
-	<Agent name="TheAgent" location="http://127.0.0.1:9980">
+	<Agent name="TheAgent" location="http://10.0.1.201:8080">
  		<Monitor class="windowsdebugger">
 			<Param name="commandline" value="mspaint.exe fuzzed.png" />
 			<Param name="windbgpath" value="c:\program files (x86)\debugging tools for windows (x86)" />
