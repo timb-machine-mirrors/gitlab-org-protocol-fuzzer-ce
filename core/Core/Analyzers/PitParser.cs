@@ -547,36 +547,20 @@ namespace Peach.Core.Analyzers
 		protected virtual void handleInclude(Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
 		{
 			var ns = child.getAttrString("ns");
-			var src = child.getAttrString("src");
-			var uri = new Uri(new Uri(Environment.CurrentDirectory), src);
+			var fileName = child.getAttrString("src");
+			fileName = fileName.Replace("file:", "");
+			var normalized = Path.GetFullPath(fileName);
 
-			Stream stream = null;
-			if (uri.Scheme == Uri.UriSchemeFile)
+			if (!File.Exists(normalized))
 			{
-				if (!File.Exists(uri.AbsolutePath))
-					uri = new Uri(new Uri(Utilities.ExecutionDirectory), src);
-
-				if (File.Exists(uri.AbsolutePath))
-					stream = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
-			}
-			else if (uri.Scheme == "asm")
-			{
-				var type = ClassLoader.FindPluginByName<ResourceLoaderAttribute>(uri.Host);
-				var loader = (IResourceLoader)Activator.CreateInstance(type);
-				stream = loader.GetResource(uri.AbsolutePath);
-			}
-			else
-			{
-				throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(src));
+				string newFileName = Utilities.GetAppResourcePath(fileName);
+				normalized = Path.GetFullPath(newFileName);
+				if (!File.Exists(normalized))
+					throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
+				fileName = newFileName;
 			}
 
-			if (stream == null)
-			{
-				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
-			}
-
-			var dataName = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
-			var newDom = asParser(args, new StreamReader(stream), dataName, true);
+			var newDom = asParser(args, fileName);
 			newDom.Name = ns;
 			dom.ns.Add(newDom);
 

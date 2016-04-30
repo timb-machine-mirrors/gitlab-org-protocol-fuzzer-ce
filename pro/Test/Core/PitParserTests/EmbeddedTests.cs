@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,48 +15,27 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	[Peach]
 	public class EmbeddedTests
 	{
-		const string LibraryName = "test.peachfuzzer.com";
-		const string PitLibraryPath = "asm://" + LibraryName;
 		const string PitsResourcePrefix = "Peach.Pro.Test.Core.Resources.Pits";
-
-		[ResourceLoader(LibraryName)]
-		public class TestResourceLoader : ResourceLoader
-		{
-			public TestResourceLoader()
-				: base(Assembly.GetExecutingAssembly(), PitsResourcePrefix)
-			{ }
-		}
-
-		[PythonMetaPathImporter(LibraryName)]
-		public class TestResourceMetaPathImporter : ResourceMetaPathImporter
-		{
-			public TestResourceMetaPathImporter(Uri baseUri)
-				: base(baseUri, Assembly.GetExecutingAssembly(), PitsResourcePrefix)
-			{ }
-		}
 
 		[Test]
 		public void BasicTest()
 		{
-			var configName = "/Net/DNP3_Slave.config.xml";
-			var pitName = "/Net/DNP3_Slave.xml";
+			var asm = Assembly.GetExecutingAssembly();
+			var pitName = PitsResourcePrefix + ".Net.DNP3_Slave.xml";
+			var configName = PitsResourcePrefix + ".Net.DNP3_Slave.xml.config";
 
 			using (var tmpDir = new TempDirectory())
 			{
-				ExtractSamples(tmpDir);
-
-				var type = ClassLoader.FindPluginByName<ResourceLoaderAttribute>(LibraryName);
-				Assert.NotNull(type);
-				var loader = (IResourceLoader)Activator.CreateInstance(type);
+				ExtractFile(tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
+				ExtractDirectory(tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
 
 				PitDefines defs;
-				using (var stream = loader.GetResource(configName))
+				using (var stream = asm.GetManifestResourceStream(configName))
 				{
-					Assert.NotNull(stream);
-					defs = PitDefines.Parse(stream, PitLibraryPath, new Dictionary<string, string> {
+					Assert.NotNull(stream, configName);
+					defs = PitDefines.Parse(stream, tmpDir.Path, new Dictionary<string, string> {
 						{"Source", "0"},
 						{"Destination", "0"},
-						{"PitSamplesPath", tmpDir.Path},
 					});
 				}
 
@@ -65,12 +43,12 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					{ PitParser.DEFINED_VALUES, defs.Evaluate() }
 				};
 
-				var parser = new PitParser();
+				var parser = new ProPitParser(tmpDir.Path, asm, PitsResourcePrefix);
 				Peach.Core.Dom.Dom dom;
-				using (var stream = loader.GetResource(pitName))
+				using (var stream = asm.GetManifestResourceStream(pitName))
 				using (var reader = new StreamReader(stream))
 				{
-					Assert.NotNull(stream);
+					Assert.NotNull(stream, pitName);
 					dom = parser.asParser(args, reader, pitName, true);
 				}
 
@@ -81,15 +59,14 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			}
 		}
 
-		private static void ExtractSamples(TempDirectory tmpDir)
+		private static void ExtractDirectory(string targetDir, params string[] parts)
 		{
-			var dirs = new[] { "_Common", "Samples", "Net", "DNP3" };
 			var sep = new string(new[] { Path.DirectorySeparatorChar });
-			var dir = string.Join(sep, new[] { tmpDir.Path }.Concat(dirs));
+			var dir = string.Join(sep, new[] { targetDir }.Concat(parts));
 			Directory.CreateDirectory(dir);
 
 			var asm = Assembly.GetExecutingAssembly();
-			var prefix = string.Join(".", new[] { PitsResourcePrefix }.Concat(dirs));
+			var prefix = string.Join(".", new[] { PitsResourcePrefix }.Concat(parts));
 			foreach (var name in asm.GetManifestResourceNames())
 			{
 				if (name.StartsWith(prefix))
@@ -99,6 +76,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					Utilities.ExtractEmbeddedResource(asm, name, target);
 				}
 			}
+		}
+
+		private static void ExtractFile(string targetDir, string filename, params string[] dirs)
+		{
+			var sep = new string(new[] { Path.DirectorySeparatorChar });
+			var dir = string.Join(sep, new[] { targetDir }.Concat(dirs));
+			Directory.CreateDirectory(dir);
+
+			var asm = Assembly.GetExecutingAssembly();
+			var name = string.Join(".", 
+				new[] { PitsResourcePrefix }
+				.Concat(dirs)
+				.Concat(new[] { filename })
+			);
+			var target = Path.Combine(dir, filename);
+			Utilities.ExtractEmbeddedResource(asm, name, target);
 		}
 	}
 }

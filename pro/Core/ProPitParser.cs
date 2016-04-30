@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -19,6 +21,20 @@ namespace Peach.Pro.Core
 	public class ProPitParser : PitParser
 	{
 		public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+		private readonly string _pitLibraryPath;
+		private readonly Assembly _pitsAssembly;
+		private readonly string _pitsPrefix;
+
+		public ProPitParser(
+			string pitLibraryPath = "", 
+			Assembly pitsAssembly = null, 
+			string pitsPrefix = "")
+		{
+			_pitLibraryPath = pitLibraryPath;
+			_pitsAssembly = pitsAssembly;
+			_pitsPrefix = pitsPrefix;
+		}
 
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
@@ -76,7 +92,7 @@ namespace Peach.Pro.Core
 
 			foreach (var stateModel in godelDom.stateModels)
 			{
-				var sm = (StateModel) stateModel;
+				var sm = (StateModel)stateModel;
 				foreach (var item in sm.godel)
 				{
 					if (!string.IsNullOrEmpty(item.refName))
@@ -129,6 +145,67 @@ namespace Peach.Pro.Core
 
 				sm.godel = newList;
 			}
+		}
+
+		protected override void handleInclude(Peach.Core.Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
+		{
+			var ns = child.getAttrString("ns");
+			var src = child.getAttrString("src");
+
+			Stream stream = null;
+
+			// try to load from assembly
+			if (_pitsAssembly != null && src.StartsWith(_pitLibraryPath))
+			{
+				var relative = src.Substring(_pitLibraryPath.Length);
+				var fullName = _pitsPrefix + relative.Replace("/", ".");
+				stream = _pitsAssembly.GetManifestResourceStream(fullName);
+			}
+
+			// if fail, try to load from disk
+			if (stream == null)
+			{
+				var uri = new Uri(new Uri(Environment.CurrentDirectory), src);
+				if (uri.Scheme == Uri.UriSchemeFile)
+				{
+					if (!File.Exists(uri.AbsolutePath))
+						uri = new Uri(new Uri(Utilities.ExecutionDirectory), src);
+
+					if (File.Exists(uri.AbsolutePath))
+						stream = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+				}
+				else
+				{
+					throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(src));
+				}
+			}
+
+			if (stream == null)
+			{
+				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
+			}
+
+			Peach.Core.Dom.Dom newDom;
+			using (stream)
+			{
+				var dataName = Path.GetFileNameWithoutExtension(src);
+				newDom = asParser(args, new StreamReader(stream), dataName, true);
+			}
+
+			newDom.Name = ns;
+			dom.ns.Add(newDom);
+
+			foreach (var item in newDom.Python.Paths)
+				dom.Python.AddSearchPath(item);
+
+			foreach (var item in newDom.Python.Modules)
+				dom.Python.ImportModule(item);
+
+			foreach (var item in newDom.Ruby.Paths)
+				dom.Ruby.AddSearchPath(item);
+
+			foreach (var item in newDom.Ruby.Modules)
+				dom.Ruby.ImportModule(item);
 		}
 
 		private void deferParse(StateModel sm, string fullName, XmlNode node)

@@ -526,52 +526,26 @@ namespace Peach.Pro.Core
 			IEnumerable<KeyValuePair<string, string>> overrides,
 			bool includeSystemDefs = true)
 		{
-			var defs = File.Exists(fileName) ? XmlTools.Deserialize<PitDefines>(fileName) : new PitDefines();
+			if (!File.Exists(fileName))
+				return Parse(null, pitLibraryPath, overrides, includeSystemDefs);
 
-			if (includeSystemDefs)
+			using (var stream = new FileStream(fileName, FileMode.Open))
 			{
-				AddSystemDefines(pitLibraryPath, defs);
+				return Parse(stream, pitLibraryPath, overrides, includeSystemDefs);
 			}
-
-			if (overrides != null)
-			{
-				defs.SystemDefines.AddRange(
-					overrides.Select(kv => new SystemDefine
-					{
-						Name = kv.Key,
-						Key = kv.Key,
-						Value = kv.Value
-					})
-				);
-			}
-
-			return defs;
 		}
 
 		public static PitDefines Parse(
-			Stream stream, 
-			string pitLibraryPath, 
-			IEnumerable<KeyValuePair<string, string>> overrides)
+			Stream stream,
+			string pitLibraryPath,
+			IEnumerable<KeyValuePair<string, string>> overrides,
+			bool includeSystemDefs = true)
 		{
 			var defs = stream != null ? XmlTools.Deserialize<PitDefines>(stream) : new PitDefines();
-			AddSystemDefines(pitLibraryPath, defs);
-			if (overrides != null)
-			{
-				defs.SystemDefines.AddRange(
-					overrides.Select(kv => new SystemDefine
-					{
-						Name = kv.Key,
-						Key = kv.Key,
-						Value = kv.Value
-					})
-				);
-			}
-			return defs;
-		}
 
-		static void AddSystemDefines(string pitLibraryPath, PitDefines defs)
-		{
-			defs.SystemDefines.AddRange(new Define[] {
+			if (includeSystemDefs)
+			{
+				defs.SystemDefines.AddRange(new Define[] {
 					new SystemDefine {
 						Key = "Peach.OS",
 						Name = "Peach OS",
@@ -603,6 +577,20 @@ namespace Peach.Pro.Core
 						Value = pitLibraryPath ?? Environment.CurrentDirectory,
 					}
 				});
+			}
+
+			if (overrides != null)
+			{
+				defs.SystemDefines.AddRange(
+					overrides.Select(kv => new SystemDefine
+					{
+						Name = kv.Key,
+						Key = kv.Key,
+						Value = kv.Value
+					})
+				);
+			}
+			return defs;
 		}
 
 		public static List<KeyValuePair<string, string>> ParseFileWithDefaults(string pitLibraryPath, string fileName)
@@ -696,7 +684,7 @@ namespace Peach.Pro.Core
 
 			var re = new Regex("##(\\w+?)##");
 
-			var evaluator = new MatchEvaluator(delegate (Match m)
+			var evaluator = new MatchEvaluator(delegate(Match m)
 			{
 				var key = m.Groups[1].Value;
 				var val = ret.Where(x => x.Key == key).Select(x => x.Value).FirstOrDefault();
@@ -704,7 +692,7 @@ namespace Peach.Pro.Core
 				return val ?? m.Groups[0].Value;
 			});
 
-			for (var i = 0; i < ret.Count;)
+			for (var i = 0; i < ret.Count; )
 			{
 				var oldVal = ret[i].Value;
 				if (oldVal == null)

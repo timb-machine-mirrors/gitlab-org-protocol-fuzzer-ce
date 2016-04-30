@@ -35,55 +35,11 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
-using IronPython.Runtime;
 using IronRuby;
 using Peach.Core.IO;
 
 namespace Peach.Core
 {
-	public interface IPythonMetaPathImporter
-	{
-		//
-		// Constructor(Uri path)
-		//
-
-		/// <summary>
-		/// find_module(fullname, path=None) -> self or None.
-		/// 
-		/// Search for a module specified by 'fullname'. 'fullname' must be the
-		/// fully qualified (dotted) module name. It returns the importer
-		/// instance itself if the module was found, or None if it wasn't.
-		/// The optional 'path' argument is ignored -- it's there for compatibility
-		/// with the importer protocol.
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="fullname"></param>
-		/// <param name="args"></param>
-		/// <returns></returns>
-		object find_module(CodeContext context, string fullname, params object[] args);
-
-		/// <summary>
-		/// load_module(fullname) -> module.
-		/// 
-		/// Load the module specified by 'fullname'. 'fullname' must be the
-		/// fully qualified (dotted) module name. It returns the imported
-		/// module, or raises ResourceImportError if it wasn't found.
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="fullname"></param>
-		/// <returns></returns>
-		object load_module(CodeContext context, string fullname);
-	}
-
-	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
-	public class PythonMetaPathImporterAttribute : PluginAttribute
-	{
-		public PythonMetaPathImporterAttribute(string name)
-			: base(typeof(IPythonMetaPathImporter), name, true)
-		{
-		}
-	}
-
 	public class PythonScripting : Scripting
 	{
 		protected override ScriptEngine GetEngine()
@@ -118,7 +74,6 @@ namespace Peach.Core
 
 		private readonly Dictionary<string, object> _modules = new Dictionary<string, object>();
 		private readonly ScriptEngine _engine;
-		private List<string> _paths = new List<string>(); 
 
 		#endregion
 
@@ -156,37 +111,17 @@ namespace Peach.Core
 
 		public void AddSearchPath(string path)
 		{
-			var uri = new Uri(new Uri(Environment.CurrentDirectory), path);
-			if (uri.Scheme == Uri.UriSchemeFile)
+			var paths = _engine.GetSearchPaths();
+			if (!paths.Contains(path))
 			{
-				var paths = _engine.GetSearchPaths();
-				if (!paths.Contains(path))
-				{
-					paths.Add(path);
-					_engine.SetSearchPaths(paths);
-				}
+				paths.Add(path);
+				_engine.SetSearchPaths(paths);
 			}
-			else if (uri.Scheme == "asm")
-			{
-				var type = ClassLoader.FindPluginByName<PythonMetaPathImporterAttribute>(uri.Host);
-				var importer = (IPythonMetaPathImporter)Activator.CreateInstance(type, uri);
-
-				var sys = _engine.GetSysModule();
-				var metaPath = sys.GetVariable<List>("meta_path");
-				metaPath.Add(importer);
-				sys.SetVariable("meta_path", metaPath);
-			}
-			else
-			{
-				throw new PeachException("Invalid uri scheme for <PythonPath>: {0}".Fmt(path));
-			}
-
-			_paths.Add(path);
 		}
 
 		public IEnumerable<string> Paths
 		{
-			get { return _paths; }
+			get { return _engine.GetSearchPaths(); }
 		}
 
 		#endregion
