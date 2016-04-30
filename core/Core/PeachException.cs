@@ -28,8 +28,7 @@
 
 using System;
 using System.Runtime.Serialization;
-using System.Security.Cryptography;
-using System.Text;
+using Peach.Core.Agent;
 
 namespace Peach.Core
 {
@@ -125,144 +124,24 @@ namespace Peach.Core
 	[Serializable]
 	public class FaultException : SoftException
 	{
-		/// <summary>
-		/// One line title of fault
-		/// </summary>
-		public string Title;
+		public FaultSummary Fault { get; private set; }
 
-		/// <summary>
-		/// Description field of fault
-		/// </summary>
-		public string Description;
-
-		/// <summary>
-		/// Major hash of fault.
-		/// </summary>
-		public string MajorHash;
-
-		/// <summary>
-		/// Minor hash of fault
-		/// </summary>
-		public string MinorHash;
-
-		/// <summary>
-		/// Exploitability of fault
-		/// </summary>
-		public string Exploitablity = "Unknown";
-
-		/// <summary>
-		/// Detection source for fault, typically the class name
-		/// </summary>
-		/// For the Rest publisher the detection name is the name attribute while
-		/// detection source is the Publisher attribute.
-		public string DetectionSource = "Unknown";
-
-		/// <summary>
-		/// Name of detection source
-		/// </summary>
-		/// <remarks>
-		/// For the Rest publisher the detection name is the name attribute while
-		/// detection source is the Publisher attribute.
-		/// </remarks>
-		public string DetectionName = "Unknown";
-
-		/// <summary>
-		/// Name of agent fault was reported by.
-		/// </summary>
-		/// <remarks>
-		/// Only used when fault generated via agent, otherwise null.
-		/// </remarks>
-		public string AgentName = "Internal";
-
-		/// <summary>
-		/// Constructor for use in Publishers or when base class sets detectionSource
-		/// </summary>
-		/// <remarks>
-		/// Expects base class to set detectionSource
-		/// </remarks>
-		/// <param name="title">Title of fault</param>
-		/// <param name="description">Description of fault</param>
-		/// <param name="majorHash">Major hash for fault. Set to null or empty string to skip bucketing.</param>
-		/// <param name="minorHash">Minor hash for fault. Set to null or empty string to skip bucketing.</param>
-		/// <param name="exploitability">Exploitability for fault</param>
-		public FaultException(string title, string description, string majorHash, string minorHash, string exploitability)
-			: base("Fault: " + title)
+		public FaultException(FaultSummary fault)
+			: base(fault.Title)
 		{
-			Title = title;
-			Description = description;
-			MajorHash = majorHash;
-			MinorHash = minorHash;
-			Exploitablity = exploitability;
+			Fault = fault;
 		}
 
-		/// <summary>
-		/// Constructor for non-agents
-		/// </summary>
-		/// <param name="title">Title of fault</param>
-		/// <param name="description">Description of fault</param>
-		/// <param name="majorHash">Major hash for fault. Set to null or empty string to skip bucketing.</param>
-		/// <param name="minorHash">Minor hash for fault. Set to null or empty string to skip bucketing.</param>
-		/// <param name="exploitability">Exploitability for fault</param>
-		/// <param name="detectionSource">Detection source. For Publishers set to publisher attribute name.</param>
-		/// <param name="detectionName">Detection source. For Publishers set to name attribute.</param>
-		public FaultException(string title, string description, string majorHash, string minorHash, string exploitability, string detectionSource, string detectionName)
-			: base("Fault: " + title)
+		public FaultException(FaultSummary fault, Exception innerException)
+			: base(fault.Title, innerException)
 		{
-			Title = title;
-			Description = description;
-			MajorHash = majorHash;
-			MinorHash = minorHash;
-			Exploitablity = exploitability;
-			DetectionSource = detectionSource;
-			DetectionName = detectionName;
+			Fault = fault;
 		}
 
-		/// <summary>
-		/// Constructor for agents
-		/// </summary>
-		/// <param name="title">Title of fault</param>
-		/// <param name="description">Description of fault</param>
-		/// <param name="majorHash">Major hash for fault. Set to null or empty string to skip bucketing.</param>
-		/// <param name="minorHash">Minor hash for fault. Set to null or empty string to skip bucketing.</param>
-		/// <param name="exploitability">Exploitability for fault</param>
-		/// <param name="detectionSource">Detection source, such as Monitor class attribute.</param>
-		/// <param name="detectionName">Detection name, such as name attribute</param>
-		/// <param name="agentName">Name of agent fault was reported by</param>
-		public FaultException(string title, string description, string majorHash, string minorHash, string exploitability, string detectionSource, string detectionName, string agentName)
-			: base("Fault: " + title)
+		protected FaultException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
-			Title = title;
-			Description = description;
-			MajorHash = majorHash;
-			MinorHash = minorHash;
-			Exploitablity = exploitability;
-			DetectionSource = detectionSource;
-			DetectionName = detectionName;
-			AgentName = agentName;
 		}
-
-		/// <summary>
-		/// Compute the hash of a value for use as either
-		/// the MajorHash or MinorHash.
-		/// </summary>
-		/// <param name="value">String value to hash</param>
-		/// <returns>The first 4 bytes of the md5 has as a hex string</returns>
-		public static string Hash(string value)
-		{
-			using (var md5 = MD5.Create())
-			{
-				const int hashLen = 4;
-
-				var data = md5.ComputeHash(Encoding.UTF8.GetBytes(value));
-				var sb = new StringBuilder(hashLen * 2);
-
-				for (var i = 0; i < hashLen; i++)
-					sb.Append(data[i].ToString("X2"));
-
-				return sb.ToString();
-			}
-		}
-
 	}
 }
 

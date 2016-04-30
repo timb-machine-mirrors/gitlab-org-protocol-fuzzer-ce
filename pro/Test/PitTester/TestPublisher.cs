@@ -158,7 +158,7 @@ namespace PitTester
 				Logger.Debug("\n\n" + Utilities.HexDump(data.Payload, 0, data.Payload.Length));
 		}
 
-		public override void output(DataModel dataModel)
+		protected override void OnOutput(DataModel dataModel)
 		{
 			Log("Output");
 			var data = _logger.Verify<TestData.Output>(Name);
