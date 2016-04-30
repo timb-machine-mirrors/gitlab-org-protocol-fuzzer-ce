@@ -182,7 +182,7 @@ namespace Peach.Core
 					{
 						var asm = Load(file);
 						asm.GetTypes(); // make sure we can load exported types.
-						AssemblyCache.Add(file, asm);
+						AssemblyCache[asm.Location] = asm;
 					}
 					catch (Exception ex)
 					{
@@ -255,7 +255,7 @@ namespace Peach.Core
 			{
 				var asm = Load(fullPath);
 				asm.GetExportedTypes(); // make sure we can load exported types.
-				AssemblyCache.Add(fullPath, asm);
+				AssemblyCache[asm.Location] = asm;
 			}
 
 			return true;
