@@ -24,8 +24,12 @@ class PackageHandler(xml.sax.handler.ContentHandler):
 			raise Exception("Unable to find package directory '%s'; verify package 'id' and 'version' attributes in 'packages.config'." % expected_dir)
 
 		basename = bld.env.BASENAME
-		if self.mapping and basename != self.mapping.get(name, basename):
-			return
+		if self.mapping:
+			opts = self.mapping.get(name, basename)
+			if isinstance(opts, str):
+				opts = [ opts ]
+			if basename not in opts:
+				return
 
 		pat = 'lib/*.dll lib/net/*.dll lib/%s/*.dll' % target
 
