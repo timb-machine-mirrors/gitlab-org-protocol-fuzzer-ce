@@ -397,7 +397,7 @@ SUMMARY: AddressSanitizer: SEGV /home/peach/bacnet-stack-0.8.3/lib/../src/bacdco
 
 
 			Assert.IsTrue(Asan.CheckForAsanFault(example));
-			var data = Asan.AsanToMonitorData(example);
+			var data = Asan.AsanToMonitorData(null, example);
 
 			Assert.AreEqual("SEGV on unknown address 0x00002f10b7d6 (pc 0x0000004ee255 bp 0x7ffc0abb72d0 sp 0x7ffc0abb72d0 T0)", data.Title);
 			Assert.AreEqual("SEGV", data.Fault.Risk);
@@ -1263,7 +1263,7 @@ SUMMARY: AddressSanitizer: SEGV /home/peach/bacnet-stack-0.8.3/lib/../src/bacdco
 ";
 
 			Assert.IsTrue(Asan.CheckForAsanFault(example));
-			var data = Asan.AsanToMonitorData(example);
+			var data = Asan.AsanToMonitorData(null, example);
 
 			Assert.AreEqual("Failed to allocate 0x41417000 (1094807552) bytes of LargeMmapAllocator: 12", data.Title);
 			Assert.AreEqual("Out of Memory", data.Fault.Risk);
@@ -1330,7 +1330,7 @@ SUMMARY: AddressSanitizer: SEGV /home/peach/bacnet-stack-0.8.3/lib/../src/bacdco
 ";
 
 			Assert.IsTrue(Asan.CheckForAsanFault(example));
-			var data = Asan.AsanToMonitorData(example);
+			var data = Asan.AsanToMonitorData(null, example);
 
 			Assert.AreEqual("Failed to allocate 0x100002000 (4294975488) bytes of LargeMmapAllocator: Cannot allocate memory", data.Title);
 			Assert.AreEqual("Out of Memory", data.Fault.Risk);

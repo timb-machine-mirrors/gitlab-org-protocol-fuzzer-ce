@@ -30,10 +30,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
-using Peach.Core.Agent;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Action = System.Action;
 
 namespace Peach.Core
 {
@@ -72,6 +71,33 @@ namespace Peach.Core
 
 		private bool _hasStarted;
 		private bool _isOpen;
+
+		private void WrapFault(Action fn)
+		{
+			WrapFault(() =>
+			{
+				fn();
+				return (object)null;
+			});
+		}
+
+		private T WrapFault<T>(Func<T> fn)
+		{
+			try
+			{
+				return fn();
+			}
+			catch (FaultException ex)
+			{
+				if (string.IsNullOrEmpty(ex.Fault.DetectionSource))
+					ex.Fault.DetectionSource = GetType().GetAttributes<PublisherAttribute>().First().Name;
+
+				if (string.IsNullOrEmpty(ex.Fault.DetectionName))
+					ex.Fault.DetectionName = Name;
+
+				throw;
+			}
+		}
 
 		#endregion
 
@@ -246,6 +272,19 @@ namespace Peach.Core
 		/// This method can be overriden by custom Publishers.
 		/// </remarks>
 		/// <seealso cref="OnInput"/>
+		/// <param name="dataModel">Data to send/write</param>
+		protected virtual void OnOutput(DataModel dataModel)
+		{
+			output(dataModel.Value);
+		}
+
+		/// <summary>
+		/// Send data
+		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
+		/// <seealso cref="OnInput"/>
 		/// <param name="data">Data to send/write</param>
 		protected virtual void OnOutput(BitwiseStream data)
 		{
@@ -280,7 +319,7 @@ namespace Peach.Core
 		///		<item>Input action has completed.</item>
 		/// </list>
 		/// </remarks>
-		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="OnOutput(BitwiseStream)"/>
 		protected virtual void OnInput()
 		{
 			throw new PeachException("Error, action 'input' not supported by publisher");
@@ -290,7 +329,7 @@ namespace Peach.Core
 
 		#region Ctor
 
-		public Publisher(Dictionary<string, Variant> args)
+		protected Publisher(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
 		}
@@ -356,20 +395,8 @@ namespace Peach.Core
 		/// <seealso cref="OnAccept"/>
 		public void accept()
 		{
-			try
-			{
-				Logger.Debug("accept()");
-				OnAccept();
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName= Name;
-
-				throw;
-			}
+			Logger.Debug("accept()");
+			WrapFault(OnAccept);
 		}
 
 		/// <summary>
@@ -385,25 +412,13 @@ namespace Peach.Core
 		/// <seealso cref="close"/>
 		public void open()
 		{
-			try
-			{
-				if (_isOpen)
-					return;
+			if (_isOpen)
+				return;
 
-				Logger.Debug("open()");
-				OnOpen();
+			Logger.Debug("open()");
+			WrapFault(OnOpen);
 
-				_isOpen = true;
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			_isOpen = true;
 		}
 
 		/// <summary>
@@ -420,25 +435,13 @@ namespace Peach.Core
 		/// <seealso cref="open"/>
 		public void close()
 		{
-			try
-			{
-				if (!_isOpen)
-					return;
+			if (!_isOpen)
+				return;
 
-				Logger.Debug("close()");
-				OnClose();
+			Logger.Debug("close()");
+			WrapFault(OnClose);
 
-				_isOpen = false;
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			_isOpen = false;
 		}
 
 		/// <summary>
@@ -455,20 +458,8 @@ namespace Peach.Core
 		/// <returns>Returns resulting data</returns>
 		public Variant call(string method, List<BitwiseStream> args)
 		{
-			try
-			{
-				Logger.Debug("call({0}) BitwiseStream Count: {1}", method, args.Count);
-				return OnCall(method, args);
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			Logger.Debug("call({0}) BitwiseStream Count: {1}", method, args.Count);
+			return WrapFault(() => OnCall(method, args));
 		}
 
 		/// <summary>
@@ -485,20 +476,8 @@ namespace Peach.Core
 		/// <param name="value">Value to set on property</param>
 		public void setProperty(string property, Variant value)
 		{
-			try
-			{
-				Logger.Debug("setProperty({0}, {1})", property, value);
-				OnSetProperty(property, value);
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			Logger.Debug("setProperty({0}, {1})", property, value);
+			WrapFault(() => OnSetProperty(property, value));
 		}
 
 		/// <summary>
@@ -515,20 +494,8 @@ namespace Peach.Core
 		/// <returns>Returns value of property</returns>
 		public Variant getProperty(string property)
 		{
-			try
-			{
-				Logger.Debug("getProperty({0})", property);
-				return OnGetProperty(property);
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			Logger.Debug("getProperty({0})", property);
+			return WrapFault(() => OnGetProperty(property));
 		}
 
 		/// <summary>
@@ -539,31 +506,16 @@ namespace Peach.Core
 		/// the OnOutput method can be overriden to implement functionality that should
 		/// occur when this method is called.
 		/// </remarks>
-		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="OnOutput(BitwiseStream)"/>
 		/// <seealso cref="input"/>
 		/// <param name="data">Data to send/write</param>
 		public void output(BitwiseStream data)
 		{
-			try
-			{
-				data = data.PadBits();
-				data.Seek(0, SeekOrigin.Begin);
+			data = data.PadBits();
+			data.Seek(0, SeekOrigin.Begin);
 
-				Logger.Debug("output({0} bytes)", data.Length);
-				OnOutput(data);
-			}
-			catch (FaultException fe)
-			{
-				if (this is RemotePublisher)
-					throw;
-
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			Logger.Debug("output({0} bytes)", data.Length);
+			WrapFault(() => OnOutput(data));
 		}
 
 		/// <summary>
@@ -578,20 +530,8 @@ namespace Peach.Core
 		/// <seealso cref="!:Peach.Core.Publisher.output(Peach.Core.IO.BitwiseStream)"/>
 		public void input()
 		{
-			try
-			{
-				Logger.Debug("input()");
-				OnInput();
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			Logger.Debug("input()");
+			WrapFault(OnInput);
 		}
 
 		/// <summary>
@@ -636,11 +576,11 @@ namespace Peach.Core
 		/// the OnOutput method can be overriden to implement functionality that should
 		/// occur when this method is called.
 		/// </remarks>
-		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="OnOutput(DataModel)"/>
 		/// <param name="dataModel">DataModel to send/write</param>
-		public virtual void output(DataModel dataModel)
+		public void output(DataModel dataModel)
 		{
-			output(dataModel.Value);
+			WrapFault(() => OnOutput(dataModel));
 		}
 
 		/// <summary>
@@ -657,20 +597,8 @@ namespace Peach.Core
 		/// <returns>Returns resulting data</returns>
 		public Variant call(string method, List<ActionParameter> args)
 		{
-			try
-			{
-				Logger.Debug("call({0}) ActionParameter Count: {1}", method, args.Count);
-				return OnCall(method, args);
-			}
-			catch (FaultException fe)
-			{
-				var attribute = (PublisherAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PublisherAttribute));
-
-				fe.DetectionSource = attribute.Name;
-				fe.DetectionName = Name;
-
-				throw;
-			}
+			Logger.Debug("call({0}) ActionParameter Count: {1}", method, args.Count);
+			return WrapFault(() => OnCall(method, args));
 		}
 
 		#endregion
