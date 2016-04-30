@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using Peach.Core.Agent;
 
 namespace Peach.Core
 {
@@ -14,6 +14,69 @@ namespace Peach.Core
 		Fault,
 		// Data collection
 		Data
+	}
+
+	public class FaultSummary
+	{
+		/// <summary>
+		/// Compute the hash of a value for use as either
+		/// the MajorHash or MinorHash.
+		/// </summary>
+		/// <param name="value">String value to hash</param>
+		/// <returns>The first 4 bytes of the md5 has as a hex string</returns>
+		public static string Hash(string value)
+		{
+			return Monitor2.Hash(value);
+		}
+
+		/// <summary>
+		/// One line title of fault
+		/// </summary>
+		public string Title { get; set; }
+
+		/// <summary>
+		/// Description field of fault
+		/// </summary>
+		public string Description { get; set; }
+
+		/// <summary>
+		/// Major hash of fault.
+		/// </summary>
+		public string MajorHash { get; set; }
+
+		/// <summary>
+		/// Minor hash of fault
+		/// </summary>
+		public string MinorHash { get; set; }
+
+		/// <summary>
+		/// Exploitability of fault
+		/// </summary>
+		public string Exploitablity { get; set; }
+
+		/// <summary>
+		/// Detection source for fault, typically the class name
+		/// </summary>
+		/// For the Rest publisher the detection name is the name attribute while
+		/// detection source is the Publisher attribute.
+		public string DetectionSource { get; set; }
+
+		/// <summary>
+		/// Name of detection source
+		/// </summary>
+		/// <remarks>
+		/// For the Rest publisher the detection name is the name attribute while
+		/// detection source is the Publisher attribute.
+		/// </remarks>
+		public string DetectionName { get; set; }
+
+		/// <summary>
+		/// Name of agent fault was reported by.
+		/// </summary>
+		/// <remarks>
+		/// Only used when fault generated via agent, otherwise null.
+		/// </remarks>
+		public string AgentName { get; set; }
 	}
 
 	/// <summary>

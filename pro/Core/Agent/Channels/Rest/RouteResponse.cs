@@ -164,7 +164,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		/// <returns></returns>
 		public static RouteResponse Error(Exception ex)
 		{
-			HttpStatusCode code = HttpStatusCode.InternalServerError;
+			var code = HttpStatusCode.InternalServerError;
 
 			var resp = new ExceptionResponse
 			{
@@ -172,29 +172,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				StackTrace = ex.ToString(),
 			};
 
-			if (ex is FaultException)
+			var fe = ex as FaultException;
+			if (fe != null)
 			{
-				var fe = (FaultException) ex;
-
-				resp.ExceptionType = ExceptionType.FaultException;
-				resp.FaultTitle = fe.Title;
-				resp.FaultDescription = fe.Description;
-				resp.FaultMajorHash = fe.MajorHash;
-				resp.FaultMinorHash = fe.MinorHash;
-				resp.FaultDetectionName = fe.DetectionName;
-				resp.FaultDetectionSource = fe.DetectionSource;
-				resp.FaultExploitability = fe.Exploitablity;
-
+				resp.Fault = fe.Fault;
 				code = HttpStatusCode.ServiceUnavailable;
 			}
 			else if (ex is SoftException)
 			{
-				resp.ExceptionType = ExceptionType.SoftException;
 				code =  HttpStatusCode.ServiceUnavailable;
-			}
-			else if (ex is PeachException)
-			{
-				resp.ExceptionType = ExceptionType.PeachException;
 			}
 
 			return AsJson(resp, code);

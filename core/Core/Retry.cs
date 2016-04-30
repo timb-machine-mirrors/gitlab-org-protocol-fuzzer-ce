@@ -27,10 +27,6 @@ namespace Peach.Core
 					fn();
 					break;
 				}
-				catch (FaultException)
-				{
-					throw;
-				}
 				catch (Exception ex)
 				{
 					if (count++ == retryCount)
@@ -55,10 +51,6 @@ namespace Peach.Core
 				{
 					fn();
 					break;
-				}
-				catch (FaultException)
-				{
-					throw;
 				}
 				catch (Exception ex)
 				{
@@ -89,10 +81,6 @@ namespace Peach.Core
 				{
 					fn();
 					break;
-				}
-				catch (FaultException)
-				{
-					throw;
 				}
 				catch (Exception ex)
 				{
