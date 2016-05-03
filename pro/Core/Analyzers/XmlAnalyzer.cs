@@ -180,7 +180,10 @@ namespace Peach.Pro.Core.Analyzers
 				}
 				else if (!child.Name.StartsWith("#"))
 				{
-					var childName = elem.UniqueName(child.Name.Replace(':', '_'));
+					var name = child.Name
+						.Replace(':', '_')
+						.Replace('.', '_');
+					var childName = elem.UniqueName(name);
 					var childElem = new Peach.Core.Dom.XmlElement(childName);
 
 					elem.Add(childElem);
