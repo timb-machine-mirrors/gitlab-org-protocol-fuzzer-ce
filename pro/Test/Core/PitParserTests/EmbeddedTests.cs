@@ -21,39 +21,29 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		public void BasicTest()
 		{
 			var asm = Assembly.GetExecutingAssembly();
-			var pitName = PitsResourcePrefix + ".Net.DNP3_Slave.xml";
-			var configName = PitsResourcePrefix + ".Net.DNP3_Slave.xml.config";
 
 			using (var tmpDir = new TempDirectory())
 			{
+				ExtractFile(tmpDir.Path, "DNP3_Slave.xml", "Net");
+				ExtractFile(tmpDir.Path, "DNP3_Slave.xml.config", "Net");
 				ExtractFile(tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
 				ExtractDirectory(tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
 
-				PitDefines defs;
-				using (var stream = asm.GetManifestResourceStream(configName))
-				{
-					Assert.NotNull(stream, configName);
-					defs = PitDefines.Parse(stream, tmpDir.Path, new Dictionary<string, string> {
-						{"Source", "0"},
-						{"Destination", "0"},
-					});
-				}
+				var pitFile = Path.Combine(tmpDir.Path, "Net", "DNP3_Slave.xml");
+				var pitConfigFile = pitFile + ".config";
+
+				var defs = PitDefines.ParseFile(pitConfigFile, tmpDir.Path, new Dictionary<string, string> {
+					{"Source", "0"},
+					{"Destination", "0"},
+				});
 
 				var args = new Dictionary<string, object> {
 					{ PitParser.DEFINED_VALUES, defs.Evaluate() }
 				};
 
 				var parser = new ProPitParser(tmpDir.Path, asm, PitsResourcePrefix);
-				Peach.Core.Dom.Dom dom;
-				using (var stream = asm.GetManifestResourceStream(pitName))
-				using (var reader = new StreamReader(stream))
-				{
-					Assert.NotNull(stream, pitName);
-					dom = parser.asParser(args, reader, pitName, true);
-				}
-
+				var dom = parser.asParser(args, pitFile);
 				var config = new RunConfiguration() { singleIteration = true, };
-
 				var e = new Engine(null);
 				e.startFuzzing(dom, config);
 			}
