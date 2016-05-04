@@ -520,7 +520,7 @@ namespace Peach.Pro.Core
 			return ParseFile(fileName, null, overrides);
 		}
 
-		private static PitDefines ParseFile(
+		public static PitDefines ParseFile(
 			string fileName,
 			string pitLibraryPath,
 			IEnumerable<KeyValuePair<string, string>> overrides,
