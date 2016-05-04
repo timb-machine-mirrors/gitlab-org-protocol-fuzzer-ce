@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -15,12 +16,20 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	[Peach]
 	public class EmbeddedTests
 	{
+		static readonly Assembly _asm = Assembly.GetExecutingAssembly();
 		const string PitsResourcePrefix = "Peach.Pro.Test.Core.Resources.Pits";
+
+		public class PitManifest : Dictionary<string, PitManifestEntry> { }
+
+		public class PitManifestEntry
+		{
+			public string Pit { get; set; }
+			public string[] Assets { get; set; }
+		}
 
 		[Test]
 		public void BasicTest()
 		{
-			var asm = Assembly.GetExecutingAssembly();
 
 			using (var tmpDir = new TempDirectory())
 			{
@@ -41,11 +50,23 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					{ PitParser.DEFINED_VALUES, defs.Evaluate() }
 				};
 
-				var parser = new ProPitParser(tmpDir.Path, asm, PitsResourcePrefix);
+				var parser = new ProPitParser(tmpDir.Path, _asm, PitsResourcePrefix);
 				var dom = parser.asParser(args, pitFile);
 				var config = new RunConfiguration() { singleIteration = true, };
 				var e = new Engine(null);
 				e.startFuzzing(dom, config);
+			}
+		}
+
+		[Test]
+		public void ParseManifest()
+		{
+			using (var stream = _asm.GetManifestResourceStream(PitsResourcePrefix + ".manifest.json"))
+			using (var reader = new StreamReader(stream))
+			using (var json = new JsonTextReader(reader))
+			{
+				var manifest = JsonUtilities.CreateSerializer().Deserialize<PitManifest>(json);
+				CollectionAssert.Contains(manifest.Keys, "PeachPit-Net-DNP3_Slave");
 			}
 		}
 
