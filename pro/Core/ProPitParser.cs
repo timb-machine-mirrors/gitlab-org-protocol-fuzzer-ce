@@ -172,7 +172,7 @@ namespace Peach.Pro.Core
 						uri = new Uri(new Uri(Utilities.ExecutionDirectory), src);
 
 					if (File.Exists(uri.AbsolutePath))
-						stream = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+						stream = File.OpenRead(uri.AbsolutePath);
 				}
 				else
 				{
@@ -190,6 +190,7 @@ namespace Peach.Pro.Core
 			{
 				var dataName = Path.GetFileNameWithoutExtension(src);
 				newDom = asParser(args, new StreamReader(stream), dataName, true);
+				newDom.fileName = src;
 			}
 
 			newDom.Name = ns;
