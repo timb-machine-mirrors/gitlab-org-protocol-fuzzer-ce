@@ -234,7 +234,7 @@ namespace Peach.Pro.Core.WebServices
 		Pit UpdatePitById(string guid, PitConfig data);
 		Pit UpdatePitByUrl(string url, PitConfig data);
 	
-		Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description);
+		Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description);
 		Tuple<Pit, PitDetail> MigratePit(string legacyPitUrl, string pitUrl);
 	}
 
@@ -307,10 +307,10 @@ namespace Peach.Pro.Core.WebServices
 		internal static readonly string LegacyDir = "User";
 		internal static readonly string ConfigsDir = "Configs";
 
-		private string _pitLibraryPath;
+		private readonly string _pitLibraryPath;
 
-		private NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
-		private NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
+		private readonly NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
+		private readonly NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
 		LibraryDetail _configsLib;
 
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
@@ -332,12 +332,15 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		public void Load(string path)
+		public PitDatabase(string path)
 		{
 			_pitLibraryPath = Path.GetFullPath(path);
+		}
 
-			_entries = new NamedCollection<PitDetail>();
-			_libraries = new NamedCollection<LibraryDetail>();
+		public void Load()
+		{
+			_entries.Clear();
+			_libraries.Clear();
 
 			AddLibrary("", "Pits", true, false);
 			_configsLib = AddLibrary(ConfigsDir, "Configurations", false, false);
@@ -561,7 +564,6 @@ namespace Peach.Pro.Core.WebServices
 		/// <summary>
 		/// 
 		/// Throws:
-		///   UnauthorizedAccessException if the destination library is locked.
 		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
 		///   ArgumentException if a pit with the specified name already exists.
 		/// </summary>
@@ -569,7 +571,7 @@ namespace Peach.Pro.Core.WebServices
 		/// <param name="name">The name of the newly copied pit.</param>
 		/// <param name="description">The description of the newly copied pit.</param>
 		/// <returns>The newly copied pit.</returns>
-		public Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description)
+		public Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description)
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("A non-empty pit name is required.", "name");
