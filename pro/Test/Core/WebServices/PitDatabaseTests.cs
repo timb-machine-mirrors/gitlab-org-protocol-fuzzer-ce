@@ -481,7 +481,11 @@ namespace Peach.Pro.Test.Core.WebServices
 			var agents = JsonConvert.DeserializeObject<List<MAgent>>(json);
 			Assert.NotNull(agents);
 
-			var cfg = new PitConfig { Agents = agents };
+			var cfg = new PitConfig
+			{
+				Agents = agents,
+				Config = new List<Param>(),
+			};
 			var pit = _db.UpdatePitByUrl(tuple.Item1.PitUrl, cfg);
 			Assert.NotNull(pit);
 
