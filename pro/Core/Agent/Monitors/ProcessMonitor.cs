@@ -30,7 +30,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		StringBuilder _asanResult;
+		StringBuilder _asanResult = new StringBuilder();
 		readonly Process _process;
 		MonitorData _data;
 		bool _messageExit;
@@ -97,7 +97,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			lock (_asanResult)
 			{
-				_data = Asan.AsanToMonitorData(_asanResult.ToString());
+				_data = Asan.AsanToMonitorData(null, _asanResult.ToString());
 			}
 
 			return true;

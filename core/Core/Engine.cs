@@ -257,10 +257,6 @@ namespace Peach.Core
 			_context.dom = dom;
 			_context.dom.context = _context;
 
-			// Set Context on local publishers
-			foreach (var pub in _context.test.publishers)
-				pub.Context = _context;
-
 			try
 			{
 				// Initialize any watchers and loggers
@@ -554,6 +550,26 @@ namespace Peach.Core
 						context.agentManager.IterationStarting(context.reproducingFault, context.FaultOnPreviousIteration);
 
 						test.stateModel.Run(context);
+					}
+					catch (FaultException ex)
+					{
+						var fe = ex.Fault;
+
+						logger.Debug("runTest: Creating fault from FaultException: {0}", fe.Title);
+						var fault = new Fault
+						{
+							title = fe.Title,
+							description = fe.Description,
+							detectionSource = fe.DetectionSource ?? "Unknown",
+							monitorName = fe.DetectionName ?? "Unknown",
+							majorHash = fe.MajorHash,
+							minorHash = fe.MinorHash,
+							exploitability = fe.Exploitablity ?? "Unknown",
+							agentName =  fe.AgentName ?? "Internal",
+							type = FaultType.Fault
+						};
+
+						context.faults.Add(fault);
 					}
 					catch (SoftException se)
 					{

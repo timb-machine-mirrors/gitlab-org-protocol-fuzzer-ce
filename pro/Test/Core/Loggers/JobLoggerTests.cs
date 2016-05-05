@@ -13,6 +13,7 @@ using Peach.Pro.Core;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
+using FaultSummary = Peach.Pro.Core.WebServices.Models.FaultSummary;
 using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.Loggers

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Peach.Core;
 
 namespace Peach.Pro.Core.Agent.Channels.Rest
 {
@@ -112,6 +113,9 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		[JsonProperty("stackTrace")]
 		public string StackTrace { get; set; }
+
+		[JsonProperty("fault")]
+		public FaultSummary Fault { get; set; }
 	}
 
 	internal class PublisherRequest

@@ -164,15 +164,24 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		/// <returns></returns>
 		public static RouteResponse Error(Exception ex)
 		{
+			var code = HttpStatusCode.InternalServerError;
+
 			var resp = new ExceptionResponse
 			{
 				Message = ex.Message,
 				StackTrace = ex.ToString(),
 			};
 
-			var code = (ex is SoftException)
-				? HttpStatusCode.ServiceUnavailable
-				: HttpStatusCode.InternalServerError;
+			var fe = ex as FaultException;
+			if (fe != null)
+			{
+				resp.Fault = fe.Fault;
+				code = HttpStatusCode.ServiceUnavailable;
+			}
+			else if (ex is SoftException)
+			{
+				code =  HttpStatusCode.ServiceUnavailable;
+			}
 
 			return AsJson(resp, code);
 		}

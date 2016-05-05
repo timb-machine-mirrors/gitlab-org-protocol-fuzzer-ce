@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Peach.Core;
 using Peach.Core.Agent;
+using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Core.Agent.Monitors.Utilities
 {
@@ -32,12 +34,22 @@ namespace Peach.Pro.Core.Agent.Monitors.Utilities
 		/// <summary>
 		/// Convert ASAN output into Fault
 		/// </summary>
+		/// <param name="stdout"></param>
 		/// <param name="stderr"></param>
 		/// <returns></returns>
-		public static MonitorData AsanToMonitorData(string stderr)
+		public static MonitorData AsanToMonitorData(string stdout, string stderr)
 		{
-			var data = new MonitorData();
-			
+			var data = new MonitorData
+			{
+				Data = new Dictionary<string, Stream>
+				{
+					{ "stderr.log", new MemoryStream(Encoding.UTF8.GetBytes(stderr)) }
+				}
+			};
+
+			if (stdout != null)
+				data.Data.Add("stdout.log", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
+
 			var title = AsanTitle.Match(stderr);
 
 			// failed to allocate ASAN message is different from others
