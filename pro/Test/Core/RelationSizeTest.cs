@@ -1016,10 +1016,10 @@ namespace Peach.Pro.Test.Core
 		<Block name='Value'>
 			<Choice name='Items' minOccurs='2'>
 				<Block name='A' ref='TLV'>
-					<Number name='Type' size='8' token='true' value='0x10'/>
+					<Number name='Type' size='8' token='true' valueType='hex' value='0x10'/>
 				</Block>
 				<Block name='B' ref='TLV'>
-					<Number name='Type' size='8' token='true' value='0x11'/>
+					<Number name='Type' size='8' token='true' valueType='hex' value='0x11'/>
 				</Block>
 			</Choice>
 		</Block>
@@ -1051,7 +1051,7 @@ namespace Peach.Pro.Test.Core
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].publishers[0] = new BytePublisher(new byte[]
 			{
-				0x02, 0x0f,                     // outer Type and Length
+				0x02, 0x0a,                     // outer Type and Length
 				0x10, 0x03, 0x61, 0x62, 0x63,   // first item (an A)
 				0x10, 0x03, 0x61, 0x62, 0x63,   // second item (an A)
 			});
