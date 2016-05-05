@@ -39,6 +39,7 @@ using Peach.Core.IO;
 using Peach.Core.Test;
 using ASCIIEncoding = Peach.Core.ASCIIEncoding;
 using Encoding = Peach.Core.Encoding;
+using NLog;
 
 namespace Peach.Pro.Test.Core
 {
@@ -962,6 +963,104 @@ namespace Peach.Pro.Test.Core
 			Assert.NotNull(req);
 			Assert.AreEqual(1, req.relations.Count);
 			Assert.AreEqual("TheRequest.Message.Command.Request", req.relations[0].Of.fullName);
+		}
+
+
+
+		class BytePublisher : Peach.Core.Publishers.StreamPublisher
+		{
+			private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+			protected override NLog.Logger Logger { get { return logger; } }
+
+			readonly MemoryStream _data;
+
+			public BytePublisher(byte[] data)
+				: base(new Dictionary<string, Variant>())
+			{
+				Name = "Pub";
+				_data = new MemoryStream(data);
+			}
+
+			protected override void OnOpen()
+			{
+				_data.Seek(0, SeekOrigin.Begin);
+				this.stream = new MemoryStream();
+			}
+
+			public override void WantBytes(long count)
+			{
+				var buf = new byte[count];
+				var len = _data.Read(buf, 0, (int)count);
+				var pos = stream.Position;
+				stream.Seek(0, SeekOrigin.End);
+				stream.Write(buf, 0, len);
+				stream.Seek(pos, SeekOrigin.Begin);
+			}
+		}
+
+		[Test]
+		public void NestedTLVRefsWithChoiceArray()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='TLV'>
+		<Number name='Type' size='8' value='0'/>
+		<Number name='Length' size='8'>
+			<Relation type='size' of='Value'/>
+		</Number>
+		<Blob name='Value'/>
+	</DataModel>
+
+	<DataModel name='Response' ref='TLV'>
+		<Number name='Type' size='8' token='true' value='0x02'/>
+		<Block name='Value'>
+			<Choice name='Items' minOccurs='2'>
+				<Block name='A' ref='TLV'>
+					<Number name='Type' size='8' token='true' value='0x10'/>
+				</Block>
+				<Block name='B' ref='TLV'>
+					<Number name='Type' size='8' token='true' value='0x11'/>
+				</Block>
+			</Choice>
+		</Block>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Request' type='output'>
+				<DataModel name='Output'>
+					<String value='REQUEST'/>
+				</DataModel>
+			</Action>
+
+			<Action name='Response' type='input'>
+				<DataModel name='Input' ref='Response'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='SM'/>
+
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+";
+
+			PitParser parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			dom.tests[0].publishers[0] = new BytePublisher(new byte[]
+			{
+				0x02, 0x0f,                     // outer Type and Length
+				0x10, 0x03, 0x61, 0x62, 0x63,   // first item (an A)
+				0x10, 0x03, 0x61, 0x62, 0x63,   // second item (an A)
+			});
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(this);
+			Assert.DoesNotThrow(() => e.startFuzzing(dom, config));
 		}
 	}
 }
