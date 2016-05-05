@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Peach.Core;
@@ -999,7 +1000,7 @@ namespace Peach.Pro.Test.Core
 		}
 
 		[Test]
-		public void NestedTLVRefsWithChoiceArray()
+		public void RelationMaintainedShallowClones()
 		{
 			const string xml = @"
 <Peach>
@@ -1011,56 +1012,51 @@ namespace Peach.Pro.Test.Core
 		<Blob name='Value'/>
 	</DataModel>
 
-	<DataModel name='Response' ref='TLV'>
-		<Number name='Type' size='8' token='true' value='0x02'/>
-		<Block name='Value'>
-			<Choice name='Items' minOccurs='2'>
-				<Block name='A' ref='TLV'>
-					<Number name='Type' size='8' token='true' valueType='hex' value='0x10'/>
-				</Block>
-				<Block name='B' ref='TLV'>
-					<Number name='Type' size='8' token='true' valueType='hex' value='0x11'/>
-				</Block>
-			</Choice>
-		</Block>
+	<DataModel name='Response'>
+		<Choice name='Items' minOccurs='2'>
+			<Block name='A' ref='TLV'>
+				<Number name='Type' size='8' token='true' value='1'/>
+			</Block>
+			<Block name='B' ref='TLV'>
+				<Number name='Type' size='8' token='true' value='2'/>
+			</Block>
+		</Choice>
 	</DataModel>
-
-	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
-			<Action name='Request' type='output'>
-				<DataModel name='Output'>
-					<String value='REQUEST'/>
-				</DataModel>
-			</Action>
-
-			<Action name='Response' type='input'>
-				<DataModel name='Input' ref='Response'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default'>
-		<StateModel ref='SM'/>
-
-		<Publisher class='Null'/>
-	</Test>
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].publishers[0] = new BytePublisher(new byte[]
+			var dom = ParsePit(xml);
+			var dm = dom.dataModels[1];
+
+			// When DataModels are used for cracking in the state model
+			// a clone of an evaluated model is used. So make sure we call
+			// .Value prior to cracking.  The array will be expanded to
+			// two items and bot will select 'A'
+			var val = dm.Value;
+			Assert.AreEqual(new byte[] { 0x01, 0x00, 0x01, 0x00 }, val.ToArray());
+
+			var chocies = dm.Walk().OfType<Choice>().ToList();
+			Assert.AreEqual(2, chocies.Count);
+
+			foreach (var item in chocies)
 			{
-				0x02, 0x0a,                     // outer Type and Length
-				0x10, 0x03, 0x61, 0x62, 0x63,   // first item (an A)
-				0x10, 0x03, 0x61, 0x62, 0x63,   // second item (an A)
-			});
+				Assert.NotNull(item.SelectedElement);
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+				// The selected element should be a clone of one of the choice elements
+				CollectionAssert.DoesNotContain(item.choiceElements, item.SelectedElement);
+			}
 
-			Engine e = new Engine(this);
-			Assert.DoesNotThrow(() => e.startFuzzing(dom, config));
+			// Change second item to a 'B'
+			var payload = new byte[]
+			{
+				0x01, 0x03, 0x61, 0x62, 0x63,   // first item (an A)
+				0x02, 0x03, 0x61, 0x62, 0x63,   // second item (an B)
+			};
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dm, new BitStream(payload));
+
+			Assert.AreEqual(payload, dm.Value.ToArray());
 		}
 	}
 }
