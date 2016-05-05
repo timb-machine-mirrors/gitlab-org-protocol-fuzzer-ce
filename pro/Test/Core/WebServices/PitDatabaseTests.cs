@@ -148,9 +148,9 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(_originalPitPath, pitExample);
 			File.WriteAllText(_originalPitPath + ".config", configExample);
 
-			_db = new PitDatabase(_root.Path);
+			_db = new PitDatabase();
 			_db.ValidationEventHandler += OnValidationEvent;
-			_db.Load();
+			_db.Load(_root.Path);
 		}
 
 		[TearDown]
@@ -210,7 +210,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			File.WriteAllText(Path.Combine(_root.Path, "Image", "IMG Copy.xml"), pitExample);
 
-			_db.Load();
+			_db.Load(_root.Path);
 
 			var ent = _db.Entries.ToList();
 			Assert.AreEqual(2, ent.Count);
@@ -559,7 +559,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var path = Path.Combine(_root.Path, "Image", "My.xml");
 			File.WriteAllText(path, pitNoConfig);
 
-			_db.Load();
+			_db.Load(_root.Path);
 			Assert.AreEqual(2, _db.Entries.Count());
 
 			var file = _db.Entries.FirstOrDefault(e => e.PitConfig.Name == "My");
@@ -570,7 +570,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			File.Delete(path);
 
-			_db.Load(); 
+			_db.Load(_root.Path); 
 			Assert.AreEqual(1, _db.Entries.Count());
 
 			Assert.Null(_db.Entries.FirstOrDefault(e => e.PitConfig.Name == "My"));
@@ -662,7 +662,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(srcPath, pitExample);
 			File.WriteAllText(srcPath + ".config", configExample);
 
-			_db.Load();
+			_db.Load(_root.Path);
 
 			// Number of legacy entries is double for backwards compatible absolute pitUrls
 			Assert.AreEqual(3, _db.Entries.Count());
@@ -739,7 +739,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(srcPath, pitExample);
 			File.WriteAllText(srcPath + ".config", configExample);
 
-			_db.Load();
+			_db.Load(_root.Path);
 
 			// Number of legacy entries is double for backwards compatible absolute pitUrls
 			Assert.AreEqual(3, _db.Entries.Count());
@@ -791,7 +791,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var srcPath = Path.Combine(_root.Path, "Image", "Foo.Mine.xml");
 			File.WriteAllText(srcPath, pitExample);
 
-			_db.Load();
+			_db.Load(_root.Path);
 
 			var pit = _db.Entries.First(x => x.Path == srcPath);
 			var originalPit = _db.Entries.First(x => x.Path == _originalPitPath);
@@ -810,7 +810,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(srcPath, pitExample);
 			File.WriteAllText(srcPath + ".config", configExample);
 
-			_db.Load();
+			_db.Load(_root.Path);
 
 			// Number of legacy entries is double for backwards compatible absolute pitUrls
 			Assert.AreEqual(3, _db.Entries.Count());

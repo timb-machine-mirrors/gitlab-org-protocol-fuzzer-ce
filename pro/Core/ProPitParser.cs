@@ -27,13 +27,25 @@ namespace Peach.Pro.Core
 		private readonly string _pitsPrefix;
 
 		public ProPitParser(
-			string pitLibraryPath = "", 
-			Assembly pitsAssembly = null, 
-			string pitsPrefix = "")
+			string pitLibraryPath,
+			Assembly pitsAssembly = null,
+			string pitsPrefix = "Peach.Pro.Pits")
 		{
+			if (pitsAssembly == null)
+			{
+				var pitsAssemblyPath = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
+				if (File.Exists(pitsAssemblyPath))
+					pitsAssembly = Assembly.LoadFrom(pitsAssemblyPath);
+			}
+
 			_pitLibraryPath = pitLibraryPath;
 			_pitsAssembly = pitsAssembly;
 			_pitsPrefix = pitsPrefix;
+		}
+
+		// should only be used for unit tests
+		internal ProPitParser()
+		{
 		}
 
 		protected override Peach.Core.Dom.Dom CreateDom()

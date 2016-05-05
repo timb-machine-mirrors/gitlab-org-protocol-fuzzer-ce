@@ -307,7 +307,7 @@ namespace Peach.Pro.Core.WebServices
 		internal static readonly string LegacyDir = "User";
 		internal static readonly string ConfigsDir = "Configs";
 
-		private readonly string _pitLibraryPath;
+		private string _pitLibraryPath;
 
 		private readonly NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
 		private readonly NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
@@ -332,13 +332,10 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		public PitDatabase(string path)
+		public void Load(string path)
 		{
 			_pitLibraryPath = Path.GetFullPath(path);
-		}
 
-		public void Load()
-		{
 			_entries.Clear();
 			_libraries.Clear();
 

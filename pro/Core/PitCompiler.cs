@@ -270,17 +270,7 @@ namespace Peach.Pro.Core
 			var idxCopyright = 0;
 			var idx = 0;
 
-			var uri = new Uri(new Uri(Environment.CurrentDirectory), fileName);
-			if (uri.Scheme == Uri.UriSchemeFile)
-			{
-				if (!File.Exists(uri.AbsolutePath))
-					uri = new Uri(new Uri(Utilities.ExecutionDirectory), fileName);
-			}
-			else {
-				throw new NotSupportedException("Scheme not supported: {0}".Fmt(uri));
-			}
-
-			using (var rdr = XmlReader.Create(uri.AbsolutePath))
+			using (var rdr = XmlReader.Create(fileName))
 			{
 				while (++idx > 0)
 				{
@@ -348,7 +338,7 @@ namespace Peach.Pro.Core
 				var doc = new XmlDocument();
 
 				// Must call LoadXml() so that we can catch embedded newlines!
-				doc.LoadXml(File.ReadAllText(uri.AbsolutePath));
+				doc.LoadXml(File.ReadAllText(fileName));
 
 				var nav = doc.CreateNavigator();
 				var nsMgr = new XmlNamespaceManager(nav.NameTable);

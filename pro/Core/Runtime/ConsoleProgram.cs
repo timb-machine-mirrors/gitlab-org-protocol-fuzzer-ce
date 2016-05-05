@@ -349,7 +349,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual Analyzer GetParser()
 		{
-			var parser = new ProPitParser();
+			var parser = new ProPitParser(_pitLibraryPath);
 			Analyzer.defaultParser = parser;
 			return Analyzer.defaultParser;
 		}

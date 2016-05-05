@@ -220,9 +220,9 @@ namespace Peach.Pro.WebApi2
 				_jobMonitor,
 				() =>
 				{
-					var pitdb = new PitDatabase(_context.PitLibraryPath);
+					var pitdb = new PitDatabase();
 					if (!string.IsNullOrEmpty(_context.PitLibraryPath))
-						pitdb.Load();
+						pitdb.Load(_context.PitLibraryPath);
 					return pitdb;
 				}
 			);
