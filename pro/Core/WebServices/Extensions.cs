@@ -91,14 +91,40 @@ namespace Peach.Pro.Core.WebServices
 			return value;
 		}
 
-		public static List<ParamDetail> ToWeb(this PitDefines defines)
+		public static List<ParamDetail> ToWeb(this PitDefines defines, List<Param> config)
 		{
+			var set = new SortedSet<string>(config.Select(x => x.Key));
+			set.ExceptWith(defines.Walk().Select(x => x.Key));
+
+			var userConfigs = new List<Param>();
+			userConfigs.AddRange(set.Select(key => config.Single(x => x.Key == key)));
+			var userDefines = (userConfigs.Count) == 0 ? null :
+				userConfigs.Select(cfg => new ParamDetail
+				{
+					Key = cfg.Key,
+					Name = cfg.Name,
+					Description = cfg.Description,
+					Type = ParameterType.User,
+				}).ToList();
+
+
 			var ifaces = new IfaceOptions();
 			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
 
 			var ret = DefineToParamDetail(defines.Children, reserved, ifaces) ?? new List<ParamDetail>();
 
 			reserved = new List<string>();
+			
+			ret.Add(new ParamDetail
+			{
+				Key = "UserDefines",
+				Name = "User Defines",
+				Description = "",
+				Type = ParameterType.Group,
+				Collapsed = false,
+				OS = "",
+				Items = userDefines,
+			});
 
 			ret.Add(new ParamDetail
 			{

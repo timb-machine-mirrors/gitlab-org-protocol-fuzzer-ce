@@ -761,7 +761,7 @@ namespace Peach.Pro.Core.WebServices
 				Agents = detail.PitConfig.Agents,
 				Weights = detail.PitConfig.Weights,
 				Metadata = new PitMetadata {
-					Defines = defs.ToWeb(),
+					Defines = defs.ToWeb(detail.PitConfig.Config),
 					Monitors = MonitorMetadata.Generate(calls),
 					Fields = metadata != null ? metadata.Fields : null,
 				}

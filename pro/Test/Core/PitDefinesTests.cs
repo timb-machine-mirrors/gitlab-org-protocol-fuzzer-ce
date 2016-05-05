@@ -422,7 +422,7 @@ namespace Peach.Pro.Test.Core
 			{
 				var defs = PitDefines.ParseFile(tmp.Path, "/path/to/pits");
 
-				var web = defs.ToWeb();
+				var web = defs.ToWeb(new List<Param>());
 
 				Assert.AreEqual(2, web.Count);
 				Assert.AreEqual("All", web[0].Name);
@@ -450,7 +450,7 @@ namespace Peach.Pro.Test.Core
 			using (var rdr = new StringReader(xml))
 			{
 				var defs = XmlTools.Deserialize<PitDefines>(rdr);
-				var web = defs.ToWeb();
+				var web = defs.ToWeb(new List<Param>());
 				var json = web.ToJson();
 
 				var exp = @"[
@@ -496,6 +496,80 @@ namespace Peach.Pro.Test.Core
     ],
     ""Name"": ""Outter"",
     ""OS"": ""All"",
+    ""Type"": ""Group""
+  },
+  {
+    ""Collapsed"": true,
+    ""Description"": ""These values are controlled by Peach."",
+    ""Items"": [],
+    ""Key"": ""SystemDefines"",
+    ""Name"": ""System Defines"",
+    ""OS"": """",
+    ""Type"": ""Group""
+  }
+]".Replace("\r\n", Environment.NewLine);
+
+				Assert.AreEqual(exp, json);
+			}
+		}
+
+		[Test]
+		public void TestUserDefines()
+		{
+			const string xml = @"
+<PitDefines>
+	<Group name='Outer'>
+		<String key='key0' value='value0' name='name0' description='description0'/>
+	</Group>
+</PitDefines>
+";
+
+			using (var rdr = new StringReader(xml))
+			{
+				var defs = XmlTools.Deserialize<PitDefines>(rdr);
+				var web = defs.ToWeb(new List<Param>()
+				{
+					new Param 
+					{
+						Key = "CustomKey",
+						Name = "Custom Name",
+						Description = "Custom Description",
+						Value = "Custom Value",
+					}
+				});
+				var json = web.ToJson();
+				Console.WriteLine(json);
+
+				var exp = @"[
+  {
+    ""Description"": """",
+    ""Items"": [
+      {
+        ""Description"": ""description0"",
+        ""Key"": ""key0"",
+        ""Name"": ""name0"",
+        ""Options"": [],
+        ""Type"": ""String"",
+        ""Value"": ""value0""
+      }
+    ],
+    ""Name"": ""Outer"",
+    ""OS"": ""All"",
+    ""Type"": ""Group""
+  },
+  {
+    ""Description"": """",
+    ""Items"": [
+      {
+        ""Description"": ""Custom Description"",
+        ""Key"": ""CustomKey"",
+        ""Name"": ""Custom Name"",
+        ""Type"": ""User""
+      }
+    ],
+    ""Key"": ""UserDefines"",
+    ""Name"": ""User Defines"",
+    ""OS"": """",
     ""Type"": ""Group""
   },
   {
@@ -740,7 +814,7 @@ namespace Peach.Pro.Test.Core
 
 				Assert.AreEqual(3, defs.Children.Count);
 
-				var web = defs.ToWeb();
+				var web = defs.ToWeb(new List<Param>());
 				Assert.AreEqual(2, web.Count);
 
 				// Don't include empty groups in the web model
