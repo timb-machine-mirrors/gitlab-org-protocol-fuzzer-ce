@@ -124,6 +124,18 @@ namespace Peach.Core.Test
 			OnSetUp();
 		}
 
+		public static void EnableDebug()
+		{
+			var config = LogManager.Configuration;
+			var target = new ConsoleTarget { Layout = "${logger} ${message}" };
+			var rule = new LoggingRule("*", LogLevel.Debug, target);
+			
+			config.AddTarget("debugConsole", target);
+			config.LoggingRules.Add(rule);
+
+			LogManager.Configuration = config;
+		}
+
 		[TearDown]
 		public void TearDown()
 		{
