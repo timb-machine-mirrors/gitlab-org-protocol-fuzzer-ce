@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Peach.Core;
@@ -39,6 +40,7 @@ using Peach.Core.IO;
 using Peach.Core.Test;
 using ASCIIEncoding = Peach.Core.ASCIIEncoding;
 using Encoding = Peach.Core.Encoding;
+using NLog;
 
 namespace Peach.Pro.Test.Core
 {
@@ -962,6 +964,99 @@ namespace Peach.Pro.Test.Core
 			Assert.NotNull(req);
 			Assert.AreEqual(1, req.relations.Count);
 			Assert.AreEqual("TheRequest.Message.Command.Request", req.relations[0].Of.fullName);
+		}
+
+
+
+		class BytePublisher : Peach.Core.Publishers.StreamPublisher
+		{
+			private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+			protected override NLog.Logger Logger { get { return logger; } }
+
+			readonly MemoryStream _data;
+
+			public BytePublisher(byte[] data)
+				: base(new Dictionary<string, Variant>())
+			{
+				Name = "Pub";
+				_data = new MemoryStream(data);
+			}
+
+			protected override void OnOpen()
+			{
+				_data.Seek(0, SeekOrigin.Begin);
+				this.stream = new MemoryStream();
+			}
+
+			public override void WantBytes(long count)
+			{
+				var buf = new byte[count];
+				var len = _data.Read(buf, 0, (int)count);
+				var pos = stream.Position;
+				stream.Seek(0, SeekOrigin.End);
+				stream.Write(buf, 0, len);
+				stream.Seek(pos, SeekOrigin.Begin);
+			}
+		}
+
+		[Test]
+		public void RelationMaintainedShallowClones()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='TLV'>
+		<Number name='Type' size='8' value='0'/>
+		<Number name='Length' size='8'>
+			<Relation type='size' of='Value'/>
+		</Number>
+		<Blob name='Value'/>
+	</DataModel>
+
+	<DataModel name='Response'>
+		<Choice name='Items' minOccurs='2'>
+			<Block name='A' ref='TLV'>
+				<Number name='Type' size='8' token='true' value='1'/>
+			</Block>
+			<Block name='B' ref='TLV'>
+				<Number name='Type' size='8' token='true' value='2'/>
+			</Block>
+		</Choice>
+	</DataModel>
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+			var dm = dom.dataModels[1];
+
+			// When DataModels are used for cracking in the state model
+			// a clone of an evaluated model is used. So make sure we call
+			// .Value prior to cracking.  The array will be expanded to
+			// two items and bot will select 'A'
+			var val = dm.Value;
+			Assert.AreEqual(new byte[] { 0x01, 0x00, 0x01, 0x00 }, val.ToArray());
+
+			var chocies = dm.Walk().OfType<Choice>().ToList();
+			Assert.AreEqual(2, chocies.Count);
+
+			foreach (var item in chocies)
+			{
+				Assert.NotNull(item.SelectedElement);
+
+				// The selected element should be a clone of one of the choice elements
+				CollectionAssert.DoesNotContain(item.choiceElements, item.SelectedElement);
+			}
+
+			// Change second item to a 'B'
+			var payload = new byte[]
+			{
+				0x01, 0x03, 0x61, 0x62, 0x63,   // first item (an A)
+				0x02, 0x03, 0x61, 0x62, 0x63,   // second item (an B)
+			};
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dm, new BitStream(payload));
+
+			Assert.AreEqual(payload, dm.Value.ToArray());
 		}
 	}
 }
