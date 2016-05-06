@@ -364,8 +364,7 @@ qLk0TB3QXaoHknsz7EhRnw==
 	class SslPublisherTests
 	{
 		[Test]
-		[Ignore]
-		[ExpectedException(typeof(PeachException))]
+		[Ignore("Need to finish implementation")]
 		public void Test()
 		{
 			const string xml = @"
@@ -401,12 +400,12 @@ qLk0TB3QXaoHknsz7EhRnw==
 				// Changing the time TlsListener calls sleep before doing _protocol.Close()
 				// causes a variety of different exceptions and messages.
 
-				e.startFuzzing(dom, cfg);
+				 Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
 			}
 		}
 
 		[Test]
-		[Ignore]
+		[Ignore("Requires openssl to exist and be running")]
 		public void TestOpenssl()
 		{
 			// openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml;
 
 namespace Peach.Core.Dom
 {
@@ -41,7 +42,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement]
 		[DefaultValue(null)]
-		public List<Peach.Core.Xsd.Data> Data { get; set; }
+		public List<Xsd.Data> Data
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// Full input name of this parameter.
@@ -54,5 +59,22 @@ namespace Peach.Core.Dom
 		/// 'In' parameters are input
 		/// </summary>
 		public override string outputName { get { return base.outputName + ".In"; } }
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Param");
+
+			if(type != Type.In)
+				pit.WriteAttributeString("type", type.ToString());
+
+			pit.WriteStartElement("DataModel");
+			pit.WriteAttributeString("ref", dataModel.Name);
+			pit.WriteEndElement();
+
+			// todo - handle data sets
+
+			pit.WriteEndElement();
+		}
+
 	}
 }

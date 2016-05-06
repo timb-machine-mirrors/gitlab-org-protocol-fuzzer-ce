@@ -72,7 +72,7 @@ namespace Peach.Pro.Core.Publishers
 			Debug.Assert(stream == null);
 
 			var dir = Path.GetDirectoryName(FileName);
-			if (!Directory.Exists(dir))
+			if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
 				Directory.CreateDirectory(dir);
 
 			try

@@ -337,7 +337,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			Assert.AreEqual(16, elem.Value.LengthBits);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.")]
+		[Test]
 		public void CrackBadSizeParent()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
@@ -357,10 +357,11 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0}", new byte[] { 0, 0, 0, 2 });
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(CrackingFailure), ExpectedMessage = "Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.")]
+		[Test]
 		public void CrackBadSizeBlockParent()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-8'?>
@@ -382,7 +383,8 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			var data = Bits.Fmt("{0}", new byte[] { 0, 0, 0, 2 });
 
 			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
+			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Block 'TheDataModel.block' failed to crack. Length is 16 bits but already read 32 bits.", ex.Message);
 		}
 
 		[Test]

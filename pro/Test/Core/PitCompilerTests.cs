@@ -113,8 +113,8 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(Path.Combine(samplesDir, "foo.PNG"), "nothing here");
 
 			var compiler = new PitCompiler(_root.Path, filename);
-			compiler.Parse(false, false);
-			var tree = compiler.MakeMetadata().Fields;
+			var dom = compiler.Parse(false, false);
+			var tree = compiler.MakeMetadata(dom).Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -280,8 +280,8 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(filename, xml);
 
 			var compiler = new PitCompiler(_root.Path, filename);
-			compiler.Parse(false, false);
-			var tree = compiler.MakeMetadata().Fields;
+			var dom = compiler.Parse(false, false);
+			var tree = compiler.MakeMetadata(dom).Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "state", Fields = {
@@ -436,8 +436,8 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(filename, xml);
 
 			var compiler = new PitCompiler(_root.Path, filename);
-			compiler.Parse(false, false);
-			var tree = compiler.MakeMetadata().Fields;
+			var dom = compiler.Parse(false, false);
+			var tree = compiler.MakeMetadata(dom).Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "state", Fields = {
@@ -522,8 +522,8 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(filename, xml);
 
 			var compiler = new PitCompiler(_root.Path, filename);
-			compiler.Parse(false, false);
-			var tree = compiler.MakeMetadata().Fields;
+			var dom = compiler.Parse(false, false);
+			var tree = compiler.MakeMetadata(dom).Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -619,8 +619,8 @@ namespace Peach.Pro.Test.Core
 			File.WriteAllText(filename, xml);
 
 			var compiler = new PitCompiler(_root.Path, filename);
-			compiler.Parse(false, false);
-			var tree = compiler.MakeMetadata().Fields;
+			var dom = compiler.Parse(false, false);
+			var tree = compiler.MakeMetadata(dom).Fields;
 			var actual = JsonConvert.SerializeObject(tree);
 			var expected = JsonConvert.SerializeObject(new[] {
 				new PitField { Id = "Initial", Fields = {
@@ -979,13 +979,13 @@ Field'/>
 			File.WriteAllText(filename, xml);
 
 			var compiler = new PitCompiler(_root.Path, filename);
-			compiler.Parse(false, false);
+			var dom = compiler.Parse(false, false);
+			var actual = compiler.MakeMetadata(dom).Calls;
 			var expected = new[] {
 				"StartIterationEvent",
 				"ExitIterationEvent",
 				"Call",
 			};
-			var actual = compiler.MakeMetadata().Calls;
 			CollectionAssert.AreEqual(expected, actual);
 		}
 	}

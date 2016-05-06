@@ -34,6 +34,7 @@ using Peach.Core.IO;
 
 using NLog;
 using System.ComponentModel;
+using System.Xml;
 
 namespace Peach.Core.Dom
 {
@@ -80,7 +81,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement("Godel")]
 		[DefaultValue(null)]
-		public Peach.Core.Xsd.Godel schemaGodel { get; set; }
+		public Xsd.Godel schemaGodel
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// All states in state model.
@@ -317,6 +322,25 @@ namespace Peach.Core.Dom
 			{
 				parts.Add(node.Name);
 			}
+		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("StateModel");
+
+			pit.WriteAttributeString("name", Name);
+			pit.WriteAttributeString("initialState", initialStateName);
+
+			if(!string.IsNullOrEmpty(finalStateName))
+				pit.WriteAttributeString("finalState", finalStateName);
+
+			foreach (var state in states)
+				state.WritePit(pit);
+
+
+			// TODO - GOdel
+
+			pit.WriteEndElement();
 		}
 	}
 }

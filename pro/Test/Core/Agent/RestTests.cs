@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
@@ -14,6 +17,8 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using Peach.Pro.Core;
+using Peach.Pro.Test.Core.Publishers;
+using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Test.Core.Agent
 {
@@ -22,6 +27,7 @@ namespace Peach.Pro.Test.Core.Agent
 	[Peach]
 	class RestTests
 	{
+
 		/*
 		 * 1) Ensure proper cleanup happens if StartMonitor & SessionStarting throw!
 		 * 2) Ensure IterationStarting is always called when previous iteration had a fault!
@@ -133,6 +139,76 @@ namespace Peach.Pro.Test.Core.Agent
 				throw new PeachException(err.Message, err);
 		}
 
+		[Test]
+		public void FaultExceptionRemotePublisherTest()
+		{
+			var listener = new RestPublisherTests.SimpleHttpListener();
+			StartServer();
+
+			try
+			{
+				var xml = @"
+<Peach>
+	<DataModel name='Item'>
+		<String value='foo' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='Item' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='Remote' location='{1}'/>
+
+	<Test name='Default' maxOutputSize='2000'>
+		<Agent ref='Remote' />
+		<StateModel ref='SM' />
+		<Publisher class='Remote' name='Scooby'>
+			<Param name='Agent' value='Remote' />
+			<Param name='Class' value='Http'/>
+			<Param name='Method' value='POST' />
+			<Param name='Url' value='http://127.0.0.1:{0}/item' />
+			<Param name='FaultOnStatusCodes' value='500'/>
+		</Publisher>
+	</Test>
+</Peach>
+".Fmt(listener.Port, _uri.ToString());
+
+				listener.FaultOnRequest = 3;
+
+				var dom = DataModelCollector.ParsePit(xml);
+				var e = new Engine(null);
+				var cfg = new RunConfiguration
+				{
+					singleIteration = false,
+					range = true,
+					rangeStart = 0,
+					rangeStop = 8,
+					randomSeed = 31337
+				};
+
+				var faults = new List<Fault>();
+
+				e.Fault += (context, iteration, model, data) => faults.AddRange(data);
+				e.ReproFault += (context, iteration, model, data) => faults.AddRange(data);
+
+				e.startFuzzing(dom, cfg);
+
+				Assert.AreEqual(1, faults.Count(f => f.type == FaultType.Fault));
+
+				Assert.AreEqual("Http", faults[0].detectionSource);
+				Assert.AreEqual("Scooby", faults[0].monitorName);
+				Assert.AreEqual("Remote", faults[0].agentName);
+				Assert.AreEqual("Unknown", faults[0].exploitability);
+			}
+			finally
+			{
+				listener.Dispose();
+			}
+		}
 
 		[Test]
 		public void ServerRuns()

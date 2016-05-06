@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Linq;
+using System.Xml;
 using Peach.Core.IO;
 
 namespace Peach.Core.Dom.Actions
@@ -45,5 +47,19 @@ namespace Peach.Core.Dom.Actions
 			var result = publisher.getProperty(property);
 			data.dataModel.DefaultValue = result;
 		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+			pit.WriteAttributeString("property", property);
+
+			if (allData.Any() && dataModel != null)
+			{
+				pit.WriteStartElement("DataModel");
+				pit.WriteAttributeString("ref", dataModel.Name);
+				pit.WriteEndElement();
+			}
+
+		}
+
 	}
 }

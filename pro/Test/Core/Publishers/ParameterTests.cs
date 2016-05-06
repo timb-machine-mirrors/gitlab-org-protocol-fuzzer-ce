@@ -90,18 +90,20 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual(p3.enum2, ConsoleColor.DarkMagenta);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'testA' is missing required parameter 'req1'.")]
+		[Test]
 		public void TestNameNoDefault()
 		{
 			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			new PubMissingDefaultName(args);
+			var ex = Assert.Throws<PeachException>(() => new PubMissingDefaultName(args));
+			Assert.AreEqual("Publisher 'testA' is missing required parameter 'req1'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'testA1.default' is missing required parameter 'req1'.")]
+		[Test]
 		public void TestNameDefault()
 		{
 			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
-			new PubDefaultName(args);
+			var ex = Assert.Throws<PeachException>(() => new PubDefaultName(args));
+			Assert.AreEqual("Publisher 'testA1.default' is missing required parameter 'req1'.", ex.Message);
 		}
 
 		[Test]
@@ -123,12 +125,13 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.True(pe.Message.StartsWith("Publisher 'testA1.default' could not set parameter 'req1'.  Input string was not in"));
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'testA2.default' has no property for parameter 'req1'.")]
+		[Test]
 		public void TestMissingProperty()
 		{
 			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
 			args["req1"] = new Variant("100");
-			new PubMissingParam(args);
+			var ex = Assert.Throws<PeachException>(() => new PubMissingParam(args));
+			Assert.AreEqual("Publisher 'testA2.default' has no property for parameter 'req1'.", ex.Message);
 		}
 
 		[Publisher("good")]
@@ -158,13 +161,14 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual(IPAddress.Parse("192.168.1.1"), p.Param_ip);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'good' could not set parameter 'Param_ip'.  An invalid IP address was specified.")]
+		[Test]
 		public void TestBadIpParameter()
 		{
 			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
 			args["Param_string"] = new Variant("100");
 			args["Param_ip"] = new Variant("999.888.777.666");
-			new GoodPub(args);
+			var ex = Assert.Throws<PeachException>(() => new GoodPub(args));
+			Assert.AreEqual("Publisher 'good' could not set parameter 'Param_ip'.  An invalid IP address was specified.", ex.Message);
 		}
 
 		class CustomType
@@ -291,13 +295,14 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'GetPub' has no settable property for parameter 'param'.")]
+		[Test]
 		public void TestGetOnly()
 		{
 			// Ensure the auto setting supports handles only get properties
 			Dictionary<string, Variant> args = new Dictionary<string, Variant>();
 			args["param"] = new Variant("foo");
-			new GetPub(args);
+			var ex = Assert.Throws<PeachException>(() => new GetPub(args));
+			Assert.AreEqual("Publisher 'GetPub' has no settable property for parameter 'param'.", ex.Message);
 		}
 
 		[Publisher("NullPlugin")]
@@ -512,14 +517,15 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Publisher 'HexString' could not set parameter 'arg'.  An invalid hex string was specified.")]
+		[Test]
 		public void TestHexStringBad()
 		{
 			var obj = new HexPlugin();
 			var args = new Dictionary<string, Variant>();
 			args["arg"] = new Variant("Hello");
 
-			ParameterParser.Parse(obj, args);
+			var ex = Assert.Throws<PeachException>(() => ParameterParser.Parse(obj, args));
+			Assert.AreEqual("Publisher 'HexString' could not set parameter 'arg'.  An invalid hex string was specified.", ex.Message);
 		}
 
 		[Publisher("Regex")]

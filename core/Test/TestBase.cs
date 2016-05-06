@@ -8,6 +8,8 @@ using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using System;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Peach.Core.Test
 {
@@ -17,6 +19,44 @@ namespace Peach.Core.Test
 
 	public class SetUpFixture
 	{
+		public static ushort MakePort(ushort min, ushort max)
+		{
+			var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+			var seed = Environment.TickCount * pid;
+			var rng = new Random((uint)seed);
+
+			while (true)
+			{
+				var ret = (ushort)rng.Next(min, max);
+
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+				{
+					try
+					{
+						s.Bind(new IPEndPoint(IPAddress.Any, ret));
+					}
+					catch
+					{
+						continue;
+					}
+				}
+
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+				{
+					try
+					{
+						s.Bind(new IPEndPoint(IPAddress.Any, ret));
+					}
+					catch
+					{
+						continue;
+					}
+				}
+
+				return ret;
+			}
+		}
+
 		class AssertTestFail : TraceListener
 		{
 			public override void Write(string message)
@@ -35,8 +75,7 @@ namespace Peach.Core.Test
 			}
 		}
 
-		[SetUp]
-		public void SetUp()
+		protected void DoSetUp()
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
@@ -80,25 +119,24 @@ namespace Peach.Core.Test
 
 				LogManager.Configuration = config;
 			}
-
-			OnSetUp();
 		}
 
-		[TearDown]
-		public void TearDown()
+		public static void EnableDebug()
 		{
-			OnTearDown();
+			var config = LogManager.Configuration;
+			var target = new ConsoleTarget { Layout = "${logger} ${message}" };
+			var rule = new LoggingRule("*", LogLevel.Debug, target);
+			
+			config.AddTarget("debugConsole", target);
+			config.LoggingRules.Add(rule);
 
+			LogManager.Configuration = config;
+		}
+
+		protected void DoTearDown()
+		{
 			LogManager.Flush();
 			LogManager.Configuration = null;
-		}
-
-		protected virtual void OnSetUp()
-		{
-		}
-
-		protected virtual void OnTearDown()
-		{
 		}
 	}
 
@@ -108,8 +146,7 @@ namespace Peach.Core.Test
 
 		protected TestFixture(Assembly asm) { _asm = asm; }
 
-		[Test]
-		public void AssertWorks()
+		protected void DoAssertWorks()
 		{
 #if DEBUG
 			Assert.Throws<AssertionException>(() => Debug.Assert(false));
@@ -118,8 +155,7 @@ namespace Peach.Core.Test
 #endif
 		}
 
-		[Test]
-		public void NoMissingAttributes()
+		protected void DoNoMissingAttributes()
 		{
 			var missing = new List<string>();
 
@@ -145,14 +181,40 @@ namespace Peach.Core.Test
 	}
 
 	[SetUpFixture]
-	class TestBase : SetUpFixture
+	internal class TestBase : SetUpFixture
 	{
+		[OneTimeSetUp]
+		public void SetUp()
+		{
+			DoSetUp();
+		}
+
+		[OneTimeTearDown]
+		public void TearDown()
+		{
+			DoTearDown();
+		}
 	}
 
 	[TestFixture]
 	[Quick]
-	class CommonTests : TestFixture
+	internal class CommonTests : TestFixture
 	{
-		public CommonTests() : base(Assembly.GetExecutingAssembly()) { }
+		public CommonTests()
+			: base(Assembly.GetExecutingAssembly())
+		{
+		}
+
+		[Test]
+		public void AssertWorks()
+		{
+			DoAssertWorks();
+		}
+
+		[Test]
+		public void NoMissingAttributes()
+		{
+			DoNoMissingAttributes();
+		}
 	}
 }

@@ -551,6 +551,26 @@ namespace Peach.Core
 
 						test.stateModel.Run(context);
 					}
+					catch (FaultException ex)
+					{
+						var fe = ex.Fault;
+
+						logger.Debug("runTest: Creating fault from FaultException: {0}", fe.Title);
+						var fault = new Fault
+						{
+							title = fe.Title,
+							description = fe.Description,
+							detectionSource = fe.DetectionSource ?? "Unknown",
+							monitorName = fe.DetectionName ?? "Unknown",
+							majorHash = fe.MajorHash,
+							minorHash = fe.MinorHash,
+							exploitability = fe.Exploitablity ?? "Unknown",
+							agentName =  fe.AgentName ?? "Internal",
+							type = FaultType.Fault
+						};
+
+						context.faults.Add(fault);
+					}
 					catch (SoftException se)
 					{
 						// We should just eat SoftExceptions.

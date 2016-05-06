@@ -627,14 +627,23 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 					var error = resp.FromJson<ExceptionResponse>();
 
-					Logger.Trace(error.Message);
-					Logger.Trace("Server Stack Trace:\n{0}", error.StackTrace);
-
 					// 503 means try again later
 					if (resp.StatusCode == HttpStatusCode.ServiceUnavailable)
+					{
+						if (error.Fault != null)
+						{
+							error.Fault.AgentName = Name;
+							throw new FaultException(error.Fault, ex);
+						}
+
+						Logger.Trace(error.Message);
+						Logger.Trace("Server Stack Trace:\n{0}", error.StackTrace);
 						throw new SoftException(error.Message, ex);
+					}
 
 					// 500 is hard fail
+					Logger.Trace(error.Message);
+					Logger.Trace("Server Stack Trace:\n{0}", error.StackTrace);
 					throw new PeachException(error.Message, ex);
 				}
 			}

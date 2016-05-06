@@ -3,14 +3,13 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
+using Peach.Pro.Core;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
-using Peach.Pro.WebApi;
-using Peach.Pro.WebApi.Utility;
+using Peach.Pro.WebApi2;
 
 namespace Peach.Pro.Test.WebApi
 {
@@ -21,57 +20,63 @@ namespace Peach.Pro.Test.WebApi
 		[Test]
 		public void MultipleServers()
 		{
-			var listener = new TcpListener(IPAddress.Any, 0);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				listener.Start();
-				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-				Assert.AreNotEqual(0, port);
+				var listener = new TcpListener(IPAddress.Any, 0);
 
-				using (var web = new WebServer("", new InternalJobMonitor()))
+				try
 				{
-					web.Start(port, true);
+					listener.Start();
+					var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+					Assert.AreNotEqual(0, port);
 
-					var actualPort = web.Uri.Port;
-					Assert.Greater(actualPort, port);
-
-					using (var web2 = new WebServer("", new InternalJobMonitor()))
+					using (var web = new WebServer(tmpDir.Path, new InternalJobMonitor()))
 					{
-						web2.Start(actualPort, true);
-						Assert.Greater(web2.Uri.Port, actualPort);
+						web.Start(port, true);
+
+						var actualPort = web.Uri.Port;
+						Assert.Greater(actualPort, port);
+
+						using (var web2 = new WebServer(tmpDir.Path, new InternalJobMonitor()))
+						{
+							web2.Start(actualPort, true);
+							Assert.Greater(web2.Uri.Port, actualPort);
+						}
 					}
 				}
-			}
-			finally
-			{
-				listener.Stop();
+				finally
+				{
+					listener.Stop();
+				}
 			}
 		}
 
 		[Test]
 		public void SpecicPortInUse()
 		{
-			var listener = new TcpListener(IPAddress.Any, 0);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				listener.Start();
-				var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-				Assert.AreNotEqual(0, port);
+				var listener = new TcpListener(IPAddress.Any, 0);
 
-				using (var web = new WebServer("", new InternalJobMonitor()))
+				try
 				{
-					var ex = Assert.Throws<PeachException>(() =>
-						web.Start(port, false));
+					listener.Start();
+					var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+					Assert.AreNotEqual(0, port);
 
-					var expected = "Unable to start the web server at http://localhost:{0}/ because the port is currently in use.".Fmt(port);
-					Assert.AreEqual(expected, ex.Message);
+					using (var web = new WebServer(tmpDir.Path, new InternalJobMonitor()))
+					{
+						var ex = Assert.Throws<PeachException>(() =>
+							web.Start(port, false));
+
+						var expected = "Unable to start the web server at http://localhost:{0}/ because the port is currently in use.".Fmt(port);
+						Assert.AreEqual(expected, ex.Message);
+					}
 				}
-			}
-			finally
-			{
-				listener.Stop();
+				finally
+				{
+					listener.Stop();
+				}
 			}
 		}
 
@@ -90,10 +95,7 @@ namespace Peach.Pro.Test.WebApi
 				IterationCount = 5,
 			};
 
-			var ser = new CustomJsonSerializer
-			{
-				Formatting = Formatting.Indented
-			};
+			var ser = JsonUtilities.CreateSerializer();
 
 			var sb = new StringBuilder();
 

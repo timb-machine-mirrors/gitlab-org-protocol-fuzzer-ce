@@ -182,10 +182,10 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.True(faults[0].Data.ContainsKey("pcap"));
 
 			const string begin = "Collected ";
-			Assert.That(faults[0].Title, Is.StringStarting(begin));
+			StringAssert.StartsWith(begin, faults[0].Title);
 
 			const string end = " packets.";
-			Assert.That(faults[0].Title, Is.StringEnding(end));
+			StringAssert.EndsWith(end, faults[0].Title);
 
 			var str = faults[0].Title.Substring(begin.Length, faults[0].Title.Length - begin.Length - end.Length);
 			var cnt = int.Parse(str);

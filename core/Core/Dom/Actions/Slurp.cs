@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Peach.Core.Dom.XPath;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml;
 using System.Xml.XPath;
 
 namespace Peach.Core.Dom.Actions
@@ -84,5 +85,12 @@ namespace Peach.Core.Dom.Actions
 				throw new PeachException("Error, slurp {0} is not a valid xpath selector. [{1}]".Fmt(kind, xpath), ex);
 			}
 		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+			pit.WriteAttributeString("setXpath", setXpath);
+			pit.WriteAttributeString("valueXpath", valueXpath);
+		}
+
 	}
 }

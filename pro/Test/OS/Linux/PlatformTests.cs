@@ -12,7 +12,7 @@ namespace Peach.Pro.Test.OS.Linux
 {
 	[TestFixture]
 	[Quick]
-	[Peach]
+	[Platform("Linux")]
 	public class PlatformTests
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

@@ -4,7 +4,7 @@ Configure peach instances for use with peachcli tool.
 
 groups:
 
-  Instances are always groupped. An instance can
+  Instances are always grouped. An instance can
   be part of multiple groups.  A group named master
   must exist.
 

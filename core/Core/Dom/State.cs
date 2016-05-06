@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Xml;
 
 namespace Peach.Core.Dom
 {
@@ -68,7 +69,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement("Godel")]
 		[DefaultValue(null)]
-		public Peach.Core.Xsd.Godel schemaGodel { get; set; }
+		public Xsd.Godel schemaGodel
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// The name of this state.
@@ -266,6 +271,29 @@ namespace Peach.Core.Dom
 		{
 			foreach (var item in actions)
 				item.parent = this;
+		}
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("State");
+
+			pit.WriteAttributeString("name", Name);
+
+			if (!string.IsNullOrEmpty(FieldId))
+				pit.WriteAttributeString("fieldId", FieldId);
+
+			if (!string.IsNullOrEmpty(onStart))
+				pit.WriteAttributeString("onStart", onStart);
+
+			if (!string.IsNullOrEmpty(onComplete))
+				pit.WriteAttributeString("onComplete", onComplete);
+
+			foreach (var action in actions)
+				action.WritePit(pit);
+
+			// TODO - GOdel
+
+			pit.WriteEndElement();
 		}
 	}
 }

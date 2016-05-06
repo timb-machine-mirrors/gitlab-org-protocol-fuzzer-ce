@@ -13,6 +13,10 @@ Thumbs.db
 ipch/
 packages/
 
+# Visual Studio 2015
+*.VC.db
+.vs/
+
 # python generated files
 *.pyc
 
@@ -86,3 +90,6 @@ TestResult.xml
 /docs/Gemfile.lock
 /docs/src.pro/DevGuide/DevGuide.html
 /docs/src.pro/UserGuide/UserGuide.html
+
+# Emacs backup files
+*~

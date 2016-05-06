@@ -6,20 +6,19 @@ using System.Text;
 using System.Linq;
 
 using Peach.Core;
-using Peach.Core.Agent;
 using Peach.Core.Dom;
 
 using NLog;
 using Peach.Core.IO;
 
-namespace Peach.Core.Loggers
+namespace MyExtensions
 {
 	/// <summary>
 	/// Standard file system logger.
 	/// </summary>
 	[Logger("FileExample", true)]
 	[Parameter("Path", typeof(string), "Log folder")]
-	public class FileLogger : Logger
+	public class FileLogger : Peach.Core.Logger
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -189,7 +188,7 @@ namespace Peach.Core.Loggers
 				if (!string.IsNullOrEmpty(fault.description))
 				{
 					string fileName = string.Join(".", new[] { fault.agentName, fault.monitorName, fault.detectionSource, "description.txt" }.Where(a => !string.IsNullOrEmpty(a)));
-					ret.collectedData.Add(new Fault.Data(fileName, Encoding.UTF8.GetBytes(fault.description)));
+					ret.collectedData.Add(new Fault.Data(fileName, System.Text.Encoding.UTF8.GetBytes(fault.description)));
 				}
 			}
 
@@ -237,7 +236,7 @@ namespace Peach.Core.Loggers
 
 			var dataSets = sb.ToString();
 			if (!string.IsNullOrEmpty(dataSets))
-				ret.collectedData.Add(new Fault.Data("dataSets.txt", Encoding.UTF8.GetBytes(dataSets)));
+				ret.collectedData.Add(new Fault.Data("dataSets.txt", System.Text.Encoding.UTF8.GetBytes(dataSets)));
 
 			ret.controlIteration = coreFault.controlIteration;
 			ret.controlRecordingIteration = coreFault.controlRecordingIteration;
@@ -285,7 +284,7 @@ namespace Peach.Core.Loggers
 				});
 		}
 
-		protected override void ActionStarting(RunContext context, Dom.Action action)
+		protected override void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var rec = new Fault.Action()
 			{
@@ -311,7 +310,7 @@ namespace Peach.Core.Loggers
 			states.Last().actions.Add(rec);
 		}
 
-		protected override void ActionFinished(RunContext context, Dom.Action action)
+		protected override void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
 		{
 			var rec = states.Last().actions.Last();
 			if (rec.models == null)

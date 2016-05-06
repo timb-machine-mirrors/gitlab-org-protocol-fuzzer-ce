@@ -397,6 +397,10 @@ VOID Trace(TRACE trace, VOID *v)
 		return;
 
 	IMG img = SEC_Img(RTN_Sec(rtn));
+
+	if (!IMG_Valid(img))
+		return;
+
 	IMG_TYPE imgType = IMG_Type(img);
 
 	if ((imgType != IMG_TYPE_STATIC) &&    ///< Main image, linked with -static

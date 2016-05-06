@@ -1,4 +1,21 @@
-﻿using System;
+﻿
+//
+// Example analyzer implementation.  This analyzer works via the command line and
+// also at runtime via the Analyzer XML element.
+//
+// This example is annotated and can be used as a template for creating your own
+// custom analyzer implementations.
+//
+// To use this example:
+//   1. Create a .NET CLass Library project in Visual Studio or Mono Develop
+//   2. Add a refernce to Peach.Core.dll
+//   3. Add this source file
+//   4. Modify and compile
+//   5. Place compiled DLL into the Peach folder
+//   6. Verify Peach picks up your extension by checking "peach --showenv" output
+//
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -8,19 +25,32 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
-namespace Peach.Pro.Core.Analyzers
+namespace MyExtensions
 {
-    [Analyzer("RegexExample", true)]
+	// The following class attributes are used to identify Peach extensions and also 
+	// produce the information shown by "peach --showenv".
+	//
+	// "RegexExample" is the name used in the "class" attribute of Analyzer XML element
+	// and also for command line as value for --analyzer=XXX option
+	[Analyzer("RegexExample", true)]
     [Description("Break up a string using a regex. Each group will become strings. The group name will be used as the element name.")]
+	// Zero or more parameters are supported. Parameters without a default value are
+	// considered required.
     [Parameter("Regex", typeof(string), "The regex to use")]
+	// All analyzers must be marked Serializable
     [Serializable]
     public class RegexAnalyzer : Analyzer
     {
+		// All analyzers are required to define these static
+		// values to define which operational methods are 
+		// supported.
 		public new static readonly bool supportParser = false;
 		public new static readonly bool supportDataElement = true;
 		public new static readonly bool supportCommandLine = true;
 		public new static readonly bool supportTopLevel = false;
 
+		// These properties will receive the parameter values
+		// defined above.
         public string Regex { get; set; }
 
         public RegexAnalyzer()
@@ -29,11 +59,21 @@ namespace Peach.Pro.Core.Analyzers
 
         public RegexAnalyzer(Dictionary<string, Variant> args)
         {
+			// Parse parameters into properties
             ParameterParser.Parse(this, args);
         }
 
+		// This method is only required when supporting command line operation
+		// via the --analyzer command line switch.
+		//
+		// The output from this method should be a file on disk containing
+		// valid Peach PIT XML.
 		public override void asCommandLine(Dictionary<string, string> args)
 		{
+			// Handle any arguments.  TYpically analyzers take in two
+			// arguments.  An input file and output file.  This analzer
+			// uses three arguments.
+
 			var extra = new List<string>();
 			for (int i = 0; i < args.Count; i++)
 				extra.Add(args[i.ToString()]);
@@ -47,6 +87,10 @@ namespace Peach.Pro.Core.Analyzers
 			Regex = extra[0];
 			var inFile = extra[1];
 			var outFile = extra[2];
+
+			// Re-use the logic from asDataElement by creating a data model
+			// containing the data
+
 			var data = new BitStream(File.ReadAllBytes(inFile));
 			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
 
@@ -54,6 +98,8 @@ namespace Peach.Pro.Core.Analyzers
 			model[0].DefaultValue = new Variant(data);
 
 			asDataElement(model[0], null);
+
+			// Write the generated elements to XML using the "WritePit" methods.
 
 			var settings = new XmlWriterSettings();
 			settings.Encoding = System.Text.UTF8Encoding.UTF8;
@@ -72,11 +118,17 @@ namespace Peach.Pro.Core.Analyzers
 			}
 		}
 
+		// This method is only required when supporting runtime operation via
+		// the Analyzer XML element.
+		//
+		// Analyzer should replace or expand the parent element.
         public override void asDataElement(Peach.Core.Dom.DataElement parent, Dictionary<Peach.Core.Dom.DataElement, Peach.Core.Cracker.Position> positions)
         {
-            // Verify the parent type is a string.
+            // THis analyzer only works with String parents
             if (!(parent is Peach.Core.Dom.String))
                 throw new SoftException("Error, Regex analyzer can only be used with String elements. Element '" + parent.fullName + "' is a '" + parent.elementType + "'.");
+
+			// Implement the logic
 
             var data = (string)parent.DefaultValue;
 			if (string.IsNullOrEmpty(data) && positions == null)

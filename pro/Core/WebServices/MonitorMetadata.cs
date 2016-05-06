@@ -175,10 +175,20 @@ namespace Peach.Pro.Core.WebServices
 				var rdr = new JsonTextReader(strm);
 				var s = new JsonSerializer();
 
-				try
-				{
-					return s.Deserialize<GroupInfo>(rdr) ?? new GroupInfo { Groups = new List<NamedItem>(), Parameters = new Dictionary<string, List<NamedItem>>() };
+				try {
+					var result = s.Deserialize<GroupInfo>(rdr);
+					if (result != null)
+						return result;
+					else
+						return new GroupInfo { Groups = new List<NamedItem> (), Parameters = new Dictionary<string, List<NamedItem>> () };
 				}
+				catch (JsonReaderException ex)
+				{
+					if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Unable to parse monitor metadata resource. See line {0}, position {1}".Fmt(ex.LineNumber, ex.LinePosition), ex)));
+
+					return null;
+				} 
 				catch (Exception ex)
 				{
 					if (ErrorEventHandler != null)
@@ -250,10 +260,13 @@ namespace Peach.Pro.Core.WebServices
 
 		private NamedCollection<MonitorInfo> GetMonitorInfo()
 		{
-			return new NamedCollection<MonitorInfo>(
-				GetAllMonitors()
-					.Where(FilterInternal)
-					.Select(kv => new MonitorInfo
+			var ret = new NamedCollection<MonitorInfo>();
+
+			foreach (var kv in GetAllMonitors().Where(FilterInternal))
+			{
+				try
+				{
+					ret.Add(new MonitorInfo
 					{
 						Key = kv.Key.Name,
 						Name = KeyToName(kv.Key.Name),
@@ -262,7 +275,24 @@ namespace Peach.Pro.Core.WebServices
 						Type = kv.Value,
 						Internal = kv.Key.Internal,
 						Visited = false
-					}));
+					});
+				}
+				catch (ArgumentException ex)
+				{
+					if (ErrorEventHandler != null)
+					{
+						var key = kv.Key.Name;
+						var dupes = GetAllMonitors()
+							.Where(i => i.Key.Name == key)
+							.Select(i => "{0} @ {1}".Fmt(i.Value.FullName, i.Value.Assembly.Location));
+						var error = "Duplicate entries detected for monitor '{0}' on types '{1}'".Fmt(kv.Key.Name, string.Join("', '", dupes));
+
+						ErrorEventHandler(this, new ErrorEventArgs(new ArgumentException(error, ex)));
+					}
+				}
+			}
+
+			return ret;
 		}
 
 		private NamedCollection<ParamInfo> GetParamInfo(Type type, string name)

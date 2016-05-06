@@ -14,20 +14,30 @@ namespace Peach.Core.IO
 
 		#region Constructor
 
-		protected BitwiseStream() { }
+		protected BitwiseStream()
+		{
+		}
 
 		#endregion
 
 		#region Bitwise Interface
 
 		public abstract long LengthBits { get; }
+
 		public abstract long PositionBits { get; set; }
+
 		public abstract long SeekBits(long offset, SeekOrigin origin);
+
 		public abstract int ReadBits(out ulong bits, int count);
+
 		public abstract int ReadBit();
+
 		public abstract void SetLengthBits(long value);
+
 		public abstract void WriteBits(ulong bits, int count);
+
 		public abstract void WriteBit(int value);
+
 		public abstract BitwiseStream SliceBits(long length);
 
 		#endregion
@@ -55,9 +65,9 @@ namespace Peach.Core.IO
 			// Copying a BitwiseStream of 7 bits means
 			// length will be 0 so always add one to our minimum size.
 			// Also, on mono objects larger than 8k are considered large
-			// objets so keep our temp buffer as small as possible so it
+			// objects so keep our temp buffer as small as possible so it
 			// stays in the nursery
-			CopyTo(destination, (int)Math.Min(Length + 1,BlockCopySize));
+			CopyTo(destination, (int)Math.Min(Length + 1, BlockCopySize));
 		}
 
 		public void CopyTo(BitwiseStream destination, int bufferSize)
@@ -79,6 +89,54 @@ namespace Peach.Core.IO
 			ulong bits;
 			nread = ReadBits(out bits, 7);
 			destination.WriteBits(bits, nread);
+		}
+
+		public void CopyTo(BitwiseStream destination, int offset, int count)
+		{
+			CopyTo(destination, (int)Math.Min(Length + 1, BlockCopySize), offset, count);
+		}
+
+		public void CopyTo(BitwiseStream destination, int bufferSize, int offset, int count)
+		{
+			if (destination == null)
+				throw new ArgumentNullException("destination");
+			if (!CanRead)
+				throw new NotSupportedException("This stream does not support reading");
+			if (!destination.CanWrite)
+				throw new NotSupportedException("This destination stream does not support writing");
+			if (bufferSize <= 0)
+				throw new ArgumentOutOfRangeException("bufferSize");
+			if (offset < 0)
+				throw new ArgumentOutOfRangeException("offset");
+			if (count < 0)
+				throw new ArgumentOutOfRangeException("count");
+
+			Seek(offset, SeekOrigin.Current);
+
+			var buffer = new byte[bufferSize];
+
+			// using +1 here to ensure that the last partial byte is included, 
+			// but only if the specified count is larger than what remains in the source
+			int nread;
+			var remain = Math.Min(count, (Length - Position) + 1);
+			while (remain > bufferSize)
+			{
+				nread = Read(buffer, 0, bufferSize);
+				destination.Write(buffer, 0, nread);
+				remain -= nread;
+			}
+
+			nread = Read(buffer, 0, (int)remain);
+			destination.Write(buffer, 0, nread);
+			remain -= nread;
+
+			// if anything remains, there must be bits to consume
+			if (remain > 0)
+			{
+				ulong bits;
+				nread = ReadBits(out bits, 7);
+				destination.WriteBits(bits, nread);
+			}
 		}
 
 		#endregion

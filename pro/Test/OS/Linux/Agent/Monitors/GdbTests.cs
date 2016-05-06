@@ -1,17 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.OS.Linux.Agent.Monitors;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("Linux")]
 	public class GdbTests
 	{
 		[Test]
@@ -40,7 +44,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			Assert.IsTrue(fault.Data.ContainsKey("stdout.log"), "Fault should contain stdout.log");
 			Assert.IsTrue(fault.Data.ContainsKey("stderr.log"), "Fault should contain stderr.log");
 			Assert.Greater(fault.Data["StackTrace.txt"].Length, 0);
-			Assert.That(fault.Fault.Description, Is.StringContaining("PossibleStackCorruption"));
+			StringAssert.Contains("PossibleStackCorruption", fault.Fault.Description);
 			m.SessionFinished();
 			m.StopMonitor();
 		}
@@ -278,6 +282,93 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var faults = runner.Run(2);
 
 			Assert.AreEqual(0, faults.Length);
+		}
+
+		private static TcpClient Connect(int port, int timeout)
+		{
+			var tcp = (TcpClient)null;
+			var sw = new Stopwatch();
+
+			for (var i = 1; tcp == null; i *= 2)
+			{
+				try
+				{
+					// Must build a new client object after every failed attempt to connect.
+					// For some reason, just calling BeginConnect again does not work on mono.
+					tcp = new TcpClient();
+
+					sw.Restart();
+
+					var ar = tcp.BeginConnect(IPAddress.Loopback, port, null, null);
+					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeout)))
+						throw new TimeoutException();
+					tcp.EndConnect(ar);
+				}
+				catch
+				{
+					sw.Stop();
+
+					if (tcp != null)
+					{
+						tcp.Close();
+						tcp = null;
+					}
+
+					timeout -= (int)sw.ElapsedMilliseconds;
+
+					if (timeout <= 0)
+						throw;
+
+					var waitTime = Math.Min(timeout, i);
+					timeout -= waitTime;
+
+					Thread.Sleep(waitTime);
+				}
+			}
+
+			return tcp;
+		}
+
+		[Test]
+		public void TestSessionLifetime()
+		{
+			var port = SetUpFixture.MakePort(45000, 46000);
+
+			var startCount = 0;
+			var iteration = 0;
+
+			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
+				{ "Executable", "CrashableServer" },
+				{ "Arguments", "127.0.0.1 " + port },
+			}) {
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				Message = m =>
+				{
+					using (var cli = Connect(port, 1000))
+					{
+						var ar = cli.BeginConnect(IPAddress.Loopback, port, null, null);
+						if (!ar.AsyncWaitHandle.WaitOne(1000))
+							Assert.Fail("Should have connected to CrashableServer in 1sec");
+						cli.EndConnect(ar);
+
+						if (++iteration == 2)
+						{
+							// Crash!
+							cli.Client.Send(Encoding.ASCII.GetBytes(new string('A', 2000)));
+						}
+					}
+
+					Thread.Sleep(500);
+				},
+			};
+
+			var faults = runner.Run(10);
+
+			Assert.AreEqual(1, faults.Length);
 		}
 	}
 }

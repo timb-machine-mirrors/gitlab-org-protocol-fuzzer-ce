@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using NUnit.Framework;
@@ -8,7 +7,6 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Test;
-using Peach.Pro.Core.Publishers;
 
 
 // Disable obsolete warnings so we can test PitParser.parseDefines()
@@ -21,34 +19,34 @@ namespace Peach.Pro.Test.Core
 	[Peach]
 	class RunTests
 	{
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage="Error, DataModel could not resolve ref 'foo'. XML:\n<DataModel ref=\"foo\" />")]
+		[Test]
 		public void BadDataModelNoName()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 <DataModel ref='foo'/>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, DataModel could not resolve ref 'foo'. XML:\n<DataModel ref=\"foo\" />", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, DataModel 'DM' could not resolve ref 'foo'. XML:\n<DataModel name=\"DM\" ref=\"foo\" />")]
+		[Test]
 		public void BadDataModelName()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 <DataModel name='DM' ref='foo'/>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, DataModel 'DM' could not resolve ref 'foo'. XML:\n<DataModel name=\"DM\" ref=\"foo\" />", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, Block 'H2' resolved ref 'Header' to unsupported element String 'Final.H1.Header'. XML:\n<Block name=\"H2\" ref=\"Header\" />")]
+		[Test]
 		public void BadBlockRef()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='Header'>
 		<String name='Header'/>
@@ -59,15 +57,15 @@ namespace Peach.Pro.Test.Core
 		<Block name='H2' ref='Header'/>
 	</DataModel>
 </Peach>";
-
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, Block 'H2' resolved ref 'Header' to unsupported element String 'Final.H1.Header'. XML:\n<Block name=\"H2\" ref=\"Header\" />", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, Data element has multiple entries for field 'foo'.")]
+		[Test]
 		public void MultipleFields()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<Data>
 		<Field name='foo' value='bar'/>
@@ -75,14 +73,14 @@ namespace Peach.Pro.Test.Core
 	</Data>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, Data element has multiple entries for field 'foo'.", ex.Message);
 		}
 
 		[Test]
 		public void MultipleFieldsRef()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<Data name='Base'>
 		<Field name='foo' value='bar'/>
@@ -172,13 +170,14 @@ namespace Peach.Pro.Test.Core
 			}
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, defined values file \"filenotfound.xml\" does not exist.")]
+		[Test]
 		public void ParseDefinesFileNotFound()
 		{
-			PitParser.parseDefines("filenotfound.xml");
+			var ex = Assert.Throws<PeachException>(() => PitParser.parseDefines("filenotfound.xml"));
+			Assert.AreEqual("Error, defined values file \"filenotfound.xml\" does not exist.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error parsing Data element, file or folder does not exist: missing.txt")]
+		[Test]
 		public void TestMissingData()
 		{
 			string xml = @"
@@ -202,15 +201,8 @@ namespace Peach.Pro.Test.Core
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
-
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error parsing Data element, file or folder does not exist: missing.txt", ex.Message);
 		}
 
 		[Test]
@@ -431,7 +423,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(expected, value.ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, Action 'Action' couldn't find publisher named 'Bad'.")]
+		[Test]
 		public void MissingPublisher()
 		{
 			const string xml = @"
@@ -462,7 +454,8 @@ namespace Peach.Pro.Test.Core
 			config.singleIteration = true;
 
 			var e = new Engine(null);
-			e.startFuzzing(dom, config);
+			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+			Assert.AreEqual("Error, Action 'Action' couldn't find publisher named 'Bad'.", ex.Message);
 		}
 
 		[Test]

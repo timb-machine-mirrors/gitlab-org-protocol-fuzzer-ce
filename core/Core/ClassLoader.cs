@@ -126,7 +126,6 @@ namespace Peach.Core
 			"Peach.exe", 
 			"PeachAssemblyFuzzer.exe", 
 			"PeachFarm.Reporting.Service.exe", 
-			"PeachFuzzBang.exe", 
 			"PeachHooker.exe", 
 			"PeachLinuxCrashHandler.exe", 
 			"PeachMinset.exe", 
@@ -182,7 +181,7 @@ namespace Peach.Core
 					{
 						var asm = Load(file);
 						asm.GetTypes(); // make sure we can load exported types.
-						AssemblyCache.Add(file, asm);
+						AssemblyCache[asm.Location] = asm;
 					}
 					catch (Exception ex)
 					{
@@ -246,16 +245,32 @@ namespace Peach.Core
 			return Assembly.LoadFrom(fullPath);
 		}
 
-		static bool TryLoad(string fullPath)
+		static bool TryLoad(string fullPath, bool embedded = false)
 		{
-			if (!File.Exists(fullPath))
-				return false;
-
 			if (!AssemblyCache.ContainsKey(fullPath))
 			{
-				var asm = Load(fullPath);
+				Assembly asm;
+				if (embedded)
+				{
+					try
+					{
+						asm = Assembly.LoadFrom(fullPath);
+					}
+					catch
+					{
+						return false;
+					}
+				}
+				else
+				{
+					if (!File.Exists(fullPath))
+						return false;
+
+					asm = Load(fullPath);
+				}
+
 				asm.GetExportedTypes(); // make sure we can load exported types.
-				AssemblyCache.Add(fullPath, asm);
+				AssemblyCache[asm.Location] = asm;
 			}
 
 			return true;
@@ -320,6 +335,10 @@ namespace Peach.Core
 			}
 			else
 			{
+				// for mkbundle, attempt to load without path
+				if (TryLoad(fileName, true))
+					return;
+
 				foreach (var path in searchPath)
 				{
 					if (TryLoad(Path.Combine(path, fileName)))

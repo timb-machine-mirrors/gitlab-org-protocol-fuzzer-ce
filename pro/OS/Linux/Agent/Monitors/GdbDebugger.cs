@@ -137,6 +137,12 @@ quit
 
 		void _Start()
 		{
+			if (File.Exists(_gdbPid))
+				File.Delete(_gdbPid);
+
+			if (File.Exists(_gdbLog))
+				File.Delete(_gdbLog);
+
 			try
 			{
 				_gdb.Start(GdbPath, "-batch -n -x {0}".Fmt(_gdbCmd), null, _tmpDir.Path);

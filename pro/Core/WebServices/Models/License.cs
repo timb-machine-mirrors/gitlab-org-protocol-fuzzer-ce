@@ -1,5 +1,5 @@
 using System;
-using Lic = Peach.Pro.Core.License;
+using Peach.Pro.Core;
 
 namespace Peach.Pro.Core.WebServices.Models
 {
@@ -38,7 +38,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		/// <summary>
 		/// The features associated with this license.
 		/// </summary>
-		public Lic.Feature Version { get; set; }
+		public LicenseFeature Version { get; set; }
 
 		/// <summary>
 		/// Has the eula been accepted.

@@ -22,7 +22,7 @@
 		</Monitor>
 	</Agent>
 
-	<Test name="Default">
+	<Test name="Default" maxOutputSize="1000000">
 		<Agent ref="TheAgent"/>
 		<StateModel ref="TheState"/>
 

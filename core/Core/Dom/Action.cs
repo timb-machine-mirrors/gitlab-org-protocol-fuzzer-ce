@@ -32,7 +32,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using System.Diagnostics;
-
+using System.Xml;
 using NLog;
 using Peach.Core.IO;
 
@@ -83,21 +83,33 @@ namespace Peach.Core.Dom
 		/// </summary>
 		[XmlElement("DataModel")]
 		[DefaultValue(null)]
-		public Peach.Core.Xsd.DataModel schemaModel { get; set; }
+		public Xsd.DataModel schemaModel
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
 		[XmlElement("Data")]
 		[DefaultValue(null)]
-		public List<Peach.Core.Xsd.Data> schemaData { get; set; }
+		public List<Xsd.Data> schemaData
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
 		[XmlElement("Godel")]
 		[DefaultValue(null)]
-		public Peach.Core.Xsd.Godel schemaGodel { get; set; }
+		public Xsd.Godel schemaGodel
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		#endregion
 
@@ -391,6 +403,50 @@ namespace Peach.Core.Dom
 					context.OnActionFinished(this);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Base classes implement to add attributes and inner elements
+		/// </summary>
+		/// <param name="pit"></param>
+		public abstract void WritePitBody(XmlWriter pit);
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Action");
+
+			pit.WriteAttributeString("name", Name);
+
+			if (!string.IsNullOrEmpty(publisher))
+				pit.WriteAttributeString("publisher", publisher);
+
+			if (!string.IsNullOrEmpty(when))
+				pit.WriteAttributeString("when", when);
+
+			if (!string.IsNullOrEmpty(type))
+				pit.WriteAttributeString("type", type.ToLower());
+
+			if (!string.IsNullOrEmpty(FieldId))
+				pit.WriteAttributeString("fieldId", FieldId);
+
+			if (!string.IsNullOrEmpty(onStart))
+				pit.WriteAttributeString("onStart", onStart);
+
+			if (!string.IsNullOrEmpty(onComplete))
+				pit.WriteAttributeString("onComplete", onComplete);
+
+			WritePitBody(pit);
+
+			// TODO - Data sets
+			//foreach (var actionData in allData)
+			//{
+			//	foreach (var dataSet in actionData.dataSets)
+			//		dataSet.WritePit(pit);
+			//}
+
+			// TODO - GOdel
+
+			pit.WriteEndElement();
 		}
 	}
 

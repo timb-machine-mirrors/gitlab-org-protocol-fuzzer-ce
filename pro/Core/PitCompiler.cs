@@ -22,7 +22,6 @@ namespace Peach.Pro.Core
 		private readonly string _pitLibraryPath;
 		private readonly string _pitPath;
 		private readonly string _pitMetaPath;
-		private Peach.Core.Dom.Dom _dom;
 		private readonly List<string> _errors = new List<string>();
 
 		private const string Namespace = "http://peachfuzzer.com/2012/Peach";
@@ -66,8 +65,8 @@ namespace Peach.Pro.Core
 		{
 			try
 			{
-				Parse(verifyConfig, doLint);
-				SaveMetadata();
+				var dom = Parse(verifyConfig, doLint);
+				SaveMetadata(dom);
 			}
 			catch (Exception ex)
 			{
@@ -77,9 +76,9 @@ namespace Peach.Pro.Core
 			return _errors;
 		}
 
-		internal void SaveMetadata()
+		internal void SaveMetadata(Peach.Core.Dom.Dom dom)
 		{
-			var metadata = MakeMetadata();
+			var metadata = MakeMetadata(dom);
 			var serializer = new JsonSerializer();
 			using (var stream = new StreamWriter(_pitMetaPath))
 			using (var writer = new JsonTextWriter(stream))
@@ -107,7 +106,7 @@ namespace Peach.Pro.Core
 			return Path.ChangeExtension(pitPath, ".meta.json");
 		}
 
-		internal void Parse(bool verifyConfig, bool doLint)
+		public Peach.Core.Dom.Dom Parse(bool verifyConfig, bool doLint)
 		{
 			var defs = PitDefines.ParseFile(_pitPath + ".config", _pitLibraryPath);
 			var defsWithDefaults = defs.Evaluate().Select(PitDefines.PopulateRequiredDefine);
@@ -117,14 +116,16 @@ namespace Peach.Pro.Core
 			};
 
 			var parser = new CustomParser();
-			_dom = parser.asParser(args, _pitPath);
-			_dom.context = new RunContext { test = _dom.tests.First() };
+			var dom = parser.asParser(args, _pitPath);
+			dom.context = new RunContext { test = dom.tests.First() };
 
 			if (verifyConfig)
 				VerifyConfig(defs, args);
 
 			if (doLint)
-				VerifyPitFiles(_dom, true);
+				VerifyPitFiles(dom, true);
+
+			return dom;
 		}
 
 		private void VerifyConfig(PitDefines defs, IReadOnlyDictionary<string, object> args)
@@ -163,13 +164,13 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		internal PitMetadata MakeMetadata()
+		internal PitMetadata MakeMetadata(Peach.Core.Dom.Dom dom)
 		{
 			TotalNodes = 0;
 
 			var calls = new List<string>();
 			var root = new PitField();
-			var stateModel = _dom.context.test.stateModel;
+			var stateModel = dom.context.test.stateModel;
 			var useFieldIds = stateModel.HasFieldIds;
 
 			foreach (var state in stateModel.states)

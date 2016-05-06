@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -37,38 +38,27 @@ namespace Peach.Pro.Core.Transformers
 {
 	[Description("Truncates a Value")]
 	[Transformer("Truncate", true)]
-	[Parameter("Length", typeof(int), "Length to truncate in Bytes")]
-	[Parameter("Offset", typeof(int), "Starting Index", "0")]
+	[Parameter("Length", typeof(int), "Length to truncate in bytes")]
+	[Parameter("Offset", typeof(int), "Starting offset", "0")]
 	[Serializable]
 	public class Truncate : Transformer
 	{
-		Dictionary<string, Variant> m_args;
+		public int Offset { get; protected set; }
+		public int Length { get; protected set; }
 
 		public Truncate(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args)
 		{
-			m_args = args;
+			ParameterParser.Parse(this, args);
 		}
 
 		protected override BitwiseStream internalEncode(BitwiseStream data)
 		{
 			try
 			{
-				int maxlen = (int)data.Length;
-				var dataAsBytes = new BitReader(data).ReadBytes(maxlen);
-				int newlen = 0; 
-				int start = 0;
-				if (m_args.ContainsKey("Offset"))
-					start = (int)m_args["Offset"];
-				if (!m_args.ContainsKey("Length") || (int)m_args["Length"]+start > maxlen)
-					newlen = maxlen - start;
-				else
-					newlen = (int)m_args["Length"]; 
-				//var dataTrimmed = new byte[newlen];
-				//Buffer.BlockCopy(dataAsBytes,start,dataTrimmed, 0, newlen);
 				var ret = new BitStream();
-				ret.Write(dataAsBytes, start, newlen);
-				ret.Seek(0, System.IO.SeekOrigin.Begin);
+				data.CopyTo(ret, Offset, Length);
+				ret.Seek(0, SeekOrigin.Begin);
 				return ret;
 			}
 			catch (Exception ex)

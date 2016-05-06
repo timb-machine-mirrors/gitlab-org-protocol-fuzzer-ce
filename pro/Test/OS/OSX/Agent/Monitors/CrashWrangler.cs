@@ -12,6 +12,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 	[TestFixture]
 	[Quick]
 	[Peach]
+	[Platform("MacOSX")]
 	public class CrashWranglerTest
 	{
 		const string ExecHandler = "/usr/local/bin/exc_handler";

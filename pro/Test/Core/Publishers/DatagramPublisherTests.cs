@@ -420,32 +420,35 @@ namespace Peach.Pro.Test.Core.Publishers
 			Assert.AreEqual("Recv 11 bytes!", state.actions[1].dataModel.InternalValue.BitsToString());
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Could not resolve scope id for interface with address 'fe80::'.")]
+		[Test]
 		public void TestMissingLocalScopeId()
 		{
-			RunEngine("Udp", new Dictionary<string, string>
+			var ex = Assert.Throws<PeachException>(() => RunEngine("Udp", new Dictionary<string, string>
 			{
 				{ "Host", "fe80::%1" },
 				{ "Interface", "fe80::" },
-			});
+			}));
+			Assert.AreEqual("Could not resolve scope id for interface with address 'fe80::'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "IPv6 scope id required for resolving link local address: 'fe80::'.")]
+		[Test]
 		public void TestMissingRemoteScopeId()
 		{
-			RunEngine("Udp", new Dictionary<string, string>
+			var ex = Assert.Throws<PeachException>(() => RunEngine("Udp", new Dictionary<string, string>
 			{
 				{ "Host", "fe80::" },
-			});
+			}));
+			Assert.AreEqual("IPv6 scope id required for resolving link local address: 'fe80::'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error sending a Udp packet to 127.0.0.1, the port was not specified.")]
+		[Test]
 		public void UdpNoPortSend()
 		{
-			RunEngine("Udp", new Dictionary<string, string>
+			var ex = Assert.Throws<PeachException>(() => RunEngine("Udp", new Dictionary<string, string>
 			{
 				{ "Host", "127.0.0.1" },
-			});
+			}));
+			Assert.AreEqual("Error sending a Udp packet to 127.0.0.1, the port was not specified.", ex.Message);
 		}
 
 		[Test]

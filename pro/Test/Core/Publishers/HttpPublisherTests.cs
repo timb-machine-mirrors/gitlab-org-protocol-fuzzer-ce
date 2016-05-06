@@ -205,11 +205,11 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void HttpClientSendGet()
 		{
 			// Http publisher does not support sending data when the GET method is used
-			HttpClient(true, "GET");
+			 Assert.Throws<PeachException>(() => HttpClient(true, "GET"));
 		}
 
 		[Test]

@@ -97,20 +97,20 @@ namespace Peach.Pro.Test.Core.Publishers
 			}
 		}
 
-		[Test,  ExpectedException(typeof(PeachException))]
+		[Test]
 		public void Test2()
 		{
 			// Ensure the FileName parameter actually contains a format identifier
 			string tempFile = Path.GetTempFileName();
-			RunTest(tempFile, 0);
+			 Assert.Throws<PeachException>(() => RunTest(tempFile, 0));
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void Test3()
 		{
 			// Ensure the FileName parameter contains a valid format identifier
 			string tempFile = Path.GetTempFileName() + ".{0}.{1}";
-			RunTest(tempFile, 0);
+			 Assert.Throws<PeachException>(() => RunTest(tempFile, 0));
 		}
 	}
 }

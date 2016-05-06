@@ -26,7 +26,6 @@
 
 The following tutorials provide information on how to get started fuzzing with Peach.
 
-// * Beginner: xref:TutorialDumbFuzzingFuzzBang[Dumb File Fuzzing with Fuzz Bang (UI)]
  * Beginner: xref:TutorialDumbFuzzing[Dumb File Fuzzing (command line)]
  * Beginner: xref:TutorialFileFuzzing[File Fuzzing]
 // * Beginner: xref:TutorialNetworkServer[Network server Fuzzing]

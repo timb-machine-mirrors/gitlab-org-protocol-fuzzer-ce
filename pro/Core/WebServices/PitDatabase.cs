@@ -218,7 +218,27 @@ namespace Peach.Pro.Core.WebServices
 		}
 	}
 
-	public class PitDatabase
+	public interface IPitDatabase
+	{
+		IEnumerable<PitDetail> PitDetails { get; }
+		IEnumerable<PitDetail> Entries { get; }
+		IEnumerable<LibraryPit> LibraryPits { get; }
+		IEnumerable<Library> Libraries { get; }
+
+		Library GetLibraryById(string guid);
+
+		Pit GetPitById(string guid);
+		Pit GetPitByUrl(string url);
+		PitDetail GetPitDetailByUrl(string url);
+
+		Pit UpdatePitById(string guid, PitConfig data);
+		Pit UpdatePitByUrl(string url, PitConfig data);
+	
+		Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description);
+		Tuple<Pit, PitDetail> MigratePit(string legacyPitUrl, string pitUrl);
+	}
+
+	public class PitDatabase : IPitDatabase
 	{
 		public static readonly string PitServicePrefix = "/p/pits";
 		public static readonly string LibraryServicePrefix = "/p/libraries";
@@ -284,24 +304,13 @@ namespace Peach.Pro.Core.WebServices
 
 		#endregion
 
-		public PitDatabase()
-		{
-			_entries = new NamedCollection<PitDetail>();
-			_libraries = new NamedCollection<LibraryDetail>();
-		}
-
-		public PitDatabase(string libraryPath)
-		{
-			Load(libraryPath);
-		}
-
 		internal static readonly string LegacyDir = "User";
 		internal static readonly string ConfigsDir = "Configs";
 
 		private string _pitLibraryPath;
 
-		private NamedCollection<PitDetail> _entries;
-		private NamedCollection<LibraryDetail> _libraries;
+		private NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
+		private NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
 		LibraryDetail _configsLib;
 
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
@@ -724,14 +733,14 @@ namespace Peach.Pro.Core.WebServices
 		{
 			using (var stream = new StreamReader(path))
 			using (var reader = new JsonTextReader(stream))
-				return JsonUtilties.CreateSerializer().Deserialize<PitConfig>(reader);
+				return JsonUtilities.CreateSerializer().Deserialize<PitConfig>(reader);
 		}
 
 		public static void SavePitConfig(string path, PitConfig pit)
 		{
 			using (var stream = new StreamWriter(path))
 			using (var writer = new JsonTextWriter(stream))
-				JsonUtilties.CreateSerializer().Serialize(writer, pit);
+				JsonUtilities.CreateSerializer().Serialize(writer, pit);
 		}
 
 		#region Pit Config/Agents/Metadata
@@ -761,7 +770,7 @@ namespace Peach.Pro.Core.WebServices
 				Agents = detail.PitConfig.Agents,
 				Weights = detail.PitConfig.Weights,
 				Metadata = new PitMetadata {
-					Defines = defs.ToWeb(),
+					Defines = defs.ToWeb(detail.PitConfig.Config),
 					Monitors = MonitorMetadata.Generate(calls),
 					Fields = metadata != null ? metadata.Fields : null,
 				}

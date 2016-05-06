@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,13 +7,15 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Core.Dom.Actions;
 using Peach.Core.Test;
+using Action = Peach.Core.Dom.Action;
 
 namespace Peach.Pro.Test.Core.StateModel
 {
 	class ParamPublisher : Publisher
 	{
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
 
 		public ParamPublisher()
@@ -51,11 +54,11 @@ namespace Peach.Pro.Test.Core.StateModel
 		bool started;
 		bool finished;
 
-		void TestDelegate(string attr)
+		private void TestDelegate(string attr)
 		{
 			// If onStart or onComplete throws, ensure Action.Start/Action.Finished delegates are notified
 
-			string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String value='Hello'/>
@@ -76,18 +79,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</Test>
 </Peach>".Fmt(attr);
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration {singleIteration = true};
+			var e = new Engine(null);
 
 			started = false;
 			finished = false;
 
-			e.TestStarting += (ctx) =>
+			e.TestStarting += ctx =>
 			{
 				ctx.ActionStarting += ActionStarting;
 				ctx.ActionFinished += ActionFinished;
@@ -106,13 +105,13 @@ namespace Peach.Pro.Test.Core.StateModel
 			Assert.AreEqual(true, finished);
 		}
 
-		void ActionFinished(RunContext context, Peach.Core.Dom.Action action)
+		private void ActionFinished(RunContext context, Action action)
 		{
 			Assert.AreEqual(false, finished);
 			finished = true;
 		}
 
-		void ActionStarting(RunContext context, Peach.Core.Dom.Action action)
+		private void ActionStarting(RunContext context, Action action)
 		{
 			Assert.AreEqual(false, started);
 			started = true;
@@ -130,7 +129,7 @@ namespace Peach.Pro.Test.Core.StateModel
 			TestDelegate("onComplete");
 		}
 
-		void RunAction(string action, string children, string attr)
+		private static void RunAction(string action, string children, string attr)
 		{
 			string xml = @"
 <Peach>
@@ -153,13 +152,10 @@ namespace Peach.Pro.Test.Core.StateModel
 	</Test>
 </Peach>".Fmt(action, children, attr);
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration {singleIteration = true};
+			var e = new Engine(null);
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
 			e.startFuzzing(dom, config);
 		}
 
@@ -172,92 +168,103 @@ namespace Peach.Pro.Test.Core.StateModel
 				RunAction(action, "", "");
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, action 'SM.Initial.action' is missing required child element <DataModel>.")]
+		[Test]
 		public void Test2()
 		{
-			RunAction("input", "", "");
+			var ex = Assert.Throws<PeachException>(() => RunAction("input", "", ""));
+			Assert.AreEqual("Error, action 'SM.Initial.action' is missing required child element <DataModel>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, action 'SM.Initial.action' is missing required child element <DataModel>.")]
+		[Test]
 		public void Test3()
 		{
-			RunAction("output", "", "");
+			var ex = Assert.Throws<PeachException>(() => RunAction("output", "", ""));
+			Assert.AreEqual("Error, action 'SM.Initial.action' is missing required child element <DataModel>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, action 'SM.Initial.action' is missing required child element <DataModel>.")]
+		[Test]
 		public void Test4()
 		{
-			RunAction("setProperty", "", "property='foo'");
+			var ex = Assert.Throws<PeachException>(() => RunAction("setProperty", "", "property='foo'"));
+			Assert.AreEqual("Error, action 'SM.Initial.action' is missing required child element <DataModel>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, action 'SM.Initial.action' is missing required child element <DataModel>.")]
+		[Test]
 		public void Test5()
 		{
-			RunAction("getProperty", "", "property='foo'");
+			var ex = Assert.Throws<PeachException>(() => RunAction("getProperty", "", "property='foo'"));
+			Assert.AreEqual("Error, action 'SM.Initial.action' is missing required child element <DataModel>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, <Param> child of action 'SM.Initial.action' is missing required child element <DataModel>.")]
+		[Test]
 		public void Test6()
 		{
-			RunAction("call", "<Param/>", "method='foo'");
+			var ex = Assert.Throws<PeachException>(() => RunAction("call", "<Param/>", "method='foo'"));
+			Assert.AreEqual("Error, <Param> child of action 'SM.Initial.action' is missing required child element <DataModel>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, action 'SM.Initial.action' has unsupported child element <Data>.")]
+		[Test]
 		public void Test7()
 		{
 			// Input should error with <Data>
-			RunAction("input", "<DataModel ref='DM'/><Data/>", "");
+			var ex = Assert.Throws<PeachException>(() => RunAction("input", "<DataModel ref='DM'/><Data/>", ""));
+			Assert.AreEqual("Error, action 'SM.Initial.action' has unsupported child element <Data>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, action 'SM.Initial.action' has unsupported child element <Data>.")]
+		[Test]
 		public void Test8()
 		{
 			// GetProperty should error with <Data>
-			RunAction("getProperty", "<DataModel ref='DM'/><Data/>", "property='foo'");
+			var ex = Assert.Throws<PeachException>(() => RunAction("getProperty", "<DataModel ref='DM'/><Data/>", "property='foo'"));
+			Assert.AreEqual("Error, action 'SM.Initial.action' has unsupported child element <Data>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, <Param> child of action 'SM.Initial.action' has unsupported child element <Data>.")]
+		[Test]
 		public void Test9()
 		{
 			// Call w/Out param should error with <Data>
-			RunAction("call", "<Param type='out'><DataModel ref='DM'/><Data/></Param>", "method='foo'");
+			var ex = Assert.Throws<PeachException>(() => RunAction("call", "<Param type='out'><DataModel ref='DM'/><Data/></Param>", "method='foo'"));
+			Assert.AreEqual("Error, <Param> child of action 'SM.Initial.action' has unsupported child element <Data>.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void Test10()
 		{
 			// Call w/ <Result> should error with <Data>
-			RunAction("call", "<Result><DataModel ref='DM'/><Data/></Result>", "method='foo'");
+			var ex = Assert.Throws<PeachException>(() => RunAction("call", "<Result><DataModel ref='DM'/><Data/></Result>", "method='foo'"));
+			StringAssert.StartsWith("Error, Pit file failed to validate", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Data> element named 'myData' already exists.")]
+		[Test]
 		public void Test11()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<Data name='myData'><Field name='foo' value='bar'/></Data>
 	<Data name='myData'><Field name='foo' value='bar'/></Data>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Data> element named 'myData' already exists.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <DataModel> element named 'dm' already exists.")]
+		[Test]
 		public void Test12()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='dm'/>
 	<DataModel name='dm'/>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <DataModel> element named 'dm' already exists.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <StateModel> element named 'sm' already exists.")]
+		[Test]
 		public void Test13()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<StateModel name='sm' initialState='Initial'>
 		<State name='Initial'/>
@@ -267,13 +274,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</StateModel>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <StateModel> element named 'sm' already exists.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Test> element named 'Default' already exists.")]
+		[Test]
 		public void Test14()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<StateModel name='sm' initialState='Initial'>
 		<State name='Initial'/>
@@ -290,13 +298,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</Test>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Test> element named 'Default' already exists.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <State> element named 'Initial' already exists in state model 'sm'.")]
+		[Test]
 		public void Test15()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<StateModel name='sm' initialState='Initial'>
 		<State name='Initial'/>
@@ -304,13 +313,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</StateModel>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <State> element named 'Initial' already exists in state model 'sm'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Action> element named 'stuff' already exists in state 'sm.initial'.")]
+		[Test]
 		public void Test16()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<StateModel name='sm' initialState='initial'>
 		<State name='initial'>
@@ -320,13 +330,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</StateModel>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Action> element named 'stuff' already exists in state 'sm.initial'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Data> element named 'myData' already exists in action 'sm.initial.stuff'.")]
+		[Test]
 		public void Test17()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='dm'/>
 
@@ -341,13 +352,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</StateModel>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Data> element named 'myData' already exists in action 'sm.initial.stuff'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Param> element named 'myParam' already exists in action 'sm.initial.stuff'.")]
+		[Test]
 		public void Test18()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='dm'/>
 
@@ -365,13 +377,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</StateModel>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Param> element named 'myParam' already exists in action 'sm.initial.stuff'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Data> element named 'myData' already exists in <Param> child of action 'sm.initial.stuff'.")]
+		[Test]
 		public void Test19()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='dm'/>
 
@@ -388,25 +401,27 @@ namespace Peach.Pro.Test.Core.StateModel
 	</StateModel>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Data> element named 'myData' already exists in <Param> child of action 'sm.initial.stuff'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Agent> element named 'myAgent' already exists.")]
+		[Test]
 		public void Test20()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<Agent name='myAgent'/>
 	<Agent name='myAgent'/>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Agent> element named 'myAgent' already exists.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Monitor> element named 'mon' already exists in agent 'myAgent'.")]
+		[Test]
 		public void Test21()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<Agent name='myAgent'>
 		<Monitor name='mon' class='Null'/>
@@ -414,13 +429,14 @@ namespace Peach.Pro.Test.Core.StateModel
 	</Agent>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Monitor> element named 'mon' already exists in agent 'myAgent'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(PeachException), ExpectedMessage = "Error, a <Publisher> element named 'myPub' already exists in test 'Default'.")]
+		[Test]
 		public void Test22()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<StateModel name='sm' initialState='Initial'>
 		<State name='Initial'/>
@@ -438,7 +454,8 @@ namespace Peach.Pro.Test.Core.StateModel
 	</Test>
 </Peach>
 ";
-			new PitParser().asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			Assert.AreEqual("Error, a <Publisher> element named 'myPub' already exists in test 'Default'.", ex.Message);
 		}
 
 		[Test]
@@ -500,13 +517,12 @@ namespace Peach.Pro.Test.Core.StateModel
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
 			dom.tests[0].publishers[0] = new ParamPublisher();
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+			RunConfiguration config = new RunConfiguration {singleIteration = true};
 
 			Engine e = new Engine(null);
 			e.startFuzzing(dom, config);
 
-			var act = dom.tests[0].stateModel.states["Initial"].actions[0] as Peach.Core.Dom.Actions.Call;
+			var act = (Call)dom.tests[0].stateModel.states["Initial"].actions[0];
 
 			Assert.NotNull(act.result);
 			Assert.NotNull(act.result.dataModel);
@@ -748,8 +764,9 @@ namespace Peach.Pro.Test.Core.StateModel
 			};
 
 			var actual = new List<string>();
-			e.TestStarting += (ctx) =>
+			e.TestStarting += ctx =>
 			{
+				if (ctx == null) throw new ArgumentNullException("ctx");
 				ctx.StateStarting += (inner, state) =>
 				{
 					actual.Add(state.Name);
@@ -814,7 +831,7 @@ namespace Peach.Pro.Test.Core.StateModel
 			};
 
 			var actual = new List<string>();
-			e.TestStarting += (ctx) =>
+			e.TestStarting += ctx =>
 			{
 				ctx.StateStarting += (inner, state) => 
 				{

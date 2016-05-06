@@ -30,8 +30,6 @@ subdirs = [
 	'TotalPhase/komodo',
 	'Managed.AndroidDebugBridge',
 	'VMware-VIX-1.13.0-1295980',
-	'SuperSocket',
-	'SuperWebSocket',
 	'SocketHttpListener/SocketHttpListener',
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
@@ -55,7 +53,7 @@ if bld.env.BASENAME == 'osx':
 	)
 
 
-nunit_tools = bld.path.find_node('NUnit.Console.3.0.1/tools')
+nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.0/tools')
 
 bld(
 	name='nunit-console',

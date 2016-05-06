@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -74,6 +75,35 @@ namespace Peach.Pro.Test.Core.Publishers
 
 				Assert.AreEqual(1, output.Length);
 				Assert.AreEqual("Hello", output[0]);
+			}
+		}
+
+		[Test]
+		public void TestCreateDirectoryNoDirectory()
+		{
+			var dir = Environment.CurrentDirectory;
+
+			try
+			{
+				using (var tmpDir = new TempDirectory())
+				{
+					Environment.CurrentDirectory = tmpDir.Path;
+
+					var xml = _xml.Fmt("foo.bin");
+
+					var dom = DataModelCollector.ParsePit(xml);
+
+					var config = new RunConfiguration { singleIteration = true };
+
+					var e = new Engine(null);
+					e.startFuzzing(dom, config);
+
+					Assert.DoesNotThrow(() => e.startFuzzing(dom, config));
+				}
+			}
+			finally
+			{
+				Environment.CurrentDirectory = dir;
 			}
 		}
 	}

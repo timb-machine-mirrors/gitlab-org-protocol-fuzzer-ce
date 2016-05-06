@@ -32,6 +32,8 @@ deps = [
 	'Mono.Posix.dll',
 	'FlxLicensingClient.dll',
 	'FlxClientCommon.dll',
+	'SharpSnmpLib.Full.dll',
+	'SharpSnmpLib.Portable.dll',
 ]
 
 top = bld.path.parent.parent.parent

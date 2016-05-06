@@ -21,12 +21,9 @@ HOST=""
 EXE=""
 DIR=""
 PID=""
-LOG="/var/peachcrashes"
+LOG=$(dirname $SCRIPT)
 
-# TODO
-# Register $LOG with the kernel core_pattern so that
-# it can be controlled by the monitor and not hard
-# coded in this script.
+# Always store logs in the same directory as the crash handler
 
 while :
 do
@@ -78,18 +75,20 @@ then
 	LOG="."
 fi
 
-FILE="${LOG}/peach_${EXE}_${PID}"
-OUTDIR=$(dirname ${FILE})
-INFO="${FILE}.info"
-CORE="${FILE}.core"
-TEMP=$(mktemp)
-
 # Make the date human readable
 PRETTY_TIME=$(date --date="@${TIME}") || $TIME
 
-# Get full path to program, replacing ! with /
+# Figure out the name of the program that crashed
+# -E is the full path to the target but only works on kernel >= 3.0
+PROG="${DIR}"
 
-PROG="${DIR}/${EXE}"
+# -e works on all, but is truncated to 16 letters and doesn't include the path
+if [ -z "${PROG}" ];
+then
+	PROG="${EXE}"
+fi
+
+# Get full path to program, replacing ! with /
 
 while :
 do
@@ -103,6 +102,13 @@ do
 		PROG="${LEFT}/${RIGHT}"
 	fi
 done
+
+EXE=$(basename ${PROG})
+FILE="${LOG}/${EXE}.${PID}"
+OUTDIR=$(dirname ${FILE})
+INFO="${FILE}.info"
+CORE="${FILE}.core"
+TEMP=$(mktemp)
 
 echo "Temp: ${TEMP}"
 echo "Dir : ${OUTDIR}"
@@ -124,7 +130,6 @@ EXE: ${PROG}
 UID: ${UID}
 GID: ${GID}
 SIG: ${SIG}
-
 Host: ${HOST}
 Date: ${PRETTY_TIME}
 
@@ -138,7 +143,14 @@ if [ -z $GDB ];
 then
 	echo "Error: gdb could not be found." >> ${TEMP}
 else
-	echo "${GDB} ${PROG} ${CORE}\n" >> ${TEMP}
+	TGT="$(which ${PROG})"
+	if [ -z $TGT ];
+	then
+		# If handler was invoked on kernel < 3.0 the -E argument doesn't
+		# get passed and we don't know the full path to the program
+		echo "Error: file ${PROG} doesn't exist, not running gdb." >> ${TEMP}
+	else
+		echo "${GDB} ${PROG} ${CORE}\n" >> ${TEMP}
 
 $GDB \
 --batch \
@@ -154,6 +166,7 @@ $GDB \
 ${PROG} \
 ${CORE} 1>>${TEMP} 2>&1
 
+fi
 fi
 
 # Move .info into place last since this triggers the monitor

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
@@ -19,144 +20,119 @@ namespace Peach.Pro.Test.Core.Transformers
 		[Test]
 		public void BlobTest()
 		{
-			// standard test
 			string xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<Blob name=""Data"" value=""Hello"">
-			<Transformer class=""Truncate"">
-				<Param name=""Length"" value=""3"" />
+		<Blob name='Data' value='Hello'>
+			<Transformer class='Truncate'>
+				<Param name='Length' value='3' />
 			</Transformer>
 		</Blob>
 	</DataModel>
-	<StateModel name=""TheState"" initialState=""Initial"">
-		<State name=""Initial"">
-			<Action type=""output"">
-				<DataModel ref=""DM""/>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
 			</Action>
 		</State>
 	</StateModel>
-	<Test name=""Default"">
-		<StateModel ref=""TheState""/>
-		<Publisher class=""Null""/>
-		<Strategy class=""Random"" />
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random' />
 	</Test>
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
+			RunEngine(xml, true);
 
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(this);
-			e.startFuzzing(dom, config);
-
-			// verify values
-			// -- this is the pre-calculated result from Peach2.3 on the blob: "Hel"
-			byte[] precalcResult = Encoding.ASCII.GetBytes("Hel");
+			var expected = Encoding.ASCII.GetBytes("Hel");
 			Assert.AreEqual(1, values.Count);
-			Assert.AreEqual(precalcResult, values[0].ToArray());
+			var actual = values[0].ToArray();
+			Console.WriteLine(BitConverter.ToString(actual));
+			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
 		public void OffsetTest()
 		{
-			// standard test
 			string xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<String name=""Data"" value=""Hello"">
-			<Transformer class=""Truncate"">
-				<Param name=""Length"" value=""3"" />
-				<Param name=""Offset"" value=""1"" />
+		<String name='Data' value='Hello'>
+			<Transformer class='Truncate'>
+				<Param name='Length' value='3' />
+				<Param name='Offset' value='1' />
 			</Transformer>
 		</String>
 	</DataModel>
-	<StateModel name=""TheState"" initialState=""Initial"">
-		<State name=""Initial"">
-			<Action type=""output"">
-				<DataModel ref=""DM""/>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
 			</Action>
 		</State>
 	</StateModel>
-	<Test name=""Default"">
-		<StateModel ref=""TheState""/>
-		<Publisher class=""Null""/>
-		<Strategy class=""Random"" />
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random' />
 	</Test>
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
+			RunEngine(xml, true);
 
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(this);
-			e.startFuzzing(dom, config);
-
-			// verify values
-			// -- this is the pre-calculated result from Peach2.3 on the blob: "Hel"
-			byte[] precalcResult = Encoding.ASCII.GetBytes("ell");
+			var expected = Encoding.ASCII.GetBytes("ell");
 			Assert.AreEqual(1, values.Count);
-			Assert.AreEqual(precalcResult, values[0].ToArray());
+			Assert.AreEqual(expected, values[0].ToArray());
 		}
 
 		[Test]
 		public void LargeLengthTest()
 		{
-			// standard test
 			string xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<String name=""Data"" value=""Hello"">
-			<Transformer class=""Truncate"">
-				<Param name=""Length"" value=""10"" />
-				<Param name=""Offset"" value=""2"" />
+		<String name='Data' value='Hello'>
+			<Transformer class='Truncate'>
+				<Param name='Length' value='10' />
+				<Param name='Offset' value='2' />
 			</Transformer>
 		</String>
 	</DataModel>
-	<StateModel name=""TheState"" initialState=""Initial"">
-		<State name=""Initial"">
-			<Action type=""output"">
-				<DataModel ref=""DM""/>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
 			</Action>
 		</State>
 	</StateModel>
-	<Test name=""Default"">
-		<StateModel ref=""TheState""/>
-		<Publisher class=""Null""/>
-		<Strategy class=""Random"" />
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random' />
 	</Test>
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
+			var dom = ParsePit(xml);
 
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
+			var config = new RunConfiguration();
 			config.singleIteration = true;
 
-			Engine e = new Engine(this);
+			var e = new Engine(this);
 			e.startFuzzing(dom, config);
 
-			// verify values
-			// -- this is the pre-calculated result from Peach2.3 on the blob: "Hel"
-			byte[] precalcResult = Encoding.ASCII.GetBytes("llo");
+			var expected = Encoding.ASCII.GetBytes("llo");
 			Assert.AreEqual(1, values.Count);
-			Assert.AreEqual(precalcResult, values[0].ToArray());
+			Assert.AreEqual(expected, values[0].ToArray());
 		}
 
-		[Test, ExpectedException(typeof(PeachException))]
+		[Test]
 		public void MissingParam()
 		{
-			string xml = @"
+			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
 		<String>
@@ -166,18 +142,11 @@ namespace Peach.Pro.Test.Core.Transformers
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			var data = Bits.Fmt("{0}", (byte)'0');
-
-			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var ex = Assert.Throws<PeachException>(() => ParsePit(xml));
+			StringAssert.StartsWith("Error, Transformer 'Truncate' is missing required parameter 'Length'.", ex.Message);
 		}
 
-		[Test, ExpectedException(typeof(System.NotImplementedException), ExpectedMessage = "The method or operation is not implemented.")]
+		[Test]
 		public void CrackTest()
 		{
 			string xml = @"
@@ -185,25 +154,20 @@ namespace Peach.Pro.Test.Core.Transformers
 	<DataModel name='DM'>
 		<String>
 			<Transformer class='Truncate'>
-				<Param name=""Length"" value=""1"" />
+				<Param name='Length' value='1' />
 			</Transformer>
 		</String>
 	</DataModel>
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
+			var dom = ParsePit(xml);
 			var data = Bits.Fmt("{0}", (byte)'0');
-
-			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var cracker = new DataCracker();
+			Assert.Throws<NotImplementedException>(() => cracker.CrackData(dom.dataModels[0], data));
 		}
 
-		[Test, ExpectedException(typeof(SoftException), ExpectedMessage = "Hex decode failed, invalid length.")]
+		[Test]
 		public void CrackBadLengthTest()
 		{
 			string xml = @"
@@ -215,15 +179,11 @@ namespace Peach.Pro.Test.Core.Transformers
 </Peach>
 ";
 
-			PitParser parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
+			var dom = ParsePit(xml);
 			var data = Bits.Fmt("{0}", (byte)'0');
-
-			DataCracker cracker = new DataCracker();
-			cracker.CrackData(dom.dataModels[0], data);
-
-			Assert.AreEqual("Hello", (string)dom.dataModels[0][0].DefaultValue);
+			var cracker = new DataCracker();
+			var ex = Assert.Throws<SoftException>(() => cracker.CrackData(dom.dataModels[0], data));
+			Assert.AreEqual("Hex decode failed, invalid length.", ex.Message);
 		}
 	}
 }

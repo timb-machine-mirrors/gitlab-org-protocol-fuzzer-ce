@@ -406,7 +406,7 @@ namespace Peach.Pro.Test.Core.Agent
 					? "Could not start process 'MissingProgram'."
 					: "System debugger could not start process 'MissingProgram'.";
 
-				Assert.That(ex.Message, Is.StringStarting(msg));
+				StringAssert.StartsWith(msg, ex.Message);
 			}
 			finally
 			{

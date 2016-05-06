@@ -4,6 +4,8 @@ using System.IO;
 using Peach.Core.Cracker;
 using Peach.Core.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -90,5 +92,17 @@ namespace Peach.Core.Dom.Actions
 				}
 			}
 		}
+
+		public override void WritePitBody(XmlWriter pit)
+		{
+			if (allData.Any() && dataModel != null)
+			{
+				pit.WriteStartElement("DataModel");
+				pit.WriteAttributeString("ref", dataModel.Name);
+				pit.WriteEndElement();
+			}
+
+		}
+
 	}
 }

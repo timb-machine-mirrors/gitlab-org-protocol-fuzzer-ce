@@ -293,11 +293,11 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write("[[ ");
 				Console.ForegroundColor = ConsoleColor.DarkCyan;
 				Console.WriteLine(Copyright);
-				if (License.IsNearingExpiration)
+				if (License.Instance.IsNearingExpiration)
 				{
 					Console.ForegroundColor = ConsoleColor.Yellow;
 					Console.WriteLine();
-					Console.WriteLine(License.ExpirationWarning, License.ExpirationInDays);
+					Console.WriteLine(License.ExpirationWarning, License.Instance.ExpirationInDays);
 				}
 				Console.ForegroundColor = DefaultForground;
 				Console.WriteLine();
@@ -384,10 +384,11 @@ namespace Peach.Pro.Core.Runtime
 				}
 			}
 
-			Job job = null;
-			var userLogger = test.loggers.OfType<JobLogger>().FirstOrDefault();
-			if (userLogger != null || !_noweb)
-				job = new Job(_config);
+			// Add the JobLogger as necessary
+			if (!test.loggers.OfType<JobLogger>().Any())
+				test.loggers.Insert(0, new JobLogger());
+
+			var job = new Job(_config);
 
 			if (_noweb || CreateWeb == null)
 			{
@@ -404,10 +405,6 @@ namespace Peach.Pro.Core.Runtime
 
 				InteractiveConsoleWatcher.WriteInfoMark();
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
-
-				// Add the JobLogger as necessary
-				if (userLogger == null)
-					test.loggers.Insert(0, new JobLogger());
 
 				var e = new Engine(GetUIWatcher());
 				e.startFuzzing(dom, _config);
@@ -487,7 +484,7 @@ namespace Peach.Pro.Core.Runtime
 				// Ensure the EULA has been accepted before running a job
 				// on the command line.  The WebUI will present a EULA
 				// in the later case.
-				if (!License.EulaAccepted)
+				if (!License.Instance.EulaAccepted)
 					ShowEula();
 
 				_config.shouldStop = () => _shouldStop;
@@ -664,7 +661,7 @@ Debug Peach XML File
 
 		private void ShowEula()
 		{
-			Console.WriteLine(License.EulaText());
+			Console.WriteLine(License.Instance.EulaText());
 
 			Console.WriteLine(
 @"BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
@@ -684,7 +681,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 				if (answer == "yes")
 				{
-					License.EulaAccepted = true;
+					License.Instance.EulaAccepted = true;
 					return;
 				}
 

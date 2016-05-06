@@ -6,18 +6,18 @@ deps = [
 	
 	'System.dll',
 	'System.Core.dll',
+	'System.Net.Http.dll',
+	'System.Web.Http.dll',
 
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 
 	'Peach.Pro.dll',
-	'Peach.Pro.WebApi.dll',
-
-	'Nancy.dll',
-	'Nancy.Serialization.JsonNet.dll',
-	'Nancy.Testing.dll',
+	'Peach.Pro.WebApi2.dll',
 
 	'Newtonsoft.Json.dll',
+
+	'Moq.dll',
 ]
 
 bld(
