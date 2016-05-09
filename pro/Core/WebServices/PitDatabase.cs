@@ -736,6 +736,41 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Pit Config/Agents/Metadata
 
+		void ExtractCalls(string xmlPath, string stateModel, string ns, HashSet<string> calls)
+		{
+			var contents = Parse(xmlPath);
+
+			if (string.IsNullOrEmpty(stateModel))
+			{
+				stateModel = contents.Children.OfType<PeachElement.TestElement>()
+									 .SelectMany(x => x.StateModelRefs)
+									 .Select(x => x.Ref)
+									 .FirstOrDefault();
+			}
+
+			foreach (var sm in contents.Children.OfType<PeachElement.StateModelElement>())
+			{
+				var name = string.IsNullOrEmpty(ns) ? sm.Name : "{0}:{1}".Fmt(ns, sm.Name);
+				if (name == stateModel)
+				{
+					var methods = sm.States.SelectMany(x => x.Actions)
+					                .Where(x => x.Type == "call" && x.Publisher == "Peach.Agent")
+					                .Select(x => x.Method);
+					foreach (var method in methods)
+						calls.Add(method);
+					return;
+				}
+			}
+
+			foreach (var inc in contents.Children.OfType<PeachElement.IncludeElement>())
+			{
+				var path = inc.Source
+							  .Replace("file:", "")
+							  .Replace("##PitLibraryPath##", _pitLibraryPath);
+				ExtractCalls(path, stateModel, inc.Ns, calls);
+			}
+		}
+
 		private Pit MakePit(PitDetail detail)
 		{
 			var pitXml = Path.Combine(_pitLibraryPath, detail.PitConfig.OriginalPit);
@@ -743,9 +778,8 @@ namespace Peach.Pro.Core.WebServices
 			var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath);
 			var metadata = PitCompiler.LoadMetadata(pitXml);
 
-			var calls = new List<string>();
-			if (metadata != null && metadata.Calls != null)
-				calls = metadata.Calls;
+			var calls = new HashSet<string>();
+			ExtractCalls(pitXml, null, null, calls);
 
 			var pit = new Pit {
 				Id = detail.Id,
@@ -762,7 +796,7 @@ namespace Peach.Pro.Core.WebServices
 				Weights = detail.PitConfig.Weights,
 				Metadata = new PitMetadata {
 					Defines = defs.ToWeb(detail.PitConfig.Config),
-					Monitors = MonitorMetadata.Generate(calls),
+					Monitors = MonitorMetadata.Generate(calls.ToList()),
 					Fields = metadata != null ? metadata.Fields : null,
 				}
 			};
