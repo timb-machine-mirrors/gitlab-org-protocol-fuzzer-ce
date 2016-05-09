@@ -499,7 +499,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 					return DBG_CONTINUE;
 			}
 
-			var stop = !HandleAccessViolation(new ExceptionEvent
+			var ev = new ExceptionEvent
 			{
 				FirstChance = DebugEv.u.Exception.dwFirstChance,
 				Code = DebugEv.u.Exception.ExceptionRecord.ExceptionCode,
@@ -508,10 +508,40 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 					DebugEv.u.Exception.ExceptionRecord.ExceptionInformation[0].ToInt64(),
 					DebugEv.u.Exception.ExceptionRecord.ExceptionInformation[1].ToInt64()
 				}
-			});
+			};
+
+			// Only some first chance exceptions are interesting
+			while (ev.FirstChance != 0)
+			{
+				// Guard page or illegal op
+				if (ev.Code == 0x80000001 || ev.Code == 0xC000001D)
+					break;
+
+				// http://msdn.microsoft.com/en-us/library/windows/desktop/aa363082(v=vs.85).aspx
+
+				// Access violation
+				if (ev.Code == 0xC0000005)
+				{
+					// A/V on EIP
+					if (ev.Info[0] == 0)
+						break;
+
+					// write a/v not near null
+					if (ev.Info[0] == 1 && ev.Info[1] != 0)
+						break;
+
+					// DEP
+					if (ev.Info[0] == 8)
+						break;
+				}
+
+				// Skip uninteresting first chance and keep going
+				return DBG_EXCEPTION_NOT_HANDLED;
+			}
 
 			// If 1st chance, only stop if HandleAccessViolation returns false
 			// If 2nd chance, always stop
+			var stop = !HandleAccessViolation(ev);
 
 			// Stop by calling TerminateProcess and continuing
 			// so we get thread & process exit notifications

@@ -367,13 +367,16 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			_fault = null;
 
-			if (_systemDebugger != null && _systemDebugger.caughtException)
+			if (_systemDebugger != null)
 			{
-				logger.Debug("DetectedFault - Using system debugger, caught exception");
-				_fault = GetDebuggerFault(_systemDebugger.crashInfo);
+				_fault = _systemDebugger.Fault;
 
-				_systemDebugger.StopDebugger();
-				_systemDebugger = null;
+				if (_fault != null)
+				{
+					logger.Debug("DetectedFault - Using system debugger, caught exception");
+					_systemDebugger.Stop();
+					_systemDebugger = null;
+				}
 			}
 			else if (_debugger != null && _hybrid)
 			{
@@ -540,20 +543,14 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			if (_systemDebugger == null || !_systemDebugger.IsRunning)
 			{
 				if (_systemDebugger == null)
-				{
 					_systemDebugger = new SystemDebuggerInstance();
 
-					_systemDebugger.commandLine = _commandLine;
-					_systemDebugger.processName = _processName;
-					_systemDebugger.service = _service;
-					_systemDebugger.serviceStartTimeout = _serviceStartTimeout;
-					_systemDebugger.ignoreFirstChanceGuardPage = _ignoreFirstChanceGuardPage;
-					_systemDebugger.ignoreSecondChanceGuardPage = _ignoreSecondChanceGuardPage;
-					_systemDebugger.noCpuKill = _noCpuKill;
-				}
-
-				_systemDebugger.StopDebugger();
-				_systemDebugger.StartDebugger();
+				if (!string.IsNullOrEmpty(_commandLine))
+					_systemDebugger.StartProcess(_commandLine);
+				else if (!string.IsNullOrEmpty(_service))
+					_systemDebugger.StartService(_service, TimeSpan.FromSeconds(_serviceStartTimeout));
+				else
+					_systemDebugger.AttachProcess(_processName);
 
 				OnInternalEvent(EventArgs.Empty);
 			}
@@ -779,7 +776,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				try
 				{
-					_systemDebugger.FinishDebugging();
+					_systemDebugger.Stop();
 				}
 				catch
 				{
@@ -836,7 +833,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				try
 				{
-					_systemDebugger.StopDebugger();
+					_systemDebugger.Stop();
 				}
 				catch
 				{
