@@ -27,12 +27,14 @@
 // $Id$
 
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.Test;
+using Peach.Pro.Test.Core.StateModel;
 
 namespace Peach.Pro.Test.Core.Analyzers
 {
@@ -478,7 +480,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 		{
 			var payload = @"<?xml version='1.0' encoding='UTF-8'?>
 <A>
-  <B.1>foo</B.1>
+  <B.1 some.attr='x'>foo</B.1>
   <B.2>bar</B.2>
 </A>
 ";
@@ -518,6 +520,29 @@ namespace Peach.Pro.Test.Core.Analyzers
 			var e = new Engine(null);
 
 			Assert.DoesNotThrow(() => e.startFuzzing(dom, config));
+
+			var bs = dom
+				.stateModels[0]
+				.states[0]
+				.actions[0]
+				.allData.First()
+				.dataModel.Children().First()
+				.Children().ToList();
+
+			var b1 = bs[0] as XmlElement;
+			Assert.NotNull(b1);
+			Assert.AreEqual("B.1", b1.elementName);
+			Assert.AreEqual("B_1", b1.Name);
+
+			var b2 = bs[1] as XmlElement;
+			Assert.NotNull(b1);
+			Assert.AreEqual("B.2", b2.elementName);
+			Assert.AreEqual("B_2", b2.Name);
+
+			var b1Attr = b1[0] as XmlAttribute;
+			Assert.NotNull(b1Attr);
+			Assert.AreEqual("some.attr", b1Attr.attributeName);
+			Assert.AreEqual("some_attr", b1Attr.Name);
 		}
 
     }
