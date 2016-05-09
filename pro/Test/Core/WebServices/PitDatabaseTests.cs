@@ -34,7 +34,21 @@ namespace Peach.Pro.Test.Core.WebServices
 		PitDatabase _db;
 		string _originalPitPath;
 
-		static string modelExample =
+		static string dataModelExample =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'
+       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+       author='Pit Author Name'
+       description='IMG PIT'
+       version='0.0.1'>
+	<DataModel name='DM'>
+		<String value='Hello World' />
+	</DataModel>
+</Peach>
+";
+
+		static string stateModelExample =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -43,9 +57,17 @@ namespace Peach.Pro.Test.Core.WebServices
        description='IMG PIT'
        version='0.0.1'>
 
-	<DataModel name='DM'>
-		<String value='Hello World' />
-	</DataModel>
+	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action type='output'>
+				<DataModel name='DM:DM'/>
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+		</State>
+	</StateModel>
 </Peach>
 ";
 
@@ -57,6 +79,8 @@ namespace Peach.Pro.Test.Core.WebServices
        author='Pit Author Name'
        version='0.0.1'>
 
+	<Include ns='SM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_State.xml' />
+
 	<Agent name='TheAgent'>
 		<Monitor class='RunCommand'>
 			<Param name='Command' value='Foo'/>
@@ -64,20 +88,10 @@ namespace Peach.Pro.Test.Core.WebServices
 		</Monitor>
 	</Agent>
 
-	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
-
-	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel name='DM:DM'/>
-			</Action>
-		</State>
-	</StateModel>
-
 	<Test name='Default'>
 		<Agent ref='TheAgent'/>
 		<Strategy class='Random'/>
-		<StateModel ref='SM' />
+		<StateModel ref='SM:SM' />
 		<Publisher class='Null'/>
 	</Test>
 </Peach>
@@ -132,7 +146,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_originalPitPath = Path.Combine(cat, "IMG.xml");
 
-			File.WriteAllText(Path.Combine(mod, "IMG_Data.xml"), modelExample);
+			File.WriteAllText(Path.Combine(mod, "IMG_State.xml"), stateModelExample);
+			File.WriteAllText(Path.Combine(mod, "IMG_Data.xml"), dataModelExample);
 			File.WriteAllText(_originalPitPath, pitExample);
 			File.WriteAllText(_originalPitPath + ".config", configExample);
 
@@ -191,6 +206,20 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(1, libs[2].Versions[0].Version);
 			Assert.True(libs[2].Versions[0].Locked);
 			Assert.AreEqual(0, libs[2].Versions[0].Pits.Count);
+
+			// Metadata
+			var expected = new string[] { "StartIterationEvent", "ExitIterationEvent" };
+			var callParams = (from grp in p.Metadata.Monitors
+							  from monitor in grp.Items
+							  from param in monitor.Items
+							  where param.Type == ParameterType.Call
+							  select param).ToList();
+
+			Assert.IsNotEmpty(callParams);
+			foreach (var param in callParams)
+			{
+				CollectionAssert.AreEqual(expected, param.Options);
+			}
 		}
 
 		[Test]
