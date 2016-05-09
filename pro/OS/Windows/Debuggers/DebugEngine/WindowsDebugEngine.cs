@@ -408,11 +408,16 @@ namespace Peach.Pro.OS.Windows.Debuggers.DebugEngine
 				_engine.dbgControl.Execute((uint)Const.DEBUG_OUTCTL_THIS_CLIENT, "kb", (uint)Const.DEBUG_EXECUTE_ECHO);
 				_engine.output.Append("\n\n");
 
-				// 3. Dump File
+				// 3. Display SEH chain
+
+				_engine.dbgControl.Execute((uint)Const.DEBUG_OUTCTL_THIS_CLIENT, "!exchain", (uint)Const.DEBUG_EXECUTE_ECHO);
+				_engine.output.Append("\n\n");
+
+				// 4. Dump File
 
 				// Note: This can cause hangs on a bad day.  Don't think it's all that important, so skipping.
 
-				// 4. !exploitable
+				// 5. !exploitable
 
 				// TODO - Load correct version of !exploitable
 				if (IntPtr.Size == 4)
