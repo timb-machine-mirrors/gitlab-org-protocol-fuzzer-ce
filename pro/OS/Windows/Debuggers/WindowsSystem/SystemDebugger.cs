@@ -36,6 +36,22 @@ using Peach.Core;
 
 namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
+	public interface IWindowsDebugger
+	{
+		Func<ExceptionEvent, bool> HandleAccessViolation { get; set; }
+		Action<int> ProcessCreated { get; set; }
+
+		void MainLoop();
+		void TerminateProcess();
+	}
+
+	public class ExceptionEvent
+	{
+		public uint FirstChance { get; set; }
+		public uint Code { get; set; }
+		public long[] Info { get; set; }
+	}
+
 	/// <summary>
 	/// A lightweight Windows debugger written using the 
 	/// system debugger APIs.
@@ -46,7 +62,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 	/// it should be reproduced using the Windows Debug Engine to
 	/// gather more information.
 	/// </remarks>
-	public class SystemDebugger
+	public class SystemDebugger : IWindowsDebugger
 	{
 		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -140,22 +156,15 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		// ReSharper restore UnusedMember.Local
 		#endregion
 
-		public class ExceptionEvent
-		{
-			public uint FirstChance { get; set; }
-			public uint Code { get; set; }
-			public long[] Info { get; set; }
-		}
-
 		/// <summary>
 		/// Callback to handle an A/V exception
 		/// </summary>
 		/// <returns>
 		/// true to keep debugging, false to stop debugging
 		/// </returns>
-		public Func<ExceptionEvent, bool> HandleAccessViolation = e => true;
+		public Func<ExceptionEvent, bool> HandleAccessViolation { get; set; }
 
-		public Action ProcessCreated = () => {};
+		public Action<int> ProcessCreated { get; set; }
 
 		public int ProcessId { get; private set; }
 
@@ -454,7 +463,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			openHandles.Add(DebugEv.dwThreadId, CreateProcessInfo.hThread);
 
 			if (ProcessId == DebugEv.dwProcessId && ProcessCreated != null)
-				ProcessCreated();
+				ProcessCreated(ProcessId);
 
 			return DBG_CONTINUE;
 		}
@@ -541,7 +550,7 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 
 			// If 1st chance, only stop if HandleAccessViolation returns false
 			// If 2nd chance, always stop
-			var stop = !HandleAccessViolation(ev);
+			var stop = HandleAccessViolation != null && !HandleAccessViolation(ev);
 
 			// Stop by calling TerminateProcess and continuing
 			// so we get thread & process exit notifications

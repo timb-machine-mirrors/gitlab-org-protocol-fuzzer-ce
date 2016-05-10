@@ -96,7 +96,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 			dbg.MainLoop();
 		}
 
-		public bool HandleAccessViolation(SystemDebugger.ExceptionEvent evt)
+		public bool HandleAccessViolation(ExceptionEvent evt)
 		{
 			if (evt.FirstChance != 0)
 			{
@@ -132,8 +132,9 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 					si.Lock();
 
 					var dbg = new SystemDebuggerInstance();
+					var pid = BaseDebuggerInstance.GetServicePid("iphlpsvc", TimeSpan.FromSeconds(30));
 
-					dbg.StartService("iphlpsvc", TimeSpan.FromSeconds(30));
+					dbg.AttachProcess(pid);
 
 					for (int i = 0; i < 10; ++i)
 					{

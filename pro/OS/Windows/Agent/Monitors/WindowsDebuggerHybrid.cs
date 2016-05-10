@@ -37,6 +37,7 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
+using Peach.Pro.OS.Windows.Debuggers;
 using Monitor = Peach.Core.Agent.Monitor2;
 using Random = Peach.Core.Random;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
@@ -98,7 +99,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		MonitorData _fault = null;
 
 		DebuggerInstance _debugger = null;
-		SystemDebuggerInstance _systemDebugger = null;
+		IDebuggerInstance _systemDebugger = null;
 		Thread _ipcHeartBeatThread = null;
 		System.Threading.Mutex _ipcHeartBeatMutex = null;
 
@@ -548,9 +549,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				if (!string.IsNullOrEmpty(_commandLine))
 					_systemDebugger.StartProcess(_commandLine);
 				else if (!string.IsNullOrEmpty(_service))
-					_systemDebugger.StartService(_service, TimeSpan.FromSeconds(_serviceStartTimeout));
+					_systemDebugger.AttachProcess(BaseDebuggerInstance.GetServicePid(_service, TimeSpan.FromSeconds(_serviceStartTimeout)));
 				else
-					_systemDebugger.AttachProcess(_processName);
+					_systemDebugger.AttachProcess(BaseDebuggerInstance.GetProcessPid(_processName));
 
 				OnInternalEvent(EventArgs.Empty);
 			}
