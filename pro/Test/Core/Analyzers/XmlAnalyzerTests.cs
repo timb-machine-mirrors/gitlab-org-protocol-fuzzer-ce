@@ -480,7 +480,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 		{
 			var payload = @"<?xml version='1.0' encoding='UTF-8'?>
 <A>
-  <B.1 some.attr='x'>foo</B.1>
+  <B..1 some.attr='x'>foo</B..1>
   <B.2>bar</B.2>
 </A>
 ";
@@ -531,8 +531,8 @@ namespace Peach.Pro.Test.Core.Analyzers
 
 			var b1 = bs[0] as XmlElement;
 			Assert.NotNull(b1);
-			Assert.AreEqual("B.1", b1.elementName);
-			Assert.AreEqual("B_1", b1.Name);
+			Assert.AreEqual("B..1", b1.elementName);
+			Assert.AreEqual("B__1", b1.Name);
 
 			var b2 = bs[1] as XmlElement;
 			Assert.NotNull(b1);

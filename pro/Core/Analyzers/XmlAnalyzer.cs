@@ -49,6 +49,7 @@ namespace Peach.Pro.Core.Analyzers
 		public new static readonly bool supportDataElement = true;
 		public new static readonly bool supportCommandLine = true;
 		public new static readonly bool supportTopLevel = false;
+		private static readonly Regex nameSanitizerRegex = new Regex(@"[:\.]");
 
 		public XmlAnalyzer()
 		{
@@ -152,8 +153,7 @@ namespace Peach.Pro.Core.Analyzers
 
 		private static string sanitizeXmlName(string name)
 		{
-			var regex = new Regex(@"[:\.]");
-			return regex.Replace(name, "_");
+			return nameSanitizerRegex.Replace(name, "_");
 		}
 
 		protected void handleXmlNode(Peach.Core.Dom.XmlElement elem, XmlNode node, StringType type)
