@@ -164,34 +164,31 @@ namespace Peach.Core
 
 		static ClassLoader()
 		{
-			foreach (var path in searchPath)
-			{
-				foreach (var file in Directory.GetFiles(path))
-				{
-					if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
-						continue;
-
-					if (excludeList.Contains(Path.GetFileName(file)))
-						continue;
-
-					if (AssemblyCache.ContainsKey(file))
-						continue;
-
-					try
-					{
-						var asm = Load(file);
-						asm.GetTypes(); // make sure we can load exported types.
-						AssemblyCache[asm.Location] = asm;
-					}
-					catch (Exception ex)
-					{
-						logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
-					}
-				}
-			}
-
 			if (!Directory.Exists(pluginsPath))
 				return;
+
+			foreach (var file in Directory.GetFiles(pluginsPath))
+			{
+				if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
+					continue;
+
+				if (excludeList.Contains(Path.GetFileName(file)))
+					continue;
+
+				if (AssemblyCache.ContainsKey(file))
+					continue;
+
+				try
+				{
+					var asm = Load(file);
+					asm.GetTypes(); // make sure we can load exported types.
+					AssemblyCache[asm.Location] = asm;
+				}
+				catch (Exception ex)
+				{
+					logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
+				}
+			}
 
 			var pys = Directory.GetFiles(pluginsPath, "*.py");
 			if (pys.Length == 0)
