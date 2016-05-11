@@ -13,6 +13,7 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.Core.OS.Windows;
+using Peach.Pro.OS.Windows.Debuggers.WindowsSystem;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Monitor = System.Threading.Monitor;
 using SysProcess = System.Diagnostics.Process;
@@ -24,8 +25,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("KernelConnectionString", typeof(string), "Connection string for kernel debugging.")]
 	[Parameter("SymbolsPath", typeof(string), "Optional Symbol path.  Default is Microsoft public symbols server.", "SRV*http://msdl.microsoft.com/download/symbols")]
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
-	[Parameter("IgnoreFirstChanceGuardPage", typeof(bool), "Ignore first chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
-	[Parameter("IgnoreSecondChanceGuardPage", typeof(bool), "Ignore second chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("ConnectTimeout", typeof(uint), "How long to wait for kernel connection.", "3000")]
 	public class WindowsKernelDebugger : Monitor2
@@ -33,8 +32,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		public string KernelConnectionString { get; set; }
 		public string SymbolsPath { get; set; }
 		public string WinDbgPath { get; set; }
-		public bool IgnoreFirstChanceGuardPage { get; set; }
-		public bool IgnoreSecondChanceGuardPage { get; set; }
 		public bool RestartAfterFault { get; set; }
 		public uint ConnectTimeout { get; set; }
 
@@ -98,8 +95,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				SymbolsPath = SymbolsPath,
 				WinDbgPath = WinDbgPath,
-				IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage,
-				IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage,
 			};
 
 			_debugger.AcceptKernel(KernelConnectionString);
@@ -199,8 +194,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		string SymbolsPath { get; set; }
 		string WinDbgPath { get; set; }
-		bool IgnoreFirstChanceGuardPage { get; set; }
-		bool IgnoreSecondChanceGuardPage { get; set; }
 	}
 
 	public class KernelDebugger : IKernelDebugger
@@ -222,8 +215,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public string SymbolsPath { get; set; }
 		public string WinDbgPath { get; set; }
-		public bool IgnoreFirstChanceGuardPage { get; set; }
-		public bool IgnoreSecondChanceGuardPage { get; set; }
 
 		public void Dispose()
 		{
@@ -255,8 +246,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				_dbg = remote.GetKernelDebugger(logLevel);
 				_dbg.SymbolsPath = SymbolsPath;
 				_dbg.WinDbgPath = WinDbgPath;
-				_dbg.IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage;
-				_dbg.IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage;
 
 				_dbg.AcceptKernel(kernelConnectionString);
 			}
@@ -305,7 +294,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		#region WinDbg Wrapper
 
-		class WinDbg : IDisposable, IDebugEventCallbacks, IDebugOutputCallbacks
+		internal class WinDbg : IDebugEventCallbacks, IDebugOutputCallbacks, IWindowsDebugger
 		{
 			static readonly Regex ReMajorHash = new Regex(@"^MAJOR_HASH:(0x.*)\r$", RegexOptions.Multiline);
 			static readonly Regex ReMinorHash = new Regex(@"^MINOR_HASH:(0x.*)\r$", RegexOptions.Multiline);
@@ -313,6 +302,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			static readonly Regex ReTitle = new Regex(@"^SHORT_DESCRIPTION:(.*)\r$", RegexOptions.Multiline);
 
 			const uint LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008;
+			const uint DEBUG_PROCESS = 0x00000001;
 
 			[DllImport("kernel32.dll", SetLastError = true)]
 			static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReserved, uint dwFlags);
@@ -321,8 +311,11 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			[return: MarshalAs(UnmanagedType.Bool)]
 			static extern bool FreeLibrary(IntPtr hModule);
 
-			[DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+			[DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
 			static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+			[DllImport("kernel32.dll", SetLastError = true)]
+			static extern int GetProcessId(uint hProcess);
 
 			delegate uint DebugCreate(ref Guid InterfaceId, [MarshalAs(UnmanagedType.IUnknown)] out object Interface);
 
@@ -331,6 +324,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			IntPtr _hDll;
 			object _dbgEng;
 			bool _handlingException;
+			bool _processCreated;
 
 			public Action OnConnected { private get; set; }
 
@@ -340,11 +334,22 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			public MonitorData Fault { get; private set; }
 
-			public bool IgnoreFirstChanceGuardPage { private get; set; }
-			public bool IgnoreSecondChanceGuardPage { private get; set; }
-			public bool IgnoreBreakpoint { private get; set; }
+			public bool Interrupt { private get; set; }
 
 			public WinDbg(string winDbgPath)
+			{
+				try
+				{
+					Initialize(winDbgPath);
+				}
+				catch
+				{
+					Dispose();
+					throw;
+				}
+			}
+
+			private void Initialize(string winDbgPath)
 			{
 				if (!Path.IsPathRooted(winDbgPath))
 					throw new ArgumentException("Must be an absolute path.", "winDbgPath");
@@ -417,206 +422,111 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				}
 			}
 
-			public int Breakpoint(IDebugBreakpoint Bp)
+			#region IDebugEventCallbacks
+
+			int IDebugEventCallbacks.Breakpoint(IDebugBreakpoint Bp)
 			{
 				Logger.Trace("Breakpoint: {0}", Bp);
 				return 0;
 			}
 
-			public int ChangeDebuggeeState(DEBUG_CDS Flags, ulong Argument)
+			int IDebugEventCallbacks.ChangeDebuggeeState(DEBUG_CDS Flags, ulong Argument)
 			{
 				Logger.Trace("ChangeDebuggeeState: {0} {1}", Flags, Argument);
 				return 0;
 			}
 
-			public int ChangeEngineState(DEBUG_CES Flags, ulong Argument)
+			int IDebugEventCallbacks.ChangeEngineState(DEBUG_CES Flags, ulong Argument)
 			{
 				Logger.Trace("ChangeEngineState: {0} {1}", Flags, Argument);
 				return 0;
 			}
 
-			public int ChangeSymbolState(DEBUG_CSS Flags, ulong Argument)
+			int IDebugEventCallbacks.ChangeSymbolState(DEBUG_CSS Flags, ulong Argument)
 			{
 				Logger.Trace("ChangeSymbolState: {0} {1}", Flags, Argument);
 				return 0;
 			}
 
-			public int CreateProcess(ulong ImageFileHandle, ulong Handle, ulong BaseOffset, uint ModuleSize, string ModuleName, string ImageName, uint CheckSum, uint TimeDateStamp, ulong InitialThreadHandle, ulong ThreadDataOffset, ulong StartOffset)
+			int IDebugEventCallbacks.CreateProcess(ulong ImageFileHandle, ulong Handle, ulong BaseOffset, uint ModuleSize, string ModuleName, string ImageName, uint CheckSum, uint TimeDateStamp, ulong InitialThreadHandle, ulong ThreadDataOffset, ulong StartOffset)
 			{
 				Logger.Trace("CreateProcess: {0} {1} {2} {3} {4} {5}", ImageFileHandle, Handle, BaseOffset, ModuleSize, ModuleName, ImageName);
+
+				if (!_processCreated)
+				{
+					_processCreated = true;
+
+					if (ProcessCreated != null)
+					{
+						var pid = GetProcessId((uint)Handle);
+						ProcessCreated(pid);
+					}
+				}
+
 				return 0;
 			}
 
-			public int CreateThread(ulong Handle, ulong DataOffset, ulong StartOffset)
+			int IDebugEventCallbacks.CreateThread(ulong Handle, ulong DataOffset, ulong StartOffset)
 			{
 				Logger.Trace("CreateThread: 0x{0:x8} 0x{1:x8}0x {2:x8}", Handle, DataOffset, StartOffset);
 				return 0;
 			}
 
-			public unsafe int Exception(ref EXCEPTION_RECORD64 Exception, uint FirstChance)
+			unsafe int IDebugEventCallbacks.Exception(ref EXCEPTION_RECORD64 Exception, uint FirstChance)
 			{
 				Logger.Debug("Exception: 0x{0:x8}, FirstChance: {1}", Exception.ExceptionCode, FirstChance);
 
-				bool handle;
-
-				if (FirstChance == 1)
+				var ev = new ExceptionEvent
 				{
-					if (Exception.ExceptionCode == 0x80000003)
-					{
-						handle = !IgnoreBreakpoint;
-					}
-					else if (IgnoreFirstChanceGuardPage && Exception.ExceptionCode == 0x80000001)
-					{
-						handle = false;
-					}
-					else if (Exception.ExceptionCode == 0x80000001 || Exception.ExceptionCode == 0xC000001D)
-					{
-						// Guard page or illegal op
-						handle = true;
-					}
+					FirstChance = FirstChance,
+					Code = Exception.ExceptionCode,
+					Info = new long[2]
+				};
 
-					else if (Exception.ExceptionCode == 0xC0000005)
-					{
-						// Access violation
-						// http://msdn.microsoft.com/en-us/library/windows/desktop/aa363082(v=vs.85).aspx
-
-						fixed (ulong* ptr = Exception.ExceptionInformation)
-						{
-							// A/V on EIP
-							if (ptr[0] == 0)
-								handle = true;
-
-							// write a/v
-							else if (ptr[0] == 1 && ptr[1] != 0)
-								handle = true;
-
-							// DEP
-							else if (ptr[0] == 8)
-								handle = true;
-
-							// Skip uninteresting A/V
-							else
-								handle = false;
-						}
-					}
-					else
-					{
-						// Skip uninteresting first chance
-						handle = false;
-					}
-				}
-				else
+				fixed (ulong* ptr = Exception.ExceptionInformation)
 				{
-					if (IgnoreSecondChanceGuardPage && Exception.ExceptionCode == 0x80000001)
-					{
-						handle = false;
-					}
-					else
-					{
-						// All 2nd chance exceptions are interesting
-						handle = true;
-					}
+					ev.Info[0] = (long)ptr[0];
+					ev.Info[1] = (long)ptr[1];
 				}
 
-				if (handle)
-				{
-					// Don't recurse (does this really happen?)
-					if (_handlingException)
-						return (int)DEBUG_STATUS.NO_CHANGE;
-
-					_handlingException = true;
-
-					Logger.Debug("Fault detected, collecting info from windbg...");
-
-					// 1. Output registers
-
-					DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "r", DEBUG_EXECUTE.ECHO);
-					DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "rF", DEBUG_EXECUTE.ECHO);
-					DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "rX", DEBUG_EXECUTE.ECHO);
-					DebugClient.FlushCallbacks();
-					_output.Append("\n\n");
-
-					// 2. Output stacktrace
-
-					// Note: There is a known issue with dbgeng that can cause stack traces to take days due to issues in 
-					// resolving symbols.  There is no known work arround.  We need the ability to skip a stacktrace
-					// when this occurs.
-
-					DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "kb", DEBUG_EXECUTE.ECHO);
-					DebugClient.FlushCallbacks();
-					_output.Append("\n\n");
-
-					// 3. Dump File
-
-					// Note: This can cause hangs on a bad day.  Don't think it's all that important, so skipping.
-
-					// 4. !exploitable
-
-					var path = IntPtr.Size == 4
-						? "Debuggers\\DebugEngine\\msec86.dll"
-						: "Debuggers\\DebugEngine\\msec64.dll";
-
-					path = Path.Combine(Utilities.ExecutionDirectory, path);
-					DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, ".load " + path, DEBUG_EXECUTE.ECHO);
-					DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "!exploitable -m", DEBUG_EXECUTE.ECHO);
-					_output.Append("\n\n");
-
-					_output.Replace("\x0a", "\r\n");
-
-					var output = _output.ToString();
-
-					var fault = new MonitorData
-					{
-						Title = ReTitle.Match(output).Groups[1].Value,
-						Fault = new MonitorData.Info
-						{
-							Description = output,
-							MajorHash = ReMajorHash.Match(output).Groups[1].Value,
-							MinorHash = ReMinorHash.Match(output).Groups[1].Value,
-							Risk = ReRisk.Match(output).Groups[1].Value,
-							MustStop = false,
-						},
-						Data = new Dictionary<string, Stream>()
-					};
-
-					Logger.Debug("Completed gathering windbg information");
-
-					Fault = fault;
-				}
+				OnException(ev);
 
 				return (int)DEBUG_STATUS.NO_CHANGE;
 			}
 
-			public int ExitProcess(uint ExitCode)
+			int IDebugEventCallbacks.ExitProcess(uint ExitCode)
 			{
 				Logger.Trace("ExitProcess: {0}", ExitCode);
 				return 0;
 			}
 
-			public int ExitThread(uint ExitCode)
+			int IDebugEventCallbacks.ExitThread(uint ExitCode)
 			{
 				Logger.Trace("ExitThread: {0}", ExitCode);
 				return 0;
 			}
 
-			public int GetInterestMask(out DEBUG_EVENT Mask)
+			int IDebugEventCallbacks.GetInterestMask(out DEBUG_EVENT Mask)
 			{
 				Mask = DEBUG_EVENT.EXCEPTION |
 					DEBUG_EVENT.SESSION_STATUS |
 					DEBUG_EVENT.SYSTEM_ERROR |
 					DEBUG_EVENT.CHANGE_DEBUGGEE_STATE |
 					DEBUG_EVENT.CHANGE_ENGINE_STATE |
-					DEBUG_EVENT.BREAKPOINT;
+					DEBUG_EVENT.BREAKPOINT |
+					DEBUG_EVENT.CREATE_PROCESS |
+					DEBUG_EVENT.EXIT_PROCESS
+					;
 				return 0;
 			}
 
-			public int LoadModule(ulong ImageFileHandle, ulong BaseOffset, uint ModuleSize, string ModuleName, string ImageName, uint CheckSum, uint TimeDateStamp)
+			int IDebugEventCallbacks.LoadModule(ulong ImageFileHandle, ulong BaseOffset, uint ModuleSize, string ModuleName, string ImageName, uint CheckSum, uint TimeDateStamp)
 			{
 				Logger.Trace("LoadModule: {0} {1} {2} {3} {4}", ImageFileHandle, BaseOffset, ModuleSize, ModuleName, ImageName);
 				return 0;
 			}
 
-			public int SessionStatus(DEBUG_SESSION Status)
+			int IDebugEventCallbacks.SessionStatus(DEBUG_SESSION Status)
 			{
 				Logger.Trace("SessionStatus: {0}", Status);
 
@@ -626,22 +536,185 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				return 0;
 			}
 
-			public int SystemError(uint Error, uint Level)
+			int IDebugEventCallbacks.SystemError(uint Error, uint Level)
 			{
 				Logger.Trace("SystemError: {0} {1}", Error, Level);
 				return 0;
 			}
 
-			public int UnloadModule(string ImageBaseName, ulong BaseOffset)
+			int IDebugEventCallbacks.UnloadModule(string ImageBaseName, ulong BaseOffset)
 			{
 				Logger.Trace("UnloadModule: {0} {1}", ImageBaseName, BaseOffset);
 				return 0;
 			}
 
-			public int Output(DEBUG_OUTPUT Mask, string Text)
+			#endregion
+
+			#region IDebugOutputCallbacks
+
+			int IDebugOutputCallbacks.Output(DEBUG_OUTPUT Mask, string Text)
 			{
 				_output.Append(Text);
 				return 0;
+			}
+
+			#endregion
+
+			private void OnException(ExceptionEvent ev)
+			{
+				bool keepGoing;
+
+				if (ev.Code == 0x80000003)
+				{
+					// We stop the debugger by triggering a first change breakpoint
+					if (ev.FirstChance == 1 && Interrupt)
+						return;
+
+					// Kernel crashes come in as bugcheck breakpoints
+					keepGoing = false;
+				}
+				else if (HandleAccessViolation != null)
+				{
+					// If handler is registered, ask whether to keep going
+					keepGoing = HandleAccessViolation(ev);
+				}
+				else
+				{
+					// Default is to break on all non-first chance exceptions
+					keepGoing = ev.FirstChance == 1;
+				}
+
+				if (keepGoing)
+					return;
+
+				// Don't recurse (does this really happen?)
+				if (_handlingException)
+					return;
+
+				_handlingException = true;
+
+				Logger.Debug("Fault detected, collecting info from windbg...");
+
+				// 1. Output registers
+
+				DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "r", DEBUG_EXECUTE.ECHO);
+				DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "rF", DEBUG_EXECUTE.ECHO);
+				DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "rX", DEBUG_EXECUTE.ECHO);
+				DebugClient.FlushCallbacks();
+				_output.Append("\n\n");
+
+				// 2. Output stacktrace
+
+				// Note: There is a known issue with dbgeng that can cause stack traces to take days due to issues in 
+				// resolving symbols.  There is no known work arround.  We need the ability to skip a stacktrace
+				// when this occurs.
+
+				DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "kb", DEBUG_EXECUTE.ECHO);
+				DebugClient.FlushCallbacks();
+				_output.Append("\n\n");
+
+				// 3. Dump File
+
+				// Note: This can cause hangs on a bad day.  Don't think it's all that important, so skipping.
+
+				// 4. !exploitable
+
+				var path = IntPtr.Size == 4
+					? "Debuggers\\DebugEngine\\msec86.dll"
+					: "Debuggers\\DebugEngine\\msec64.dll";
+
+				path = Path.Combine(Utilities.ExecutionDirectory, path);
+				DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, ".load " + path, DEBUG_EXECUTE.ECHO);
+				DebugControl.Execute(DEBUG_OUTCTL.THIS_CLIENT, "!exploitable -m", DEBUG_EXECUTE.ECHO);
+				_output.Append("\n\n");
+
+				_output.Replace("\x0a", "\r\n");
+
+				var output = _output.ToString();
+
+				var fault = new MonitorData
+				{
+					Title = ReTitle.Match(output).Groups[1].Value,
+					Fault = new MonitorData.Info
+					{
+						Description = output,
+						MajorHash = ReMajorHash.Match(output).Groups[1].Value,
+						MinorHash = ReMinorHash.Match(output).Groups[1].Value,
+						Risk = ReRisk.Match(output).Groups[1].Value,
+						MustStop = false,
+					},
+					Data = new Dictionary<string, Stream>()
+				};
+
+				Logger.Debug("Completed gathering windbg information");
+
+				Fault = fault;
+			}
+
+			public Func<ExceptionEvent, bool> HandleAccessViolation { get; set; }
+			public Action<int> ProcessCreated { get; set; }
+
+			internal static WinDbg CreateProcess(string winDbgPath, string symbolsPath, string commandLine)
+			{
+				var dbg = new WinDbg(Path.Combine(winDbgPath, "dbgeng.dll"));
+
+				dbg.DebugControl.SetInterruptTimeout(1);
+				dbg.DebugSymbols.SetSymbolPath(symbolsPath);
+
+				try
+				{
+					var hr = dbg.DebugClient.CreateProcessAndAttach(
+						0,
+						commandLine,
+						(DEBUG_CREATE_PROCESS)DEBUG_PROCESS,
+						0,
+						DEBUG_ATTACH.DEFAULT);
+
+					var ex = Marshal.GetExceptionForHR(hr);
+					if (ex != null)
+						throw ex;
+
+					return dbg;
+				}
+				catch
+				{
+					dbg.Dispose();
+					throw;
+				}
+			}
+
+			internal static WinDbg AttachToProcess(string winDbgPath, string symbolsPath, int pid)
+			{
+				throw new NotSupportedException();
+			}
+
+			public void MainLoop()
+			{
+				while (Fault == null && !Interrupt)
+				{
+					var hr = DebugControl.WaitForEvent(DEBUG_WAIT.DEFAULT, uint.MaxValue);
+
+					Logger.Trace("WaitForEvent: 0x{0:x8}", hr);
+
+					// E_UNEXPECTED means ran to completion
+					if ((uint)hr == 0x8000ffff)
+						break;
+
+					var ex = Marshal.GetExceptionForHR(hr);
+					if (ex != null)
+						throw ex;
+				}
+
+				DebugClient.EndSession(DEBUG_END.PASSIVE);
+
+				Logger.Debug("Debugger ended gracefully");
+			}
+
+			public void TerminateProcess()
+			{
+				// Cause the debugger to break by generating a synthetic exception
+				Interrupt = true;
+				DebugControl.SetInterrupt(DEBUG_INTERRUPT.ACTIVE);
 			}
 		}
 
@@ -659,8 +732,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public string SymbolsPath { get; set; }
 		public string WinDbgPath { get; set; }
-		public bool IgnoreFirstChanceGuardPage { get; set; }
-		public bool IgnoreSecondChanceGuardPage { get; set; }
 
 		public void Dispose()
 		{
@@ -675,7 +746,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						if (_connected)
 						{
 							// Stops active debugger connections
-							_winDbg.IgnoreBreakpoint = true;
+							_winDbg.Interrupt = true;
 							_winDbg.DebugControl.SetInterrupt(DEBUG_INTERRUPT.ACTIVE);
 						}
 						else
@@ -751,9 +822,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 					dbg.DebugControl.SetInterruptTimeout(1);
 					dbg.DebugSymbols.SetSymbolPath(SymbolsPath);
-
-					dbg.IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage;
-					dbg.IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage;
 
 					Logger.Debug("Starting kernel debugger");
 

@@ -549,9 +549,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				if (!string.IsNullOrEmpty(_commandLine))
 					_systemDebugger.StartProcess(_commandLine);
 				else if (!string.IsNullOrEmpty(_service))
-					_systemDebugger.AttachProcess(BaseDebuggerInstance.GetServicePid(_service, TimeSpan.FromSeconds(_serviceStartTimeout)));
+					_systemDebugger.StartService(_service, TimeSpan.FromSeconds(_serviceStartTimeout));
 				else
-					_systemDebugger.AttachProcess(BaseDebuggerInstance.GetProcessPid(_processName));
+					_systemDebugger.AttachProcess(_processName);
 
 				OnInternalEvent(EventArgs.Empty);
 			}

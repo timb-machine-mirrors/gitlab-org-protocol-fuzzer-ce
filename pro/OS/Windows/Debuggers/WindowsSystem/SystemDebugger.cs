@@ -29,20 +29,25 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using NLog;
 using Peach.Core;
+using Peach.Core.Agent;
 
 namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 {
-	public interface IWindowsDebugger
+	public interface IWindowsDebugger : IDisposable
 	{
 		Func<ExceptionEvent, bool> HandleAccessViolation { get; set; }
 		Action<int> ProcessCreated { get; set; }
 
 		void MainLoop();
 		void TerminateProcess();
+
+		MonitorData Fault { get; }
 	}
 
 	public class ExceptionEvent
@@ -160,21 +165,22 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		/// Callback to handle an A/V exception
 		/// </summary>
 		/// <returns>
-		/// true to keep debugging, false to stop debugging
+		/// Return true to keep debugging, false to stop debugging
 		/// </returns>
 		public Func<ExceptionEvent, bool> HandleAccessViolation { get; set; }
 
 		public Action<int> ProcessCreated { get; set; }
 
-		public int ProcessId { get; private set; }
+		public MonitorData Fault { get; private set; }
 
+		private readonly int _processId;
 		private readonly List<IntPtr> processHandles = new List<IntPtr>();
 		private readonly Dictionary<uint, IntPtr> openHandles = new Dictionary<uint, IntPtr>();
 		private readonly object mutex = new object();
 
 		private SystemDebugger(int dwProcessId)
 		{
-			ProcessId = dwProcessId;
+			_processId = dwProcessId;
 		}
 
 		public static SystemDebugger CreateProcess(string command)
@@ -221,6 +227,10 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			UnsafeMethods.DebugSetProcessKillOnExit(true);
 
 			return new SystemDebugger(dwProcessId);
+		}
+
+		public void Dispose()
+		{
 		}
 
 		public void MainLoop()
@@ -462,8 +472,8 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 			openHandles.Add(DebugEv.dwProcessId, CreateProcessInfo.hProcess);
 			openHandles.Add(DebugEv.dwThreadId, CreateProcessInfo.hThread);
 
-			if (ProcessId == DebugEv.dwProcessId && ProcessCreated != null)
-				ProcessCreated(ProcessId);
+			if (_processId == DebugEv.dwProcessId && ProcessCreated != null)
+				ProcessCreated(_processId);
 
 			return DBG_CONTINUE;
 		}
@@ -519,48 +529,49 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 				}
 			};
 
-			// Only some first chance exceptions are interesting
-			while (ev.FirstChance != 0)
-			{
-				// Guard page or illegal op
-				if (ev.Code == 0x80000001 || ev.Code == 0xC000001D)
-					break;
+			var keepGoing = HandleAccessViolation != null
+				? HandleAccessViolation(ev)
+				: ev.FirstChance != 0;
 
-				// http://msdn.microsoft.com/en-us/library/windows/desktop/aa363082(v=vs.85).aspx
-
-				// Access violation
-				if (ev.Code == 0xC0000005)
-				{
-					// A/V on EIP
-					if (ev.Info[0] == 0)
-						break;
-
-					// write a/v not near null
-					if (ev.Info[0] == 1 && ev.Info[1] != 0)
-						break;
-
-					// DEP
-					if (ev.Info[0] == 8)
-						break;
-				}
-
-				// Skip uninteresting first chance and keep going
+			if (keepGoing)
 				return DBG_EXCEPTION_NOT_HANDLED;
+
+			var title = "Exception: 0x" + ev.Code.ToString("x8");
+			var desc = new StringBuilder();
+
+			if (ev.FirstChance == 1)
+				desc.Append("First Chance ");
+
+			desc.AppendLine(title);
+
+			if (ev.Code == 0xC0000005)
+			{
+				desc.Append("Access Violation ");
+				desc.Append(ev.Info[0] == 0 ? " Reading From 0x" : " Writing To 0x");
+				desc.Append(ev.Info[1].ToString("x16"));
 			}
 
-			// If 1st chance, only stop if HandleAccessViolation returns false
-			// If 2nd chance, always stop
-			var stop = HandleAccessViolation != null && !HandleAccessViolation(ev);
+			Debug.Assert(Fault == null);
+
+			Fault = new MonitorData
+			{
+				Title = title,
+				DetectionSource = "SystemDebugger",
+				Data = new Dictionary<string, Stream>(),
+				Fault = new MonitorData.Info
+				{
+					Description = desc.ToString(),
+					MajorHash = "",
+					MinorHash = "",
+					Risk = "",
+					MustStop = false
+				}
+			};
 
 			// Stop by calling TerminateProcess and continuing
 			// so we get thread & process exit notifications
-			if (stop || Exception.dwFirstChance == 0)
-			{
-				TerminateProcess();
-				return DBG_CONTINUE;
-			}
-
-			return DBG_EXCEPTION_NOT_HANDLED;
+			TerminateProcess();
+			return DBG_CONTINUE;
 		}
 
 		private static bool ReadProcessMemory(IntPtr hProc, IntPtr lpBaseAddress, IntPtr lpBuffer, ref uint len)
