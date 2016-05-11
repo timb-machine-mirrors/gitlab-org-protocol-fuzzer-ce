@@ -30,6 +30,7 @@ subdirs = [
 	'BouncyCastle/crypto/test',
 	'sqlite-3.8.11.1',
 	'Portable.Licensing',
+	'libusbdotnet',
 ]
 
 bld.recurse(subdirs)
