@@ -216,6 +216,49 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 		}
 
 		[Test]
+		public void TestAttachBadProcess()
+		{
+			SetUpFixture.EnableDebug();
+
+			var dbg = new WindowsDebuggerInstance
+			{
+				WinDbgPath = WindowsKernelDebugger.FindWinDbg(null),
+				SymbolsPath = "SRV*http://msdl.microsoft.com/download/symbols"
+			};
+
+			var ex = Assert.Throws<PeachException>(() => dbg.AttachProcess("1234"));
+
+			StringAssert.Contains("Value does not fall within the expected range.", ex.Message);
+		}
+
+		[Test]
+		public void TestAttachProcess()
+		{
+			SetUpFixture.EnableDebug();
+
+			var dbg = new WindowsDebuggerInstance
+			{
+				WinDbgPath = WindowsKernelDebugger.FindWinDbg(null),
+				SymbolsPath = "SRV*http://msdl.microsoft.com/download/symbols"
+			};
+
+			var exe = Utilities.GetAppResourcePath("CrashableServer.exe");
+			using (var p = ProcessHelper.Start(exe, "127.0.0.1 0", null, null))
+			{
+				dbg.AttachProcess(p.Id.ToString());
+
+				System.Threading.Thread.Sleep(1000);
+
+				Assert.True(dbg.IsRunning, "Debugger should be running");
+
+				dbg.Stop();
+
+				Assert.Null(dbg.Fault, "Should not have detected fault");
+			}
+		}
+
+
+		[Test]
 		public void TestWinDbgStop()
 		{
 			SetUpFixture.EnableDebug();

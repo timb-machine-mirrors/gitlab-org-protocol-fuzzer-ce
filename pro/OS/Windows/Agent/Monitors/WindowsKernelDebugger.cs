@@ -685,7 +685,29 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			internal static WinDbg AttachToProcess(string winDbgPath, string symbolsPath, int pid)
 			{
-				throw new NotSupportedException();
+				var dbg = new WinDbg(Path.Combine(winDbgPath, "dbgeng.dll"));
+
+				dbg.DebugControl.SetInterruptTimeout(1);
+				dbg.DebugSymbols.SetSymbolPath(symbolsPath);
+
+				try
+				{
+					var hr = dbg.DebugClient.AttachProcess(
+						0,
+						(uint)pid,
+						DEBUG_ATTACH.DEFAULT);
+
+					var ex = Marshal.GetExceptionForHR(hr);
+					if (ex != null)
+						throw ex;
+
+					return dbg;
+				}
+				catch
+				{
+					dbg.Dispose();
+					throw;
+				}
 			}
 
 			public void MainLoop()
