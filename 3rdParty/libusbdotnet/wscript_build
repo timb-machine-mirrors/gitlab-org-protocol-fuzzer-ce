@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Xml.dll',
+	'Microsoft.CSharp.dll',
+	'System.Windows.Forms.dll',
+]
+
+if bld.env.CS_NAME == 'csc':
+	# Microsoft.NET
+	src = ctx.path.ant_glob('LibWinUsb/**/*.cs',
+		excl=['LibWinUsb/Main/SetupApiRegistry.cs'])
+		
+	csflags = [
+		'/define:LIBUSBDOTNET',
+	]
+	
+else:
+	# Mono
+	src = ctx.path.ant_glob('MonoLibUsb/**/*.cs')
+	src.append(ctx.path.find_node('ClassCodeType.cs'))
+	src.append(ctx.path.find_node('DescriptorType.cs'))
+	src.append(ctx.path.find_node('EndpointType.cs'))
+	src.append(ctx.path.find_node('Helper.cs'))
+	src.append(ctx.path.find_node('SafeContextHandle.cs'))
+	src.append(ctx.path.find_node('UsbConstrants.cs'))
+	src.append(ctx.path.find_node('UsbCtrlFlags.cs'))
+	src.append(ctx.path.find_node('UsbEndpointDIrection.cs'))
+	src.append(ctx.path.find_node('UsbException.cs'))
+	src.append(ctx.path.find_node('UsbRequestRecipient.cs'))
+	src.append(ctx.path.find_node('UsbRequestType.cs'))
+	src.append(ctx.path.find_node('UsbStandardRequest.cs'))
+	
+	csflags = None
+	
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = src,
+	name = 'LibUsbDotNet.dll',
+	version = False,
+	csdoc = False,
+	csflags = csflags,
+)
+
+# 	csflags = [ '/nowarn:0219' ],
