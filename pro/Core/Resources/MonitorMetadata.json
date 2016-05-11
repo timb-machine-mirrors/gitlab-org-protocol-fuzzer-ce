@@ -330,8 +330,7 @@
         "Name": "Advanced",
         "Collapsed": true,
         "Items": [
-          "LogFolder",
-          "Mono"
+          "LogFolder"
         ]
       }
     ],

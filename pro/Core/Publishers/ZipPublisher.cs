@@ -91,7 +91,7 @@ namespace Peach.Pro.Core.Publishers
 			throw new NotSupportedException();
 		}
 
-		public override void output(DataModel dataModel)
+		protected override void OnOutput(DataModel dataModel)
 		{
 			long cnt = 0;
 

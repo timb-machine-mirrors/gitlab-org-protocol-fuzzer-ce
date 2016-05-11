@@ -250,6 +250,32 @@ namespace Peach.Core
 		#endregion
 
 		/// <summary>
+		/// Triggers a fault for the currently executing test case.
+		/// </summary>
+		/// <param name="title">Title of fault</param>
+		/// <param name="description">Description of fault</param>
+		/// <param name="majorHash">Major hash for fault. Set to null or empty string to skip bucketing.</param>
+		/// <param name="minorHash">Minor hash for fault. Set to null or empty string to skip bucketing.</param>
+		/// <param name="exploitability">Exploitability for fault</param>
+		/// <param name="detectionSource">Detection source, such as Monitor class attribute.</param>
+		/// <param name="detectionName">Detection name, such as name attribute</param>
+		/// <param name="agentName">Name of agent fault was reported by</param>
+		public void Fault(string title, string description, string majorHash, string minorHash, string exploitability, string detectionSource, string detectionName = null, string agentName = null)
+		{
+			throw new FaultException(new FaultSummary
+			{
+				Title = title,
+				Description = description,
+				MajorHash = majorHash,
+				MinorHash = minorHash,
+				Exploitablity = exploitability,
+				DetectionSource = detectionSource,
+				DetectionName = detectionName,
+				AgentName = agentName
+			});
+		}
+
+		/// <summary>
 		/// Configuration settings for this run
 		/// </summary>
 		public RunConfiguration config = null;

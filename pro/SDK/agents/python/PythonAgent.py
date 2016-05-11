@@ -298,9 +298,13 @@ class Agent_Publisher_call:
 		# TODO - Do something with method call
 
 		# If method needs to return data, put 'data' member in returned object
-		# return json.dumps({ "data":"T3V0cHV0IGRhdGE=", "error":"false", "errorString":None })
+		return json.dumps({ "value":"T3V0cHV0IGRhdGE=", "error":"false" })
 
-		return json.dumps({ "error":"false", "errorString":None })
+		# If no data is needed set value to None
+		#return json.dumps({ "value": None, "error":"false", "errorString":None })
+		
+		# Or you can return an error
+		#return json.dumps({ "error":"true", "errorString":"Connection lost..." })
 
 
 class Agent_Publisher_stop:

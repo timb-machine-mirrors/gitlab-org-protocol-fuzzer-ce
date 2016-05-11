@@ -551,19 +551,21 @@ namespace Peach.Core
 
 						test.stateModel.Run(context);
 					}
-					catch (FaultException fe)
+					catch (FaultException ex)
 					{
+						var fe = ex.Fault;
+
 						logger.Debug("runTest: Creating fault from FaultException: {0}", fe.Title);
 						var fault = new Fault
 						{
 							title = fe.Title,
 							description = fe.Description,
-							detectionSource = fe.DetectionSource,
-							monitorName = fe.DetectionName,
+							detectionSource = fe.DetectionSource ?? "Unknown",
+							monitorName = fe.DetectionName ?? "Unknown",
 							majorHash = fe.MajorHash,
 							minorHash = fe.MinorHash,
-							exploitability = fe.Exploitablity,
-							agentName =  fe.AgentName,
+							exploitability = fe.Exploitablity ?? "Unknown",
+							agentName =  fe.AgentName ?? "Internal",
 							type = FaultType.Fault
 						};
 

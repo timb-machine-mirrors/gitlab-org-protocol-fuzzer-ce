@@ -12,6 +12,7 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Swagger.Annotations;
+using FaultSummary = Peach.Pro.Core.WebServices.Models.FaultSummary;
 using FileInfo = System.IO.FileInfo;
 using SysProcess = System.Diagnostics.Process;
 
