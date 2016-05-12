@@ -15,6 +15,8 @@ deps = [
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
+	'System.ServiceProcess.dll',
+	'Microsoft.Diagnostics.Runtime.dll',
 
 	'Portable.Licensing.dll',
 	'SocketHttpListener.dll',

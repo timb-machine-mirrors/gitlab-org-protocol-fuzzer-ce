@@ -32,6 +32,7 @@ using System.ServiceProcess;
 using System.Threading;
 using NLog;
 using Peach.Core;
+using Peach.Pro.Core.OS.Windows.Debugger;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug
 {
@@ -199,7 +200,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug
 					}
 					else if (service != null)
 					{
-						var pid = SystemDebuggerInstance.GetServicePid(service, TimeSpan.FromSeconds(serviceStartTimeout));
+						var pid = 0;// SystemDebuggerInstance.GetServicePid(service, TimeSpan.FromSeconds(serviceStartTimeout));
 
 						_dbg.AttachProcess(pid);
 					}

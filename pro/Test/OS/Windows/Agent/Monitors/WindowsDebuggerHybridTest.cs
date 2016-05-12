@@ -6,7 +6,6 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
-using Peach.Pro.OS.Windows.Agent.Monitors;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
@@ -28,9 +27,11 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
 				Assert.Ignore("Cannot run the 64bit version of this test on a 32bit operating system.");
+
+			Assert.Fail("FIXME");
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			Assert.Null(this.faults);
 			Assert.True(context.reproducingFault);
@@ -38,7 +39,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			this.faults = faults;
 		}
 
-		void _AppendFault(RunContext context, uint currentIteration, Core.Dom.StateModel stateModel, Fault[] faults)
+		void _AppendFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
 		{
 			List<Fault> tmp = new List<Fault>();
 			if (this.faults != null)
@@ -90,7 +91,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
@@ -110,7 +111,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators.Add("StringMutator");
 
 			RunConfiguration config = new RunConfiguration();
@@ -168,7 +169,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;
@@ -195,6 +196,13 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			Assert.AreEqual("SystemDebugger", this.faults[0].detectionSource);
 			Assert.AreEqual(FaultType.Fault, this.faults[1].type);
 			Assert.AreEqual("WindowsDebugEngine", this.faults[1].detectionSource);
+		}
+
+		private class WindowsDebuggerHybrid : Monitor2
+		{
+			public WindowsDebuggerHybrid(string name) : base(name)
+			{
+			}
 		}
 
 		[Test]

@@ -58,11 +58,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		{
 			base.StartMonitor(args);
 
-			if (WinDbgPath == null)
-				WinDbgPath = WindowsDebuggerHybrid.FindWinDbg();
-
-			if (WinDbgPath == null)
-				throw new PeachException("Error, unable to locate WinDbg, please specify using 'WinDbgPath' parameter.");
+			WinDbgPath = WindowsKernelDebugger.FindWinDbg(WinDbgPath);
 		}
 
 		public override void SessionStarting()

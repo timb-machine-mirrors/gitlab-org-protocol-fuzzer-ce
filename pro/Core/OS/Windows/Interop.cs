@@ -1,41 +1,13 @@
-﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
-
 using System;
 using System.Runtime.InteropServices;
 
-namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
+namespace Peach.Pro.Core.OS.Windows
 {
 	/// <summary>
 	/// Contains definitions for marshaled method calls and related
 	/// types.
 	/// </summary>
-	internal static class UnsafeMethods
+	internal static class Interop
 	{
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 		public struct STARTUPINFO
@@ -150,15 +122,17 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool ImpersonateSelf(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel);
 
+		public const uint DEBUG_PROCESS = 0x00000001;
+
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool CreateProcess(
 			string lpApplicationName,
-			string lpCommandLine, 
+			string lpCommandLine,
 			int lpProcessAttributes,
-			int lpThreadAttributes, 
+			int lpThreadAttributes,
 			bool bInheritHandles,
-			uint dwCreationFlags, 
-			IntPtr lpEnvironment, 
+			uint dwCreationFlags,
+			IntPtr lpEnvironment,
 			string lpCurrentDirectory,
 			[In] ref STARTUPINFO lpStartupInfo,
 			out PROCESS_INFORMATION lpProcessInformation);
@@ -178,17 +152,32 @@ namespace Peach.Pro.OS.Windows.Debuggers.WindowsSystem
 		[DllImport("kernel32.dll")]
 		public static extern bool DebugSetProcessKillOnExit(bool KillOnExit);
 
+		public const uint LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008;
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReserved, uint dwFlags);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool FreeLibrary(IntPtr hModule);
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+		public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern int GetProcessId(uint hProcess);
+
 		public enum DebugEventType : uint
 		{
-			EXCEPTION_DEBUG_EVENT      = 1,
-			CREATE_THREAD_DEBUG_EVENT  = 2,
+			EXCEPTION_DEBUG_EVENT = 1,
+			CREATE_THREAD_DEBUG_EVENT = 2,
 			CREATE_PROCESS_DEBUG_EVENT = 3,
-			EXIT_THREAD_DEBUG_EVENT    = 4,
-			EXIT_PROCESS_DEBUG_EVENT   = 5,
-			LOAD_DLL_DEBUG_EVENT       = 6,
-			UNLOAD_DLL_DEBUG_EVENT     = 7,
-			OUTPUT_DEBUG_STRING_EVENT  = 8,
-			RIP_EVENT                  = 9,
+			EXIT_THREAD_DEBUG_EVENT = 4,
+			EXIT_PROCESS_DEBUG_EVENT = 5,
+			LOAD_DLL_DEBUG_EVENT = 6,
+			UNLOAD_DLL_DEBUG_EVENT = 7,
+			OUTPUT_DEBUG_STRING_EVENT = 8,
+			RIP_EVENT = 9,
 		};
 
 		public struct DEBUG_EVENT

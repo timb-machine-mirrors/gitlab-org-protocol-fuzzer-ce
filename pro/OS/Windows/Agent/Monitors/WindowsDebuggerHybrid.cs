@@ -26,6 +26,7 @@
 
 // $Id$
 
+#if DISABLED
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -916,5 +917,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		}
 	}
 }
+#endif
 
 // end
