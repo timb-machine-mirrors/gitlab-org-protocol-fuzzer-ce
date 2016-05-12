@@ -99,7 +99,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				var encrypted = Path.Combine(tmpDir.Path, "TestProtectResources.dll");
 				PitResourceLoader.EncryptResources(Assembly.GetExecutingAssembly(), encrypted, password);
 
-				var asm = Assembly.LoadFile(encrypted);
+				var asm = LoadAssembly(encrypted);
 				var name = PitResourceLoader.MakeFullName(PitsResourcePrefix, resourceName);
 				using (var stream = asm.GetManifestResourceStream(name))
 				using (var reader = new StreamReader(stream))
@@ -114,6 +114,16 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					var actual = reader.ReadLine();
 					Assert.AreEqual(expected, actual);
 				}
+			}
+		}
+
+		private static Assembly LoadAssembly(string encrypted)
+		{
+			using (var ms = new MemoryStream())
+			using (var fs = File.OpenRead(encrypted))
+			{
+				fs.CopyTo(ms);
+				return Assembly.Load(ms.ToArray());
 			}
 		}
 
