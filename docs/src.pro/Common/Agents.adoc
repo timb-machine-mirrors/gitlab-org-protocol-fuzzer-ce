@@ -822,6 +822,65 @@ The result of a _call_ or _getProperty_ action.
 |errorString  |Error message                                |false    |String
 |==========================
 
+[[Agent-Rest-Schema-Output]]
+====== Output
+
+Data to output
+
+[source,java]
+----
+{
+    "data"    : "AA=="
+}
+----
+
+.Parameters
+[options="header",cols="2,8,1,2"]
+|==========================
+|Name         |Description                                  |Required |Schema
+|data         |Property value. Base64 encoded.              |true     |Bytes
+|==========================
+
+[[Agent-Rest-Schema-SetProperty]]
+====== SetProperty
+
+Contains information required to make a SetProperty call.
+
+[source,java]
+----
+{
+    "property": "FirstName",
+    "data"    : "AA=="
+}
+----
+
+.Parameters
+[options="header",cols="2,8,1,2"]
+|==========================
+|Name         |Description                                  |Required |Schema
+|property     |Property to set data on                      |true     |String
+|data         |Property value. Base64 encoded.              |true     |Bytes
+|==========================
+
+[[Agent-Rest-Schema-Count]]
+====== Count
+
+Count of bytes requested.
+
+[source,java]
+----
+{
+    "count": 1000,
+}
+----
+
+.Parameters
+[options="header",cols="2,8,1,2"]
+|==========================
+|Name      |Description                                  |Required |Schema
+|count     |Property to set data on                      |true     |Integer
+|==========================
+
 
 //////////////////////////
 
