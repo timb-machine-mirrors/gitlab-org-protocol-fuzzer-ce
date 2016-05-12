@@ -29,7 +29,7 @@ namespace Peach.Pro.Core
 		public ProPitParser(
 			string pitLibraryPath,
 			Assembly pitsAssembly = null,
-			string pitsPrefix = "Peach.Pro.Pits")
+			string pitsPrefix = "")
 		{
 			if (pitsAssembly == null)
 			{
@@ -177,14 +177,10 @@ namespace Peach.Pro.Core
 			// if fail, try to load from disk
 			if (stream == null)
 			{
-				var uri = new Uri(new Uri(Environment.CurrentDirectory), src);
+				var uri = new Uri(src);
 				if (uri.Scheme == Uri.UriSchemeFile)
 				{
-					if (!File.Exists(uri.AbsolutePath))
-						uri = new Uri(new Uri(Utilities.ExecutionDirectory), src);
-
-					if (File.Exists(uri.AbsolutePath))
-						stream = File.OpenRead(uri.AbsolutePath);
+					stream = File.OpenRead(uri.AbsolutePath);
 				}
 				else
 				{
