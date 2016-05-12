@@ -4,6 +4,7 @@
 This section documents general elements used in creating a fuzzing definition.
 
 :leveloffset: 2
+include::Workflow.adoc[]
 include::Data.adoc[]
 include::Defaults.adoc[]
 include::Import.adoc[]
