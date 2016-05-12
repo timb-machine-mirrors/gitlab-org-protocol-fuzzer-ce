@@ -1,5 +1,5 @@
 <<<
-[[Monitors_Snmppower]]
+[[Monitors_SnmpPower]]
 == SNMP Power Monitor
 
 *Monitor Categories*: *Automation*
