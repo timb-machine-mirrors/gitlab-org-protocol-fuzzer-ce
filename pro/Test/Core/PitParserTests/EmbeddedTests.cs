@@ -141,7 +141,6 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					master.Features[featureName].Secret))
 				{
 					Assert.IsNull(stream);
-				
 				}
 			}
 		}
