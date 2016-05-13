@@ -51,7 +51,7 @@ namespace Peach.Core.Fixups
 
 			try
 			{
-				_defaultValue = OnActionRun(ctx);
+				_defaultValue = DoActionRun(ctx);
 			}
 			catch (Exception ex)
 			{
@@ -59,6 +59,26 @@ namespace Peach.Core.Fixups
 			}
 
 			parent.Invalidate();
+		}
+
+		private Variant DoActionRun(RunContext ctx)
+		{
+			if (ctx.controlRecordingIteration)
+			{
+				var dm = parent.root as DataModel;
+				if (dm != null && dm.actionData != null)
+				{
+					// Allow value to be overridden via the stateStore using key:
+					// Peach.VolatileOverride.StateName.ActionName.ModelName.Path.To.Element
+					var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, parent.fullName);
+
+					object obj;
+					if (ctx.stateStore.TryGetValue(key, out obj))
+						return (Variant)obj;
+				}
+			}
+
+			return OnActionRun(ctx);
 		}
 
 		// ReSharper disable once UnusedMember.Local

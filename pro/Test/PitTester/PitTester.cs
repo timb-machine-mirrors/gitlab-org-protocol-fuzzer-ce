@@ -249,14 +249,14 @@ namespace PitTester
 
 			e.TestStarting += ctx =>
 			{
-				foreach (var kv in fixupOverrides)
-					ctx.stateStore.Add(kv.Key, kv.Value);
-
 				if (testData.Slurps.Count > 0)
 				{
 					ctx.StateModelStarting += (context, model) =>
 					{
-						ApplySlurps(testData, model, null);
+						ApplySlurps(testData, model, fixupOverrides);
+
+						foreach (var kv in fixupOverrides)
+							ctx.stateStore[kv.Key] = kv.Value;
 					};
 				}
 			};
