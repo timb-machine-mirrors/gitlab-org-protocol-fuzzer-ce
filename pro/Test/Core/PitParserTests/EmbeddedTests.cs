@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -55,9 +53,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		{
 			using (var tmpDir = new TempDirectory())
 			{
-				ExtractFile(tmpDir.Path, "DNP3_Slave.xml", "Net");
-				ExtractFile(tmpDir.Path, "DNP3_Slave.xml.config", "Net");
-				ExtractFile(tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
+				ExtractDirectory(tmpDir.Path, "Net");
 				ExtractDirectory(tmpDir.Path, "_Common", "Models", "Net");
 				ExtractDirectory(tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
 
@@ -93,14 +89,25 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		{
 			using (var tmpDir = new TempDirectory())
 			{
-				var password = "password";
-				var resourceName = "Net.DNP3_Slave.xml";
+				var masterSalt = "salt";
+				var featureName = "PeachPit-Net-DNP3_Slave";
+				var otherFeatureName = "PeachPit-Net-DNP3_Master";
+				var asset = "_Common.Models.Net.DNP3_State.xml";
 				var expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 				var encrypted = Path.Combine(tmpDir.Path, "TestProtectResources.dll");
-				PitResourceLoader.EncryptResources(Assembly.GetExecutingAssembly(), encrypted, password);
+
+				var master = PitResourceLoader.EncryptResources(
+					Assembly.GetExecutingAssembly(),
+					PitsResourcePrefix,
+					encrypted,
+					masterSalt
+				);
 
 				var asm = LoadAssembly(encrypted);
-				var name = PitResourceLoader.MakeFullName(PitsResourcePrefix, resourceName);
+				var manifest = PitResourceLoader.LoadManifest(asm, PitsResourcePrefix);
+				var rawAssetName = featureName + "." + asset;
+
+				var name = PitResourceLoader.MakeFullName(PitsResourcePrefix, rawAssetName);
 				using (var stream = asm.GetManifestResourceStream(name))
 				using (var reader = new StreamReader(stream))
 				{
@@ -108,11 +115,33 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					Assert.AreNotEqual(expected, actual);
 				}
 
-				using (var stream = PitResourceLoader.DecryptResource(asm, PitsResourcePrefix, resourceName, password))
+				var feature = manifest.Features[featureName];
+				using (var stream = PitResourceLoader.DecryptResource(
+					asm, 
+					PitsResourcePrefix,
+					featureName,
+ 					feature,
+					asset, 
+					master.Features[featureName].Secret))
 				using (var reader = new StreamReader(stream))
 				{
 					var actual = reader.ReadLine();
 					Assert.AreEqual(expected, actual);
+				}
+
+				// other features use different passwords
+				// this should fail since we are using the wrong password
+				var otherFeature = manifest.Features[otherFeatureName];
+				using (var stream = PitResourceLoader.DecryptResource(
+					asm, 
+					PitsResourcePrefix,
+					otherFeatureName,
+ 					otherFeature,
+					asset, 
+					master.Features[featureName].Secret))
+				{
+					Assert.IsNull(stream);
+				
 				}
 			}
 		}

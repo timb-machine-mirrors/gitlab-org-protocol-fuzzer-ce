@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
-using Peach.Pro.Core;
 
 namespace Peach.Pro.Test.Core
 {
 	public class PitManifest
 	{
-		public byte[] Salt { get; set; }
-		public byte[] IV { get; set; }
 		public Dictionary<string, PitManifestFeature> Features { get; set; }
 	}
 
@@ -20,13 +18,26 @@ namespace Peach.Pro.Test.Core
 	{
 		public string Pit { get; set; }
 		public string[] Assets { get; set; }
+		public byte[] Secret { get; set; }
 	}
 
 	public static class PitResourceLoader
 	{
+		static readonly string ManifestName = "manifest.json";
+
+		internal static JsonSerializer CreateSerializer()
+		{
+			var settings = new JsonSerializerSettings
+			{
+				Formatting = Formatting.Indented,
+				NullValueHandling = NullValueHandling.Ignore,
+			};
+			return JsonSerializer.Create(settings);
+		}
+
 		public static PitManifest LoadManifest(Assembly asm, string prefix)
 		{
-			var name = MakeFullName(prefix, "manifest.json");
+			var name = MakeFullName(prefix, ManifestName);
 			using (var stream = asm.GetManifestResourceStream(name))
 				return LoadManifest(stream);
 		}
@@ -45,7 +56,7 @@ namespace Peach.Pro.Test.Core
 			using (var reader = new StreamReader(stream))
 			using (var json = new JsonTextReader(reader))
 			{
-				return JsonUtilities.CreateSerializer().Deserialize<PitManifest>(json);
+				return CreateSerializer().Deserialize<PitManifest>(json);
 			}
 		}
 
@@ -53,11 +64,15 @@ namespace Peach.Pro.Test.Core
 		{
 			using (var writer = new StreamWriter(stream, Encoding.UTF8, 4096, true))
 			{
-				JsonUtilities.CreateSerializer().Serialize(writer, manifest);
+				CreateSerializer().Serialize(writer, manifest);
 			}
 		}
 
-		public static void EncryptResources(Assembly asmInput, string output, string password)
+		public static PitManifest EncryptResources(
+			Assembly asm,
+			string prefix,
+			string output,
+			string masterSalt)
 		{
 			var dir = Path.GetDirectoryName(output);
 			var asmName = Path.GetFileNameWithoutExtension(output);
@@ -65,90 +80,149 @@ namespace Peach.Pro.Test.Core
 
 			var builder = AppDomain.CurrentDomain.DefineDynamicAssembly(
 				new AssemblyName(asmName),
-				System.Reflection.Emit.AssemblyBuilderAccess.Save,
+				AssemblyBuilderAccess.Save,
 				dir
 			);
+			var module = builder.DefineDynamicModule(asmName, fileName);
 
+			var master = new PitManifest
+			{
+				Features = new Dictionary<string, PitManifestFeature>()
+			};
+
+			var manifest = LoadManifest(asm, prefix);
+			foreach (var feature in manifest.Features)
+			{
+				var password = MakePassword(feature.Key, masterSalt);
+				master.Features[feature.Key] = new PitManifestFeature
+				{
+					Secret = password
+				};
+				EncryptFeature(asm, prefix, feature, module, password);
+			}
+
+			var ms = new MemoryStream();
+			SaveManifest(ms, manifest);
+			var manifestName = MakeFullName(prefix, ManifestName);
+			module.DefineManifestResource(manifestName, ms, ResourceAttributes.Public);
+
+			builder.Save(fileName);
+
+			return master;
+		}
+
+		static byte[] MakePassword(string feature, string salt)
+		{
+			using (var algorithm = new SHA256Managed())
+			{
+				using (var crypto = new CryptoStream(Stream.Null, algorithm, CryptoStreamMode.Write))
+				using (var writer = new StreamWriter(crypto))
+				{
+					var password = salt + feature + salt;
+					writer.Write(password);
+				}
+				return algorithm.Hash;
+			}
+		}
+
+		static void EncryptFeature(
+			Assembly asm,
+			string prefix,
+			KeyValuePair<string, PitManifestFeature> feature,
+			ModuleBuilder module,
+			byte[] password)
+		{
 			using (var cipher = new AesManaged())
 			{
 				cipher.Mode = CipherMode.CBC;
 				cipher.Padding = PaddingMode.PKCS7;
 				cipher.GenerateIV();
+				feature.Value.Secret = cipher.IV;
 
-				byte[] salt;
-				using (var pbkdf = new Rfc2898DeriveBytes(password, cipher.KeySize / 8))
+				using (var pbkdf = new Rfc2898DeriveBytes(password, feature.Value.Secret, 1000))
 				{
-					salt = pbkdf.Salt;
 					cipher.Key = pbkdf.GetBytes(cipher.KeySize / 8);
 				}
 
 				using (var encrypter = cipher.CreateEncryptor())
 				{
-					var module = builder.DefineDynamicModule(asmName, fileName);
-					foreach (var resourceName in asmInput.GetManifestResourceNames())
+					foreach (var asset in feature.Value.Assets)
 					{
-						if (resourceName.Contains("manifest.json"))
-						{
-							PitManifest manifest;
-							using (var stream = asmInput.GetManifestResourceStream(resourceName))
-							{
-								manifest = LoadManifest(stream);
-								manifest.IV = cipher.IV;
-								manifest.Salt = salt;
-							}
+						var rawAssetName = feature.Key + "." + asset;
+						var inputResourceName = MakeFullName(prefix, asset);
+						var outputResourceName = MakeFullName(prefix, rawAssetName);
 
-							var ms = new MemoryStream();
-							SaveManifest(ms, manifest);
-							module.DefineManifestResource(resourceName, ms, ResourceAttributes.Public);
-						}
-						else
-						{
-							var ms = new MemoryStream();
-							using (var stream = asmInput.GetManifestResourceStream(resourceName))
-							using (var crypto = new CryptoStream(stream, encrypter, CryptoStreamMode.Read))
-							{
-								crypto.CopyTo(ms);
-								crypto.Clear();
-							}
+						var hmac = new HMACSHA256(cipher.Key);
 
-							ms.Seek(0, SeekOrigin.Begin);
-							module.DefineManifestResource(resourceName, ms, ResourceAttributes.Public);
+						var ms = new MemoryStream();
+						ms.Seek(hmac.HashSize / 8, SeekOrigin.Begin);
+						var tgt = new CryptoStream(ms, hmac, CryptoStreamMode.Write);
+
+						using (var stream = asm.GetManifestResourceStream(inputResourceName))
+						using (var src = new CryptoStream(stream, encrypter, CryptoStreamMode.Read))
+						{
+							src.CopyTo(tgt);
 						}
+						tgt.FlushFinalBlock();
+
+						ms.Seek(0, SeekOrigin.Begin);
+						ms.Write(hmac.Hash, 0, hmac.HashSize / 8);
+
+						ms.Seek(0, SeekOrigin.Begin);
+						module.DefineManifestResource(outputResourceName, ms, ResourceAttributes.Public);
 					}
-					cipher.Clear();
 				}
-
-				builder.Save(fileName);
 			}
 		}
 
-		public static Stream DecryptResource(Assembly asm, string prefix, string resourceName, string password)
+		public static Stream DecryptResource(
+			Assembly asm,
+			string prefix,
+			string featureName,
+			PitManifestFeature feature,
+			string asset,
+			byte[] password)
 		{
-			var manifest = LoadManifest(asm, prefix);
-
-			var cipher = new AesManaged();
-			cipher.Mode = CipherMode.CBC;
-			cipher.Padding = PaddingMode.PKCS7;
-			cipher.IV = manifest.IV;
-
-			using (var pbkdf = new Rfc2898DeriveBytes(password, manifest.Salt))
+			using (var cipher = new AesManaged())
 			{
-				cipher.Key = pbkdf.GetBytes(cipher.KeySize / 8);
+				cipher.Mode = CipherMode.CBC;
+				cipher.Padding = PaddingMode.PKCS7;
+				cipher.IV = feature.Secret;
+
+				using (var pbkdf = new Rfc2898DeriveBytes(password, feature.Secret, 1000))
+				{
+					cipher.Key = pbkdf.GetBytes(cipher.KeySize / 8);
+				}
+
+				var decrypter = cipher.CreateDecryptor();
+				var rawAssetName = featureName + "." + asset;
+				var resourceName = MakeFullName(prefix, rawAssetName);
+
+				var hmac = new HMACSHA256(cipher.Key);
+				var hash = new byte[hmac.HashSize / 8];
+
+				var ms = new MemoryStream();
+				var tgt = new CryptoStream(ms, decrypter, CryptoStreamMode.Write);
+
+				using (var stream = asm.GetManifestResourceStream(resourceName))
+				using (var src = new CryptoStream(stream, hmac, CryptoStreamMode.Read))
+				{
+					stream.Read(hash, 0, hmac.HashSize / 8);
+					src.CopyTo(tgt);
+				}
+
+				for (var i = 0; i < hmac.HashSize / 8; i++)
+				{
+					var computed = hmac.Hash;
+					if (hash[i] != computed[i])
+						return null;
+				}
+
+				tgt.FlushFinalBlock();
+
+				ms.Seek(0, SeekOrigin.Begin);
+				return ms;
 			}
-
-			var decrypter = cipher.CreateDecryptor();
-			var name = MakeFullName(prefix, resourceName);
-
-			var ms = new MemoryStream();
-			using (var stream = asm.GetManifestResourceStream(name))
-			using (var crypto = new CryptoStream(stream, decrypter, CryptoStreamMode.Read))
-			{
-				crypto.CopyTo(ms);
-				crypto.Clear();
-			}
-
-			ms.Seek(0, SeekOrigin.Begin);
-			return ms;
 		}
 	}
 }
