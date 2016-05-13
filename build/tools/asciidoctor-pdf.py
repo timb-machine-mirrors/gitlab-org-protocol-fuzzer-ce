@@ -3,7 +3,7 @@ from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs, Task
 from waflib import Utils, Errors, Logs, Context
-import os, shutil, re
+import os, shutil, re, sys
 
 re_xi = re.compile('''^(include|image)::(.*?.(adoc|png|PNG))\[''', re.M)
 
@@ -167,6 +167,54 @@ def asciidoctor_scan(self):
 				print 'Missing node for dependency: %s' % name
 	return [depnodes, ()]
 
+def run_asciidoctor_cmd(self, cmd, **kw):
+	bld = self.generator.bld
+	try:
+		if not kw.get('cwd', None):
+			kw['cwd'] = bld.cwd
+	except AttributeError:
+		bld.cwd = kw['cwd'] = bld.variant_dir
+
+	subprocess = Utils.subprocess
+	kw['shell'] = isinstance(cmd, str)
+	Logs.debug('runner: %r' % (cmd,))
+	Logs.debug('runner_env: kw=%s' % kw)
+
+	if bld.logger:
+		bld.logger.info(cmd)
+
+	kw['stdout'] = subprocess.PIPE
+	kw['stderr'] = subprocess.PIPE
+
+	if Logs.verbose and not kw['shell'] and not Utils.check_exe(cmd[0]):
+		raise Errors.WafError("Program %s not found!" % cmd[0])
+
+	try:
+		p = subprocess.Popen(cmd, **kw)
+		(out, err) = p.communicate()
+		ret = p.returncode
+	except Exception as e:
+		raise Errors.WafError('Execution failure: %s' % str(e), ex=e)
+
+	if out:
+		if not isinstance(out, str):
+			out = out.decode(sys.stdout.encoding or 'iso8859-1')
+		if bld.logger:
+			bld.logger.debug('out: %s' % out)
+		else:
+			Logs.info(out, extra={'stream':sys.stdout, 'c1': ''})
+		return -1
+	if err:
+		if not isinstance(err, str):
+			err = err.decode(sys.stdout.encoding or 'iso8859-1')
+		if bld.logger:
+			bld.logger.error('err: %s' % err)
+		else:
+			Logs.info(err, extra={'stream':sys.stderr, 'c1': ''})
+		return -1
+
+	return ret
+
 class asciidoctor_pdf(Task):
 	run_str = '${BUNDLE} exec ${RUBY} ${ASCIIDOCTOR_PDF} ${ASCIIDOCTOR_PDF_OPTS} ${ASCIIDOCTOR_PDF_THEME_OPTS} -o ${TGT} ${SRC}'
 	color   = 'PINK'
@@ -178,7 +226,7 @@ class asciidoctor_pdf(Task):
 		env = dict(self.env.env or os.environ)
 		env.update(BUNDLE_GEMFILE = self.env['ASCIIDOCTOR_PDF_GEMFILE'])
 		kw['env'] = env
-		return super(asciidoctor_pdf, self).exec_command(cmd, **kw)
+		return run_asciidoctor_cmd(self, cmd, **kw)
 
 class asciidoctor_html(Task):
 	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_HTML_OPTS} ${ASCIIDOCTOR_HTML_THEME_OPTS} -b html5 -o ${TGT} ${SRC}'
@@ -187,6 +235,7 @@ class asciidoctor_html(Task):
 	vars    = ['ASCIIDOCTOR_HTML_OPTS', 'ASCIIDOCTOR_HTML_THEME_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: x.env.ASCIIDOCTOR_HTML_THEME_DEPS
+	exec_command = run_asciidoctor_cmd
 
 class asciidoctor(Task):
 	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
@@ -194,3 +243,4 @@ class asciidoctor(Task):
 	vars    = ['ASCIIDOCTOR_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: []
+	exec_command = run_asciidoctor_cmd
