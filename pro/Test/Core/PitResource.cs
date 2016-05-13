@@ -113,7 +113,7 @@ namespace Peach.Pro.Test.Core
 
 		static byte[] MakePassword(string feature, string salt)
 		{
-			using (var algorithm = new SHA256Managed())
+			using (var algorithm = SHA256.Create())
 			{
 				using (var crypto = new CryptoStream(Stream.Null, algorithm, CryptoStreamMode.Write))
 				using (var writer = new StreamWriter(crypto))
@@ -132,7 +132,7 @@ namespace Peach.Pro.Test.Core
 			ModuleBuilder module,
 			byte[] password)
 		{
-			using (var cipher = new AesManaged())
+			using (var cipher = Aes.Create())
 			{
 				cipher.Mode = CipherMode.CBC;
 				cipher.Padding = PaddingMode.PKCS7;
@@ -154,22 +154,21 @@ namespace Peach.Pro.Test.Core
 
 						var hmac = new HMACSHA256(cipher.Key);
 
-						var ms = new MemoryStream();
-						ms.Seek(hmac.HashSize / 8, SeekOrigin.Begin);
-						var tgt = new CryptoStream(ms, hmac, CryptoStreamMode.Write);
+						var output = new MemoryStream();
+						output.Seek(hmac.HashSize / 8, SeekOrigin.Begin);
 
-						using (var stream = asm.GetManifestResourceStream(inputResourceName))
-						using (var src = new CryptoStream(stream, encrypter, CryptoStreamMode.Read))
+						using (var input = asm.GetManifestResourceStream(inputResourceName))
+						using (var csEncrypter = new CryptoStream(input, encrypter, CryptoStreamMode.Read))
+						using (var csHasher = new CryptoStream(csEncrypter, hmac, CryptoStreamMode.Read))
 						{
-							src.CopyTo(tgt);
+							csHasher.CopyTo(output);
 						}
-						tgt.FlushFinalBlock();
 
-						ms.Seek(0, SeekOrigin.Begin);
-						ms.Write(hmac.Hash, 0, hmac.HashSize / 8);
+						output.Seek(0, SeekOrigin.Begin);
+						output.Write(hmac.Hash, 0, hmac.HashSize / 8);
 
-						ms.Seek(0, SeekOrigin.Begin);
-						module.DefineManifestResource(outputResourceName, ms, ResourceAttributes.Public);
+						output.Seek(0, SeekOrigin.Begin);
+						module.DefineManifestResource(outputResourceName, output, ResourceAttributes.Public);
 					}
 				}
 			}
@@ -183,7 +182,7 @@ namespace Peach.Pro.Test.Core
 			string asset,
 			byte[] password)
 		{
-			using (var cipher = new AesManaged())
+			using (var cipher = Aes.Create())
 			{
 				cipher.Mode = CipherMode.CBC;
 				cipher.Padding = PaddingMode.PKCS7;
@@ -201,14 +200,14 @@ namespace Peach.Pro.Test.Core
 				var hmac = new HMACSHA256(cipher.Key);
 				var hash = new byte[hmac.HashSize / 8];
 
-				var ms = new MemoryStream();
-				var tgt = new CryptoStream(ms, decrypter, CryptoStreamMode.Write);
+				var output = new MemoryStream();
+				var csDecrypter = new CryptoStream(output, decrypter, CryptoStreamMode.Write);
 
 				using (var stream = asm.GetManifestResourceStream(resourceName))
-				using (var src = new CryptoStream(stream, hmac, CryptoStreamMode.Read))
+				using (var csHasher = new CryptoStream(stream, hmac, CryptoStreamMode.Read))
 				{
 					stream.Read(hash, 0, hmac.HashSize / 8);
-					src.CopyTo(tgt);
+					csHasher.CopyTo(csDecrypter);
 				}
 
 				for (var i = 0; i < hmac.HashSize / 8; i++)
@@ -218,10 +217,10 @@ namespace Peach.Pro.Test.Core
 						return null;
 				}
 
-				tgt.FlushFinalBlock();
+				csDecrypter.FlushFinalBlock();
 
-				ms.Seek(0, SeekOrigin.Begin);
-				return ms;
+				output.Seek(0, SeekOrigin.Begin);
+				return output;
 			}
 		}
 	}
