@@ -425,6 +425,83 @@ namespace PitTester
 		}
 
 		[Test]
+		public void SlurpOverCrackedVolatileFixup()
+		{
+			var pitFile = Path.GetTempFileName();
+			var pitTest = pitFile + ".test";
+			var pitSample = pitFile + ".sample";
+
+			var xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice minOccurs='1'>
+			<Block name='h1'>
+				<String value='h1:' token='true' />
+				<String name='value' />
+				<String value='|' token='true' />
+			</Block>
+			<Block name='h2'>
+				<String value='h2:' token='true' />
+				<String name='value'>
+					<Fixup class='UnixTime'>
+						<Param name='Format' value='r' />
+					</Fixup>
+				</String>
+				<String value='|' token='true' />
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM'/>
+				<Data fileName='{0}' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null' />
+	</Test>
+</Peach>
+".Fmt(pitSample);
+
+			const string test = @"
+<TestData>
+	<Slurp setXpath='//h2/value' value='overridden'/>
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Act1' publisher='Pub'/>
+		<Output action='TheState.Initial.Act1' publisher='Pub'>
+<![CDATA[
+00000000   68 31 3A 66 6F 6F 7C 68  32 3A 6F 76 65 72 72 69   h1:foo|h2:overri
+00000010   64 64 65 6E 7C 68 31 3A  62 61 7A 7C 68 32 3A 6F   dden|h1:baz|h2:o
+00000020   76 65 72 72 69 64 64 65  6E 7C                     verridden|      
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+
+			File.WriteAllText(pitFile, xml);
+			File.WriteAllText(pitTest, test);
+			File.WriteAllText(pitSample, "h1:foo|h2:bar|h1:baz|h2:qux|");
+
+			try
+			{
+				PitTester.TestPit("", pitFile, true, null, true);
+			}
+			finally
+			{
+				File.Delete(pitFile);
+				File.Delete(pitTest);
+				File.Delete(pitSample);
+			}
+		}
+
+		[Test]
 		public void TestSkippedActions()
 		{
 			const string xml = @"
