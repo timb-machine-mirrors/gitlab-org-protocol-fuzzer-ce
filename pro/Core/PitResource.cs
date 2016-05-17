@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Peach.Pro.Test.Core
+namespace Peach.Pro.Core
 {
 	public class PitManifest
 	{
@@ -48,7 +48,7 @@ namespace Peach.Pro.Test.Core
 			if (!string.IsNullOrEmpty(prefix))
 				parts.Add(prefix);
 			parts.Add(name);
-			return string.Join(".", parts);
+			return string.Join(".", parts).Replace("/", ".");
 		}
 
 		private static PitManifest LoadManifest(Stream stream)
@@ -60,7 +60,7 @@ namespace Peach.Pro.Test.Core
 			}
 		}
 
-		private static void SaveManifest(Stream stream, PitManifest manifest)
+		public static void SaveManifest(Stream stream, PitManifest manifest)
 		{
 			using (var writer = new StreamWriter(stream, Encoding.UTF8, 4096, true))
 			{
@@ -151,11 +151,20 @@ namespace Peach.Pro.Test.Core
 						var rawAssetName = feature.Key + "." + asset;
 						var inputResourceName = MakeFullName(prefix, asset);
 						var outputResourceName = MakeFullName(prefix, rawAssetName);
+						//Console.WriteLine("{0} -> {1}", inputResourceName, outputResourceName);
 
 						var hmac = new HMACSHA256(cipher.Key);
 
 						var output = new MemoryStream();
 						output.Seek(hmac.HashSize / 8, SeekOrigin.Begin);
+
+						//using (var input = asm.GetManifestResourceStream(inputResourceName))
+						//using (var reader = new StreamReader(input))
+						//{
+						//	Console.WriteLine("----------");
+						//	Console.WriteLine(asset);
+						//	Console.WriteLine(reader.ReadToEnd());
+						//}
 
 						using (var input = asm.GetManifestResourceStream(inputResourceName))
 						using (var csEncrypter = new CryptoStream(input, encrypter, CryptoStreamMode.Read))
@@ -204,10 +213,12 @@ namespace Peach.Pro.Test.Core
 				var csDecrypter = new CryptoStream(output, decrypter, CryptoStreamMode.Write);
 
 				using (var stream = asm.GetManifestResourceStream(resourceName))
-				using (var csHasher = new CryptoStream(stream, hmac, CryptoStreamMode.Read))
 				{
 					stream.Read(hash, 0, hmac.HashSize / 8);
-					csHasher.CopyTo(csDecrypter);
+					using (var csHasher = new CryptoStream(stream, hmac, CryptoStreamMode.Read))
+					{
+						csHasher.CopyTo(csDecrypter);
+					}
 				}
 
 				for (var i = 0; i < hmac.HashSize / 8; i++)
@@ -218,6 +229,13 @@ namespace Peach.Pro.Test.Core
 				}
 
 				csDecrypter.FlushFinalBlock();
+
+				output.Seek(0, SeekOrigin.Begin);
+
+				//var reader = new StreamReader(output);
+				//Console.WriteLine("----------");
+				//Console.WriteLine(asset);
+				//Console.WriteLine(reader.ReadToEnd());
 
 				output.Seek(0, SeekOrigin.Begin);
 				return output;

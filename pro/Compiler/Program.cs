@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Peach.Core;
@@ -6,6 +7,8 @@ using Peach.Core.Runtime;
 using System.Reflection;
 using System.IO;
 using System.Security.Cryptography;
+using Peach.Pro.Test.Core;
+using Peach.Pro.Core;
 
 namespace PitCompiler
 {
@@ -14,6 +17,10 @@ namespace PitCompiler
 		static int _logLevel;
 		static OptionSet _options;
 		static readonly Dictionary<string, string> _defines = new Dictionary<string, string>();
+		static bool _protect;
+		static string _prefix = "";
+		static string _salt;
+		static bool _help;
 
 		static int Main(string[] args)
 		{
@@ -21,44 +28,66 @@ namespace PitCompiler
 			{
 				_options = new OptionSet()
 				{
-					{ 
-						"h|?|help", 
+					{
+						"h|?|help",
 						"Show this help",
-						v => Syntax(false) 
+						x => _help = true
 					},
 					{
 						"V|version",
 						"Show the current version of this tool",
-						v => Version()
+						x => Version()
 					},
-					{ 
-						"debug", 
+					{
+						"debug",
 						"Enable debug messages",
-						v => _logLevel = 1 
+						x => _logLevel = 1
 					},
-					{ 
-						"trace", 
+					{
+						"trace",
 						"Enable trace messages",
-						v => _logLevel = 2 
+						x => _logLevel = 2
 					},
 					{
 						"D|define=",
 						"Specify a pit define.",
 						AddDefine
 					},
+					{
+						"protect",
+						"Protect a resource assembly",
+						x => _protect = true
+					},
+					{
+						"prefix=",
+						"Prefix for resources in an assembly",
+						x => _prefix = x
+					},
+					{
+						"salt=",
+						"Path to file containing salt",
+						x => _salt = x
+					}
 				};
 
 				var extra = _options.Parse(args);
-				if (extra.Count != 1)
-					Syntax(true);
 
 				Utilities.ConfigureLogging(_logLevel);
+
+				if (_protect)
+					return Protect(extra);
+
+				if (_help)
+					Syntax(false);
+
+				if (extra.Count != 1)
+					Syntax(true);
 
 				return Run(extra[0]);
 			}
 			catch (Exception ex)
 			{
-				Console.Error.WriteLine("Error: {0}", ex.Message);
+				Console.Error.WriteLine("Error: {0}", ex);
 				NLog.LogManager.GetLogger("pitc").Debug(ex);
 				return -1;
 			}
@@ -68,6 +97,13 @@ namespace PitCompiler
 				if (Debugger.IsAttached)
 					Debugger.Break();
 			}
+		}
+
+		static void ProtectSyntax(bool error)
+		{
+			Console.WriteLine("Usage: {0} --protect [OPTION...] input_asm output_asm", Utilities.ExecutableName);
+			_options.WriteOptionDescriptions(Console.Out);
+			Environment.Exit(error ? -1 : 0);
 		}
 
 		static void Syntax(bool error)
@@ -85,6 +121,37 @@ namespace PitCompiler
 				ComputeVersionHash()
 			);
 			Environment.Exit(0);
+		}
+
+		static int Protect(List<string> args)
+		{
+			if (_help)
+				ProtectSyntax(false);
+
+			if (args.Count != 2)
+				ProtectSyntax(true);
+
+			var input = args[0];
+			var output = args[1];
+			var dir = Path.GetDirectoryName(output);
+			var asm = Assembly.LoadFile(input);
+
+			if (!File.Exists(_salt))
+			{
+				Console.Error.WriteLine("File specified by --salt does not exist");
+				ProtectSyntax(true);
+			}
+			var salt = File.ReadAllLines(_salt).FirstOrDefault();
+
+			var manifest = PitResourceLoader.EncryptResources(asm, _prefix, output, salt);
+
+			var privatePath = Path.Combine(dir, "private.json");
+			using (var stream = File.OpenWrite(privatePath))
+			{
+				PitResourceLoader.SaveManifest(stream, manifest);
+			}
+
+			return 0;
 		}
 
 		static string ComputeVersionHash()

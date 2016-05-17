@@ -39,6 +39,17 @@ namespace Peach.Pro.Core
 		bool EulaAccepted { get; set; }
 		string EulaText();
 		string EulaText(LicenseFeature version);
+
+		//IEnumerable<IFeature> GetFeatures();
+		IFeature GetFeature(string name);
+	}
+
+	public interface IFeature : IDisposable
+	{
+		bool Acquire();
+		void Release();
+
+		string VendorString { get; }
 	}
 
 	public class License : ILicense
@@ -371,6 +382,11 @@ namespace Peach.Pro.Core
 			}
 
 			return false;
+		}
+
+		public IFeature GetFeature(string name)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

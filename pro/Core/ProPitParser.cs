@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
 using NLog;
@@ -25,9 +26,14 @@ namespace Peach.Pro.Core
 		private readonly string _pitLibraryPath;
 		private readonly Assembly _pitsAssembly;
 		private readonly string _pitsPrefix;
+		private readonly string _pitFeatureName;
+		private readonly PitManifestFeature _pitFeature;
+		private readonly IFeature _feature;
 
 		public ProPitParser(
+			ILicense license,
 			string pitLibraryPath,
+			string pitPath,
 			Assembly pitsAssembly = null,
 			string pitsPrefix = "")
 		{
@@ -41,6 +47,29 @@ namespace Peach.Pro.Core
 			_pitLibraryPath = pitLibraryPath;
 			_pitsAssembly = pitsAssembly;
 			_pitsPrefix = pitsPrefix;
+
+			if (_pitsAssembly != null)
+			{
+				var manifest = PitResourceLoader.LoadManifest(_pitsAssembly, _pitsPrefix);
+				var pitName = Path.Combine(
+					Path.GetFileName(Path.GetDirectoryName(pitPath)),
+					Path.GetFileName(pitPath)
+				);
+
+				var query = manifest.Features.Where(x => x.Value.Pit == pitName);
+				if (query.Any())
+				{
+					var kv = query.First();
+					_pitFeatureName = kv.Key;
+					_pitFeature = kv.Value;
+					_feature = license.GetFeature(_pitFeatureName);
+				}
+			}
+
+			if (_feature == null)
+			{
+				_feature = license.GetFeature("PeachPit-Custom");
+			}
 		}
 
 		// should only be used for unit tests
@@ -169,9 +198,19 @@ namespace Peach.Pro.Core
 			// try to load from assembly
 			if (_pitsAssembly != null && src.StartsWith(_pitLibraryPath))
 			{
-				var relative = src.Substring(_pitLibraryPath.Length);
-				var fullName = _pitsPrefix + relative.Replace("/", ".");
-				stream = _pitsAssembly.GetManifestResourceStream(fullName);
+				var asset = src.Substring(_pitLibraryPath.Length)
+				               .Replace("/", ".")
+				               .Substring(1); // skip 1st '.'
+				var password = Convert.FromBase64String(_feature.VendorString);
+
+				stream = PitResourceLoader.DecryptResource(
+					_pitsAssembly,
+					_pitsPrefix, 
+					_pitFeatureName, 
+					_pitFeature, 
+					asset, 
+					password
+				);
 			}
 
 			// if fail, try to load from disk

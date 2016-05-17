@@ -224,7 +224,7 @@ namespace Peach.Pro.Core.Runtime
 			var defs = ParseConfig();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser(_pitLibraryPath);
+			var parser = new ProPitParser(License.Instance, _pitLibraryPath, _config.pitFile);
 
 			using (var db = new NodeDatabase())
 			{

@@ -347,13 +347,6 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		protected virtual Analyzer GetParser()
-		{
-			var parser = new ProPitParser(_pitLibraryPath);
-			Analyzer.defaultParser = parser;
-			return Analyzer.defaultParser;
-		}
-
 		/// <summary>
 		/// Create an engine and run the fuzzing job
 		/// </summary>
@@ -490,21 +483,17 @@ namespace Peach.Pro.Core.Runtime
 				_config.shouldStop = () => _shouldStop;
 				Console.CancelKeyPress += Console_CancelKeyPress;
 
-				string pitPath = null;
+				var pitPath = _config.pitFile = extra[0];
+
 				PitConfig pitConfig = null;
-
-				if (extra.Count > 0)
+				if (Path.GetExtension(pitPath) == ".peach")
 				{
-					pitPath = _config.pitFile = extra[0];
-					if (Path.GetExtension(pitPath) == ".peach")
-					{
-						// Ensure pit library exists
-						_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
-						_definedValues[PitLibraryPath] = _pitLibraryPath;
+					// Ensure pit library exists
+					_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
+					_definedValues[PitLibraryPath] = _pitLibraryPath;
 
-						pitConfig = PitDatabase.LoadPitConfig(pitPath);
-						pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
-					}
+					pitConfig = PitDatabase.LoadPitConfig(pitPath);
+					pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
 				}
 
 				if (extra.Count > 1)
@@ -515,7 +504,7 @@ namespace Peach.Pro.Core.Runtime
 				var parserArgs = new Dictionary<string, object>();
 				parserArgs[PitParser.DEFINED_VALUES] = defs;
 
-				var parser = GetParser();
+				var parser = new ProPitParser(License.Instance, _pitLibraryPath, pitPath);
 
 				if (test)
 				{

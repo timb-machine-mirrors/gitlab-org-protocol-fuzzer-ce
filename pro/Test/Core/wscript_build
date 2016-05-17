@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 deps = [
+	'Moq.dll',
 	'NLog.dll',
 	'nunit.framework.dll',
 	'System.dll',
