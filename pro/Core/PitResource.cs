@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.IO;
+using Org.BouncyCastle.Crypto.Modes;
+using Org.BouncyCastle.Crypto.Parameters;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Core
 {
@@ -17,8 +23,8 @@ namespace Peach.Pro.Core
 	public class PitManifestFeature
 	{
 		public string Pit { get; set; }
+		public byte[] Key { get; set; }
 		public string[] Assets { get; set; }
-		public byte[] Secret { get; set; }
 	}
 
 	public static class PitResourceLoader
@@ -48,7 +54,9 @@ namespace Peach.Pro.Core
 			if (!string.IsNullOrEmpty(prefix))
 				parts.Add(prefix);
 			parts.Add(name);
-			return string.Join(".", parts).Replace("/", ".");
+			return string.Join(".", parts)
+				.Replace("/", ".")
+				.Replace("\\", ".");
 		}
 
 		private static PitManifest LoadManifest(Stream stream)
@@ -93,12 +101,13 @@ namespace Peach.Pro.Core
 			var manifest = LoadManifest(asm, prefix);
 			foreach (var feature in manifest.Features)
 			{
-				var password = MakePassword(feature.Key, masterSalt);
+				var key = MakeKey(feature.Key, masterSalt);
 				master.Features[feature.Key] = new PitManifestFeature
 				{
-					Secret = password
+					Key = key
 				};
-				EncryptFeature(asm, prefix, feature, module, password);
+
+				EncryptFeature(asm, prefix, feature, module, key);
 			}
 
 			var ms = new MemoryStream();
@@ -111,136 +120,102 @@ namespace Peach.Pro.Core
 			return master;
 		}
 
-		static byte[] MakePassword(string feature, string salt)
-		{
-			using (var algorithm = SHA256.Create())
-			{
-				using (var crypto = new CryptoStream(Stream.Null, algorithm, CryptoStreamMode.Write))
-				using (var writer = new StreamWriter(crypto))
-				{
-					var password = salt + feature + salt;
-					writer.Write(password);
-				}
-				return algorithm.Hash;
-			}
-		}
-
 		static void EncryptFeature(
 			Assembly asm,
 			string prefix,
 			KeyValuePair<string, PitManifestFeature> feature,
 			ModuleBuilder module,
-			byte[] password)
+			byte[] key)
 		{
-			using (var cipher = Aes.Create())
+			foreach (var asset in feature.Value.Assets)
 			{
-				cipher.Mode = CipherMode.CBC;
-				cipher.Padding = PaddingMode.PKCS7;
-				cipher.GenerateIV();
-				feature.Value.Secret = cipher.IV;
+				var cipher = MakeCipher(asset, key, true);
 
-				using (var pbkdf = new Rfc2898DeriveBytes(password, feature.Value.Secret, 1000))
+				var rawAssetName = feature.Key + "." + asset;
+				var inputResourceName = MakeFullName(prefix, asset);
+				var outputResourceName = MakeFullName(prefix, rawAssetName);
+				Console.WriteLine("{0} -> {1}", inputResourceName, outputResourceName);
+
+				var output = new MemoryStream();
+				using (var input = asm.GetManifestResourceStream(inputResourceName))
+				using (var wrapper = new NonClosingStreamWrapper(output))
+				using (var encrypter = new CipherStream(wrapper, null, cipher))
 				{
-					cipher.Key = pbkdf.GetBytes(cipher.KeySize / 8);
+					input.CopyTo(encrypter);
 				}
 
-				using (var encrypter = cipher.CreateEncryptor())
-				{
-					foreach (var asset in feature.Value.Assets)
-					{
-						var rawAssetName = feature.Key + "." + asset;
-						var inputResourceName = MakeFullName(prefix, asset);
-						var outputResourceName = MakeFullName(prefix, rawAssetName);
-						//Console.WriteLine("{0} -> {1}", inputResourceName, outputResourceName);
-
-						var hmac = new HMACSHA256(cipher.Key);
-
-						var output = new MemoryStream();
-						output.Seek(hmac.HashSize / 8, SeekOrigin.Begin);
-
-						//using (var input = asm.GetManifestResourceStream(inputResourceName))
-						//using (var reader = new StreamReader(input))
-						//{
-						//	Console.WriteLine("----------");
-						//	Console.WriteLine(asset);
-						//	Console.WriteLine(reader.ReadToEnd());
-						//}
-
-						using (var input = asm.GetManifestResourceStream(inputResourceName))
-						using (var csEncrypter = new CryptoStream(input, encrypter, CryptoStreamMode.Read))
-						using (var csHasher = new CryptoStream(csEncrypter, hmac, CryptoStreamMode.Read))
-						{
-							csHasher.CopyTo(output);
-						}
-
-						output.Seek(0, SeekOrigin.Begin);
-						output.Write(hmac.Hash, 0, hmac.HashSize / 8);
-
-						output.Seek(0, SeekOrigin.Begin);
-						module.DefineManifestResource(outputResourceName, output, ResourceAttributes.Public);
-					}
-				}
+				output.Seek(0, SeekOrigin.Begin);
+				module.DefineManifestResource(outputResourceName, output, ResourceAttributes.Public);
 			}
 		}
 
 		public static Stream DecryptResource(
 			Assembly asm,
 			string prefix,
-			string featureName,
-			PitManifestFeature feature,
+			KeyValuePair<string, PitManifestFeature> feature,
 			string asset,
-			byte[] password)
+			byte[] key)
 		{
-			using (var cipher = Aes.Create())
+			var cipher = MakeCipher(asset, key, false);
+
+			var rawAssetName = feature.Key + "." + asset;
+			var resourceName = MakeFullName(prefix, rawAssetName);
+
+			var output = new MemoryStream();
+			using (var input = asm.GetManifestResourceStream(resourceName))
+			using (var wrapper = new NonClosingStreamWrapper(input))
+			using (var decrypter = new CipherStream(wrapper, cipher, null))
 			{
-				cipher.Mode = CipherMode.CBC;
-				cipher.Padding = PaddingMode.PKCS7;
-				cipher.IV = feature.Secret;
-
-				using (var pbkdf = new Rfc2898DeriveBytes(password, feature.Secret, 1000))
+				try
 				{
-					cipher.Key = pbkdf.GetBytes(cipher.KeySize / 8);
+					decrypter.CopyTo(output);
 				}
-
-				var decrypter = cipher.CreateDecryptor();
-				var rawAssetName = featureName + "." + asset;
-				var resourceName = MakeFullName(prefix, rawAssetName);
-
-				var hmac = new HMACSHA256(cipher.Key);
-				var hash = new byte[hmac.HashSize / 8];
-
-				var output = new MemoryStream();
-				var csDecrypter = new CryptoStream(output, decrypter, CryptoStreamMode.Write);
-
-				using (var stream = asm.GetManifestResourceStream(resourceName))
+				catch (InvalidCipherTextException)
 				{
-					stream.Read(hash, 0, hmac.HashSize / 8);
-					using (var csHasher = new CryptoStream(stream, hmac, CryptoStreamMode.Read))
-					{
-						csHasher.CopyTo(csDecrypter);
-					}
+					// MAC check for GCM failed
+					return null;
 				}
-
-				for (var i = 0; i < hmac.HashSize / 8; i++)
-				{
-					var computed = hmac.Hash;
-					if (hash[i] != computed[i])
-						return null;
-				}
-
-				csDecrypter.FlushFinalBlock();
-
-				output.Seek(0, SeekOrigin.Begin);
-
-				//var reader = new StreamReader(output);
-				//Console.WriteLine("----------");
-				//Console.WriteLine(asset);
-				//Console.WriteLine(reader.ReadToEnd());
-
-				output.Seek(0, SeekOrigin.Begin);
-				return output;
 			}
+
+			output.Seek(0, SeekOrigin.Begin);
+			return output;
+		}
+
+		static byte[] MakeKey(string feature, string salt)
+		{
+			var saltBytes = Encoding.UTF8.GetBytes(salt);
+			var password = Encoding.UTF8.GetBytes(feature);
+
+			var digest = new Sha256Digest();
+			var key = new byte[digest.GetDigestSize()];
+
+			digest.BlockUpdate(saltBytes, 0, saltBytes.Length);
+			digest.BlockUpdate(password, 0, password.Length);
+			digest.BlockUpdate(saltBytes, 0, saltBytes.Length);
+			digest.DoFinal(key, 0);
+
+			return key;
+		}
+
+		static byte[] Digest(byte[] input)
+		{
+			var digest = new Sha256Digest();
+			var output = new byte[digest.GetDigestSize()];
+			digest.BlockUpdate(input, 0, input.Length);
+			digest.DoFinal(output, 0);
+			return output;
+		}
+
+		static IBufferedCipher MakeCipher(string asset, byte[] key, bool forEncryption)
+		{
+			var iv = Digest(Encoding.UTF8.GetBytes(asset));
+			var keyParam = new KeyParameter(key);
+			var cipherParams = new AeadParameters(keyParam, 16 * 8, iv);
+			var blockCipher = new AesFastEngine();
+			var aeadBlockCipher = new GcmBlockCipher(blockCipher);
+			var cipher = new BufferedAeadBlockCipher(aeadBlockCipher);
+			cipher.Init(forEncryption, cipherParams);
+			return cipher;
 		}
 	}
 }
-

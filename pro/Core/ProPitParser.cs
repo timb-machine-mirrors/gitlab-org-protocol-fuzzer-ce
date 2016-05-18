@@ -26,8 +26,7 @@ namespace Peach.Pro.Core
 		private readonly string _pitLibraryPath;
 		private readonly Assembly _pitsAssembly;
 		private readonly string _pitsPrefix;
-		private readonly string _pitFeatureName;
-		private readonly PitManifestFeature _pitFeature;
+		private readonly KeyValuePair<string, PitManifestFeature> _pitFeature;
 		private readonly IFeature _feature;
 
 		public ProPitParser(
@@ -51,7 +50,7 @@ namespace Peach.Pro.Core
 			if (_pitsAssembly != null)
 			{
 				var manifest = PitResourceLoader.LoadManifest(_pitsAssembly, _pitsPrefix);
-				var pitName = Path.Combine(
+				var pitName = string.Join("/",
 					Path.GetFileName(Path.GetDirectoryName(pitPath)),
 					Path.GetFileName(pitPath)
 				);
@@ -59,10 +58,8 @@ namespace Peach.Pro.Core
 				var query = manifest.Features.Where(x => x.Value.Pit == pitName);
 				if (query.Any())
 				{
-					var kv = query.First();
-					_pitFeatureName = kv.Key;
-					_pitFeature = kv.Value;
-					_feature = license.GetFeature(_pitFeatureName);
+					_pitFeature = query.First();
+					_feature = license.GetFeature(_pitFeature.Key);
 				}
 			}
 
@@ -200,16 +197,15 @@ namespace Peach.Pro.Core
 			{
 				var asset = src.Substring(_pitLibraryPath.Length)
 				               .Replace("/", ".")
+							   .Replace("\\", ".")
 				               .Substring(1); // skip 1st '.'
-				var password = Convert.FromBase64String(_feature.VendorString);
 
 				stream = PitResourceLoader.DecryptResource(
 					_pitsAssembly,
 					_pitsPrefix, 
-					_pitFeatureName, 
 					_pitFeature, 
-					asset, 
-					password
+					asset,
+					_feature.Key
 				);
 			}
 

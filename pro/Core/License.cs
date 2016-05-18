@@ -49,7 +49,7 @@ namespace Peach.Pro.Core
 		bool Acquire();
 		void Release();
 
-		string VendorString { get; }
+		byte[] Key { get; }
 	}
 
 	public class License : ILicense

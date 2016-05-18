@@ -40,17 +40,15 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					MasterSalt
 				);
 
-				var password = Convert.ToBase64String(master.Features[featureName].Secret);
-
 				var feature = new Mock<IFeature>();
-				feature.SetupGet(x => x.VendorString)
-				       .Returns(password);
+				feature.SetupGet(x => x.Key)
+					   .Returns(master.Features[featureName].Key);
 
 				var license = new Mock<ILicense>();
 				license.Setup(x => x.GetFeature(featureName))
 				       .Returns(feature.Object);
 
-				var encryptedAsm = Assembly.LoadFile(encrypted);
+				var encryptedAsm = LoadAssembly(encrypted);
 
 				var pitFile = Path.Combine(tmpDir.Path, "Net", "DNP3_Slave.xml");
 				var pitConfigFile = pitFile + ".config";
@@ -152,10 +150,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				using (var stream = PitResourceLoader.DecryptResource(
 					asm,
 					PitsResourcePrefix,
-					featureName,
- 					feature,
+					new KeyValuePair<string, PitManifestFeature>(featureName, feature), 
 					asset1,
-					master.Features[featureName].Secret))
+					master.Features[featureName].Key))
 				using (var reader = new StreamReader(stream))
 				{
 					var actual = reader.ReadLine();
@@ -165,10 +162,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				using (var stream = PitResourceLoader.DecryptResource(
 					asm,
 					PitsResourcePrefix,
-					featureName,
- 					feature,
+					new KeyValuePair<string, PitManifestFeature>(featureName, feature), 
 					asset2,
-					master.Features[featureName].Secret))
+					master.Features[featureName].Key))
 				using (var reader = new StreamReader(stream))
 				{
 					var actual = reader.ReadLine();
@@ -181,10 +177,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				using (var stream = PitResourceLoader.DecryptResource(
 					asm,
 					PitsResourcePrefix,
-					otherFeatureName,
- 					otherFeature,
+					new KeyValuePair<string, PitManifestFeature>(otherFeatureName, otherFeature),
 					asset1,
-					master.Features[featureName].Secret))
+					master.Features[featureName].Key))
 				{
 					Assert.IsNull(stream);
 				}
