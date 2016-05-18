@@ -1,13 +1,12 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
 using Peach.Core;
 using Peach.Core.Runtime;
-using System.Reflection;
-using System.IO;
-using System.Security.Cryptography;
-using Peach.Pro.Test.Core;
 using Peach.Pro.Core;
 
 namespace PitCompiler

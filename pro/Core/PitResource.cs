@@ -70,7 +70,7 @@ namespace Peach.Pro.Core
 
 		public static void SaveManifest(Stream stream, PitManifest manifest)
 		{
-			using (var writer = new StreamWriter(stream, Encoding.UTF8, 4096, true))
+			using (var writer = new StreamWriter(stream))
 			{
 				CreateSerializer().Serialize(writer, manifest);
 			}
@@ -107,11 +107,16 @@ namespace Peach.Pro.Core
 					Key = key
 				};
 
+				//Console.WriteLine("{0,-40}: {1}", feature.Key, Convert.ToBase64String(key));
+
 				EncryptFeature(asm, prefix, feature, module, key);
 			}
 
 			var ms = new MemoryStream();
-			SaveManifest(ms, manifest);
+			using (var wrapper = new NonClosingStreamWrapper(ms))
+			{
+				SaveManifest(wrapper, manifest);
+			}
 			var manifestName = MakeFullName(prefix, ManifestName);
 			module.DefineManifestResource(manifestName, ms, ResourceAttributes.Public);
 
@@ -134,7 +139,6 @@ namespace Peach.Pro.Core
 				var rawAssetName = feature.Key + "." + asset;
 				var inputResourceName = MakeFullName(prefix, asset);
 				var outputResourceName = MakeFullName(prefix, rawAssetName);
-				Console.WriteLine("{0} -> {1}", inputResourceName, outputResourceName);
 
 				var output = new MemoryStream();
 				using (var input = asm.GetManifestResourceStream(inputResourceName))
