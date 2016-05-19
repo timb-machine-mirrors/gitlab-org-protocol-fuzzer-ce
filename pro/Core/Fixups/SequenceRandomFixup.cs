@@ -68,20 +68,6 @@ namespace Peach.Pro.Core.Fixups
 
 			object obj;
 
-			if (ctx.controlRecordingIteration)
-			{
-				var dm = parent.root as DataModel;
-				if (dm != null && dm.actionData != null)
-				{
-					// Allow value to be overridden via the stateStore using key:
-					// Peach.VolatileOverride.StateName.ActionName.ModelName.Path.To.Element
-					var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, parent.fullName);
-
-					if (ctx.stateStore.TryGetValue(key, out obj))
-						return (Variant) obj;
-				}
-			}
-
 			Random rng;
 
 			if (!ctx.iterationStateStore.TryGetValue("SequenceRandomFixup", out obj))

@@ -51,6 +51,66 @@ None
 
 === Examples
 
+.Command line data model generation
+==========================
+This example uses the Asn.1 analyzer on the command line to automatically generate a data model.
+The sample file contains an ASN.1 bit string that is comprised of two concatenated ASN.1 bit strings.
+
+
+Hex dump of sample file +asn1.bin+
+----
+00000000: 2380 0303 000a 3b03 0504 5f29 1cd0 0000  #.....;..._)....
+----
+
+Output from running peach on the command line
+----
+> peach --analyzer=Asn1 asn1.bin asn1.xml
+
+[[ Peach Pro v3.0.0.0
+[[ Copyright (c) Peach Fuzzer LLC
+
+[*] Starting Analyzer
+----
+
+Contents of generated pit +asn1.xml+
+[source,xml]
+----
+<Peach>
+  <DataModel name="example_asn1">
+    <Asn1Type class="0" pc="1" tag="3" name="BIT_STRING">
+      <Block name="Value">
+        <Asn1Type class="0" pc="0" tag="3" name="BIT_STRING">
+          <Block name="Value">
+            <Number size="8" signed="false" name="UnusedLen" value="0">
+              <Relation type="size" of="UnusedBits" />
+            </Number>
+            <Blob name="Value" valueType="hex" value="0a3b" />
+            <Blob name="UnusedBits" valueType="hex" value="" />
+            <Padding name="Padding" />
+          </Block>
+        </Asn1Type>
+        <Asn1Type class="0" pc="0" tag="3" name="BIT_STRING_1">
+          <Block name="Value">
+            <Number size="8" signed="false" name="UnusedLen" value="4">
+              <Relation type="size" of="UnusedBits" />
+            </Number>
+            <Blob name="Value" valueType="hex" value="5f291c" />
+            <Blob name="UnusedBits" valueType="hex" value="" />
+            <Padding name="Padding" />
+          </Block>
+        </Asn1Type>
+        <Asn1Type class="0" pc="0" tag="0" name="EOC">
+          <Blob name="Value" valueType="hex" value="" />
+        </Asn1Type>
+      </Block>
+    </Asn1Type>
+  </DataModel>
+</Peach>
+----
+
+==========================
+
+
 .Certificate Inline Example
 ==========================
 This example uses the Asn.1 analyzer on inline Blob data.

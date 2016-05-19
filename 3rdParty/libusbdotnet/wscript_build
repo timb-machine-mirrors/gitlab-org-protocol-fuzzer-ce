@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Xml.dll',
+	'Microsoft.CSharp.dll',
+	'System.Windows.Forms.dll',
+]
+
+bld(
+	features = 'cs',
+	use = deps,
+	source = bld.path.ant_glob('LibWinUsb/**/*.cs',
+		excl=['LibWinUsb/Main/SetupApiRegistry.cs']),
+	name = 'LibUsbDotNet.dll',
+	version = False,
+	csdoc = False,
+	csflags = [
+		'/define:LIBUSBDOTNET',
+	]
+)
+
