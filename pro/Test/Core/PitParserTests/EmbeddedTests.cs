@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +8,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Test.Core.PitParserTests
 {

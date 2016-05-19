@@ -7,7 +7,9 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2.Controllers;
 using SysProcess = System.Diagnostics.Process;
@@ -16,7 +18,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 {
 	[TestFixture]
 	[Quick]
-	class JobServiceTests : ControllerTestsBase
+	class JobsControllerTests : ControllerTestsBase
 	{
 		SysProcess _process;
 
@@ -29,15 +31,26 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			}
 		}
 
-		[SetUp]
-		public void SetUp()
+		protected override Mock<ILicense> CreateLicense()
 		{
-			_license.Setup(x => x.IsValid).Returns(true);
-			_license.Setup(x => x.EulaAccepted).Returns(true);
-			_jobMonitor.Setup(x => x.Pid).Returns(Utilities.GetCurrentProcessId());
+			var license = base.CreateLicense();
+			license.Setup(x => x.IsValid).Returns(true);
+			license.Setup(x => x.EulaAccepted).Returns(true);
+			return license;
+		}
 
-			DoSetUp();
+		protected override Mock<IJobMonitor> CreateJobMonitor()
+		{
+			var jobMonitor = base.CreateJobMonitor();
+			jobMonitor.Setup(x => x.Pid).Returns(Utilities.GetCurrentProcessId());
+			return jobMonitor;
+		}
 
+		[SetUp]
+		public override void SetUp()
+		{
+			base.SetUp();
+		
 			_process = new SysProcess()
 			{
 				StartInfo = new ProcessStartInfo
@@ -55,9 +68,9 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		}
 
 		[TearDown]
-		public void TearDown()
+		public override void TearDown()
 		{
-			DoTearDown();
+			base.TearDown();
 
 			_process.Kill();
 			_process.WaitForExit();
@@ -398,7 +411,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			}
 
 			var ctrl = new JobsController(_context, _pitDatabase.Object, _jobMonitor.Object);
-			var jobs = ctrl.Get(dryrun: true).ToArray();
+			var jobs = ctrl.Get(true).ToArray();
 
 			Assert.NotNull(jobs);
 			Assert.AreEqual(1, jobs.Length);

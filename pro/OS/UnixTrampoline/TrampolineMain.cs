@@ -12,7 +12,7 @@ using Mono.Unix.Native;
 
 namespace PeachTrampoline
 {
-	public class Program
+	public class TrampolineMain
 	{
 		static int Main(string[] args)
 		{

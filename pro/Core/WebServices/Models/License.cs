@@ -1,5 +1,5 @@
 using System;
-using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core.WebServices.Models
 {

@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2;
 
@@ -57,17 +58,37 @@ namespace Peach.Pro.Test.WebApi
 		protected HttpServer _server;
 		protected HttpMessageInvoker _client;
 		protected WebContext _context;
-		protected Mock<ILicense> _license = new Mock<ILicense>();
-		protected Mock<IPitDatabase> _pitDatabase = new Mock<IPitDatabase>();
-		protected Mock<IJobMonitor> _jobMonitor = new Mock<IJobMonitor>();
 
-		public void DoSetUp()
+		protected Mock<ILicense> _license;
+		protected Mock<IPitDatabase> _pitDatabase;
+		protected Mock<IJobMonitor> _jobMonitor;
+
+		protected virtual Mock<ILicense> CreateLicense()
+		{
+			return new Mock<ILicense>();
+		}
+
+		protected virtual Mock<IPitDatabase> CreatePitDatabase()
+		{
+			return new Mock<IPitDatabase>();
+		}
+
+		protected virtual Mock<IJobMonitor> CreateJobMonitor()
+		{
+			return new Mock<IJobMonitor>();
+		}
+
+		[SetUp]
+		public virtual void SetUp()
 		{
 			_tmpDir = new TempDirectory();
 
 			Configuration.LogRoot = _tmpDir.Path;
 
 			_context = new WebContext(Path.Combine(_tmpDir.Path, "pits"));
+			_license = CreateLicense();
+			_pitDatabase = CreatePitDatabase();
+			_jobMonitor = CreateJobMonitor();
 
 			var config = WebServer.CreateHttpConfiguration(
 				_context, 
@@ -80,7 +101,8 @@ namespace Peach.Pro.Test.WebApi
 			_client = new HttpMessageInvoker(_server);
 		}
 
-		public void DoTearDown()
+		[TearDown]
+		public virtual void TearDown()
 		{
 			_client.Dispose();
 			_server.Dispose();

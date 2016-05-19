@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Xml;
 using NLog;
@@ -10,6 +9,7 @@ using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Dom.Actions;
 using Peach.Pro.Core.Godel;
+using Peach.Pro.Core.License;
 using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
 using StateModel = Peach.Pro.Core.Godel.StateModel;
@@ -23,11 +23,7 @@ namespace Peach.Pro.Core
 	{
 		public static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private readonly string _pitLibraryPath;
-		private readonly Assembly _pitsAssembly;
-		private readonly string _pitsPrefix;
-		private readonly KeyValuePair<string, PitManifestFeature> _pitFeature;
-		private readonly IFeature _feature;
+		private readonly IPitResource _pitResource;
 
 		public ProPitParser(
 			ILicense license,
@@ -36,42 +32,13 @@ namespace Peach.Pro.Core
 			Assembly pitsAssembly = null,
 			string pitsPrefix = "")
 		{
-			if (pitsAssembly == null)
-			{
-				var pitsAssemblyPath = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
-				if (File.Exists(pitsAssemblyPath))
-					pitsAssembly = Assembly.LoadFrom(pitsAssemblyPath);
-			}
-
-			_pitLibraryPath = pitLibraryPath;
-			_pitsAssembly = pitsAssembly;
-			_pitsPrefix = pitsPrefix;
-
-			if (_pitsAssembly != null)
-			{
-				var manifest = PitResourceLoader.LoadManifest(_pitsAssembly, _pitsPrefix);
-				var pitName = string.Join("/",
-					Path.GetFileName(Path.GetDirectoryName(pitPath)),
-					Path.GetFileName(pitPath)
-				);
-
-				var query = manifest.Features.Where(x => x.Value.Pit == pitName);
-				if (query.Any())
-				{
-					_pitFeature = query.First();
-					_feature = license.GetFeature(_pitFeature.Key);
-				}
-			}
-
-			if (_feature == null)
-			{
-				_feature = license.GetFeature("PeachPit-Custom");
-			}
+			_pitResource = new PitResource(license, pitLibraryPath, pitPath, pitsAssembly, pitsPrefix);
 		}
 
 		// should only be used for unit tests
 		internal ProPitParser()
 		{
+			_pitResource = new FilePitResource();
 		}
 
 		protected override Peach.Core.Dom.Dom CreateDom()
@@ -190,43 +157,9 @@ namespace Peach.Pro.Core
 			var ns = child.getAttrString("ns");
 			var src = child.getAttrString("src");
 
-			Stream stream = null;
-
-			// try to load from assembly
-			if (_pitsAssembly != null && src.StartsWith(_pitLibraryPath))
-			{
-				var asset = src.Substring(_pitLibraryPath.Length)
-				               .Replace("/", ".")
-							   .Replace("\\", ".")
-				               .Substring(1); // skip 1st '.'
-
-				stream = PitResourceLoader.DecryptResource(
-					_pitsAssembly,
-					_pitsPrefix, 
-					_pitFeature, 
-					asset,
-					_feature.Key
-				);
-			}
-
-			// if fail, try to load from disk
+			var stream = _pitResource.Load(src);
 			if (stream == null)
-			{
-				var uri = new Uri(src);
-				if (uri.Scheme == Uri.UriSchemeFile)
-				{
-					stream = File.OpenRead(uri.AbsolutePath);
-				}
-				else
-				{
-					throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(src));
-				}
-			}
-
-			if (stream == null)
-			{
 				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
-			}
 
 			Peach.Core.Dom.Dom newDom;
 			using (stream)

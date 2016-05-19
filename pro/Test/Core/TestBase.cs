@@ -17,7 +17,7 @@ namespace Peach.Pro.Test.Core
 		{
 			DoSetUp();
 
-			Program.LoadPlatformAssembly();
+			BaseProgram.LoadPlatformAssembly();
 
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;

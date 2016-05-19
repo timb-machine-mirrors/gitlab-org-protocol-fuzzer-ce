@@ -1,13 +1,14 @@
-﻿using System.IO;
-using NLog;
-using Peach.Core;
-using Peach.Core.Runtime;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using NLog;
+using Peach.Core;
+using Peach.Core.Runtime;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebServices;
 using SysProcess = System.Diagnostics.Process;
 
@@ -24,14 +25,15 @@ namespace Peach.Pro.Core.Runtime
 		Uri Uri { get; }
 	}
 
-	public abstract class Program
+	public abstract class BaseProgram
 	{
 		// PitLibraryPath, IJobMonitor
-		public Func<string, IJobMonitor, IWebStatus> CreateWeb { get; set; }
+		public Func<ILicense, string, IJobMonitor, IWebStatus> CreateWeb { get; set; }
 
 		protected OptionSet _options;
 		protected int _verbosity;
 		protected int? _webPort;
+		protected ILicense _license = new PortableLicense();
 
 		// this is static so it can be re-used by unit tests
 		public static void LoadPlatformAssembly()
@@ -185,9 +187,7 @@ namespace Peach.Pro.Core.Runtime
 
 				LoadPlatformAssembly();
 
-				OnRun(extra);
-
-				return 0;
+				return OnRun(extra);
 			}
 			catch (OptionException ex)
 			{
@@ -204,7 +204,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		protected abstract void OnRun(List<string> args);
+		protected abstract int OnRun(List<string> args);
 
 		protected virtual void ConfigureLogging()
 		{
@@ -343,7 +343,7 @@ namespace Peach.Pro.Core.Runtime
 					e.Cancel = true;
 				};
 
-				using (var svc = CreateWeb(pitLibraryPath, jobMonitor))
+				using (var svc = CreateWeb(_license, pitLibraryPath, jobMonitor))
 				{
 					svc.Start(_webPort);
 

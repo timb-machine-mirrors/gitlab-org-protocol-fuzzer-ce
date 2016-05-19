@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -11,7 +11,9 @@ using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.IO;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
+using Peach.Core;
 using Peach.Core.IO;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core
 {
@@ -25,6 +27,93 @@ namespace Peach.Pro.Core
 		public string Pit { get; set; }
 		public byte[] Key { get; set; }
 		public string[] Assets { get; set; }
+	}
+
+	public interface IPitResource
+	{
+		Stream Load(string path);
+	}
+
+	internal class FilePitResource : IPitResource
+	{
+		public Stream Load(string path)
+		{
+			return File.OpenRead(path);
+		}
+	}
+
+	public class PitResource : IPitResource
+	{
+		private readonly string _pitLibraryPath;
+		private readonly Assembly _pitsAssembly;
+		private readonly string _pitsPrefix;
+		private readonly KeyValuePair<string, PitManifestFeature> _pitFeature;
+		private readonly IFeature _feature;
+
+		public PitResource(
+			ILicense license,
+			string pitLibraryPath,
+			string pitPath,
+			Assembly pitsAssembly = null,
+			string pitsPrefix = "")
+		{
+			if (pitsAssembly == null)
+			{
+				var pitsAssemblyPath = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
+				if (File.Exists(pitsAssemblyPath))
+					pitsAssembly = Assembly.LoadFrom(pitsAssemblyPath);
+			}
+
+			_pitLibraryPath = pitLibraryPath;
+			_pitsAssembly = pitsAssembly;
+			_pitsPrefix = pitsPrefix;
+
+			if (_pitsAssembly != null)
+			{
+				var manifest = PitResourceLoader.LoadManifest(_pitsAssembly, _pitsPrefix);
+				var pitName = string.Join("/",
+					Path.GetFileName(Path.GetDirectoryName(pitPath)),
+					Path.GetFileName(pitPath)
+				);
+
+				var query = manifest.Features.Where(x => x.Value.Pit == pitName);
+				if (query.Any())
+				{
+					_pitFeature = query.First();
+					_feature = license.GetFeature(_pitFeature.Key);
+				}
+			}
+		}
+
+		public Stream Load(string path)
+		{
+			path = path.Replace("##PitLibraryPath##", _pitLibraryPath);
+			
+			Stream stream = null;
+
+			// try to load from assembly
+			if (_pitsAssembly != null && path.StartsWith(_pitLibraryPath))
+			{
+				stream = PitResourceLoader.DecryptResource(
+					_pitsAssembly,
+					_pitsPrefix,
+					_pitFeature,
+					path.Substring(_pitLibraryPath.Length + 1), // skip 1st '.'
+					_feature.Key
+				);
+			}
+
+			// if fail, try to load from disk
+			if (stream == null)
+			{
+				var uri = new Uri(path);
+				if (uri.Scheme != Uri.UriSchemeFile)
+					throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(path));
+				stream = File.OpenRead(uri.AbsolutePath);
+			}
+
+			return stream;
+		}
 	}
 
 	public static class PitResourceLoader
@@ -134,11 +223,11 @@ namespace Peach.Pro.Core
 		{
 			foreach (var asset in feature.Value.Assets)
 			{
-				var cipher = MakeCipher(asset, key, true);
-
 				var rawAssetName = feature.Key + "." + asset;
 				var inputResourceName = MakeFullName(prefix, asset);
 				var outputResourceName = MakeFullName(prefix, rawAssetName);
+
+				var cipher = MakeCipher(outputResourceName, key, true);
 
 				var output = new MemoryStream();
 				using (var input = asm.GetManifestResourceStream(inputResourceName))
@@ -160,10 +249,10 @@ namespace Peach.Pro.Core
 			string asset,
 			byte[] key)
 		{
-			var cipher = MakeCipher(asset, key, false);
-
 			var rawAssetName = feature.Key + "." + asset;
 			var resourceName = MakeFullName(prefix, rawAssetName);
+
+			var cipher = MakeCipher(resourceName, key, false);
 
 			var output = new MemoryStream();
 			using (var input = asm.GetManifestResourceStream(resourceName))
@@ -174,9 +263,10 @@ namespace Peach.Pro.Core
 				{
 					decrypter.CopyTo(output);
 				}
-				catch (InvalidCipherTextException)
+				catch (InvalidCipherTextException ex)
 				{
 					// MAC check for GCM failed
+					NLog.LogManager.GetCurrentClassLogger().Debug(ex);
 					return null;
 				}
 			}
@@ -187,8 +277,8 @@ namespace Peach.Pro.Core
 
 		static byte[] MakeKey(string feature, string salt)
 		{
-			var saltBytes = Encoding.UTF8.GetBytes(salt);
-			var password = Encoding.UTF8.GetBytes(feature);
+			var saltBytes = System.Text.Encoding.UTF8.GetBytes(salt);
+			var password = System.Text.Encoding.UTF8.GetBytes(feature);
 
 			var digest = new Sha256Digest();
 			var key = new byte[digest.GetDigestSize()];
@@ -212,7 +302,7 @@ namespace Peach.Pro.Core
 
 		static IBufferedCipher MakeCipher(string asset, byte[] key, bool forEncryption)
 		{
-			var iv = Digest(Encoding.UTF8.GetBytes(asset));
+			var iv = Digest(System.Text.Encoding.UTF8.GetBytes(asset));
 			var keyParam = new KeyParameter(key);
 			var cipherParams = new AeadParameters(keyParam, 16 * 8, iv);
 			var blockCipher = new AesFastEngine();

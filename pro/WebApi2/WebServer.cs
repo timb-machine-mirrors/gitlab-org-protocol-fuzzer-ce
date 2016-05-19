@@ -19,6 +19,7 @@ using Swashbuckle.Application;
 using Swashbuckle.Swagger;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.WebApi2
 {
@@ -31,12 +32,14 @@ namespace Peach.Pro.WebApi2
 		private const int ERROR_ALREADY_EXISTS = 183;
 		// ReSharper restore InconsistentNaming
 
+		readonly ILicense _license;
 		readonly IWebContext _context;
 		readonly IJobMonitor _jobMonitor;
 		IDisposable _server;
 
-		public WebServer(string pitLibraryPath, IJobMonitor jobMonitor)
+		public WebServer(ILicense license, string pitLibraryPath, IJobMonitor jobMonitor)
 		{
+			_license = license;
 			_context = new WebContext(pitLibraryPath);
 			_jobMonitor = jobMonitor;
 		}
@@ -216,11 +219,11 @@ namespace Peach.Pro.WebApi2
 		{
 			var cfg = CreateHttpConfiguration(
 				_context,
-				Core.License.Instance,
+				_license,
 				_jobMonitor,
 				() =>
 				{
-					var pitdb = new PitDatabase();
+					var pitdb = new PitDatabase(_license);
 					if (!string.IsNullOrEmpty(_context.PitLibraryPath))
 						pitdb.Load(_context.PitLibraryPath);
 					return pitdb;

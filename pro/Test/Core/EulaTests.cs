@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
-using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Encoding = System.Text.Encoding;
 
 namespace Peach.Pro.Test.Core
@@ -27,7 +27,8 @@ namespace Peach.Pro.Test.Core
  			if (!Enum.TryParse(version, out ver))
 				Assert.Fail("Enumeration value '{0}' is not a valid License.Version".Fmt(version));
 
-			var txt = License.Instance.EulaText(ver);
+			var license = new PortableLicense();
+			var txt = license.EulaText(ver);
 
 			Assert.NotNull(txt);
 			Assert.Greater(txt.Length, 0);

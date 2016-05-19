@@ -1,5 +1,5 @@
 using System.Web.Http;
-using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.WebApi2.Utility;
 using LicenseModel = Peach.Pro.Core.WebServices.Models.License;
 

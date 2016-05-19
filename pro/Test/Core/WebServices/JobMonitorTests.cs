@@ -2,11 +2,13 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Moq;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
@@ -18,7 +20,7 @@ using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
-	class BaseJobMonitorTests<T> where T : IJobMonitor, new()
+	class BaseJobMonitorTests
 	{
 		protected IJobMonitor _monitor;
 		protected ManualResetEvent _doneEvt;
@@ -100,8 +102,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	abstract class JobMonitorTests<T> : BaseJobMonitorTests<T>
-		where T : IJobMonitor, new()
+	abstract class JobMonitorTests : BaseJobMonitorTests
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempDirectory _tmpDir;
@@ -111,6 +112,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		protected string _pitConfigFailPath;
 		protected bool _oldAsync;
 		protected string _oldLogRoot;
+
+		protected abstract IJobMonitor CreateJobMonitor();
 
 		[SetUp]
 		public void SetUp()
@@ -127,13 +130,11 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_doneEvt = new ManualResetEvent(false);
 
-			_monitor = new T
+			_monitor = CreateJobMonitor();
+			_monitor.InternalEvent = (s, a) =>
 			{
-				InternalEvent = (s, a) =>
-				{
-					Logger.Trace("InternalEvent");
-					_doneEvt.Set();
-				}
+				Logger.Trace("InternalEvent");
+				_doneEvt.Set();
 			};
 
 			_pitXmlPath = Path.Combine(_tmpDir.Path, "Test.xml");
@@ -158,6 +159,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_monitor.Dispose();
 			_monitor = null;
+
 			_tmpDir.Dispose();
 			_tmpDir = null;
 
@@ -485,27 +487,33 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	namespace JobMonitorTests
+	[TestFixture]
+	[Peach]
+	[Quick]
+	class ExternalJobMonitorTests : JobMonitorTests
 	{
-		[TestFixture]
-		[Peach]
-		[Quick]
-		class External : JobMonitorTests<ExternalJobMonitor>
+		protected override IJobMonitor CreateJobMonitor()
 		{
-		}
-
-		[TestFixture]
-		[Peach]
-		[Quick]
-		class Internal : JobMonitorTests<InternalJobMonitor>
-		{
+			return new ExternalJobMonitor();
 		}
 	}
 
 	[TestFixture]
 	[Peach]
 	[Quick]
-	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
+	class InternalJobMonitorTests : JobMonitorTests
+	{
+		protected override IJobMonitor CreateJobMonitor()
+		{
+			var license = new Mock<ILicense>();
+			return new InternalJobMonitor(license.Object);
+		}
+	}
+
+	[TestFixture]
+	[Peach]
+	[Quick]
+	class ExternalJobMonitorTests2 : BaseJobMonitorTests
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempDirectory _tmpDir;

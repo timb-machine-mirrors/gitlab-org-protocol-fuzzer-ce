@@ -14,6 +14,8 @@ using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Core.Test;
+using Peach.Pro.Core.License;
+using Moq;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -57,7 +59,7 @@ namespace Peach.Pro.Test.Core.WebServices
        description='IMG PIT'
        version='0.0.1'>
 
-	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
+	<Include ns='DM' src='##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
 
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
@@ -79,7 +81,7 @@ namespace Peach.Pro.Test.Core.WebServices
        author='Pit Author Name'
        version='0.0.1'>
 
-	<Include ns='SM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_State.xml' />
+	<Include ns='SM' src='##PitLibraryPath##/_Common/Models/Image/IMG_State.xml' />
 
 	<Agent name='TheAgent'>
 		<Monitor class='RunCommand'>
@@ -163,7 +165,9 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(_originalPitPath, pitExample);
 			File.WriteAllText(_originalPitPath + ".config", configExample);
 
-			_db = new PitDatabase();
+			var license = new Mock<ILicense>();
+
+			_db = new PitDatabase(license.Object);
 			_db.ValidationEventHandler += OnValidationEvent;
 			_db.Load(_root.Path);
 		}

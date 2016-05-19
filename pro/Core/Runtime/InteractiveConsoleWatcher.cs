@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using Peach.Core;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -25,9 +26,11 @@ namespace Peach.Pro.Core.Runtime
 		string _status = "";
 		string _eta = "";
 		DateTime _lastScreenUpdate = DateTime.Now;
+		ILicense _license;
 
-		public InteractiveConsoleWatcher(string titleSuffix = "")
+		public InteractiveConsoleWatcher(ILicense license, string titleSuffix = "")
 		{
+			_license = license;
 			_title += Assembly.GetExecutingAssembly().GetName().Version;
 			_title += titleSuffix;
 		}
@@ -253,7 +256,7 @@ namespace Peach.Pro.Core.Runtime
 
 				// Optionally display license expiration warning
 
-				if (License.Instance.IsNearingExpiration)
+				if (_license.IsNearingExpiration)
 				{
 					Console.ForegroundColor = ConsoleColor.Black;
 					Console.BackgroundColor = ConsoleColor.Yellow;
@@ -262,9 +265,9 @@ namespace Peach.Pro.Core.Runtime
 					for (var i = 0; i < Console.WindowWidth; i++)
 						Console.Write(" ");
 
-					var center = (Console.WindowWidth / 2) - (License.ExpirationWarning.Length / 2);
+					var center = (Console.WindowWidth / 2) - (_license.ExpirationWarning.Length / 2);
 					Console.SetCursorPosition(center, 1);
-					Console.Write(License.ExpirationWarning, License.Instance.ExpirationInDays);
+					Console.Write(_license.ExpirationWarning);
 				}
 
 				Console.ForegroundColor = ConsoleColor.Gray;
