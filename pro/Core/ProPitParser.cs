@@ -155,7 +155,8 @@ namespace Peach.Pro.Core
 		protected override void handleInclude(Peach.Core.Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
 		{
 			var ns = child.getAttrString("ns");
-			var src = child.getAttrString("src");
+			var src = child.getAttrString("src")
+				.Replace("file:", "");
 
 			var stream = _pitResource.Load(src);
 			if (stream == null)
