@@ -92,7 +92,7 @@ namespace Peach.Pro.Core.Runtime
 
 			Target target = new ConsoleTarget
 			{
-				Layout = "${longdate} ${logger} ${message}",
+				Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}",
 				Error = true,
 			};
 

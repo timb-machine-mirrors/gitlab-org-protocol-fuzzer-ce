@@ -83,7 +83,7 @@ namespace Peach.Core.Test
 			{
 				var consoleTarget = new ConsoleTarget
 				{
-					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message} ${exception:format=tostring}"
 				};
 
 
@@ -109,7 +109,7 @@ namespace Peach.Core.Test
 					var fileTarget = new FileTarget
 					{
 						Name = "FileTarget",
-						Layout = "${longdate} ${logger} ${message}",
+						Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}",
 						FileName = peachLog,
 						Encoding = System.Text.Encoding.UTF8,
 					};
@@ -124,7 +124,7 @@ namespace Peach.Core.Test
 		public static void EnableDebug()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message}" };
+			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
 			config.AddTarget("debugConsole", target);

@@ -104,7 +104,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			var target = new ConsoleTarget
 			{
-				Layout = "${time} ${logger} ${message}"
+				Layout = "${time} ${logger} ${message} ${exception:format=tostring}"
 			};
 
 			var config = new LoggingConfiguration();

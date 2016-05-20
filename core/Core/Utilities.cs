@@ -270,26 +270,13 @@ namespace Peach.Core
 		/// Configure NLog.
 		/// </summary>
 		/// <remarks>
-		/// Level &lt; 0 --&gt; Clear Config
-		/// Level = 0 --&gt; Do nothing
+		/// Level = 0 --&gt; Info
 		/// Level = 1 --&gt; Debug
-		/// Leven &gt; 1 --&gt; Trace
+		/// Level &gt; 1 --&gt; Trace
 		/// </remarks>
 		/// <param name="level"></param>
 		public static void ConfigureLogging(int level)
 		{
-			if (level < 0)
-			{
-				// Need to reset configuration to null for NLog 2.0 on mono
-				// so we don't hang on exit.
-				LogManager.Flush();
-				LogManager.Configuration = null;
-				return;
-			}
-
-			if (level == 0)
-				return;
-
 			if (LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0)
 			{
 				Console.Error.WriteLine("Logging was configured by a .config file, not changing the configuration.");
@@ -312,7 +299,7 @@ namespace Peach.Core
 
 			var target = new ConsoleTarget
 			{
-				Layout = "${logger} ${message}",
+				Layout = "${logger} ${message} ${exception:format=tostring}",
 				Error = true,
 			};
 

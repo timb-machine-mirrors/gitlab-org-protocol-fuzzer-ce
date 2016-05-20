@@ -1049,7 +1049,7 @@ namespace Peach.Pro.Test.Core.Agent
 			public LogCollector()
 			{
 				Messages = new List<string>();
-				Layout = "${level}|${logger}|${message}";
+				Layout = "${level}|${logger}|${message} ${exception:format=tostring}";
 			}
 
 			protected override void Write(LogEventInfo logEvent)

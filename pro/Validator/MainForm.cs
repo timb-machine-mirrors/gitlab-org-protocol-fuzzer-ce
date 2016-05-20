@@ -41,7 +41,7 @@ namespace PeachValidator
            var nconfig = new LoggingConfiguration();
             logTarget = new MemoryTarget();
             nconfig.AddTarget("console", logTarget);
-            logTarget.Layout = "${logger} ${message}";
+			logTarget.Layout = "${logger} ${message} ${exception:format=tostring}";
 
 		    var rule = new LoggingRule("*", LogLevel.Debug, logTarget);
             nconfig.LoggingRules.Add(rule);
