@@ -14,48 +14,14 @@ using Peach.Core.IO;
 using Peach.Pro.Core;
 using Peach.Pro.Core.MutationStrategies;
 using Action = Peach.Core.Dom.Action;
-using Ionic.Zip;
 using StateModel = Peach.Core.Dom.StateModel;
 using Peach.Core.Cracker;
+using Peach.Pro.Core.License;
 
 namespace PitTester
 {
 	public class PitTester
 	{
-		public static void ExtractPack(string pack, string dir, int logLevel)
-		{
-			using (var zip = new ZipFile(pack))
-			{
-				Console.WriteLine("Extracting {0} to {1}", pack, dir);
-		
-				zip.ExtractProgress += (sender, e) =>
-				{
-					if (e.EventType == ZipProgressEventType.Extracting_BeforeExtractEntry)
-					{
-						var fileName = e.CurrentEntry.FileName;
-
-						if (logLevel > 0)
-							Console.WriteLine(fileName);
-						
-						if (fileName.EndsWith(".xml.config"))
-						{
-							var testFile = Path.ChangeExtension(fileName, ".test");
-							var src = Path.Combine(Path.GetDirectoryName(pack), "Assets", testFile);
-							var tgt = Path.Combine(dir, testFile);
-							if (File.Exists(src))
-							{
-								Console.WriteLine(testFile);
-								File.Copy(src, tgt);
-							}
-						}
-					}
-				};
-
-				zip.ExtractAll(dir);
-				Console.WriteLine();
-			}
-		}
-
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
 			if (context.config.singleIteration)
@@ -71,22 +37,21 @@ namespace PitTester
 
 		public static void TestPit(
 			string libraryPath,
-			string pitFile,
+			string testPath,
 			bool singleIteration,
 			uint? seed,
 			bool keepGoing,
 			uint stop = 500)
 		{
-			var testFile = pitFile + ".test";
-			if (!File.Exists(testFile))
+			if (!File.Exists(testPath))
 				throw new FileNotFoundException();
 
-			var testData = TestData.Parse(testFile);
-
+			var testData = TestData.Parse(testPath);
 			if (testData.Tests.Any(x => x.Skip))
 				throw new FileNotFoundException();
 
 			var cleanme = new List<IDisposable>();
+			var pitFile = Path.Combine(libraryPath, testData.Pit);
 
 			try
 			{
@@ -96,7 +61,15 @@ namespace PitTester
 					tmp.Populate();
 				}
 
-				DoTestPit(testData, libraryPath, pitFile, singleIteration, seed, keepGoing, stop);
+				DoTestPit(
+					testData,
+					libraryPath,
+					pitFile,
+					singleIteration,
+					seed,
+					keepGoing,
+					stop
+				);
 			}
 			finally
 			{
@@ -148,7 +121,7 @@ namespace PitTester
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new PitParser();
+			var parser = new ProPitParser(new PortableLicense(), libraryPath, pitFile);
 
 			var dom = parser.asParser(args, pitFile);
 
@@ -220,7 +193,8 @@ namespace PitTester
 				}
 			}
 
-			var config = new RunConfiguration {
+			var config = new RunConfiguration
+			{
 				range = true,
 				rangeStart = 0,
 				rangeStop = stop,
@@ -270,9 +244,9 @@ namespace PitTester
 			catch (Exception ex)
 			{
 				var msg = "Encountered an unhandled exception on iteration {0}, seed {1}.\n{2}".Fmt(
-					          num,
-					          config.randomSeed,
-					          ex.Message);
+							  num,
+							  config.randomSeed,
+							  ex.Message);
 				errors.Add(new PeachException(msg, ex));
 			}
 
@@ -367,15 +341,14 @@ namespace PitTester
 			}
 		}
 
-		public static void VerifyDataSets(string pitLibraryPath, string fileName)
+		public static void VerifyDataSets(string pitLibraryPath, string pitTestPath)
 		{
-			var testData = new TestData();
-
-			var pitTest = fileName + ".test";
-			if (File.Exists(pitTest))
-				testData = TestData.Parse(pitTest);
+			var testData = TestData.Parse(pitTestPath);
+			if (!File.Exists(pitTestPath))
+				throw new FileNotFoundException();
 
 			var cleanme = new List<IDisposable>();
+			var pitFile = Path.Combine(pitLibraryPath, testData.Pit);
 
 			try
 			{
@@ -385,7 +358,7 @@ namespace PitTester
 					tmp.Populate();
 				}
 
-				DoVerifyDataSets(testData, pitLibraryPath, fileName);
+				DoVerifyDataSets(testData, pitLibraryPath, pitFile);
 			}
 			finally
 			{
@@ -394,7 +367,10 @@ namespace PitTester
 			}
 		}
 
-		private static void DoVerifyDataSets(TestData testData, string pitLibraryPath, string fileName)
+		private static void DoVerifyDataSets(
+			TestData testData,
+			string pitLibraryPath,
+			string fileName)
 		{
 			var defs = PitDefines.ParseFileWithDefaults(pitLibraryPath, fileName);
 
@@ -410,7 +386,7 @@ namespace PitTester
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new PitParser();
+			var parser = new ProPitParser(new PortableLicense(), pitLibraryPath, fileName);
 
 			var dom = parser.asParser(args, fileName);
 
@@ -445,12 +421,12 @@ namespace PitTester
 		}
 
 		private static void VerifyDataSet(
-			bool verifyBytes, 
-			Data data, 
-			ActionData actionData, 
-			Test test, 
+			bool verifyBytes,
+			Data data,
+			ActionData actionData,
+			Test test,
 			State state,
-			Action action, 
+			Action action,
 			StringBuilder sb)
 		{
 			try
@@ -544,7 +520,7 @@ namespace PitTester
 					var sep = '-';
 					if (item is DataElementContainer)
 						sep = '+';
-					
+
 					var depth = item.fullName.Count(x => x == '.');
 					var prefix = string.Concat(Enumerable.Repeat(" |", depth));
 
