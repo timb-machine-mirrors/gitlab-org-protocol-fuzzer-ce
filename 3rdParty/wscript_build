@@ -45,7 +45,7 @@ if bld.env.BASENAME == 'osx':
 		install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
 	)
 
-nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.0/tools')
+nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.1/tools')
 
 bld(
 	name='nunit-console',
