@@ -529,7 +529,7 @@ namespace Peach.Pro.Core
 			if (!File.Exists(fileName))
 				return Parse(null, pitLibraryPath, overrides, includeSystemDefs);
 
-			using (var stream = new FileStream(fileName, FileMode.Open))
+			using (var stream = File.OpenRead(fileName))
 			{
 				return Parse(stream, pitLibraryPath, overrides, includeSystemDefs);
 			}
