@@ -4,12 +4,11 @@ deps = [
 	'Newtonsoft.Json.dll',
 	'NLog.dll',
 	'Peach.Core.dll',
-	'Peach.Core.Test.dll',
 	'Peach.Pro.dll',
-	'Peach.Pro.Test.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
+	'PitTester.exe',
 ]
 
 app = bld(

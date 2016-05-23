@@ -17,6 +17,9 @@ using Action = Peach.Core.Dom.Action;
 using StateModel = Peach.Core.Dom.StateModel;
 using Peach.Core.Cracker;
 using Peach.Pro.Core.License;
+using System.Reflection;
+using System.Reflection.Emit;
+using NUnit.Framework;
 
 namespace PitTester
 {
@@ -35,6 +38,88 @@ namespace PitTester
 				Console.Write(".");
 		}
 
+		public static void MakeTestAssembly(
+			string pitLibraryPath,
+			string pitTestFile, 
+			string pitAssemblyFile)
+		{
+			var dir = Path.GetDirectoryName(pitAssemblyFile);
+			var asmName = Path.GetFileNameWithoutExtension(pitAssemblyFile);
+			var fileName = Path.GetFileName(pitAssemblyFile);
+
+			var testFixtureType = typeof(TestFixtureAttribute);
+			var testFixtureCtor = testFixtureType.GetConstructor(new Type[0]);
+			var testFixtureAttr = new CustomAttributeBuilder(testFixtureCtor, new object[0]);
+
+			var testType = typeof(TestAttribute);
+			var testCtor = testType.GetConstructor(new Type[0]);
+			var testAttr = new CustomAttributeBuilder(testCtor, new object[0]);
+
+			var builder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+				new AssemblyName(asmName),
+				AssemblyBuilderAccess.Save,
+				dir
+			);
+
+			var module = builder.DefineDynamicModule(asmName, fileName);
+
+			var type = module.DefineType(asmName);
+			type.SetCustomAttribute(testFixtureAttr);
+
+			MakeTestPit("TestSingleIteration", type, testAttr, pitLibraryPath, pitTestFile, 1);
+			MakeTestPit("TestManyIterations", type, testAttr, pitLibraryPath, pitTestFile, 500);
+			MakeTestDatasets(type, testAttr, pitLibraryPath, pitTestFile);
+
+			type.CreateType();
+		
+			builder.Save(fileName);
+		}
+
+		static void MakeTestPit(
+			string name,
+			TypeBuilder type,
+			CustomAttributeBuilder testAttr,
+			string pitLibraryPath, 
+			string pitTestFile,
+			int iterations)
+		{
+			var method = type.DefineMethod(name, MethodAttributes.Public);
+			method.SetCustomAttribute(testAttr);
+
+			var testPitMethod = typeof(PitTester).GetMethod("TestPit");
+
+			var il = method.GetILGenerator();
+			var local = il.DeclareLocal(typeof(uint?));
+			il.Emit(OpCodes.Ldstr, pitLibraryPath);
+			il.Emit(OpCodes.Ldstr, pitTestFile);
+			il.Emit(iterations == 1 ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
+			il.Emit(OpCodes.Ldloca, local);
+			il.Emit(OpCodes.Initobj, typeof(uint?));
+			il.Emit(OpCodes.Ldloc_0);
+			il.Emit(OpCodes.Ldc_I4_1); // true
+			il.Emit(OpCodes.Ldc_I4, iterations);
+			il.Emit(OpCodes.Call, testPitMethod);
+			il.Emit(OpCodes.Ret);
+		}
+
+		static void MakeTestDatasets(
+			TypeBuilder type,
+			CustomAttributeBuilder testAttr,
+			string pitLibraryPath,
+			string pitTestFile)
+		{
+			var method = type.DefineMethod("TestDatasets", MethodAttributes.Public);
+			method.SetCustomAttribute(testAttr);
+
+			var testPitMethod = typeof(PitTester).GetMethod("VerifyDataSets");
+
+			var il = method.GetILGenerator();
+			il.Emit(OpCodes.Ldstr, pitLibraryPath);
+			il.Emit(OpCodes.Ldstr, pitTestFile);
+			il.Emit(OpCodes.Call, testPitMethod);
+			il.Emit(OpCodes.Ret);
+		}
+
 		public static void TestPit(
 			string libraryPath,
 			string testPath,
@@ -44,14 +129,15 @@ namespace PitTester
 			uint stop = 500)
 		{
 			if (!File.Exists(testPath))
-				throw new FileNotFoundException();
+				throw new FileNotFoundException("Invalid PitTestPath", testPath);
 
 			var testData = TestData.Parse(testPath);
 			if (testData.Tests.Any(x => x.Skip))
-				throw new FileNotFoundException();
+				Assert.Ignore("Skipping test: {0}", testPath);
 
 			var cleanme = new List<IDisposable>();
 			var pitFile = Path.Combine(libraryPath, testData.Pit);
+			Console.WriteLine("PitFile: {0}", pitFile);
 
 			try
 			{
@@ -345,7 +431,7 @@ namespace PitTester
 		{
 			var testData = TestData.Parse(pitTestPath);
 			if (!File.Exists(pitTestPath))
-				throw new FileNotFoundException();
+				throw new FileNotFoundException("Invalid PitTestPath", pitTestPath);
 
 			var cleanme = new List<IDisposable>();
 			var pitFile = Path.Combine(pitLibraryPath, testData.Pit);
