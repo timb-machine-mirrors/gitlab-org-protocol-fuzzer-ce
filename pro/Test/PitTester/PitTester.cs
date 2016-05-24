@@ -20,6 +20,7 @@ using Peach.Pro.Core.License;
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
+using Peach.Core.Test;
 
 namespace PitTester
 {
@@ -47,14 +48,6 @@ namespace PitTester
 			var asmName = Path.GetFileNameWithoutExtension(pitAssemblyFile);
 			var fileName = Path.GetFileName(pitAssemblyFile);
 
-			var testFixtureType = typeof(TestFixtureAttribute);
-			var testFixtureCtor = testFixtureType.GetConstructor(new Type[0]);
-			var testFixtureAttr = new CustomAttributeBuilder(testFixtureCtor, new object[0]);
-
-			var testType = typeof(TestAttribute);
-			var testCtor = testType.GetConstructor(new Type[0]);
-			var testAttr = new CustomAttributeBuilder(testCtor, new object[0]);
-
 			var builder = AppDomain.CurrentDomain.DefineDynamicAssembly(
 				new AssemblyName(asmName),
 				AssemblyBuilderAccess.Save,
@@ -63,9 +56,12 @@ namespace PitTester
 
 			var module = builder.DefineDynamicModule(asmName, fileName);
 
-			var type = module.DefineType(asmName);
-			type.SetCustomAttribute(testFixtureAttr);
+			MakeTestBase(module);
 
+			var type = module.DefineType(asmName);
+			type.SetCustomAttribute(MakeCustomAttribute(typeof(TestFixtureAttribute)));
+
+			var testAttr = MakeCustomAttribute(typeof(TestAttribute));
 			MakeTestPit("TestSingleIteration", type, testAttr, pitLibraryPath, pitTestFile, 1);
 			MakeTestPit("TestManyIterations", type, testAttr, pitLibraryPath, pitTestFile, 500);
 			MakeTestDatasets(type, testAttr, pitLibraryPath, pitTestFile);
@@ -73,6 +69,37 @@ namespace PitTester
 			type.CreateType();
 		
 			builder.Save(fileName);
+		}
+
+		static CustomAttributeBuilder MakeCustomAttribute(Type type)
+		{
+			var ctor = type.GetConstructor(new Type[0]);
+			return new CustomAttributeBuilder(ctor, new object[0]);
+		}
+
+		static void MakeTestBase(ModuleBuilder module)
+		{
+			var baseType = typeof(SetUpFixture);
+			
+			var type = module.DefineType("TestBase");
+			type.SetCustomAttribute(MakeCustomAttribute(typeof(SetUpFixtureAttribute)));
+			type.SetParent(baseType);
+
+			var setUpMethod = type.DefineMethod("SetUp", MethodAttributes.Public);
+			setUpMethod.SetCustomAttribute(MakeCustomAttribute(typeof(OneTimeSetUpAttribute)));
+			var setUpIl = setUpMethod.GetILGenerator();
+			setUpIl.Emit(OpCodes.Ldarg_0);
+			setUpIl.Emit(OpCodes.Call, baseType.GetMethod("DoSetUp", BindingFlags.Instance | BindingFlags.NonPublic));
+			setUpIl.Emit(OpCodes.Ret);
+
+			var tearDownMethod = type.DefineMethod("TearDown", MethodAttributes.Public);
+			tearDownMethod.SetCustomAttribute(MakeCustomAttribute(typeof(OneTimeTearDownAttribute)));
+			var tearDownIl = tearDownMethod.GetILGenerator();
+			tearDownIl.Emit(OpCodes.Ldarg_0);
+			tearDownIl.Emit(OpCodes.Call, baseType.GetMethod("DoTearDown", BindingFlags.Instance | BindingFlags.NonPublic));
+			tearDownIl.Emit(OpCodes.Ret);
+
+			type.CreateType();
 		}
 
 		static void MakeTestPit(
