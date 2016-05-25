@@ -36,13 +36,13 @@ namespace Peach.Pro.Core.WebServices.Models
 		public DateTime Expiration { get; set; }
 
 		/// <summary>
-		/// The features associated with this license.
-		/// </summary>
-		public LicenseFeature Version { get; set; }
-
-		/// <summary>
 		/// Has the eula been accepted.
 		/// </summary>
 		public bool EulaAccepted { get; set; }
+
+		/// <summary>
+		/// Gets or sets the EULAs.
+		/// </summary>
+		public EulaType[] Eulas { get; set; }
 	}
 }

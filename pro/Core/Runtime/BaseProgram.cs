@@ -33,7 +33,7 @@ namespace Peach.Pro.Core.Runtime
 		protected OptionSet _options;
 		protected int _verbosity;
 		protected int? _webPort;
-		protected ILicense _license = new PortableLicense();
+		protected ILicense _license;
 
 		// this is static so it can be re-used by unit tests
 		public static void LoadPlatformAssembly()

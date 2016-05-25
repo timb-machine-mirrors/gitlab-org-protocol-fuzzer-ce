@@ -234,8 +234,7 @@ namespace PitTester
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser(new PortableLicense(), libraryPath, pitFile);
-
+			var parser = new ProPitParser(null, libraryPath, pitFile);
 			var dom = parser.asParser(args, pitFile);
 
 			var errors = new List<Exception>();
@@ -499,8 +498,7 @@ namespace PitTester
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser(new PortableLicense(), pitLibraryPath, fileName);
-
+			var parser = new ProPitParser(null, pitLibraryPath, fileName);
 			var dom = parser.asParser(args, fileName);
 
 			dom.context = new RunContext();

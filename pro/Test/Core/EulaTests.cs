@@ -18,17 +18,17 @@ namespace Peach.Pro.Test.Core
 	class EulaTests
 	{
 		[Datapoints]
-		public string[] versions = Enum.GetNames(typeof(LicenseFeature));
+		public string[] versions = Enum.GetNames(typeof(PortableLicense.LicenseFeature));
 
 		[Theory]
 		public void HaveEulaText(string version)
 		{
-			LicenseFeature ver;
+			PortableLicense.LicenseFeature ver;
  			if (!Enum.TryParse(version, out ver))
 				Assert.Fail("Enumeration value '{0}' is not a valid License.Version".Fmt(version));
 
-			var license = new PortableLicense();
-			var txt = license.EulaText(ver);
+			var license = new PortableLicense(null);
+			var txt = license.GetEulaText(ver);
 
 			Assert.NotNull(txt);
 			Assert.Greater(txt.Length, 0);

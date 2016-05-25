@@ -43,6 +43,7 @@ using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -280,6 +281,9 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override int OnRun(List<string> args)
 		{
+			var root = ResourceRoot.GetDefault(Path.GetFullPath(_pitLibraryPath));
+			_license = new PortableLicense(root);
+
 			_config.commandLine = args.ToArray();
 
 			try
@@ -293,11 +297,11 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write("[[ ");
 				Console.ForegroundColor = ConsoleColor.DarkCyan;
 				Console.WriteLine(Copyright);
-				if (_license.IsNearingExpiration)
+				if (_license.IsNearingExpiration())
 				{
 					Console.ForegroundColor = ConsoleColor.Yellow;
 					Console.WriteLine();
-					Console.WriteLine(_license.ExpirationWarning);
+					Console.WriteLine(_license.ExpirationWarning());
 				}
 				Console.ForegroundColor = DefaultForground;
 				Console.WriteLine();
@@ -659,7 +663,7 @@ Debug Peach XML File
 
 		private void ShowEula()
 		{
-			Console.WriteLine(_license.EulaText());
+			Console.WriteLine(_license.EulaText);
 
 			Console.WriteLine(
 @"BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND

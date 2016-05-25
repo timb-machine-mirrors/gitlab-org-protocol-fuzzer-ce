@@ -1,39 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
+using Peach.Core;
 
 namespace Peach.Pro.Core.License
 {
-	public enum LicenseFeature
+	public enum EulaType
 	{
-		Enterprise,
-		Distributed,
-		ProfessionalWithConsulting,
-		Professional,
-		TrialAllPits,
-		Trial,
-		Academic,
-		TestSuites,
-		Studio,
+		Acedemic,
 		Developer,
-		Unknown,
+		Enterprise,
+		Professional,
+		Trial,
 	}
-
+	
 	public interface ILicense
 	{
-		string ErrorText { get; }
-		LicenseFeature Version { get; }
-		DateTime Expiration { get; }
-		string ExpirationWarning { get; }
 		bool IsMissing { get; }
 		bool IsExpired { get; }
 		bool IsInvalid { get; }
-		bool IsNearingExpiration { get; }
-		int ExpirationInDays { get; }
 		bool IsValid { get; }
-		bool EulaAccepted { get; set; }
-		string EulaText();
-		string EulaText(LicenseFeature version);
+		string ErrorText { get; }
+		DateTime Expiration { get; }
 
-		//IEnumerable<IFeature> GetFeatures();
+		bool EulaAccepted { get; set; }
+		string EulaText { get; }
+		IEnumerable<EulaType> Eulas { get; }
+
+		IEnumerable<IFeature> Features { get; }
 		IFeature GetFeature(string name);
 	}
 
@@ -44,5 +37,23 @@ namespace Peach.Pro.Core.License
 
 		bool Acquire();
 		void Release();
+	}
+
+	public static class LicenseExtensions
+	{
+		public static string ExpirationWarning(this ILicense license)
+		{
+			return "Warning: Peach expires in {0} days".Fmt(license.ExpirationInDays());
+		}
+
+		public static int ExpirationInDays(this ILicense license)
+		{
+			return (license.Expiration - DateTime.Now).Days;
+		}
+
+		public static bool IsNearingExpiration(this ILicense license)
+		{
+			return license.IsValid && license.Expiration < DateTime.Now.AddDays(30);
+		}
 	}
 }
