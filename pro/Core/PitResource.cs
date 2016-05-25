@@ -20,6 +20,7 @@ namespace Peach.Pro.Core
 	public class PitManifest
 	{
 		public Dictionary<string, PitManifestFeature> Features { get; set; }
+		public Dictionary<string, string[]> Packs { get; set; }
 	}
 
 	public class PitManifestFeature
