@@ -42,11 +42,29 @@ namespace Peach.Pro.Core
 		}
 	}
 
+	public class ResourceRoot
+	{
+		public Assembly Assembly { get; set; }
+		public string Prefix { get; set; }
+
+		public static ResourceRoot GetDefault(string pitLibraryPath)
+		{
+			var path = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
+			if (!File.Exists(path))
+				return null;
+
+			return new ResourceRoot
+			{
+				Assembly = Assembly.LoadFrom(path),
+				Prefix = "",
+			};
+		}
+	}
+
 	public class PitResource : IPitResource
 	{
 		private readonly string _pitLibraryPath;
-		private readonly Assembly _pitsAssembly;
-		private readonly string _pitsPrefix;
+		private readonly ResourceRoot _root;
 		private readonly KeyValuePair<string, PitManifestFeature> _pitFeature;
 		private readonly IFeature _feature;
 
@@ -54,23 +72,17 @@ namespace Peach.Pro.Core
 			ILicense license,
 			string pitLibraryPath,
 			string pitPath,
-			Assembly pitsAssembly = null,
-			string pitsPrefix = "")
+			ResourceRoot root = null)
 		{
-			if (pitsAssembly == null)
-			{
-				var pitsAssemblyPath = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
-				if (File.Exists(pitsAssemblyPath))
-					pitsAssembly = Assembly.LoadFrom(pitsAssemblyPath);
-			}
+			if (root == null)
+				root = ResourceRoot.GetDefault(pitLibraryPath);
 
 			_pitLibraryPath = pitLibraryPath;
-			_pitsAssembly = pitsAssembly;
-			_pitsPrefix = pitsPrefix;
+			_root = root;
 
-			if (_pitsAssembly != null)
+			if (root != null)
 			{
-				var manifest = PitResourceLoader.LoadManifest(_pitsAssembly, _pitsPrefix);
+				var manifest = PitResourceLoader.LoadManifest(root);
 				var pitName = string.Join("/",
 					Path.GetFileName(Path.GetDirectoryName(pitPath)),
 					Path.GetFileName(pitPath)
@@ -92,11 +104,10 @@ namespace Peach.Pro.Core
 			Stream stream = null;
 
 			// try to load from assembly
-			if (_pitsAssembly != null && path.StartsWith(_pitLibraryPath))
+			if (_root != null && path.StartsWith(_pitLibraryPath))
 			{
 				stream = PitResourceLoader.DecryptResource(
-					_pitsAssembly,
-					_pitsPrefix,
+					_root,
 					_pitFeature,
 					path.Substring(_pitLibraryPath.Length + 1), // skip 1st '.'
 					_feature.Key
@@ -130,10 +141,10 @@ namespace Peach.Pro.Core
 			return JsonSerializer.Create(settings);
 		}
 
-		public static PitManifest LoadManifest(Assembly asm, string prefix)
+		public static PitManifest LoadManifest(ResourceRoot root)
 		{
-			var name = MakeFullName(prefix, ManifestName);
-			using (var stream = asm.GetManifestResourceStream(name))
+			var name = MakeFullName(root.Prefix, ManifestName);
+			using (var stream = root.Assembly.GetManifestResourceStream(name))
 				return LoadManifest(stream);
 		}
 
@@ -166,8 +177,7 @@ namespace Peach.Pro.Core
 		}
 
 		public static PitManifest EncryptResources(
-			Assembly asm,
-			string prefix,
+			ResourceRoot root,
 			string output,
 			string masterSalt)
 		{
@@ -187,7 +197,7 @@ namespace Peach.Pro.Core
 				Features = new Dictionary<string, PitManifestFeature>()
 			};
 
-			var manifest = LoadManifest(asm, prefix);
+			var manifest = LoadManifest(root);
 			foreach (var feature in manifest.Features)
 			{
 				var key = MakeKey(feature.Key, masterSalt);
@@ -198,7 +208,7 @@ namespace Peach.Pro.Core
 
 				//Console.WriteLine("{0,-40}: {1}", feature.Key, Convert.ToBase64String(key));
 
-				EncryptFeature(asm, prefix, feature, module, key);
+				EncryptFeature(root, feature, module, key);
 			}
 
 			var ms = new MemoryStream();
@@ -206,7 +216,7 @@ namespace Peach.Pro.Core
 			{
 				SaveManifest(wrapper, manifest);
 			}
-			var manifestName = MakeFullName(prefix, ManifestName);
+			var manifestName = MakeFullName(root.Prefix, ManifestName);
 			module.DefineManifestResource(manifestName, ms, ResourceAttributes.Public);
 
 			builder.Save(fileName);
@@ -215,8 +225,7 @@ namespace Peach.Pro.Core
 		}
 
 		static void EncryptFeature(
-			Assembly asm,
-			string prefix,
+			ResourceRoot root,
 			KeyValuePair<string, PitManifestFeature> feature,
 			ModuleBuilder module,
 			byte[] key)
@@ -224,13 +233,13 @@ namespace Peach.Pro.Core
 			foreach (var asset in feature.Value.Assets)
 			{
 				var rawAssetName = feature.Key + "." + asset;
-				var inputResourceName = MakeFullName(prefix, asset);
-				var outputResourceName = MakeFullName(prefix, rawAssetName);
+				var inputResourceName = MakeFullName(root.Prefix, asset);
+				var outputResourceName = MakeFullName(root.Prefix, rawAssetName);
 
 				var cipher = MakeCipher(outputResourceName, key, true);
 
 				var output = new MemoryStream();
-				using (var input = asm.GetManifestResourceStream(inputResourceName))
+				using (var input = root.Assembly.GetManifestResourceStream(inputResourceName))
 				using (var wrapper = new NonClosingStreamWrapper(output))
 				using (var encrypter = new CipherStream(wrapper, null, cipher))
 				{
@@ -243,19 +252,18 @@ namespace Peach.Pro.Core
 		}
 
 		public static Stream DecryptResource(
-			Assembly asm,
-			string prefix,
+			ResourceRoot root,
 			KeyValuePair<string, PitManifestFeature> feature,
 			string asset,
 			byte[] key)
 		{
 			var rawAssetName = feature.Key + "." + asset;
-			var resourceName = MakeFullName(prefix, rawAssetName);
+			var resourceName = MakeFullName(root.Prefix, rawAssetName);
 
 			var cipher = MakeCipher(resourceName, key, false);
 
 			var output = new MemoryStream();
-			using (var input = asm.GetManifestResourceStream(resourceName))
+			using (var input = root.Assembly.GetManifestResourceStream(resourceName))
 			using (var wrapper = new NonClosingStreamWrapper(input))
 			using (var decrypter = new CipherStream(wrapper, cipher, null))
 			{

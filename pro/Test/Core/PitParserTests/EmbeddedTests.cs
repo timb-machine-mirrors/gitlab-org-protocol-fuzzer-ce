@@ -17,8 +17,11 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	[Peach]
 	public class EmbeddedTests
 	{
-		static readonly Assembly _asm = Assembly.GetExecutingAssembly();
-		const string PitsResourcePrefix = "Peach.Pro.Test.Core.Resources.Pits";
+		static readonly ResourceRoot ResourceRoot = new ResourceRoot
+		{
+			Assembly = Assembly.GetExecutingAssembly(),
+			Prefix = "Peach.Pro.Test.Core.Resources.Pits"
+		};
 		const string MasterSalt = "salt";
 
 		[Test]
@@ -33,12 +36,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 				var encrypted = Path.Combine(tmpDir.Path, "Peach.Pro.Pits.dll");
 
-				var master = PitResourceLoader.EncryptResources(
-					_asm,
-					PitsResourcePrefix,
-					encrypted,
-					MasterSalt
-				);
+				var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
 
 				var feature = new Mock<IFeature>();
 				feature.SetupGet(x => x.Key)
@@ -48,7 +46,11 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				license.Setup(x => x.GetFeature(featureName))
 				       .Returns(feature.Object);
 
-				var encryptedAsm = LoadAssembly(encrypted);
+				var encryptedRoot = new ResourceRoot
+				{
+					Assembly = LoadAssembly(encrypted),
+					Prefix = ResourceRoot.Prefix
+				};
 
 				var pitFile = Path.Combine(tmpDir.Path, "Net", "DNP3_Slave.xml");
 				var pitConfigFile = pitFile + ".config";
@@ -66,8 +68,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					license.Object, 
 					tmpDir.Path, 
 					pitFile, 
-					encryptedAsm, 
-					PitsResourcePrefix
+					encryptedRoot
 				);
 				var dom = parser.asParser(args, pitFile);
 				var config = new RunConfiguration() { singleIteration = true, };
@@ -110,7 +111,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void ParseManifest()
 		{
-			var manifest = PitResourceLoader.LoadManifest(_asm, PitsResourcePrefix);
+			var manifest = PitResourceLoader.LoadManifest(ResourceRoot);
 			CollectionAssert.Contains(manifest.Features.Keys, "PeachPit-Net-DNP3_Slave");
 		}
 
@@ -126,30 +127,28 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				var expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 				var encrypted = Path.Combine(tmpDir.Path, "TestProtectResources.dll");
 
-				var master = PitResourceLoader.EncryptResources(
-					_asm,
-					PitsResourcePrefix,
-					encrypted,
-					MasterSalt
-				);
+				var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
 
-				var asm = LoadAssembly(encrypted);
-				var manifest = PitResourceLoader.LoadManifest(asm, PitsResourcePrefix);
+				var root = new ResourceRoot
+				{
+					Assembly = LoadAssembly(encrypted),
+					Prefix = ResourceRoot.Prefix
+				};
+				var manifest = PitResourceLoader.LoadManifest(root);
 
 				{
-					var actual = GetFirstLine(asm, featureName, asset1);
+					var actual = GetFirstLine(root.Assembly, featureName, asset1);
 					Assert.AreNotEqual(expected, actual);
 				}
 
 				{
-					var actual = GetFirstLine(asm, featureName, asset2);
+					var actual = GetFirstLine(root.Assembly, featureName, asset2);
 					Assert.AreNotEqual(expected, actual);
 				}
 
 				var feature = manifest.Features[featureName];
 				using (var stream = PitResourceLoader.DecryptResource(
-					asm,
-					PitsResourcePrefix,
+					root,
 					new KeyValuePair<string, PitManifestFeature>(featureName, feature), 
 					asset1,
 					master.Features[featureName].Key))
@@ -160,8 +159,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				}
 
 				using (var stream = PitResourceLoader.DecryptResource(
-					asm,
-					PitsResourcePrefix,
+					root,
 					new KeyValuePair<string, PitManifestFeature>(featureName, feature), 
 					asset2,
 					master.Features[featureName].Key))
@@ -175,8 +173,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				// this should fail since we are using the wrong password
 				var otherFeature = manifest.Features[otherFeatureName];
 				using (var stream = PitResourceLoader.DecryptResource(
-					asm,
-					PitsResourcePrefix,
+					root,
 					new KeyValuePair<string, PitManifestFeature>(otherFeatureName, otherFeature),
 					asset1,
 					master.Features[featureName].Key))
@@ -190,7 +187,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		{
 			var rawAssetName = featureName + "." + asset;
 
-			var name = PitResourceLoader.MakeFullName(PitsResourcePrefix, rawAssetName);
+			var name = PitResourceLoader.MakeFullName(ResourceRoot.Prefix, rawAssetName);
 			using (var stream = asm.GetManifestResourceStream(name))
 			using (var reader = new StreamReader(stream))
 			{
@@ -215,16 +212,16 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Directory.CreateDirectory(dir);
 
 			var prefix = string.Join(".",
-				new[] { PitsResourcePrefix }
+				new[] { ResourceRoot.Prefix }
 				.Concat(parts)
 			);
-			foreach (var name in _asm.GetManifestResourceNames())
+			foreach (var name in ResourceRoot.Assembly.GetManifestResourceNames())
 			{
 				if (name.StartsWith(prefix))
 				{
 					var fileName = name.Substring(prefix.Length + 1); // exclude last '.'
 					var target = Path.Combine(dir, fileName);
-					Utilities.ExtractEmbeddedResource(_asm, name, target);
+					Utilities.ExtractEmbeddedResource(ResourceRoot.Assembly, name, target);
 				}
 			}
 		}
@@ -236,12 +233,12 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Directory.CreateDirectory(dir);
 
 			var name = string.Join(".",
-				new[] { PitsResourcePrefix }
+				new[] { ResourceRoot.Prefix }
 				.Concat(dirs)
 				.Concat(new[] { filename })
 			);
 			var target = Path.Combine(dir, filename);
-			Utilities.ExtractEmbeddedResource(_asm, name, target);
+			Utilities.ExtractEmbeddedResource(ResourceRoot.Assembly, name, target);
 		}
 	}
 }

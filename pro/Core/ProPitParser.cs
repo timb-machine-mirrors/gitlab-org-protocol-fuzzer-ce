@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -29,10 +28,9 @@ namespace Peach.Pro.Core
 			ILicense license,
 			string pitLibraryPath,
 			string pitPath,
-			Assembly pitsAssembly = null,
-			string pitsPrefix = "")
+			ResourceRoot root = null)
 		{
-			_pitResource = new PitResource(license, pitLibraryPath, pitPath, pitsAssembly, pitsPrefix);
+			_pitResource = new PitResource(license, pitLibraryPath, pitPath, root);
 		}
 
 		// should only be used for unit tests
