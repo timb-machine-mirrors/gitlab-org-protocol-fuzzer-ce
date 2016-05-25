@@ -28,12 +28,13 @@ namespace Peach.Pro.Test.Core
 		/// <param name="controlIter"></param>
 		/// <param name="waitTime"></param>
 		/// <param name="faultWaitTime"></param>
-		void RunIter(string faultIter, bool repro, uint controlIter, string waitTime = "0.0", string faultWaitTime = "0.0")
+		/// <param name="softException"></param>
+		void RunIter(string faultIter, bool repro, uint controlIter, string waitTime = "0.0", string faultWaitTime = "0.0", bool softException = false)
 		{
 			const string template = @"
 <Peach>
 	<DataModel name='TheDataModel'>
-		<String value='Hello World'/>
+		<String name='s' value='Hello World'/>
 	</DataModel>
 
 	<StateModel name='TheState' initialState='Initial'>
@@ -44,14 +45,30 @@ namespace Peach.Pro.Test.Core
 		</State>
 	</StateModel>
 
+	<StateModel name='TheStateSwitch' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='TheDataModel'/>
+				<Data>
+					<Field name='s' value='Hello' />
+				</Data>
+				<Data>
+					<Field name='s' value='World' />
+				</Data>
+			</Action>
+		</State>
+	</StateModel>
+
 	<!-- Need an agent to measure time between iteration finished and detected fault -->
 	<Agent name='LocalAgent' />
 
 	<Test name='Default' targetLifetime='iteration' controlIteration='{0}' waitTime='{1}' faultWaitTime='{2}'>
 		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
+		<StateModel ref='{3}'/>
 		<Publisher class='Null'/>
-		<Strategy class='Random'/>
+		<Strategy class='Random'>
+			<Param name='SwitchCount' value='5' />
+		</Strategy>
 	</Test>
 </Peach>";
 
@@ -59,7 +76,7 @@ namespace Peach.Pro.Test.Core
 			_faultHistory.Clear();
 			_waitTimes.Clear();
 
-			var xml = string.Format(template, controlIter, waitTime, faultWaitTime);
+			var xml = string.Format(template, controlIter, waitTime, faultWaitTime, faultIter.StartsWith("R") ? "TheStateSwitch" : "TheState");
 
 			var dom = DataModelCollector.ParsePit(xml);
 
@@ -77,22 +94,38 @@ namespace Peach.Pro.Test.Core
 			e.TestStarting += ctx =>
 			{
 				ctx.DetectedFault += (c, agent) => _waitTimes.Add(sw.Elapsed);
+				ctx.StateModelStarting += (c, sm) =>
+				{
+					var it = c.currentIteration;
+
+					_iterationHistory.Add(it);
+
+					if (faultIter.StartsWith("RC"))
+					{
+						if (ctx.controlRecordingIteration && ctx.controlIteration && it == int.Parse(faultIter.Substring(2)) && (!ctx.reproducingFault || repro))
+						{
+							if (softException)
+								throw new SoftException("Simulated SoftException");
+
+							ctx.InjectFault();
+						}
+					}
+					else if (faultIter.StartsWith("C"))
+					{
+						if (ctx.controlIteration && it == int.Parse(faultIter.Substring(1)) && (!ctx.reproducingFault || repro))
+							ctx.InjectFault();
+					}
+					else if (faultIter == it.ToString(CultureInfo.InvariantCulture))
+					{
+						if (repro || !ctx.reproducingFault)
+							ctx.InjectFault();
+					}
+
+				};
 			};
 
 			e.IterationStarting += (ctx, it, ti) =>
 			{
-				_iterationHistory.Add(it);
-
-				if (faultIter.StartsWith("C"))
-				{
-					if (ctx.controlIteration && it == int.Parse(faultIter.Substring(1)) && (!ctx.reproducingFault || repro))
-						ctx.InjectFault();
-				}
-				else if (faultIter == it.ToString(CultureInfo.InvariantCulture))
-				{
-					if (repro || !ctx.reproducingFault)
-						ctx.InjectFault();
-				}
 			};
 
 			e.IterationFinished += (ctx, it) => sw.Restart();
@@ -105,7 +138,11 @@ namespace Peach.Pro.Test.Core
 
 		private void SaveFault(string type, RunContext context)
 		{
-			var item = "{0}_{1}{2}".Fmt(type, context.controlIteration ? "C" : "", context.currentIteration);
+			var item = "{0}_{1}{2}{3}".Fmt(
+				type,
+				context.controlRecordingIteration ? "R" : "",
+				context.controlIteration ? "C" : "",
+				context.currentIteration);
 			_faultHistory.Add(item);
 		}
 
@@ -231,6 +268,116 @@ namespace Peach.Pro.Test.Core
 			{
 				"ReproFault_C5",
 				"Fault_C5"
+			};
+
+			Assert.AreEqual(faults, _faultHistory.ToArray());
+		}
+
+		[Test]
+		public void TestIterationNoReproControlRecord()
+		{
+			// Target lifetime is per iteration and non-reproducible fault
+			// found on a control record iteration.
+			// expect it to only replay the same interation and
+			// continue fuzzing.
+
+			RunIter("RC6", false, 0);
+
+			var expected = new uint[] {
+				1,  // Control
+				1, 2, 3, 4, 5,
+				6, // Record Control & fault
+				6, // Record Control & non-repro
+				6, 7, 8, 9, 10
+			};
+
+			var actual = _iterationHistory.ToArray();
+			Assert.AreEqual(expected, actual);
+
+			var faults = new[]
+			{
+				"ReproFault_RC6",
+				"ReproFailed_RC6"
+		};
+
+			Assert.AreEqual(faults, _faultHistory.ToArray());
+		}
+
+		[Test]
+		public void TestIterationReproControlRecord()
+		{
+			// Target lifetime is per iteration and reproducible fault
+			// found on a control record iteration.
+			// expect it to only replay the same interation and
+			// stop fuzzing.
+
+			var ex = Assert.Throws<PeachException>(() => RunIter("RC6", true, 0));
+
+			Assert.AreEqual("Fault detected on control record iteration.", ex.Message);
+
+			var expected = new uint[] {
+				1,  // Control
+				1, 2, 3, 4, 5,
+				6, // Record Control & fault
+				6 // Record Control & repro
+			};
+
+			var actual = _iterationHistory.ToArray();
+			Assert.AreEqual(expected, actual);
+
+			var faults = new[]
+			{
+				"ReproFault_RC6",
+				"Fault_RC6"
+			};
+
+			Assert.AreEqual(faults, _faultHistory.ToArray());
+		}
+
+		[Test]
+		public void TestSoftExceptionFirst()
+		{
+			// Target lifetime is per iteration and soft exception happens
+			// on a record iteration.  Expect fuzzing to stop.
+
+			var ex = Assert.Throws<PeachException>(() => RunIter("RC1", true, 0, softException: true));
+
+			Assert.AreEqual("Simulated SoftException", ex.Message);
+
+			var expected = new uint[] {
+				1 // Record Control & Soft Exception
+			};
+
+			var actual = _iterationHistory.ToArray();
+			Assert.AreEqual(expected, actual);
+
+			CollectionAssert.IsEmpty(_faultHistory);
+		}
+
+		[Test]
+		public void TestSoftExceptionLater()
+		{
+			// Target lifetime is per iteration and soft exception happens
+			// on a record iteration.  Expect fuzzing to stop.
+
+			var ex = Assert.Throws<PeachException>(() => RunIter("RC6", true, 0, softException: true));
+
+			Assert.AreEqual("Fault detected on control record iteration.", ex.Message);
+
+			var expected = new uint[] {
+				1,  // Control
+				1, 2, 3, 4, 5,
+				6, // Record Control & soft exceptiopn
+				6 // Record Control & soft exceptiopn repro
+			};
+
+			var actual = _iterationHistory.ToArray();
+			Assert.AreEqual(expected, actual);
+
+			var faults = new[]
+			{
+				"ReproFault_RC6",
+				"Fault_RC6"
 			};
 
 			Assert.AreEqual(faults, _faultHistory.ToArray());

@@ -477,6 +477,7 @@ namespace Peach.Core
 			uint iterationCount = iterationStart;
 			bool firstRun = true;
 			bool controlAfterRepro = false;
+			bool reproducedFault = false;
 
 			// First iteration is always a control/recording iteration
 			context.controlIteration = true;
@@ -494,6 +495,8 @@ namespace Peach.Core
 
 			while ((firstRun || iterationCount <= iterationStop) && context.continueFuzzing)
 			{
+				var isFirst = firstRun;
+
 				context.currentIteration = iterationCount;
 
 				firstRun = false;
@@ -542,7 +545,7 @@ namespace Peach.Core
 						if (context.controlIteration)
 						{
 							if (context.controlRecordingIteration)
-								logger.Debug("runTest: Performing recording iteration.");
+								logger.Debug("runTest: Performing control recording iteration.");
 							else
 								logger.Debug("runTest: Performing control iteration.");
 						}
@@ -577,23 +580,30 @@ namespace Peach.Core
 						// They indicate we should move to the next
 						// iteration.
 
-						if (context.controlRecordingIteration)
+						if (isFirst)
 						{
-							logger.Debug("runTest: SoftException on recording iteration");
+							logger.Debug("runTest: SoftException on control recording iteration");
 							if (se.InnerException != null && string.IsNullOrEmpty(se.Message))
 								throw new PeachException(se.InnerException.Message, se);
 							throw new PeachException(se.Message, se);
 						}
-
-						if (context.controlIteration)
+						else if (context.controlRecordingIteration)
+						{
+							logger.Debug("runTest: SoftException on control recording iteration, saving as fault");
+							var ex = se.InnerException ?? se;
+							OnControlFault("SoftException Detected:\n" + ex);
+						}
+						else if (context.controlIteration)
 						{
 							logger.Debug("runTest: SoftException on control iteration, saving as fault");
 							var ex = se.InnerException ?? se;
 							OnControlFault("SoftException Detected:\n" + ex);
 						}
-
-						logger.Debug("runTest: SoftException, skipping to next iteration");
-						logger.Trace(se);
+						else
+						{
+							logger.Debug("runTest: SoftException, skipping to next iteration");
+							logger.Trace(se);
+						}
 					}
 					catch (OutOfMemoryException ex)
 					{
@@ -627,8 +637,13 @@ namespace Peach.Core
 							Thread.Sleep(TimeSpan.FromSeconds(context.test.faultWaitTime));
 					}
 
+					var engineFaults = context.faults.Count;
+
 					// Collect any faults that were found
 					context.agentManager.CollectFaults();
+
+					// Ensure engine faults are prioritized second to agent faults
+					context.faults = context.faults.Skip(engineFaults).Concat(context.faults.Take(engineFaults)).ToList();
 
 					if (context.faults.Count > 0)
 					{
@@ -641,6 +656,7 @@ namespace Peach.Core
 							context.reproducingInitialIteration = iterationCount;
 							context.reproducingIterationJumpCount = 0;
 							context.reproducingControlIteration = context.controlIteration;
+							context.reproducingControlRecordingIteration = context.controlRecordingIteration;
 						}
 
 						foreach (Fault fault in context.faults)
@@ -657,7 +673,7 @@ namespace Peach.Core
 							// Notify loggers first
 							OnFault(iterationCount, test.stateModel, context.faults.ToArray());
 
-							if (context.controlRecordingIteration)
+							if (context.controlRecordingIteration && test.TargetLifetime == Test.Lifetime.Iteration)
 							{
 								logger.Debug("runTest: Fault detected on control record iteration");
 								throw new PeachException("Fault detected on control record iteration.");
@@ -673,12 +689,20 @@ namespace Peach.Core
 
 							// If the lifetime is Session the fault was detected on a control iteration
 							// and we reproduced it on the very first try, we need to stop fuzzing
+							if (context.controlRecordingIteration && test.TargetLifetime == Test.Lifetime.Session && context.reproducingControlIteration && context.reproducingIterationJumpCount == 0)
+							{
+								logger.Debug("runTest: Fault detected on control recording iteration");
+								throw new PeachException("Fault detected on control recording iteration.");
+							}
+
+
+							// If the lifetime is Session the fault was detected on a control iteration
+							// and we reproduced it on the very first try, we need to stop fuzzing
 							if (context.controlIteration && test.TargetLifetime == Test.Lifetime.Session && context.reproducingControlIteration && context.reproducingIterationJumpCount == 0)
 							{
 								logger.Debug("runTest: Fault detected on control iteration");
 								throw new PeachException("Fault detected on control iteration.");
 							}
-
 
 							// Fault reproduced, so skip forward to were we left off.
 							lastReproFault = context.reproducingInitialIteration;
@@ -686,9 +710,13 @@ namespace Peach.Core
 							if (context.reproducingControlIteration)
 								--lastReproFault;
 
+							if (context.reproducingControlRecordingIteration)
+								reproducedFault = true;
+
 							controlAfterRepro = false;
 							iterationCount = context.reproducingInitialIteration;
 							context.controlIteration = context.reproducingControlIteration;
+							context.controlRecordingIteration = context.reproducingControlRecordingIteration;
 
 							context.reproducingFault = false;
 							context.reproducingIterationJumpCount = 0;
@@ -720,7 +748,9 @@ namespace Peach.Core
 							OnReproFailed(iterationCount);
 
 							context.controlIteration = context.reproducingControlIteration;
+							context.controlRecordingIteration = context.reproducingControlRecordingIteration;
 							context.reproducingControlIteration = false;
+							context.reproducingControlRecordingIteration = false;
 						}
 						else if (test.TargetLifetime == Test.Lifetime.Session)
 						{
@@ -747,9 +777,11 @@ namespace Peach.Core
 									OnReproFailed(iterationCount);
 
 									context.controlIteration = context.reproducingControlIteration;
+									context.controlRecordingIteration = context.reproducingControlRecordingIteration;
 									context.reproducingInitialIteration = 0;
 									context.reproducingIterationJumpCount = 0;
 									context.reproducingControlIteration = false;
+									context.reproducingControlRecordingIteration = false;
 
 								}
 								else
@@ -770,7 +802,7 @@ namespace Peach.Core
 									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
 								}
 							}
-							else if (context.test.controlIteration > 0)
+							else if (context.test.controlIteration > 0 || context.reproducingControlRecordingIteration)
 							{
 								controlAfterRepro = false;
 								context.controlRecordingIteration = false;
@@ -869,8 +901,15 @@ namespace Peach.Core
 						if (context.controlIteration)
 							lastControlIteration = iterationCount;
 
-						context.controlIteration = false;
-						context.controlRecordingIteration = false;
+						if (reproducedFault)
+						{
+							reproducedFault = false;
+						}
+						else
+						{
+							context.controlIteration = false;
+							context.controlRecordingIteration = false;
+						}
 					}
 				}
 			}
