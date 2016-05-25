@@ -774,10 +774,10 @@ namespace Org.BouncyCastle.Crypto.Tls
 
             int prfAlgorithm = context.SecurityParameters.PrfAlgorithm;
 
-            if (prfAlgorithm == PrfAlgorithm.tls_prf_legacy)
-                return PRF_legacy(secret, label, labelSeed, size);
+	        if (prfAlgorithm == PrfAlgorithm.tls_prf_legacy)
+		        return PRF_legacy(secret, label, labelSeed, size);
 
-            IDigest prfDigest = CreatePrfHash(prfAlgorithm);
+	        IDigest prfDigest = CreatePrfHash(prfAlgorithm);
             byte[] buf = new byte[size];
             HMacHash(prfDigest, secret, labelSeed, buf);
             return buf;

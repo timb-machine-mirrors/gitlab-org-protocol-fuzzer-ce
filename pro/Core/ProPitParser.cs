@@ -176,6 +176,10 @@ namespace Peach.Pro.Core
 				msg.Status = node.getAttrString("status");
 				msg.Error = node.getAttrString("error");
 			}
+			if (action is Error)
+			{
+				((Error)action).ErrorMessage = node.getAttrString("error");
+			}
 
 			return action;
 		}
