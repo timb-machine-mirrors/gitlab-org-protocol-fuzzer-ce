@@ -90,7 +90,7 @@ namespace Peach.Pro.Core.Storage
 		}
 
 		public NodeDatabase()
-			: base(GetDatabasePath(), false)
+			: base(GetDatabasePath(), true)
 		{
 		}
 
