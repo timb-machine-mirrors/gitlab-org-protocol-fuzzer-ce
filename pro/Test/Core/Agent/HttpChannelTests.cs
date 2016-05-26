@@ -57,7 +57,7 @@ namespace Peach.Pro.Test.Core.Agent
 				"/Agent/AgentConnect",
 				"/Agent/StartMonitor?name=Monitor&cls=SaveFile",
 				"/Agent/SessionStarting",
-				"/Agent/IterationStarting?iterationCount=0&isReproduction=False",
+				"/Agent/IterationStarting?iterationCount=0&isReproduction=False&lastWasFault=False",
 				"/Agent/Publisher/CreatePublisher",
 				"/Agent/Publisher/start",
 				"/Agent/Publisher/Set_Iteration",
