@@ -149,25 +149,28 @@ namespace Peach.Pro.Core.OS.Unix
 
 			while (true)
 			{
-				fds[0].revents = 0;
-				fds[1].revents = 0;
-				fds[2].revents = 0;
+				lock (fds)
+				{
+					fds[0].revents = 0;
+					fds[1].revents = 0;
+					fds[2].revents = 0;
 
-				var ret = Syscall.poll(fds, 2, read_timeout);
+					var ret = Syscall.poll(fds, 2, read_timeout);
 
-				if (UnixMarshal.ShouldRetrySyscall(ret))
-					continue;
+					if (UnixMarshal.ShouldRetrySyscall(ret))
+						continue;
 
-				UnixMarshal.ThrowExceptionForLastErrorIf(ret);
+					UnixMarshal.ThrowExceptionForLastErrorIf(ret);
 
-				if (ret == 0)
-					throw new TimeoutException();
+					if (ret == 0)
+						throw new TimeoutException();
 
-				// If stop event was signalled, return 0 bytes
-				if (fds[1].revents != 0)
-					return 0;
+					// If stop event was signalled, return 0 bytes
+					if (fds[1].revents != 0)
+						return 0;
 
-				break;
+					break;
+				}
 			}
 
 			unsafe
@@ -250,11 +253,30 @@ namespace Peach.Pro.Core.OS.Unix
 			
 			disposed = true;
 
-			Syscall.close(fds[2].fd);
-			Syscall.close(fds[1].fd);
+			// Write 1 byte to the pipe to break the poll() on osx
+			var stop = new byte[] { 0 };
 
-			if (Syscall.close(fds[0].fd) != 0)
-				UnixMarshal.ThrowExceptionForLastError();
+			unsafe
+			{
+				fixed (byte* ptr = stop)
+				{
+					Syscall.write(fds[2].fd, ptr, 1);
+				}
+			}
+
+			lock (fds)
+			{
+				Syscall.close(fds[2].fd);
+				fds[2].fd = -1;
+
+				Syscall.close(fds[1].fd);
+				fds[1].fd = -1;
+
+				var err = Syscall.close(fds[0].fd);
+				fds[0].fd = -1;
+
+				UnixMarshal.ThrowExceptionForLastErrorIf(err);
+			}
 		}
 
 		public override void Close ()
