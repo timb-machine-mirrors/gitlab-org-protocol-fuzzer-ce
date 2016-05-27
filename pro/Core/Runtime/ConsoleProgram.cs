@@ -282,7 +282,18 @@ namespace Peach.Pro.Core.Runtime
 		protected override int OnRun(List<string> args)
 		{
 			var root = ResourceRoot.GetDefault(Path.GetFullPath(_pitLibraryPath));
-			_license = new PortableLicense(root);
+			if (root == null)
+				_license = new PortableLicense(null, null);
+			else
+			{
+				var manifest = PitResourceLoader.LoadManifest(root);
+				var secrets = PitResourceLoader.LoadManifest(new ResourceRoot
+				{
+					Assembly = Assembly.GetExecutingAssembly(),
+					Prefix = "Peach.Pro.Core.Resources"
+				});
+				_license = new PortableLicense(manifest, secrets);
+			}
 
 			_config.commandLine = args.ToArray();
 

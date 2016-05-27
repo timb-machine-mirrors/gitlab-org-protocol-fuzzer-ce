@@ -27,7 +27,7 @@ namespace Peach.Pro.Test.Core
  			if (!Enum.TryParse(version, out ver))
 				Assert.Fail("Enumeration value '{0}' is not a valid License.Version".Fmt(version));
 
-			var license = new PortableLicense(null);
+			var license = new PortableLicense(null, null);
 			var txt = license.GetEulaText(ver);
 
 			Assert.NotNull(txt);

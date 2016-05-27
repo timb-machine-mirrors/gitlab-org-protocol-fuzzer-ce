@@ -21,6 +21,16 @@ namespace Peach.Pro.Core
 	{
 		public Dictionary<string, PitManifestFeature> Features { get; set; }
 		public Dictionary<string, string[]> Packs { get; set; }
+
+		public string FindFeatureForPit(string name)
+		{
+			return Features.SingleOrDefault(x => x.Value.Pit == name).Key;
+		}
+
+		public string FindFeatureForLegacyPit(string name)
+		{
+			return Features.SingleOrDefault(x => x.Value.Pit.Split('/')[1] == name).Key;
+		}
 	}
 
 	public class PitManifestFeature

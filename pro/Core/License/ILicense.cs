@@ -12,7 +12,15 @@ namespace Peach.Pro.Core.License
 		Professional,
 		Trial,
 	}
-	
+
+	public static class FeatureNames
+	{
+		public const string Android = "Peach-Android";
+		public const string Engine = "Peach-Engine";
+		public const string ExportPit = "Peach-ExportPit";
+		public const string CustomPit = "Peach-CustomPit";
+	}
+
 	public interface ILicense
 	{
 		bool IsMissing { get; }
@@ -27,6 +35,19 @@ namespace Peach.Pro.Core.License
 		IEnumerable<EulaType> Eulas { get; }
 
 		IEnumerable<IFeature> Features { get; }
+
+		/// <summary>
+		/// Get a feature by name.
+		/// <list type="bullet">
+		/// <item>Peach-Android</item>
+		/// <item>Peach-Engine</item>
+		/// <item>Peach-ExportPit</item>
+		/// <item>PeachPit-Custom</item>
+		/// <item>PeachPit-$CATEGORY-$PIT</item>
+		/// </list>
+		/// </summary>
+		/// <returns>The feature.</returns>
+		/// <param name="name">Feature name.</param>
 		IFeature GetFeature(string name);
 	}
 
@@ -36,7 +57,7 @@ namespace Peach.Pro.Core.License
 		byte[] Key { get; }
 
 		bool Acquire();
-		void Release();
+		// Call Dispose() to release the license
 	}
 
 	public static class LicenseExtensions
