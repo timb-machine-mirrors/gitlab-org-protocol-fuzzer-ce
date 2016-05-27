@@ -93,7 +93,7 @@ def run_nunit(args, asm, fixture, outdir):
 	cmd = dotnet([
 		nunit,
 		'--labels=All',
-		"--where:'%s'" % category_filter(args.include),
+		"--where:%s" % category_filter(args.include),
 		'--result=%s' % result,
 		asm,
 		'--test=%s' % test,
@@ -195,7 +195,7 @@ def main():
 		explore = dotnet([
 			nunit,
 			'--explore=%s' % tmp.name,
-			"--where:'%s'" % category_filter(args.include),
+			"--where:%s" % category_filter(args.include),
 		], newpg=False) + args.input
 
 	subprocess.check_call(explore)
