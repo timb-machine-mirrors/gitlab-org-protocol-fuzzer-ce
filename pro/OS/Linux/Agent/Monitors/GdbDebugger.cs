@@ -41,6 +41,12 @@ define log_if_crash
   set logging redirect on
   set logging on {0}
   exploitable -v
+  printf ""\n--- Info Frame ---\n\n""
+  info frame
+  printf ""\n--- Info Registers ---\n\n""
+  info registers
+  printf ""\n--- Backtrace ---\n\n""
+  thread apply all bt full
   set logging off
  end
 end

@@ -91,14 +91,39 @@ namespace Peach.Pro.Core.WebServices
 			return value;
 		}
 
-		public static List<ParamDetail> ToWeb(this PitDefines defines)
+		public static List<ParamDetail> ToWeb(this PitDefines defines, List<Param> config)
 		{
+			var set = new SortedSet<string>(config.Select(x => x.Key));
+			set.ExceptWith(defines.Walk().Select(x => x.Key));
+
+			var userConfigs = new List<Param>();
+			userConfigs.AddRange(set.Select(key => config.Single(x => x.Key == key)));
+			var userDefines = (userConfigs.Count) == 0 ? null : 
+				userConfigs.Select(cfg => new ParamDetail
+				{
+					Key = cfg.Key,
+					Name = cfg.Name,
+					Description = cfg.Description,
+					Type = ParameterType.User,
+				}).ToList();
+
 			var ifaces = new IfaceOptions();
 			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
 
 			var ret = DefineToParamDetail(defines.Children, reserved, ifaces) ?? new List<ParamDetail>();
 
 			reserved = new List<string>();
+
+			ret.Add(new ParamDetail
+			{
+				Key = "UserDefines",
+				Name = "User Defines",
+				Description = "",
+				Type = ParameterType.Group,
+				Collapsed = false,
+				OS = "",
+				Items = userDefines,
+			});
 
 			ret.Add(new ParamDetail
 			{
@@ -112,70 +137,6 @@ namespace Peach.Pro.Core.WebServices
 			});
 
 			return ret.Where(d => d.Type != ParameterType.Group || d.Items != null).ToList();
-		}
-
-		public static void ApplyWeb(this PitDefines defines, List<Param> config)
-		{
-			const string UserDefinesName = "User Defines";
-			const string UserDefinesDesc = "User provided configuration variables";
-
-			var visited = new HashSet<string>();
-			var missing = new HashSet<string>();
-			var reserved = defines.SystemDefines.Select(d => d.Key).ToList();
-
-			foreach (var def in defines.Walk())
-			{
-				visited.Add(def.Key);
-
-				if (reserved.Contains(def.Key))
-					continue;
-
-				if (def.ConfigType == ParameterType.Space || def.ConfigType == ParameterType.Group)
-					continue;
-
-				var cfg = config.FirstOrDefault(i => i.Key == def.Key);
-				if (cfg != null)
-					def.Value = cfg.Value;
-				else
-					missing.Add(def.Key);
-			}
-
-			var newDefines = config.Where(c => !visited.Contains(c.Key)).ToList();
-			var userDefines = defines.Children.LastOrDefault();
-
-			if (newDefines.Count > 0)
-			{
-				if (userDefines == null || userDefines.Name != UserDefinesName)
-				{
-					userDefines = new PitDefines.Group { Name = UserDefinesName };
-
-					defines.Children.Add(userDefines);
-				}
-
-				foreach (var def in newDefines)
-				{
-					if (reserved.Contains(def.Key))
-						continue;
-
-					userDefines.Children.Add(new PitDefines.UserDefine
-					{
-						Key = def.Key,
-						Name = def.Name,
-						Value = def.Value,
-						Description = def.Description
-					});
-				}
-			}
-
-			if (userDefines != null && userDefines.Name == UserDefinesName)
-			{
-				userDefines.Description = UserDefinesDesc;
-
-				userDefines.Children.RemoveAll(d => missing.Contains(d.Key));
-
-				if (userDefines.Children.Count == 0)
-					defines.Children.Remove(userDefines);
-			}
 		}
 
 		private class IfaceOptions
@@ -200,7 +161,10 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		private static List<ParamDetail> DefineToParamDetail(IEnumerable<PitDefines.Define> defines, List<string> reserved, IfaceOptions ifaces)
+		private static List<ParamDetail> DefineToParamDetail(
+			IEnumerable<PitDefines.Define> defines, 
+			List<string> reserved, 
+			IfaceOptions ifaces)
 		{
 			if (defines == null)
 				return null;
@@ -213,7 +177,10 @@ namespace Peach.Pro.Core.WebServices
 			return ret.Count > 0 ? ret : null;
 		}
 
-		private static ParamDetail DefineToParamDetail(PitDefines.Define define, List<string> reserved, IfaceOptions ifaces)
+		private static ParamDetail DefineToParamDetail(
+			PitDefines.Define define, 
+			List<string> reserved, 
+			IfaceOptions ifaces)
 		{
 			var grp = define as PitDefines.Collection;
 

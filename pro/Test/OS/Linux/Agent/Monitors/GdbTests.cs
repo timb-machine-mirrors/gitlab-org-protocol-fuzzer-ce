@@ -18,13 +18,17 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 	[Platform("Linux")]
 	public class GdbTests
 	{
+		private static readonly string CrashableServer = Utilities.GetAppResourcePath("CrashableServer");
+		private static readonly string CrashingFileConsumer = Utilities.GetAppResourcePath("CrashingFileConsumer");
+		private static readonly string CrashTest = Utilities.GetAppResourcePath("CrashTest");
+
 		[Test]
 		public void TestFault()
 		{
 			var self = Path.Combine(Utilities.ExecutionDirectory, "Peach.exe");
 
 			var args = new Dictionary<string, string>() {
-				{ "Executable",  "CrashingFileConsumer" },
+				{ "Executable", CrashingFileConsumer },
 				{ "Arguments", self },
 				{ "RestartOnEachTest", "true" },
 			};
@@ -53,7 +57,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		public void TestNoFault()
 		{
 			var args = new Dictionary<string, string>() {
-				{ "Executable",  "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 12346" },
 			};
 
@@ -120,7 +124,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		public void TestCpuKill()
 		{
 			var args = new Dictionary<string, string>() {
-				{ "Executable","CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 12346" },
 				{ "StartOnCall", "Foo" },
 			};
@@ -152,7 +156,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		public void TestNoCpuKill()
 		{
 			var args = new Dictionary<string, string> {
-				{ "Executable", "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 0 5" },
 				{ "StartOnCall", "Foo" },
 				{ "NoCpuKill", "true" }
@@ -185,7 +189,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		public void TestNoCpuKillWaitFail()
 		{
 			var args = new Dictionary<string, string>() {
-				{ "Executable", "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 0 5" },
 				{ "StartOnCall", "Foo" },
 				{ "NoCpuKill", "true" },
@@ -221,7 +225,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var starts = 0;
 
 			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
-				{ "Executable", "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 0 1" },
 			}) {
 				StartMonitor = (m, args) =>
@@ -247,7 +251,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var iteration = 0;
 
 			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
-				{ "Executable", "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartAfterFault", "true" },
 			}) {
@@ -274,7 +278,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		public void TestForkingInferior()
 		{
 			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
-				{ "Executable", "CrashTest" },
+				{ "Executable", CrashTest },
 				{ "Arguments", "fork" },
 				{ "RestartOnEachTest", "true" },
 			});
@@ -338,7 +342,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var iteration = 0;
 
 			var runner = new MonitorRunner("Gdb", new Dictionary<string, string> {
-				{ "Executable", "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 " + port },
 			}) {
 				StartMonitor = (m, args) =>

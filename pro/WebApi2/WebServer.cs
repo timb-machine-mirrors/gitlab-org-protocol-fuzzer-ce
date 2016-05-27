@@ -24,6 +24,10 @@ namespace Peach.Pro.WebApi2
 {
 	public class WebServer : IWebStatus
 	{
+		// If we use "+" on mono, there is a 10 sec startup & shutdown delay
+		// as we try and resolve the ip for dns name "+"
+		private static readonly string AnyHost = Platform.IsRunningOnMono() ? "*" : "+";
+
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
 		// ReSharper disable InconsistentNaming
 		private const int ERROR_ACCESS_DENIED = 5;
@@ -63,7 +67,7 @@ namespace Peach.Pro.WebApi2
 
 			while (_server == null)
 			{
-				var url = "http://+:{0}/".Fmt(port);
+				var url = "http://{0}:{1}/".Fmt(AnyHost, port);
 
 				try
 				{
