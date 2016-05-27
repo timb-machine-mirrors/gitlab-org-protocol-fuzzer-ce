@@ -452,6 +452,11 @@ namespace Peach.Core
 		public bool reproducingControlIteration = false;
 
 		/// <summary>
+		/// Did the fault we are trying to reproduce occur on a control iteration.
+		/// </summary>
+		public bool reproducingControlRecordingIteration = false;
+
+		/// <summary>
 		/// Number of iterations to jump.
 		/// </summary>
 		/// <remarks>
