@@ -98,9 +98,6 @@ namespace Peach.Core.Dom
 		{
 			commonAncestor = new Binding(parent);
 			relativeElement = new RelativeBinding(this, parent);
-
-			parent.relations.Add(commonAncestor);
-			parent.relations.Add(relativeElement);
 		}
 
 		public override void WritePit(XmlWriter pit)
