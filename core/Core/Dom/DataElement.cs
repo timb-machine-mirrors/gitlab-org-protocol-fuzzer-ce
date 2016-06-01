@@ -1650,8 +1650,13 @@ namespace Peach.Core.Dom
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
 				return MutatedValue;
 
-			foreach (var r in relations.From<Relation>())
+			for (var i = 0; i < relations.Count; ++i)
 			{
+				// Only interested in "From" relations
+				var r = relations[i] as Relation;
+				if (r == null || r.From != this)
+					continue;
+
 				// CalculateFromValue can return null sometimes
 				// when mutations mess up the relation.
 				// In that case use the exsiting value for this element.

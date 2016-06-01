@@ -71,7 +71,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 			// The core_pattern has a max length of 128 bytes, so LogFolder must be <60 bytes
 			if (LogFolder.Length >= 60)
-				throw new PeachException("The specified log folder is too long, it must be less than 60 characters.");
+				throw new PeachException(string.Format("The specified log folder is too long, it must be less than 60 characters: '{0}'", LogFolder));
 
 			// 1) Ensure only one monitor exists...
 			var si = SingleInstance.CreateInstance("LinuxCoreFile");

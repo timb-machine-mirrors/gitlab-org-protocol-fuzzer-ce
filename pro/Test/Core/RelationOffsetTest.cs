@@ -624,7 +624,7 @@ namespace Peach.Pro.Test.Core
 				rdr.BigEndian();
 				var offset = rdr.ReadUInt32();
 
-				Assert.AreEqual(offset, 4);
+				Assert.AreEqual(4, offset);
 			}
 		}
 	}

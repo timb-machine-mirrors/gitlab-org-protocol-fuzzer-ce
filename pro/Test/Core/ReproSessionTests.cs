@@ -26,6 +26,8 @@ namespace Peach.Pro.Test.Core
 
 				WaitTime = 0.0;
 				FaultWaitTime = 0.0;
+
+				InjectFault = true;
 			}
 
 			public uint RangeStop { get; set; }
@@ -42,16 +44,20 @@ namespace Peach.Pro.Test.Core
 			public string Repro { get; set; }
 
 			public bool FaultOnControl { get; set; }
+			public bool SoftException { get; set; }
+			public bool InjectFault { get; set; }
 
 			public uint? MaxBackSearch { get; set; }
 		}
 
 		private readonly List<TimeSpan> _waitTimes = new List<TimeSpan>();
+		private readonly List<string> _faults = new List<string>();
 
 		[SetUp]
 		public void SetUp()
 		{
 			_waitTimes.Clear();
+			_faults.Clear();
 		}
 
 
@@ -111,36 +117,67 @@ namespace Peach.Pro.Test.Core
 			e.TestStarting += ctx =>
 			{
 				ctx.DetectedFault += (c, agent) => _waitTimes.Add(sw.Elapsed);
+
+				var trigger = new Action<RunContext, bool, Action>((c, add, fn) =>
+				{
+					var it = ctx.currentIteration;
+
+					string i;
+
+					if (ctx.controlRecordingIteration)
+						i = "R" + it;
+					else if (ctx.controlIteration)
+						i = "C" + it;
+					else
+						i = it.ToString(CultureInfo.InvariantCulture);
+
+					if (add)
+						history.Add(i);
+
+					var j = "{0},{1}".Fmt(i, history.Count(h => h == i));
+
+					var fault = false;
+
+					if (!ctx.reproducingFault && (i == args.Fault || j == args.Fault || i == args.Initial))
+						fault = true;
+					else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro || i == args.InitialRepro || j == args.InitialRepro))
+						fault = true;
+
+					if (fault)
+						fn();
+				});
+
+				ctx.StateModelStarting += (c, sm) =>
+				{
+					trigger(c, true, () =>
+					{
+						if (args.SoftException)
+							throw new SoftException("Simulated SoftException");
+					});
+				};
+				
+
+				if (args.InjectFault)
+				{
+					ctx.DetectedFault += (c, agent) =>
+					{
+						trigger(c, false, c.InjectFault);
+					};
+				}
+
+				ctx.IterationFinished += (c, it) =>
+				{
+					sw.Restart();
+				};
 			};
-
-			e.IterationStarting += (ctx, it, ti) =>
-			{
-				string i;
-
-				if (ctx.controlRecordingIteration)
-					i = "R" + it;
-				else if (ctx.controlIteration)
-					i = "C" + it;
-				else
-					i = it.ToString(CultureInfo.InvariantCulture);
-
-				var j = "{0},{1}".Fmt(i, history.Count(h => h == i));
-
-				history.Add(i);
-
-				if (!ctx.reproducingFault && (i == args.Fault || i == args.Initial))
-					ctx.InjectFault();
-				else if (ctx.reproducingFault && (i == args.Repro || j == args.Repro || i == args.InitialRepro || j == args.InitialRepro))
-					ctx.InjectFault();
-			};
-
-			e.IterationFinished += (ctx, it) => sw.Restart();
 
 			e.Fault += (ctx, it, sm, fault) =>
 			{
 				history.Add("Fault");
+				_faults.Add(fault.Where(f => f.type == FaultType.Fault).Select(f => f.title).First());
 
-				Assert.AreEqual(1, fault.Length);
+				if (!args.SoftException)
+					Assert.AreEqual(1, fault.Length);
 				Assert.LessOrEqual(it, ctx.reproducingInitialIteration);
 				Assert.GreaterOrEqual(ctx.reproducingIterationJumpCount, 0);
 
@@ -149,7 +186,8 @@ namespace Peach.Pro.Test.Core
 			{
 				history.Add("ReproFault");
 
-				Assert.AreEqual(1, fault.Length);
+				if (!args.SoftException)
+					Assert.AreEqual(1, fault.Length);
 				Assert.AreEqual(it, ctx.reproducingInitialIteration);
 				Assert.AreEqual(0, ctx.reproducingIterationJumpCount);
 			};
@@ -525,7 +563,7 @@ namespace Peach.Pro.Test.Core
 			// Run 1 C2 2 C3 3 C4 4 C6 5 C6
 			// Repro on iteration C6
 
-			var act = Run(new Args { Fault = "C6", Repro = "C6,2", ControlIterations = 5 });
+			var act = Run(new Args { Fault = "C6", Repro = "C6,3", ControlIterations = 5 });
 
 			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 Fault 6 7 8 9 10";
 
@@ -621,7 +659,7 @@ namespace Peach.Pro.Test.Core
 			// Repro on 13
 			// Resume at 21 22 23 24 25
 
-			var act = Run(new Args { RangeStop = 25, Fault = "C21", Repro = "13,2", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 25, Fault = "C21", Repro = "13,3", ControlIterations = 5 });
 
 			var exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 ReproFault " +
@@ -648,7 +686,7 @@ namespace Peach.Pro.Test.Core
 			// Repro on 13
 			// Resume at 21 22 23 24 25
 
-			var act = Run(new Args { RangeStop = 25, Fault = "21", Repro = "13,2", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 25, Fault = "21", Repro = "13,3", ControlIterations = 5 });
 
 			var exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 21 ReproFault " +
@@ -729,7 +767,7 @@ namespace Peach.Pro.Test.Core
 
 			// Resume at 27 28 29 30
 
-			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11,2", Fault = "C26", ControlIterations = 5 });
+			var act = Run(new Args { RangeStop = 30, Initial = "C11", InitialRepro = "C11,3", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 " +
@@ -806,6 +844,128 @@ namespace Peach.Pro.Test.Core
 				"6 4 5 Fault 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestIterationNoReproControlRecord()
+		{
+			// Fault detected on record control iteration
+			// Replay and don't reproduce, search for fault and don't find
+			// Continue fuzzing
+
+			var act = Run(new Args { Initial = "R6", SwitchCount = 5 });
+
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
+				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 ReproFailed 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestIterationReproControlRecord()
+		{
+			// Fault detected on record control iteration
+			// Replay and reproduce
+			// Stop fuzzing
+
+			var ex = Assert.Throws<PeachException>(() =>
+				Run(new Args { Initial = "R6", Repro = "R6", SwitchCount = 5 }));
+
+			const string exp = "Fault detected on control recording iteration.";
+
+			Assert.AreEqual(exp, ex.Message);
+		}
+
+		[Test]
+		public void TestIterationReproControlBeforeRecord()
+		{
+			Assert.Ignore("Implement me when we get the engine to control data set switching");
+
+			// R(d1) 1 2 3 4 5 c(d1) r(d2) fault r(d2) (no-repro)
+			// R(d1) 1 c(d1) 2 c(d1) 3 c(d1) 4 c(d1) 5 c(d1) r(d2) (give up search)
+			// 6 7 8 9...
+		}
+
+		[Test]
+		public void TestIterationReproControlRecordSearch()
+		{
+			// Fault detected on record control iteration
+			// Replay and don't reproduce, search and eventually reproduce
+			// Continue fuzzing
+
+			var act = Run(new Args { Fault = "R6,1", Repro = "R6,3", SwitchCount = 5 });
+
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
+				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault R6 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+		}
+
+		[Test]
+		public void TestIterationReproControlRecordSearchDeep()
+		{
+			// Fault detected on record control iteration
+			// Replay and don't reproduce, search twice and eventually reproduce
+			// Continue fuzzing
+		}
+
+		[Test]
+		public void TestSoftExceptionFirst()
+		{
+			// SoftException on 1st Record Control 
+			// Stop fuzzing
+		}
+
+		[Test]
+		public void TestSoftExceptionReproNoFault()
+		{
+			// SoftException on data set switch
+			// No fault detected, SoftException reproduces
+			// Stop fuzzing
+		}
+
+		[Test]
+		public void TestSoftExceptionNoReproNoFault()
+		{
+			// SoftException on data set switch
+			// No fault detected and SoftException does not reproduce
+			// Treat SoftException as fault
+			// Continue fuzzing
+
+			var act = Run(new Args { Fault = "R6,1", Repro = "R6,3", SwitchCount = 5, InjectFault = false, SoftException = true });
+
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
+				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault R6 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+
+			CollectionAssert.AreEqual(new[] { "Peach Control Iteration Failed" }, _faults);
+		}
+
+		[Test]
+		public void TestSoftExceptionNoReproFault()
+		{
+			// SoftException on data set switch
+			// Fault detected, start searching for repro and don't find one
+			// Continue fuzzing
+		}
+
+		[Test]
+		public void TestSoftExceptionReproFault()
+		{
+			// SoftException on data set switch
+			// Fault detected, start searching for repro and  find one
+			// Continue fuzzing
+
+
+			var act = Run(new Args { Fault = "R6,1", Repro = "R6,3", SwitchCount = 5, SoftException = true });
+
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
+				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault R6 6 7 8 9 10";
+
+			Assert.AreEqual(exp, act);
+
+			CollectionAssert.AreEqual(new[] { "UnitTest" }, _faults);
 		}
 	}
 }
