@@ -139,27 +139,6 @@ namespace Peach.Core
 			get { return searchPath; }
 		}
 
-		//public static string FindFile(string fileName)
-		//{
-		//	if (Path.IsPathRooted(fileName))
-		//	{
-		//		if (File.Exists(fileName))
-		//			return fileName;
-		//	}
-		//	else
-		//	{
-		//		foreach (var path in searchPath)
-		//		{
-		//			var fullPath = Path.Combine(path, fileName);
-
-		//			if (File.Exists(fullPath))
-		//				return fullPath;
-		//		}
-		//	}
-
-		//	throw new FileNotFoundException();
-		//}
-
 		public static void LoadAssembly(Assembly asm)
 		{
 			asm.GetExportedTypes(); // make sure we can load exported types.
