@@ -19,7 +19,6 @@ using Peach.Core.Cracker;
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
-using Peach.Core.Test;
 
 namespace PitTester
 {
@@ -56,16 +55,7 @@ namespace PitTester
 			var module = builder.DefineDynamicModule(asmName, fileName);
 
 			MakeTestBase(module);
-
-			var type = module.DefineType(asmName);
-			type.SetCustomAttribute(MakeCustomAttribute(typeof(TestFixtureAttribute)));
-
-			var testAttr = MakeCustomAttribute(typeof(TestAttribute));
-			MakeTestPit("TestSingleIteration", type, testAttr, pitLibraryPath, pitTestFile, 1);
-			MakeTestPit("TestManyIterations", type, testAttr, pitLibraryPath, pitTestFile, 500);
-			MakeTestDatasets(type, testAttr, pitLibraryPath, pitTestFile);
-
-			type.CreateType();
+			MakeTestFixture(module, asmName, pitLibraryPath, pitTestFile);
 
 			builder.Save(fileName);
 		}
@@ -78,25 +68,20 @@ namespace PitTester
 
 		static void MakeTestBase(ModuleBuilder module)
 		{
-			var baseType = typeof(SetUpFixture);
-			
 			var type = module.DefineType("TestBase");
-			type.SetCustomAttribute(MakeCustomAttribute(typeof(SetUpFixtureAttribute)));
-			type.SetParent(baseType);
+			type.SetParent(typeof(TestBase));
+			type.CreateType();
+		}
 
-			var setUpMethod = type.DefineMethod("SetUp", MethodAttributes.Public);
-			setUpMethod.SetCustomAttribute(MakeCustomAttribute(typeof(OneTimeSetUpAttribute)));
-			var setUpIl = setUpMethod.GetILGenerator();
-			setUpIl.Emit(OpCodes.Ldarg_0);
-			setUpIl.Emit(OpCodes.Call, baseType.GetMethod("DoSetUp", BindingFlags.Instance | BindingFlags.NonPublic));
-			setUpIl.Emit(OpCodes.Ret);
+		static void MakeTestFixture(ModuleBuilder module, string asmName, string pitLibraryPath, string pitTestFile)
+		{
+			var type = module.DefineType(asmName);
+			type.SetCustomAttribute(MakeCustomAttribute(typeof(TestFixtureAttribute)));
 
-			var tearDownMethod = type.DefineMethod("TearDown", MethodAttributes.Public);
-			tearDownMethod.SetCustomAttribute(MakeCustomAttribute(typeof(OneTimeTearDownAttribute)));
-			var tearDownIl = tearDownMethod.GetILGenerator();
-			tearDownIl.Emit(OpCodes.Ldarg_0);
-			tearDownIl.Emit(OpCodes.Call, baseType.GetMethod("DoTearDown", BindingFlags.Instance | BindingFlags.NonPublic));
-			tearDownIl.Emit(OpCodes.Ret);
+			var testAttr = MakeCustomAttribute(typeof(TestAttribute));
+			MakeTestPit("TestSingleIteration", type, testAttr, pitLibraryPath, pitTestFile, 1);
+			MakeTestPit("TestManyIterations", type, testAttr, pitLibraryPath, pitTestFile, 500);
+			MakeTestDatasets(type, testAttr, pitLibraryPath, pitTestFile);
 
 			type.CreateType();
 		}
