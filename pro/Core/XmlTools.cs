@@ -40,67 +40,70 @@ namespace Peach.Pro.Core
 			if (xmlRoot == null)
 				throw new ArgumentException("Type '{0}' is missing XmlRootAttribute.".Fmt(type.FullName));
 
-			XmlSchema ret;
-			if (schemas.TryGetValue(type, out ret))
-				return ret;
-
-			var importer = new XmlReflectionImporter();
-			var schema = new XmlSchemas();
-			var exporter = new XmlSchemaExporter(schema);
-
-			var xmlTypeMapping = importer.ImportTypeMapping(type);
-			exporter.ExportTypeMapping(xmlTypeMapping);
-
-			PrintSchema(schema[0]);
-
-			foreach (XmlSchemaObject obj in schema[0].Items)
+			lock (schemas)
 			{
-				if (obj is XmlSchemaElement || obj is XmlSchemaSimpleType)
-					continue;
+				XmlSchema ret;
+				if (schemas.TryGetValue(type, out ret))
+					return ret;
 
-				var asType = (XmlSchemaComplexType)obj;
+				var importer = new XmlReflectionImporter();
+				var schema = new XmlSchemas();
+				var exporter = new XmlSchemaExporter(schema);
 
-				FixupComplexType(asType);
+				var xmlTypeMapping = importer.ImportTypeMapping(type);
+				exporter.ExportTypeMapping(xmlTypeMapping);
 
-				FixupAttributes(asType.Attributes);
+				PrintSchema(schema[0]);
 
-				if (asType.ContentModel != null)
+				foreach (XmlSchemaObject obj in schema[0].Items)
 				{
-					var content = (XmlSchemaComplexContent)asType.ContentModel;
-					var ext = (XmlSchemaComplexContentExtension)content.Content;
+					if (obj is XmlSchemaElement || obj is XmlSchemaSimpleType)
+						continue;
 
-					// If xs:complexType isMixed='true' we need to set
-					// the xs:complexContent to have isMixed='true' also
-					if (content.IsMixed == false && asType.IsMixed == true)
-						content.IsMixed = true;
+					var asType = (XmlSchemaComplexType)obj;
 
-					FixupAttributes(ext.Attributes);
+					FixupComplexType(asType);
+
+					FixupAttributes(asType.Attributes);
+
+					if (asType.ContentModel != null)
+					{
+						var content = (XmlSchemaComplexContent)asType.ContentModel;
+						var ext = (XmlSchemaComplexContentExtension)content.Content;
+
+						// If xs:complexType isMixed='true' we need to set
+						// the xs:complexContent to have isMixed='true' also
+						if (content.IsMixed == false && asType.IsMixed == true)
+							content.IsMixed = true;
+
+						FixupAttributes(ext.Attributes);
+					}
 				}
+
+				var errors = new StringBuilder();
+
+				ValidationEventHandler handler = (o, e) =>
+				{
+					var ex = e.Exception;
+
+					errors.AppendFormat("Line: {0}, Position: {1} - ", ex.LineNumber, ex.LinePosition);
+					errors.Append(ex.Message);
+					errors.AppendLine();
+				};
+
+				schema.Compile(handler, false);
+
+				if (errors.Length > 0)
+					throw new PeachException("{0} schema failed to generate: \r\n{0}".Fmt(type.Name, errors));
+
+				ret = schema[0];
+
+				PrintSchema(ret);
+
+				schemas.Add(type, ret);
+			
+				return ret;
 			}
-
-			var errors = new StringBuilder();
-
-			ValidationEventHandler handler = (o, e) =>
-			{
-				var ex = e.Exception;
-
-				errors.AppendFormat("Line: {0}, Position: {1} - ", ex.LineNumber, ex.LinePosition);
-				errors.Append(ex.Message);
-				errors.AppendLine();
-			};
-
-			schema.Compile(handler, false);
-
-			if (errors.Length > 0)
-				throw new PeachException("{0} schema failed to generate: \r\n{0}".Fmt(type.Name, errors));
-
-			ret = schema[0];
-
-			PrintSchema(ret);
-
-			schemas.Add(type, ret);
-
-			return ret;
 		}
 
 		[Conditional("DISABLED")]

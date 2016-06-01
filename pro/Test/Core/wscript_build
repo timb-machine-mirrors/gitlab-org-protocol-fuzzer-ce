@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 deps = [
+	'Moq.dll',
 	'NLog.dll',
 	'nunit.framework.dll',
 	'System.dll',
@@ -13,10 +14,6 @@ deps = [
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.dll',
-	'Microsoft.Scripting.dll',
-	'Microsoft.Scripting.Metadata.dll',
-	'IronPython.dll',
-	'IronPython.Modules.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',
 	'Renci.SshNet.dll',
@@ -32,6 +29,7 @@ deps = [
 	'Mono.Posix.dll',
 	'SharpSnmpLib.Full.dll',
 	'SharpSnmpLib.Portable.dll',
+	'Portable.Licensing.dll',
 ]
 
 bld(

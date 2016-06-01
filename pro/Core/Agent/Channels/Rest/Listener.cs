@@ -132,17 +132,17 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			public void FatalException(string message, Exception exception, params object[] paramList)
 			{
-				Logger.FatalException(message.Fmt(paramList), exception);
+				Logger.Fatal(exception, message, paramList);
 			}
 
 			public void ErrorException(string message, Exception exception, params object[] paramList)
 			{
-				Logger.ErrorException(message.Fmt(paramList), exception);
+				Logger.Error(exception, message, paramList);
 			}
 
 			public void LogMultiline(string message, Patterns.Logging.LogSeverity severity, System.Text.StringBuilder additionalContent)
 			{
-				Log(severity, message, new object[0]);
+				Log(severity, message);
 			}
 
 			public void Log(Patterns.Logging.LogSeverity severity, string message, params object[] paramList)

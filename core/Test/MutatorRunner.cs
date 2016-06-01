@@ -158,7 +158,7 @@ namespace Peach.Core.Test
 		{
 			runner = new Runner(null, null);
 			runner.Initialize();
-			type = ClassLoader.GetAllTypesByAttribute<MutatorAttribute>((t, a) => a.Name == name).FirstOrDefault();
+			type = ClassLoader.FindPluginByName<MutatorAttribute>(name);
 
 			if (type == null)
 				throw new ArgumentException("Could not find mutator named '{0}'.".Fmt(name));

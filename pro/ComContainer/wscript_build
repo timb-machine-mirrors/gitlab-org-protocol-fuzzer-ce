@@ -19,7 +19,6 @@ deps = [
 	'Microsoft.Scripting.Metadata.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
-	'Peach.Pro.OS.Windows.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',
 ]

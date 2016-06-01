@@ -43,6 +43,7 @@ using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -50,7 +51,7 @@ namespace Peach.Pro.Core.Runtime
 	/// Command line interface for Peach 3.  Mostly backwards compatable with
 	/// Peach 2.3.
 	/// </summary>
-	public class ConsoleProgram : Program
+	public class ConsoleProgram : BaseProgram
 	{
 		private static readonly string PitLibraryPath = "PitLibraryPath";
 		public static ConsoleColor DefaultForground = Console.ForegroundColor;
@@ -278,8 +279,10 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		protected override void OnRun(List<string> args)
+		protected override int OnRun(List<string> args)
 		{
+			PrepareLicensing(_pitLibraryPath);
+
 			_config.commandLine = args.ToArray();
 
 			try
@@ -293,27 +296,22 @@ namespace Peach.Pro.Core.Runtime
 				Console.Write("[[ ");
 				Console.ForegroundColor = ConsoleColor.DarkCyan;
 				Console.WriteLine(Copyright);
-				if (License.Instance.IsNearingExpiration)
+				if (_license.IsNearingExpiration())
 				{
 					Console.ForegroundColor = ConsoleColor.Yellow;
 					Console.WriteLine();
-					Console.WriteLine(License.ExpirationWarning, License.Instance.ExpirationInDays);
+					Console.WriteLine(_license.ExpirationWarning());
 				}
 				Console.ForegroundColor = DefaultForground;
 				Console.WriteLine();
 
 				if (_agent != null)
-				{
-					OnRunAgent(_agent, args);
-				}
-				else if (_analyzer != null)
-				{
-					OnRunAnalyzer(_analyzer, args);
-				}
-				else
-				{
-					OnRunJob(_test, args);
-				}
+					return OnRunAgent(_agent, args);
+
+				if (_analyzer != null)
+					return OnRunAnalyzer(_analyzer, args);
+
+				return OnRunJob(_test, args);
 			}
 			finally
 			{
@@ -339,19 +337,12 @@ namespace Peach.Pro.Core.Runtime
 
 				var title = _webUri == null ? "" : " ({0})".Fmt(_webUri);
 
-				return new InteractiveConsoleWatcher(title);
+				return new InteractiveConsoleWatcher(_license, title);
 			}
 			catch (IOException)
 			{
 				return new ConsoleWatcher();
 			}
-		}
-
-		protected virtual Analyzer GetParser()
-		{
-			var parser = new ProPitParser();
-			Analyzer.defaultParser = parser;
-			return Analyzer.defaultParser;
 		}
 
 		/// <summary>
@@ -397,7 +388,7 @@ namespace Peach.Pro.Core.Runtime
 				return;
 			}
 
-			using (var svc = CreateWeb("", new ConsoleJobMonitor(job)))
+			using (var svc = CreateWeb(_license, "", new ConsoleJobMonitor(job)))
 			{
 				svc.Start(_webPort);
 
@@ -416,7 +407,7 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		/// <param name="analyzer"></param>
 		/// <param name="extra"></param>
-		protected virtual void OnRunAnalyzer(string analyzer, List<string> extra)
+		protected virtual int OnRunAnalyzer(string analyzer, List<string> extra)
 		{
 			var analyzerType = ClassLoader.FindPluginByName<AnalyzerAttribute>(analyzer);
 			if (analyzerType == null)
@@ -437,6 +428,8 @@ namespace Peach.Pro.Core.Runtime
 				args[i.ToString()] = extra[i];
 
 			analyzerInstance.asCommandLine(args);
+
+			return 0;
 		}
 
 		/// <summary>
@@ -444,7 +437,7 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		/// <param name="agent"></param>
 		/// <param name="extra"></param>
-		protected virtual void OnRunAgent(string agent, List<string> extra)
+		protected virtual int OnRunAgent(string agent, List<string> extra)
 		{
 			var agentType = ClassLoader.FindPluginByName<AgentServerAttribute>(agent);
 			if (agentType == null)
@@ -460,6 +453,8 @@ namespace Peach.Pro.Core.Runtime
 				args[i.ToString()] = extra[i];
 
 			agentServer.Run(args);
+
+			return 0;
 		}
 
 		/// <summary>
@@ -467,7 +462,7 @@ namespace Peach.Pro.Core.Runtime
 		/// </summary>
 		/// <param name="test">Test only. Parses the pit and exits.</param>
 		/// <param name="extra">Extra command line options</param>
-		protected virtual void OnRunJob(bool test, List<string> extra)
+		protected virtual int OnRunJob(bool test, List<string> extra)
 		{
 			if (!string.IsNullOrEmpty(_pitLibraryPath) && !string.IsNullOrEmpty(_defPitLibraryPath))
 			{
@@ -484,27 +479,31 @@ namespace Peach.Pro.Core.Runtime
 				// Ensure the EULA has been accepted before running a job
 				// on the command line.  The WebUI will present a EULA
 				// in the later case.
-				if (!License.Instance.EulaAccepted)
+
+				if (!_license.EulaAccepted)
 					ShowEula();
+
+				// Let Web-UI show errors when no command line args are specified
+				if (!_license.IsValid)
+				{
+					Console.WriteLine(_license.ErrorText);
+					return -1;
+				}
 
 				_config.shouldStop = () => _shouldStop;
 				Console.CancelKeyPress += Console_CancelKeyPress;
 
-				string pitPath = null;
+				var pitPath = _config.pitFile = extra[0];
+
 				PitConfig pitConfig = null;
-
-				if (extra.Count > 0)
+				if (Path.GetExtension(pitPath) == ".peach")
 				{
-					pitPath = _config.pitFile = extra[0];
-					if (Path.GetExtension(pitPath) == ".peach")
-					{
-						// Ensure pit library exists
-						_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
-						_definedValues[PitLibraryPath] = _pitLibraryPath;
+					// Ensure pit library exists
+					_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
+					_definedValues[PitLibraryPath] = _pitLibraryPath;
 
-						pitConfig = PitDatabase.LoadPitConfig(pitPath);
-						pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
-					}
+					pitConfig = PitDatabase.LoadPitConfig(pitPath);
+					pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
 				}
 
 				if (extra.Count > 1)
@@ -515,7 +514,7 @@ namespace Peach.Pro.Core.Runtime
 				var parserArgs = new Dictionary<string, object>();
 				parserArgs[PitParser.DEFINED_VALUES] = defs;
 
-				var parser = GetParser();
+				var parser = new ProPitParser(_license, _pitLibraryPath, pitPath);
 
 				if (test)
 				{
@@ -537,8 +536,10 @@ namespace Peach.Pro.Core.Runtime
 			else if (!_noweb && CreateWeb != null)
 			{
 				_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
-				RunWeb(_pitLibraryPath, !_nobrowser, new InternalJobMonitor());
+				RunWeb(_pitLibraryPath, !_nobrowser, new InternalJobMonitor(_license));
 			}
+
+			return 0;
 		}
 
 		/// <summary>
@@ -661,7 +662,7 @@ Debug Peach XML File
 
 		private void ShowEula()
 		{
-			Console.WriteLine(License.Instance.EulaText());
+			Console.WriteLine(_license.EulaText);
 
 			Console.WriteLine(
 @"BY TYPING ""YES"" YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTAND, AND
@@ -681,7 +682,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 				if (answer == "yes")
 				{
-					License.Instance.EulaAccepted = true;
+					_license.EulaAccepted = true;
 					return;
 				}
 

@@ -271,7 +271,7 @@ namespace Peach.Core.Analysis
 			}
 			catch (Exception ex)
 			{
-				Logger.Debug("Failed to create coverage.\n{0}", ex);
+				Logger.Debug(ex, "Failed to create coverage.");
 
 				throw new PeachException(ex.Message, ex);
 			}

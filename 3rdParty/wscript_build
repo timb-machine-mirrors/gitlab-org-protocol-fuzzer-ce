@@ -35,10 +35,7 @@ subdirs = [
 
 bld.recurse(subdirs)
 
-if bld.env.CS_NAME == 'csc':
-	# Allow for compilation of all c# on windows
-	bld.read_csshlib('Mono.Posix.dll', paths=['Mono.2.10.9'])
-else:
+if bld.env.CS_NAME != 'csc':
 	bld.read_csshlib('System.Data.SQLite.dll', paths=['System.Data.SQLite.Mono.1.0.98.1'])
 
 if bld.env.BASENAME == 'osx':
@@ -48,8 +45,7 @@ if bld.env.BASENAME == 'osx':
 		install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
 	)
 
-
-nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.0/tools')
+nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.1/tools')
 
 bld(
 	name='nunit-console',

@@ -24,7 +24,7 @@ def glob_from(*parts):
 		top.ant_glob(os.path.join(path, '**'))
 	)
 
-python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.4', 'content')
+python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.5', 'content')
 
 makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
 

@@ -17,6 +17,8 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
+using Moq;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
@@ -102,7 +104,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			var target = new ConsoleTarget
 			{
-				Layout = "${time} ${logger} ${message}"
+				Layout = "${time} ${logger} ${message} ${exception:format=tostring}"
 			};
 
 			var config = new LoggingConfiguration();
@@ -135,8 +137,10 @@ namespace Peach.Pro.Test.Core.Runtime
 				var pitPath = Path.Combine(pitLibraryPath, "Test.peach");
 				PitDatabase.SavePitConfig(pitPath, pitConfig);
 
+				var license = new Mock<ILicense>();
+
 				_job = new Job(jobRequest, pitPath);
-				JobRunner = new JobRunner(_job, pitLibraryPath, pitPath);
+				JobRunner = new JobRunner(license.Object, _job, pitLibraryPath, pitPath);
 				_thread = new Thread(() =>
 				{
 					try

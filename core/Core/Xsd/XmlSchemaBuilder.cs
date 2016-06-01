@@ -522,25 +522,26 @@ namespace Peach.Core.Xsd
 
 		static XPathDocument GetXmlDoc(Assembly asm)
 		{
-			XPathDocument doc;
-
-			if (!Cache.TryGetValue(asm, out doc))
+			lock(Cache)
 			{
-				var file = Path.ChangeExtension(asm.CodeBase, ".xml");
-
-				try
+				XPathDocument doc;
+				if (!Cache.TryGetValue(asm, out doc))
 				{
-					doc = new XPathDocument(file);
-				}
-				catch (FileNotFoundException)
-				{
-					doc = null;
-				}
+					var file = Path.ChangeExtension(asm.CodeBase, ".xml");
 
-				Cache.Add(asm, doc);
+					try
+					{
+						doc = new XPathDocument(file);
+					}
+					catch (FileNotFoundException)
+					{
+						doc = null;
+					}
+
+					Cache.Add(asm, doc);
+				}
+				return doc;
 			}
-
-			return doc;
 		}
 	}
 
