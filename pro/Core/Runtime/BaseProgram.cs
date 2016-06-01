@@ -34,39 +34,43 @@ namespace Peach.Pro.Core.Runtime
 		protected int _verbosity;
 		protected int? _webPort;
 		protected ILicense _license;
+		protected string _pluginsPath;
 
-		// this is static so it can be re-used by unit tests
-		public static void LoadPlatformAssembly()
+		protected void PrepareLicensing(string pitLibraryPath)
 		{
-			//if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
-			//	throw new PeachException("Error: Cannot use the 32bit version of Peach 3 on a 64bit operating system.");
+			ResourceRoot root = null;
+			if (pitLibraryPath != null)
+				root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
 
-			//if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
-			//	throw new PeachException("Error: Cannot use the 64bit version of Peach 3 on a 32bit operating system.");
-
-			string osAssembly = null;
-
-			switch (Platform.GetOS())
+			if (root == null)
 			{
-				case Platform.OS.OSX:
-					osAssembly = "Peach.Pro.OS.OSX.dll";
-					break;
-				case Platform.OS.Linux:
-					osAssembly = "Peach.Pro.OS.Linux.dll";
-					break;
-				case Platform.OS.Windows:
-					osAssembly = "Peach.Pro.OS.Windows.dll";
-					break;
+				_license = new PortableLicense(null, null);
 			}
+			else
+			{
+				var manifest = PitResourceLoader.LoadManifest(root);
+				var secrets = PitResourceLoader.LoadManifest(new ResourceRoot
+				{
+					Assembly = Assembly.GetExecutingAssembly(),
+					Prefix = "Peach.Pro.Core.Resources"
+				});
+				_license = new PortableLicense(manifest, secrets);
+			}
+		}
 
-			try
-			{
-				ClassLoader.LoadAssembly(osAssembly);
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException(string.Format("Error, could not load platform assembly '{0}'.  {1}", osAssembly, ex.Message), ex);
-			}
+		void LoadAssemblies()
+		{
+			// Peach.Core.dll
+			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
+
+			// Peach.Pro.dll
+			ClassLoader.LoadAssembly(Assembly.GetExecutingAssembly());
+
+			var path =
+				_pluginsPath ??
+				Utilities.GetUserConfig().AppSettings.Settings.Get("Plugins") ??
+				Utilities.GetAppResourcePath("Plugins");
+			ClassLoader.LoadPlugins(Path.GetFullPath(path));
 		}
 
 		private static Version ParseMonoVersion(string str)
@@ -85,7 +89,6 @@ namespace Peach.Pro.Core.Runtime
 
 			return ret;
 		}
-
 
 		private static bool SupportedKernel()
 		{
@@ -185,7 +188,7 @@ namespace Peach.Pro.Core.Runtime
 
 				ConfigureLogging();
 
-				LoadPlatformAssembly();
+				LoadAssemblies();
 
 				return OnRun(extra);
 			}
@@ -236,6 +239,11 @@ namespace Peach.Pro.Core.Runtime
 				"v|verbose",
 				"Increase verbosity, can use multiple times",
 				v => _verbosity++
+			);
+			options.Add(
+				"plugins=",
+				"Specify the plugins path",
+				v => _pluginsPath = v
 			);
 		}
 

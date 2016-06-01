@@ -29,6 +29,7 @@ deps = [
 	'Mono.Posix.dll',
 	'SharpSnmpLib.Full.dll',
 	'SharpSnmpLib.Portable.dll',
+	'Portable.Licensing.dll',
 ]
 
 bld(

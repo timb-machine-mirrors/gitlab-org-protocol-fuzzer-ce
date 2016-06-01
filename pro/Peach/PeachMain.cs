@@ -1,4 +1,5 @@
-﻿using Peach.Pro.Core.Runtime;
+﻿//using System.Diagnostics;
+using Peach.Pro.Core.Runtime;
 using Peach.Pro.WebApi2;
 
 namespace Peach
@@ -11,6 +12,8 @@ namespace Peach
 	{
 		static int Main(string[] args)
 		{
+			//Debugger.Launch();
+
 			return new ConsoleProgram
 			{
 				CreateWeb = (license, pitLibraryPath, jobMonitor) => 

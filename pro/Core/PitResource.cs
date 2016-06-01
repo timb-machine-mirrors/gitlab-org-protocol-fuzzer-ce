@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,9 +28,11 @@ namespace Peach.Pro.Core
 			return Features.SingleOrDefault(x => x.Value.Pit == name).Key;
 		}
 
-		public string FindFeatureForLegacyPit(string name)
+		public IEnumerable<string> FindFeaturesForLegacyPit(string name)
 		{
-			return Features.SingleOrDefault(x => x.Value.Pit.Split('/')[1] == name).Key;
+			return from x in Features
+				   where x.Value.Legacy == name
+				   select x.Key;
 		}
 	}
 
@@ -38,6 +41,7 @@ namespace Peach.Pro.Core
 		public string Pit { get; set; }
 		public byte[] Key { get; set; }
 		public string[] Assets { get; set; }
+		public string Legacy { get; set; }
 	}
 
 	public interface IPitResource
@@ -104,6 +108,9 @@ namespace Peach.Pro.Core
 				{
 					_pitFeature = query.First();
 					_feature = license.GetFeature(_pitFeature.Key);
+
+					if (_feature == null)
+						throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(pitName));
 				}
 			}
 		}

@@ -16,7 +16,6 @@ using Peach.Pro.Core.MutationStrategies;
 using Action = Peach.Core.Dom.Action;
 using StateModel = Peach.Core.Dom.StateModel;
 using Peach.Core.Cracker;
-using Peach.Pro.Core.License;
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
@@ -67,7 +66,7 @@ namespace PitTester
 			MakeTestDatasets(type, testAttr, pitLibraryPath, pitTestFile);
 
 			type.CreateType();
-		
+
 			builder.Save(fileName);
 		}
 

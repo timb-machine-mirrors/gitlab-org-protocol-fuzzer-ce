@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.CrashTestDummy
 {
@@ -13,6 +14,12 @@ namespace Peach.CrashTestDummy
 		{
 			if (args.Any(i => i == "--gui"))
 				return RunGui(args);
+
+			// Peach.Core.dll
+			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
+
+			// Peach.Pro.dll
+			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
 
 			Console.WriteLine("Opening mutex...");
 			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))

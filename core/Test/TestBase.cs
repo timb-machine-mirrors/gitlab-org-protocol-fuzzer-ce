@@ -10,6 +10,7 @@ using NUnit.Framework;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.Core.Test
 {
@@ -90,7 +91,7 @@ namespace Peach.Core.Test
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
 
-				var logLevel = LogLevel.Info;
+				var logLevel = LogLevel.Warn;
 
 				var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
 				if (peachDebug == "1")
@@ -187,6 +188,13 @@ namespace Peach.Core.Test
 		public void SetUp()
 		{
 			DoSetUp();
+
+			// Peach.Core.dll
+			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
+
+			// Peach.Pro.dll
+			// we need this to make the SingleInstance work
+			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
 		}
 
 		[OneTimeTearDown]

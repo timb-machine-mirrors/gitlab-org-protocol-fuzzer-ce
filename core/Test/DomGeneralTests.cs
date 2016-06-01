@@ -371,7 +371,7 @@ namespace Peach.Core.Test
 			const string xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<String value='https://www.google.com/search?site=&amp;tbm=isch&amp;source=hp&amp;biw=1920&amp;bih=979&amp;q=peach&amp;oq=peach&amp;gs_l=img.3..0l10.1242.1667.0.1828.5.5.0.0.0.0.79.287.5.5.0....0...1ac.1.64.img..0.5.287.8H3bm7Z3gFw'>			<Analyzer class='StringToken' />
+		<String value='https://www.google.com/search?site=&amp;tbm=isch&amp;source=hp&amp;biw=1920&amp;bih=979&amp;q=peach&amp;oq=peach&amp;gs_l=img.3..0l10.1242.1667.0.1828.5.5.0.0.0.0.79.287.5.5.0....0...1ac.1.64.img..0.5.287.8H3bm7Z3gFw'>
 		</String>
 	</DataModel>
 </Peach>

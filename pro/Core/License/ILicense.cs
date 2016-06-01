@@ -17,6 +17,7 @@ namespace Peach.Pro.Core.License
 	{
 		public const string Android = "Peach-Android";
 		public const string Engine = "Peach-Engine";
+		public const string Edition = "Peach-Edition";
 		public const string ExportPit = "Peach-ExportPit";
 		public const string CustomPit = "Peach-CustomPit";
 	}

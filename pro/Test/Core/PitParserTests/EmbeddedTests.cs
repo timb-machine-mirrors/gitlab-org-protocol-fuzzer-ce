@@ -24,88 +24,134 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		};
 		const string MasterSalt = "salt";
 
+		TempDirectory _tmpDir;
+
+		[SetUp]
+		public void SetUp()
+		{
+			_tmpDir = new TempDirectory();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_tmpDir.Dispose();
+		}
+
+		[Test]
+		public void TestUnlicensedPit()
+		{
+			var featureName = "PeachPit-Net-DNP3_Slave";
+			ExtractDirectory(_tmpDir.Path, "Net");
+			ExtractFile(_tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
+			ExtractDirectory(_tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
+
+			var encrypted = Path.Combine(_tmpDir.Path, "Peach.Pro.Pits.dll");
+
+			PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
+
+			var license = new Mock<ILicense>();
+			license.Setup(x => x.GetFeature(featureName))
+				   .Returns(() => null);
+
+			var encryptedRoot = new ResourceRoot
+			{
+				Assembly = LoadAssembly(encrypted),
+				Prefix = ResourceRoot.Prefix
+			};
+
+			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
+
+			Assert.That(() =>
+			{
+				new ProPitParser(
+					license.Object,
+					_tmpDir.Path,
+					pitFile,
+					encryptedRoot
+				);
+			},
+				Throws.TypeOf<PeachException>()
+					.With.Message.Contains("Your license does not include support for 'Net/DNP3_Slave.xml'.")
+			);
+		}
+
 		[Test]
 		public void TestLoadFromAssembly()
 		{
 			var featureName = "PeachPit-Net-DNP3_Slave";
-			using (var tmpDir = new TempDirectory())
+			ExtractDirectory(_tmpDir.Path, "Net");
+			ExtractFile(_tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
+			ExtractDirectory(_tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
+
+			var encrypted = Path.Combine(_tmpDir.Path, "Peach.Pro.Pits.dll");
+
+			var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
+
+			var feature = new Mock<IFeature>();
+			feature.SetupGet(x => x.Key)
+				   .Returns(master.Features[featureName].Key);
+
+			var license = new Mock<ILicense>();
+			license.Setup(x => x.GetFeature(featureName))
+				   .Returns(feature.Object);
+
+			var encryptedRoot = new ResourceRoot
 			{
-				ExtractDirectory(tmpDir.Path, "Net");
-				ExtractFile(tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
-				ExtractDirectory(tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
+				Assembly = LoadAssembly(encrypted),
+				Prefix = ResourceRoot.Prefix
+			};
 
-				var encrypted = Path.Combine(tmpDir.Path, "Peach.Pro.Pits.dll");
+			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
+			var pitConfigFile = pitFile + ".config";
 
-				var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
+			var defs = PitDefines.ParseFile(pitConfigFile, _tmpDir.Path, new Dictionary<string, string> {
+				{"Source", "0"},
+				{"Destination", "0"},
+			});
 
-				var feature = new Mock<IFeature>();
-				feature.SetupGet(x => x.Key)
-					   .Returns(master.Features[featureName].Key);
+			var args = new Dictionary<string, object> {
+				{ PitParser.DEFINED_VALUES, defs.Evaluate() }
+			};
 
-				var license = new Mock<ILicense>();
-				license.Setup(x => x.GetFeature(featureName))
-				       .Returns(feature.Object);
-
-				var encryptedRoot = new ResourceRoot
-				{
-					Assembly = LoadAssembly(encrypted),
-					Prefix = ResourceRoot.Prefix
-				};
-
-				var pitFile = Path.Combine(tmpDir.Path, "Net", "DNP3_Slave.xml");
-				var pitConfigFile = pitFile + ".config";
-
-				var defs = PitDefines.ParseFile(pitConfigFile, tmpDir.Path, new Dictionary<string, string> {
-					{"Source", "0"},
-					{"Destination", "0"},
-				});
-
-				var args = new Dictionary<string, object> {
-					{ PitParser.DEFINED_VALUES, defs.Evaluate() }
-				};
-
-				var parser = new ProPitParser(
-					license.Object, 
-					tmpDir.Path, 
-					pitFile, 
-					encryptedRoot
-				);
-				var dom = parser.asParser(args, pitFile);
-				var config = new RunConfiguration() { singleIteration = true, };
-				var e = new Engine(null);
-				e.startFuzzing(dom, config);
-			}
+			var parser = new ProPitParser(
+				license.Object,
+				_tmpDir.Path,
+				pitFile,
+				encryptedRoot
+			);
+			var dom = parser.asParser(args, pitFile);
+			var config = new RunConfiguration() { singleIteration = true, };
+			var e = new Engine(null);
+			e.startFuzzing(dom, config);
 		}
 
 		[Test]
 		public void TestLoadFromDisk()
 		{
-			using (var tmpDir = new TempDirectory())
-			{
-				var license = new Mock<ILicense>();
+			var license = new Mock<ILicense>();
 
-				ExtractDirectory(tmpDir.Path, "Net");
-				ExtractDirectory(tmpDir.Path, "_Common", "Models", "Net");
-				ExtractDirectory(tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
+			ExtractDirectory(_tmpDir.Path, "Net");
+			ExtractDirectory(_tmpDir.Path, "_Common", "Models", "Net");
+			ExtractDirectory(_tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
 
-				var pitFile = Path.Combine(tmpDir.Path, "Net", "DNP3_Slave.xml");
-				var pitConfigFile = pitFile + ".config";
+			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
+			var pitConfigFile = pitFile + ".config";
 
-				var defs = PitDefines.ParseFile(pitConfigFile, tmpDir.Path, new Dictionary<string, string> {
-					{"Source", "0"},
-					{"Destination", "0"},
-				});
+			var defs = PitDefines.ParseFile(pitConfigFile, _tmpDir.Path, new Dictionary<string, string> {
+				{"Source", "0"},
+				{"Destination", "0"},
+			});
 
-				var args = new Dictionary<string, object> {
-					{ PitParser.DEFINED_VALUES, defs.Evaluate() }
-				};
+			var args = new Dictionary<string, object> {
+				{ PitParser.DEFINED_VALUES, defs.Evaluate() }
+			};
 
-				var parser = new ProPitParser(license.Object, tmpDir.Path, pitFile);
-				var dom = parser.asParser(args, pitFile);
-				var config = new RunConfiguration() { singleIteration = true, };
-				var e = new Engine(null);
-				e.startFuzzing(dom, config);
-			}
+			var parser = new ProPitParser(license.Object, _tmpDir.Path, pitFile);
+			var dom = parser.asParser(args, pitFile);
+			var config = new RunConfiguration() { singleIteration = true, };
+			var e = new Engine(null);
+			e.startFuzzing(dom, config);
 		}
 
 		[Test]
@@ -118,68 +164,65 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		[Test]
 		public void TestProtectResources()
 		{
-			using (var tmpDir = new TempDirectory())
+			var featureName = "PeachPit-Net-DNP3_Slave";
+			var otherFeatureName = "PeachPit-Net-DNP3_Master";
+			var asset1 = "_Common.Models.Net.DNP3_State.xml";
+			var asset2 = "_Common.Models.Net.DNP3_Data.xml";
+			var expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+			var encrypted = Path.Combine(_tmpDir.Path, "TestProtectResources.dll");
+
+			var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
+
+			var root = new ResourceRoot
 			{
-				var featureName = "PeachPit-Net-DNP3_Slave";
-				var otherFeatureName = "PeachPit-Net-DNP3_Master";
-				var asset1 = "_Common.Models.Net.DNP3_State.xml";
-				var asset2 = "_Common.Models.Net.DNP3_Data.xml";
-				var expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-				var encrypted = Path.Combine(tmpDir.Path, "TestProtectResources.dll");
+				Assembly = LoadAssembly(encrypted),
+				Prefix = ResourceRoot.Prefix
+			};
+			var manifest = PitResourceLoader.LoadManifest(root);
 
-				var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
+			{
+				var actual = GetFirstLine(root.Assembly, featureName, asset1);
+				Assert.AreNotEqual(expected, actual);
+			}
 
-				var root = new ResourceRoot
-				{
-					Assembly = LoadAssembly(encrypted),
-					Prefix = ResourceRoot.Prefix
-				};
-				var manifest = PitResourceLoader.LoadManifest(root);
+			{
+				var actual = GetFirstLine(root.Assembly, featureName, asset2);
+				Assert.AreNotEqual(expected, actual);
+			}
 
-				{
-					var actual = GetFirstLine(root.Assembly, featureName, asset1);
-					Assert.AreNotEqual(expected, actual);
-				}
+			var feature = manifest.Features[featureName];
+			using (var stream = PitResourceLoader.DecryptResource(
+				root,
+				new KeyValuePair<string, PitManifestFeature>(featureName, feature),
+				asset1,
+				master.Features[featureName].Key))
+			using (var reader = new StreamReader(stream))
+			{
+				var actual = reader.ReadLine();
+				Assert.AreEqual(expected, actual);
+			}
 
-				{
-					var actual = GetFirstLine(root.Assembly, featureName, asset2);
-					Assert.AreNotEqual(expected, actual);
-				}
+			using (var stream = PitResourceLoader.DecryptResource(
+				root,
+				new KeyValuePair<string, PitManifestFeature>(featureName, feature),
+				asset2,
+				master.Features[featureName].Key))
+			using (var reader = new StreamReader(stream))
+			{
+				var actual = reader.ReadLine();
+				Assert.AreEqual(expected, actual);
+			}
 
-				var feature = manifest.Features[featureName];
-				using (var stream = PitResourceLoader.DecryptResource(
-					root,
-					new KeyValuePair<string, PitManifestFeature>(featureName, feature), 
-					asset1,
-					master.Features[featureName].Key))
-				using (var reader = new StreamReader(stream))
-				{
-					var actual = reader.ReadLine();
-					Assert.AreEqual(expected, actual);
-				}
-
-				using (var stream = PitResourceLoader.DecryptResource(
-					root,
-					new KeyValuePair<string, PitManifestFeature>(featureName, feature), 
-					asset2,
-					master.Features[featureName].Key))
-				using (var reader = new StreamReader(stream))
-				{
-					var actual = reader.ReadLine();
-					Assert.AreEqual(expected, actual);
-				}
-
-				// other features use different passwords
-				// this should fail since we are using the wrong password
-				var otherFeature = manifest.Features[otherFeatureName];
-				using (var stream = PitResourceLoader.DecryptResource(
-					root,
-					new KeyValuePair<string, PitManifestFeature>(otherFeatureName, otherFeature),
-					asset1,
-					master.Features[featureName].Key))
-				{
-					Assert.IsNull(stream);
-				}
+			// other features use different passwords
+			// this should fail since we are using the wrong password
+			var otherFeature = manifest.Features[otherFeatureName];
+			using (var stream = PitResourceLoader.DecryptResource(
+				root,
+				new KeyValuePair<string, PitManifestFeature>(otherFeatureName, otherFeature),
+				asset1,
+				master.Features[featureName].Key))
+			{
+				Assert.IsNull(stream);
 			}
 		}
 

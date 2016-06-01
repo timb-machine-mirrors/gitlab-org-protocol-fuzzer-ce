@@ -15,6 +15,7 @@ deps = [
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
+	'System.ServiceProcess.dll',
 
 	'Portable.Licensing.dll',
 	'SocketHttpListener.dll',
@@ -58,6 +59,8 @@ deps = [
 
 	'SharpSnmpLib.Full.dll',
 	'SharpSnmpLib.Portable.dll',
+
+	'Microsoft.Diagnostics.Runtime.dll',
 ]
 
 if bld.env.TARGET in ['win']:
@@ -65,7 +68,7 @@ if bld.env.TARGET in ['win']:
 else:
 	embed = ''
 
-bld(
+asm = bld(
 	features = 'cs',
 	unsafe = True,
 	use = deps,
@@ -75,4 +78,11 @@ bld(
 	ide_content = 'WebServices/Models/Model.cd',
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
+	install_755 = bld.path.ant_glob('Debuggers/DebugEngine/*.dll') + bld.path.ant_glob('gdb/**/*')
 )
+
+if 'win' in bld.env['supported_features']:
+	deps.extend([
+		'UIAutomationClient.dll',
+		'UIAutomationTypes.dll',
+	]),
