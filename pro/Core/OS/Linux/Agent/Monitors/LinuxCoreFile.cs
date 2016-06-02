@@ -99,7 +99,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 			{
 				Utilities.ExtractEmbeddedResource(
 					Assembly.GetExecutingAssembly(),
-					"Peach.Pro.OS.Linux.Resources.PeachCrashHandler.sh",
+					"Peach.Pro.Core.Resources.PeachCrashHandler.sh",
 					script);
 				Logger.Trace("Extracted core handler '{0}'", script);
 			}
