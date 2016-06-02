@@ -211,18 +211,18 @@ namespace Peach.Pro.Core.Runtime
 			options.Add(
 				"showdevices",
 				"Display the list of PCAP devices",
-				var => ShowDevices()
+				var => _cmd = ShowDevices
 			);
 			options.Add(
 				"showenv",
 				"Print a list of all DataElements, Fixups, Agents, " +
 				"Publishers and their associated parameters.",
-				var => ShowEnvironment()
+				var => _cmd = ShowEnvironment
 			);
 			options.Add(
 				"makexsd",
 				"Generate peach.xsd",
-				var => MakeSchema()
+				var => _cmd = MakeSchema
 			);
 
 			// web ui
@@ -320,9 +320,10 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		protected override void ShowUsage()
+		protected override int ShowUsage(List<string> args)
 		{
 			Syntax();
+			return 0;
 		}
 
 		protected virtual Watcher GetUIWatcher()
@@ -778,7 +779,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		#region Global Actions
 
-		static void ShowDevices()
+		static int ShowDevices(List<string> args)
 		{
 			var devices = RawEtherPublisher.Devices();
 
@@ -803,16 +804,16 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 				}
 			}
 
-			throw new SyntaxException();
+			return 0;
 		}
 
-		static void ShowEnvironment()
+		static int ShowEnvironment(List<string> args)
 		{
 			Usage.Print();
-			throw new SyntaxException();
+			return 0;
 		}
 
-		static void MakeSchema()
+		static int MakeSchema(List<string> args)
 		{
 			try
 			{
@@ -825,7 +826,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 					Console.WriteLine("Successfully generated {0}", stream.Name);
 				}
 
-				throw new SyntaxException();
+				return 0;
 			}
 			catch (UnauthorizedAccessException ex)
 			{

@@ -35,6 +35,7 @@ namespace Peach.Pro.Core.Runtime
 		protected int? _webPort;
 		protected ILicense _license;
 		protected string _pluginsPath;
+		protected Func<List<string>, int> _cmd;
 
 		protected void PrepareLicensing(string pitLibraryPath)
 		{
@@ -190,6 +191,9 @@ namespace Peach.Pro.Core.Runtime
 
 				LoadAssemblies();
 
+				if (_cmd != null)
+					return _cmd(extra);
+
 				return OnRun(extra);
 			}
 			catch (OptionException ex)
@@ -228,12 +232,12 @@ namespace Peach.Pro.Core.Runtime
 			options.Add(
 				"h|help",
 				"Display this help and exit",
-				v => { throw new SyntaxException(true); }
+				v => _cmd = ShowUsage
 			);
 			options.Add(
 				"V|version",
 				"Display version information and exit",
-				v => ShowVersion()
+				v => _cmd = ShowVersion
 			);
 			options.Add(
 				"v|verbose",
@@ -276,7 +280,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.Error.WriteLine();
 
 			if (showUsage)
-				ShowUsage();
+				ShowUsage(null);
 	
 			return string.IsNullOrEmpty(ex.Message) ? 0 : 2;
 		}
@@ -295,7 +299,7 @@ namespace Peach.Pro.Core.Runtime
 			get { return ""; }
 		}
 
-		protected virtual void ShowUsage()
+		protected virtual int ShowUsage(List<string> args)
 		{
 			var usage = new[]
 			{
@@ -306,13 +310,15 @@ namespace Peach.Pro.Core.Runtime
 			Console.WriteLine(string.Join(Environment.NewLine, usage));
 			_options.WriteOptionDescriptions(Console.Out);
 			Console.WriteLine(Synopsis);
+
+			return 0;
 		}
 
-		protected virtual void ShowVersion()
+		protected virtual int ShowVersion(List<string> args)
 		{
 			var name = Assembly.GetEntryAssembly().GetName();
 			Console.WriteLine("{0}: Version {1}".Fmt(name.Name, name.Version));
-			throw new SyntaxException();
+			return 0;
 		}
 
 		protected string FindPitLibrary(string pitLibraryPath)
