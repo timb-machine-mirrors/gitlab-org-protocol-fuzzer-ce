@@ -270,7 +270,8 @@ namespace Peach.Pro.Core.Dom
 			}
 
 			// Only perform regeneration if payload is invalidated
-			if (!InputModel && (_payloadInvalidated || !_generatedFragments))
+                        // if (!InputModel && (_payloadInvalidated || !_generatedFragments))
+			if (!InputModel && (_payloadInvalidated || !_generatedFragments || true))
 			{
 				_generatedFragments = true;
 				_payloadInvalidated = false;
