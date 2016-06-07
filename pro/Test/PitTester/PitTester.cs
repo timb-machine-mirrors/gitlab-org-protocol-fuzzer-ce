@@ -19,6 +19,7 @@ using Peach.Core.Cracker;
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
+using Peach.Core.Test;
 
 namespace PitTester
 {
@@ -96,6 +97,11 @@ namespace PitTester
 		{
 			var method = type.DefineMethod(name, MethodAttributes.Public);
 			method.SetCustomAttribute(testAttr);
+			method.SetCustomAttribute(MakeCustomAttribute(typeof(PeachAttribute)));
+			if (iterations == 1)
+				method.SetCustomAttribute(MakeCustomAttribute(typeof(QuickAttribute)));
+			else
+				method.SetCustomAttribute(MakeCustomAttribute(typeof(SlowAttribute)));
 
 			var testPitMethod = typeof(PitTester).GetMethod("TestPit");
 
@@ -121,6 +127,8 @@ namespace PitTester
 		{
 			var method = type.DefineMethod("TestDatasets", MethodAttributes.Public);
 			method.SetCustomAttribute(testAttr);
+			method.SetCustomAttribute(MakeCustomAttribute(typeof(PeachAttribute)));
+			method.SetCustomAttribute(MakeCustomAttribute(typeof(SlowAttribute)));
 
 			var testPitMethod = typeof(PitTester).GetMethod("VerifyDataSets");
 
