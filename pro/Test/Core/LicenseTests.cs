@@ -214,6 +214,30 @@ namespace Peach.Pro.Test.Core
 			});
 		}
 
+		[Test]
+		public void TestGod()
+		{
+			var lic = License.New()
+				.WithProductFeatures(new Dictionary<string, string>
+				{
+					{"Developer", ""},
+				})
+				.As(LicenseType.Standard)
+				.LicensedTo("Jenkins", "dev@peachfuzzer.com")
+				.ExpiresAt(DateTime.UtcNow + TimeSpan.FromDays(2))
+				.CreateAndSignWithPrivateKey(PrivateKey, PassPhrase);
+
+			var features = new List<string>
+			{
+				FeatureNames.Android,
+				FeatureNames.Engine,
+				FeatureNames.ExportPit,
+				FeatureNames.CustomPit,
+			};
+			features.AddRange(_manifest.Features.Keys);
+			DoTest("God.license", lic, features.ToArray());
+		}
+
 		void DoTest(string name, License lic, string[] expected)
 		{
 			var buf = new StringWriter();
