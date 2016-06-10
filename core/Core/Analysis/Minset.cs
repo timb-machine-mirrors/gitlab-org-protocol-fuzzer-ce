@@ -121,7 +121,7 @@ namespace Peach.Core.Analysis
 		/// <param name="sampleFiles">Collection of sample files</param>
 		/// <param name="traceFiles">Collection of trace files for sample files</param>
 		/// <returns>Returns the minimum set of smaple files.</returns>
-		public string[] RunCoverage(string [] sampleFiles, string [] traceFiles)
+		public string[] RunCoverage(string[] sampleFiles, string[] traceFiles)
 		{
 			var samples = sampleFiles.ToList();
 			var traces = traceFiles.ToList();
@@ -131,8 +131,8 @@ namespace Peach.Core.Analysis
 
 			Debug.Assert(samples.Count == traces.Count);
 
-			var coverage = new Dictionary<string, long>();
-			var db = new Dictionary<string, HashSet<string>>();
+			var coverage = new Dictionary<int, long>();
+			var db = new Dictionary<string, HashSet<int>>();
 
 			if (TraceMessage != null)
 				TraceMessage(this, "Loading {0} trace files...".Fmt(traces.Count));
@@ -140,11 +140,10 @@ namespace Peach.Core.Analysis
 			for (var i = 0; i < traces.Count; ++i)
 			{
 				var trace = traces[i];
-				var sample = samples[i];
 
 				Logger.Debug("Loading '{0}'", trace);
 
-				coverage.Add(sample, 0);
+				coverage.Add(i, 0);
 
 				using (var rdr = new StreamReader(trace))
 				{
@@ -152,26 +151,31 @@ namespace Peach.Core.Analysis
 
 					while ((line = rdr.ReadLine()) != null)
 					{
-						HashSet<string> v;
-
-						if (db.TryGetValue(line, out v))
+						HashSet<int> value;
+						if (!db.TryGetValue(line, out value))
 						{
-							v.Add(sample);
+							value = new HashSet<int>();
 						}
-						else
-						{
-							db.Add(line, new HashSet<string> { sample });
-						}
+						value.Add(i);
+						db[line] = value;
 					}
 				}
+
+				GC.Collect();
 			}
+
+			//var proc = System.Diagnostics.Process.GetCurrentProcess();
+			//Console.WriteLine("Memory Usage: WorkingSet: {0}M, GC Total: {1}M",
+			//	proc.PrivateMemorySize64 / 1024 / 1024,
+			//	GC.GetTotalMemory(true) / 1024 / 1024
+			//);
 
 			if (TraceMessage != null)
 				TraceMessage(this, "Computing minimum set coverage...".Fmt(traces.Count));
 
 			Logger.Debug("Loaded {0} files, starting minset computation", traces.Count);
 
-			var total = db.Count;
+			var total = db.Count();
 			var ret = new List<string>();
 
 			while (coverage.Count > 0)
@@ -194,7 +198,7 @@ namespace Peach.Core.Analysis
 						Logger.Debug(l.Key);
 				}
 
-				ret.Add(keep);
+				ret.Add(samples[keep]);
 
 				// Don't track selected trace anymore
 				coverage.Remove(keep);
