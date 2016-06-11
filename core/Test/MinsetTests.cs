@@ -53,7 +53,7 @@ namespace Peach.Core.Test
 		public void TestEfficiency()
 		{
 			const int MAX_SAMPLES = 2500;
-			const int MAX_LINES = 1000;
+			const int MAX_LINES = 10000;
 			const int MAX_UNIQUE = 10;
 			using (var tmpDir = new TempDirectory())
 			{
@@ -66,7 +66,23 @@ namespace Peach.Core.Test
 					traces.Add(MakeTraceFile(tmpDir.Path, name + ".trace", MakeTraceLines(i, MAX_LINES, MAX_UNIQUE)));
 				}
 
+				var proc = System.Diagnostics.Process.GetCurrentProcess();
 				var minset = new Minset();
+				minset.TraceLoaded += (s, i) =>
+				{
+					if (i % 100 == 0)
+					{
+						var keySize = sizeof(ushort) + sizeof(ulong);
+						var theory = (MAX_LINES * keySize) + (MAX_LINES * (MAX_SAMPLES / 8));
+						Console.WriteLine("Trace: {0}, Memory Usage: WorkingSet: {1}M, GC Total: {2}M, Theory: {3}K",
+							i,
+							proc.PrivateMemorySize64 / 1024 / 1024,
+							GC.GetTotalMemory(false) / 1024 / 1024,
+							theory / 1024
+						);
+					}
+				};
+
 				var actual = minset.RunCoverage(samples.ToArray(), traces.ToArray());
 				CollectionAssert.AreEquivalent(samples.Take(MAX_UNIQUE), actual);
 			}
@@ -76,12 +92,11 @@ namespace Peach.Core.Test
 		{
 			var lines = new List<string>();
 
-			if (index < unique)
-				lines.Add("0x{0:X8} module-{1}".Fmt(0, index));
-			
 			for (var i = 0; i < max; i++)
 			{
-				lines.Add("0x{0:X8} module".Fmt(i));
+				lines.Add("0x{0:X8} /usr/lib/system/libsystem_kernel.dylib".Fmt(i));
+				if (index < unique)
+					lines.Add("0x{0:X8} /usr/lib/system/libsystem_kernel.dylib-{1}".Fmt(0, index));
 			}
 
 			return lines.ToArray();

@@ -32,11 +32,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using NLog;
+using System.Collections;
 
 namespace Peach.Core.Analysis
 {
 	public delegate void TraceEventHandler(object sender, string fileName, int count, int totalCount);
 	public delegate void TraceEventMessage(object sender, string message);
+	public delegate void TraceLoadedHandler(object sender, int trace);
 
 	/// <summary>
 	/// Perform analysis on sample sets to identify the smallest sample set
@@ -50,6 +52,7 @@ namespace Peach.Core.Analysis
 		public event TraceEventHandler TraceCompleted;
 		public event TraceEventHandler TraceFailed;
 		public event TraceEventMessage TraceMessage;
+		public event TraceLoadedHandler TraceLoaded;
 
 		protected void OnTraceStarting(string fileName, int count, int totalCount)
 		{
@@ -112,6 +115,25 @@ namespace Peach.Core.Analysis
 			}
 		}
 
+		class BasicBlock
+		{
+			public ushort Module { get; set; }
+			public ulong Address { get; set; }
+
+			public override bool Equals(object obj)
+			{
+				var rhs = obj as BasicBlock;
+				if (rhs == null)
+					return false;
+				return Module == rhs.Module && Address == rhs.Address;
+			}
+
+			public override int GetHashCode()
+			{
+				return Module.GetHashCode() ^ Address.GetHashCode();
+			}
+		}
+
 		/// <summary>
 		/// Perform coverage analysis of trace files.
 		/// </summary>
@@ -131,8 +153,9 @@ namespace Peach.Core.Analysis
 
 			Debug.Assert(samples.Count == traces.Count);
 
-			var coverage = new Dictionary<int, long>();
-			var db = new Dictionary<string, HashSet<int>>();
+			var modules = new List<string>();
+			var coverage = new Dictionary<int, long>(traces.Count);
+			var db = new Dictionary<BasicBlock, BitArray>();
 
 			if (TraceMessage != null)
 				TraceMessage(this, "Loading {0} trace files...".Fmt(traces.Count));
@@ -143,46 +166,73 @@ namespace Peach.Core.Analysis
 
 				Logger.Debug("Loading '{0}'", trace);
 
-				coverage.Add(i, 0);
-
 				using (var rdr = new StreamReader(trace))
 				{
-					string line;
+					long count = 0;
 
+					string line;
 					while ((line = rdr.ReadLine()) != null)
 					{
-						HashSet<int> value;
-						if (!db.TryGetValue(line, out value))
+						var parts = line.Split(' ');
+
+						var module = modules.IndexOf(parts[1]);
+						if (module == -1)
 						{
-							value = new HashSet<int>();
+							module = modules.Count;
+							modules.Add(parts[1]);
 						}
-						value.Add(i);
-						db[line] = value;
+
+						var block = new BasicBlock
+						{
+							Module = (ushort)module,
+							Address = Convert.ToUInt64(parts[0], 16)
+						};
+
+						BitArray bits;
+						if (!db.TryGetValue(block, out bits))
+						{
+							bits = new BitArray(traces.Count);
+							db.Add(block, bits);
+						}
+						bits.Set(i, true);
+						count++;
 					}
+				
+					coverage[i] = count;
 				}
 
 				GC.Collect();
+				if (TraceLoaded != null)
+					TraceLoaded(this, i);
 			}
-
-			//var proc = System.Diagnostics.Process.GetCurrentProcess();
-			//Console.WriteLine("Memory Usage: WorkingSet: {0}M, GC Total: {1}M",
-			//	proc.PrivateMemorySize64 / 1024 / 1024,
-			//	GC.GetTotalMemory(true) / 1024 / 1024
-			//);
 
 			if (TraceMessage != null)
 				TraceMessage(this, "Computing minimum set coverage...".Fmt(traces.Count));
 
 			Logger.Debug("Loaded {0} files, starting minset computation", traces.Count);
 
-			var total = db.Count();
+			var total = db.Count;
 			var ret = new List<string>();
+			var isFirst = true;
 
 			while (coverage.Count > 0)
 			{
 				// Find trace with greatest coverage
-				foreach (var t in db.SelectMany(row => row.Value))
-					coverage[t] += 1;
+				if (isFirst)
+				{
+					isFirst = false;
+				}
+				else
+				{
+					foreach (var kv in db)
+					{
+						for (var i = 0; i < kv.Value.Length; i++)
+						{
+							if (kv.Value[i])
+								coverage[i] += 1;
+						}
+					}
+				}
 
 				var max = coverage.Max(kv => kv.Value);
 				var keep = coverage.First(kv => kv.Value == max).Key;
@@ -194,8 +244,8 @@ namespace Peach.Core.Analysis
 
 				if (max < 10)
 				{
-					foreach (var l in db.Where(kv => kv.Value.Contains(keep)))
-						Logger.Debug(l.Key);
+					foreach (var x in db.Where(kv => kv.Value.Get(keep)))
+						Logger.Debug(x.Key);
 				}
 
 				ret.Add(samples[keep]);
@@ -209,11 +259,11 @@ namespace Peach.Core.Analysis
 
 				// Select all rows that are now covered
 				var prune = db
-					.Where(kv => kv.Value.Remove(keep))
+					.Where(kv => kv.Value.Get(keep))
 					.Select(kv => kv.Key)
 					.ToList();
 
-				// Remvoe all covered rows
+				// Remove all covered rows
 				foreach (var p in prune)
 					db.Remove(p);
 			}
