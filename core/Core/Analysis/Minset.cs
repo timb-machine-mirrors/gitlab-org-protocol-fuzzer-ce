@@ -173,19 +173,21 @@ namespace Peach.Core.Analysis
 					string line;
 					while ((line = rdr.ReadLine()) != null)
 					{
-						var parts = line.Split(' ');
+						var delimiter = line.IndexOf(' ');
+						var strAddress = line.Substring(0, delimiter);
+						var strModule = line.Substring(delimiter + 1);
 
-						var module = modules.IndexOf(parts[1]);
+						var module = modules.IndexOf(strModule);
 						if (module == -1)
 						{
 							module = modules.Count;
-							modules.Add(parts[1]);
+							modules.Add(strModule);
 						}
 
 						var block = new BasicBlock
 						{
 							Module = (ushort)module,
-							Address = Convert.ToUInt64(parts[0], 16)
+							Address = Convert.ToUInt64(strAddress, 16)
 						};
 
 						BitArray bits;
