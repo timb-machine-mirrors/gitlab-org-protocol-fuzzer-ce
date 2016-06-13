@@ -18,6 +18,7 @@ deps = [
 	'Newtonsoft.Json.dll',
 
 	'Moq.dll',
+	'Castle.Core.dll',
 ]
 
 bld(
