@@ -61,6 +61,7 @@ deps = [
 	'SharpSnmpLib.Portable.dll',
 
 	'Microsoft.Diagnostics.Runtime.dll',
+	'Patterns.Logging.dll',
 ]
 
 if bld.env.TARGET in ['win']:

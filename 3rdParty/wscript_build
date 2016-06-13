@@ -15,9 +15,6 @@ bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 # Be.HexBox is not nugetable yet
 bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 
-# SuperSocket, SuperWebSocket and SocketHttpListener nuget packages
-# are for .NET 4.5 so we need to build them from source to target .NET 4.0
-
 subdirs = [
 	'pin',
 	'Renci.SshNet',
@@ -25,7 +22,6 @@ subdirs = [
 	'TotalPhase/komodo',
 	'Managed.AndroidDebugBridge',
 	'VMware-VIX-1.13.0-1295980',
-	'SocketHttpListener/SocketHttpListener',
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
 	'sqlite-3.8.11.1',
