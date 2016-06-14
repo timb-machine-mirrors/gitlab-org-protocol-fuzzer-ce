@@ -64,6 +64,9 @@ namespace Peach.Pro.Core
 
 		public static ResourceRoot GetDefault(string pitLibraryPath)
 		{
+			if (pitLibraryPath == null)
+				return null;
+			
 			var path = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
 			if (!File.Exists(path))
 				return null;
