@@ -94,10 +94,10 @@ peach_pro = common + [
 
 internal = common + [
 	# Internal pit testing tools
+	'CrashTest',
+	'CrashTestDummy.exe',
 	'nunit-console',
 	'nunit-tools',
-	'pitc.exe',
-	'PitTester.exe',
 	'PeachWorker.exe',
 	'PeachService.exe',
 	'Peach.Core.Test.dll',
@@ -105,10 +105,10 @@ internal = common + [
 	'Peach.Pro.Test.OS.Linux.dll',
 	'Peach.Pro.Test.OS.OSX.dll',
 	'Peach.Pro.Test.OS.Windows.dll',
-	'Peach.Pro.Test.WebApi.dll',
+	'Peach.Pro.Test.WebApi.exe',
+	'pitc.exe',
+	'PitTester.exe',
 	'UseAfterFree',
-	'CrashTest',
-	'CrashTestDummy.exe',
 ]
 
 bld(
