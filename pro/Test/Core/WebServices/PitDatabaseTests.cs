@@ -649,7 +649,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				var monitor = agent.monitors.First();
 				Assert.AreEqual("local://", agent.location);
 				Assert.AreEqual(false, monitor.parameters.Any(x => x.Key == "WaitForExitTimeout"), "WaitForExitTimeout should be omitted");
-				Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
+				Assert.AreEqual("true", (string)monitor.parameters.Single(x => x.Key == "UseNLog").Value);
 
 				var config = new RunConfiguration
 				{
