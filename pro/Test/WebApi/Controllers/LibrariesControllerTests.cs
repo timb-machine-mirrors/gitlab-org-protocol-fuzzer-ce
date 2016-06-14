@@ -44,7 +44,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			_pitDatabase.Setup(x => x.Libraries).Returns(expected);
 
 			using (var request = new HttpRequestMessage(HttpMethod.Get, "/p/libraries"))
-			using (var response = _client.SendAsync(request, CancellationToken.None).Result)
+			using (var response = _server.HttpClient.SendAsync(request, CancellationToken.None).Result)
 			{
 				var actual = response.DeserializeJson<Library[]>();
 				CollectionAssert.AreEqual(expected, actual, new Comparer());

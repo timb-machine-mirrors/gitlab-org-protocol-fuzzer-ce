@@ -16,7 +16,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			_license.Setup(x => x.IsValid).Returns(true);
 
 			using (var request = new HttpRequestMessage(HttpMethod.Get, "/p/jobs"))
-			using (var response = _client.SendAsync(request, CancellationToken.None).Result)
+			using (var response = _server.HttpClient.SendAsync(request, CancellationToken.None).Result)
 			{
 				Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
 			}

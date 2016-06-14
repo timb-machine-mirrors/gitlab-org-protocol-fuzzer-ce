@@ -1,8 +1,6 @@
-using System;
 using System.IO;
-using System.Net.Http;
 using System.Reflection;
-using System.Web.Http;
+using Microsoft.Owin.Testing;
 using Moq;
 using NUnit.Framework;
 using Peach.Core;
@@ -62,9 +60,9 @@ namespace Peach.Pro.Test.WebApi
 	abstract class ControllerTestsBase
 	{
 		protected TempDirectory _tmpDir;
-		protected HttpServer _server;
-		protected HttpMessageInvoker _client;
+		protected TestServer _server;
 		protected WebContext _context;
+		protected WebStartup _startup;
 
 		protected Mock<ILicense> _license;
 		protected Mock<IPitDatabase> _pitDatabase;
@@ -97,24 +95,20 @@ namespace Peach.Pro.Test.WebApi
 			_pitDatabase = CreatePitDatabase();
 			_jobMonitor = CreateJobMonitor();
 
-			var tuple = WebServer.CreateHttpConfiguration(
-				_context, 
+			_startup = new WebStartup(
 				_license.Object,
+				_context,
 				_jobMonitor.Object,
 				ctx => _pitDatabase.Object
 			);
 
-			var config = tuple.Item1;
-			var container = tuple.Item2;
-
-			_server = new HttpServer(config);
-			_client = new HttpMessageInvoker(_server);
+			_server = TestServer.Create(_startup.OnStartup);
 		}
 
 		[TearDown]
 		public virtual void TearDown()
 		{
-			_client.Dispose();
+			_startup.Dispose();
 			_server.Dispose();
 			_tmpDir.Dispose();
 		}
