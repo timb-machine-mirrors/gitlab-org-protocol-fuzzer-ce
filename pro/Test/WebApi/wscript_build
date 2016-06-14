@@ -17,6 +17,7 @@ deps = [
 
 	'Newtonsoft.Json.dll',
 
+	'Autofac.dll',
 	'Moq.dll',
 	'Castle.Core.dll',
 ]

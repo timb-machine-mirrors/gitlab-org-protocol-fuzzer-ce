@@ -17,9 +17,10 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Application;
 using Swashbuckle.Swagger;
-using SimpleInjector;
-using SimpleInjector.Integration.WebApi;
 using Peach.Pro.Core.License;
+using Autofac;
+using Autofac.Integration.WebApi;
+using System.Reflection;
 
 namespace Peach.Pro.WebApi2
 {
@@ -169,11 +170,11 @@ namespace Peach.Pro.WebApi2
 				_jobMonitor.Dispose();
 		}
 
-		internal static HttpConfiguration CreateHttpConfiguration(
+		internal static Tuple<HttpConfiguration, IContainer> CreateHttpConfiguration(
 			IWebContext context,
 			ILicense license,
 			IJobMonitor jobMonitor,
-			Func<IPitDatabase> pitDatabaseCreator)
+			Func<IComponentContext, IPitDatabase> pitDatabaseCreator)
 		{
 			var cfg = new HttpConfiguration();
 
@@ -202,30 +203,29 @@ namespace Peach.Pro.WebApi2
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
 			}).EnableSwaggerUi();
 
-			var container = new Container();
-			container.Options.DefaultScopedLifestyle = new WebApiRequestLifestyle();
+			var builder = new ContainerBuilder();
 
-			container.RegisterSingleton(context);
-			container.RegisterSingleton(license);
-			container.RegisterSingleton(jobMonitor);
-			container.Register(pitDatabaseCreator, Lifestyle.Scoped);
+			builder.RegisterInstance(context);
+			builder.RegisterInstance(license);
+			builder.RegisterInstance(jobMonitor);
+			builder.Register(pitDatabaseCreator);
 
-			container.RegisterWebApiControllers(cfg);
+			builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+			builder.RegisterWebApiFilterProvider(cfg);
 
-			container.Verify();
+			var container = builder.Build();
+			cfg.DependencyResolver = new AutofacWebApiDependencyResolver(container);
 
-			cfg.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);
-
-			return cfg;
+			return Tuple.Create(cfg, container);
 		}
 
 		private void OnStartup(IAppBuilder app)
 		{
-			var cfg = CreateHttpConfiguration(
+			var tuple = CreateHttpConfiguration(
 				_context,
 				_license,
 				_jobMonitor,
-				() =>
+				ctx =>
 				{
 					var pitdb = new PitDatabase(_license);
 					if (!string.IsNullOrEmpty(_context.PitLibraryPath))
@@ -234,7 +234,12 @@ namespace Peach.Pro.WebApi2
 				}
 			);
 
-			app.UseWebApi(cfg);
+			var config = tuple.Item1;
+			var container = tuple.Item2;
+
+			app.UseAutofacMiddleware(container);
+			app.UseAutofacWebApi(config);
+			app.UseWebApi(config);
 
 			// We don't need to do any favicon.ico specific stuff.
 			// It will properly get served off disk as static content.

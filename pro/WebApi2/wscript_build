@@ -31,9 +31,10 @@ deps = [
 
 	'Ionic.Zip.dll',
 
-	'SimpleInjector.dll',
-	# 'SimpleInjector.Integration.WebApi.dll',
-	# 'SimpleInjector.Extensions.ExecutionContextScoping.dll',
+	'Autofac.dll',
+	'Autofac.Integration.Owin.dll',
+	'Autofac.Integration.WebApi.dll',
+	'Autofac.Integration.WebApi.Owin.dll',
 ]
 
 bld(

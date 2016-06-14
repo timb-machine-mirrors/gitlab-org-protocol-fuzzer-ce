@@ -97,12 +97,15 @@ namespace Peach.Pro.Test.WebApi
 			_pitDatabase = CreatePitDatabase();
 			_jobMonitor = CreateJobMonitor();
 
-			var config = WebServer.CreateHttpConfiguration(
+			var tuple = WebServer.CreateHttpConfiguration(
 				_context, 
 				_license.Object,
 				_jobMonitor.Object,
-				() => _pitDatabase.Object
+				ctx => _pitDatabase.Object
 			);
+
+			var config = tuple.Item1;
+			var container = tuple.Item2;
 
 			_server = new HttpServer(config);
 			_client = new HttpMessageInvoker(_server);
