@@ -29,8 +29,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			string val = !string.IsNullOrEmpty(encoding) ? "encoding=\"" + encoding + "\"" : "";
 			string xml = "<?xml version=\"1.0\" " + val + "?>\r\n" +
 				"<Peach>\r\n" +
-				"	<DataModel name=\"##VAR1##\">\r\n" +
-				"		<String name=\"##VAR2##\"/>\r\n" +
+				"	<DataModel name=\"Foo\">\r\n" +
+				"		<String value=\"##VAR1##\"/>\r\n" +
+				"		<String value=\"##VAR2##\"/>\r\n" +
 				"	</DataModel>\r\n" +
 				"</Peach>";
 
@@ -59,17 +60,17 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				dom.evaulateDataModelAnalyzers();
 
 				Assert.AreEqual(1, dom.dataModels.Count);
-				Assert.AreEqual(1, dom.dataModels[0].Count);
+				Assert.AreEqual(2, dom.dataModels[0].Count);
 
 				if (defaultArgs)
 				{
-					Assert.AreEqual("TheDataModel", dom.dataModels[0].Name);
-					Assert.AreEqual("SomeString", dom.dataModels[0][0].Name);
+					Assert.AreEqual("TheDataModel", (string)dom.dataModels[0][0].DefaultValue);
+					Assert.AreEqual("SomeString", (string)dom.dataModels[0][1].DefaultValue);
 				}
 				else
 				{
-					Assert.AreEqual("##VAR1##", dom.dataModels[0].Name);
-					Assert.AreEqual("##VAR2##", dom.dataModels[0][0].Name);
+					Assert.AreEqual("##VAR1##", (string)dom.dataModels[0][0].DefaultValue);
+					Assert.AreEqual("##VAR2##", (string)dom.dataModels[0][1].DefaultValue);
 				}
 			}
 		}
