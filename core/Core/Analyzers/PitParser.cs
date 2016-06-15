@@ -418,10 +418,6 @@ namespace Peach.Core.Analyzers
 						handleInclude(dom, args, child);
 						break;
 
-					case "Require":
-						dom.Ruby.ImportModule(child.getAttrString("require"));
-						break;
-
 					case "Import":
 						dom.Python.ImportModule(child.getAttrString("import"));
 						break;
@@ -430,14 +426,7 @@ namespace Peach.Core.Analyzers
 						dom.Python.AddSearchPath(child.getAttrString("path"));
 						break;
 
-					case "RubyPath":
-						dom.Ruby.AddSearchPath(child.getAttrString("require"));
-						break;
-
 					case "Python":
-						break;
-
-					case "Ruby":
 						break;
 
 					case "Defaults":
@@ -569,12 +558,6 @@ namespace Peach.Core.Analyzers
 
 			foreach (var item in newDom.Python.Modules)
 				dom.Python.ImportModule(item);
-
-			foreach (var item in newDom.Ruby.Paths)
-				dom.Ruby.AddSearchPath(item);
-
-			foreach (var item in newDom.Ruby.Modules)
-				dom.Ruby.ImportModule(item);
 		}
 
 		#endregion
