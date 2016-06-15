@@ -793,6 +793,7 @@ namespace Peach.Core.Xsd
 				var nameAttr = new XmlSchemaAttribute();
 				nameAttr.Name = "name";
 				nameAttr.Annotate("{0} name.".Fmt(pluginAttr.PluginName));
+				nameAttr.SchemaTypeName = new XmlQualifiedName("Name", XmlSchema.Namespace);
 				nameAttr.Use = XmlSchemaUse.Optional;
 
 				complexType.Attributes.Add(nameAttr);
@@ -1081,8 +1082,11 @@ namespace Peach.Core.Xsd
 			Console.WriteLine(e.Message);
 		}
 
-		XmlQualifiedName GetSchemaType(Type type)
+		XmlQualifiedName GetSchemaType(Type type, string attrName)
 		{
+			if (attrName == "name" || attrName == "fieldId")
+				return new XmlQualifiedName("Name", XmlSchema.Namespace);
+
 			if (IsGenericType(type, typeof(Nullable<>)))
 				type = type.GetGenericArguments()[0];
 
@@ -1120,7 +1124,7 @@ namespace Peach.Core.Xsd
 			}
 			else
 			{
-				attr.SchemaTypeName = GetSchemaType(pi.PropertyType);
+				attr.SchemaTypeName = GetSchemaType(pi.PropertyType, name);
 			}
 
 			if (defaultValue != null)
@@ -1174,7 +1178,7 @@ namespace Peach.Core.Xsd
 			}
 			else
 			{
-				attr.SchemaTypeName = GetSchemaType(paramAttr.type);
+				attr.SchemaTypeName = GetSchemaType(paramAttr.type, name);
 			}
 
 			if (!paramAttr.required)
