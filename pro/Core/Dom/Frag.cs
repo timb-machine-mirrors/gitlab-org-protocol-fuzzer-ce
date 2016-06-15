@@ -185,13 +185,18 @@ namespace Peach.Pro.Core.Dom
 			pit.WriteEndElement();
 		}
 
+		protected override string GetDisplaySuffix(DataElement child)
+		{
+			return "";
+		}
+
 		public override IEnumerable<DataElement> Children(bool forDisplay = false)
 		{
 			// Make sure we re-generate if needed
 			if (!viewPreRendering)
 				GenerateDefaultValue();
 			
-			return base.Children();
+			return base.Children(forDisplay);
 		}
 
 		protected override DataElement GetChild(string name)
