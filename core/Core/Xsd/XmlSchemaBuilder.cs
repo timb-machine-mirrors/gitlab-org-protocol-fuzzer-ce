@@ -391,7 +391,7 @@ namespace Peach.Core.Xsd
 			/// Name of field to specify a default value for.
 			/// Format of name is: "Element" or "Block.Block.Element".
 			/// </summary>
-			[XmlAttribute]
+			[XmlAttribute(DataType="string", Namespace=XmlSchema.Namespace)]
 			public string name { get; set; }
 
 			/// <summary>
@@ -723,7 +723,7 @@ namespace Peach.Core.Xsd
 					var attrAttr = pi.GetAttributes<XmlAttributeAttribute>().FirstOrDefault();
 					if (attrAttr != null)
 					{
-						var attr = MakeAttribute(attrAttr.AttributeName, pi);
+						var attr = MakeAttribute(attrAttr, pi);
 						if (!addedAttrs.ContainsKey(attr.Name))
 						{
 							complexType.Attributes.Add(attr);
@@ -928,7 +928,7 @@ namespace Peach.Core.Xsd
 				var attrAttr = pi.GetAttributes<XmlAttributeAttribute>().FirstOrDefault();
 				if (attrAttr != null)
 				{
-					var attr = MakeAttribute(attrAttr.AttributeName, pi);
+					var attr = MakeAttribute(attrAttr, pi);
 					complexType.Attributes.Add(attr);
 					continue;
 				}
@@ -1108,8 +1108,10 @@ namespace Peach.Core.Xsd
 			throw new NotImplementedException();
 		}
 
-		XmlSchemaAttribute MakeAttribute(string name, PropertyInfo pi)
+		XmlSchemaAttribute MakeAttribute(XmlAttributeAttribute propAttr, PropertyInfo pi)
 		{
+			var name = propAttr.AttributeName;
+
 			if (string.IsNullOrEmpty(name))
 				name = pi.Name;
 
@@ -1118,7 +1120,11 @@ namespace Peach.Core.Xsd
 			var attr = new XmlSchemaAttribute {Name = name};
 			attr.Annotate(pi);
 
-			if (IsSimpleType(pi.PropertyType))
+			if (!string.IsNullOrEmpty(propAttr.DataType))
+			{
+				attr.SchemaTypeName = new XmlQualifiedName(propAttr.DataType, propAttr.Namespace);
+			}
+			else if (IsSimpleType(pi.PropertyType))
 			{
 				attr.SchemaType = GetSimpleType(pi.PropertyType);
 			}
