@@ -285,7 +285,7 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse()
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool forDisplay = false)
 		{
 			var useFieldIds = HasFieldIds;
 			foreach (var state in states)
@@ -299,7 +299,7 @@ namespace Peach.Core.Dom
 
 					foreach (var actionData in action.outputData)
 					{
-						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds, false))
+						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds, forDisplay))
 						{
 							var key = element.Key;
 							if (!string.IsNullOrEmpty(element.Key) && !string.IsNullOrEmpty(prefix))

@@ -13,6 +13,3 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name='PeachMinset.exe',
 )
-
-
-

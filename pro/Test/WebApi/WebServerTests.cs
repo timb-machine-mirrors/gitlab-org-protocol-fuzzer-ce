@@ -3,10 +3,12 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Moq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.WebApi2;
@@ -17,6 +19,8 @@ namespace Peach.Pro.Test.WebApi
 	[Quick]
 	class WebServerTests
 	{
+		Mock<ILicense> _license = new Mock<ILicense>();
+		
 		[Test]
 		public void MultipleServers()
 		{
@@ -30,14 +34,14 @@ namespace Peach.Pro.Test.WebApi
 					var port = ((IPEndPoint)listener.LocalEndpoint).Port;
 					Assert.AreNotEqual(0, port);
 
-					using (var web = new WebServer(tmpDir.Path, new InternalJobMonitor()))
+					using (var web = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
 					{
 						web.Start(port, true);
 
 						var actualPort = web.Uri.Port;
 						Assert.Greater(actualPort, port);
 
-						using (var web2 = new WebServer(tmpDir.Path, new InternalJobMonitor()))
+						using (var web2 = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
 						{
 							web2.Start(actualPort, true);
 							Assert.Greater(web2.Uri.Port, actualPort);
@@ -64,7 +68,7 @@ namespace Peach.Pro.Test.WebApi
 					var port = ((IPEndPoint)listener.LocalEndpoint).Port;
 					Assert.AreNotEqual(0, port);
 
-					using (var web = new WebServer(tmpDir.Path, new InternalJobMonitor()))
+					using (var web = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
 					{
 						var ex = Assert.Throws<PeachException>(() =>
 							web.Start(port, false));

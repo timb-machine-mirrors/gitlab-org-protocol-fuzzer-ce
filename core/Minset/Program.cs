@@ -27,7 +27,6 @@
 // $Id$
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -63,11 +62,6 @@ namespace PeachMinset
 
 				if (ex.InnerException != null && ex.InnerException.Message != ex.Message)
 					Console.WriteLine("{0}\n", ex.InnerException.Message);
-			}
-			finally
-			{
-				// HACK - Required on Mono with NLog 2.0
-				Utilities.ConfigureLogging(-1);
 			}
 
 			return -1;

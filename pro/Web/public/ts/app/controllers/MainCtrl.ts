@@ -33,7 +33,7 @@ namespace Peach {
 				});
 			});
 
-			this.eulaService.Verify().then((license : ILicense) => {
+			this.eulaService.Verify().then(license => {
 				this.license = license;
 			});
 		}

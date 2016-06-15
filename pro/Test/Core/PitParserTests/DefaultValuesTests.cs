@@ -45,31 +45,32 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				parserArgs[PitParser.DEFINED_VALUES] = defaultValues;
 			}
 
-			string pitFile = Path.GetTempFileName();
-
-			using (FileStream f = File.OpenWrite(pitFile))
+			using (var pitFile = new TempFile())
 			{
-				using (StreamWriter sw = new StreamWriter(f, System.Text.Encoding.GetEncoding(codepage)))
+				using (FileStream f = File.OpenWrite(pitFile.Path))
 				{
-					sw.Write(xml);
+					using (StreamWriter sw = new StreamWriter(f, System.Text.Encoding.GetEncoding(codepage)))
+					{
+						sw.Write(xml);
+					}
 				}
-			}
 
-			Peach.Core.Dom.Dom dom = Analyzer.defaultParser.asParser(parserArgs, pitFile);
-			dom.evaulateDataModelAnalyzers();
+				Peach.Core.Dom.Dom dom = Analyzer.defaultParser.asParser(parserArgs, pitFile.Path);
+				dom.evaulateDataModelAnalyzers();
 
-			Assert.AreEqual(1, dom.dataModels.Count);
-			Assert.AreEqual(1, dom.dataModels[0].Count);
+				Assert.AreEqual(1, dom.dataModels.Count);
+				Assert.AreEqual(1, dom.dataModels[0].Count);
 
-			if (defaultArgs)
-			{
-				Assert.AreEqual("TheDataModel", dom.dataModels[0].Name);
-				Assert.AreEqual("SomeString", dom.dataModels[0][0].Name);
-			}
-			else
-			{
-				Assert.AreEqual("##VAR1##", dom.dataModels[0].Name);
-				Assert.AreEqual("##VAR2##", dom.dataModels[0][0].Name);
+				if (defaultArgs)
+				{
+					Assert.AreEqual("TheDataModel", dom.dataModels[0].Name);
+					Assert.AreEqual("SomeString", dom.dataModels[0][0].Name);
+				}
+				else
+				{
+					Assert.AreEqual("##VAR1##", dom.dataModels[0].Name);
+					Assert.AreEqual("##VAR2##", dom.dataModels[0][0].Name);
+				}
 			}
 		}
 
@@ -116,18 +117,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	<Include ns='test' src='file:##FILE##'/>
 </Peach>
 ";
-			string tempFile = Path.GetTempFileName();
-			File.WriteAllText(tempFile, "<Peach><DataModel name='DM'/></Peach>");
+			using (var tempFile = new TempFile())
+			{
+				File.WriteAllText(tempFile.Path, "<Peach><DataModel name='DM'/></Peach>");
 
-			var defines = new Dictionary<string, string>();
-			defines["FILE"] = tempFile;
+				var defines = new Dictionary<string, string>();
+				defines["FILE"] = tempFile.Path;
 
-			var args = new Dictionary<string, object>();
-			args[PitParser.DEFINED_VALUES] = defines;
+				var args = new Dictionary<string, object>();
+				args[PitParser.DEFINED_VALUES] = defines;
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(args, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			Assert.NotNull(dom);
+				Assert.DoesNotThrow(() => DataModelCollector.ParsePit(xml, args));
+			}
 		}
 	}
 }

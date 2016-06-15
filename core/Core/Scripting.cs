@@ -35,6 +35,7 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
+using IronRuby;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -43,13 +44,12 @@ namespace Peach.Core
 	{
 		protected override ScriptEngine GetEngine()
 		{
+			var engine = Python.CreateEngine();
+
 			// Need to add python stdlib to search path
-			var engine = IronPython.Hosting.Python.CreateEngine();
 			var paths = engine.GetSearchPaths();
-
-			foreach (string path in ClassLoader.SearchPaths)
+			foreach (var path in ClassLoader.SearchPaths)
 				paths.Add(Path.Combine(path, "Lib"));
-
 			engine.SetSearchPaths(paths);
 
 			return engine;
@@ -60,7 +60,7 @@ namespace Peach.Core
 	{
 		protected override ScriptEngine GetEngine()
 		{
-			return IronRuby.Ruby.CreateEngine();
+			return Ruby.CreateEngine();
 		}
 	}
 
@@ -72,17 +72,16 @@ namespace Peach.Core
 	{
 		#region Private Members
 
-		private Dictionary<string, object> modules;
-		private ScriptEngine engine;
+		private readonly Dictionary<string, object> _modules = new Dictionary<string, object>();
+		private readonly ScriptEngine _engine;
 
 		#endregion
 
 		#region Constructor
 
-		public Scripting()
+		protected Scripting()
 		{
-			modules = new Dictionary<string, object>();
-			engine = GetEngine();
+			_engine = GetEngine();
 		}
 
 		#endregion
@@ -97,16 +96,13 @@ namespace Peach.Core
 
 		public void ImportModule(string module)
 		{
-			if (!modules.ContainsKey(module))
-				modules.Add(module, engine.ImportModule(module));
+			if (!_modules.ContainsKey(module))
+				_modules.Add(module, _engine.ImportModule(module));
 		}
 
 		public IEnumerable<string> Modules
 		{
-			get
-			{
-				return modules.Keys;
-			}
+			get { return _modules.Keys; }
 		}
 
 		#endregion
@@ -115,21 +111,17 @@ namespace Peach.Core
 
 		public void AddSearchPath(string path)
 		{
-			var paths = engine.GetSearchPaths();
-
+			var paths = _engine.GetSearchPaths();
 			if (!paths.Contains(path))
 			{
 				paths.Add(path);
-				engine.SetSearchPaths(paths);
+				_engine.SetSearchPaths(paths);
 			}
 		}
 
 		public IEnumerable<string> Paths
 		{
-			get
-			{
-				return engine.GetSearchPaths();
-			}
+			get { return _engine.GetSearchPaths(); }
 		}
 
 		#endregion
@@ -196,7 +188,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Global scope for this instance of scripting
 		/// </summary>
-		ScriptScope _scope = null;
+		ScriptScope _scope;
 
 		/// <summary>
 		/// Create the global scope, or return existing one
@@ -206,9 +198,9 @@ namespace Peach.Core
 		{
 			if (_scope == null)
 			{
-				_scope = engine.CreateScope();
+				_scope = _engine.CreateScope();
 
-				Apply(_scope, modules);
+				Apply(_scope, _modules);
 			}
 
 			return _scope;
@@ -327,18 +319,6 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Clear out our scope object. This is very slow!
-		/// </summary>
-		/// <param name="scope"></param>
-		private void CleanupScope(ScriptScope scope)
-		{
-			// Clean up any internal state created by the scope
-			var names = scope.GetVariableNames().ToList();
-			foreach (var name in names)
-				scope.RemoveVariable(name);
-		}
-
-		/// <summary>
 		/// Remove local scope items from global scope. This is quick.
 		/// </summary>
 		/// <param name="scope"></param>
@@ -353,8 +333,8 @@ namespace Peach.Core
 		{
 			foreach (var item in vars)
 			{
-				string name = item.Key;
-				object value = item.Value;
+				var name = item.Key;
+				var value = item.Value;
 
 				var bs = value as BitwiseStream;
 				if (bs != null)
@@ -363,7 +343,7 @@ namespace Peach.Core
 					var offset = 0;
 					var count = buffer.Length;
 
-					bs.Seek(0, System.IO.SeekOrigin.Begin);
+					bs.Seek(0, SeekOrigin.Begin);
 
 					int nread;
 					while ((nread = bs.Read(buffer, offset, count)) != 0)

@@ -792,5 +792,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			StringAssert.Contains("The required attribute 'initialState' is missing.", lines[2]);
 			StringAssert.Contains("The required attribute 'name' is missing.", lines[3]);
 		}
+
+
+		[Test]
+		public void TestValidName()
+		{
+			// Ensure all fieldId values are valid element names so they are xpath selectable
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='1bad' />
+	</DataModel>
+</Peach>
+";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			StringAssert.StartsWith("Error, Pit file failed to validate", ex.Message);
+		}
 	}
 }
