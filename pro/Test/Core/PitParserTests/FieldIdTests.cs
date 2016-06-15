@@ -126,12 +126,12 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				null, // Rendering
 				"k",  // Template
 				"l",  // Payload
-				"m",  //Blob
+				"m",  // Blob
 				"n",  // Choice
 				"o",  // Number
 				"p",  // Padding
 				"q",  // Array
-				null, //String
+				null, // String
 				"r",  // Flags
 				"s",  // Flag
 				"t",  // XmlElement
@@ -142,7 +142,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				null, // Asn1Type.tag
 				null, // Asn1Type.length
 				"w",  // Asn1Tag
-				"x",  //Asn1Length
+				"x",  // Asn1Length
 				"y",  // BacNetTag
 				null, // BacNetTag.Tag
 				null, // BacNetTag.Class
