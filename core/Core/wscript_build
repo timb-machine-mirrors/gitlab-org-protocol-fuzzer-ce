@@ -9,9 +9,6 @@ deps = [
 	'System.Xml.dll',
 
 	'IronPython.dll',
-	'IronRuby.dll',
-	'IronRuby.Libraries.dll',
-	'IronRuby.Libraries.Yaml.dll',
 
 	'Microsoft.Dynamic.dll',
 	'Microsoft.CSharp.dll',

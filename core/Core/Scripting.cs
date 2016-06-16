@@ -35,7 +35,6 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
-using IronRuby;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -53,14 +52,6 @@ namespace Peach.Core
 			engine.SetSearchPaths(paths);
 
 			return engine;
-		}
-	}
-
-	public class RubyScripting : Scripting
-	{
-		protected override ScriptEngine GetEngine()
-		{
-			return Ruby.CreateEngine();
 		}
 	}
 

@@ -26,11 +26,11 @@ namespace Peach.Pro.Test.Core.StateModel
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
-			Assert.AreEqual(args[0].Name, "Named Param 1");
+			Assert.AreEqual(args[0].Name, "NamedParam1");
 			Assert.AreEqual(args[0].type, ActionParameter.Type.In);
 			Assert.AreEqual("Param1", (string)args[0].dataModel[0].InternalValue);
 
-			Assert.AreEqual(args[1].Name, "Named Param 2");
+			Assert.AreEqual(args[1].Name, "NamedParam2");
 			Assert.AreEqual(args[1].type, ActionParameter.Type.Out);
 			Assert.AreEqual("Hello", (string)args[1].dataModel[0].InternalValue);
 
@@ -475,13 +475,13 @@ namespace Peach.Pro.Test.Core.StateModel
 	<StateModel name='SM' initialState='Initial'>
 		<State name='Initial'>
 			<Action name='action' type='call' method='foo'>
-				<Param name='Named Param 1' type='in'>
+				<Param name='NamedParam1' type='in'>
 					<DataModel ref='DM1'/>
 					<Data>
 						<Field name='str1' value='Param1'/>
 					</Data>
 				</Param>
-				<Param name='Named Param 2' type='out'>
+				<Param name='NamedParam2' type='out'>
 					<DataModel ref='DM1'/>
 				</Param>
 				<Param type='inout'>

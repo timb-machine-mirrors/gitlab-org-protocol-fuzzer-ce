@@ -176,12 +176,6 @@ namespace Peach.Pro.Core
 
 			foreach (var item in newDom.Python.Modules)
 				dom.Python.ImportModule(item);
-
-			foreach (var item in newDom.Ruby.Paths)
-				dom.Ruby.AddSearchPath(item);
-
-			foreach (var item in newDom.Ruby.Modules)
-				dom.Ruby.ImportModule(item);
 		}
 
 		private void deferParse(StateModel sm, string fullName, XmlNode node)
