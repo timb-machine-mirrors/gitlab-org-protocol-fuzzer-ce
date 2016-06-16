@@ -21,7 +21,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 	/// it should be reproduced using the Windows Debug Engine to
 	/// gather more information.
 	/// </remarks>
-	public class SystemDebugger : IDebugger
+	internal class SystemDebugger : IDebugger
 	{
 		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 

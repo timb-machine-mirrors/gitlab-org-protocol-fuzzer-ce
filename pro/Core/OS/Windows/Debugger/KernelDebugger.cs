@@ -6,7 +6,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.Core.OS.Windows.Debugger
 {
-	public class KernelDebugger : IKernelDebugger
+	internal class KernelDebugger : IKernelDebugger
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 

@@ -12,7 +12,7 @@ using Peach.Core.Agent;
 
 namespace Peach.Pro.Core.OS.Windows.Debugger
 {
-	public class DebugEngine : IDebugEventCallbacks, IDebugOutputCallbacks, IDebugger
+	internal class DebugEngine : IDebugEventCallbacks, IDebugOutputCallbacks, IDebugger
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -358,7 +358,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 
 		public Action<int> ProcessCreated { get; set; }
 
-		internal static DebugEngine CreateProcess(string winDbgPath, string symbolsPath, string commandLine)
+		public static DebugEngine CreateProcess(string winDbgPath, string symbolsPath, string commandLine)
 		{
 			var dbg = new DebugEngine(Path.Combine(winDbgPath, "dbgeng.dll"));
 
@@ -387,7 +387,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			}
 		}
 
-		internal static DebugEngine AttachToProcess(string winDbgPath, string symbolsPath, int pid)
+		public static DebugEngine AttachToProcess(string winDbgPath, string symbolsPath, int pid)
 		{
 			var dbg = new DebugEngine(Path.Combine(winDbgPath, "dbgeng.dll"));
 
