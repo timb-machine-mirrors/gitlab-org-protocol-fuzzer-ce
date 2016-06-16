@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 
 deps = [
-	'nunit.framework.dll',
+	'Autofac.dll',
+	'Castle.Core.dll',
+	'Microsoft.Owin.Testing.dll',
+	'Moq.dll',
+	'Newtonsoft.Json.dll',
 	'NLog.dll',
-	
+	'nunit.framework.dll',
+	'Owin.dll',
+	'Peach.Core.dll',
+	'Peach.Core.Test.dll',
+	'Peach.Pro.dll',
+	'Peach.Pro.WebApi2.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Net.Http.dll',
 	'System.Web.Http.dll',
-
-	'Peach.Core.dll',
-	'Peach.Core.Test.dll',
-
-	'Peach.Pro.dll',
-	'Peach.Pro.WebApi2.dll',
-
-	'Newtonsoft.Json.dll',
-
-	'Moq.dll',
 ]
 
 bld(
 	features = 'cs test',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.Pro.Test.WebApi.dll',
+	name = 'Peach.Pro.Test.WebApi.exe',
 	csdoc = False,
 )

@@ -4,7 +4,7 @@ using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core.Runtime
 {
-	public class Service : Program
+	public class Service : BaseProgram
 	{
 		string _pitLibraryPath;
 
@@ -22,13 +22,18 @@ namespace Peach.Pro.Core.Runtime
 			);
 		}
 
-		protected override void OnRun(List<string> args)
+		protected override int OnRun(List<string> args)
 		{
+			if (!_license.IsValid)
+				return -1;
+
 			// Ensure pit library exists
 			var pits = FindPitLibrary(_pitLibraryPath);
 
 			if (CreateWeb != null)
 				RunWeb(pits, false, new ExternalJobMonitor());
+
+			return 0;
 		}
 	}
 }

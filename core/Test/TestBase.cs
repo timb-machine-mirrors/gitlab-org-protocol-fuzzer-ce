@@ -10,6 +10,7 @@ using NUnit.Framework;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.Core.Test
 {
@@ -83,14 +84,14 @@ namespace Peach.Core.Test
 			{
 				var consoleTarget = new ConsoleTarget
 				{
-					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}"
+					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message} ${exception:format=tostring}"
 				};
 
 
 				var config = new LoggingConfiguration();
 				config.AddTarget("console", consoleTarget);
 
-				var logLevel = LogLevel.Info;
+				var logLevel = LogLevel.Warn;
 
 				var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
 				if (peachDebug == "1")
@@ -109,7 +110,7 @@ namespace Peach.Core.Test
 					var fileTarget = new FileTarget
 					{
 						Name = "FileTarget",
-						Layout = "${longdate} ${logger} ${message}",
+						Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}",
 						FileName = peachLog,
 						Encoding = System.Text.Encoding.UTF8,
 					};
@@ -124,7 +125,7 @@ namespace Peach.Core.Test
 		public static void EnableDebug()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message}" };
+			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
 			config.AddTarget("debugConsole", target);
@@ -187,6 +188,13 @@ namespace Peach.Core.Test
 		public void SetUp()
 		{
 			DoSetUp();
+
+			// Peach.Core.dll
+			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
+
+			// Peach.Pro.dll
+			// we need this to make the SingleInstance work
+			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
 		}
 
 		[OneTimeTearDown]

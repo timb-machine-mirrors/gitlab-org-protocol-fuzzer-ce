@@ -33,6 +33,11 @@ namespace Peach.Pro.Core.Dom
 		{
 		}
 
+		protected override string GetDisplaySuffix(DataElement child)
+		{
+			return "";
+		}
+
 		public IEnumerable<BitwiseStream> GetFragments()
 		{
 			var countOverride = GetCountOverride();

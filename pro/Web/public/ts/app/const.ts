@@ -166,13 +166,6 @@ namespace Peach.C {
 			export const StartJob = 'html/modal/StartJob.html';
 			export const AddMonitor = 'html/modal/AddMonitor.html';
 		}
-		export namespace Eula {
-			export const Acedemic = 'html/eula/Acedemic.html';
-			export const Developer = 'html/eula/Developer.html';
-			export const Enterprise = 'html/eula/Enterprise.html';
-			export const Professional = 'html/eula/Professional.html';
-			export const Trial = 'html/eula/Trial.html';
-		}
 		export namespace Directives {
 			export const Agent = 'html/directives/agent.html';
 			export const Combobox = 'html/directives/combobox.html';

@@ -7,6 +7,7 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
@@ -27,9 +28,11 @@ namespace Peach.Pro.Core.Runtime
 		bool _shouldStop;
 		Engine _engine;
 		Thread _currentThread;
+		ILicense _license;
 
-		public JobRunner(Job job, string pitLibraryPath, string pitFile)
+		public JobRunner(ILicense license, Job job, string pitLibraryPath, string pitFile)
 		{
+			_license = license;
 			_pitLibraryPath = pitLibraryPath;
 			_pitConfig = PitDatabase.LoadPitConfig(pitFile);
 
@@ -224,7 +227,7 @@ namespace Peach.Pro.Core.Runtime
 			var defs = ParseConfig();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser();
+			var parser = new ProPitParser(_license, _pitLibraryPath, _config.pitFile);
 
 			using (var db = new NodeDatabase())
 			{

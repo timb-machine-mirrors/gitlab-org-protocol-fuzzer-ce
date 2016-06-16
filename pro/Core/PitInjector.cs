@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Peach.Core;
-using DomAgent = Peach.Core.Dom.Agent;
 using DomMonitor = Peach.Core.Dom.Monitor;
 using DomObject = Peach.Core.Dom.Dom;
 using WebAgent = Peach.Pro.Core.WebServices.Models.Agent;

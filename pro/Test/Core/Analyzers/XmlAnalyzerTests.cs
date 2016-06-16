@@ -1,37 +1,11 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
-
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
+using Peach.Core.IO;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Analyzers
@@ -91,6 +65,33 @@ namespace Peach.Pro.Test.Core.Analyzers
 
 			var result = dom.dataModels[0].Value;
 			Assert.NotNull(result);
+		}
+
+		[Test]
+		public void CdataTest()
+		{
+			var xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Peach>
+	<DataModel name=""TheDataModel"">
+
+		<String value=""&lt;value&gt;&lt;![CDATA[DescriptionFile]]&gt;&lt;/value&gt;"">
+			<Analyzer class=""Xml""/>
+		</String>
+
+	</DataModel>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			Assert.IsTrue(dom.dataModels["TheDataModel"][0] is XmlElement);
+
+			var result = dom.dataModels[0].Value;
+			var reader = new BitReader(result);
+			var buff = reader.ReadBytes((int)result.Length);
+			var xmlResult = UTF8Encoding.UTF8.GetString(buff);
+
+			Assert.AreEqual("<value><![CDATA[DescriptionFile]]></value>", xmlResult);
 		}
 
 		[Test]

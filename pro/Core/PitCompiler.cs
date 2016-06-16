@@ -9,7 +9,6 @@ using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Publishers;
 using Newtonsoft.Json;
 using System.IO;
-using NLog;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Schema;
@@ -18,7 +17,6 @@ namespace Peach.Pro.Core
 {
 	public class PitCompiler
 	{
-		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 		private readonly string _pitLibraryPath;
 		private readonly string _pitPath;
 		private readonly string _pitMetaPath;
@@ -50,7 +48,7 @@ namespace Peach.Pro.Core
 			var input = MetaPath(pitPath);
 			if (!File.Exists(input))
 				return null;
-			
+
 			var serializer = new JsonSerializer();
 			using (var stream = new StreamReader(input))
 			using (var reader = new JsonTextReader(stream))
@@ -63,16 +61,8 @@ namespace Peach.Pro.Core
 
 		public IEnumerable<string> Run(bool verifyConfig = true, bool doLint = true)
 		{
-			try
-			{
-				var dom = Parse(verifyConfig, doLint);
-				SaveMetadata(dom);
-			}
-			catch (Exception ex)
-			{
-				_errors.Add(ex.Message);
-				Logger.Debug(ex);
-			}
+			var dom = Parse(verifyConfig, doLint);
+			SaveMetadata(dom);
 			return _errors;
 		}
 
@@ -94,7 +84,8 @@ namespace Peach.Pro.Core
 			{
 				// ignore publishers
 				var args = new Dictionary<string, Variant>();
-				var pub = new NullPublisher(args) {
+				var pub = new NullPublisher(args)
+				{
 					Name = node.getAttr("name", null) ?? parent.publishers.UniqueName()
 				};
 				parent.publishers.Add(pub);
@@ -213,7 +204,8 @@ namespace Peach.Pro.Core
 				}
 			}
 
-			return new PitMetadata {
+			return new PitMetadata
+			{
 				Calls = calls,
 				Fields = root.Fields,
 			};
@@ -393,7 +385,7 @@ namespace Peach.Pro.Core
 							var name = parameters.Current.GetAttribute("name", string.Empty);
 							var value = parameters.Current.GetAttribute("value", string.Empty);
 							if (!ShouldSkipRule(parameters, "Allow_HardCodedParamValue") &&
-							    (!value.StartsWith("##") || !value.EndsWith("##")))
+								(!value.StartsWith("##") || !value.EndsWith("##")))
 							{
 								_errors.Add(
 									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
