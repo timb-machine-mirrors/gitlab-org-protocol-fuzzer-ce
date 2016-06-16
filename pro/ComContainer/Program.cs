@@ -35,7 +35,7 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Serialization.Formatters;
 using System.Threading;
 using Peach.Core;
-using Peach.Pro.OS.Windows.Publishers.Com;
+using Peach.Pro.Core.OS.Windows.Publishers.Com;
 
 namespace Peach.Pro.ComContainer
 {

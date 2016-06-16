@@ -99,7 +99,7 @@ namespace Peach.Pro.Core.Loggers
 
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		const string DebugLogLayout = "${longdate} ${logger} ${message}";
+		const string DebugLogLayout = "${longdate} ${logger} ${message} ${exception:format=tostring}";
 
 		// Filter these loggers to the info level since they are spammy at debug
 		static readonly string[] FilteredLoggers =

@@ -74,7 +74,7 @@ namespace Peach.Pro.Core.WebServices
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex);
+					Logger.Debug(ex, "Exception in Kill");
 					return false;
 				}
 			}
@@ -161,7 +161,7 @@ namespace Peach.Pro.Core.WebServices
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex);
+					Logger.Debug(ex, "Exception in SendCommand");
 					return false;
 				}
 			}
@@ -195,7 +195,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 			catch (Exception ex)
 			{
-				Logger.Debug(ex);
+				Logger.Debug(ex, "Exception in LoggingTask");
 			}
 		}
 

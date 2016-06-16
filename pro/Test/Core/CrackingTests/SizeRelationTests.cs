@@ -314,10 +314,10 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 			"	<DataModel name=\"TheDataModel\">" +
-			"      <Block name=\"10\">" +
-			"         <Number name=\"14\" signed=\"false\" size=\"32\"/>" +
-			"         <Number name=\"15\" signed=\"false\" size=\"32\">" +
-			"           <Relation type=\"size\" of=\"10\"/>" +
+			"      <Block name=\"Elem10\">" +
+			"         <Number name=\"Elem14\" signed=\"false\" size=\"32\"/>" +
+			"         <Number name=\"Elem15\" signed=\"false\" size=\"32\">" +
+			"           <Relation type=\"size\" of=\"Elem10\"/>" +
 			"         </Number>" +
 			"         <Blob name='blob'/>" +
 			"      </Block>" +
@@ -332,7 +332,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			var elem = dom.dataModels[0].find("TheDataModel.10.blob");
+			var elem = dom.dataModels[0].find("TheDataModel.Elem10.blob");
 			Assert.NotNull(elem);
 			Assert.AreEqual(16, elem.Value.LengthBits);
 		}

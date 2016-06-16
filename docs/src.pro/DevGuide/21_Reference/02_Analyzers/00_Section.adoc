@@ -13,8 +13,9 @@ Using an _Analyzer_ can incredibly reduce the time needed to begin smart fuzzing
 
 xref:Analyzers_Asn1[Asn1]:: Converts ASN.1 data in _Blobs_ into a full data model.
 xref:Analyzers_Binary[Binary]:: Breaks up unknown data when strings are found.
-xref:Analyzers_StringToken[StringToken]:: Separates strings using a precedence based list of punctuation. The strings are used to form the resulting _DataModel_.
+xref:Analyzers_Json[JSON]:: Converts JSON data in a _String_ into a full data model.
 xref:Analyzers_Regex[Regex]:: Use regular expressions to parse strings. Supports regular expression named groups.
+xref:Analyzers_StringToken[StringToken]:: Separates strings using a precedence based list of punctuation. The strings are used to form the resulting _DataModel_.
 xref:Analyzers_Xml[Xml]:: Converts XML contained in a _string_ element into a data model of _XmlElement_ and _XmlAttribute_ types.
 xref:Analyzers_Zip[Zip]:: Converts zipped data in a _blob_ into a data model of _stream_ elements.
 

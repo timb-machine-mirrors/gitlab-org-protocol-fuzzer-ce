@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
+using Peach.Core.Dom;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
@@ -31,7 +32,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			Assert.Fail("FIXME");
 		}
 
-		void _Fault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
+		void _Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			Assert.Null(this.faults);
 			Assert.True(context.reproducingFault);
@@ -39,7 +40,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			this.faults = faults;
 		}
 
-		void _AppendFault(RunContext context, uint currentIteration, Peach.Core.Dom.StateModel stateModel, Fault[] faults)
+		void _AppendFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
 		{
 			List<Fault> tmp = new List<Fault>();
 			if (this.faults != null)
@@ -91,7 +92,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators = new List<string>();
 			dom.tests[0].includedMutators.Add("StringCaseMutator");
 
@@ -111,7 +112,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 			PitParser parser = new PitParser();
 
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 			dom.tests[0].includedMutators.Add("StringMutator");
 
 			RunConfiguration config = new RunConfiguration();
@@ -169,7 +170,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 </Peach>";
 
 			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
 
 			RunConfiguration config = new RunConfiguration();
 			config.range = true;

@@ -8,6 +8,7 @@ deps = [
 	'System.Runtime.Remoting.dll',
 	'System.Xml.dll',
 	'Peach.Core.dll',
+	'Peach.Pro.dll',
 	'Microsoft.Scripting.dll',
 	'Microsoft.Scripting.Metadata.dll',
 	'IronPython.dll',

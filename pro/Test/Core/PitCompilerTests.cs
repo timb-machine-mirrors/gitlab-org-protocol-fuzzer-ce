@@ -7,6 +7,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Peach.Core;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace Peach.Pro.Test.Core
 {

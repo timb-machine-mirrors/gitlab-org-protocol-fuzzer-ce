@@ -11,9 +11,9 @@ namespace Peach.Core.Test
 {
 	public class DataModelCollector : Watcher
 	{
-		public static Dom.Dom ParsePit(string xml)
+		public static Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
 		{
-			return new PitParser().asParser(null, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
+			return new PitParser().asParser(args, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
 		}
 
 		public static void VerifyRoundTrip(string xml)

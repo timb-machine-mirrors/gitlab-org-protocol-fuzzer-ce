@@ -1,9 +1,6 @@
-//using NUnit.Framework.Constraints;
-
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
@@ -47,29 +44,23 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</Test>
 	
 </Peach>";
-			
-			string remote = Path.GetTempFileName();
-			string output = Path.GetTempFileName();
 
-			string xml = string.Format(template, remote, output);
-
-			using (TextWriter writer = File.CreateText(remote))
+			using (var remote = new TempFile())
+			using (var output = new TempFile())
 			{
-				writer.Write(inc1);
+				string xml = string.Format(template, remote.Path, output.Path);
+				File.WriteAllText(remote.Path, inc1);
+
+				var dom = DataModelCollector.ParsePit(xml);
+
+				var config = new RunConfiguration();
+				config.singleIteration = true;
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
+
+				Assert.AreEqual("Hello World!13", File.ReadAllText(output.Path));
 			}
-
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
-
-			string result = File.ReadAllText(output);
-
-			Assert.AreEqual("Hello World!13", result);
 		}
 
 		[Test]
@@ -112,28 +103,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	
 </Peach>";
 
-			string remote = Path.GetTempFileName();
-			string output = Path.GetTempFileName();
-
-			string xml = string.Format(template, remote, output);
-
-			using (TextWriter writer = File.CreateText(remote))
+			using (var remote = new TempFile())
+			using (var output = new TempFile())
 			{
-				writer.Write(inc1);
+				File.WriteAllText(remote.Path, inc1);
+				var xml = template.Fmt(remote.Path, output.Path);
+
+				var dom = DataModelCollector.ParsePit(xml);
+
+				var config = new RunConfiguration();
+				config.singleIteration = true;
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
+
+				Assert.AreEqual("Hello World!", File.ReadAllText(output.Path));
 			}
-
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
-
-			string result = File.ReadAllText(output);
-
-			Assert.AreEqual("Hello World!", result);
 		}
 
 		[Test]
@@ -185,34 +170,24 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	
 </Peach>";
 
-			string remote1 = Path.GetTempFileName();
-			string remote2 = Path.GetTempFileName();
-			string output = Path.GetTempFileName();
-
-			string xml = string.Format(template, remote2, output);
-
-			using (TextWriter writer = File.CreateText(remote1))
+			using (var remote1 = new TempFile())
+			using (var remote2 = new TempFile())
+			using (var output = new TempFile())
 			{
-				writer.Write(inc1);
+				var xml = template.Fmt(remote2.Path, output.Path);
+				File.WriteAllText(remote1.Path, inc1);
+				File.WriteAllText(remote2.Path, inc2.Fmt(remote1.Path));
+
+				var dom = DataModelCollector.ParsePit(xml);
+
+				var config = new RunConfiguration();
+				config.singleIteration = true;
+
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
+
+				Assert.AreEqual("Hello World!", File.ReadAllText(output.Path));
 			}
-
-			using (TextWriter writer = File.CreateText(remote2))
-			{
-				writer.Write(string.Format(inc2, remote1));
-			}
-
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
-
-			string result = File.ReadAllText(output);
-
-			Assert.AreEqual("Hello World!", result);
 		}
 
 		[Test]
@@ -294,47 +269,46 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	
 </Peach>";
 
-			string remote = Path.GetTempFileName();
-			string output = Path.GetTempFileName();
-
-			string xml = string.Format(template, remote, output);
-
-			using (TextWriter writer = File.CreateText(remote))
+			using (var remote = new TempFile())
+			using (var output = new TempFile())
 			{
-				writer.Write(inc1);
+				string xml = string.Format(template, remote.Path, output.Path);
+
+				File.WriteAllText(remote.Path, inc1);
+
+				var dom = DataModelCollector.ParsePit(xml);
+
+				var config = new RunConfiguration();
+				config.singleIteration = true;
+
+				var e = new Engine(null);
+				config.runName = "Default";
+				e.startFuzzing(dom, config);
+
+				byte[] result = File.ReadAllBytes(output.Path);
+
+				Assert.AreEqual(Encoding.ASCII.GetBytes("\x0005four"), result);
+
+				dom = DataModelCollector.ParsePit(xml);
+
+				e = new Engine(null);
+				config.runName = "Override";
+				e.startFuzzing(dom, config);
+
+				result = File.ReadAllBytes(output.Path);
+
+				Assert.AreEqual(Encoding.ASCII.GetBytes("\x0006hello"), result);
+
+				dom = DataModelCollector.ParsePit(xml);
+
+				e = new Engine(null);
+				config.runName = "Slurp";
+				e.startFuzzing(dom, config);
+
+				result = File.ReadAllBytes(output.Path);
+
+				Assert.AreEqual(Encoding.ASCII.GetBytes("\x0009slurping"), result);
 			}
-
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
-			config.runName = "Default";
-			e.startFuzzing(dom, config);
-
-			byte[] result = File.ReadAllBytes(output);
-
-			Assert.AreEqual(Encoding.ASCII.GetBytes("\x0005four"), result);
-
-			dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			e = new Engine(null);
-			config.runName = "Override";
-			e.startFuzzing(dom, config);
-
-			result = File.ReadAllBytes(output);
-
-			Assert.AreEqual(Encoding.ASCII.GetBytes("\x0006hello"), result);
-
-			dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			e = new Engine(null);
-			config.runName = "Slurp";
-			e.startFuzzing(dom, config);
-
-			result = File.ReadAllBytes(output);
-
-			Assert.AreEqual(Encoding.ASCII.GetBytes("\x0009slurping"), result);
 		}
 
 		[Test]
@@ -376,21 +350,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</Test>
 </Peach>";
 
-			string remote = Path.GetTempFileName();
-			string xml = string.Format(template, remote);
-			File.WriteAllText(remote, inc1);
+			using (var remote = new TempFile())
+			{
+				string xml = string.Format(template, remote.Path);
+				File.WriteAllText(remote.Path, inc1);
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var dom = DataModelCollector.ParsePit(xml);
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+				var config = new RunConfiguration();
+				config.singleIteration = true;
 
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
 
-			var act = dom.tests[0].stateModel.states["Initial"].actions[2];
-			Assert.AreEqual("foo", (string)act.dataModel[0].DefaultValue);
+				var act = dom.tests[0].stateModel.states["Initial"].actions[2];
+				Assert.AreEqual("foo", (string)act.dataModel[0].DefaultValue);
+			}
 		}
 
 		[Test]
@@ -428,23 +403,25 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	</Test>
 </Peach>";
 
-			string tmp = Path.GetTempFileName();
-			File.WriteAllText(tmp, "Hello World");
-			string remote = Path.GetTempFileName();
-			string xml = string.Format(template, remote, tmp);
-			File.WriteAllText(remote, inc1);
+			using (var remote = new TempFile())
+			using (var tmp = new TempFile())
+			{
+				File.WriteAllText(tmp.Path, "Hello World");
+				File.WriteAllText(remote.Path, inc1);
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				string xml = string.Format(template, remote.Path, tmp.Path);
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
+				var dom = DataModelCollector.ParsePit(xml);
 
-			Engine e = new Engine(null);
-			e.startFuzzing(dom, config);
+				var config = new RunConfiguration();
+				config.singleIteration = true;
 
-			var act = dom.tests[0].stateModel.states["Initial"].actions[0];
-			Assert.AreEqual("Hello World", (string)act.dataModel[0].DefaultValue);
+				var e = new Engine(null);
+				e.startFuzzing(dom, config);
+
+				var act = dom.tests[0].stateModel.states["Initial"].actions[0];
+				Assert.AreEqual("Hello World", (string)act.dataModel[0].DefaultValue);
+			}
 		}
 
 		[Test]
@@ -471,12 +448,13 @@ namespace Peach.Pro.Test.Core.PitParserTests
 </Peach>
 ";
 
-			string tmp1 = Path.GetTempFileName();
-			string tmp2 = Path.GetTempFileName();
-			File.WriteAllText(tmp1, inc1);
-			File.WriteAllText(tmp2, inc2);
+			using (var tmp1 = new TempFile())
+			using (var tmp2 = new TempFile())
+			{
+				File.WriteAllText(tmp1.Path, inc1);
+				File.WriteAllText(tmp2.Path, inc2);
 
-			string xml = @"
+				string xml = @"
 <Peach>
 	<Include ns='NS1' src='{0}' />
 	<Include ns='NS2' src='{1}' />
@@ -484,17 +462,17 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	<DataModel name='Packet' ref='NS1:Frame'>
 		<Block name='Payload' ref='NS2:Packet'/>
 	</DataModel>
-</Peach>".Fmt(tmp1, tmp2);
+</Peach>".Fmt(tmp1.Path, tmp2.Path);
 
-			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+				var dom = DataModelCollector.ParsePit(xml);
 
-			Assert.AreEqual(1, dom.dataModels.Count);
+				Assert.AreEqual(1, dom.dataModels.Count);
 
-			var val = dom.dataModels[0].InternalValue.BitsToString();
+				var val = dom.dataModels[0].InternalValue.BitsToString();
 
-			var exp = "typesrcdstPacket Payload";
-			Assert.AreEqual(exp, val);
+				var exp = "typesrcdstPacket Payload";
+				Assert.AreEqual(exp, val);
+			}
 		}
 	}
 }

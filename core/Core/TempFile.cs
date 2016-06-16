@@ -28,6 +28,11 @@ namespace Peach.Core
 			try { File.Delete(Path); }
 			catch { }
 		}
+
+		public override string ToString()
+		{
+			return Path;
+		}
 	}
 
 	public class TempDirectory : IDisposable
@@ -52,6 +57,11 @@ namespace Peach.Core
 			{
 				Console.WriteLine("{0}: {1}", Path, ex.Message);
 			}
+		}
+
+		public override string ToString()
+		{
+			return Path;
 		}
 	}
 }

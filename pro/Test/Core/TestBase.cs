@@ -2,8 +2,8 @@
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
-using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Test.Core
 {
@@ -17,7 +17,14 @@ namespace Peach.Pro.Test.Core
 		{
 			DoSetUp();
 
-			Program.LoadPlatformAssembly();
+			// Peach.Core.dll
+			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
+
+			// Peach.Pro.dll
+			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
+
+			// Peach.Pro.Test.dll
+			ClassLoader.LoadAssembly(Assembly.GetExecutingAssembly());
 
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;

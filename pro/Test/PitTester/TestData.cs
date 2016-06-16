@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using Peach.Pro.Core;
@@ -307,7 +306,8 @@ namespace PitTester
 			public bool IsDatagram { get; set; }
 		}
 
-		public enum ExpectedOutputSource {
+		public enum ExpectedOutputSource
+		{
 			[XmlEnum("cdata")]
 			CData,
 
@@ -341,5 +341,8 @@ namespace PitTester
 
 		[XmlElement("Test")]
 		public List<Test> Tests { get; set; }
+
+		[XmlAttribute("pit")]
+		public string Pit { get; set; }
 	}
 }

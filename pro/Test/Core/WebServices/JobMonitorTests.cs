@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Moq;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
@@ -18,7 +21,7 @@ using TestStatus = Peach.Pro.Core.WebServices.Models.TestStatus;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
-	class BaseJobMonitorTests<T> where T : IJobMonitor, new()
+	class BaseJobMonitorTests
 	{
 		protected IJobMonitor _monitor;
 		protected ManualResetEvent _doneEvt;
@@ -100,17 +103,39 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 	}
 
-	abstract class JobMonitorTests<T> : BaseJobMonitorTests<T>
-		where T : IJobMonitor, new()
+	interface IJobMonitorFactory
 	{
-		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-		protected TempDirectory _tmpDir;
-		protected string _pitXmlPath;
-		protected string _pitConfigPath;
-		protected string _pitXmlFailPath;
-		protected string _pitConfigFailPath;
-		protected bool _oldAsync;
-		protected string _oldLogRoot;
+		IJobMonitor Create();
+	}
+
+	class ExternalJobMonitorFactory : IJobMonitorFactory
+	{
+		public IJobMonitor Create()
+		{
+			return new ExternalJobMonitor();
+		}
+	}
+
+	class InternalJobMonitorFactory : IJobMonitorFactory
+	{
+		public IJobMonitor Create()
+		{
+			var license = new Mock<ILicense>();
+			return new InternalJobMonitor(license.Object);
+		}
+	}
+
+	abstract class JobMonitorTests<T> : BaseJobMonitorTests 
+		where T : IJobMonitorFactory, new()
+	{
+		static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+		TempDirectory _tmpDir;
+		string _pitXmlPath;
+		string _pitConfigPath;
+		string _pitXmlFailPath;
+		string _pitConfigFailPath;
+		bool _oldAsync;
+		string _oldLogRoot;
 
 		[SetUp]
 		public void SetUp()
@@ -127,13 +152,12 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_doneEvt = new ManualResetEvent(false);
 
-			_monitor = new T
+			var factory = new T();
+			_monitor = factory.Create();
+			_monitor.InternalEvent = (s, a) =>
 			{
-				InternalEvent = (s, a) =>
-				{
-					Logger.Trace("InternalEvent");
-					_doneEvt.Set();
-				}
+				Logger.Trace("InternalEvent");
+				_doneEvt.Set();
 			};
 
 			_pitXmlPath = Path.Combine(_tmpDir.Path, "Test.xml");
@@ -158,6 +182,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_monitor.Dispose();
 			_monitor = null;
+
 			_tmpDir.Dispose();
 			_tmpDir = null;
 
@@ -167,9 +192,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Logger.Trace("<<< TearDown");
 		}
 
-		[Test]
-		[Repeat(10)]
-		public void TestBasic()
+		public virtual void TestBasic()
 		{
 			var jobRequest = new JobRequest
 			{
@@ -188,9 +211,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			VerifyDatabase(job);
 		}
 
-		[Test]
-		[Repeat(10)]
-		public void TestStop()
+		public virtual void TestStop()
 		{
 			var jobRequest = new JobRequest();
 
@@ -215,7 +236,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
-		public void TestPauseContinue()
+		public virtual void TestPauseContinue()
 		{
 			var jobRequest = new JobRequest();
 
@@ -247,9 +268,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			VerifyDatabase(job);
 		}
 
-		[Test]
-		[Repeat(30)]
-		public void TestKill()
+		public virtual void TestKill()
 		{
 			Logger.Trace("TestKill");
 
@@ -275,9 +294,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			VerifyDatabase(job, false);
 		}
 
-		[Test]
-		[Repeat(2)]
-		public void TestPitTester()
+		public virtual void TestPitTester()
 		{
 			var jobRequest = new JobRequest
 			{
@@ -312,8 +329,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsTrue(File.Exists(job.DebugLogPath));
 		}
 
-		[Test]
-		public void TestPitParseFailureDuringTest()
+		public virtual void TestPitParseFailureDuringTest()
 		{
 			var jobRequest = new JobRequest
 			{
@@ -358,8 +374,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsFalse(File.Exists(job.DebugLogPath), "job.DebugLogPath should not exist");
 		}
 
-		[Test]
-		public void TestPitParseFailureDuringRun()
+		public virtual void TestPitParseFailureDuringRun()
 		{
 			var jobRequest = new JobRequest();
 			var job = _monitor.Start(_tmpDir.Path, _pitConfigFailPath, jobRequest);
@@ -400,8 +415,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			}
 		}
 
-		[Test]
-		public void TestPid()
+		public virtual void TestPid()
 		{
 			// The pid should always be set to the pid of the process that controls
 			// the engine.  For the InternalJobMonitor it will be the same process
@@ -435,8 +449,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			VerifyDatabase(job);
 		}
 
-		[Test]
-		public void TestHeartBeat()
+		public virtual void TestHeartBeat()
 		{
 			var jobRequest = new JobRequest();
 
@@ -490,22 +503,137 @@ namespace Peach.Pro.Test.Core.WebServices
 		[TestFixture]
 		[Peach]
 		[Quick]
-		class External : JobMonitorTests<ExternalJobMonitor>
+		class External : JobMonitorTests<ExternalJobMonitorFactory>
 		{
+			[Test]
+			[Repeat(10)]
+			public override void TestBasic()
+			{
+				base.TestBasic();
+			}
+
+			[Test]
+			[Repeat(10)]
+			public override void TestStop()
+			{
+				base.TestStop();
+			}
+
+			[Test]
+			public override void TestPauseContinue()
+			{
+				base.TestPauseContinue();
+			}
+
+			[Test]
+			[Repeat(30)]
+			public override void TestKill()
+			{
+				base.TestKill();
+			}
+
+			[Test]
+			[Repeat(2)]
+			public override void TestPitTester()
+			{
+				base.TestPitTester();
+			}
+
+			[Test]
+			public override void TestPitParseFailureDuringTest()
+			{
+				base.TestPitParseFailureDuringTest();
+			}
+
+			[Test]
+			public override void TestPitParseFailureDuringRun()
+			{
+				base.TestPitParseFailureDuringRun();
+			}
+
+			[Test]
+			public override void TestPid()
+			{
+				base.TestPid();
+			}
+
+			[Test]
+			public override void TestHeartBeat()
+			{
+				base.TestHeartBeat();
+			}
 		}
 
 		[TestFixture]
 		[Peach]
 		[Quick]
-		class Internal : JobMonitorTests<InternalJobMonitor>
+		class Internal : JobMonitorTests<InternalJobMonitorFactory>
 		{
+			[Test]
+			[Repeat(10)]
+			public override void TestBasic()
+			{
+				base.TestBasic();
+			}
+
+			[Test]
+			[Repeat(10)]
+			public override void TestStop()
+			{
+				base.TestStop();
+			}
+
+			[Test]
+			public override void TestPauseContinue()
+			{
+				base.TestPauseContinue();
+			}
+
+			[Test]
+			[Repeat(30)]
+			public override void TestKill()
+			{
+				base.TestKill();
+			}
+
+			[Test]
+			[Repeat(2)]
+			public override void TestPitTester()
+			{
+				base.TestPitTester();
+			}
+
+			[Test]
+			public override void TestPitParseFailureDuringTest()
+			{
+				base.TestPitParseFailureDuringTest();
+			}
+
+			[Test]
+			public override void TestPitParseFailureDuringRun()
+			{
+				base.TestPitParseFailureDuringRun();
+			}
+
+			[Test]
+			public override void TestPid()
+			{
+				base.TestPid();
+			}
+
+			[Test]
+			public override void TestHeartBeat()
+			{
+				base.TestHeartBeat();
+			}
 		}
 	}
+
 
 	[TestFixture]
 	[Peach]
 	[Quick]
-	class ExternalJobMonitorTests : BaseJobMonitorTests<ExternalJobMonitor>
+	class ExternalJobMonitorTests2 : BaseJobMonitorTests
 	{
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 		protected TempDirectory _tmpDir;

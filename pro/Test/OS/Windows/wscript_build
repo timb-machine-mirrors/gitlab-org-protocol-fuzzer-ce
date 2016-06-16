@@ -12,7 +12,6 @@ deps = [
 	'Microsoft.CSharp.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
-	'Peach.Pro.OS.Windows.dll',
 	'Peach.Core.Test.dll',
 ]
 
