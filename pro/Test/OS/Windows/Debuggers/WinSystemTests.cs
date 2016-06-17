@@ -143,7 +143,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 						System.Threading.Thread.Sleep(100);
 					}
 
-					dbg.Stop();
+					dbg.Dispose();
 
 					Assert.Null(dbg.Fault);
 				}
@@ -197,7 +197,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 			Assert.False(dbg.IsRunning, "Debugger should not be running");
 			Assert.NotNull(dbg.Fault, "Debugger should have detected fault");
 
-			dbg.Stop();
+			dbg.Dispose();
 		}
 
 		[Test]
@@ -252,7 +252,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 
 				Assert.True(dbg.IsRunning, "Debugger should be running");
 
-				dbg.Stop();
+				dbg.Dispose();
 
 				Assert.Null(dbg.Fault, "Should not have detected fault");
 			}
@@ -277,7 +277,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 
 			Assert.True(dbg.IsRunning, "Debugger should be running");
 
-			dbg.Stop();
+			dbg.Dispose();
 
 			Assert.Null(dbg.Fault, "Should not have detected fault");
 

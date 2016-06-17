@@ -18,6 +18,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		void Run();
 		void Stop();
 
+		ulong TotalProcessorTicks { get; }
 		MonitorData Fault { get; }
 	}
 }

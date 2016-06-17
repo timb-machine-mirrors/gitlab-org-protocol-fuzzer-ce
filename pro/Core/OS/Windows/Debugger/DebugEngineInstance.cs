@@ -52,11 +52,6 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			get { return instance.Name; }
 		}
 
-		public int ProcessId
-		{
-			get { return instance.ProcessId; }
-		}
-
 		public bool IsRunning
 		{
 			get { return instance.IsRunning; }
@@ -77,9 +72,14 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			instance.StartService(serviceName, startTimeout);
 		}
 
-		public void Stop()
+		public bool WaitForExit(int timeout)
 		{
-			instance.Stop();
+			return instance.WaitForExit(timeout);
+		}
+
+		public bool WaitForIdle(int timeout, uint pollInterval)
+		{
+			return instance.WaitForIdle(timeout, pollInterval);
 		}
 
 		public bool DetectedFault

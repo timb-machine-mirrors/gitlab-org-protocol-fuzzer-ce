@@ -8,6 +8,7 @@ using System.Text;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace Peach.Pro.Core.OS.Windows.Debugger
 {
@@ -127,13 +128,15 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 
 		public MonitorData Fault { get; private set; }
 
+		private readonly IntPtr _hProcess;
 		private readonly int _processId;
 		private readonly List<IntPtr> processHandles = new List<IntPtr>();
 		private readonly Dictionary<uint, IntPtr> openHandles = new Dictionary<uint, IntPtr>();
 		private readonly object mutex = new object();
 
-		private SystemDebugger(int dwProcessId)
+		private SystemDebugger(int dwProcessId, IntPtr hProcess)
 		{
+			_hProcess = hProcess;
 			_processId = dwProcessId;
 		}
 
@@ -159,32 +162,42 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 				throw new PeachException("System debugger could not start process '" + command + "'.  " + ex.Message, ex);
 			}
 
-			Interop.CloseHandle(pi.hProcess);
 			Interop.CloseHandle(pi.hThread);
 			Interop.DebugSetProcessKillOnExit(true);
 
-			return new SystemDebugger(pi.dwProcessId);
+			return new SystemDebugger(pi.dwProcessId, pi.hProcess);
 		}
 
 		public static SystemDebugger AttachToProcess(int dwProcessId)
 		{
+			IntPtr hProcess;
+
 			using (new Privilege(Privilege.SeDebugPrivilege))
 			{
+				hProcess = Interop.OpenProcess(Interop.ProcessAccessFlags.All, false, dwProcessId);
+				if (hProcess == IntPtr.Zero)
+				{
+					var ex = new Win32Exception(Marshal.GetLastWin32Error());
+					throw new PeachException("System debugger could not open handle to process id " + dwProcessId + ".  " + ex.Message, ex);
+				}
+
 				// DebugActiveProcess
 				if (!Interop.DebugActiveProcess((uint)dwProcessId))
 				{
 					var ex = new Win32Exception(Marshal.GetLastWin32Error());
+					Interop.CloseHandle(hProcess);
 					throw new PeachException("System debugger could not attach to process id " + dwProcessId + ".  " + ex.Message, ex);
 				}
 			}
 
 			Interop.DebugSetProcessKillOnExit(true);
 
-			return new SystemDebugger(dwProcessId);
+			return new SystemDebugger(dwProcessId, hProcess);
 		}
 
 		public void Dispose()
 		{
+			Interop.CloseHandle(_hProcess);
 		}
 
 		public void Run()
@@ -258,6 +271,30 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 						logger.Trace("Failed to stop process 0x{0:X}.  {1}", proc.ToInt32(), ex.Message);
 					}
 				}
+			}
+		}
+
+		public ulong TotalProcessorTicks
+		{
+			get
+			{
+				FILETIME ftCreation, ftExit, ftKernel, ftUser;
+				if (!Interop.GetProcessTimes(_hProcess, out ftCreation, out ftExit, out ftKernel, out ftUser))
+				{
+					var ex = new Win32Exception(Marshal.GetLastWin32Error());
+					logger.Trace("Failed to get process times for process 0x{0:X}.  {1}", _processId, ex.Message);
+					return 0;
+				}
+
+				var kernel = (ulong)ftKernel.dwLowDateTime;
+				kernel <<= 32;
+				kernel += (ulong)ftKernel.dwLowDateTime;
+
+				var user = (ulong)ftUser.dwLowDateTime;
+				user <<= 32;
+				user += (ulong)ftUser.dwLowDateTime;
+
+				return kernel + user;
 			}
 		}
 
@@ -490,6 +527,8 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			if (keepGoing)
 				return DBG_EXCEPTION_NOT_HANDLED;
 
+			logger.Debug("Fault detected, collecting info from system debugger...");
+
 			var title = "Exception: 0x" + ev.Code.ToString("x8");
 			var desc = new StringBuilder();
 
@@ -521,6 +560,8 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 					MustStop = false
 				}
 			};
+
+			logger.Debug("Completed gathering system debugger information");
 
 			// Stop by calling TerminateProcess and continuing
 			// so we get thread & process exit notifications

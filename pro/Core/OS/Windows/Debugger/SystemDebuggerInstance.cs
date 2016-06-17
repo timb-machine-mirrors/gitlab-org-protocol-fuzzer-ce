@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Management;
 using System.ServiceProcess;
 using System.Threading;
+using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = System.Threading.Monitor;
@@ -12,12 +13,13 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 {
 	public class SystemDebuggerInstance : IDebuggerInstance
 	{
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
 		public bool IgnoreFirstChanceGuardPage { get; set; }
 		public bool IgnoreSecondChanceGuardPage { get; set; }
 
 		private readonly object _mutex = new object();
 
-		private int _processId;
 		private bool _detectedFault;
 		private MonitorData _fault;
 		private Exception _exception;
@@ -100,17 +102,6 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			get { return "SystemDebugger"; }
 		}
 
-		public int ProcessId
-		{
-			get
-			{
-				lock (_mutex)
-				{
-					return _processId;
-				}
-			}
-		}
-
 		public bool IsRunning
 		{
 			get
@@ -154,10 +145,6 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 
 		public void Dispose()
 		{
-		}
-
-		public void Stop()
-		{
 			lock (_mutex)
 			{
 				if (_debugger == null)
@@ -165,6 +152,76 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 
 				_debugger.Stop();
 				Monitor.Wait(_mutex);
+			}
+		}
+
+		public bool WaitForExit(int timeout)
+		{
+			lock (_mutex)
+			{
+				if (_debugger == null)
+					return true;
+
+				if (timeout == 0)
+				{
+					_debugger.Stop();
+					Monitor.Wait(_mutex);
+					return false;
+				}
+
+				Logger.Debug("WaitForExit({0})", timeout == -1 ? "INFINITE" : timeout.ToString());
+
+				if (Monitor.Wait(_mutex, timeout))
+					return true;
+
+				Logger.Debug("WaitForExit ran out of time, killing debugger!");
+
+				_debugger.Stop();
+				Monitor.Wait(_mutex);
+
+				return false;
+			}
+		}
+
+		public bool WaitForIdle(int timeout, uint pollInterval)
+		{
+			lock (_mutex)
+			{
+				var first = true;
+				var lastTime = (ulong)0;
+				var sw = Stopwatch.StartNew();
+
+				while (_debugger != null)
+				{
+					var newTime = _debugger.TotalProcessorTicks;
+
+					Logger.Trace("CpuKill: OldTicks={0} NewTicks={1}", lastTime, newTime);
+
+					if (!first && lastTime <= newTime)
+					{
+						Logger.Debug("Cpu is idle, stopping process.");
+						_debugger.Stop();
+						Monitor.Wait(_mutex);
+						return true;
+					}
+
+					lastTime = newTime;
+					first = false;
+
+					var remain = timeout - sw.ElapsedMilliseconds;
+
+					if (remain <= 0)
+					{
+						Logger.Debug("Timed out waiting for cpu idle, stopping process.");
+						_debugger.Stop();
+						Monitor.Wait(_mutex);
+						return true;
+					}
+
+					Monitor.Wait(_mutex, (int)Math.Min(remain, pollInterval));
+				}
+
+				return true;
 			}
 		}
 
@@ -239,7 +296,6 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 				if (_debugger != null)
 					throw new InvalidOperationException("Can not start system debugger, it is alread running.");
 
-				_processId = 0;
 				_fault = null;
 				_exception = null;
 
@@ -271,7 +327,6 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 					lock (_mutex)
 					{
 						_debugger = dbg;
-						_processId = pid;
 						Monitor.Pulse(_mutex);
 					}
 				};

@@ -9,6 +9,7 @@ using Microsoft.Diagnostics.Runtime.Interop;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace Peach.Pro.Core.OS.Windows.Debugger
 {
@@ -26,10 +27,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		readonly StringBuilder _output = new StringBuilder();
 
 		IntPtr _hDll;
+		IntPtr _hProcess;
 		object _dbgEng;
 		bool _handlingException;
 		bool _processCreated;
 		bool _stop;
+		int _processId;
 
 		public Action OnConnected { private get; set; }
 
@@ -112,6 +115,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			DebugControl = null;
 			DebugSymbols = null;
 
+			if (_hProcess != IntPtr.Zero)
+			{
+				Interop.CloseHandle(_hProcess);
+				_hProcess = IntPtr.Zero;
+			}
+
 			if (_dbgEng != null)
 			{
 				Marshal.FinalReleaseComObject(_dbgEng);
@@ -158,12 +167,11 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			if (!_processCreated)
 			{
 				_processCreated = true;
+				_processId = Interop.GetProcessId((uint)Handle);
+				_hProcess = Interop.OpenProcess(Interop.ProcessAccessFlags.All, false, _processId);
 
 				if (ProcessCreated != null)
-				{
-					var pid = Interop.GetProcessId((uint)Handle);
-					ProcessCreated(pid);
-				}
+					ProcessCreated(_processId);
 			}
 
 			return 0;
@@ -338,6 +346,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			var fault = new MonitorData
 			{
 				Title = ReTitle.Match(output).Groups[1].Value,
+				DetectionSource = "WindowsDebugEngine",
 				Fault = new MonitorData.Info
 				{
 					Description = output,
@@ -360,6 +369,13 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 
 		public static DebugEngine CreateProcess(string winDbgPath, string symbolsPath, string commandLine)
 		{
+			if (winDbgPath == null)
+				throw new ArgumentNullException("winDbgPath");
+			if (symbolsPath == null)
+				throw new ArgumentNullException("symbolsPath");
+			if (commandLine == null)
+				throw new ArgumentNullException("commandLine");
+
 			var dbg = new DebugEngine(Path.Combine(winDbgPath, "dbgeng.dll"));
 
 			dbg.DebugControl.SetInterruptTimeout(1);
@@ -411,6 +427,30 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			{
 				dbg.Dispose();
 				throw;
+			}
+		}
+
+		public ulong TotalProcessorTicks
+		{
+			get
+			{
+				FILETIME ftCreation, ftExit, ftKernel, ftUser;
+				if (!Interop.GetProcessTimes(_hProcess, out ftCreation, out ftExit, out ftKernel, out ftUser))
+				{
+					var ex = new Win32Exception(Marshal.GetLastWin32Error());
+					Logger.Trace("Failed to get process times for process 0x{0:X}.  {1}", _processId, ex.Message);
+					return 0;
+				}
+
+				var kernel = (ulong)ftKernel.dwLowDateTime;
+				kernel <<= 32;
+				kernel += (ulong)ftKernel.dwLowDateTime;
+
+				var user = (ulong)ftUser.dwLowDateTime;
+				user <<= 32;
+				user += (ulong)ftUser.dwLowDateTime;
+
+				return kernel + user;
 			}
 		}
 
