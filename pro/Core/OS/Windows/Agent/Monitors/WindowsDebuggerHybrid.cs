@@ -184,6 +184,9 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms.");
 			}
 
+			if (_replay && _debugger != null)
+				_StopDebugger();
+
 			if (_fault != null)
 				return true;
 
