@@ -145,12 +145,24 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		int IDebugEventCallbacks.ChangeDebuggeeState(DEBUG_CDS Flags, ulong Argument)
 		{
 			Logger.Trace("ChangeDebuggeeState: {0} {1}", Flags, Argument);
+
+			if (_processId != 0 &&
+				!_processCreated &&
+				Flags == DEBUG_CDS.REGISTERS)
+			{
+				_processCreated = true;
+
+				if (ProcessCreated != null)
+					ProcessCreated(_processId);
+			}
+
 			return 0;
 		}
 
 		int IDebugEventCallbacks.ChangeEngineState(DEBUG_CES Flags, ulong Argument)
 		{
 			Logger.Trace("ChangeEngineState: {0} {1}", Flags, Argument);
+
 			return 0;
 		}
 
@@ -164,14 +176,10 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		{
 			Logger.Trace("CreateProcess: {0} {1} {2} {3} {4} {5}", ImageFileHandle, Handle, BaseOffset, ModuleSize, ModuleName, ImageName);
 
-			if (!_processCreated)
+			if (_processId == 0)
 			{
-				_processCreated = true;
 				_processId = Interop.GetProcessId((uint)Handle);
 				_hProcess = Interop.OpenProcess(Interop.ProcessAccessFlags.All, false, _processId);
-
-				if (ProcessCreated != null)
-					ProcessCreated(_processId);
 			}
 
 			return 0;
@@ -479,6 +487,9 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		public void Stop()
 		{
 			// Cause the debugger to break by generating a synthetic exception
+
+			Logger.Trace("Stoping debugger...");
+
 			_stop = true;
 			DebugControl.SetInterrupt(DEBUG_INTERRUPT.ACTIVE);
 		}
