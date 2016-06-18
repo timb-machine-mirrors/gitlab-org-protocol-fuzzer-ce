@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Analyzers;
-using Peach.Core.Dom;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
@@ -16,41 +17,22 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 	[Platform("Win")]
 	public class WindowsDebuggerHybridTest
 	{
-		Fault[] faults = null;
+		private static readonly string CrashingFileConsumer = Utilities.GetAppResourcePath("CrashingFileConsumer.exe");
+		private static readonly string CrashableServer = Utilities.GetAppResourcePath("CrashableServer.exe");
 
 		[SetUp]
 		public void SetUp()
 		{
-			faults = null;
-
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
 				Assert.Ignore("Cannot run the 32bit version of this test on a 64bit operating system.");
 
 			if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
 				Assert.Ignore("Cannot run the 64bit version of this test on a 32bit operating system.");
-
-			Assert.Fail("FIXME");
 		}
 
-		void _Fault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
+		private static Fault[] RunEngine(string mutator, RunConfiguration cfg)
 		{
-			Assert.Null(this.faults);
-			Assert.True(context.reproducingFault);
-			Assert.AreEqual(330, context.reproducingInitialIteration);
-			this.faults = faults;
-		}
-
-		void _AppendFault(RunContext context, uint currentIteration, StateModel stateModel, Fault[] faults)
-		{
-			List<Fault> tmp = new List<Fault>();
-			if (this.faults != null)
-				tmp.AddRange(this.faults);
-
-			tmp.AddRange(faults);
-			this.faults = tmp.ToArray();
-		}
-
-		string xml = @"
+			var xml = @"
 <Peach>
 	<DataModel name='TheDataModel'>
 		<String value='Hello'/>
@@ -66,7 +48,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 	<Agent name='LocalAgent'>
 		<Monitor class='WindowsDebugger'>
-			<Param name='Executable' value='CrashableServer.exe'/>
+			<Param name='Executable' value='{0}'/>
 			<Param name='Arguments' value='127.0.0.1 44444'/>
 		</Monitor>
 	</Agent>
@@ -79,285 +61,272 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			<Param name='Port' value='44444'/>
 		</Publisher>
 		<Strategy class='Sequential'/>
-		<Mutators mode='include'>
-			<Mutator class='StringLengthEdgeCase' />
-		</Mutators>
 	</Test>
-</Peach>";
+</Peach>".Fmt(CrashableServer);
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			dom.tests[0].includedMutators = new List<string>(new[] { mutator });
+
+			var e = new Engine(null);
+			var ret = new List<Fault>();
+
+			e.Fault += (context, currentIteration, stateModel, faults) =>
+			{
+				Assert.AreEqual(0, ret.Count);
+				Assert.True(context.reproducingFault);
+				Assert.AreEqual(330, context.reproducingInitialIteration);
+				ret.AddRange(faults);
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			return ret.ToArray();
+		}
 
 		[Test]
 		public void TestNoFault()
 		{
-			VerifyArch();
+			var faults = RunEngine("StringCaseMutator", new RunConfiguration());
 
-			PitParser parser = new PitParser();
-
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators = new List<string>();
-			dom.tests[0].includedMutators.Add("StringCaseMutator");
-
-			RunConfiguration config = new RunConfiguration();
-
-			Engine e = new Engine(null);
-			e.Fault += _Fault;
-			e.startFuzzing(dom, config);
-
-			Assert.Null(this.faults);
+			Assert.NotNull(faults);
+			Assert.AreEqual(0, faults.Length);
 		}
 
 		[Test]
 		public void TestFault()
 		{
-			VerifyArch();
+			SetUpFixture.EnableTrace();
 
-			PitParser parser = new PitParser();
-
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-			dom.tests[0].includedMutators.Add("StringMutator");
-
-			RunConfiguration config = new RunConfiguration();
-			config.range = true;
-			config.rangeStart = 330;
-			config.rangeStop = 330;
-
-			Engine e = new Engine(null);
-			e.Fault += _Fault;
-			e.startFuzzing(dom, config);
-
-			Assert.NotNull(this.faults);
-			Assert.AreEqual(1, this.faults.Length);
-			Assert.AreEqual(FaultType.Fault, this.faults[0].type);
-			Assert.AreEqual("WindowsDebugEngine", this.faults[0].detectionSource);
-		}
-
-		void VerifyArch()
-		{
-			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
-				Assert.Ignore("Can't run the 32bit version of test on a 64bit operating system.");
-			else if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
-				Assert.Ignore("Can't run the 64bit version of test on a 32bit operating system.");
-		}
-
-		[Test]
-		public void TestEarlyExit()
-		{
-			string pit = @"
-<Peach>
-	<DataModel name='TheDataModel'>
-		<String value='Hello'/>
-	</DataModel>
-
-	<StateModel name='TheState' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel ref='TheDataModel'/>
-			</Action>
-		</State>
-	</StateModel>
-
-	<Agent name='LocalAgent'>
-		<Monitor class='WindowsDebugger'>
-			<Param name='Executable' value='CrashingFileConsumer.exe'/>
-			<Param name='FaultOnEarlyExit' value='true'/>
-		</Monitor>
-	</Agent>
-
-	<Test name='Default' targetLifetime='iteration'>
-		<Agent ref='LocalAgent'/>
-		<StateModel ref='TheState'/>
-		<Publisher class='Null'/>
-	</Test>
-</Peach>";
-
-			PitParser parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(pit)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.range = true;
-			config.rangeStart = 1;
-			config.rangeStop = 1;
-
-			Engine e = new Engine(null);
-			e.Fault += _AppendFault;
-			e.ReproFault += _AppendFault;
-
-			try
+			var cfg = new RunConfiguration
 			{
-				e.startFuzzing(dom, config);
-				Assert.Fail("Should throw!");
-			}
-			catch (PeachException ex)
-			{
-				Assert.AreEqual("Fault detected on control record iteration.", ex.Message);
-			}
-
-			Assert.NotNull(this.faults);
-			Assert.AreEqual(2, this.faults.Length);
-			Assert.AreEqual(FaultType.Fault, this.faults[0].type);
-			Assert.AreEqual("SystemDebugger", this.faults[0].detectionSource);
-			Assert.AreEqual(FaultType.Fault, this.faults[1].type);
-			Assert.AreEqual("WindowsDebugEngine", this.faults[1].detectionSource);
-		}
-
-		private class WindowsDebuggerHybrid : Monitor2
-		{
-			public WindowsDebuggerHybrid(string name) : base(name)
-			{
-			}
-		}
-
-		[Test]
-		public void TestExitEarlyFault()
-		{
-			var args = new Dictionary<string, string>
-			{
-				{ "Executable", "CrashingFileConsumer.exe" },
-				{ "FaultOnEarlyExit", "true" },
+				range = true,
+				rangeStart = 330,
+				rangeStop = 330
 			};
 
-			var w = new WindowsDebuggerHybrid(null);
-			w.StartMonitor(args);
-			w.IterationStarting(new IterationStartingArgs());
+			var faults = RunEngine("StringLengthEdgeCase", cfg);
 
-			System.Threading.Thread.Sleep(1000);
-
-			w.IterationFinished();
-
-			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetMonitorData();
-			Assert.NotNull(f);
-			Assert.NotNull(f.Fault);
-			Assert.AreEqual("Process exited early.", f.Title);
-
-			w.SessionFinished();
-			w.StopMonitor();
+			Assert.NotNull(faults);
+			Assert.AreEqual(1, faults.Length);
+			Assert.AreEqual(FaultType.Fault, faults[0].type);
+			Assert.AreEqual("WindowsDebugEngine", faults[0].detectionSource);
 		}
 
 		[Test]
-		public void TestExitEarlyFault1()
+		[TestCase(true)]
+		[TestCase(false)]
+		[Timeout(10000)]
+		public void TestWaitForExitFault(bool replay)
+		{
+			var startCount = 0;
+
+			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
+			{
+				{ "Executable", CrashableServer },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "StartOnCall", "foo" },
+				{ "WaitForExitOnCall", "bar" },
+				{ "WaitForExitTimeout", "100" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				},
+				Message = m =>
+				{
+					m.Message("foo");
+					m.Message("bar");
+				}
+			};
+
+			var f = runner.Run(5);
+
+			Assert.AreEqual(5, f.Length);
+			Assert.AreEqual(5, startCount);
+
+			foreach (var item in f)
+			{
+				Assert.AreEqual("Process did not exit in 100ms.", item.Title);
+			}
+		}
+
+		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
+		[Timeout(10000)]
+		public void TestExitEarlyFault1(bool replay)
 		{
 			// FaultOnEarlyExit doesn't fault when stop message is sent
 
-			var args = new Dictionary<string, string>
+			var startCount = 0;
+
+			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
 			{
-				{ "Executable", "CrashingFileConsumer.exe" },
+				{ "Executable", CrashingFileConsumer },
 				{ "StartOnCall", "foo" },
 				{ "WaitForExitOnCall", "bar" },
 				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				},
+				Message = m =>
+				{
+					m.Message("foo");
+					m.Message("bar");
+				}
 			};
 
-			var w = new WindowsDebuggerHybrid(null);
-			w.StartMonitor(args);
-			w.SessionStarting();
-			w.IterationStarting(new IterationStartingArgs());
+			var f = runner.Run(5);
 
-			w.Message("foo");
-			w.Message("bar");
-
-			w.IterationFinished();
-
-			Assert.AreEqual(false, w.DetectedFault());
-
-			w.SessionFinished();
-			w.StopMonitor();
+			Assert.AreEqual(0, f.Length);
+			Assert.AreEqual(5, startCount);
 		}
 
 		[Test]
-		public void TestExitEarlyFault2()
+		[TestCase(true)]
+		[TestCase(false)]
+		[Timeout(10000)]
+		public void TestExitEarlyFault2(bool replay)
 		{
 			// FaultOnEarlyExit faults when StartOnCall is used and stop message is not sent
 
-			var args = new Dictionary<string, string>
+			var startCount = 0;
+
+			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
 			{
-				{ "Executable", "CrashingFileConsumer.exe" },
+				{ "Executable", CrashingFileConsumer },
 				{ "StartOnCall", "foo" },
 				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				},
+				Message = m =>
+				{
+					m.Message("foo");
+					Thread.Sleep(1000);
+				}
 			};
 
-			var w = new WindowsDebuggerHybrid(null);
-			w.StartMonitor(args);
-			w.SessionStarting();
-			w.IterationStarting(new IterationStartingArgs());
+			var f = runner.Run(5);
 
-			w.Message("foo");
+			Assert.AreEqual(5, f.Length);
+			Assert.AreEqual(5, startCount);
 
-			System.Threading.Thread.Sleep(1000);
-
-			w.IterationFinished();
-
-			Assert.AreEqual(true, w.DetectedFault());
-			var f = w.GetMonitorData();
-			Assert.NotNull(f);
-			Assert.NotNull(f.Fault);
-			Assert.AreEqual("Process exited early.", f.Title);
-
-			w.SessionFinished();
-			w.StopMonitor();
+			foreach (var item in f)
+			{
+				Assert.AreEqual("Process exited early.", item.Title);
+			}
 		}
 
 		[Test]
-		public void TestExitEarlyFault3()
+		[TestCase(true)]
+		[TestCase(false)]
+		[Timeout(10000)]
+		public void TestExitEarlyFault3(bool replay)
 		{
 			// FaultOnEarlyExit doesn't fault when StartOnCall is used
 
-			var args = new Dictionary<string, string>
+			var startCount = 0;
+
+			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
 			{
-				{ "Executable", "CrashableServer.exe" },
-				{ "Arguments", "127.0.0.1 6789" },
+				{ "Executable", CrashableServer },
+				{ "Arguments", "127.0.0.1 0" },
 				{ "StartOnCall", "foo" },
 				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				},
+				Message = m =>
+				{
+					m.Message("foo");
+				}
 			};
 
-			var w = new WindowsDebuggerHybrid(null);
-			w.StartMonitor(args);
-			w.SessionStarting();
-			w.IterationStarting(new IterationStartingArgs());
+			var f = runner.Run(5);
 
-			w.Message("foo");
-
-			w.IterationFinished();
-
-			Assert.AreEqual(false, w.DetectedFault());
-
-			w.SessionFinished();
-			w.StopMonitor();
+			Assert.AreEqual(0, f.Length);
+			Assert.AreEqual(5, startCount);
 		}
 
 		[Test]
-		public void TestExitEarlyFault4()
+		[TestCase(true)]
+		[TestCase(false)]
+		[Timeout(10000)]
+		public void TestExitEarlyFault4(bool replay)
 		{
 			// FaultOnEarlyExit doesn't fault when restart every iteration is true
 
-			var args = new Dictionary<string, string>
+			var startCount = 0;
+
+			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
 			{
-				{ "Executable", "CrashableServer.exe" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 6789" },
 				{ "RestartOnEachTest", "true" },
 				{ "FaultOnEarlyExit", "true" },
+			})
+			{
+				StartMonitor = (m, args) =>
+				{
+					m.InternalEvent += (s, e) => ++startCount;
+					m.StartMonitor(args);
+				},
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				}
 			};
 
-			var w = new WindowsDebuggerHybrid(null);
-			w.StartMonitor(args);
-			w.SessionStarting();
-			w.IterationStarting(new IterationStartingArgs());
+			var f = runner.Run(5);
 
-			w.IterationFinished();
-
-			Assert.AreEqual(false, w.DetectedFault());
-
-			w.SessionFinished();
-			w.StopMonitor();
+			Assert.AreEqual(0, f.Length);
+			Assert.AreEqual(5, startCount);
 		}
 
 		[Test]
-		public void TestRestartAfterFault()
+		[TestCase(true)]
+		[TestCase(false)]
+		[Timeout(10000)]
+		public void TestRestartAfterFault(bool replay)
 		{
 			var startCount = 0;
 			var iteration = 0;
 
 			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
 			{
-				{ "Executable", "CrashableServer" },
+				{ "Executable", CrashableServer },
 				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartAfterFault", "true" },
 			})
@@ -367,19 +336,59 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 					m.InternalEvent += (s, e) => ++startCount;
 					m.StartMonitor(args);
 				},
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				},
 				DetectedFault = m =>
 				{
 					Assert.False(m.DetectedFault(), "Should not have detected a fault");
 
 					return ++iteration == 2;
 				}
-			}
-			;
+			};
 
 			var f = runner.Run(5);
 
 			Assert.AreEqual(0, f.Length);
 			Assert.AreEqual(2, startCount);
+		}
+
+		[Test]
+		[TestCase(true)]
+		[TestCase(false)]
+		public void TestCpuKill(bool replay)
+		{
+			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
+			{
+				{ "Executable", CrashableServer },
+				{ "Arguments", "127.0.0.1 0" },
+				{ "StartOnCall", "ScoobySnacks" },
+			})
+			{
+				IterationStarting = (m, args) =>
+				{
+					m.IterationStarting(new IterationStartingArgs { IsReproduction = replay, LastWasFault = args.LastWasFault });
+				},
+				Message = m =>
+				{
+					m.Message("ScoobySnacks");
+				},
+				IterationFinished = m =>
+				{
+					var sw = Stopwatch.StartNew();
+
+					m.IterationFinished();
+
+					var elapsed = sw.Elapsed;
+
+					Assert.Less(elapsed, TimeSpan.FromSeconds(1));
+				}
+			};
+
+			var f = runner.Run(1);
+
+			Assert.AreEqual(0, f.Length);
 		}
 	}
 }
