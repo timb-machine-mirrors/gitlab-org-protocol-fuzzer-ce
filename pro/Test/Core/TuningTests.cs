@@ -270,20 +270,20 @@ namespace Peach.Pro.Test.Core
 		}
 
 
-        [Test]
-        public void NREBug_MarkMutableElements()
-        {
-            const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+		[Test]
+		public void NREBug_MarkMutableElements()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
 	<StateModel name='SM' initialState='initial'>
 		<State name='initial'>
 			<Action name='output' type='output'>
 				<DataModel name='Request'>
-                    <Choice name='Strategy'>
-                        <Blob name='A' fieldId='A' value='aaaa'/>
-                        <Blob name='B' fieldId='B' value='bbbb'/>
-                    </Choice>
-                </DataModel>
+					<Choice name='Strategy'>
+						<Blob name='A' fieldId='A' value='aaaa'/>
+						<Blob name='B' fieldId='B' value='bbbb'/>
+					</Choice>
+				</DataModel>
 			</Action>
 		</State>
 	</StateModel>
@@ -297,24 +297,24 @@ namespace Peach.Pro.Test.Core
 </Peach>
 ";
 
-            var pit = new PitConfig
-            {
-                Config = new List<Param>(),
-                Agents = new List<Pro.Core.WebServices.Models.Agent>(),
-                Weights = new List<PitWeight> {
-                    new PitWeight { Id = "initial.output.Request.Strategy.A", Weight = 0 },
-                    new PitWeight { Id = "initial.output.Request.Strategy.B", Weight = 1 },
+			var pit = new PitConfig
+			{
+				Config = new List<Param>(),
+				Agents = new List<Pro.Core.WebServices.Models.Agent>(),
+				Weights = new List<PitWeight> {
+					new PitWeight { Id = "initial.output.Request.Strategy.A", Weight = 0 },
+					new PitWeight { Id = "initial.output.Request.Strategy.B", Weight = 1 },
 				}
-            };
+			};
 
-            Action<Engine> hooker = engine => { };
+			Action<Engine> hooker = engine => { };
 
-            var jobRequest = new JobRequest
-            {
-                Seed = 0,
-                RangeStop = 100,
-            };
-            Assert.DoesNotThrow(() => RunTest(xml, pit, jobRequest, hooker));
-        }
+			var jobRequest = new JobRequest
+			{
+				Seed = 0,
+				RangeStop = 100,
+			};
+			Assert.DoesNotThrow(() => RunTest(xml, pit, jobRequest, hooker));
+		}
 	}
 }
