@@ -273,9 +273,18 @@ namespace Peach.Pro.Test.Core
 		[Test]
 		public void NREBug_MarkMutableElements()
 		{
+			/* Without the fieldId defined on the StateModel, this test fails with an NRE.
+			 * 
+			 * However, with the fieldId it's 'passing' with some suppressed exception:
+			 * 
+			 *    18:06:57 Peach.Pro.Core.Runtime.JobRunner Exception: Error, Pit file
+			 *    "C:\Users\Jake\AppData\Local\Temp\Peach-a09d8cc4-bd54-4964-8daa-1c74ce0ff968\Test.xml" failed to validate: 
+			 *    Line: 3, Position: 47 - The 'fieldId' attribute is not declared.
+			 */ 
+
 			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
-	<StateModel name='SM' initialState='initial'>
+	<StateModel name='SM' initialState='initial' fieldId='StateModelRoot'>
 		<State name='initial'>
 			<Action name='output' type='output'>
 				<DataModel name='Request'>
@@ -301,20 +310,40 @@ namespace Peach.Pro.Test.Core
 			{
 				Config = new List<Param>(),
 				Agents = new List<Pro.Core.WebServices.Models.Agent>(),
-				Weights = new List<PitWeight> {
-					new PitWeight { Id = "initial.output.Request.Strategy.A", Weight = 0 },
-					new PitWeight { Id = "initial.output.Request.Strategy.B", Weight = 1 },
+				Weights = new List<PitWeight>
+				{
+					new PitWeight {Id = "StateModelRoot", Weight = 0},
+					new PitWeight {Id = "A", Weight = 0},
+					new PitWeight {Id = "B", Weight = 0},
 				}
 			};
 
-			Action<Engine> hooker = engine => { };
+			var count = new Dictionary<string, int>();
+
+			Action<Engine> hooker = engine =>
+			{
+				engine.TestStarting += ctx =>
+				{
+					ctx.DataMutating += (c, actionData, element, mutator) =>
+					{
+						var name = element.fullName;
+						int cnt;
+						if (count.TryGetValue(name, out cnt))
+							++cnt;
+
+						count[name] = cnt;
+					};
+				};
+			};
 
 			var jobRequest = new JobRequest
 			{
 				Seed = 0,
-				RangeStop = 100,
+				RangeStop = 1,
 			};
-			Assert.DoesNotThrow(() => RunTest(xml, pit, jobRequest, hooker));
+			var job = RunTest(xml, pit, jobRequest, hooker);
+
+			Assert.IsEmpty(count);
 		}
 	}
 }
