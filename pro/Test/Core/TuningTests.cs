@@ -268,5 +268,53 @@ namespace Peach.Pro.Test.Core
 
 			Assert.IsEmpty(count);
 		}
+
+
+        [Test]
+        public void NREBug_MarkMutableElements()
+        {
+            const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<StateModel name='SM' initialState='initial'>
+		<State name='initial'>
+			<Action name='output' type='output'>
+				<DataModel name='Request'>
+                    <Choice name='Strategy'>
+                        <Blob name='A' fieldId='A' value='aaaa'/>
+                        <Blob name='B' fieldId='B' value='bbbb'/>
+                    </Choice>
+                </DataModel>
+			</Action>
+		</State>
+	</StateModel>
+	<Test name='Default' maxOutputSize='200'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='1' />
+		</Strategy>
+	</Test>
+</Peach>
+";
+
+            var pit = new PitConfig
+            {
+                Config = new List<Param>(),
+                Agents = new List<Pro.Core.WebServices.Models.Agent>(),
+                Weights = new List<PitWeight> {
+                    new PitWeight { Id = "initial.output.Request.Strategy.A", Weight = 0 },
+                    new PitWeight { Id = "initial.output.Request.Strategy.B", Weight = 1 },
+				}
+            };
+
+            Action<Engine> hooker = engine => { };
+
+            var jobRequest = new JobRequest
+            {
+                Seed = 0,
+                RangeStop = 100,
+            };
+            Assert.DoesNotThrow(() => RunTest(xml, pit, jobRequest, hooker));
+        }
 	}
 }
