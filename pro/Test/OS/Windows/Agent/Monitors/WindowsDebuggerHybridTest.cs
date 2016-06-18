@@ -291,7 +291,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var runner = new MonitorRunner("WindowsDebugger", new Dictionary<string, string>
 			{
 				{ "Executable", CrashableServer },
-				{ "Arguments", "127.0.0.1 6789" },
+				{ "Arguments", "127.0.0.1 0" },
 				{ "RestartOnEachTest", "true" },
 				{ "FaultOnEarlyExit", "true" },
 			})
