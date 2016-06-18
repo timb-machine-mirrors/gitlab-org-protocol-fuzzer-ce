@@ -140,6 +140,11 @@ xref:XmlAttribute[]::
 The _XmlAttribute_ defines an XML attribute.
 This element is only valid as a child of xref:XmlElement[].
 
+xref:XmlCharacterData[]::
++
+The _XmlCharacterData_ element defines an XML CDATA section.
+This element is only valid as a child of xref:XmlElement[].
+
 xref:XmlElement[]::
 +
 _XmlElement_ defines an XML element.
@@ -169,6 +174,7 @@ include::Sequence.adoc[]
 include::Stream.adoc[]
 include::String.adoc[]
 include::XmlAttribute.adoc[]
+include::XmlCharacterData.adoc[]
 include::XmlElement.adoc[]
 
 // end

@@ -15,59 +15,77 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using NLog;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 
 namespace PeachValidator
 {
 	public partial class MainForm : Form
 	{
-	    readonly string _windowTitle = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version;
-	    readonly string _windowTitlePit = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - {0}";
-	    readonly string _windowTitlePitSample = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - {0} - {1}";
-	    readonly string _windowTitleSample = "Peach Validator v" + Assembly.GetAssembly(typeof(Peach.Core.Engine)).GetName().Version + " - None - {0}";
-		public string SampleFileName = null;
-		public string PitFileName = null;
-		public string SaveFileName = null;
-	    readonly Dictionary<string, object> _parserArgs = new Dictionary<string, object>();
-		CrackModel crackModel = new CrackModel();
-	    readonly Dictionary<DataElement, CrackNode> _crackMap = new Dictionary<DataElement, CrackNode>();
-	    private readonly MemoryTarget logTarget = null;
+		static Version Version = Assembly.GetAssembly(typeof(Engine)).GetName().Version;
+		readonly string _windowTitle = "Peach Validator v" + Version;
+		readonly string _windowTitlePit = "Peach Validator v" + Version + " - {0}";
+		readonly string _windowTitlePitSample = "Peach Validator v" + Version + " - {0} - {1}";
+		readonly string _windowTitleSample = "Peach Validator v" + Version + " - None - {0}";
 
-		public MainForm()
+		ILicense _license;
+		string _pitLibraryPath;
+		string _pitFileName;
+		string _sampleFileName;
+		string _saveFileName;
+
+		readonly Dictionary<string, object> _parserArgs = new Dictionary<string, object>();
+		readonly Dictionary<DataElement, CrackNode> _crackMap = new Dictionary<DataElement, CrackNode>();
+		readonly MemoryTarget _logTarget;
+		CrackModel _crackModel = new CrackModel();
+		List<DataElement> _exceptions = new List<DataElement>();
+
+		public MainForm(
+			ILicense license,
+			string pitLibraryPath,
+			string pitFileName,
+			string sampleFileName,
+			string saveFileName)
 		{
+			_license = license;
+			_pitLibraryPath = pitLibraryPath;
+			_pitFileName = pitFileName;
+			_sampleFileName = sampleFileName;
+			_saveFileName = saveFileName;
+			
 			InitializeComponent();
 
 			setTitle();
 
-           var nconfig = new LoggingConfiguration();
-            logTarget = new MemoryTarget();
-            nconfig.AddTarget("console", logTarget);
-			logTarget.Layout = "${logger} ${message} ${exception:format=tostring}";
+			var nconfig = new LoggingConfiguration();
+			_logTarget = new MemoryTarget();
+			nconfig.AddTarget("console", _logTarget);
+			_logTarget.Layout = "${logger} ${message} ${exception:format=tostring}";
 
-		    var rule = new LoggingRule("*", LogLevel.Debug, logTarget);
-            nconfig.LoggingRules.Add(rule);
+			var rule = new LoggingRule("*", LogLevel.Debug, _logTarget);
+			nconfig.LoggingRules.Add(rule);
 
-            LogManager.Configuration = nconfig;
+			LogManager.Configuration = nconfig;
 		}
 
 		protected void setTitle()
 		{
-			if (!string.IsNullOrEmpty(SampleFileName) && !string.IsNullOrEmpty(PitFileName))
-				Text = string.Format(_windowTitlePitSample, Path.GetFileName(PitFileName), Path.GetFileName(SampleFileName));
-			else if (string.IsNullOrEmpty(SampleFileName) && !string.IsNullOrEmpty(PitFileName))
-				Text = string.Format(_windowTitlePit, Path.GetFileName(PitFileName));
-			else if (!string.IsNullOrEmpty(SampleFileName) && string.IsNullOrEmpty(PitFileName))
-				Text = string.Format(_windowTitleSample, Path.GetFileName(SampleFileName));
+			if (!string.IsNullOrEmpty(_sampleFileName) && !string.IsNullOrEmpty(_pitFileName))
+				Text = string.Format(_windowTitlePitSample, Path.GetFileName(_pitFileName), Path.GetFileName(_sampleFileName));
+			else if (string.IsNullOrEmpty(_sampleFileName) && !string.IsNullOrEmpty(_pitFileName))
+				Text = string.Format(_windowTitlePit, Path.GetFileName(_pitFileName));
+			else if (!string.IsNullOrEmpty(_sampleFileName) && string.IsNullOrEmpty(_pitFileName))
+				Text = string.Format(_windowTitleSample, Path.GetFileName(_sampleFileName));
 			else
 				Text = _windowTitle;
 		}
 
 		private void toolStripButtonOpenSample_Click(object sender, EventArgs e)
 		{
-			OpenFileDialog ofd = new OpenFileDialog();
-			if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			var ofd = new OpenFileDialog();
+			if (ofd.ShowDialog() != DialogResult.OK)
 				return;
 
-			SampleFileName = ofd.FileName;
+			_sampleFileName = ofd.FileName;
 			setTitle();
 
 			toolStripButtonRefreshSample_Click(null, null);
@@ -77,34 +95,34 @@ namespace PeachValidator
 		{
 			var cursor = Cursor.Current;
 			Cursor.Current = Cursors.WaitCursor;
-            var holder = (DataModelHolder)toolStripComboBoxDataModel.SelectedItem;
+			var holder = (DataModelHolder)toolStripComboBoxDataModel.SelectedItem;
 			try
 			{
 				// Clear the cracking debug logs
 				textBoxLogs.Text = "";
-				logTarget.Logs.Clear();
+				_logTarget.Logs.Clear();
 
-				if (holder == null || string.IsNullOrEmpty(SampleFileName) || string.IsNullOrEmpty(PitFileName))
+				if (holder == null || string.IsNullOrEmpty(_sampleFileName) || string.IsNullOrEmpty(_pitFileName))
 					return;
 
 				// Refresh the hex display in case the file has changed.
-				DynamicFileByteProvider dynamicFileByteProvider;
-				dynamicFileByteProvider = new DynamicFileByteProvider(new FileStream(SampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+				var fileStream = new FileStream(_sampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				var dynamicFileByteProvider = new DynamicFileByteProvider(fileStream);
 				hexBox1.ByteProvider = dynamicFileByteProvider;
 
-				using (Stream sin = new FileStream(SampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				using (Stream sin = new FileStream(_sampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				{
 					treeViewAdv1.BeginUpdate();
 					treeViewAdv1.Model = null;
 
 					try
 					{
-						BitStream data = new BitStream(sin);
-						DataCracker cracker = new DataCracker();
-						cracker.EnterHandleNodeEvent += new EnterHandleNodeEventHandler(cracker_EnterHandleNodeEvent);
-						cracker.ExitHandleNodeEvent += new ExitHandleNodeEventHandler(cracker_ExitHandleNodeEvent);
-						cracker.AnalyzerEvent += new AnalyzerEventHandler(cracker_AnalyzerEvent);
-						cracker.ExceptionHandleNodeEvent += new ExceptionHandleNodeEventHandler(cracker_ExceptionHandleNodeEvent);
+						var data = new BitStream(sin);
+						var cracker = new DataCracker();
+						cracker.EnterHandleNodeEvent += cracker_EnterHandleNodeEvent;
+						cracker.ExitHandleNodeEvent += cracker_ExitHandleNodeEvent;
+						cracker.AnalyzerEvent += cracker_AnalyzerEvent;
+						cracker.ExceptionHandleNodeEvent += cracker_ExceptionHandleNodeEvent;
 						//cracker.CrackData(dom.dataModels[dataModel], data);
 
 						try
@@ -112,9 +130,9 @@ namespace PeachValidator
 							var dm = holder.MakeCrackModel();
 							cracker.CrackData(dm, data);
 
-							if (!string.IsNullOrEmpty(SaveFileName))
+							if (!string.IsNullOrEmpty(_saveFileName))
 							{
-								using (var f = File.Open(SaveFileName, FileMode.Create))
+								using (var f = File.Open(_saveFileName, FileMode.Create))
 								{
 									var val = dm.Value;
 									val.CopyTo(f);
@@ -131,7 +149,7 @@ namespace PeachValidator
 						MessageBox.Show(ex.Message, "Error Cracking");
 
 						long endPos = -1;
-						foreach (var element in exceptions)
+						foreach (var element in _exceptions)
 						{
 							CrackNode currentModel;
 							if (_crackMap.TryGetValue(element, out currentModel))
@@ -155,8 +173,8 @@ namespace PeachValidator
 							node.Parent = _crackMap[node.DataElement.parent];
 					}
 
-					crackModel.Root = _crackMap.Values.First().Root;
-					treeViewAdv1.Model = crackModel;
+					_crackModel.Root = _crackMap.Values.First().Root;
+					treeViewAdv1.Model = _crackModel;
 					treeViewAdv1.EndUpdate();
 					treeViewAdv1.Root.Children[0].Expand();
 
@@ -164,8 +182,8 @@ namespace PeachValidator
 					_crackMap.Clear();
 
 					// Display debug logs
-					textBoxLogs.Text = string.Join("\r\n", logTarget.Logs);
-					logTarget.Logs.Clear();
+					textBoxLogs.Text = string.Join("\r\n", _logTarget.Logs);
+					_logTarget.Logs.Clear();
 				}
 			}
 			catch (Exception ex)
@@ -190,11 +208,9 @@ namespace PeachValidator
 
 			// Remove any elements that have 'element' as a parent
 			var res = _crackMap.Select(kv => kv.Key).Where(k => k.parent == element).ToList();
-		    foreach (var elem in res)
-		        RemoveElement(elem);
+			foreach (var elem in res)
+				RemoveElement(elem);
 		}
-
-		List<DataElement> exceptions = new List<DataElement>();
 
 		void cracker_ExceptionHandleNodeEvent(DataElement element, long position, BitStream data, Exception e)
 		{
@@ -202,10 +218,10 @@ namespace PeachValidator
 			{
 				// If offsets can't be figured out - we will get a crack exception
 				// before getting a begin element.
-				_crackMap.Add(element, new CrackNode(crackModel, element, position, 0));
+				_crackMap.Add(element, new CrackNode(_crackModel, element, position, 0));
 			}
 
-			exceptions.Add(element);
+			_exceptions.Add(element);
 		}
 
 		void cracker_AnalyzerEvent(DataElement element, BitStream data)
@@ -215,12 +231,12 @@ namespace PeachValidator
 
 		void cracker_ExitHandleNodeEvent(DataElement element, long position, BitStream data)
 		{
-			foreach (var item in exceptions)
+			foreach (var item in _exceptions)
 				RemoveElement(item);
-			exceptions.Clear();
+			_exceptions.Clear();
 
-		    if (!_crackMap.ContainsKey(element))
-		        return;
+			if (!_crackMap.ContainsKey(element))
+				return;
 
 			var currentModel = _crackMap[element];
 			currentModel.StopBits = position;
@@ -235,15 +251,15 @@ namespace PeachValidator
 
 		void cracker_EnterHandleNodeEvent(DataElement element, long position, BitStream data)
 		{
-			_crackMap[element] = new CrackNode(crackModel, element, position, 0);
+			_crackMap[element] = new CrackNode(_crackModel, element, position, 0);
 		}
 
 		private void toolStripButtonOpenPit_Click(object sender, EventArgs e)
 		{
-			OpenFileDialog ofd = new OpenFileDialog();
+			var ofd = new OpenFileDialog();
 			ofd.Title = "Select PIT file";
 
-			if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+			if (ofd.ShowDialog() != DialogResult.OK)
 				return;
 
 			SelectPit(ofd.FileName, true);
@@ -251,47 +267,21 @@ namespace PeachValidator
 
 		private void SelectPit(string fileName, bool getDefs)
 		{
-			PitFileName = fileName;
+			_pitFileName = fileName;
 			setTitle();
 
-			// Switch out working folder to pit location
-			// this should allow us to resolve local data files
-			var pitPath = Path.GetDirectoryName(fileName);
-			if(Directory.Exists(pitPath))
-				Directory.SetCurrentDirectory(pitPath);
-
-			Regex re = new Regex("##\\w+##");
-            List<KeyValuePair<string, string>> defs;
-            if (File.Exists(PitFileName + ".config"))
-            {
-                defs = PitDefines.ParseFile(PitFileName + ".config").Evaluate();
-            }
-			else if (getDefs && File.Exists(PitFileName) && re.IsMatch(File.ReadAllText(PitFileName)))
-            {
-	            var ofd = new OpenFileDialog();
-	            ofd.Title = "Select PIT defines file";
-
-	            if (ofd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-		            return;
-
-				defs = PitDefines.ParseFile(ofd.FileName).Evaluate();
-            }
-            else
-            {
-                defs = new List<KeyValuePair<string, string>>();
-            }
-
+			var defs = PitDefines.ParseFileWithDefaults(_pitLibraryPath, fileName);
 			_parserArgs[PitParser.DEFINED_VALUES] = defs;
 			toolStripButtonRefreshPit_Click(null, null);
 		}
 
 
-        private void addDataModels(Dom dom, string ns)
-        {
-            if (!string.IsNullOrEmpty(ns))
-                ns += ":";
+		private void addDataModels(Dom dom, string ns)
+		{
+			if (!string.IsNullOrEmpty(ns))
+				ns += ":";
 
-            foreach (var otherNs in dom.ns)
+			foreach (var otherNs in dom.ns)
 				addDataModels(otherNs, ns + dom.Name);
 
 			var name = dom.Name;
@@ -299,41 +289,41 @@ namespace PeachValidator
 			if (!string.IsNullOrEmpty(name))
 				name += ":";
 
-            foreach (var dm in dom.dataModels)
+			foreach (var dm in dom.dataModels)
 				toolStripComboBoxDataModel.Items.Add(new DataModelHolder(dm, ns + name + dm.Name));
-        }
+		}
 
 		private void toolStripButtonRefreshPit_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrEmpty(PitFileName))
+			if (string.IsNullOrEmpty(_pitFileName))
 				return;
 
 			try
 			{
-				var parser = new PitParser();
+				var parser = new ProPitParser(_license, _pitLibraryPath, _pitFileName);
 
-				var dom = parser.asParser(_parserArgs, PitFileName);
+				var dom = parser.asParser(_parserArgs, _pitFileName);
 
 				var previouslySelectedModelName = toolStripComboBoxDataModel.SelectedItem;
 
 				toolStripComboBoxDataModel.Items.Clear();
 
-                addDataModels(dom, "");
+				addDataModels(dom, "");
 
-                var newModelIndex = -1;
+				var newModelIndex = -1;
 
-                if (previouslySelectedModelName != null)
-                    newModelIndex = toolStripComboBoxDataModel.Items.IndexOf(previouslySelectedModelName);
+				if (previouslySelectedModelName != null)
+					newModelIndex = toolStripComboBoxDataModel.Items.IndexOf(previouslySelectedModelName);
 
 				if (newModelIndex < 0)
-                    newModelIndex = toolStripComboBoxDataModel.Items.Count - 1;
+					newModelIndex = toolStripComboBoxDataModel.Items.Count - 1;
 
 				if (toolStripComboBoxDataModel.Items.Count > 0)
 					toolStripComboBoxDataModel.SelectedIndex = newModelIndex;
 
 				treeViewAdv1.BeginUpdate();
-                var model = (DataModelHolder)toolStripComboBoxDataModel.Items[newModelIndex];
-                treeViewAdv1.Model = CrackModel.CreateModelFromPit(model.DataModel);
+				var model = (DataModelHolder)toolStripComboBoxDataModel.Items[newModelIndex];
+				treeViewAdv1.Model = CrackModel.CreateModelFromPit(model.DataModel);
 				treeViewAdv1.EndUpdate();
 				treeViewAdv1.Root.Children[0].Expand();
 			}
@@ -343,16 +333,16 @@ namespace PeachValidator
 			}
 		}
 
-        class DataModelHolder
-        {
-            public DataModel DataModel { get; set; }
-            public string FullName { get; set; }
+		class DataModelHolder
+		{
+			public DataModel DataModel { get; set; }
+			public string FullName { get; set; }
 
-            public DataModelHolder(DataModel DataModel, string FullName)
-            {
-                this.DataModel = DataModel;
-                this.FullName = FullName;
-            }
+			public DataModelHolder(DataModel DataModel, string FullName)
+			{
+				this.DataModel = DataModel;
+				this.FullName = FullName;
+			}
 
 			public DataModel MakeCrackModel()
 			{
@@ -364,26 +354,26 @@ namespace PeachValidator
 				return ret;
 			}
 
-            public override string ToString()
-            {
-                return FullName;
-            }
+			public override string ToString()
+			{
+				return FullName;
+			}
 
-            public override bool Equals(object obj)
-            {
-                var other = obj as DataModelHolder;
+			public override bool Equals(object obj)
+			{
+				var other = obj as DataModelHolder;
 
-                if (other == null)
-                    return false;
+				if (other == null)
+					return false;
 
-                return other.FullName == this.FullName;
-            }
+				return other.FullName == this.FullName;
+			}
 
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-        }
+			public override int GetHashCode()
+			{
+				return base.GetHashCode();
+			}
+		}
 
 
 		private void toolStripComboBoxDataModel_SelectedIndexChanged(object sender, EventArgs e)
@@ -394,8 +384,8 @@ namespace PeachValidator
 
 				treeViewAdv1.BeginUpdate();
 
-                crackModel = CrackModel.CreateModelFromPit(dataModel.DataModel);
-                treeViewAdv1.Model = crackModel;
+				_crackModel = CrackModel.CreateModelFromPit(dataModel.DataModel);
+				treeViewAdv1.Model = _crackModel;
 				treeViewAdv1.EndUpdate();
 				treeViewAdv1.Root.Children[0].Expand();
 			}
@@ -415,15 +405,15 @@ namespace PeachValidator
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
-			if (PitFileName != null)
+			if (_pitFileName != null)
 			{
-				SelectPit(PitFileName, false);
+				SelectPit(_pitFileName, false);
 			}
 
-			if (SampleFileName != null)
+			if (_sampleFileName != null)
 			{
-				DynamicFileByteProvider dynamicFileByteProvider;
-				dynamicFileByteProvider = new DynamicFileByteProvider(new FileStream(SampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+				var fileStream = new FileStream(_sampleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+				var dynamicFileByteProvider = new DynamicFileByteProvider(fileStream);
 				hexBox1.ByteProvider = dynamicFileByteProvider;
 
 				toolStripButtonRefreshSample_Click(null, null);
