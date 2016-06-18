@@ -96,8 +96,6 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestFault()
 		{
-			SetUpFixture.EnableTrace();
-
 			var cfg = new RunConfiguration
 			{
 				range = true,
