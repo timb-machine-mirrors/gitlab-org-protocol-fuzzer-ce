@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core.OS.Windows.Debugger;
 using Peach.Pro.OS.Windows.Agent.Monitors;
@@ -32,7 +33,7 @@ namespace Peach.Pro.Test.OS.Windows
 		[Test]
 		public void TestBadCommand()
 		{
-			_dbg.StartProcess("foo.exe");
+			Assert.Throws<PeachException>(() => _dbg.StartProcess("foo.exe"));
 		}
 	}
 }
