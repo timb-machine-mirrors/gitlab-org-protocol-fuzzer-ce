@@ -5,6 +5,7 @@ using Peach.Pro.OS.Windows.Agent.Monitors;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Peach.Pro.Core.OS.Windows;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
@@ -65,6 +66,9 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestBasic()
 		{
+			if (!Privilege.IsUserAdministrator())
+				Assert.Ignore("User is not an administrator.");
+
 			var exe = "foobar";
 			var runner = new MonitorRunner(Monitor, new Dictionary<string, string>
 			{
