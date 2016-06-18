@@ -271,20 +271,11 @@ namespace Peach.Pro.Test.Core
 
 
 		[Test]
-		public void NREBug_MarkMutableElements()
+		public void TestNullElements()
 		{
-			/* Without the fieldId defined on the StateModel, this test fails with an NRE.
-			 * 
-			 * However, with the fieldId it's 'passing' with some suppressed exception:
-			 * 
-			 *    18:06:57 Peach.Pro.Core.Runtime.JobRunner Exception: Error, Pit file
-			 *    "C:\Users\Jake\AppData\Local\Temp\Peach-a09d8cc4-bd54-4964-8daa-1c74ce0ff968\Test.xml" failed to validate: 
-			 *    Line: 3, Position: 47 - The 'fieldId' attribute is not declared.
-			 */ 
-
 			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
-	<StateModel name='SM' initialState='initial' fieldId='StateModelRoot'>
+	<StateModel name='SM' initialState='initial'>
 		<State name='initial'>
 			<Action name='output' type='output'>
 				<DataModel name='Request'>
@@ -312,7 +303,6 @@ namespace Peach.Pro.Test.Core
 				Agents = new List<Pro.Core.WebServices.Models.Agent>(),
 				Weights = new List<PitWeight>
 				{
-					new PitWeight {Id = "StateModelRoot", Weight = 0},
 					new PitWeight {Id = "A", Weight = 0},
 					new PitWeight {Id = "B", Weight = 0},
 				}
@@ -330,7 +320,6 @@ namespace Peach.Pro.Test.Core
 						int cnt;
 						if (count.TryGetValue(name, out cnt))
 							++cnt;
-
 						count[name] = cnt;
 					};
 				};
@@ -339,11 +328,13 @@ namespace Peach.Pro.Test.Core
 			var jobRequest = new JobRequest
 			{
 				Seed = 0,
-				RangeStop = 1,
+				RangeStop = 100,
 			};
-			var job = RunTest(xml, pit, jobRequest, hooker);
-
-			Assert.IsEmpty(count);
+			RunTest(xml, pit, jobRequest, hooker);
+			var expected = new[] {
+				"Request.Strategy|99"
+			};
+			CollectionAssert.AreEqual(expected, count.Select(x => "{0}|{1}".Fmt(x.Key, x.Value.ToString())));
 		}
 	}
 }
