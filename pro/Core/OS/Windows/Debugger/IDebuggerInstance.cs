@@ -5,6 +5,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 {
 	public interface IDebuggerInstance : IDisposable
 	{
+		string WinDbgPath { get; set; }
+		string SymbolsPath { get; set; }
+
+		bool IgnoreFirstChanceGuardPage { get; set; }
+		bool IgnoreSecondChanceGuardPage { get; set; }
+
 		string Name { get; }
 		bool IsRunning { get; }
 

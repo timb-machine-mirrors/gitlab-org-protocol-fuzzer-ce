@@ -12,11 +12,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			return new KernelDebuggerInstance();
 		}
 
-		public IDebuggerInstance GetProcessDebugger(int logLevel)
+		public IDebuggerInstance GetProcessDebugger<T>(int logLevel)
+			where T: MarshalByRefObject, IDebuggerInstance, new()
 		{
 			Utilities.ConfigureLogging(logLevel);
 
-			return new DebugEngineProxy();
+			return new T();
 		}
 	}
 }

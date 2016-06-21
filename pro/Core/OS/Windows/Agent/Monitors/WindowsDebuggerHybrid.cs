@@ -206,24 +206,9 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		{
 			Debug.Assert(_debugger == null);
 
-			if (_replay)
-			{
-				_debugger = new DebugEngineInstance
-				{
-					IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage,
-					IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage,
-					WinDbgPath = WinDbgPath,
-					SymbolsPath = SymbolsPath
-				};
-			}
-			else
-			{
-				_debugger = new SystemDebuggerInstance
-				{
-					IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage,
-					IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage
-				};
-			}
+			_debugger = _replay
+				? GetDebuggerInstance<DebugEngineInstance>()
+				: GetDebuggerInstance<SystemDebuggerInstance>();
 
 			if (!string.IsNullOrEmpty(CommandLine))
 				_debugger.StartProcess(CommandLine);
@@ -243,6 +228,17 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 
 			_debugger.Dispose();
 			_debugger = null;
+		}
+
+		private IDebuggerInstance GetDebuggerInstance<T>() where T : class, IDebuggerInstance, new()
+		{
+			return new T
+			{
+				IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage,
+				IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage,
+				WinDbgPath = WinDbgPath,
+				SymbolsPath = SymbolsPath
+			};
 		}
 
 		private MonitorData GetGeneralFault(string type, string reason)

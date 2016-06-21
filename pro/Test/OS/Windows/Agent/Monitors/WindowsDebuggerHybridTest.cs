@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
-using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors

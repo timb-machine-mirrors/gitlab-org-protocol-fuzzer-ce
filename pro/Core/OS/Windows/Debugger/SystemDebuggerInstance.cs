@@ -15,6 +15,9 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
+		public string WinDbgPath { get; set; }
+		public string SymbolsPath { get; set; }
+
 		public bool IgnoreFirstChanceGuardPage { get; set; }
 		public bool IgnoreSecondChanceGuardPage { get; set; }
 
