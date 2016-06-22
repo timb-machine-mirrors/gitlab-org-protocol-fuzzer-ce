@@ -5,7 +5,8 @@
 					ng-keyup="vm.OnKeyUp($event)"
 					placeholder="{{placeholder}}"
 					class="form-control"
-					peach:auto-focus />
+					peach:auto-focus 
+					autocomplete="off" />
 	<span class="open"
 				ng-click="vm.ToggleOptions()"
 				ng-disabled="!data.length">

@@ -116,7 +116,8 @@
 	<div class="panel-body">
 		<form name="form"
 					class="form-horizontal"
-					novalidate>
+					novalidate
+					autocomplete="off">
 			<div ng-show="vm.storage.showStartHelp">
 				<p>
 					The Start Options specify the test cases that start and end a fuzzing job, 
@@ -165,6 +166,7 @@
 				</label>
 				<div class="col-sm-6">
 					<input name="seed"
+								 autocomplete="off"
 								 ng-model="vm.Job.seed"
 								 type="number"
 								 step="1"
@@ -189,6 +191,7 @@
 				</label>
 				<div class="col-sm-6">
 					<input name="start"
+								 autocomplete="off"
 								 ng-model="vm.Job.rangeStart"
 								 type="number"
 								 step="1"
@@ -212,6 +215,7 @@
 				</label>
 				<div class="col-sm-6">
 					<input name="stop"
+								 autocomplete="off"
 								 ng-model="vm.Job.rangeStop"
 								 type="number"
 								 step="1"
