@@ -110,8 +110,10 @@ namespace Peach.Pro.Core
 				if (query.Any())
 				{
 					_pitFeature = query.First();
-					_feature = license.GetFeature(_pitFeature.Key);
+					if (license == null)
+						throw new PeachException("A valid license could not be found.");
 
+					_feature = license.GetFeature(_pitFeature.Key);
 					if (_feature == null)
 						throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(pitName));
 				}
