@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.Remoting;
 using NLog;
 using Peach.Core;
@@ -183,6 +184,8 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 
 		public DebuggerProxy()
 		{
+			var sw = Stopwatch.StartNew();
+
 			_process = new Remotable<DebuggerServer>();
 
 			try
@@ -194,6 +197,8 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 				var logLevel = Logger.IsTraceEnabled ? 2 : (Logger.IsDebugEnabled ? 1 : 0);
 
 				_dbg = remote.GetProcessDebugger<Proxy>(logLevel);
+
+				Logger.Trace("{0} created in {1}ms", typeof(T).Name, sw.ElapsedMilliseconds);
 			}
 			catch (RemotingException ex)
 			{
