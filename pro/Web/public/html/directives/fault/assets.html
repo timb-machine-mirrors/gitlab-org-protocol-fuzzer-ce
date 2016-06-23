@@ -17,14 +17,16 @@
 						{{agent.agentName}}
 					</uib-tab-heading>
 
-					<uib-accordion close-others="false">
-						<uib-accordion-group is-open="true"
-							heading="{{mon.monitorClass}} ({{mon.monitorName}})"
-							ng-repeat="mon in agent.children">
-							<peach:fault-files files="mon.children">
-							</peach:fault-files>
-						</uib-accordion-group>
-					</uib-accordion>
+					<div class="fault-monitor-tab-content">
+						<uib-accordion close-others="false">
+							<uib-accordion-group is-open="true"
+								heading="{{mon.monitorClass}} ({{mon.monitorName}})"
+								ng-repeat="mon in agent.children">
+								<peach:fault-files files="mon.children">
+								</peach:fault-files>
+							</uib-accordion-group>
+						</uib-accordion>
+					</div>
 				</uib-tab>
 			</uib-tabset>
 		</td>
