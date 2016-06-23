@@ -125,7 +125,7 @@ namespace Peach.Core.Test
 		public static void EnableDebug()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
+			var target = new ConsoleTarget { Layout = "${time} ${logger} ${message} ${exception:format=tostring}" };
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
 			config.AddTarget("debugConsole", target);
@@ -137,7 +137,7 @@ namespace Peach.Core.Test
 		public static void EnableTrace()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
+			var target = new ConsoleTarget { Layout = "${time} ${logger} ${message} ${exception:format=tostring}" };
 			var rule = new LoggingRule("*", LogLevel.Trace, target);
 
 			config.AddTarget("debugConsole", target);
