@@ -207,7 +207,9 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 			Debug.Assert(_debugger == null);
 
 			_debugger = _replay
-				? GetDebuggerInstance<DebugEngineInstance>()
+				? GetDebuggerInstance<DebuggerProxy<DebugEngineInstance>>()
+				//? GetDebuggerInstance<DebugEngineInstance>()
+				//: GetDebuggerInstance<DebuggerProxy<SystemDebuggerInstance>>();
 				: GetDebuggerInstance<SystemDebuggerInstance>();
 
 			if (!string.IsNullOrEmpty(CommandLine))

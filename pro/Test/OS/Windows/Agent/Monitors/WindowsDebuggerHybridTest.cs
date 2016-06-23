@@ -196,7 +196,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		[TestCase(true)]
 		[TestCase(false)]
-		[Timeout(10000)]
+		[Timeout(20000)]
 		public void TestExitEarlyFault2(bool replay)
 		{
 			// FaultOnEarlyExit faults when StartOnCall is used and stop message is not sent
