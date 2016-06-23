@@ -69,7 +69,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, true);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -133,7 +133,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, true);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -203,7 +203,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, true);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -254,7 +254,7 @@ namespace PitTester
 
 				Assert.That(() =>
 				{
-					PitTester.TestPit(tmpDir.Path, pitTest, true, null, true);
+					PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 				},
 					Throws.TypeOf<AggregateException>()
 						.With.InnerException.Message.StartsWith("Encountered an unhandled exception on iteration 1, seed ")
@@ -327,7 +327,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, false, null, true);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 500);
 			}
 		}
 
@@ -381,7 +381,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, false, null, true);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 500);
 			}
 		}
 
@@ -451,7 +451,7 @@ namespace PitTester
 				File.WriteAllText(pitTest, test);
 				File.WriteAllText(pitSample, "h1:foo|h2:bar|h1:baz|h2:qux|");
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, true);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -520,7 +520,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, false, null, false, 5);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 5);
 			}
 		}
 
@@ -580,7 +580,7 @@ namespace PitTester
 				File.WriteAllText(pitFile, xml);
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, false, null, false, 5);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 5);
 			}
 		}
 
@@ -673,7 +673,7 @@ SGVsbG8=
 				File.WriteAllText(pitTest, test);
 				File.WriteAllText(pitConfig, config);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, false, 1);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
 
@@ -735,7 +735,7 @@ SGVsbG8=
 				File.WriteAllText(pitFile, xml.Fmt(datasetFile));
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, false, 1);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
 
@@ -781,7 +781,7 @@ SGVsbG8=
 				File.WriteAllText(pitFile, xml.Fmt(datasetFile));
 				File.WriteAllText(pitTest, test);
 
-				PitTester.TestPit(tmpDir.Path, pitTest, true, null, false, 1);
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
 
@@ -833,7 +833,7 @@ SGVsbG8=
 
 				Assert.That(() =>
 				{
-					PitTester.TestPit(tmpDir.Path, pitTest, true, null, false, 1);
+					PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 				},
 					Throws.TypeOf<AggregateException>()
 						.With.InnerException.TypeOf<PeachException>()
@@ -887,7 +887,7 @@ SGVsbG8=
 
 				Assert.That(() =>
 				{
-					PitTester.TestPit(tmpDir.Path, pitTest, true, null, false, 1);
+					PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 				},
 					Throws.TypeOf<AggregateException>()
 						.With.InnerException.TypeOf<PeachException>()

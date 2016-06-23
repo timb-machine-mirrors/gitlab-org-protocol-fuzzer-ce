@@ -83,12 +83,12 @@ namespace Peach {
 	}
 
 	function applyWeights(weights: IPitWeight[], fields: IPitFieldNode[]) {
-		console.time('applyWeights');
+		// console.time('applyWeights');
 		for (const rule of weights) {
 			const parts = rule.id.split('.');
 			applyWeight(fields, parts, rule.weight);
 		}
-		console.timeEnd('applyWeights');
+		// console.timeEnd('applyWeights');
 	}
 
 	function applyWeight(fields: IPitFieldNode[], parts: string[], weight: number) {
@@ -165,7 +165,7 @@ namespace Peach {
 			this.$scope.MAX_NODES = MAX_NODES;
 			this.DelayedOnSearch = _.debounce(() => this.OnSearch(), DELAY);
 
-			console.time('load');
+			// console.time('load');
 			const promise = pitService.LoadPit();
 			promise.then((pit: IPit) => {
 				this.pit = pit;
@@ -175,30 +175,30 @@ namespace Peach {
 					this.$scope.hasData = true;
 				}
 				this.$scope.hasLoaded = true;
-				setTimeout(() => console.timeEnd('load'));
+				// setTimeout(() => console.timeEnd('load'));
 			});
 		}
 
 		init() {
-			console.time('clone');
+			// console.time('clone');
 			this.tree = cloneFields(this.pit.metadata.fields);
-			console.timeEnd('clone');
+			// console.timeEnd('clone');
 			applyWeights(this.pit.weights, this.tree);
 		
 			const result: Result = {
 				nodes: [],
 				total: 0
 			};
-			console.time('flatten');
+			// console.time('flatten');
 			flatten(this.tree, 0, '', null, result);
-			console.timeEnd('flatten');
+			// console.timeEnd('flatten');
 
 			this.source = result.nodes;
 			this.total = result.total;
 		}
 
 		update() {
-			console.time('update');
+			// console.time('update');
 
 			this.source.forEach(node => {
 				const parent = node.parent;
@@ -221,13 +221,13 @@ namespace Peach {
 			this.$scope.isTruncated = (visible.length > MAX_NODES);
 			this.$scope.flat = _.take(visible, MAX_NODES);
 
-			console.timeEnd('update');
+			// console.timeEnd('update');
 		
-			console.log('nodes', this.total, this.$scope.flat.length);
+			// console.log('nodes', this.total, this.$scope.flat.length);
 		}
 
 		search(search: string) {
-			console.time('search');
+			// console.time('search');
 
 			this.init();
 
@@ -282,7 +282,7 @@ namespace Peach {
 
 			this.source = _.filter(this.source, 'include');
 
-			console.timeEnd('search');
+			// console.timeEnd('search');
 		}
 
 		DelayedApply() {
@@ -357,10 +357,10 @@ namespace Peach {
 
 		OnSave(): void {
 			const weights = [];
-			console.time('extractWeights');
+			// console.time('extractWeights');
 			extractWeights('', this.tree, weights);
-			console.timeEnd('extractWeights');
-			console.log(weights.length);
+			// console.timeEnd('extractWeights');
+			// console.log(weights.length);
 
 			const promise = this.pitService.SaveWeights(weights);
 			promise.then(() => {

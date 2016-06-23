@@ -1,22 +1,6 @@
 ﻿/// <reference path="../reference.ts" />
 
 namespace Peach {
-	export interface IFaultFiles
-	{
-		// Is list of test i/o
-		TestData: IFaultFile[];
-
-		// Is list of Agents
-		// Children is List if Monitors
-		// Children[0].Children is files for a given monitor
-		GroupedMonitorAssets: IFaultFile[];
-
-		FlatMonitorAssets: IFaultFile[];
-
-		// Is list of test i/o
-		Other: IFaultFile[];
-	}
-
 	export interface IFaultDetailScope extends IFaultSummaryScope {
 		FaultDetailTitle: string;
 	}
@@ -44,78 +28,65 @@ namespace Peach {
 			const promise = jobService.LoadFaultDetail(id);
 			promise.then((detail: IFaultDetail) => {
 				this.Fault = detail;
-
-				this.Initial = {
-					TestData: [],
-					GroupedMonitorAssets: [],
-					FlatMonitorAssets: [],
-					Other: []
-				};
-
-				this.Files = {
-					TestData: [],
-					GroupedMonitorAssets: [],
-					FlatMonitorAssets: [],
-					Other: []
-				};
-
-				detail.files.forEach((f: IFaultFile) => {
-					if (f.initial)
-						this.doAddFile(this.Initial, f);
-					else
-						this.doAddFile(this.Files, f);
-				});
+				for (const file of detail.files) {
+					const assets = file.initial ? this.InitialAssets : this.Assets;
+					this.organizeFile(file, assets);
+				}
 			}, () => {
 				$state.go(C.States.MainHome);
 			});
 		}
 
 		public Fault: IFaultDetail;
-		public Files: IFaultFiles;
-		public Initial: IFaultFiles;
+		
+		public Assets: IFaultAssets = {
+			TestData: [],
+			MonitorAssets: [],
+			Other: []
+		};
+		
+		public InitialAssets: IFaultAssets = {
+			TestData: [],
+			MonitorAssets: [],
+			Other: []
+		};
 
-		private doAddFile(dst: IFaultFiles, f: IFaultFile) {
-			if (f.type === FaultFileType.Asset) {
-				if (_.isEmpty(f.agentName) || _.isEmpty(f.monitorClass) || _.isEmpty(f.monitorName)) {
-					dst.Other.push(f);
+		public HasInitialAssets: boolean = false;
 
-					if (f.initial)
-						f.displayName = f.name;
-					else
-						f.displayName = f.fullName;
+		organizeFile(file: IFaultFile, assets: IFaultAssets) {
+			if (assets === this.InitialAssets) {
+				this.HasInitialAssets = true;
+			}
+
+			if (file.type === FaultFileType.Asset) {
+				if (_.isEmpty(file.agentName) || _.isEmpty(file.monitorClass) || _.isEmpty(file.monitorName)) {
+					assets.Other.push(file);
 				} else {
-					let lastAgent = _.last(dst.GroupedMonitorAssets);
-					if (_.isUndefined(lastAgent) || lastAgent.agentName !== f.agentName) {
+					let lastAgent = _.last(assets.MonitorAssets);
+					if (_.isUndefined(lastAgent) || lastAgent.agentName !== file.agentName) {
 						lastAgent = {
-							agentName: f.agentName,
+							agentName: file.agentName,
 							children: []
 						}
 
-						dst.GroupedMonitorAssets.push(lastAgent);
+						assets.MonitorAssets.push(lastAgent);
 					}
 
 					let lastMonitor = _.last(lastAgent.children);
-					if (_.isUndefined(lastMonitor) || lastMonitor.monitorName !== f.monitorName) {
+					if (_.isUndefined(lastMonitor) || lastMonitor.monitorName !== file.monitorName) {
 						lastMonitor = {
-							monitorName: f.monitorName,
-							monitorClass: f.monitorClass,
+							monitorName: file.monitorName,
+							monitorClass: file.monitorClass,
 							children: []
 						}
 
 						lastAgent.children.push(lastMonitor);
 					}
 
-					lastMonitor.children.push(f);
-
-					dst.FlatMonitorAssets.push(f);
+					lastMonitor.children.push(file);
 				}
 			} else {
-				const idx = dst.TestData.push(f);
-
-				if (f.type === FaultFileType.Input)
-					f.displayName = "#" + idx.toString() + " - Rx - " + f.name;
-				else
-					f.displayName = "#" + idx.toString() + " - Tx - " + f.name;
+				assets.TestData.push(file);
 			}
 		}
 	}

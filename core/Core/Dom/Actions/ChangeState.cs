@@ -2,6 +2,7 @@ using System;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using System.Xml;
+using NLog;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -9,6 +10,8 @@ namespace Peach.Core.Dom.Actions
 	[Serializable]
 	public class ChangeState : Action
 	{
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		/// <summary>
 		/// Name of state to change to, type=ChangeState
 		/// </summary>

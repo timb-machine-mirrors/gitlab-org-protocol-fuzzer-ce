@@ -109,7 +109,6 @@ namespace PitTester
 			var local = il.DeclareLocal(typeof(uint?));
 			il.Emit(OpCodes.Ldstr, pitLibraryPath);
 			il.Emit(OpCodes.Ldstr, pitTestFile);
-			il.Emit(iterations == 1 ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
 			il.Emit(OpCodes.Ldloca, local);
 			il.Emit(OpCodes.Initobj, typeof(uint?));
 			il.Emit(OpCodes.Ldloc_0);
@@ -142,10 +141,9 @@ namespace PitTester
 		public static void TestPit(
 			string libraryPath,
 			string testPath,
-			bool singleIteration,
 			uint? seed,
 			bool keepGoing,
-			uint stop = 500)
+			uint stop)
 		{
 			if (!File.Exists(testPath))
 				throw new FileNotFoundException("Invalid PitTestPath", testPath);
@@ -170,7 +168,6 @@ namespace PitTester
 					testData,
 					libraryPath,
 					pitFile,
-					singleIteration,
 					seed,
 					keepGoing,
 					stop
@@ -187,13 +184,12 @@ namespace PitTester
 			TestData testData,
 			string libraryPath,
 			string pitFile,
-			bool singleIteration,
 			uint? seed,
 			bool keepGoing,
-			uint stop = 500)
+			uint stop)
 		{
 			if (testData.Tests.Any(x => x.SingleIteration))
-				singleIteration = true;
+				stop = 1;
 
 			var defs = PitDefines.ParseFile(pitFile + ".config", libraryPath).Evaluate();
 
@@ -258,7 +254,7 @@ namespace PitTester
 				for (var i = 0; i < test.publishers.Count; ++i)
 				{
 					var oldPub = test.publishers[i];
-					var newPub = new TestPublisher(logger, singleIteration) { Name = oldPub.Name };
+					var newPub = new TestPublisher(logger, stop == 1) { Name = oldPub.Name };
 					newPub.Error += err =>
 					{
 						var ex = new PeachException(err);
@@ -304,7 +300,7 @@ namespace PitTester
 				rangeStop = stop,
 				pitFile = Path.GetFileName(pitFile),
 				runName = "Default",
-				singleIteration = singleIteration
+				singleIteration = (stop == 1)
 			};
 
 			if (seed.HasValue)
@@ -405,14 +401,21 @@ namespace PitTester
 
 		public static void ProfilePit(string pitLibraryPath, string fileName)
 		{
-			var defs = PitDefines.ParseFile(fileName + ".config", pitLibraryPath).Evaluate();
+			var testData = TestData.Parse(fileName);
+			if (testData.Tests.Any(x => x.Skip))
+				Assert.Ignore("Skipping test: {0}", fileName);
+
+			var pitFile = Path.Combine(pitLibraryPath, testData.Pit);
+			Console.WriteLine("PitFile: {0}", pitFile);
+
+			var defs = PitDefines.ParseFile(pitFile + ".config", pitLibraryPath).Evaluate();
 
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
 			var parser = new PitParser();
 
-			var dom = parser.asParser(args, fileName);
+			var dom = parser.asParser(args, pitFile);
 
 			dom.context = new RunContext();
 

@@ -94,7 +94,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			++_startCount;
 
-			if (_rnd.Next() % Exception == 0)
+			if (Exception > 0 && _rnd.Next() % Exception == 0)
 				throw new SoftException("你好 from RandoFaulter.");
 		}
 

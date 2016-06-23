@@ -375,16 +375,19 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			foreach (var element in stateModel.TuningTraverse())
+			if (weights.Count > 0)
 			{
-				SelectWeight item;
-				if (weights.TryGetValue(element.Key, out item))
+				foreach (var element in stateModel.TuningTraverse())
 				{
-					element.Value.Weight = item.Weight;
-				}
-				else
-				{
-					Logger.Debug("Missing weight specification for: {0}", element.Key);
+					SelectWeight item;
+					if (weights.TryGetValue(element.Key, out item))
+					{
+						element.Value.Weight = item.Weight;
+					}
+					else
+					{
+						Logger.Trace("Missing weight specification for: {0}", element.Key);
+					}
 				}
 			}
 

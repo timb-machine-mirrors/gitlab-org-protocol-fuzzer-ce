@@ -206,6 +206,13 @@ namespace Peach.Core.Dom
 					continue;
 				}
 
+				var asCData = child as XmlCharacterData;
+				if (asCData != null && !asCData.mutationFlags.HasFlag(MutateOverride.TypeTransform))
+				{
+					asCData.GenXmlNode(doc, node);
+					continue;
+				}
+
 				var text = doc.CreateTextNode(ElemToStr(child));
 				node.AppendChild(text);
 			}
