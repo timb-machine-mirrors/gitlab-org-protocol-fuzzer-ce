@@ -53,7 +53,7 @@ namespace Peach.Core.Test
 		public void TestEfficiency()
 		{
 			const int MAX_SAMPLES = 2500;
-			const int MAX_LINES = 10000;
+			const int MAX_LINES = 1000;
 			const int MAX_UNIQUE = 10;
 			using (var tmpDir = new TempDirectory())
 			{

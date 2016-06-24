@@ -79,27 +79,12 @@ namespace Peach.Core.Test
 		protected List<string> iterStrategies = null;
 		protected List<string> allStrategies = null;
 		protected bool cloneActions = false;
-		private SingleInstance _si;
 
 		[SetUp]
 		public void SetUp()
 		{
-			// Ensure only 1 instance of this test runs at a time
-			_si = SingleInstance.CreateInstance(GetType().FullName);
-			_si.Lock();
-
 			cloneActions = false;
 			ResetContainers();
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			if (_si != null)
-			{
-				_si.Dispose();
-				_si = null;
-			}
 		}
 
 		protected void ResetContainers()

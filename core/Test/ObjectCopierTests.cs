@@ -376,8 +376,11 @@ namespace Peach.Core.Test
 		[Test]
 		public void LotsOfObjects2()
 		{
+			const int COUNT = 200000;
+			const int FACTOR = 10;
+
 			var list1 = new List<SimpleClass>();
-			for (var i = 0; i < 20000; ++i)
+			for (var i = 0; i < COUNT; ++i)
 				list1.Add(new ComplexClass() {member = i});
 
 			var sw = new Stopwatch();
@@ -390,7 +393,7 @@ namespace Peach.Core.Test
 			Assert.AreEqual(copy.Count, list1.Count);
 
 			var list2 = new List<SimpleClass>();
-			for (var i = 0; i < 2000000; ++i)
+			for (var i = 0; i < COUNT * FACTOR; ++i)
 				list2.Add(new ComplexClass() {member = i});
 
 			sw = new Stopwatch();
@@ -399,8 +402,15 @@ namespace Peach.Core.Test
 			sw.Stop();
 			Assert.NotNull(copy);
 			Assert.AreEqual(copy.Count, list2.Count);
-			var min = Math.Max(4000, list1Elaps * list1Elaps);
-			Assert.LessOrEqual(sw.ElapsedMilliseconds, min);
+
+			// ensure that copying FACTOR times more objects 
+			// does not take longer than 4 * FACTOR time
+			var max = list1Elaps * FACTOR * 4;
+			Console.WriteLine("Elapsed {0}: {1}", COUNT, list1Elaps);
+			Console.WriteLine("Elapsed {0}: {1}", COUNT * FACTOR, sw.ElapsedMilliseconds);
+			Console.WriteLine("Max Allowed: {0}", max);
+
+			Assert.LessOrEqual(sw.ElapsedMilliseconds, max);
 		}
 
 		bool VerifyField(FieldInfo field, Type type)
@@ -424,13 +434,17 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
-		[Ignore("Figure out why we are ignoring this!")]
+		[Ignore("This test is hard to get right!")]
 		public void EnsureSerializable()
 		{
+			// Challenges:
+			// 1) Recursive interface descent (i.e. Peach.Core.Dom.Data)
+			// 2) Generic type resolution (i.e. OwnedCollection<T>)
+			// maybe more...
 			var fails = (
 				from kv in ClassLoader.AssemblyCache
-				where kv.Value.GetName().FullName.StartsWith("Peach")
-				from type in kv.Value.GetTypes()
+				where kv.GetName().FullName.StartsWith("Peach")
+				from type in kv.GetTypes()
 				where type.IsSerializable
 				from field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 				where !VerifyField(field, field.FieldType)

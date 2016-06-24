@@ -41,7 +41,6 @@ namespace Peach.Core
 	/// strategy allows one to fully control which elements
 	/// are mutated, by which mutators, and when.
 	/// </summary>
-	[Serializable]
 	public abstract class MutationStrategy
 	{
 		protected MutationStrategy(Dictionary<string, Variant> args)

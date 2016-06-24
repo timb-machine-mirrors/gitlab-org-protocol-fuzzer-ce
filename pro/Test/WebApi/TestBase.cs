@@ -7,7 +7,6 @@ using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.License;
-using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2;
 
@@ -21,11 +20,7 @@ namespace Peach.Pro.Test.WebApi
 		{
 			DoSetUp();
 
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
+			ClassLoader.Initialize();
 		}
 
 		[OneTimeTearDown]

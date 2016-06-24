@@ -59,19 +59,13 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		void LoadAssemblies()
+		public void LoadAssemblies()
 		{
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			ClassLoader.LoadAssembly(Assembly.GetExecutingAssembly());
-
 			var path =
 				_pluginsPath ??
 				Utilities.GetUserConfig().AppSettings.Settings.Get("Plugins") ??
 				Utilities.GetAppResourcePath("Plugins");
-			ClassLoader.LoadPlugins(Path.GetFullPath(path));
+			ClassLoader.Initialize(Path.GetFullPath(path));
 		}
 
 		private static Version ParseMonoVersion(string str)

@@ -10,7 +10,10 @@ using NUnit.Framework;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Peach.Pro.Core.Runtime;
+using Peach.Core;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Core.Test
 {
@@ -189,12 +192,7 @@ namespace Peach.Core.Test
 		{
 			DoSetUp();
 
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			// we need this to make the SingleInstance work
-			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
+			ClassLoader.Initialize();
 		}
 
 		[OneTimeTearDown]

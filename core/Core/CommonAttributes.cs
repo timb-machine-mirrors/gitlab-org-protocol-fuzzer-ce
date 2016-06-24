@@ -1,8 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Peach.Core
 {
+	[AttributeUsage(AttributeTargets.Assembly)]
+	public class PluginAssemblyAttribute : Attribute
+	{
+	}
+
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public class ObsoleteParameterAttribute : Attribute
 	{

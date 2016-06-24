@@ -2,7 +2,9 @@
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
-using Peach.Pro.Core.Runtime;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Pro.Test.OS.OSX
 {
@@ -14,14 +16,7 @@ namespace Peach.Pro.Test.OS.OSX
 		{
 			DoSetUp();
 
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
-
-			// Peach.Pro.Test.OS.OSX.dll
-			ClassLoader.LoadAssembly(Assembly.GetExecutingAssembly());
+			ClassLoader.Initialize();
 		}
 
 		[OneTimeTearDown]
