@@ -85,7 +85,7 @@ namespace Peach.Core.Test
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget
+				var consoleTarget = new ColoredConsoleTarget
 				{
 					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message} ${exception:format=tostring}"
 				};
@@ -128,7 +128,10 @@ namespace Peach.Core.Test
 		public static void EnableDebug()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
+			var target = new ColoredConsoleTarget 
+			{ 
+				Layout = "${logger} ${message} ${exception:format=tostring}" 
+			};
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
 			config.AddTarget("debugConsole", target);

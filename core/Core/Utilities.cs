@@ -296,10 +296,10 @@ namespace Peach.Core
 					break;
 			}
 
-			var target = new ConsoleTarget
+			var target = new ColoredConsoleTarget
 			{
 				Layout = "${logger} ${message} ${exception:format=tostring}",
-				Error = true,
+				ErrorStream = true,
 			};
 
 			var rule = new LoggingRule("*", logLevel, target);

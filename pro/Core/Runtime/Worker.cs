@@ -90,10 +90,10 @@ namespace Peach.Pro.Core.Runtime
 		{
 			// Override logging so that we force messages to stderr instead of stdout
 
-			Target target = new ConsoleTarget
+			Target target = new ColoredConsoleTarget
 			{
 				Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}",
-				Error = true,
+				ErrorStream = true,
 			};
 
 			if (!syncLogging)
