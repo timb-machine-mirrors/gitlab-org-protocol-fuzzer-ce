@@ -281,11 +281,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual string UsageLine
 		{
-			get
-			{
-				var name = Assembly.GetEntryAssembly().GetName();
-				return "Usage: {0} [OPTION]...".Fmt(name.Name);
-			}
+			get { return "Usage: {0} [OPTION]...".Fmt(Utilities.ExecutableName); }
 		}
 
 		protected virtual string Synopsis
@@ -311,7 +307,7 @@ namespace Peach.Pro.Core.Runtime
 		protected virtual int ShowVersion(List<string> args)
 		{
 			var name = Assembly.GetEntryAssembly().GetName();
-			Console.WriteLine("{0}: Version {1}".Fmt(name.Name, name.Version));
+			Console.WriteLine("{0}: Version {1}".Fmt(Utilities.ExecutableName, name.Version));
 			return 0;
 		}
 
