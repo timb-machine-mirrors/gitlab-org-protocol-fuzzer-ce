@@ -130,10 +130,22 @@ namespace Peach.Core.Test
 			var config = LogManager.Configuration;
 			var target = new ColoredConsoleTarget 
 			{ 
-				Layout = "${logger} ${message} ${exception:format=tostring}" 
+				Layout = "${time} ${logger} ${message} ${exception:format=tostring}" 
 			};
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
+			config.AddTarget("debugConsole", target);
+			config.LoggingRules.Add(rule);
+
+			LogManager.Configuration = config;
+		}
+
+		public static void EnableTrace()
+		{
+			var config = LogManager.Configuration;
+			var target = new ConsoleTarget { Layout = "${time} ${logger} ${message} ${exception:format=tostring}" };
+			var rule = new LoggingRule("*", LogLevel.Trace, target);
+
 			config.AddTarget("debugConsole", target);
 			config.LoggingRules.Add(rule);
 
