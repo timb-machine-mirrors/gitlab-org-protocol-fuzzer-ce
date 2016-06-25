@@ -1,8 +1,13 @@
-﻿using System.Data.SQLite;
-using System;
+﻿using System;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core.Test;
+using Peach.Core;
+using Peach.Pro.Core.Storage;
+using Peach.Pro.Test.Core.Storage;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Linq;
 
 namespace Peach.Pro.Test.Core.Mutators
 {
@@ -11,11 +16,10 @@ namespace Peach.Pro.Test.Core.Mutators
 	[Quick]
 	class SampleNinjaMutatorTest : DataModelCollector
 	{
-
 		// 1. Create Ninja DB and verify
 		// 2. Run some mutations and verify no exceptions
 
-		byte [] ninjaSample1 = new byte[]{
+		byte[] ninjaSample1 = {
 			0x58, 0x02, 0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0x58,
 			0x02, 0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0x58, 0x02,
 			0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0xA0, 0x06, 0x50,
@@ -23,10 +27,10 @@ namespace Peach.Pro.Test.Core.Mutators
 			0x36, 0x30, 0x30, 0x2C, 0x22, 0x53, 0x74, 0x72, 0x22, 0x3A, 0x22, 0x50, 0x65, 0x61, 0x63, 0x68,
 			0x79, 0x22, 0x2C, 0x22, 0x42, 0x6C, 0x6F, 0x62, 0x22, 0x3A, 0x22, 0x51, 0x6D, 0x78, 0x76, 0x59,
 			0x6D, 0x4A, 0x35, 0x22, 0x2C, 0x22, 0x6E, 0x75, 0x6C, 0x6C, 0x22, 0x3A, 0x6E, 0x75, 0x6C, 0x6C,
-			0x2C, 0x22, 0x62, 0x6F, 0x6F, 0x6C, 0x22, 0x3A, 0x74, 0x72, 0x75, 0x65, 0x7D, 0x0A 
+			0x2C, 0x22, 0x62, 0x6F, 0x6F, 0x6C, 0x22, 0x3A, 0x74, 0x72, 0x75, 0x65, 0x7D, 0x0A
 		};
 
-		byte [] ninjaSample2 = new byte[]{
+		byte[] ninjaSample2 = {
 			0x57, 0x02, 0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0x58,
 			0x02, 0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0x58, 0x02,
 			0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0xA0, 0x06, 0x50,
@@ -34,10 +38,10 @@ namespace Peach.Pro.Test.Core.Mutators
 			0x36, 0x30, 0x30, 0x2C, 0x22, 0x53, 0x74, 0x72, 0x22, 0x3A, 0x22, 0x50, 0x65, 0x61, 0x63, 0x68,
 			0x79, 0x22, 0x2C, 0x22, 0x42, 0x6C, 0x6F, 0x62, 0x22, 0x3A, 0x22, 0x51, 0x6D, 0x78, 0x76, 0x59,
 			0x6D, 0x4A, 0x35, 0x22, 0x2C, 0x22, 0x6E, 0x75, 0x6C, 0x6C, 0x22, 0x3A, 0x6E, 0x75, 0x6C, 0x6C,
-			0x2C, 0x22, 0x62, 0x6F, 0x6F, 0x6C, 0x22, 0x3A, 0x74, 0x72, 0x75, 0x65, 0x7D, 0x0A 
+			0x2C, 0x22, 0x62, 0x6F, 0x6F, 0x6C, 0x22, 0x3A, 0x74, 0x72, 0x75, 0x65, 0x7D, 0x0A
 		};
 
-		byte[] ninjaSample3 = new byte[]{
+		byte[] ninjaSample3 = {
 			0x56, 0x02, 0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0x58,
 			0x02, 0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0x58, 0x02,
 			0x50, 0x65, 0x61, 0x63, 0x68, 0x79, 0x42, 0x6C, 0x6F, 0x62, 0x62, 0x79, 0x00, 0xA0, 0x06, 0x50,
@@ -45,19 +49,18 @@ namespace Peach.Pro.Test.Core.Mutators
 			0x36, 0x30, 0x30, 0x2C, 0x22, 0x53, 0x74, 0x72, 0x22, 0x3A, 0x22, 0x50, 0x65, 0x61, 0x63, 0x68,
 			0x79, 0x22, 0x2C, 0x22, 0x42, 0x6C, 0x6F, 0x62, 0x22, 0x3A, 0x22, 0x51, 0x6D, 0x78, 0x76, 0x59,
 			0x6D, 0x4A, 0x35, 0x22, 0x2C, 0x22, 0x6E, 0x75, 0x6C, 0x6C, 0x22, 0x3A, 0x6E, 0x75, 0x6C, 0x6C,
-			0x2C, 0x22, 0x62, 0x6F, 0x6F, 0x6C, 0x22, 0x3A, 0x74, 0x72, 0x75, 0x65, 0x7D, 0x0A 
+			0x2C, 0x22, 0x62, 0x6F, 0x6F, 0x6C, 0x22, 0x3A, 0x74, 0x72, 0x75, 0x65, 0x7D, 0x0A
 		};
 
 		string ninjaSampleXml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
-	<DataModel name='NinjaDm'>
-	
+	<DataModel name='Ninja'>
 		<Block name='Block' maxOccurs='-1'>
 			<Number name='Num16' size='16' value='600' />
 			<String name='Str' value='Peachy' token='true' />
 			<Blob name='Blob' value='Blobby' token='true' />
 			
-			<Flags name='Flgs' size='8'>
+			<Flags name='Flags' size='8'>
 				<Flag name='F1' size='1' position='1' />
 				<Flag name='F2' size='1' position='2' />
 			</Flags>
@@ -79,13 +82,12 @@ namespace Peach.Pro.Test.Core.Mutators
 		<String value='\n' token='true' />
 		
 		<Padding />
-
 	</DataModel>
 
 	<StateModel name='TheStateModel' initialState='initial'>
 		<State name='initial'>
 		  <Action type='output'>
-			<DataModel ref='NinjaDm'/>
+			<DataModel ref='Ninja'/>
 		  </Action>
 		</State>
 	</StateModel>
@@ -102,196 +104,147 @@ namespace Peach.Pro.Test.Core.Mutators
 ";
 
 		// Use this model to generate bin file.
-//		string ninjaSampleXmlGenerateBin = @"<?xml version='1.0' encoding='utf-8'?>
-//<Peach>
-//	<!-- Used to generate bin file -->
-//	<DataModel name='NinjaDmOut'>
-//	
-//		<Block name='Block' maxOccurs='-1'>
-//			<Number name='Num16' size='16' value='600' />
-//			<String name='Str' value='Peachy' token='true' />
-//			<Blob name='Blob' value='Blobby' token='true' />
-//			
-//			<Flags name='Flgs' size='8'>
-//				<Flag name='F1' size='1' position='1' />
-//				<Flag name='F2' size='1' position='2' />
-//			</Flags>
-//		</Block>
-//		
-//		<Asn1Type class='2' pc='1' tag='0' name='terminationID'>
-//			<String name='Value' value='Peachy'/>
-//		</Asn1Type>
-//		
-//		<Choice name='Choice'>
-//			<Number name='Num6' size='16' value='600' token='true' />
-//			<Number name='Num7' size='16' value='700' token='true' />
-//		</Choice>
-//
-//		<Json name='JsonTest'>
-//			<Number name='Num16' size='16' value='600' />
-//			<String name='Str' value='Peachy' />
-//			<Blob name='Blob' value='Blobby' />
-//			<Null name='null'/>
-//			<Bool name='bool' value='1'/>
-//		</Json>
-//		
-//		<String value='\n' token='true' />
-//		
-//		<Padding />
-//
-//	</DataModel>
-//
-//	<StateModel name='TheStateModel' initialState='initial'>
-//		<State name='initial'>
-//		  <Action type='output'>
-//			<DataModel ref='NinjaDm'/>
-//   			<Data>
-//				<Field name='Block[0]' value='' />
-//				<Field name='Block[1]' value='' />
-//				<Field name='Block[2]' value='' />
-//			</Data>
-//		  </Action>
-//		</State>
-//	</StateModel>
-//
-//	<Test name='Default' maxOutputSize='200'>
-//		<StateModel ref='TheStateModel'/>
-//		<Publisher class='File'>
-//			<Param name='FileName' value='ninja.bin' />
-//		</Publisher>
-//	</Test>
-//</Peach>
-//";
-		string tmpPath;
-		string pitFile;
-		string pitSamplePath;
-		string pitSample1File;
-		string pitSample2File;
-		string pitSample3File;
-		string ninjaDbFile;
+		//		string ninjaSampleXmlGenerateBin = @"<?xml version='1.0' encoding='utf-8'?>
+		//<Peach>
+		//	<!-- Used to generate bin file -->
+		//	<DataModel name='NinjaOut'>
+		//	
+		//		<Block name='Block' maxOccurs='-1'>
+		//			<Number name='Num16' size='16' value='600' />
+		//			<String name='Str' value='Peachy' token='true' />
+		//			<Blob name='Blob' value='Blobby' token='true' />
+		//			
+		//			<Flags name='Flags' size='8'>
+		//				<Flag name='F1' size='1' position='1' />
+		//				<Flag name='F2' size='1' position='2' />
+		//			</Flags>
+		//		</Block>
+		//		
+		//		<Asn1Type class='2' pc='1' tag='0' name='terminationID'>
+		//			<String name='Value' value='Peachy'/>
+		//		</Asn1Type>
+		//		
+		//		<Choice name='Choice'>
+		//			<Number name='Num6' size='16' value='600' token='true' />
+		//			<Number name='Num7' size='16' value='700' token='true' />
+		//		</Choice>
+		//
+		//		<Json name='JsonTest'>
+		//			<Number name='Num16' size='16' value='600' />
+		//			<String name='Str' value='Peachy' />
+		//			<Blob name='Blob' value='Blobby' />
+		//			<Null name='null'/>
+		//			<Bool name='bool' value='1'/>
+		//		</Json>
+		//		
+		//		<String value='\n' token='true' />
+		//		
+		//		<Padding />
+		//
+		//	</DataModel>
+		//
+		//	<StateModel name='TheStateModel' initialState='initial'>
+		//		<State name='initial'>
+		//		  <Action type='output'>
+		//			<DataModel ref='Ninja'/>
+		//   			<Data>
+		//				<Field name='Block[0]' value='' />
+		//				<Field name='Block[1]' value='' />
+		//				<Field name='Block[2]' value='' />
+		//			</Data>
+		//		  </Action>
+		//		</State>
+		//	</StateModel>
+		//
+		//	<Test name='Default' maxOutputSize='200'>
+		//		<StateModel ref='TheStateModel'/>
+		//		<Publisher class='File'>
+		//			<Param name='FileName' value='ninja.bin' />
+		//		</Publisher>
+		//	</Test>
+		//</Peach>
+		//";
+		string _pitFile;
+		string _dbPath;
+		List<Sample> _samples;
+
+		TempDirectory _tmpDir;
 
 		[SetUp]
-		public void BuildNinjaDatabase()
+		public void ThisSetUp()
 		{
-			tmpPath = Path.GetTempFileName();
-			pitFile = Path.Combine(tmpPath, "ninja.xml");
-			pitSamplePath = Path.Combine(tmpPath, "samples");
-			pitSample1File = Path.Combine(pitSamplePath, "ninja1.bin");
-			pitSample2File = Path.Combine(pitSamplePath, "ninja2.bin");
-			pitSample3File = Path.Combine(pitSamplePath, "ninja3.bin");
-			ninjaDbFile = pitFile + ".ninja";
+			_tmpDir = new TempDirectory();
 
-			try
+			_pitFile = Path.Combine(_tmpDir.Path, "ninja.xml");
+			File.WriteAllText(_pitFile, ninjaSampleXml);
+
+			var samplesPath = Path.Combine(_tmpDir.Path, "samples");
+			Directory.CreateDirectory(samplesPath);
+
+			_samples = new List<Sample>
 			{
-				File.Delete(tmpPath);
-				Directory.CreateDirectory(tmpPath);
-				Directory.CreateDirectory(pitSamplePath);
+				MakeSample(1, samplesPath, ninjaSample1),
+				MakeSample(2, samplesPath, ninjaSample2),
+				MakeSample(3, samplesPath, ninjaSample3),
+			};
 
-				File.WriteAllText(pitFile, ninjaSampleXml);
-				File.WriteAllBytes(pitSample1File, ninjaSample1);
-				File.WriteAllBytes(pitSample2File, ninjaSample2);
-				File.WriteAllBytes(pitSample3File, ninjaSample3);
+			_dbPath = SampleNinjaDatabase.Create(_tmpDir.Path, _pitFile, "Ninja", samplesPath);
+		}
 
-				PeachSampleNinja.Program.Main(new[] { pitFile, "NinjaDm", pitSamplePath });
-
-				Assert.IsTrue(File.Exists(ninjaDbFile));
-			}
-			catch
-			{
-				if (Directory.Exists(tmpPath))
-					Directory.Delete(tmpPath, true);
-				if (File.Exists(tmpPath))
-					File.Delete(tmpPath);
-
-				throw;
-			}
+		Sample MakeSample(ulong id, string dir, byte[] buf)
+		{
+			var name = "ninja{0}.bin".Fmt(id + 1);
+			var path = Path.Combine(dir, name);
+			File.WriteAllBytes(path, buf);
+			var hash = SHA1.Create().ComputeHash(buf);
+			return new Sample(id, path, hash);
 		}
 
 		[TearDown]
-		public void DeleteNinjaDatabase()
+		public void TearDown()
 		{
-			GC.Collect();
-			GC.WaitForPendingFinalizers();
-
-			if (Directory.Exists(tmpPath))
-				Directory.Delete(tmpPath, true);
-			if (File.Exists(tmpPath))
-				File.Delete(tmpPath);
+			_tmpDir.Dispose();
 		}
 
 		[Test]
 		public void VerifyNinjaDatabase()
 		{
-			using (var Connection = new SQLiteConnection("data source=" + ninjaDbFile))
+			using (var db = new SampleNinjaDatabase(_dbPath))
 			{
-				Connection.Open();
+				DatabaseTests.AssertResult(db.LoadTable<Sample>(), _samples);
 
-				Guid definitionId;
+				DatabaseTests.AssertResult(db.LoadTable<Element>(), new[] {
+					new Element { ElementId = 1, Name = "Ninja" },
+					new Element { ElementId = 2, Name = "Block" },
+					new Element { ElementId = 3, Name = "Num16" },
+					new Element { ElementId = 4, Name = "Str" },
+					new Element { ElementId = 5, Name = "Blob" },
+					new Element { ElementId = 6, Name = "Flags" },
+					new Element { ElementId = 7, Name = "F1" },
+					new Element { ElementId = 8, Name = "F2" },
+					new Element { ElementId = 9, Name = "terminationID" },
+					new Element { ElementId = 10, Name = "class" },
+					new Element { ElementId = 11, Name = "pc" },
+					new Element { ElementId = 12, Name = "tag" },
+					new Element { ElementId = 13, Name = "length" },
+					new Element { ElementId = 14, Name = "Value" },
+					new Element { ElementId = 15, Name = "Choice" },
+					new Element { ElementId = 16, Name = "Num6" },
+					new Element { ElementId = 17, Name = "JsonTest" },
+					new Element { ElementId = 18, Name = "null" },
+					new Element { ElementId = 19, Name = "bool" },
+					new Element { ElementId = 20, Name = "DataElement_0" },
+					new Element { ElementId = 21, Name = "DataElement_1" },
+				});
 
-				using (var cmd = new SQLiteCommand(Connection))
-				{
-					cmd.CommandText = @"select definitionid, name from definition";
-
-					using (var reader = cmd.ExecuteReader())
-					{
-						Assert.True(reader.Read());
-						definitionId = reader.GetGuid(0);
-						Assert.AreEqual("ninja.xml", reader.GetString(1));
-						Assert.False(reader.Read());
-					}
-				}
-
-				using (var cmd = new SQLiteCommand(Connection))
-				{
-					cmd.CommandText = @"select count('x') from element";
-
-					using (var reader = cmd.ExecuteReader())
-					{
-						Assert.True(reader.Read());
-						Assert.AreEqual(21, reader.GetInt32(0));
-					}
-				}
-
-				using (var cmd = new SQLiteCommand(Connection))
-				{
-					cmd.CommandText = @"select sampleid, file from sample where definitionid = ?";
-					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
-					cmd.Parameters[0].Value = definitionId;
-
-					using (var reader = cmd.ExecuteReader())
-					{
-						var sampleCount = 0;
-						while (reader.Read())
-						{
-							sampleCount++;
-
-							var sampleId = reader.GetGuid(0);
-							Assert.AreEqual("ninja" + sampleCount + ".bin", reader.GetString(1));
-
-							using (var cmd2 = new SQLiteCommand(Connection))
-							{
-								cmd2.CommandText = @"select count('x') from sampleelement where sampleid = ?";
-								cmd2.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
-								cmd2.Parameters[0].Value = sampleId;
-
-								using (var reader2 = cmd2.ExecuteReader())
-								{
-									Assert.IsTrue(reader2.Read());
-									Assert.AreEqual(39, reader2.GetInt32(0));
-								}
-							}
-						}
-
-						Assert.AreEqual(3, sampleCount);
-					}
-				}
+				Assert.AreEqual(117, db.LoadTable<SampleElement>().Count());
 			}
 		}
 
 		[Test]
 		public void TestMutations()
 		{
-			RunEngine(ninjaSampleXml, pitFile);
+			RunEngine(ninjaSampleXml, _pitFile);
 			Assert.AreEqual(123, mutatedDataModels.Count);
 		}
 	}

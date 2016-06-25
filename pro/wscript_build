@@ -8,7 +8,6 @@ subdirs = [
 	'NetworkFuzzer',
 	'OS/UnixTrampoline',
 	'Peach',
-	'SampleNinja',
 	'Service',
 	'SDK',
 	'Test/Apps/AsanTest',

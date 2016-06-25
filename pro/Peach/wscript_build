@@ -83,7 +83,7 @@ peach_pro = common + [
 	# Helper Programs
 	'PeachValidator.exe',
 	'PeachMinset.exe',
-	'PeachSampleNinja.exe',
+	'pitc.exe',
 
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
@@ -106,7 +106,6 @@ internal = common + [
 	'Peach.Pro.Test.OS.OSX.dll',
 	'Peach.Pro.Test.OS.Windows.dll',
 	'Peach.Pro.Test.WebApi.exe',
-	'pitc.exe',
 	'PitTester.exe',
 	'UseAfterFree',
 ]

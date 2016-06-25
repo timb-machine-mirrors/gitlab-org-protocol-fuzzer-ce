@@ -612,8 +612,7 @@ namespace PitTester
 			var dom = pitc.Parse(false, false);
 
 			Console.WriteLine("Looking for data model: '{0}'", dataModelName);
-			var dm = FindDataModel(dom, dataModelName);
-
+			var dm = dom.getRef(dataModelName, x => x.dataModels);
 			if (dm == null)
 				throw new PeachException("Data model not found: '{0}'".Fmt(dataModelName));
 
@@ -650,25 +649,6 @@ namespace PitTester
 					Console.WriteLine("{0}-{1} {2} '{3}' {4}", prefix, sep, item.elementType, item.Name, valuePart);
 				}
 			}
-		}
-
-		private static DataModel FindDataModel(Peach.Core.Dom.Dom dom, string dataModelName)
-		{
-			foreach (var dm in dom.dataModels)
-			{
-				var name = "{0}:{1}".Fmt(dom.Name, dm.Name);
-				if (name == dataModelName)
-					return dm;
-			}
-
-			foreach (var ns in dom.ns)
-			{
-				var dm = FindDataModel(ns, dataModelName);
-				if (dm != null)
-					return dm;
-			}
-
-			return null;
 		}
 	}
 }

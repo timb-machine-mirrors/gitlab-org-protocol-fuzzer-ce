@@ -68,6 +68,16 @@ namespace Peach.Pro.Core.Runtime
 			ClassLoader.Initialize(Path.GetFullPath(path));
 		}
 
+		/// <summary>
+		/// This is a hack so that other assemblies can ensure
+		/// that Peach.Pro is actually loaded before 
+		/// calling Initialize() on the ClassLoader
+		/// </summary>
+		public static void Initialize()
+		{
+			ClassLoader.Initialize();
+		}
+
 		private static Version ParseMonoVersion(string str)
 		{
 			// Example version string:
