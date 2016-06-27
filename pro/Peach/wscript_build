@@ -53,12 +53,8 @@ common = [
 	# Peach
 	'Peach.exe',
 	'Peach.Pro.Web',
+	'pitc.exe',
 
-	# Peach Platform Suppoort
-	'Peach.Pro.OS.Windows.dll',
-	'Peach.Pro.OS.Linux.dll',
-	'Peach.Pro.OS.OSX.dll',
-	
 	# Include sample programs so sample pits work
 	'SimpleHttpServer',
 	'CrashableServer',
@@ -71,7 +67,6 @@ common = [
 
 	# Windows side-process helpers
 	'Peach.Pro.ComContainer.exe',
-	'Peach.Pro.WindowsDebugInstance.exe',
 
 	'VMware-VIX',        # VMWare VIX API
 	'CrashWrangler',
@@ -83,7 +78,6 @@ peach_pro = common + [
 	# Helper Programs
 	'PeachValidator.exe',
 	'PeachMinset.exe',
-	'pitc.exe',
 
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
