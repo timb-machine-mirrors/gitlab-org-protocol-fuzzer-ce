@@ -6,6 +6,7 @@ subdirs = [
 	'Core',
 	'LinuxCrashHandler',
 	'NetworkFuzzer',
+	'Nustache.Core.dll',
 	'OS/UnixTrampoline',
 	'Peach',
 	'Service',
