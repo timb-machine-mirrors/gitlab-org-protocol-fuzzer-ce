@@ -102,7 +102,7 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			_loggingConfig = LogManager.Configuration;
 
-			var target = new ConsoleTarget
+			var target = new ColoredConsoleTarget
 			{
 				Layout = "${time} ${logger} ${message} ${exception:format=tostring}"
 			};

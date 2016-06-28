@@ -1,31 +1,281 @@
-﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using NLog;
+using Peach.Core;
+using Peach.Core.Agent;
+using Peach.Pro.Core.OS.Windows.Debugger;
+using Peach.Pro.OS.Windows.Agent.Monitors;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
+namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
+{
+	[Monitor("WindowsDebugger")]
+	[Alias("WindowsDebuggerHybrid")]
+	[Alias("WindowsDebugEngine")]
+	[Alias("debugger.WindowsDebugEngine")]
+	[Description("Controls a Windows debugger instance")]
+	[Parameter("Executable", typeof(string), "Executable to launch", "")]
+	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
+	[Parameter("ProcessName", typeof(string), "Name of process to attach too.", "")]
+	[Parameter("Service", typeof(string), "Name of Windows Service to attach to.  Service will be started if stopped or crashes.", "")]
+	[Parameter("SymbolsPath", typeof(string), "Optional Symbol path.  Default is Microsoft public symbols server.", "SRV*http://msdl.microsoft.com/download/symbols")]
+	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
+	[Parameter("StartOnCall", typeof(string), "Indicate the debugger should wait to start or attach to process until notified by state machine.", "")]
+	[Parameter("IgnoreFirstChanceGuardPage", typeof(bool), "Ignore first chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
+	[Parameter("IgnoreSecondChanceGuardPage", typeof(bool), "Ignore second chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
+	[Parameter("NoCpuKill", typeof(bool), "Don't use process CPU usage to terminate early.", "false")]
+	[Parameter("CpuPollInterval", typeof(uint), "How often to poll for idle CPU in milliseconds.", "200")]
+	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists (defaults to false)", "false")]
+	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
+	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
+	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("ServiceStartTimeout", typeof(int), "How many seconds to wait for target windows service to start", "60")]
+	public class WindowsDebuggerHybrid : Monitor2
+	{
+		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-// $Id$
+		public string CommandLine { get; set; }
+		public string Executable { get; set; }
+		public string Arguments { get; set; }
+		public string ProcessName { get; set; }
+		public string Service { get; set; }
+		public string SymbolsPath { get; set; }
+		public string WinDbgPath { get; set; }
+		public string StartOnCall { get; set; }
+		public bool IgnoreFirstChanceGuardPage { get; set; }
+		public bool IgnoreSecondChanceGuardPage { get; set; }
+		public bool NoCpuKill { get; set; }
+		public uint CpuPollInterval { get; set; }
+		public bool FaultOnEarlyExit { get; set; }
+		public string WaitForExitOnCall { get; set; }
+		public int WaitForExitTimeout { get; set; }
+		public bool RestartOnEachTest { get; set; }
+		public bool RestartAfterFault { get; set; }
+		public int ServiceStartTimeout { get; set; }
 
+		private IDebuggerInstance _debugger;
+		private bool _replay;
+		private bool _stopMessage;
+		private bool _exitEarly;
+		private bool _exitTimeout;
+		private MonitorData _fault;
+
+		public WindowsDebuggerHybrid(string name)
+			: base(name)
+		{
+		}
+
+		public override void StartMonitor(Dictionary<string, string> args)
+		{
+			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
+				throw new PeachException("Error: Cannot use the 32bit version of Peach on a 64bit operating system.");
+
+			if (Environment.Is64BitProcess && !Environment.Is64BitOperatingSystem)
+				throw new PeachException("Error: Cannot use the 64bit version of Peach on a 32bit operating system.");
+
+			base.StartMonitor(args);
+
+			ParameterParser.EnsureOne(this, "Executable", "ProcessName", "Service");
+
+			if (!string.IsNullOrEmpty(Executable) && !string.IsNullOrEmpty(Arguments))
+				CommandLine = Executable + " " + Arguments;
+			else
+				CommandLine = Executable;
+
+			WinDbgPath = WindowsKernelDebugger.FindWinDbg(WinDbgPath);
+
+		}
+
+		public override void SessionStarting()
+		{
+			if (StartOnCall == null && !RestartOnEachTest)
+				_StartDebugger();
+		}
+
+		public override void SessionFinished()
+		{
+			if (_debugger != null)
+				_StopDebugger();
+		}
+
+		public override void IterationStarting(IterationStartingArgs args)
+		{
+			_stopMessage = false;
+			_exitEarly = false;
+			_exitTimeout = false;
+			_replay = args.IsReproduction;
+
+			if (_debugger != null)
+			{
+				if ((RestartAfterFault && args.LastWasFault) || !_debugger.IsRunning)
+					_StopDebugger();
+			}
+
+			if (StartOnCall == null && _debugger == null)
+				_StartDebugger();
+		}
+
+		public override void IterationFinished()
+		{
+			if (_debugger == null)
+				return;
+
+			if (!_stopMessage && FaultOnEarlyExit && !_debugger.IsRunning)
+			{
+				_exitEarly = true;
+			}
+			else if (StartOnCall != null)
+			{
+				if (NoCpuKill)
+					_exitTimeout = !_debugger.WaitForExit(WaitForExitTimeout);
+				else
+					_debugger.WaitForIdle(WaitForExitTimeout, CpuPollInterval);
+			}
+			else if (RestartOnEachTest)
+			{
+				_debugger.WaitForExit(0);
+			}
+		}
+
+		public override void Message(string msg)
+		{
+			if (msg == StartOnCall)
+			{
+				if (_debugger != null)
+					_StopDebugger();
+
+				_StartDebugger();
+			}
+			else if (msg == WaitForExitOnCall)
+			{
+				_stopMessage = true;
+				_exitTimeout = !_debugger.WaitForExit(WaitForExitTimeout);
+			}
+		}
+
+		public override bool DetectedFault()
+		{
+			Logger.Debug("DetectedFault()");
+
+			_fault = null;
+
+			if (_debugger != null)
+			{
+				Logger.Debug("DetectedFault - Using {0}, checking for fault", _debugger.Name);
+
+				if (_debugger.DetectedFault)
+				{
+					Logger.Debug("DetectedFault - Caught fault with {0}", _debugger.Name);
+					return true;
+				}
+			}
+
+			if (_exitEarly)
+			{
+				Logger.Debug("DetectedFault() - Fault detected, process exited early");
+				_fault = GetGeneralFault("ExitedEarly", "Process exited early.");
+			}
+			else if (_exitTimeout)
+			{
+				Logger.Debug("DetectedFault() - Fault detected, timed out waiting for process to exit");
+				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms.");
+			}
+
+			if (_replay && _debugger != null)
+				_StopDebugger();
+
+			if (_fault != null)
+				return true;
+
+			Logger.Debug("DetectedFault() - No fault detected");
+			return false;
+		}
+
+		public override MonitorData GetMonitorData()
+		{
+			if (_debugger != null && _debugger.DetectedFault)
+				_fault = _debugger.Fault;
+
+			return _fault;
+		}
+
+		private void _StartDebugger()
+		{
+			Debug.Assert(_debugger == null);
+
+			_debugger = _replay
+				? GetDebuggerInstance<DebuggerProxy<DebugEngineInstance>>()
+				//? GetDebuggerInstance<DebugEngineInstance>()
+				//: GetDebuggerInstance<DebuggerProxy<SystemDebuggerInstance>>();
+				: GetDebuggerInstance<SystemDebuggerInstance>();
+
+			if (!string.IsNullOrEmpty(CommandLine))
+				_debugger.StartProcess(CommandLine);
+			else if (!string.IsNullOrEmpty(ProcessName))
+				_debugger.AttachProcess(ProcessName);
+			else if (!string.IsNullOrEmpty(Service))
+				_debugger.StartService(Service, TimeSpan.FromSeconds(ServiceStartTimeout));
+			else
+				throw new NotSupportedException();
+
+			OnInternalEvent(EventArgs.Empty);
+		}
+
+		private void _StopDebugger()
+		{
+			Debug.Assert(_debugger != null);
+
+			_debugger.Dispose();
+			_debugger = null;
+		}
+
+		private IDebuggerInstance GetDebuggerInstance<T>() where T : class, IDebuggerInstance, new()
+		{
+			return new T
+			{
+				IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage,
+				IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage,
+				WinDbgPath = WinDbgPath,
+				SymbolsPath = SymbolsPath
+			};
+		}
+
+		private MonitorData GetGeneralFault(string type, string reason)
+		{
+			var title = string.Empty;
+
+			if (ProcessName != null)
+				title = ProcessName;
+			else if (Executable != null)
+				title = Executable;
+			else if (Service != null)
+				title = Service;
+
+			var desc = reason + ": " + title;
+
+			var fault = new MonitorData
+			{
+				DetectionSource = _debugger.Name,
+				Title = reason,
+				Data = new Dictionary<string, Stream>(),
+				Fault = new MonitorData.Info
+				{
+					Description = desc,
+					MajorHash = Hash(Class + title),
+					MinorHash = Hash(type),
+				}
+			};
+
+			return fault;
+		}
+
+	}
+}
+
+#if DISABLED
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,6 +287,7 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
+using Peach.Pro.OS.Windows.Debuggers;
 using Monitor = Peach.Core.Agent.Monitor2;
 using Random = Peach.Core.Random;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
@@ -98,7 +349,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		MonitorData _fault = null;
 
 		DebuggerInstance _debugger = null;
-		SystemDebuggerInstance _systemDebugger = null;
+		IDebuggerInstance _systemDebugger = null;
 		Thread _ipcHeartBeatThread = null;
 		System.Threading.Mutex _ipcHeartBeatMutex = null;
 
@@ -109,8 +360,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 		public override void StartMonitor(Dictionary<string, string> args)
 		{
-			// TODO: base.StartMonitor(args)
-
 			//var color = Console.ForegroundColor;
 			if (!Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
 			{
@@ -367,13 +616,16 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 
 			_fault = null;
 
-			if (_systemDebugger != null && _systemDebugger.caughtException)
+			if (_systemDebugger != null)
 			{
-				logger.Debug("DetectedFault - Using system debugger, caught exception");
-				_fault = GetDebuggerFault(_systemDebugger.crashInfo);
+				_fault = _systemDebugger.Fault;
 
-				_systemDebugger.StopDebugger();
-				_systemDebugger = null;
+				if (_fault != null)
+				{
+					logger.Debug("DetectedFault - Using system debugger, caught exception");
+					_systemDebugger.Stop();
+					_systemDebugger = null;
+				}
 			}
 			else if (_debugger != null && _hybrid)
 			{
@@ -540,20 +792,14 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			if (_systemDebugger == null || !_systemDebugger.IsRunning)
 			{
 				if (_systemDebugger == null)
-				{
 					_systemDebugger = new SystemDebuggerInstance();
 
-					_systemDebugger.commandLine = _commandLine;
-					_systemDebugger.processName = _processName;
-					_systemDebugger.service = _service;
-					_systemDebugger.serviceStartTimeout = _serviceStartTimeout;
-					_systemDebugger.ignoreFirstChanceGuardPage = _ignoreFirstChanceGuardPage;
-					_systemDebugger.ignoreSecondChanceGuardPage = _ignoreSecondChanceGuardPage;
-					_systemDebugger.noCpuKill = _noCpuKill;
-				}
-
-				_systemDebugger.StopDebugger();
-				_systemDebugger.StartDebugger();
+				if (!string.IsNullOrEmpty(_commandLine))
+					_systemDebugger.StartProcess(_commandLine);
+				else if (!string.IsNullOrEmpty(_service))
+					_systemDebugger.StartService(_service, TimeSpan.FromSeconds(_serviceStartTimeout));
+				else
+					_systemDebugger.AttachProcess(_processName);
 
 				OnInternalEvent(EventArgs.Empty);
 			}
@@ -779,7 +1025,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				try
 				{
-					_systemDebugger.FinishDebugging();
+					_systemDebugger.Stop();
 				}
 				catch
 				{
@@ -836,7 +1082,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 			{
 				try
 				{
-					_systemDebugger.StopDebugger();
+					_systemDebugger.Stop();
 				}
 				catch
 				{
@@ -918,5 +1164,6 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 		}
 	}
 }
+#endif
 
 // end

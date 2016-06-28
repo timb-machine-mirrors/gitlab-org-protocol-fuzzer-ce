@@ -10,7 +10,10 @@ using NUnit.Framework;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Peach.Pro.Core.Runtime;
+using Peach.Core;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Core.Test
 {
@@ -82,7 +85,7 @@ namespace Peach.Core.Test
 
 			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
 			{
-				var consoleTarget = new ConsoleTarget
+				var consoleTarget = new ColoredConsoleTarget
 				{
 					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message} ${exception:format=tostring}"
 				};
@@ -125,9 +128,24 @@ namespace Peach.Core.Test
 		public static void EnableDebug()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
+			var target = new ColoredConsoleTarget 
+			{ 
+				Layout = "${time} ${logger} ${message} ${exception:format=tostring}" 
+			};
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
+			config.AddTarget("debugConsole", target);
+			config.LoggingRules.Add(rule);
+
+			LogManager.Configuration = config;
+		}
+
+		public static void EnableTrace()
+		{
+			var config = LogManager.Configuration;
+			var target = new ConsoleTarget { Layout = "${time} ${logger} ${message} ${exception:format=tostring}" };
+			var rule = new LoggingRule("*", LogLevel.Trace, target);
+
 			config.AddTarget("debugConsole", target);
 			config.LoggingRules.Add(rule);
 
@@ -189,12 +207,7 @@ namespace Peach.Core.Test
 		{
 			DoSetUp();
 
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			// we need this to make the SingleInstance work
-			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
+			ClassLoader.Initialize();
 		}
 
 		[OneTimeTearDown]

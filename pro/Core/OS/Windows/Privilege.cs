@@ -2,37 +2,36 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using Peach.Pro.OS.Windows.Debuggers.WindowsSystem;
 
-namespace Peach.Pro.OS.Windows
+namespace Peach.Pro.Core.OS.Windows
 {
 	public class Privilege : IDisposable
 	{
 		public static string SeDebugPrivilege = "SeDebugPrivilege";
 
 		private IntPtr hToken;
-		private string name;
+		private readonly string name;
 
 		public Privilege(string name)
 		{
 			this.name = name;
 
-			IntPtr hThread = UnsafeMethods.GetCurrentThread();
+			IntPtr hThread = Interop.GetCurrentThread();
 
-			if (!UnsafeMethods.OpenThreadToken(hThread, UnsafeMethods.TOKEN_ADJUST_PRIVILEGES | UnsafeMethods.TOKEN_QUERY, false, out hToken))
+			if (!Interop.OpenThreadToken(hThread, Interop.TOKEN_ADJUST_PRIVILEGES | Interop.TOKEN_QUERY, false, out hToken))
 			{
 				int error = Marshal.GetLastWin32Error();
 
-				if (error != UnsafeMethods.ERROR_NO_TOKEN)
+				if (error != Interop.ERROR_NO_TOKEN)
 					throw new Win32Exception(error);
 
-				if (!UnsafeMethods.ImpersonateSelf(UnsafeMethods.SECURITY_IMPERSONATION_LEVEL.SecurityImpersonation))
+				if (!Interop.ImpersonateSelf(Interop.SECURITY_IMPERSONATION_LEVEL.SecurityImpersonation))
 				{
 					error = Marshal.GetLastWin32Error();
 					throw new Win32Exception(error);
 				}
 
-				if (!UnsafeMethods.OpenThreadToken(hThread, UnsafeMethods.TOKEN_ADJUST_PRIVILEGES | UnsafeMethods.TOKEN_QUERY, false, out hToken))
+				if (!Interop.OpenThreadToken(hThread, Interop.TOKEN_ADJUST_PRIVILEGES | Interop.TOKEN_QUERY, false, out hToken))
 				{
 					error = Marshal.GetLastWin32Error();
 					throw new Win32Exception(error);
@@ -42,7 +41,7 @@ namespace Peach.Pro.OS.Windows
 			if (!SetPrivilege(true))
 			{
 				int error = Marshal.GetLastWin32Error();
-				UnsafeMethods.CloseHandle(hToken);
+				Interop.CloseHandle(hToken);
 				hToken = IntPtr.Zero;
 				throw new Win32Exception(error);
 			}
@@ -74,31 +73,31 @@ namespace Peach.Pro.OS.Windows
 			if (IntPtr.Zero != hToken)
 			{
 				SetPrivilege(false);
-				UnsafeMethods.CloseHandle(hToken);
+				Interop.CloseHandle(hToken);
 				hToken = IntPtr.Zero;
 			}
 		}
 
 		private bool SetPrivilege(bool bEnablePrivilege)
 		{
-			UnsafeMethods.TOKEN_PRIVILEGES tp;
-			UnsafeMethods.LUID luid;
+			Interop.TOKEN_PRIVILEGES tp;
+			Interop.LUID luid;
 
-			if (!UnsafeMethods.LookupPrivilegeValue(null, name, out luid))
+			if (!Interop.LookupPrivilegeValue(null, name, out luid))
 				return false;
 
 			tp.PrivilegeCount = 1;
 			tp.Luid = luid;
-			tp.Attributes = bEnablePrivilege ? UnsafeMethods.SE_PRIVILEGE_ENABLED : 0;
+			tp.Attributes = bEnablePrivilege ? Interop.SE_PRIVILEGE_ENABLED : 0;
 
 			// Enable the privilege or disable all privileges.
 
-			if (!UnsafeMethods.AdjustTokenPrivileges(hToken, false, ref tp, 0, IntPtr.Zero, IntPtr.Zero))
+			if (!Interop.AdjustTokenPrivileges(hToken, false, ref tp, 0, IntPtr.Zero, IntPtr.Zero))
 				return false;
 
 			int err = Marshal.GetLastWin32Error();
 
-			if (err == UnsafeMethods.ERROR_NOT_ALL_ASSIGNED)
+			if (err == Interop.ERROR_NOT_ALL_ASSIGNED)
 				return false;
 
 			return true;

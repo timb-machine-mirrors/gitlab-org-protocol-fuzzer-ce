@@ -9,7 +9,6 @@ subdirs = [
 	'Nustache.Core.dll',
 	'OS/UnixTrampoline',
 	'Peach',
-	'SampleNinja',
 	'Service',
 	'SDK',
 	'Test/Apps/AsanTest',
@@ -30,7 +29,6 @@ subdirs = [
 	'Validator',
 	'Web',
 	'WebApi2',
-	'WindowsDebugInstance',
 	'Worker',
 	'XmlGenerator',
 ]

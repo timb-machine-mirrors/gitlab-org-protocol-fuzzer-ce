@@ -1,5 +1,6 @@
 ﻿
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -7,6 +8,7 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Test;
+using Peach.Pro.Test.Core.StateModel;
 
 namespace Peach.Pro.Test.Core.Analyzers
 {
@@ -474,6 +476,75 @@ namespace Peach.Pro.Test.Core.Analyzers
 			e.startFuzzing(dom, config);
 		}
 
+		[Test]
+		public void PeriodsInElements()
+		{
+			var payload = @"<?xml version='1.0' encoding='UTF-8'?>
+<A>
+  <B..1 some.attr='x'>foo</B..1>
+  <B.2>bar</B.2>
+</A>
+";
+
+			string tmp = Path.GetTempFileName();
+
+			string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String>
+			<Analyzer class='Xml'/>
+		</String>
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM'/>
+				<Data fileName='{0}'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<Strategy class='Sequential'/>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>
+".Fmt(tmp);
+
+			File.WriteAllText(tmp, payload);
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration() { singleIteration = true };
+			var e = new Engine(null);
+
+			Assert.DoesNotThrow(() => e.startFuzzing(dom, config));
+
+			var bs = dom
+				.stateModels[0]
+				.states[0]
+				.actions[0]
+				.allData.First()
+				.dataModel.Children().First()
+				.Children().ToList();
+
+			var b1 = bs[0] as XmlElement;
+			Assert.NotNull(b1);
+			Assert.AreEqual("B..1", b1.elementName);
+			Assert.AreEqual("B__1", b1.Name);
+
+			var b2 = bs[1] as XmlElement;
+			Assert.NotNull(b1);
+			Assert.AreEqual("B.2", b2.elementName);
+			Assert.AreEqual("B_2", b2.Name);
+
+			var b1Attr = b1[0] as XmlAttribute;
+			Assert.NotNull(b1Attr);
+			Assert.AreEqual("some.attr", b1Attr.attributeName);
+			Assert.AreEqual("some_attr", b1Attr.Name);
+		}
 
     }
 }

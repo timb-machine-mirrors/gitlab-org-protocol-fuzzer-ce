@@ -273,7 +273,7 @@ namespace Peach.Pro.Core.Storage
 				var values = columns.Select(pi =>
 				{
 					var value = pi.GetValue(item, null);
-					return value == null ? "<NULL>" : value.ToString();
+					return value == null ? "<NULL>" : ToString(value);
 				}).ToArray();
 				for (var i = 0; i < values.Length; i++)
 				{
@@ -293,6 +293,14 @@ namespace Peach.Pro.Core.Storage
 			{
 				Console.WriteLine(finalFmt, row);
 			}
+		}
+
+		static string ToString(object value)
+		{
+			var bytes = value as byte[];
+			if (bytes != null)
+				return BitConverter.ToString(bytes);
+			return value.ToString();
 		}
 
 		#region Unit Test Helpers

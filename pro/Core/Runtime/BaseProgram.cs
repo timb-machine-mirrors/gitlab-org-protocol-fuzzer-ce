@@ -59,19 +59,23 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		void LoadAssemblies()
+		public void LoadAssemblies()
 		{
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			ClassLoader.LoadAssembly(Assembly.GetExecutingAssembly());
-
 			var path =
 				_pluginsPath ??
 				Utilities.GetUserConfig().AppSettings.Settings.Get("Plugins") ??
 				Utilities.GetAppResourcePath("Plugins");
-			ClassLoader.LoadPlugins(Path.GetFullPath(path));
+			ClassLoader.Initialize(Path.GetFullPath(path));
+		}
+
+		/// <summary>
+		/// This is a hack so that other assemblies can ensure
+		/// that Peach.Pro is actually loaded before 
+		/// calling Initialize() on the ClassLoader
+		/// </summary>
+		public static void Initialize()
+		{
+			ClassLoader.Initialize();
 		}
 
 		private static Version ParseMonoVersion(string str)
@@ -287,11 +291,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual string UsageLine
 		{
-			get
-			{
-				var name = Assembly.GetEntryAssembly().GetName();
-				return "Usage: {0} [OPTION]...".Fmt(name.Name);
-			}
+			get { return "Usage: {0} [OPTION]...".Fmt(Utilities.ExecutableName); }
 		}
 
 		protected virtual string Synopsis
@@ -317,7 +317,7 @@ namespace Peach.Pro.Core.Runtime
 		protected virtual int ShowVersion(List<string> args)
 		{
 			var name = Assembly.GetEntryAssembly().GetName();
-			Console.WriteLine("{0}: Version {1}".Fmt(name.Name, name.Version));
+			Console.WriteLine("{0}: Version {1}".Fmt(Utilities.ExecutableName, name.Version));
 			return 0;
 		}
 

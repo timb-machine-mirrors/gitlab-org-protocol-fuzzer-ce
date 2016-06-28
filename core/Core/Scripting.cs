@@ -43,21 +43,13 @@ namespace Peach.Core
 	{
 		protected override ScriptEngine GetEngine()
 		{
-			var engine = Python.CreateEngine();
-
-			// Need to add python stdlib to search path
-			var paths = engine.GetSearchPaths();
-			foreach (var path in ClassLoader.SearchPaths)
-				paths.Add(Path.Combine(path, "Lib"));
-			engine.SetSearchPaths(paths);
-
-			return engine;
+			return Python.CreateEngine();
 		}
 	}
 
 	/// <summary>
 	/// Scripting class provides easy to use
-	/// methods for using Python/Ruby with Peach.
+	/// methods for using Python with Peach.
 	/// </summary>
 	public abstract class Scripting
 	{
