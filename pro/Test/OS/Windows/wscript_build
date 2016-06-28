@@ -11,7 +11,7 @@ deps = [
 	'System.ServiceProcess.dll',
 	'Microsoft.CSharp.dll',
 	'Peach.Core.dll',
-	'Peach.Pro.OS.Windows.dll',
+	'Peach.Pro.dll',
 	'Peach.Core.Test.dll',
 ]
 

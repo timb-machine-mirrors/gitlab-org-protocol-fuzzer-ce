@@ -14,6 +14,7 @@ using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Newtonsoft.Json;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -234,7 +235,7 @@ namespace Peach.Pro.Core.WebServices
 		Pit UpdatePitById(string guid, PitConfig data);
 		Pit UpdatePitByUrl(string url, PitConfig data);
 	
-		Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description);
+		Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description);
 		Tuple<Pit, PitDetail> MigratePit(string legacyPitUrl, string pitUrl);
 	}
 
@@ -245,7 +246,7 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Static Helpers
 
-		private static PeachElement Parse(string fileName)
+		private static PeachElement Parse(string fileName, Stream input)
 		{
 			try
 			{
@@ -261,7 +262,7 @@ namespace Peach.Pro.Core.WebServices
 
 				var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
 
-				using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
+				using (var rdr = XmlReader.Create(input, settingsRdr, parserCtx))
 				{
 					var s = XmlTools.GetSerializer(typeof(PeachElement));
 					var elem = (PeachElement)s.Deserialize(rdr);
@@ -307,10 +308,11 @@ namespace Peach.Pro.Core.WebServices
 		internal static readonly string LegacyDir = "User";
 		internal static readonly string ConfigsDir = "Configs";
 
+		private readonly ILicense _license;
 		private string _pitLibraryPath;
 
-		private NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
-		private NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
+		private readonly NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
+		private readonly NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
 		LibraryDetail _configsLib;
 
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
@@ -332,12 +334,17 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
+		public PitDatabase(ILicense license)
+		{
+			_license = license;
+		}
+
 		public void Load(string path)
 		{
 			_pitLibraryPath = Path.GetFullPath(path);
 
-			_entries = new NamedCollection<PitDetail>();
-			_libraries = new NamedCollection<LibraryDetail>();
+			_entries.Clear();
+			_libraries.Clear();
 
 			AddLibrary("", "Pits", true, false);
 			_configsLib = AddLibrary(ConfigsDir, "Configurations", false, false);
@@ -561,7 +568,6 @@ namespace Peach.Pro.Core.WebServices
 		/// <summary>
 		/// 
 		/// Throws:
-		///   UnauthorizedAccessException if the destination library is locked.
 		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
 		///   ArgumentException if a pit with the specified name already exists.
 		/// </summary>
@@ -569,7 +575,7 @@ namespace Peach.Pro.Core.WebServices
 		/// <param name="name">The name of the newly copied pit.</param>
 		/// <param name="description">The description of the newly copied pit.</param>
 		/// <returns>The newly copied pit.</returns>
-		public Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description)
+		public Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description)
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("A non-empty pit name is required.", "name");
@@ -663,7 +669,11 @@ namespace Peach.Pro.Core.WebServices
 				.ToList();
 
 			// 3. Parse legacyPit.xml
-			var contents = Parse(legacyFile);
+			PeachElement contents;
+			using (var stream = File.OpenRead(legacyFile))
+			{
+				contents = Parse(legacyFile, stream);
+			}
 
 			// 4. Extract Agents
 			var agents = contents.Children.OfType<PeachElement.AgentElement>();
@@ -745,9 +755,14 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Pit Config/Agents/Metadata
 
-		void ExtractCalls(string xmlPath, string stateModel, string ns, HashSet<string> calls)
+		void ExtractCalls(PitResource pitResource, 
+		                  string xmlPath, 
+		                  Stream input, 
+		                  string stateModel, 
+		                  string ns, 
+		                  HashSet<string> calls)
 		{
-			var contents = Parse(xmlPath);
+			var contents = Parse(xmlPath, input);
 
 			if (string.IsNullOrEmpty(stateModel))
 			{
@@ -773,10 +788,10 @@ namespace Peach.Pro.Core.WebServices
 
 			foreach (var inc in contents.Children.OfType<PeachElement.IncludeElement>())
 			{
-				var path = inc.Source
-							  .Replace("file:", "")
-							  .Replace("##PitLibraryPath##", _pitLibraryPath);
-				ExtractCalls(path, stateModel, inc.Ns, calls);
+				using (var stream = pitResource.Load(inc.Source))
+				{
+					ExtractCalls(pitResource, inc.Source, stream, stateModel, inc.Ns, calls);
+				}
 			}
 		}
 
@@ -788,7 +803,11 @@ namespace Peach.Pro.Core.WebServices
 			var metadata = PitCompiler.LoadMetadata(pitXml);
 
 			var calls = new HashSet<string>();
-			ExtractCalls(pitXml, null, null, calls);
+			var pitResource = new PitResource(_license, _pitLibraryPath, pitXml);
+			using (var stream = File.OpenRead(pitXml))
+			{
+				ExtractCalls(pitResource, pitXml, stream, null, null, calls);
+			}
 
 			var pit = new Pit {
 				Id = detail.Id,

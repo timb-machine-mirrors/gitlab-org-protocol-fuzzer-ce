@@ -59,7 +59,7 @@ namespace Peach.Pro.WebApi2.Controllers
 				}
 				else
 				{
-					tuple = _pitDatabase.CopyPit(
+					tuple = _pitDatabase.NewConfig(
 						data.PitUrl,
 						data.Name,
 						data.Description

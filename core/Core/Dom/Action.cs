@@ -68,7 +68,7 @@ namespace Peach.Core.Dom
 
 		#endregion
 
-		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		[NonSerialized]
 		protected Dictionary<string, object> scope = new Dictionary<string, object>();

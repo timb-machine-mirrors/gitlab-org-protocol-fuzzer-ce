@@ -84,8 +84,13 @@ namespace Peach.Core
 				}
 				catch (Exception ex)
 				{
-					if (sw.Elapsed >= maxTotalDelay)
+					var remain = maxTotalDelay - sw.Elapsed;
+
+					if (remain <= TimeSpan.Zero)
 						throw;
+
+					if (retryDelay.CompareTo(remain) >= 0)
+						retryDelay = remain;
 
 					Logger.Trace("Retrying in {0}ms after error: {1}",
 						retryDelay.TotalMilliseconds,

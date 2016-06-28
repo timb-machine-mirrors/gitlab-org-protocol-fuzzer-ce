@@ -17,6 +17,8 @@ namespace Peach.C {
 		export const Combobox = 'peachCombobox';
 		export const Defines = 'peachDefines';
 		export const Faults = 'peachFaults';
+		export const FaultAssets = 'peachFaultAssets';
+		export const FaultFiles = 'peachFaultFiles';
 		export const Jobs = 'peachJobs';
 		export const Monitor = 'peachMonitor';
 		export const Parameter = 'peachParameter';
@@ -46,6 +48,8 @@ namespace Peach.C {
 		export const Combobox = 'ComboboxController';
 		export const Defines = 'DefinesController';
 		export const Faults = 'FaultsDirectiveController';
+		export const FaultAssets = 'FaultAssetsController';
+		export const FaultFiles = 'FaultFilesController';
 		export const Jobs = 'JobsDirectiveController';
 		export const Monitor = 'MonitorController';
 		export const Parameter = 'ParameterController';
@@ -63,9 +67,11 @@ namespace Peach.C {
 		export const Job = 'JobService';
 		export const Test = 'TestService';
 		export const Wizard = 'WizardService';
+		export const Node = 'NodeService';
 	}
 
 	export namespace Api {
+		export const Nodes = '/p/nodes';
 		export const License = '/p/license';
 		export const Libraries = '/p/libraries';
 		export const Pits = '/p/pits';
@@ -166,18 +172,13 @@ namespace Peach.C {
 			export const StartJob = 'html/modal/StartJob.html';
 			export const AddMonitor = 'html/modal/AddMonitor.html';
 		}
-		export namespace Eula {
-			export const Acedemic = 'html/eula/Acedemic.html';
-			export const Developer = 'html/eula/Developer.html';
-			export const Enterprise = 'html/eula/Enterprise.html';
-			export const Professional = 'html/eula/Professional.html';
-			export const Trial = 'html/eula/Trial.html';
-		}
 		export namespace Directives {
 			export const Agent = 'html/directives/agent.html';
 			export const Combobox = 'html/directives/combobox.html';
 			export const Defines = 'html/directives/defines.html';
 			export const Faults = 'html/directives/faults.html';
+			export const FaultAssets = 'html/directives/fault/assets.html';
+			export const FaultFiles = 'html/directives/fault/files.html';
 			export const Jobs = 'html/directives/jobs.html';
 			export const Monitor = 'html/directives/monitor.html';
 			export const Parameter = 'html/directives/parameter.html';

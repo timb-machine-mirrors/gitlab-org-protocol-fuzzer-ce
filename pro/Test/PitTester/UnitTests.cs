@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -46,7 +44,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Ignore xpath='//value' />
 
 	<Test name='Default'>
@@ -63,20 +61,15 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, true);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -115,7 +108,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Ignore xpath='//str1' />
 	<Ignore xpath='//str2' />
 
@@ -132,20 +125,15 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, true);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -190,7 +178,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Slurp setXpath='//tgt' value='Hello' />
 
 	<Test name='Default'>
@@ -207,20 +195,15 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, true);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -253,7 +236,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.Action' publisher='Pub'/>
 	</Test>
@@ -261,35 +244,23 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			var ex = Assert.Throws<AggregateException>(() =>
+			using (var tmpDir = new TempDirectory())
 			{
-				try
-				{
-					PitTester.TestPit("", pitFile, true, null, true);
-				}
-				finally
-				{
-					File.Delete(pitFile);
-					File.Delete(pitTest);
-				}
-			});
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
 
-			var sb = new StringBuilder();
-			ex.Handle(e =>
-			{
-				sb.AppendLine(e.Message);
-				return true;
-			});
-			var err = sb.ToString();
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
 
-			StringAssert.StartsWith("Encountered an unhandled exception on iteration 1, seed ", err);
-			StringAssert.Contains("Missing record in test data", err);
+				Assert.That(() =>
+				{
+					PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
+				},
+					Throws.TypeOf<AggregateException>()
+						.With.InnerException.Message.StartsWith("Encountered an unhandled exception on iteration 1, seed ")
+						.With.InnerException.Message.Contains("Missing record in test data")
+				);
+			}
 		}
 
 		[Test]
@@ -325,7 +296,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Slurp setXpath='//Act1/DM/num' valueType='hex' value='00'/>
 	<Slurp setXpath='//Act1/DM/str1' value='1234567890'/>
 	<Slurp setXpath='//Act2/DM/num' value='0'/>
@@ -348,20 +319,15 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, false, null, true);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 500);
 			}
 		}
 
@@ -393,7 +359,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Slurp setXpath='//Act1/DM/str1' value='1234567890'/>
 
 	<Test name='Default'>
@@ -407,20 +373,85 @@ namespace PitTester
 </TestData>
 ";
 
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, false, null, true);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 500);
 			}
-			finally
+		}
+
+		[Test]
+		public void SlurpOverCrackedVolatileFixup()
+		{
+			var xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice minOccurs='1'>
+			<Block name='h1'>
+				<String value='h1:' token='true' />
+				<String name='value' />
+				<String value='|' token='true' />
+			</Block>
+			<Block name='h2'>
+				<String value='h2:' token='true' />
+				<String name='value'>
+					<Fixup class='UnixTime'>
+						<Param name='Format' value='r' />
+					</Fixup>
+				</String>
+				<String value='|' token='true' />
+			</Block>
+		</Choice>
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM'/>
+				<Data fileName='{0}' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null' />
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData pit='test.xml'>
+	<Slurp setXpath='//h2/value' value='overridden'/>
+
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Act1' publisher='Pub'/>
+		<Output action='TheState.Initial.Act1' publisher='Pub'>
+<![CDATA[
+00000000   68 31 3A 66 6F 6F 7C 68  32 3A 6F 76 65 72 72 69   h1:foo|h2:overri
+00000010   64 64 65 6E 7C 68 31 3A  62 61 7A 7C 68 32 3A 6F   dden|h1:baz|h2:o
+00000020   76 65 72 72 69 64 64 65  6E 7C                     verridden|      
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+			using (var tmpDir = new TempDirectory())
 			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+				var pitSample = pitFile + ".sample";
+
+				File.WriteAllText(pitFile, xml.Fmt(pitSample));
+				File.WriteAllText(pitTest, test);
+				File.WriteAllText(pitSample, "h1:foo|h2:bar|h1:baz|h2:qux|");
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, true, 1);
 			}
 		}
 
@@ -457,7 +488,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.Action' publisher='Pub'/>
 		<Output action='TheState.Initial.Action' publisher='Pub'>
@@ -481,20 +512,15 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, false, null, false, 5);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 5);
 			}
 		}
 
@@ -523,7 +549,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.Action' publisher='Pub'/>
 		<Input action='TheState.Initial.Action' publisher='Pub'>
@@ -546,20 +572,15 @@ namespace PitTester
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, false, null, false, 5);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 5);
 			}
 		}
 
@@ -609,7 +630,7 @@ namespace PitTester
 ";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 
 	<Define key='Pre' value='foo' />
 
@@ -642,32 +663,24 @@ SGVsbG8=
 ";
 
 			// Ensure we can run when there is an ignore that matches a de-selected choice
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-			var pitConfig = pitFile + ".config";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-			File.WriteAllText(pitConfig, config);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, false, 1);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
-				File.Delete(pitConfig);
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+				var pitConfig = pitFile + ".config";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+				File.WriteAllText(pitConfig, config);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
 
 		[Test]
-		public void ComparePublishedOutputAgainstExplicitCDATA() 
+		public void ComparePublishedOutputAgainstExplicitCDATA()
 		{
-			string datasetFile = Path.GetTempFileName();
-
-			string xml = string.Format(@"
+			const string xml = @"
 <Peach>
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
@@ -691,10 +704,10 @@ SGVsbG8=
 		<Publisher name='Pub' class='Null'/>
 	</Test>
 </Peach>
-", datasetFile);
+";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.In' publisher='Pub'/>
 		<Input  action='TheState.Initial.In' publisher='Pub'>
@@ -711,32 +724,25 @@ SGVsbG8=
 </TestData>
 ";
 
-			File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
-
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, false, 1);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
-				File.Delete(datasetFile);
+				var datasetFile = Path.Combine(tmpDir.Path, "data.bin");
+				File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml.Fmt(datasetFile));
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
 
 		[Test]
-		public void VerifyOutputAgainstSourceDataFile() 
+		public void VerifyOutputAgainstSourceDataFile()
 		{
-			string datasetFile = Path.GetTempFileName();
-
-			string xml = string.Format(@"
+			const string xml = @"
 <Peach>
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
@@ -754,43 +760,35 @@ SGVsbG8=
 		<Publisher name='Pub' class='Null'/>
 	</Test>
 </Peach>
-", datasetFile);
+";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.Out' publisher='Pub'/>
 		<Output action='TheState.Initial.Out' verifyAgainst='dataFile' publisher='Pub'/>
 	</Test>
 </TestData>
 ";
-
-			File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
-
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, false, 1);
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
-				File.Delete(datasetFile);
+				var datasetFile = Path.Combine(tmpDir.Path, "data.bin");
+				File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml.Fmt(datasetFile));
+				File.WriteAllText(pitTest, test);
+
+				PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
 
 		[Test]
-		public void DisallowOutputCDATAWhenVerifyingAgainstDataSetFile() 
+		public void DisallowOutputCDATAWhenVerifyingAgainstDataSetFile()
 		{
-			string datasetFile = Path.GetTempFileName();
-
-			string xml = string.Format(@"
+			const string xml = @"
 <Peach>
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
@@ -808,10 +806,10 @@ SGVsbG8=
 		<Publisher name='Pub' class='Null'/>
 	</Test>
 </Peach>
-", datasetFile);
+";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.Out' publisher='Pub'/>
 		<Output action='TheState.Initial.Out' verifyAgainst='dataFile' publisher='Pub'>
@@ -822,47 +820,32 @@ SGVsbG8=
 	</Test>
 </TestData>
 ";
-
-			File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
-
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			bool caughtExpectedException = false;
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, false, 1);
-			}
-			catch (AggregateException ex)
-			{
-				foreach (var innerEx in ex.InnerExceptions)
+				var datasetFile = Path.Combine(tmpDir.Path, "data.bin");
+				File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml.Fmt(datasetFile));
+				File.WriteAllText(pitTest, test);
+
+				Assert.That(() =>
 				{
-					if (innerEx is PeachException)
-					{
-						var peachEx = (PeachException)innerEx;
-						caughtExpectedException = peachEx.Message.Contains("Unexpected CDATA");
-					}
-				}
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
-				File.Delete(datasetFile);
-
-				Assert.IsTrue(caughtExpectedException);
+					PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
+				},
+					Throws.TypeOf<AggregateException>()
+						.With.InnerException.TypeOf<PeachException>()
+						.With.InnerException.Message.Contains("Unexpected CDATA")
+				);
 			}
 		}
 
 		[Test]
-		public void RequireOutputCDATAWhenVerifyingAgainstCDATA() 
+		public void RequireOutputCDATAWhenVerifyingAgainstCDATA()
 		{
-			string datasetFile = Path.GetTempFileName();
-
-			string xml = string.Format(@"
+			const string xml = @"
 <Peach>
 	<StateModel name='TheState' initialState='Initial'>
 		<State name='Initial'>
@@ -880,10 +863,10 @@ SGVsbG8=
 		<Publisher name='Pub' class='Null'/>
 	</Test>
 </Peach>
-", datasetFile);
+";
 
 			const string test = @"
-<TestData>
+<TestData pit='test.xml'>
 	<Test name='Default'>
 		<Open   action='TheState.Initial.Out' publisher='Pub'/>
 		<Output action='TheState.Initial.Out' verifyAgainst='cdata' publisher='Pub'/>
@@ -891,37 +874,25 @@ SGVsbG8=
 </TestData>
 ";
 
-			File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
-
-			var pitFile = Path.GetTempFileName();
-			var pitTest = pitFile + ".test";
-
-			File.WriteAllText(pitFile, xml);
-			File.WriteAllText(pitTest, test);
-
-			bool caughtExpectedException = false;
-			try
+			using (var tmpDir = new TempDirectory())
 			{
-				PitTester.TestPit("", pitFile, true, null, false, 1);
-			}
-			catch (AggregateException ex)
-			{
-				foreach (var innerEx in ex.InnerExceptions)
+				var datasetFile = Path.Combine(tmpDir.Path, "data.bin");
+				File.WriteAllBytes(datasetFile, new byte[] { 0x00 });
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml.Fmt(datasetFile));
+				File.WriteAllText(pitTest, test);
+
+				Assert.That(() =>
 				{
-					if (innerEx is PeachException)
-					{
-						var peachEx = (PeachException)innerEx;
-						caughtExpectedException = peachEx.Message.Contains("CDATA missing");
-					}
-				}
-			}
-			finally
-			{
-				File.Delete(pitFile);
-				File.Delete(pitTest);
-				File.Delete(datasetFile);
-
-				Assert.IsTrue(caughtExpectedException);
+					PitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
+				},
+					Throws.TypeOf<AggregateException>()
+						.With.InnerException.TypeOf<PeachException>()
+						.With.InnerException.Message.Contains("CDATA missing")
+				);
 			}
 		}
 	}

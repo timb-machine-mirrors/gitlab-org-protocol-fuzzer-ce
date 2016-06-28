@@ -277,6 +277,8 @@ namespace Peach.Pro.Core.Agent.Channels
 			/// </summary>
 			protected bool isCreated = false;
 
+			protected bool isOpen = false;
+
 			public RestProxyPublisher(Dictionary<string, string> args)
 				: base(new Dictionary<string, Variant>())
 			{
@@ -399,11 +401,14 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			protected override void OnStop()
 			{
+				isOpen = false;
 				Send("stop");
 			}
 
 			protected override void OnOpen()
 			{
+				isOpen = true;
+
 				var req1 = new IterationRequest { iteration = Iteration };
 				Send("Set_Iteration", JsonConvert.SerializeObject(req1));
 
@@ -415,6 +420,8 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			protected override void OnClose()
 			{
+				isOpen = false;
+
 				Send("close");
 			}
 
@@ -425,6 +432,15 @@ namespace Peach.Pro.Core.Agent.Channels
 
 			protected override Variant OnCall(string method, List<BitwiseStream> args)
 			{
+				if (!isOpen)
+				{
+					var req1 = new IterationRequest { iteration = Iteration };
+					Send("Set_Iteration", JsonConvert.SerializeObject(req1));
+
+					var req2 = new IsControlIterationRequest { isControlIteration = IsControlIteration };
+					Send("Set_IsControlIteration", JsonConvert.SerializeObject(req2));
+				}
+
 				var request = new OnCallRequest();
 
 				request.method = method;
@@ -549,7 +565,9 @@ namespace Peach.Pro.Core.Agent.Channels
 		public override void StartMonitor(string monName, string cls, Dictionary<string, string> args)
 		{
 			_monitors = true;
-			Send("StartMonitor?name=" + monName + "&cls=" + cls, args);
+			Send(string.Format("StartMonitor?name={0}&cls={1}",
+				 System.Web.HttpUtility.UrlEncode(monName),
+				 System.Web.HttpUtility.UrlEncode(cls)), args);
 		}
 
 		public override void StopAllMonitors()
@@ -573,7 +591,9 @@ namespace Peach.Pro.Core.Agent.Channels
 		public override void IterationStarting(IterationStartingArgs args)
 		{
 			if (_monitors)
-				Send("IterationStarting?iterationCount=0&" + "isReproduction=" + args.IsReproduction);
+				Send(string.Format("IterationStarting?iterationCount=0&isReproduction={0}&lastWasFault={1}",
+					args.IsReproduction,
+					args.LastWasFault));
 		}
 
 		public override void IterationFinished()
@@ -617,7 +637,9 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		public override void Message(string msg)
 		{
-			throw new NotImplementedException();
+			if (!_monitors)
+				Send(string.Format("Message?msg={0}",
+					System.Web.HttpUtility.UrlEncode(msg)));
 		}
 
 		#endregion

@@ -69,6 +69,10 @@ namespace Peach.Core.Dom
 		private Binding commonAncestor;
 		private RelativeBinding relativeElement;
 
+		// This is local only state, don't copy to prevent cloned objects
+		// from getting into the wrong state if the clone happens
+		// when a relation is being evaulated
+		[NonSerialized]
 		private bool _isRecursing;
 
 		public bool isRelativeOffset
@@ -94,9 +98,6 @@ namespace Peach.Core.Dom
 		{
 			commonAncestor = new Binding(parent);
 			relativeElement = new RelativeBinding(this, parent);
-
-			parent.relations.Add(commonAncestor);
-			parent.relations.Add(relativeElement);
 		}
 
 		public override void WritePit(XmlWriter pit)

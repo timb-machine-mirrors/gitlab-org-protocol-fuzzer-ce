@@ -126,12 +126,12 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				null, // Rendering
 				"k",  // Template
 				"l",  // Payload
-				"m",  //Blob
+				"m",  // Blob
 				"n",  // Choice
 				"o",  // Number
 				"p",  // Padding
 				"q",  // Array
-				null, //String
+				null, // String
 				"r",  // Flags
 				"s",  // Flag
 				"t",  // XmlElement
@@ -142,7 +142,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				null, // Asn1Type.tag
 				null, // Asn1Type.length
 				"w",  // Asn1Tag
-				"x",  //Asn1Length
+				"x",  // Asn1Length
 				"y",  // BacNetTag
 				null, // BacNetTag.Tag
 				null, // BacNetTag.Class
@@ -425,6 +425,22 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			};
 
 			CollectionAssert.AreEqual(expected, result);
+		}
+
+		[Test]
+		public void TestValidName()
+		{
+			// Ensure all fieldId values are valid element names so they are xpath selectable
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='pre' fieldId='1bad' />
+	</DataModel>
+</Peach>
+";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			StringAssert.StartsWith("Error, Pit file failed to validate", ex.Message);
 		}
 	}
 }

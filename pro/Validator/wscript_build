@@ -19,9 +19,6 @@ deps = [
 	'Ionic.Zip.dll',
 	'IronPython.dll',
 	'IronPython.Modules.dll',
-	'IronRuby.dll',
-	'IronRuby.Libraries.dll',
-	'IronRuby.Libraries.Yaml.dll',
 	'Microsoft.Dynamic.dll',
 	'Microsoft.CSharp.dll',
 	'Microsoft.Scripting.dll',
@@ -38,3 +35,4 @@ bld(
 	icon = 'icons/peach20x20.ico',
 )
 
+\

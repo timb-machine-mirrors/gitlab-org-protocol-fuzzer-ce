@@ -57,14 +57,14 @@ namespace Peach.Pro.Test.Core
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 <DataModel name=""GeneratedModel"">
-            <Block name=""0"">
-                <Number name=""1"" signed=""false"" size=""32""/>
-                <Block name=""2"">
-                    <Number name=""3"" signed=""false"" size=""32""/>
-                    <Number name=""4"" maxOccurs=""9999"" minOccurs=""0"" signed=""false"" size=""32"">
-                        <Relation type=""count"" of=""5""/>
+            <Block name=""a"">
+                <Number name=""b"" signed=""false"" size=""32""/>
+                <Block name=""c"">
+                    <Number name=""d"" signed=""false"" size=""32""/>
+                    <Number name=""e"" maxOccurs=""9999"" minOccurs=""0"" signed=""false"" size=""32"">
+                        <Relation type=""count"" of=""f""/>
                     </Number>
-                    <Blob name=""5""/>
+                    <Blob name=""f""/>
                 </Block>
             </Block>
     </DataModel>
@@ -89,12 +89,12 @@ namespace Peach.Pro.Test.Core
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 <DataModel name=""GeneratedModel"">
-            <Block name=""0"">
-                <Number name=""1"" size=""32""/>
-                <Block name=""2"">
-                    <Number name=""3"" size=""32""/>
-                    <Number name=""4"" size=""32"">
-                        <Relation type=""size"" of=""2""/>
+            <Block name=""a"">
+                <Number name=""b"" size=""32""/>
+                <Block name=""c"">
+                    <Number name=""d"" size=""32""/>
+                    <Number name=""e"" size=""32"">
+                        <Relation type=""size"" of=""c""/>
                     </Number>
                 </Block>
             </Block>
@@ -121,7 +121,7 @@ namespace Peach.Pro.Test.Core
 
 			DataCracker cracker = new DataCracker();
 			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
-			Assert.AreEqual("Block 'GeneratedModel.0.2' failed to crack. Read 64 of 5381942480 bits but buffer only has 40 bits left.", ex.Message);
+			Assert.AreEqual("Block 'GeneratedModel.a.c' failed to crack. Read 64 of 5381942480 bits but buffer only has 40 bits left.", ex.Message);
 		}
 
 		/// <summary>
@@ -133,12 +133,12 @@ namespace Peach.Pro.Test.Core
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 <DataModel name=""GeneratedModel"">
-            <Block name=""0"">
-                <Number name=""1"" size=""32""/>
-                <Block name=""2"">
-                    <Number name=""3"" size=""32""/>
-                    <Number name=""4"" size=""32"">
-                        <Relation type=""size"" of=""2""/>
+            <Block name=""a"">
+                <Number name=""b"" size=""32""/>
+                <Block name=""c"">
+                    <Number name=""d"" size=""32""/>
+                    <Number name=""e"" size=""32"">
+                        <Relation type=""size"" of=""c""/>
                     </Number>
                 </Block>
             </Block>
@@ -182,16 +182,16 @@ namespace Peach.Pro.Test.Core
 			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
 <DataModel name=""GeneratedModel"">
-            <Block name=""0"">
-                <Block name=""1"">
-                    <Number name=""3"" size=""32"">
-                        <Relation type=""size"" of=""2""/>
+            <Block name=""a"">
+                <Block name=""b"">
+                    <Number name=""d"" size=""32"">
+                        <Relation type=""size"" of=""c""/>
                     </Number>
-                    <Number name=""4"" size=""32"">
-                        <Relation type=""size"" of=""1""/>
+                    <Number name=""e"" size=""32"">
+                        <Relation type=""size"" of=""b""/>
                     </Number>
                 </Block>
-                <Blob name=""2"">
+                <Blob name=""c"">
                 </Blob>
             </Block>
     </DataModel>
@@ -212,7 +212,7 @@ namespace Peach.Pro.Test.Core
 
 			DataCracker cracker = new DataCracker();
 			var ex = Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
-			Assert.AreEqual("Block 'GeneratedModel.0.1' failed to crack. Length is 8 bits but already read 64 bits.", ex.Message);
+			Assert.AreEqual("Block 'GeneratedModel.a.b' failed to crack. Length is 8 bits but already read 64 bits.", ex.Message);
 		}
 
 

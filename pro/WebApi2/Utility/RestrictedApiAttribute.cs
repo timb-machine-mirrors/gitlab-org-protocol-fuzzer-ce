@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.WebApi2.Utility
 {

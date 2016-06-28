@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Aga.Controls.Tree;
 using Peach.Core.Dom;
 
@@ -12,7 +11,7 @@ namespace PeachValidator
 	{
 		public CrackNode Root = null;
 
-		public System.Collections.IEnumerable  GetChildren(TreePath treePath)
+		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
 			if (treePath.FullPath.Count() == 0)
 				return new object[] { Root };
@@ -30,7 +29,7 @@ namespace PeachValidator
 			if (NodesChanged == null)
 				return;
 
-			NodesChanged(sender, new TreeModelEventArgs(sender.GetTreePath(), (object[])sender.Children.ToArray()));
+			NodesChanged(sender, new TreeModelEventArgs(sender.GetTreePath(), sender.Children.ToArray()));
 		}
 
 		public void OnNodesInserted(CrackNode sender)
@@ -38,7 +37,7 @@ namespace PeachValidator
 			if (NodesInserted == null)
 				return;
 
-			NodesInserted(sender, new TreeModelEventArgs(sender.GetTreePath(), (object[])sender.Children.ToArray()));
+			NodesInserted(sender, new TreeModelEventArgs(sender.GetTreePath(), sender.Children.ToArray()));
 		}
 
 		public void OnNodesRemoved(CrackNode sender)
@@ -46,7 +45,7 @@ namespace PeachValidator
 			if (NodesRemoved == null)
 				return;
 
-			NodesRemoved(sender, new TreeModelEventArgs(sender.GetTreePath(), (object[])sender.Children.ToArray()));
+			NodesRemoved(sender, new TreeModelEventArgs(sender.GetTreePath(), sender.Children.ToArray()));
 		}
 
 		public void OnStructureChanged(CrackNode sender)
@@ -64,16 +63,14 @@ namespace PeachValidator
 
 		public static CrackModel CreateModelFromPit(DataModel dataModel)
 		{
-			CrackModel model = new CrackModel();
+			var model = new CrackModel();
 			model.Root = BuildFromElement(model, dataModel);
-
 			return model;
 		}
 
 		public static CrackNode BuildFromElement(CrackModel model, DataElementContainer container)
 		{
-			CrackNode node = new CrackNode(model, container, 0, 0);
-
+			var node = new CrackNode(model, container, 0, 0);
 			if (container is Choice)
 			{
 				foreach (var child in ((Choice)container).choiceElements)
@@ -115,6 +112,8 @@ namespace PeachValidator
 
 	public class CrackNode
 	{
+		public List<CrackNode> Children = new List<CrackNode>();
+
 		public CrackNode(CrackModel model, DataElement element, long startBits, long stopBits)
 		{
 			Model = model;
@@ -124,17 +123,13 @@ namespace PeachValidator
 			Error = false;
 		}
 
-		public bool RelativeToParent
-		{
-			get;
-			set;
-		}
+		public bool RelativeToParent { get; set; }
 
 		public CrackNode Root
 		{
 			get
 			{
-				CrackNode root = this;
+				var root = this;
 				while (root.Parent != null)
 					root = root.Parent;
 
@@ -155,7 +150,6 @@ namespace PeachValidator
 			{
 				if (Error)
 					return "PeachValidator.icons.node-error.png";
-
 				return "PeachValidator.icons.node-" + DataElement.GetType().Name.ToLower() + ".png";
 			}
 		}
@@ -165,7 +159,6 @@ namespace PeachValidator
 			get
 			{
 				var asm = System.Reflection.Assembly.GetEntryAssembly();
-
 				var strm = asm.GetManifestResourceStream(IconName);
 				if (strm == null)
 					strm = asm.GetManifestResourceStream("PeachValidator.icons.node-unknown.png");
@@ -174,29 +167,13 @@ namespace PeachValidator
 			}
 		}
 
-		public CrackNode Parent
-		{
-			get;
-			set;
-		}
+		public CrackNode Parent { get; set; }
 
-		public DataElement DataElement
-		{
-			get;
-			set;
-		}
+		public DataElement DataElement { get; set; }
 
-		public long StartBits
-		{
-			get;
-			set;
-		}
+		public long StartBits { get; set; }
 
-		public long StopBits
-		{
-			get;
-			set;
-		}
+		public long StopBits { get; set; }
 
 		public string Position
 		{
@@ -208,18 +185,11 @@ namespace PeachValidator
 			get { return FmtBits(StopBits - StartBits); }
 		}
 
-		public bool Error
-		{
-			get;
-			set;
-		}
+		public bool Error { get; set; }
 
 		public string Value
 		{
-			get
-			{
-				return DataElement.DefaultValue == null ? "" : DataElement.DefaultValue.ToString();
-			}
+			get { return DataElement.DefaultValue == null ? "" : DataElement.DefaultValue.ToString(); }
 		}
 
 		private static string FmtBits(long bits)
@@ -233,11 +203,9 @@ namespace PeachValidator
 			return string.Format("{0}-{1}", bytes, remain);
 		}
 
-		public List<CrackNode> Children = new List<CrackNode>();
-
 		public TreePath GetTreePath()
 		{
-			List<object> parents = new List<object>();
+			var parents = new List<object>();
 			parents.Add(this);
 			CrackNode p = Parent;
 
@@ -270,6 +238,5 @@ namespace PeachValidator
 		{
 			return Children;
 		}
-
 	}
 }
