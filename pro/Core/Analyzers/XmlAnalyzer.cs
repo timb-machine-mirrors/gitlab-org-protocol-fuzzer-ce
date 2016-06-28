@@ -8,6 +8,7 @@ using Peach.Core;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using System.Text.RegularExpressions;
 using String = Peach.Core.Dom.String;
 using XmlCharacterData = Peach.Core.Dom.XmlCharacterData;
 
@@ -23,6 +24,7 @@ namespace Peach.Pro.Core.Analyzers
 		public new static readonly bool supportDataElement = true;
 		public new static readonly bool supportCommandLine = true;
 		public new static readonly bool supportTopLevel = false;
+		private static readonly Regex nameSanitizerRegex = new Regex(@"[:\.]");
 
 		public XmlAnalyzer()
 		{
@@ -124,6 +126,11 @@ namespace Peach.Pro.Core.Analyzers
 			parent.parent[parent.Name] = elem;
 		}
 
+		private static string sanitizeXmlName(string name)
+		{
+			return nameSanitizerRegex.Replace(name, "_");
+		}
+
 		protected void handleXmlNode(Peach.Core.Dom.XmlElement elem, XmlNode node, StringType type)
 		{
 			if (node is XmlComment || node is XmlDeclaration || node is XmlEntity || node is XmlDocumentType)
@@ -135,7 +142,7 @@ namespace Peach.Pro.Core.Analyzers
 			foreach (System.Xml.XmlAttribute attr in node.Attributes)
 			{
 				var strElem = makeString("value", attr.Value, type);
-				var attrName = elem.UniqueName(attr.Name.Replace(':', '_'));
+				var attrName = elem.UniqueName(sanitizeXmlName(attr.Name));
 				var attrElem = new Peach.Core.Dom.XmlAttribute(attrName)
 				{
 					attributeName = attr.Name,
@@ -165,7 +172,8 @@ namespace Peach.Pro.Core.Analyzers
 				}
 				else if (!child.Name.StartsWith("#"))
 				{
-					var childName = elem.UniqueName(child.Name.Replace(':', '_'));
+					var name = sanitizeXmlName(child.Name);
+					var childName = elem.UniqueName(name);
 					var childElem = new Peach.Core.Dom.XmlElement(childName);
 
 					elem.Add(childElem);
