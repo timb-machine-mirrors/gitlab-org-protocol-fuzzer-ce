@@ -235,6 +235,22 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			var jsonObject = new JsonObject(name);
 			jsonObject.PropertyName = propertyName;
 
+			JToken value;
+			if (obj.TryGetValue("allOf", out value))
+			{
+				var allOfArray = (JArray) value;
+				var allOf = (JObject) allOfArray[0];
+				var allOfRef = allOf["$ref"];
+
+				var swaggerRef = GetSwaggerRef(allOfRef.Value<string>(), (JObject)obj.Root["definitions"]);
+				jsonObject = DefinitionObject(name, propertyName, swaggerRef);
+
+				if (allOfArray.Count > 1)
+					obj = (JObject)allOfArray[1];
+				else
+					return jsonObject;
+			}
+
 			foreach (var item in (JObject)obj["properties"])
 			{
 				jsonObject.Add((DataElement)DefinitionToElement(item.Key.Replace(".", "_"), item.Key, (JObject)item.Value));
