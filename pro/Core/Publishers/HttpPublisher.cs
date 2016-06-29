@@ -402,13 +402,47 @@ namespace Peach.Pro.Core.Publishers
 
 			if (FaultOnStatusCodes.Contains((int)Response.StatusCode))
 			{
+				var sb = new StringBuilder();
+
+				sb.AppendFormat("HTTP/{0} {1} {2}\r\n", Response.ProtocolVersion, (int)Response.StatusCode, Response.StatusDescription);
+
+				for (var i = 0; i < Response.Headers.Count; ++i)
+				{
+					sb.AppendFormat("{0}: {1}\r\n", Response.Headers.Keys[i], Response.Headers[i]);
+				}
+
+				sb.AppendFormat("\r\n");
+
+				try
+				{
+					var stream = Response.GetResponseStream();
+
+					if (stream != null)
+					{
+						var ch = Response.CharacterSet;
+						if (string.IsNullOrEmpty(ch))
+							ch = "utf-8";
+
+						using (var rdr = new StreamReader(stream, System.Text.Encoding.GetEncoding(ch)))
+						{
+							string line;
+							while ((line = rdr.ReadLine()) != null)
+								sb.AppendLine(line);
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					sb.Append("Error reading reponse from server.");
+					sb.AppendLine();
+					sb.Append(ex.Message);
+					sb.AppendLine();
+				}
+
 				var fault = new FaultSummary
 				{
 					Title = "Fault on status code {0} ({1})".Fmt((int)Response.StatusCode, Response.StatusCode),
-					Description = "Publisher has been configured to fault when one " + 
-						"or more HTTP status codes are detected.\n" +
-						"During this test case the status code {0} ({1}) " +
-						"was detected causing this fault.".Fmt((int) Response.StatusCode, Response.StatusCode),
+					Description = sb.ToString(),
 					MajorHash = FaultSummary.Hash(Response.StatusCode.ToString()),
 					MinorHash = FaultSummary.Hash(string.Format("{0} {1} {2}", request.Method, request.RequestUri, Response.StatusCode)),
 					Exploitablity = "Unknown"

@@ -46,18 +46,20 @@ namespace Peach.Core.Dom
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class DataElementAttribute : Attribute
+	public class DataElementAttribute : PluginAttribute
 	{
 		public string elementName;
 		public DataElementTypes elementTypes;
 
 		public DataElementAttribute(string elementName)
+			: base(typeof(DataElement), elementName, true)
 		{
 			this.elementName = elementName;
 			this.elementTypes = DataElementTypes.All;
 		}
 
 		public DataElementAttribute(string elementName, DataElementTypes elementTypes)
+			: base(typeof(DataElement), elementName, true)
 		{
 			this.elementName = elementName;
 			this.elementTypes = elementTypes;

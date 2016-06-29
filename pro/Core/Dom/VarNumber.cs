@@ -10,7 +10,7 @@ using Peach.Core.IO;
 namespace Peach.Pro.Core.Dom
 {
 	[PitParsable("VarNumber")]
-	[DataElement("VarNumber", DataElementTypes.NonDataElements)]
+	[DataElement("VarNumber", DataElementTypes.NonDataElements, Internal = true)]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("value", typeof(string), "Default value", "")]

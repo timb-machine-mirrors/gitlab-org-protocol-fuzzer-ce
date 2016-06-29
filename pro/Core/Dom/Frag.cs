@@ -14,7 +14,7 @@ using Logger = NLog.Logger;
 namespace Peach.Pro.Core.Dom
 {
 	[PitParsable("Frag")]
-	[DataElement("Frag", DataElementTypes.All)]
+	[DataElement("Frag", DataElementTypes.All, Internal = true)]
 	[DescriptionAttribute("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("fieldId", typeof(string), "Element field ID", "")]
