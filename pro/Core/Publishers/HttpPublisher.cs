@@ -73,7 +73,10 @@ namespace Peach.Pro.Core.Publishers
 		protected CookieContainer CookieJar = new CookieContainer();
 		protected HttpWebResponse Response { get; set; }
 		protected string Query { get; set; }
-		protected Dictionary<string, string> Headers = new Dictionary<string, string>();
+
+		// Allow access from scripting
+		public Dictionary<string, string> Headers = new Dictionary<string, string>();
+
 		protected CredentialCache Credentials;
 
 		public HttpPublisher(Dictionary<string, Variant> args)
