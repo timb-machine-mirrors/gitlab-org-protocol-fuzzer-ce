@@ -147,13 +147,19 @@ namespace Peach.Pro.Core.OS.Unix
 			if (buffer.Length - offset < count )
 				throw new ArgumentException ("The size of the buffer is less than offset + count.");
 
-			while (true)
+			lock (fds)
 			{
-				lock (fds)
+				while (true)
 				{
+					// fd[0] == serial port
+					// fd[1] == cancel pipe
+
+					// Ensure Dispose() hasnt been called on a different thread
+					if (fds[0].fd == -1)
+						return 0;
+
 					fds[0].revents = 0;
 					fds[1].revents = 0;
-					fds[2].revents = 0;
 
 					var ret = Syscall.poll(fds, 2, read_timeout);
 
@@ -169,17 +175,15 @@ namespace Peach.Pro.Core.OS.Unix
 					if (fds[1].revents != 0)
 						return 0;
 
-					break;
-				}
-			}
-
-			unsafe
-			{
-				fixed (byte* ptr = buffer)
-				{
-					var result = (int)Syscall.read(fds[0].fd, ptr + offset, (ulong)count);
-					UnixMarshal.ThrowExceptionForLastErrorIf(result);
-					return result;
+					unsafe
+					{
+						fixed (byte* ptr = buffer)
+						{
+							var result = (int)Syscall.read(fds[0].fd, ptr + offset, (ulong)count);
+							UnixMarshal.ThrowExceptionForLastErrorIf(result);
+							return result;
+						}
+					}
 				}
 			}
 		}
