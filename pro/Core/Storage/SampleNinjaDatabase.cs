@@ -81,7 +81,7 @@ namespace Peach.Pro.Core.Storage
 
 		public ElementQuery GetElement(string name)
 		{
-			return Connection.Query<ElementQuery>(Sql.SelectNinjaElement, new { Name = name })
+			return Connection.Query<ElementQuery>(Sql.SelectNinjaElementCount, new { Name = name })
 				.SingleOrDefault();
 		}
 
@@ -112,10 +112,13 @@ namespace Peach.Pro.Core.Storage
 
 			var dataModel = dom.getRef(dataModelRef, x => x.dataModels);
 			if (dataModel == null)
-				throw new ArgumentException("DataModel '{0}' not found in '{1}'".Fmt(dataModelRef, pitFile));
+			{
+				var error = "DataModel '{0}' not found in '{1}'.\nAvailable models:\n".Fmt(dataModelRef, pitFile);
+				var models = string.Join("\n", GetDataModels(dom, null).Select(x => "    {0}".Fmt(x)));
+				throw new ArgumentException(error + models);
+			}
 
 			var dbPath = System.IO.Path.ChangeExtension(pitFile, ".ninja");
-
 			using (var db = new SampleNinjaDatabase(dbPath))
 			{
 				if (samplesPath.Contains("*"))
@@ -123,24 +126,43 @@ namespace Peach.Pro.Core.Storage
 					var dir = System.IO.Path.GetDirectoryName(samplesPath);
 					foreach (var file in Directory.GetFiles(dir, System.IO.Path.GetFileName(samplesPath)))
 					{
-						db.ProcessSample(dataModel, dir, System.IO.Path.GetFileName(file));
+						var path = System.IO.Path.Combine(dir, System.IO.Path.GetFileName(file));
+						db.ProcessSample(dataModel, path);
 					}
 				}
-				else
+				else if (Directory.Exists(samplesPath))
 				{
 					foreach (var file in Directory.EnumerateFiles(samplesPath))
 					{
-						db.ProcessSample(dataModel, samplesPath, System.IO.Path.GetFileName(file));
+						var path = System.IO.Path.Combine(samplesPath, System.IO.Path.GetFileName(file));
+						db.ProcessSample(dataModel, path);
 					}
+				}
+				else if (File.Exists(samplesPath))
+				{
+					db.ProcessSample(dataModel, samplesPath);
+				}
+				else
+				{
+					throw new FileNotFoundException("Invalid samples path: {0}".Fmt(samplesPath));
 				}
 			}
 
 			return dbPath;
 		}
 
-		void ProcessSample(DataModel dataModel, string dir, string fileName)
+		static IEnumerable<string> GetDataModels(Peach.Core.Dom.Dom dom, string prefix)
 		{
-			var path = System.IO.Path.Combine(dir, fileName);
+			return dom.dataModels.Select(dm =>
+			{
+				if (!string.IsNullOrEmpty(dom.Name))
+					return "{0}{1}:{2}".Fmt(prefix, dom.Name, dm.Name);
+				return "{0}{1}".Fmt(prefix, dm.Name);
+			}).Concat(dom.ns.SelectMany(x => GetDataModels(x, x.Name + ":")));
+		}
+
+		public void ProcessSample(DataModel dataModel, string path)
+		{
 			using (var stream = File.OpenRead(path))
 			{
 				var hash = Hash(stream);
@@ -219,9 +241,9 @@ namespace Peach.Pro.Core.Storage
 
 		void InsertElement(Element element)
 		{
-			var query = Connection.Query<ElementQuery>(Sql.SelectNinjaElement, new { element.Name });
-			if (query.Any())
-				element.ElementId = query.Single().ElementId;
+			var elementId = Connection.ExecuteScalar<ulong?>(Sql.SelectNinjaElement, new { element.Name });
+			if (elementId.HasValue)
+				element.ElementId = elementId.Value;
 			else
 				element.ElementId = Connection.ExecuteScalar<ulong>(Sql.InsertNinjaElement, element);
 		}
