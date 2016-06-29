@@ -82,19 +82,7 @@ namespace Peach.Core
 		{
 			var color = Console.ForegroundColor;
 
-			var domTypes = new SortedDictionary<string, Type>();
 			var dupes = new List<string>();
-
-			foreach (var type in ClassLoader.GetAllByAttribute<Peach.Core.Dom.DataElementAttribute>(null))
-			{
-				if (domTypes.ContainsKey(type.Key.elementName))
-				{
-					AddDuplicate(dupes, "Data element", type.Key.elementName, domTypes[type.Key.elementName], type.Value);
-					continue;
-				}
-
-				domTypes.Add(type.Key.elementName, type.Value);
-			}
 
 			var pluginsByName = new SortedDictionary<string, Type>();
 			var plugins = new SortedDictionary<Type, SortedDictionary<Type, SortedSet<PluginAttribute>>>(new TypeComparer());
@@ -132,19 +120,31 @@ namespace Peach.Core
 					attrs.Add(new PluginAlias(type.Value, a.Name));
 			}
 
-			Console.WriteLine("----- Data Elements --------------------------------------------");
-			foreach (var elem in domTypes)
-			{
-				Console.WriteLine();
-				Console.WriteLine("  {0}", elem.Key);
-				PrintParams(elem.Value);
-			}
-
 			foreach (var kv in plugins)
 			{
+				var name = kv.Key.Name;
+
+				if (kv.Key.IsInterface && name[0] == 'I')
+					name = name.Substring(1);
+
+				var isLower = false;
+
+				for (var i = 0; i < name.Length; ++i)
+				{
+					var isUpper = char.IsUpper(name[i]);
+
+					if (isUpper && isLower)
+					{
+						name = name.Insert(i, " ");
+						++i;
+					}
+
+					isLower = !isUpper;
+				}
+
 				Console.WriteLine();
 				Console.WriteLine();
-				Console.WriteLine("----- {0}s --------------------------------------------", kv.Key.Name);
+				Console.WriteLine("----- {0}s --------------------------------------------", name);
 
 				foreach (var plugin in kv.Value)
 				{
