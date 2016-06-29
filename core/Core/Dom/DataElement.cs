@@ -989,7 +989,9 @@ namespace Peach.Core.Dom
 			if (name.IndexOf('.') > -1)
 				throw new PeachException("Error, DataElements cannot contain a period in their name. \"" + name + "\"");
 
-			elementType = GetType().GetAttributes<DataElementAttribute>(null).First().elementName;
+			var attr = GetType().GetAttributes<DataElementAttribute>().FirstOrDefault();
+
+			elementType = attr != null ? attr.elementName : GetType().Name;
 
 			_relations = new RelationContainer(this);
 			_name = name;

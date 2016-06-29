@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Dom
 {
@@ -18,8 +17,6 @@ namespace Peach.Pro.Core.Dom
 	/// way of expanding/contracting sequences will not work. Instead
 	/// we need to override how iteration of this sequence works.
 	/// </remarks>
-	[DataElement("FragSequence")]
-	[DescriptionAttribute("Internal element, not for direct use.")]
 	[Serializable]
 	public class FragSequence : Sequence
 	{
