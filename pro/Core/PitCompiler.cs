@@ -12,14 +12,23 @@ using System.IO;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Schema;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core
 {
 	public class PitCompiler
 	{
+		class NinjaSample
+		{
+			public string SamplePath { get; set; }
+			public DataModel DataModel { get; set; }
+		}
+
 		private readonly string _pitLibraryPath;
 		private readonly string _pitPath;
 		private readonly string _pitMetaPath;
+		private readonly string _pitNinjaPath;
+		private readonly List<NinjaSample> _samples = new List<NinjaSample>();
 		private readonly List<string> _errors = new List<string>();
 
 		private const string Namespace = "http://peachfuzzer.com/2012/Peach";
@@ -41,6 +50,7 @@ namespace Peach.Pro.Core
 			_pitLibraryPath = pitLibraryPath;
 			_pitPath = pitPath;
 			_pitMetaPath = MetaPath(pitPath);
+			_pitNinjaPath = NinjaPath(pitPath);
 		}
 
 		public static PitMetadata LoadMetadata(string pitPath)
@@ -57,12 +67,27 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		private static string MetaPath(string pitPath)
+		{
+			return Path.ChangeExtension(pitPath, ".meta.json");
+		}
+
+		private static string NinjaPath(string pitPath)
+		{
+			return Path.ChangeExtension(pitPath, ".ninja");
+		}
+
 		public int TotalNodes { get; private set; }
 
-		public IEnumerable<string> Run(bool verifyConfig = true, bool doLint = true)
+		public IEnumerable<string> Run(
+			bool verifyConfig = true, 
+			bool doLint = true, 
+			bool createNinja = true)
 		{
 			var dom = Parse(verifyConfig, doLint);
 			SaveMetadata(dom);
+			if (createNinja && _samples.Any())
+				CreateNinjaDatabase(dom);
 			return _errors;
 		}
 
@@ -78,6 +103,18 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		void CreateNinjaDatabase(Peach.Core.Dom.Dom dom)
+		{
+			using (var db = new SampleNinjaDatabase(_pitNinjaPath))
+			{
+				foreach (var sample in _samples)
+				{
+					sample.DataModel.dom = dom;
+					db.ProcessSample(sample.DataModel, sample.SamplePath);
+				}
+			}
+		}
+
 		class CustomParser : ProPitParser
 		{
 			protected override void handlePublishers(XmlNode node, Test parent)
@@ -90,11 +127,6 @@ namespace Peach.Pro.Core
 				};
 				parent.publishers.Add(pub);
 			}
-		}
-
-		private static string MetaPath(string pitPath)
-		{
-			return Path.ChangeExtension(pitPath, ".meta.json");
 		}
 
 		public Peach.Core.Dom.Dom Parse(bool verifyConfig, bool doLint)
@@ -168,6 +200,17 @@ namespace Peach.Pro.Core
 			{
 				foreach (var action in state.actions)
 				{
+					_samples.AddRange(
+						from actionData in action.allData
+						from data in actionData.allData
+						let file = data as DataFile
+						where file != null
+						select new NinjaSample
+						{
+							SamplePath = file.FileName, 
+							DataModel = actionData.dataModel,
+						});
+
 					var node = new PitField();
 					foreach (var actionData in action.outputData)
 					{
@@ -184,10 +227,7 @@ namespace Peach.Pro.Core
 						{
 							var parent = node;
 							var parts = kv.Key.Split('.');
-							foreach (var part in parts)
-							{
-								parent = AddNode(parent, part);
-							}
+							parts.Aggregate(parent, AddNode);
 						}
 					}
 

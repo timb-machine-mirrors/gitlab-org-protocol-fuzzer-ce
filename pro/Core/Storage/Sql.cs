@@ -46,6 +46,12 @@ WHERE File = @File
 ";
 
 		public const string SelectNinjaElement = @"
+SELECT ElementId
+FROM Element
+WHERE Name = @Name
+";
+
+		public const string SelectNinjaElementCount = @"
 SELECT
 	COUNT(*) as Count,
 	e.ElementId

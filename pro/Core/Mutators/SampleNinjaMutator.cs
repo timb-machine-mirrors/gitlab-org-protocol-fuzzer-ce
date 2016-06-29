@@ -15,7 +15,7 @@ namespace Peach.Pro.Core.Mutators
 	[Description("Will use existing samples to generate mutated files.")]
 	public class SampleNinja : Mutator
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		readonly ElementQuery _element;
 		readonly string _dbPath;
@@ -122,7 +122,7 @@ namespace Peach.Pro.Core.Mutators
 		// For arrays, normalize to wrapper name
 		static string NormalizeName(DataElement element)
 		{
-			if (element.parent is Peach.Core.Dom.Array)
+			if (element.parent is Array)
 				return element.parent.Name;
 			return element.Name;
 		}
