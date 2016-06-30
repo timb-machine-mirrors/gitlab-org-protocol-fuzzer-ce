@@ -57,7 +57,16 @@ namespace Peach.Core
 					LoadPlugins(path, scripting);
 			}
 
-			foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+			var before = AppDomain.CurrentDomain.GetAssemblies();
+
+			foreach (var asmRef in Assembly.GetCallingAssembly().GetReferencedAssemblies())
+				Assembly.Load(asmRef);
+
+			var after = AppDomain.CurrentDomain.GetAssemblies();
+
+			logger.Trace("Forced the loading of {0} referenced assemblies", after.Length - before.Length);
+
+			foreach (var asm in after)
 			{
 				var attr = asm.GetCustomAttribute<PluginAssemblyAttribute>();
 				if (attr != null)
