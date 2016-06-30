@@ -22,6 +22,9 @@ using NUnit.Framework;
 
 namespace Peach.Pro.PitTester
 {
+	class QuickAttribute : CategoryAttribute { }
+	class SlowAttribute : CategoryAttribute { }
+	
 	public static class ThePitTester
 	{
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
@@ -39,7 +42,7 @@ namespace Peach.Pro.PitTester
 
 		public static void MakeTestAssembly(
 			string pitLibraryPath,
-			string pitTestFile, 
+			string pitTestFile,
 			string pitAssemblyFile)
 		{
 			var dir = Path.GetDirectoryName(pitAssemblyFile);
@@ -90,13 +93,17 @@ namespace Peach.Pro.PitTester
 			string name,
 			TypeBuilder type,
 			CustomAttributeBuilder testAttr,
-			string pitLibraryPath, 
+			string pitLibraryPath,
 			string pitTestFile,
 			int iterations)
 		{
 			var method = type.DefineMethod(name, MethodAttributes.Public);
 			method.SetCustomAttribute(testAttr);
-
+			if (iterations == 1)
+				method.SetCustomAttribute(MakeCustomAttribute(typeof(QuickAttribute)));
+			else
+				method.SetCustomAttribute(MakeCustomAttribute(typeof(SlowAttribute)));
+			
 			var testPitMethod = typeof(ThePitTester).GetMethod("TestPit");
 
 			var il = method.GetILGenerator();
@@ -120,6 +127,7 @@ namespace Peach.Pro.PitTester
 		{
 			var method = type.DefineMethod("TestDatasets", MethodAttributes.Public);
 			method.SetCustomAttribute(testAttr);
+			method.SetCustomAttribute(MakeCustomAttribute(typeof(SlowAttribute)));
 
 			var testPitMethod = typeof(ThePitTester).GetMethod("VerifyDataSets");
 
