@@ -82,10 +82,12 @@ namespace Peach.Pro.Core
 		public IEnumerable<string> Run(
 			bool verifyConfig = true, 
 			bool doLint = true, 
+			bool createMetadata = true,
 			bool createNinja = true)
 		{
 			var dom = Parse(verifyConfig, doLint);
-			SaveMetadata(dom);
+			if (createMetadata)
+				SaveMetadata(dom);
 			if (createNinja && _samples.Any())
 				CreateNinjaDatabase(dom);
 			return _errors;

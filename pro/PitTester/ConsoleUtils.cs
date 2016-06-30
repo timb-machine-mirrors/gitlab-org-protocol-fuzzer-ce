@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PitTester
+namespace Peach.Pro.PitTester
 {
 	class ForegroundColor : IDisposable
 	{
