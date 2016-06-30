@@ -66,7 +66,7 @@ namespace Peach.Pro.Core
 		{
 			if (pitLibraryPath == null)
 				return null;
-			
+
 			var path = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
 			if (!File.Exists(path))
 				return null;
@@ -123,7 +123,7 @@ namespace Peach.Pro.Core
 		public Stream Load(string path)
 		{
 			path = path.Replace("##PitLibraryPath##", _pitLibraryPath);
-			
+
 			Stream stream = null;
 
 			// try to load from assembly
@@ -199,6 +199,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
+#if DEBUG
 		public static PitManifest EncryptResources(
 			ResourceRoot root,
 			string output,
@@ -273,6 +274,7 @@ namespace Peach.Pro.Core
 				module.DefineManifestResource(outputResourceName, output, ResourceAttributes.Public);
 			}
 		}
+#endif
 
 		public static Stream DecryptResource(
 			ResourceRoot root,
