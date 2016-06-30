@@ -179,11 +179,6 @@ namespace Peach.Pro.Core.Runtime
 				"Sets the seed used by the random number generator.",
 				(uint v) => _config.randomSeed = v
 			);
-			options.Add(
-				"p|parallel=",
-				"Parallel fuzzing. Total of M machines, this is machine N.",
-				v => ParseParallel("parallel", v)
-			);
 
 			// Defined values & .config files
 			options.Add(
@@ -629,16 +624,6 @@ Performing Fuzzing Run
   
   Additionally a range of test cases can be specified using --range.
 
-Performing A Parellel Fuzzing Run
-
-  Syntax: peach -p 10,2 peach_xml_flie [test_name]
-
-  A parallel fuzzing run uses multiple machines to perform the same fuzzing
-  which shortens the time required.  To run in parallel mode we will need
-  to know the total number of machines and which machine we are.  This
-  information is fed into Peach via the " + "\"-p\"" + @" command line argument in the
-  format " + "\"total_machines,our_machine\"." + @"
-
 Validate Peach XML File
 
   Syntax: peach -t peach_xml_file
@@ -652,7 +637,7 @@ Debug Peach XML File
   
   This will perform a single iteration (-1) of your pit file while displaying
   alot of debugging information (--debug).  The debugging information was
-  origionally intended just for the developers, but can be usefull in pit
+  originally intended just for the developers, but can be useful in pit
   debugging as well.
 ";
 
@@ -718,45 +703,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 				throw new PeachException("Invalid range stop iteration: " + parts[1], ex);
 			}
 
-			if (_config.parallel)
-				throw new PeachException("--range is not supported when --parallel is specified");
-
 			_config.range = true;
-		}
-
-		protected void ParseParallel(string arg, string v)
-		{
-			var parts = v.Split(',');
-			if (parts.Length != 2)
-				throw new PeachException("Invalid parallel value: " + v);
-
-			try
-			{
-				_config.parallelTotal = Convert.ToUInt32(parts[0]);
-
-				if (_config.parallelTotal == 0)
-					throw new ArgumentOutOfRangeException();
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Invalid parallel machine total: " + parts[0], ex);
-			}
-
-			try
-			{
-				_config.parallelNum = Convert.ToUInt32(parts[1]);
-				if (_config.parallelNum == 0 || _config.parallelNum > _config.parallelTotal)
-					throw new ArgumentOutOfRangeException();
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Invalid parallel machine number: " + parts[1], ex);
-			}
-
-			if (_config.range)
-				throw new PeachException("--parallel is not supported when --range is specified");
-
-			_config.parallel = true;
 		}
 
 		protected void AddNewDefine(string arg)

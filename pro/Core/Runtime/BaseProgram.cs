@@ -141,7 +141,7 @@ namespace Peach.Pro.Core.Runtime
 			if (type == null)
 				return true;
 
-			var minVer = new Version(2, 10, 8);
+			var minVer = new Version(4, 0, 0);
 
 			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
 
