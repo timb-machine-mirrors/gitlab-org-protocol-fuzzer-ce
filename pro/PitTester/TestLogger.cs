@@ -7,7 +7,7 @@ using Peach.Core.Dom.XPath;
 
 using Action = Peach.Core.Dom.Action;
 
-namespace PitTester
+namespace Peach.Pro.PitTester
 {
 	public class TestLogger : Logger
 	{
@@ -164,7 +164,7 @@ namespace PitTester
 			verify = true;
 			index = 0;
 
-			PitTester.OnIterationStarting(context, currentIteration, totalIterations);
+			ThePitTester.OnIterationStarting(context, currentIteration, totalIterations);
 		}
 
 		protected override void Engine_IterationFinished(RunContext context, uint currentIteration)

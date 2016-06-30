@@ -2,12 +2,13 @@
 
 subdirs = [
 	'ComContainer',
-	'Compiler',
 	'Core',
 	'LinuxCrashHandler',
 	'NetworkFuzzer',
 	'OS/UnixTrampoline',
 	'Peach',
+	'PitTester',
+	'PitTool',
 	'Service',
 	'SDK',
 	'Test/Apps/AsanTest',
@@ -23,7 +24,6 @@ subdirs = [
 	'Test/OS/Linux',
 	'Test/OS/OSX',
 	'Test/OS/Windows',
-	'Test/PitTester',
 	'Test/WebApi',
 	'Validator',
 	'Web',
