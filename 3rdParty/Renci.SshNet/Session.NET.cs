@@ -17,7 +17,7 @@ namespace Renci.SshNet
         private const byte CarriageReturn = 0x0d;
         private const byte LineFeed = 0x0a;
 
-        private readonly TraceSource _log =
+        public static readonly TraceSource _log =
 #if DEBUG
             new TraceSource("SshNet.Logging", SourceLevels.All);
 #else
