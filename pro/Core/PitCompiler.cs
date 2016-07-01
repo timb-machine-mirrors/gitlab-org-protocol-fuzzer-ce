@@ -80,8 +80,8 @@ namespace Peach.Pro.Core
 		public int TotalNodes { get; private set; }
 
 		public IEnumerable<string> Run(
-			bool verifyConfig = true, 
-			bool doLint = true, 
+			bool verifyConfig = true,
+			bool doLint = true,
 			bool createMetadata = true,
 			bool createNinja = true)
 		{
@@ -209,7 +209,7 @@ namespace Peach.Pro.Core
 						where file != null
 						select new NinjaSample
 						{
-							SamplePath = file.FileName, 
+							SamplePath = file.FileName,
 							DataModel = actionData.dataModel,
 						});
 
@@ -301,7 +301,9 @@ namespace Peach.Pro.Core
 		private void VerifyPit(string fileName, bool isTest)
 		{
 			var idxDeclaration = 0;
+#if DEBUG
 			var idxCopyright = 0;
+#endif
 			var idx = 0;
 
 			using (var rdr = XmlReader.Create(fileName))
@@ -318,6 +320,7 @@ namespace Peach.Pro.Core
 					{
 						idxDeclaration = idx;
 					}
+#if DEBUG
 					else if (rdr.NodeType == XmlNodeType.Comment)
 					{
 						idxCopyright = idx;
@@ -326,6 +329,7 @@ namespace Peach.Pro.Core
 						if (split.Length <= 1)
 							_errors.Add("Long form copyright message is missing.");
 					}
+#endif
 					else if (rdr.NodeType == XmlNodeType.Element)
 					{
 						if (rdr.Name != "Peach")
@@ -334,6 +338,7 @@ namespace Peach.Pro.Core
 							break;
 						}
 
+#if DEBUG
 						if (!rdr.MoveToAttribute("description"))
 							_errors.Add("Pit is missing description attribute.");
 						else if (string.IsNullOrEmpty(rdr.Value))
@@ -345,16 +350,17 @@ namespace Peach.Pro.Core
 							_errors.Add("Pit is missing author attribute.");
 						else if (author != rdr.Value)
 							_errors.Add("Pit author is '{0}' but should be '{1}'.".Fmt(rdr.Value, author));
+	
+						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
+							_errors.Add("Pit is missing xsi:schemaLocation attribute.");
+						else if (SchemaLocation != rdr.Value)
+							_errors.Add("Pit xsi:schemaLocation is '{0}' but should be '{1}'.".Fmt(rdr.Value, SchemaLocation));
+#endif
 
 						if (!rdr.MoveToAttribute("xmlns"))
 							_errors.Add("Pit is missing xmlns attribute.");
 						else if (Namespace != rdr.Value)
 							_errors.Add("Pit xmlns is '{0}' but should be '{1}'.".Fmt(rdr.Value, Namespace));
-
-						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
-							_errors.Add("Pit is missing xsi:schemaLocation attribute.");
-						else if (SchemaLocation != rdr.Value)
-							_errors.Add("Pit xsi:schemaLocation is '{0}' but should be '{1}'.".Fmt(rdr.Value, SchemaLocation));
 
 						break;
 					}
@@ -363,9 +369,10 @@ namespace Peach.Pro.Core
 				if (idxDeclaration != 1)
 					_errors.Add("Pit is missing xml declaration.");
 
+#if DEBUG
 				if (idxCopyright == 0)
 					_errors.Add("Pit is missing top level copyright message.");
-
+#endif
 			}
 
 			{
@@ -395,6 +402,7 @@ namespace Peach.Pro.Core
 					if (string.IsNullOrEmpty(lifetime))
 						_errors.Add("<Test> element is missing targetLifetime attribute.");
 
+#if DEBUG
 					if (!ShouldSkipRule(it, "Skip_Lifetime"))
 					{
 						var parts = fileName.Split(Path.DirectorySeparatorChar);
@@ -414,6 +422,7 @@ namespace Peach.Pro.Core
 					var loggers = it.Current.Select("p:Logger", nsMgr);
 					if (loggers.Count != 0)
 						_errors.Add("Number of <Logger> elements is {0} but should be 0.".Fmt(loggers.Count));
+#endif
 
 					var pubs = it.Current.Select("p:Publisher", nsMgr);
 					while (pubs.MoveNext())

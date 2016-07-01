@@ -38,6 +38,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			_tmpDir.Dispose();
 		}
 
+#if DEBUG
 		[Test]
 		public void TestUnlicensedPit()
 		{
@@ -125,6 +126,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var e = new Engine(null);
 			e.startFuzzing(dom, config);
 		}
+#endif
 
 		[Test]
 		public void TestLoadFromDisk()
@@ -161,6 +163,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			CollectionAssert.Contains(manifest.Features.Keys, "PeachPit-Net-DNP3_Slave");
 		}
 
+#if DEBUG
 		[Test]
 		public void TestProtectResources()
 		{
@@ -247,6 +250,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				return Assembly.Load(ms.ToArray());
 			}
 		}
+#endif
 
 		private static void ExtractDirectory(string targetDir, params string[] parts)
 		{

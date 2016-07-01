@@ -840,7 +840,7 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 <PitDefines>
 </PitDefines>
 ";
-			
+
 			var xmlPath = Path.Combine(_root.Path, "TestPitLintIgnore.xml");
 			File.WriteAllText(xmlPath, xml);
 
@@ -988,5 +988,51 @@ Field'/>
 			};
 			CollectionAssert.AreEqual(expected, actual);
 		}
+
+#if !DEBUG
+		[Test]
+		public void TestReleaseLint()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'>
+	<DataModel name='DM'>
+		<String name='str1' value='value' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM' />
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535' targetLifetime='iteration'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null' name='null' />
+		<Logger class='File' />
+	</Test>
+</Peach>
+";
+
+			const string xmlConfig = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+</PitDefines>
+";
+			var xmlPath = Path.Combine(_root.Path, "TestRelease.xml");
+			File.WriteAllText(xmlPath, xml);
+
+			var xmlConfigPath = Path.Combine(_root.Path, "TestRelease.xml.config");
+			File.WriteAllText(xmlConfigPath, xmlConfig);
+
+			var compiler = new PitCompiler(_root.Path, xmlPath);
+			var actual = compiler.Run().ToArray();
+
+			actual.ForEach(Console.WriteLine);
+			CollectionAssert.IsEmpty(actual);
+		}
+#endif
 	}
 }

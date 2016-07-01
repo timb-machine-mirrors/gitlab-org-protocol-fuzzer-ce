@@ -36,13 +36,16 @@ namespace PitTool
 	{
 		// global options
 		string _pitLibraryPath;
+		NamedCollection<Command> _cmds = new NamedCollection<Command>();
 
 		// compile options
 		bool _fast;
 
+#if DEBUG
 		// protect options
 		string _prefix = "";
 		string _salt;
+#endif
 
 		// test options
 		uint? _seed;
@@ -52,8 +55,6 @@ namespace PitTool
 		bool _profile;
 		uint? _stop;
 		readonly List<string> _errors = new List<string>();
-
-		NamedCollection<Command> _cmds = new NamedCollection<Command>();
 
 		static int Main(string[] args)
 		{
@@ -101,6 +102,7 @@ namespace PitTool
 				Description = "Create an assembly that can be used by NUnit.",
 				Action = MakeTestAssembly,
 			});
+#if DEBUG
 			_cmds.Add(new Command
 			{
 				Name = "protect",
@@ -109,6 +111,7 @@ namespace PitTool
 				Options = MakeProtectOptions(),
 				Action = Protect,
 			});
+#endif
 			_cmds.Add(new Command
 			{
 				Name = "crack",
@@ -166,6 +169,7 @@ namespace PitTool
 			return options;
 		}
 
+#if DEBUG
 		OptionSet MakeProtectOptions()
 		{
 			var options = new OptionSet();
@@ -173,15 +177,20 @@ namespace PitTool
 			options.Add("salt=", "Path to file containing salt", x => _salt = x);
 			return options;
 		}
+#endif
 
 		protected override int ShowUsage(List<string> args)
 		{
-			var first = args.First();
-			if (first != null)
+			string first = null;
+			if (args != null)
 			{
-				Command cmd;
-				if (_cmds.TryGetValue(first, out cmd))
-					return ShowHelp(cmd);
+				first = args.FirstOrDefault();
+				if (first != null)
+				{
+					Command cmd;
+					if (_cmds.TryGetValue(first, out cmd))
+						return ShowHelp(cmd);
+				}
 			}
 
 			var cmds = _cmds.ToList();
@@ -200,6 +209,7 @@ namespace PitTool
 
 			Console.WriteLine("General Options:");
 			_options.WriteOptionDescriptions(Console.Out);
+			Console.WriteLine();
 
 			return 0;
 		}
@@ -263,6 +273,7 @@ namespace PitTool
 
 			Console.WriteLine("General Options:");
 			_options.WriteOptionDescriptions(Console.Out);
+			Console.WriteLine();
 
 			return 0;
 		}
@@ -310,6 +321,7 @@ namespace PitTool
 			return errors.Any() ? -1 : 0;
 		}
 
+#if DEBUG
 		int Protect(List<string> args)
 		{
 			if (args.Count != 2)
@@ -344,6 +356,7 @@ namespace PitTool
 
 			return 0;
 		}
+#endif
 
 		int MakeTestAssembly(List<string> args)
 		{
