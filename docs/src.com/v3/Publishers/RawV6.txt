@@ -8,7 +8,7 @@ NOTE: This publisher runs best on Linux and requires root privileges.
 === Parameters
 
  * _Host_ -- Hostname or IP address of remote host
- * _Interface_ -- IP of interface to bind too (optional)
+ * _Interface_ -- IP of interface to bind to (optional)
  * _Protocol_ -- IP protocol to use (e.g. TCP)
  * _Timeout_ -- How long to wait in milliseconds for data/connection (optional, default 3,000)
  * _MaxMTU_ -- Maximum allowable MTU property value (optional, default 131,070)
