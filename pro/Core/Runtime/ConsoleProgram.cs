@@ -179,12 +179,6 @@ namespace Peach.Pro.Core.Runtime
 				"Sets the seed used by the random number generator.",
 				(uint v) => _config.randomSeed = v
 			);
-			options.Add( /* DEPRICATED - Not in syntax help */
-				"p|parallel=",
-				"Parallel fuzzing. Total of M machines, this is machine N.",
-				v => ParseParallel("parallel", v)
-			);
-
 			// Defined values & .config files
 			options.Add(
 				"D|define=",
@@ -774,45 +768,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 				throw new PeachException("Invalid range stop iteration: " + parts[1], ex);
 			}
 
-			if (_config.parallel)
-				throw new PeachException("--range is not supported when --parallel is specified");
-
 			_config.range = true;
-		}
-
-		protected void ParseParallel(string arg, string v)
-		{
-			var parts = v.Split(',');
-			if (parts.Length != 2)
-				throw new PeachException("Invalid parallel value: " + v);
-
-			try
-			{
-				_config.parallelTotal = Convert.ToUInt32(parts[0]);
-
-				if (_config.parallelTotal == 0)
-					throw new ArgumentOutOfRangeException();
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Invalid parallel machine total: " + parts[0], ex);
-			}
-
-			try
-			{
-				_config.parallelNum = Convert.ToUInt32(parts[1]);
-				if (_config.parallelNum == 0 || _config.parallelNum > _config.parallelTotal)
-					throw new ArgumentOutOfRangeException();
-			}
-			catch (Exception ex)
-			{
-				throw new PeachException("Invalid parallel machine number: " + parts[1], ex);
-			}
-
-			if (_config.range)
-				throw new PeachException("--parallel is not supported when --range is specified");
-
-			_config.parallel = true;
 		}
 
 		protected void AddNewDefine(string arg)

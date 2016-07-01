@@ -234,7 +234,9 @@ namespace Peach.Pro.Core.WebServices
 
 		Pit UpdatePitById(string guid, PitConfig data);
 		Pit UpdatePitByUrl(string url, PitConfig data);
-	
+
+		void DeletePitById(string guid);
+
 		Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description);
 		Tuple<Pit, PitDetail> MigratePit(string legacyPitUrl, string pitUrl);
 	}
@@ -568,7 +570,7 @@ namespace Peach.Pro.Core.WebServices
 		/// <summary>
 		/// 
 		/// Throws:
-		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
+		///   KeyNotFoundException if libraryUrl/pitUrl is not valid.
 		///   ArgumentException if a pit with the specified name already exists.
 		/// </summary>
 		/// <param name="pitUrl">The url of the source pit to copy.</param>
@@ -598,14 +600,23 @@ namespace Peach.Pro.Core.WebServices
 			if (File.Exists(dstFile))
 				throw new ArgumentException("A pit already exists with the specified name.");
 
-			var pitConfig = new PitConfig {
-				Name = name,
-				Description = description,
-				OriginalPit = srcPit.PitConfig.OriginalPit,
-				Config = new List<Param>(),
-				Agents = new List<Models.Agent>(),
-				Weights = new List<PitWeight>(),
-			};
+			PitConfig pitConfig;
+			if (srcPit.Locked)
+			{
+				pitConfig = new PitConfig
+				{
+					Name = name,
+					Description = description,
+					OriginalPit = srcPit.PitConfig.OriginalPit,
+					Config = new List<Param>(),
+					Agents = new List<Models.Agent>(),
+					Weights = new List<PitWeight>(),
+				};
+			}
+			else
+			{
+				pitConfig = LoadPitConfig(srcPit.Path);
+			}
 
 			SavePitConfig(dstFile, pitConfig);
 
@@ -725,6 +736,19 @@ namespace Peach.Pro.Core.WebServices
 			PitDetail pit;
 			_entries.TryGetValue(url, out pit);
 			return UpdatePitById(pit.Id, data);
+		}
+
+		public void DeletePitById(string guid)
+		{
+			var detail = GetPitDetailById(guid);
+			if (detail == null)
+				throw new KeyNotFoundException();
+		
+			if (detail.Locked)
+				throw new UnauthorizedAccessException();
+
+			File.Delete(detail.Path);
+			_entries.Remove(detail);
 		}
 
 		private PitDetail GetPitDetailById(string guid)

@@ -19,11 +19,13 @@ using Peach.Core.Cracker;
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
-using Peach.Core.Test;
 
-namespace PitTester
+namespace Peach.Pro.PitTester
 {
-	public class PitTester
+	class QuickAttribute : CategoryAttribute { }
+	class SlowAttribute : CategoryAttribute { }
+	
+	public static class ThePitTester
 	{
 		public static void OnIterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{
@@ -40,7 +42,7 @@ namespace PitTester
 
 		public static void MakeTestAssembly(
 			string pitLibraryPath,
-			string pitTestFile, 
+			string pitTestFile,
 			string pitAssemblyFile)
 		{
 			var dir = Path.GetDirectoryName(pitAssemblyFile);
@@ -91,19 +93,18 @@ namespace PitTester
 			string name,
 			TypeBuilder type,
 			CustomAttributeBuilder testAttr,
-			string pitLibraryPath, 
+			string pitLibraryPath,
 			string pitTestFile,
 			int iterations)
 		{
 			var method = type.DefineMethod(name, MethodAttributes.Public);
 			method.SetCustomAttribute(testAttr);
-			method.SetCustomAttribute(MakeCustomAttribute(typeof(PeachAttribute)));
 			if (iterations == 1)
 				method.SetCustomAttribute(MakeCustomAttribute(typeof(QuickAttribute)));
 			else
 				method.SetCustomAttribute(MakeCustomAttribute(typeof(SlowAttribute)));
-
-			var testPitMethod = typeof(PitTester).GetMethod("TestPit");
+			
+			var testPitMethod = typeof(ThePitTester).GetMethod("TestPit");
 
 			var il = method.GetILGenerator();
 			var local = il.DeclareLocal(typeof(uint?));
@@ -126,10 +127,9 @@ namespace PitTester
 		{
 			var method = type.DefineMethod("TestDatasets", MethodAttributes.Public);
 			method.SetCustomAttribute(testAttr);
-			method.SetCustomAttribute(MakeCustomAttribute(typeof(PeachAttribute)));
 			method.SetCustomAttribute(MakeCustomAttribute(typeof(SlowAttribute)));
 
-			var testPitMethod = typeof(PitTester).GetMethod("VerifyDataSets");
+			var testPitMethod = typeof(ThePitTester).GetMethod("VerifyDataSets");
 
 			var il = method.GetILGenerator();
 			il.Emit(OpCodes.Ldstr, pitLibraryPath);

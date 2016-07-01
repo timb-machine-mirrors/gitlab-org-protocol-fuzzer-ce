@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 
 deps = [
-	'Newtonsoft.Json.dll',
+	'Ionic.Zip.dll',
 	'NLog.dll',
+	'nunit.framework.dll',
+	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
+	'SharpPcap.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
-	'PitTester.exe',
 ]
 
-app = bld(
+bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'pitc.exe',
-	ver_product = 'Peach Pit Compiler',
+	name = 'Peach.Pro.PitTester.dll',
 )

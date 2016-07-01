@@ -54,7 +54,7 @@ common = [
 	'Peach.exe',
 	'PeachAgent.exe',
 	'Peach.Pro.Web',
-	'pitc.exe',
+	'PitTool.exe',
 
 	# Include sample programs so sample pits work
 	'SimpleHttpServer',
@@ -101,7 +101,6 @@ internal = common + [
 	'Peach.Pro.Test.OS.OSX.dll',
 	'Peach.Pro.Test.OS.Windows.dll',
 	'Peach.Pro.Test.WebApi.exe',
-	'PitTester.exe',
 	'UseAfterFree',
 ]
 

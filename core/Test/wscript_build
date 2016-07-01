@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 deps = [
+	'IronPython.dll',
+	'IronPython.Modules.dll',
+	'Microsoft.Scripting.dll',
+	'Microsoft.Scripting.Metadata.dll',
 	'NLog.dll',
 	'nunit.framework.dll',
+	'Peach.Core.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Runtime.Remoting.dll',
 	'System.Xml.dll',
-	'Peach.Core.dll',
-	'Microsoft.Scripting.dll',
-	'Microsoft.Scripting.Metadata.dll',
-	'IronPython.dll',
-	'IronPython.Modules.dll',
 ]
 
 bld(

@@ -7,7 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Peach.Pro.Core;
 
-namespace PitTester
+namespace Peach.Pro.PitTester
 {
 	[XmlRoot("TestData", IsNullable = false, Namespace = "http://peachfuzzer.com/2012/TestData")]
 	public class TestData

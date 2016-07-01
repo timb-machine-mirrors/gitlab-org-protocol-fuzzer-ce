@@ -17,6 +17,7 @@ deps = [
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.dll',
+	'Peach.Pro.PitTester.dll',
 	'Portable.Licensing.dll',
 	'Renci.SshNet.dll',
 	'SharpSnmpLib.Full.dll',

@@ -35,7 +35,6 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
-
 	[Parameter("HandleSignals", typeof(string), "Signals to consider faults. Space separated list of signals/exceptions to handle as faults.", "SIGSEGV SIGFPE SIGABRT SIGILL SIGPIPE SIGBUS SIGSYS SIGXCPU SIGXFSZ EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC")]
 	[Parameter("Script", typeof(string), "Script file used to drive GDB and perform crash analysis.", "")]
 	public class GdbDebugger : Monitor
