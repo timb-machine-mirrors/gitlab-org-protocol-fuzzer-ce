@@ -2,16 +2,6 @@
 [[Publishers_Http]]
 == Http Publisher
 
-// 02/13/2014: Seth & Adam: Outlined
-//  Params are good
-//  give full put to run for example
-//  examples to show, fuzzing a get with an input action!
-//  examples: setting cookies for a get
-//  example: doing a post
-
-// 02/14/2014: Jordyn
-//   Added full examples for post,cookie and input
-
 _Http_ publisher sends data over HTTP via a valid HTTP method type.
 
 _Http_ supports the following features:
@@ -22,6 +12,8 @@ _Http_ supports the following features:
  * Fuzzing and dynamic setting of query strings
  * Optional cookie support
  * SSL
+
+See also the xref:Publisher_Rest[Rest] publisher.
 
 === Syntax
 
