@@ -52,6 +52,7 @@ if bld.env.MCS and bld.env.DEST_OS != 'win32':
 common = [
 	# Peach
 	'Peach.exe',
+	'PeachAgent.exe',
 	'Peach.Pro.Web',
 	'pitc.exe',
 
