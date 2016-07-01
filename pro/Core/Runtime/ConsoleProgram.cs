@@ -701,7 +701,7 @@ Display Known Elements
 Peach Agent
 
   The Peach Agent functionality has been moved to a separate executable
-  'PeachAgent.exe' or 'peach_agent' on Linux/OS X.
+  'PeachAgent.exe' or 'peachagent' on Linux/OS X.
 
 ";
 
