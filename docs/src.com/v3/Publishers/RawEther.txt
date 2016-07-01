@@ -7,7 +7,7 @@ NOTE: This publisher only runs on Linux with root privileges
 
 === Parameters
 
- * _Interface_ -- IP of interface to bind too (optional)
+ * _Interface_ -- IP of interface to bind to (optional)
  * _Protocol_ -- Ethernet protocol to use (optional, default is ETH_P_ALL)
  * _Timeout_ -- How long to wait in milliseconds for data/connection (optional, default 3,000)
 

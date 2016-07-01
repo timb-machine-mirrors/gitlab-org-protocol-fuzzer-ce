@@ -32,7 +32,7 @@ NOTE: This publisher requires administrative privileges.
 
 _Required:_
 
-Interface:: Name of interface to bind too
+Interface:: Name of interface to bind to
 
 _Optional:_
 
