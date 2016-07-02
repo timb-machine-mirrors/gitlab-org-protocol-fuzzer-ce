@@ -44,7 +44,7 @@ Protocol:: IP protocol to use (value must be between 0 and 255).
 
 _Optional:_
 
-Interface:: IP of interface to bind too. Uses all interfaces by default.
+Interface:: IP of interface to bind to. Uses all interfaces by default.
 Timeout:: How long to wait in milliseconds for data/connection. Defaults to 3,000.
 MaxMTU:: Maximum allowable MTU property value. Defaults to 131,070.
 MinMTU:: Minimum allowable MTU property value. Defaults to 1,280.

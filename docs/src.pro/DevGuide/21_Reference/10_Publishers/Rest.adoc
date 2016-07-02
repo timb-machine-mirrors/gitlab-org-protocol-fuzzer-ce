@@ -13,6 +13,19 @@ This publisher supports sending body data as:
 Similar to the xref:Publisher_Http[Http] publisher, the _Rest_ publisher supports setting headers by using a special action type 'call' syntax.
 See the examples section for an example of setting a custom header field.
 
+Several analyzers are useful when building Pits for RESTful APIs:
+
+xref:Analyzer_Json[Json]::
+    Converts JSON documents or strings into Peach data models.
+    Can be used both inside of DataModels with the String element or also via the command line.
+    
+xref:Analyzer_Postman[Postman]::
+    Converts Postman Catalogs to Peach Pits.
+    
+xref:Analyzer_Swagger[Swagger]::
+    Converts Swagger JSON to Peach Pits
+
+
 TIP: SSL/TLS is supported, just use +https+ as the protocol in the URL.
 
 TIP: By default the publisher will attempt to detect the body content type and set the correct ContentType header.
@@ -102,7 +115,9 @@ For the GET request, the Result element is used to capture any returned data.
 
 [source,xml]
 ----
-<Peach>
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 <DataModel name="PostData">
     <JsonObject>
@@ -202,7 +217,9 @@ The following example provides three fragments using the GET and POST methods.
 
 [source,xml]
 ----
-<Peach>
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 <DataModel name="WebApiString">
 	<String name="value" value="">
@@ -262,7 +279,9 @@ The following example provides three fragments using the GET and POST methods.
 
 [source,xml]
 ----
-<Peach>
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 <DataModel name="WebApiString">
 	<String name="value" value="">
@@ -317,7 +336,9 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
 
 [source,xml]
 ----
-<Peach>
+<?xml version="1.0" encoding="utf-8"?>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
 <DataModel name="WebApiString">
 	<String name="value" value="">
@@ -420,7 +441,8 @@ def AwsAuthGen(context, action):
 [source,xml]
 ----
 <?xml version="1.0" encoding="utf-8"?>
-<Peach>
+<Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
   <Import import="aws_s3_example"/>
   

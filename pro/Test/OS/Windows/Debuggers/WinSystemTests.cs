@@ -186,7 +186,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 			{
 				if (!dbg.IsRunning)
 					break;
-				System.Threading.Thread.Sleep(200);
+				System.Threading.Thread.Sleep(500);
 			}
 
 			Assert.False(dbg.IsRunning, "Debugger should not be running");
