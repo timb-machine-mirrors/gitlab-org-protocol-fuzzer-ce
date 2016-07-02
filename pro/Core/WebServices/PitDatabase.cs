@@ -605,8 +605,6 @@ namespace Peach.Pro.Core.WebServices
 			{
 				pitConfig = new PitConfig
 				{
-					Name = name,
-					Description = description,
 					OriginalPit = srcPit.PitConfig.OriginalPit,
 					Config = new List<Param>(),
 					Agents = new List<Models.Agent>(),
@@ -617,6 +615,9 @@ namespace Peach.Pro.Core.WebServices
 			{
 				pitConfig = LoadPitConfig(srcPit.Path);
 			}
+
+			pitConfig.Name = name;
+			pitConfig.Description = description;
 
 			SavePitConfig(dstFile, pitConfig);
 
@@ -722,6 +723,7 @@ namespace Peach.Pro.Core.WebServices
 			if (detail.Locked)
 				throw new UnauthorizedAccessException();
 
+			detail.PitConfig.Description = data.Description;
 			detail.PitConfig.Config = data.Config; // TODO: defines.ApplyWeb(config);
 			detail.PitConfig.Agents = data.Agents.FromWeb();
 			detail.PitConfig.Weights = data.Weights;

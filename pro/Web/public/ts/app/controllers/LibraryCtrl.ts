@@ -47,14 +47,15 @@ namespace Peach {
 			private $modal: ng.ui.bootstrap.IModalService,
 			private pitService: PitService
 		) {
-			this.init();
+			this.refresh();
 		}
 
 		private Libs: PitLibrary[] = [];
 		
-		private init() {
+		private refresh() {
 			const promise = this.pitService.LoadLibrary();
 			promise.then((data: ILibrary[]) => {
+				this.Libs = [];
 				for (const lib of data) {
 					const pitLib = new PitLibrary(lib.name);
 					let hasPits = false;
@@ -83,6 +84,10 @@ namespace Peach {
 			});
 		}
 
+		private ShowActions(entry: PitEntry): boolean {
+			return !entry.Library.locked;
+		}
+
 		private OnSelectPit(entry: PitEntry) {
 			if (entry.Library.versions[0].version === 1) {
 				this.$modal.open({
@@ -99,13 +104,105 @@ namespace Peach {
 				this.$modal.open({
 					templateUrl: C.Templates.Modal.NewConfig,
 					controller: NewConfigController,
-					resolve: { Pit: () => angular.copy(entry.Pit) }
+					resolve: { 
+						Title: () => 'New Pit Configuration',
+						Prompt: () => 
+							`This will create a new configuration for the <code>${entry.Pit.name}</code> pit. ` + 
+							'You will then be able to edit the configuration and start a new fuzzing job.',
+						Pit: () => angular.copy(entry.Pit),
+						OnSubmit: () => modal => this.DoNewConfig(modal)
+					}
 				}).result.then((copied: IPit) => {
 					this.GoToPit(copied);
 				});
 			} else {
 				this.GoToPit(entry.Pit);
 			}
+		}
+
+		private DoNewConfig(modal: NewConfigController) {
+			this.pitService.NewConfig(modal.Pit)
+				.then((response: ng.IHttpPromiseCallbackArg<IPit>) => {
+					modal.Close(response.data);
+				},
+				(response: ng.IHttpPromiseCallbackArg<any>) => {
+					switch (response.status) {
+						case 400:
+							modal.SetError(`${modal.Pit.name} already exists, please choose a new name.`);
+							break;
+						default:
+							modal.SetError(`Error: ${response.statusText}`);
+							break;
+					}
+				});
+		}
+
+		private OnCopyPit(entry: PitEntry) {
+			this.$modal.open({
+				templateUrl: C.Templates.Modal.NewConfig,
+				controller: NewConfigController,
+				resolve: { 
+					Title: () => 'Copy Pit Configuration',
+					Prompt: () => `This will create a copy from the <code>${entry.Pit.name}</code> pit configuration. `,
+					Pit: () => angular.copy(entry.Pit),
+					OnSubmit: () => modal => this.DoNewConfig(modal)
+				}
+			}).result.then(() => {
+				this.refresh();
+			});
+		}
+
+		private OnEditPit(entry: PitEntry) {
+			this.$modal.open({
+				templateUrl: C.Templates.Modal.NewConfig,
+				controller: NewConfigController,
+				resolve: { 
+					Title: () => 'Edit Pit Configuration',
+					Prompt: () => '',
+					Pit: () => angular.copy(entry.Pit),
+					OnSubmit: () => (modal: NewConfigController) => {
+						this.pitService.EditConfig(modal.Pit)
+							.then(() => {
+								modal.Close(null);
+							},
+							(response: ng.IHttpPromiseCallbackArg<any>) => {
+								switch (response.status) {
+									case 400:
+										modal.SetError(`${modal.Pit.name} already exists, please choose a new name.`);
+										break;
+									default:
+										modal.SetError(`Error: ${response.statusText}`);
+										break;
+								}
+							});
+					}
+				}
+			}).result.finally(() => {
+				this.refresh();
+			});
+		}
+
+		private OnDeletePit(entry: PitEntry) {
+			const options: IConfirmOptions = {
+				Title: 'Delete Pit Configuration',
+				SubmitPrompt: 'Delete'
+			};
+			Confirm(this.$modal, options).result
+				.then(result => {
+					if (result === 'ok') {
+						this.pitService.DeletePit(entry.Pit).then(() => {
+							this.refresh();
+						}, (response: ng.IHttpPromiseCallbackArg<void>) => {
+							Alert(this.$modal, {
+								Title: 'Failed to delete pit configuration',
+								Body: response.statusText
+							}).result.finally(() => {
+								this.refresh();
+							})
+						});
+					}
+				})
+			;
 		}
 
 		private GoToPit(pit: IPit) {

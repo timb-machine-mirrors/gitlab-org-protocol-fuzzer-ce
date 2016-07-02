@@ -4,14 +4,11 @@
 			autocomplete="off">
 	<div class="modal-header">
 		<h3 class="modal-title">
-			New Pit Configuration
+			{{vm.Title}}
 		</h3>
 	</div>
 	<div class="modal-body">
-		<p>
-			This will create a new configuration for the <code>{{vm.OriginalName}}</code> pit.
-			You will then be able to edit the configuration and start a new fuzzing job.
-		</p>
+		<p ng-bind-html="vm.Prompt" />
 		<div class="form-group"
 				 ng-class="{'has-error': form.name.$invalid && form.name.$dirty}">
 			<label class="col-sm-2 control-label">

@@ -55,6 +55,30 @@
 							ng-click="vm.OnSelectPit(entry)">
 								{{entry.Pit.name | peachPitName}}
 							</a>
+							<div class="pull-right action-buttons"
+								ng-show="vm.ShowActions(entry)">
+								<a href="" 
+									class="green"
+									ng-click="vm.OnCopyPit(entry)"
+									uib-tooltip="Copy"
+									tooltip-append-to-body="true">
+									<i class="fa fa-copy" />
+								</a>
+								<a href="" 
+									class="blue"
+									ng-click="vm.OnEditPit(entry)"
+									uib-tooltip="Edit"
+									tooltip-append-to-body="true">
+									<i class="fa fa-pencil" />
+								</a>
+								<a href="" 
+									class="red"
+									ng-click="vm.OnDeletePit(entry)"
+									uib-tooltip="Delete"
+									tooltip-append-to-body="true">
+									<i class="fa fa-trash" />
+								</a>
+							</div>
 					</li>
 				</ul>
 			</div>
