@@ -953,6 +953,7 @@ namespace Peach.Pro.Core.Loggers
 				ConcurrentWrites = false,
 				KeepFileOpen = !config.singleIteration,
 				ArchiveAboveSize = 10 * 1024 * 1024,
+				MaxArchiveFiles = 10,
 				ArchiveNumbering = ArchiveNumberingMode.Sequence,
 				Encoding = System.Text.Encoding.UTF8,
 			};
