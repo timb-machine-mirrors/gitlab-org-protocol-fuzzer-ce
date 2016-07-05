@@ -23,7 +23,7 @@ top = bld.path.parent.parent
 #		top.ant_glob(os.path.join(path, '**'))
 #	)
 
-bld(
+app = bld(
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
