@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Reflection;
 using System.Web.Http;
 using Peach.Pro.Core.License;
 using Peach.Pro.WebApi2.Utility;
@@ -36,6 +37,7 @@ namespace Peach.Pro.WebApi2.Controllers
 				Expiration = _license.Expiration,
 				Eulas = _license.Eulas.ToArray(),
 				EulaAccepted = _license.EulaAccepted,
+				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 			};
 		}
 

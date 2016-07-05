@@ -10,8 +10,7 @@ namespace Peach {
 			C.Angular.$window,
 			C.Services.Eula,
 			C.Services.Pit,
-			C.Services.Wizard,
-			C.Services.Node
+			C.Services.Wizard
 		];
 
 		constructor(
@@ -21,8 +20,7 @@ namespace Peach {
 			private $window: ng.IWindowService,
 			private eulaService: EulaService,
 			private pitService: PitService,
-			private wizardService: WizardService,
-			private nodeService: NodeService
+			private wizardService: WizardService
 		) {
 			$scope.vm = this;
 			$scope.$root.$on(C.Angular.$stateChangeSuccess, () => {
@@ -35,13 +33,9 @@ namespace Peach {
 				});
 			});
 
-			this.nodeService.Load().then(nodes => {
-				const node = nodes[0];
-				this.Version = node.version;
-			});
-
 			this.eulaService.Verify().then(license => {
 				this.license = license;
+				this.Version = license.version;
 			});
 		}
 

@@ -67,11 +67,9 @@ namespace Peach.C {
 		export const Job = 'JobService';
 		export const Test = 'TestService';
 		export const Wizard = 'WizardService';
-		export const Node = 'NodeService';
 	}
 
 	export namespace Api {
-		export const Nodes = '/p/nodes';
 		export const License = '/p/license';
 		export const Libraries = '/p/libraries';
 		export const Pits = '/p/pits';
