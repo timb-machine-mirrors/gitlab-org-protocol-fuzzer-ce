@@ -6,10 +6,12 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Peach.Core;
 using Peach.Core.Runtime;
+using Peach.Core.Xsd;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.PitTester;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace PitTool
 {
@@ -20,6 +22,7 @@ namespace PitTool
 		public string Description { get; set; }
 		public OptionSet Options { get; set; }
 		public Func<List<string>, int> Action { get; set; }
+		public Func<Command, int> Help { get; set; }
 
 		public string name
 		{
@@ -118,6 +121,21 @@ namespace PitTool
 				Usage = "{0} {1} [options] <PitPath> <DataModel> <SamplePath>",
 				Description = "Crack a sample file.",
 				Action = Crack,
+			});
+			_cmds.Add(new Command
+			{
+				Name = "makexsd",
+				Usage = "{0} {1} [options]",
+				Description = "Generate a peach.xsd file.",
+				Action = MakeXsd,
+			});
+			_cmds.Add(new Command
+			{
+				Name = "analyzer",
+				Usage = "{0} {1} <analyzer> [options]",
+				Description = "Run a Peach analyzer.",
+				Action = Analyzer,
+				Help = ShowAnalyzerHelp,
 			});
 		}
 
@@ -256,6 +274,9 @@ namespace PitTool
 
 		int ShowHelp(Command cmd)
 		{
+			if (cmd.Help != null)
+				return cmd.Help(cmd);
+
 			Console.WriteLine("Usage:");
 			Console.WriteLine("  " + cmd.Usage.Fmt(Utilities.ExecutableName, cmd.Name));
 			Console.WriteLine();
@@ -462,6 +483,106 @@ namespace PitTool
 			// 2 = data model
 			// 3 = sample path
 			ThePitTester.Crack(_pitLibraryPath, args[1], args[2], args[3]);
+			return 0;
+		}
+
+		int MakeXsd(List<string> args)
+		{
+			using (var stream = File.OpenWrite("peach.xsd"))
+			{
+				SchemaBuilder.Generate(typeof(Dom), stream);
+
+				Console.WriteLine("Successfully generated {0}", stream.Name);
+			}
+
+			return 0;
+		}
+
+		int Analyzer(List<string> args)
+		{
+			var name = args.FirstOrDefault();
+			if (name == null)
+			{
+				Console.WriteLine("Missing required arguments");
+				Console.WriteLine();
+				ShowHelp(_cmds["analyzer"]);
+				return 1;
+			}
+
+			var type = ClassLoader.FindPluginByName<AnalyzerAttribute>(name);
+			if (type == null)
+				throw new PeachException("Error, unable to locate analyzer named '{0}'.\n".Fmt(name));
+
+			if (!IsAnalyzerSupported(type))
+				throw new NotSupportedException("Analyzer is not configured to run from the command line.");
+
+			var analyzer = (Analyzer)Activator.CreateInstance(type);
+
+			InteractiveConsoleWatcher.WriteInfoMark();
+			Console.WriteLine("Starting Analyzer");
+
+			var dict = new Dictionary<string, string>();
+			for (var i = 1; i < args.Count; i++)
+				dict[(i - 1).ToString()] = args[i];
+
+			analyzer.asCommandLine(dict);
+
+			return 0;
+		}
+
+		bool IsAnalyzerSupported(Type type)
+		{
+			var field = type.GetField("supportCommandLine", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+			return field != null && (bool)field.GetValue(null);
+		}
+
+		bool IsAnalyzerObsolete(Type type)
+		{
+			return type.GetAttributes<ObsoleteAttribute>().Any();
+		}
+
+		string AnalyzerDescription(Type type)
+		{
+			var desc = type.GetAttributes<DescriptionAttribute>().SingleOrDefault();
+			if (desc != null)
+				return desc.Description;
+			return "";
+		}
+
+		int ShowAnalyzerHelp(Command cmd)
+		{
+			Console.WriteLine("Usage:");
+			Console.WriteLine("  " + cmd.Usage.Fmt(Utilities.ExecutableName, cmd.Name));
+			Console.WriteLine();
+
+			Console.WriteLine("Description:");
+			Console.WriteLine("  {0}", cmd.Description);
+			Console.WriteLine();
+
+			Console.WriteLine("Analyzers:");
+			var analyzers = from x in ClassLoader.GetAllByAttribute<AnalyzerAttribute>()
+							where
+			                    x.Key.IsDefault &&
+								IsAnalyzerSupported(x.Value) &&
+								!IsAnalyzerObsolete(x.Value)
+							select new { x.Key.Name, Description = AnalyzerDescription(x.Value) };
+			foreach (var analyzer in analyzers)
+			{
+				Console.WriteLine("  {0,-27}{1}", analyzer.Name, analyzer.Description);
+			}
+			Console.WriteLine();
+
+			if (cmd.Options != null)
+			{
+				Console.WriteLine("{0} Options:", cmd.Name);
+				cmd.Options.WriteOptionDescriptions(Console.Out);
+				Console.WriteLine();
+			}
+
+			Console.WriteLine("General Options:");
+			_options.WriteOptionDescriptions(Console.Out);
+			Console.WriteLine();
+
 			return 0;
 		}
 

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -11,12 +10,14 @@ using Peach.Core.IO;
 using System.Text.RegularExpressions;
 using String = Peach.Core.Dom.String;
 using XmlCharacterData = Peach.Core.Dom.XmlCharacterData;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("Xml", true)]
 	[Analyzer("XmlAnalyzer")]
 	[Analyzer("xml.XmlAnalyzer")]
+	[Description("Generate a data model based on an XML document.")]
 	[Serializable]
 	public class XmlAnalyzer : Analyzer
 	{
@@ -57,7 +58,7 @@ namespace Peach.Pro.Core.Analyzers
 			asDataElement(model[0], null);
 
 			var settings = new XmlWriterSettings();
-			settings.Encoding = System.Text.UTF8Encoding.UTF8;
+			settings.Encoding = System.Text.Encoding.UTF8;
 			settings.Indent = true;
 
 			using (var sout = new FileStream(outFile, FileMode.Create))
