@@ -235,10 +235,10 @@ namespace Peach.Pro.Core.Runtime
 				v => _test = true
 			);
 			options.Add(
-			"makexsd",
-			"Generate peach.xsd",
-			var => _cmd = MakeSchema
-								   );
+				"makexsd",
+				"Generate peach.xsd",
+				var => _cmd = MakeSchema
+		   );
 		}
 
 		protected override bool VerifyCompatibility()
