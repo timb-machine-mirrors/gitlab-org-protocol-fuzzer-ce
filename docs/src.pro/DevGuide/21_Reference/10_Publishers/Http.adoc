@@ -60,6 +60,10 @@ xref:Action_close[close]:: Close and clean up the socket.
 xref:Action_output[output]:: Data sent via output is written to the open socket.
 xref:Action_input[input]:: Data received via input is read from the open socket.
 
+=== Scripting
+
+The Http publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See the xref:Publishers_Rest[Rest] publisher examples.
+
 === Examples
 
 .HTTP POST Request

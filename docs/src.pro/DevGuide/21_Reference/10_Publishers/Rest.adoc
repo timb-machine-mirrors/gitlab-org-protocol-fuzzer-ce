@@ -105,6 +105,10 @@ By default they are fuzzed. This can be disabled using the +mutable+ attribute o
 +
 An example of settings headers both via Python and also the +call+ action are provided in the Example section.
 
+=== Scripting
+
+The Rest publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See example _Setting Custom Authentication Header via Python_ below.
+
 === Example
 
 .Calling Rest Services with Result
