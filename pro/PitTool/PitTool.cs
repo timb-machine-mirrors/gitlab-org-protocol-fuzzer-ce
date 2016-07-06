@@ -125,7 +125,7 @@ namespace PitTool
 			_cmds.Add(new Command
 			{
 				Name = "makexsd",
-				Usage = "{0} {1} [options]",
+				Usage = "{0} {1}",
 				Description = "Generate a peach.xsd file.",
 				Action = MakeXsd,
 			});
