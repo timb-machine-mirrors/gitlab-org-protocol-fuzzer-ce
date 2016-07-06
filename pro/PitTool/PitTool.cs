@@ -562,7 +562,7 @@ namespace PitTool
 			Console.WriteLine("Analyzers:");
 			var analyzers = from x in ClassLoader.GetAllByAttribute<AnalyzerAttribute>()
 							where
-			                    x.Key.IsDefault &&
+								x.Key.IsDefault &&
 								IsAnalyzerSupported(x.Value) &&
 								!IsAnalyzerObsolete(x.Value)
 							select new { x.Key.Name, Description = AnalyzerDescription(x.Value) };
