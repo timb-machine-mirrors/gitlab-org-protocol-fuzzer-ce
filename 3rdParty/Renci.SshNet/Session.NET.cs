@@ -161,6 +161,10 @@ namespace Renci.SshNet
             }
             while (!(buffer.Count > 0 && (buffer[buffer.Count - 1] == LineFeed || buffer[buffer.Count - 1] == Null)));
 
+#if DEBUG
+			Log(string.Format("SocketReadLine: {0}", BitConverter.ToString(buffer.ToArray())));
+#endif
+
             if (buffer.Count == 0)
                 response = null;
             else if (buffer.Count == 1 && buffer[buffer.Count - 1] == 0x00)
