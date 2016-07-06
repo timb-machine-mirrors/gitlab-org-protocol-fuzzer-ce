@@ -26,7 +26,7 @@ def glob_from(*parts):
 
 python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.5', 'content')
 
-makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
+makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 
 app = bld(
 	features = 'cs',

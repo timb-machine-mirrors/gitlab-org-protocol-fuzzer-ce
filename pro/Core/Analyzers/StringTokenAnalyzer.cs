@@ -36,13 +36,14 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Encoding = Peach.Core.Encoding;
-using System.Diagnostics;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("StringToken", true)]
 	[Analyzer("StringTokenAnalyzer")]
 	[Analyzer("stringtoken.StringTokenAnalyzer")]
+	[Description("Generate a data model by tokenizing a text document.")]
 	[Parameter("Tokens", typeof(string), "List of character tokens", StringTokenAnalyzer.TOKENS)]
 	[Serializable]
 	public class StringTokenAnalyzer : Analyzer

@@ -118,20 +118,6 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
-			// Run analyzer and exit
-			options.Add(
-				"analyzer=",
-				"Launch Peach Analyzer",
-				v => _analyzer = v
-			);
-
-			// Run agent and wait for ctrl-c
-			options.Add( /* DEPRICATED - Not in syntax help */
-				"a|agent=",
-				"Launch Peach Agent",
-				v => _agent = v
-			);
-
 			options.Add(
 				"1",
 				"Perform a single test case",
@@ -164,11 +150,7 @@ namespace Peach.Pro.Core.Runtime
 				"How long to run the fuzzer for.",
 				(TimeSpan v) => _config.Duration = v
 			);
-			options.Add( /* DEPRICATED - Not in syntax help */
-				"c|count",
-				"Count test cases",
-				v => _config.countOnly = true
-			);
+
 			options.Add(
 				"skipto=",
 				"Skip to a specific test #. This replaced -r for restarting a Peach run.",
@@ -186,20 +168,6 @@ namespace Peach.Pro.Core.Runtime
 				"In your PIT you can specify ##KEY## and it will be replaced with VALUE.",
 				AddNewDefine
 			);
-			options.Add( /* DEPRICATED - Not in syntax help */
-				"definedvalues=",
-				v => _configFiles.Add(v)
-			);
-			options.Add( /* DEPRICATED - Not in syntax help */
-				"config=",
-				"XML file containing defined values",
-				v => _configFiles.Add(v)
-			);
-			options.Add( /* DEPRICATED - Not in syntax help */
-				"t|test",
-				"Validate a Peach Pit file",
-				v => _test = true
-			);
 
 			// Global actions, get run and immediately exit
 			options.Add(
@@ -212,11 +180,6 @@ namespace Peach.Pro.Core.Runtime
 				"Print a list of all DataElements, Fixups, Agents, " +
 				"Publishers and their associated parameters.",
 				var => _cmd = ShowEnvironment
-			);
-			options.Add(
-				"makexsd",
-				"Generate peach.xsd",
-				var => _cmd = MakeSchema
 			);
 
 			// web ui
@@ -240,6 +203,42 @@ namespace Peach.Pro.Core.Runtime
 				"Specifies port web interface runs on.",
 				(int v) => _webPort = v
 			);
+
+			// DEPRECATED - Not in syntax help
+			options.Add(
+				"analyzer=",
+				"Launch Peach Analyzer",
+				v => _analyzer = v
+			);
+			options.Add(
+				"c|count",
+				"Count test cases",
+				v => _config.countOnly = true
+			);
+			options.Add(
+				"a|agent=",
+				"Launch Peach Agent",
+				v => _agent = v
+			);
+			options.Add(
+				"definedvalues=",
+				v => _configFiles.Add(v)
+			);
+			options.Add(
+				"config=",
+				"XML file containing defined values",
+				v => _configFiles.Add(v)
+			);
+			options.Add(
+				"t|test",
+				"Validate a Peach Pit file",
+				v => _test = true
+			);
+			options.Add(
+				"makexsd",
+				"Generate peach.xsd",
+				var => _cmd = MakeSchema
+		   );
 		}
 
 		protected override bool VerifyCompatibility()
@@ -364,7 +363,7 @@ namespace Peach.Pro.Core.Runtime
 				{
 					test.weights.Add(new SelectWeight
 					{
-						Name = item.Id, 
+						Name = item.Id,
 						Weight = (ElementWeight)item.Weight
 					});
 				}
@@ -576,10 +575,10 @@ namespace Peach.Pro.Core.Runtime
 		protected virtual void Syntax()
 		{
 			const string syntax1 =
-@"This is the core Peach application which provides the core fuzzing
-capabilities and also some utilitily functions for the custom pit
-developer. This application can be used to start the Peach Web Application
-and also to launch fuzzing jobs from the command line.
+@"This is the core Peach application which provides the fuzzing engine
+and also some utility functions for the custom pit developer. This
+application can be used to start the Peach Web Application and also to
+launch fuzzing jobs from the command line.
 
 Some options may be disabled depending on your Peach License options.
 
@@ -587,12 +586,12 @@ Please submit any bugs to support@peachfuzzer.com.
 
 Peach Web Application
 
-  Syntax: peach [--nobrowser|--webport=PORT|--plugins=PATH]
+  Syntax: peach [options]
 
    --nobrowser        Disable launching browser on start
    --webport=PORT     Specified port the web application runs on
    --plugins=PATH     Change the plugins folder location. Defaults to
-                      Peach install folder '/Plugins'.
+                      the 'Plugins' folder relative to the Peach installation.
 
   Starts Peach and provides a web application for configuring, running,
   and viewing results of a fuzzing job.
@@ -613,7 +612,7 @@ Fuzzing from Command Line
                       Multiple defines can be provided as needed.
                       Example: -DTargetIPv4=127.0.0.1 -DTargetPort=80
    --duration=DUR     Duration of fuzzing run. Peach will run for DUR length
-                      of time. Commonly integrating Peach into an automated 
+                      of time. Useful for integrating Peach into an automated 
                       test cycle or continuous integration environment. 
                       Argument format is DD.HH:MM:SS.
                       Example: --duration=12     Duration of 12 days
@@ -622,7 +621,7 @@ Fuzzing from Command Line
                                --duration=1.5:00 Duration of 1 day, 5 hrs
    --noweb            Disable the Peach Web Application
    --plugins=PATH     Change the plugins folder location. Defaults to
-                      Peach install folder '/Plugins'.
+                      the 'Plugins' folder relative to the Peach installation.
    --polite           Disable interactive console mode
    --range=S,F        Perform a range of testcases start at test case S and 
                       ending with test case F. Typically combined with the 
@@ -637,11 +636,11 @@ Fuzzing from Command Line
    --trace            Enable even more verbose debug messages.
    --webport=PORT     Specified port the web application runs on
 
-  A fuzzing run is started by by specifying the Peach Pit Configuration or
+  A fuzzing run is started by specifying the Peach Pit Configuration or
   Peach XML file and the name of a test to perform.
   
-  If a run is interupted for some reason it can be restarted using the
-  --skipto and --seed parameters and providing the test # to start 
+  If a run is interrupted for some reason it can be restarted using the
+  --skipto and --seed parameters to provide the test case to start 
   fuzzing at and the seed of the first job.
 
 Debug Peach XML File
@@ -649,25 +648,8 @@ Debug Peach XML File
   Syntax: peach -1 --debug <PEACH_PIT.xml | PEACH_CONFIG.peach> [test_name]
   
   This will perform a single iteration (-1) of your pit file while displaying
-  alot of debugging information (--debug).  The debugging information is
+  a lot of debugging information (--debug).  The debugging information is
   intended for custom pit developers.
-
-Running Analyzers from Command Line
-
-  Syntax: peach --analyzer=CLASS [options]
-          peach --analyzer=Json json_input.json pit_output.xml
-
-  Run an analyzer from the command line. Most analyzers will provide
-  syntax help when run with no options. Analyzers are documented int
-  SDK developer guide.
-
-Generate XML Schema File
-
-  Syntax: peach --makexsd
-
-  Generate XML Schema file (peach.xsd). This file is used for pit 
-  file validation and also intelliSense in XML editors. The XSD only 
-  needs to be generated if custom extensions are added to Peach.
 
 Display List of Network Capture Devices
 
@@ -706,7 +688,7 @@ Peach Agent
 ";
 
 			Console.WriteLine(syntax1);
-			// We now have some depricated options that should not be shown.
+			// We now have some deprecated options that should not be shown.
 			//_options.WriteOptionDescriptions(Console.Out);
 			//Console.WriteLine(syntax2);
 		}
@@ -787,6 +769,27 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 				_defPitLibraryPath = value;
 		}
 
+		static int MakeSchema(List<string> args)
+		{
+			try
+			{
+				Console.WriteLine();
+
+				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
+				{
+					SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
+
+					Console.WriteLine("Successfully generated {0}", stream.Name);
+				}
+
+				return 0;
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				throw new PeachException("Error creating schema. {0}".Fmt(ex.Message), ex);
+			}
+		}
+
 		#endregion
 
 		#region Global Actions
@@ -823,27 +826,6 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		{
 			Usage.Print();
 			return 0;
-		}
-
-		static int MakeSchema(List<string> args)
-		{
-			try
-			{
-				Console.WriteLine();
-
-				using (var stream = new FileStream("peach.xsd", FileMode.Create, FileAccess.Write))
-				{
-					SchemaBuilder.Generate(typeof(Peach.Core.Xsd.Dom), stream);
-
-					Console.WriteLine("Successfully generated {0}", stream.Name);
-				}
-
-				return 0;
-			}
-			catch (UnauthorizedAccessException ex)
-			{
-				throw new PeachException("Error creating schema. {0}".Fmt(ex.Message), ex);
-			}
 		}
 
 		#endregion

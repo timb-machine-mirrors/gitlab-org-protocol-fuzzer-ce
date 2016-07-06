@@ -1,0 +1,32 @@
+#!/bin/bash
+
+DIRNAME="`dirname ${0}`"
+DEBUG=""
+case "$*" in
+  *--debug*)
+    DEBUG="--debug"
+    ;;
+esac
+
+MONO="$(which mono)"
+if [ -z $MONO ];
+then
+	echo "Error: mono could not be found."
+	echo ""
+	echo "Ensure mono is properly installed and try again."
+	echo ""
+	exit 1
+fi
+
+MCS="$(which mcs)"
+if [ -z $MCS ];
+then
+	echo "Warning: some mono components could not be found."
+	echo ""
+	echo "If you have issues, please install the full mono package for your distribution."
+	echo "On ubuntu, this is mono-complete."
+	echo ""
+	echo "See: http://www.mono-project.com/docs/getting-started/install"
+fi
+
+${MONO} --gc=sgen ${DEBUG} ${DIRNAME}/PitTool.exe $@
