@@ -1,5 +1,5 @@
-[[Analyzers_Json]]
 
+[[Analyzers_Json]]
 == JSON Analyzer
 
 This analyzer converts JSON strings into a full data model. 

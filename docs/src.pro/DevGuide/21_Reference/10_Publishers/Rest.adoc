@@ -10,19 +10,19 @@ This publisher supports sending body data as:
  * XML when models contain XmlElement
  * As raw binary data when a custom content type is provided
 
-Similar to the xref:Publisher_Http[Http] publisher, the _Rest_ publisher supports setting headers by using a special action type 'call' syntax.
+Similar to the xref:Publishers_Http[Http] publisher, the _Rest_ publisher supports setting headers by using a special action type 'call' syntax.
 See the examples section for an example of setting a custom header field.
 
 Several analyzers are useful when building Pits for RESTful APIs:
 
-xref:Analyzer_Json[Json]::
+xref:Analyzers_Json[Json]::
     Converts JSON documents or strings into Peach data models.
     Can be used both inside of DataModels with the String element or also via the command line.
     
-xref:Analyzer_Postman[Postman]::
+xref:Analyzers_Postman[Postman]::
     Converts Postman Catalogs to Peach Pits.
     
-xref:Analyzer_Swagger[Swagger]::
+xref:Analyzers_Swagger[Swagger]::
     Converts Swagger JSON to Peach Pits
 
 
@@ -104,6 +104,10 @@ To set a header using a call action you must:
 By default they are fuzzed. This can be disabled using the +mutable+ attribute on the data model and data elements or using the +Include/Exclude+ elements in the +Test+ portion of the xml.
 +
 An example of settings headers both via Python and also the +call+ action are provided in the Example section.
+
+=== Scripting
+
+The Rest publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See example _Setting Custom Authentication Header via Python_ below.
 
 === Example
 

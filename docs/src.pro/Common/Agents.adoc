@@ -24,7 +24,7 @@ LocalAgent (local)::
 	The agent is hosted in the current Peach process. This is the default channel.
 
 TCP REMOTING (tcp)::
-	The external Peach agent communicates using REST API calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
+	The external Peach agent communicates using REST API calls over TCP. Peach can run as a TCP remoting agent using the xref:Program_PeachAgent[PeachAgent] program.
 
 ifdef::peachug[]
 
@@ -50,9 +50,32 @@ ifndef::peachug[]
 </Agent>
 ----
 
+endif::peachug[]
+
+==== Remote Agent
+
+Peach includes a remote xref:Program_PeachAgent[agent server] that can be used to host Monitors and Publishers on remote machines. Usage of a remote agent requires a location URL of the following format:
+
+ tcp://HOST:PORT
+ 
+HOST:: Remote host the agent is running on
+PORT:: Remote port the agent is bound to (defaults to 9001)
+
+Example:
+
+ tcp://192.168.1.100:9001
+
+ifndef::peachug[]
+
+.Configuring a local agent
+[source,xml]
+----
+<Agent name="local" location="tcp://192.168.1.100:9001">
+   <!-- Monitors -->
+</Agent>
+----
 
 ==== REST JSON Agent
-
 
 This agent is intended to communicate with custom remote agents written in other languages.
 
