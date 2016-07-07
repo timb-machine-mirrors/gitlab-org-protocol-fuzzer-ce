@@ -6,9 +6,10 @@ The following list identifies the support applications included with Peach Fuzze
 
 [options="header"]
 |=======================
-|Program                                    |Executable             | Description
-|xref:Program_PeachWebIF[Peach Web Interface]  |Peach.exe               | the {peachweb} for Peach Fuzzer.
-|xref:Program_Peach[Peach]                     |Peach.exe               | the {peachcomd} for Peach Fuzzer.
+|Program                                       |Executable             | Description
+|xref:Program_PeachWebIF[Peach Web Interface]  |Peach.exe               | The {peachweb} for Peach Fuzzer.
+|xref:Program_Peach[Peach]                     |Peach.exe               | The {peachcomd} for Peach Fuzzer.
+|xref:Program_PeachAgent[Peach Agent]          |PeachAgent.exe          | The Agent process for Peach Fuzzer.
 |xref:Program_PeachMinset[Minset]              |PeachMinset.exe         | Perform code coverage to find minimum set of sample files for use during fuzzing.
 |xref:Program_PeachValidator[Validator]        |PeachValidator.exe      | Graphical tool for debugging pit files. Provides a graphical view of the data model graph before and after cracking a file.
 |xref:Program_PeachXmlGenerator[XML Generator] |PeachXmlGenerator.exe   | Tool to produce XML sample files based on DTD
@@ -25,6 +26,10 @@ include::../../Common/WebUI/00_Section.adoc[]
 :leveloffset: 1
 <<<
 include::../../Common/RunningPeach/Peach.adoc[]
+
+:leveloffset: 1
+<<<
+include::../../Common/RunningPeach/PeachAgent.adoc[]
 
 :leveloffset: 1
 <<<
