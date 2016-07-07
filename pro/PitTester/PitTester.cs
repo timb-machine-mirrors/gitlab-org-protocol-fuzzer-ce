@@ -145,7 +145,7 @@ namespace Peach.Pro.PitTester
 			uint? seed,
 			bool keepGoing,
 			uint stop,
-			ILicense license)
+			ILicense license=null)
 		{
 			if (!File.Exists(testPath))
 				throw new FileNotFoundException("Invalid PitTestPath", testPath);
