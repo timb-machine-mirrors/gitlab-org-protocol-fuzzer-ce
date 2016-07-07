@@ -150,7 +150,7 @@ namespace Peach.Pro.Test.Core.Agent
 	}
 
 	[Monitor("LegacyRunCommand", true, IsTest = true)]
-	[Peach.Core.Description("Launches the specified command to perform a utility function")]
+	[Description("Launches the specified command to perform a utility function")]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("When", typeof(When), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]

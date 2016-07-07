@@ -12,7 +12,8 @@ using Peach.Core.IO;
 namespace Peach.Pro.Core.Loggers
 {
 	[Logger("Visualizer", true)]
-	public class VisualizerLogger :Peach.Core.Logger
+	[Obsolete]
+	public class VisualizerLogger : Logger
 	{
 		object mutext = new object();
 		string json;
@@ -121,7 +122,7 @@ namespace Peach.Pro.Core.Loggers
 					}
 					jsonWriter.WriteEndArray();
 					jsonWriter.WriteEndObject();
-					
+
 					jsonWriter.WriteStartObject();
 					jsonWriter.WritePropertyName("DataModels");
 					jsonWriter.WriteStartArray();
@@ -149,7 +150,7 @@ namespace Peach.Pro.Core.Loggers
 						jsonWriter.WritePropertyName("OriginalDataModel");
 						jsonWriter.WriteValue(Base64Encode(item.originalDataModel.Value));
 						jsonWriter.WriteEndObject();
-						
+
 						jsonWriter.WriteStartObject();
 						DataModelToJson(item.dataModel.Name, item.dataModel, jsonWriter);
 						jsonWriter.WriteEndObject();
@@ -189,7 +190,7 @@ namespace Peach.Pro.Core.Loggers
 					writer.WriteValue(item.Name);
 					writer.WritePropertyName("type");
 					writer.WriteValue(item.elementType);
-					
+
 				}
 
 				writer.WriteEndObject();

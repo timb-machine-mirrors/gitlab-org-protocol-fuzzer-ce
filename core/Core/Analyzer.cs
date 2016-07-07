@@ -173,7 +173,7 @@ namespace Peach.Core
 			throw new NotImplementedException();
 		}
 
-		public virtual void asCommandLine(Dictionary<string, string> args)
+		public virtual void asCommandLine(List<string> args)
 		{
 			throw new NotImplementedException();
 		}
@@ -196,7 +196,6 @@ namespace Peach.Core
 		{
 		}
 	}
-
 }
 
 // end

@@ -9,7 +9,7 @@ using Mono.Unix.Native;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 
 namespace Peach.Pro.OS.Linux.Publishers
 {

@@ -32,7 +32,7 @@ using System.IO;
 using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {

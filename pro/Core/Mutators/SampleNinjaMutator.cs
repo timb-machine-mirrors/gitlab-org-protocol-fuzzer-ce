@@ -2,11 +2,11 @@
 // Copyright (c) Peach Fuzzer, LLC
 //
 
+using System.ComponentModel;
 using System.IO;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.Mutators

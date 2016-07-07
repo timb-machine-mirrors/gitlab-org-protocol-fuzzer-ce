@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -202,15 +203,15 @@ namespace Peach.Pro.Core.Runtime
 			}
 			catch (OptionException ex)
 			{
-				return ReportError(true, ex);
+				return ReportError(args.ToList(), true, ex);
 			}
 			catch (SyntaxException ex)
 			{
-				return ReportError(ex.ShowUsage, ex);
+				return ReportError(args.ToList(), ex.ShowUsage, ex);
 			}
 			catch (Exception ex)
 			{
-				ReportError(false, ex);
+				ReportError(null, false, ex);
 				return 1;
 			}
 		}
@@ -271,7 +272,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		protected virtual int ReportError(bool showUsage, Exception ex)
+		protected virtual int ReportError(List<string> args, bool showUsage, Exception ex)
 		{
 			if (ex is TargetInvocationException && ex.InnerException != null)
 				ex = ex.InnerException;
@@ -284,7 +285,7 @@ namespace Peach.Pro.Core.Runtime
 			Console.Error.WriteLine();
 
 			if (showUsage)
-				ShowUsage(null);
+				ShowUsage(args);
 	
 			return string.IsNullOrEmpty(ex.Message) ? 0 : 2;
 		}

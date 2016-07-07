@@ -37,6 +37,7 @@ app = bld(
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = {
 		python_stdlib[0] : python_stdlib[1],
+		bld.path : bld.path.ant_glob('Plugins/*'),
 	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
 	ide_custom_commands = [
