@@ -325,7 +325,7 @@ namespace Peach.Pro.Core.WebServices
 		private static bool FilterInternal(KeyValuePair<MonitorAttribute, Type> kv)
 		{
 #if !DEBUG
-			return !kv.Key.Internal;
+			return kv.Key.Scope != PluginScope.Internal;
 #else
 			return true;
 #endif
