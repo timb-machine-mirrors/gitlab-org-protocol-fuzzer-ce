@@ -481,7 +481,7 @@ namespace PitTool
 
 			try
 			{
-				ThePitTester.VerifyDataSets(_pitLibraryPath, pitTestFile);
+				ThePitTester.VerifyDataSets(_pitLibraryPath, pitTestFile, _license);
 			}
 			catch (Exception ex)
 			{
@@ -505,7 +505,8 @@ namespace PitTool
 					pitTestFile,
 					_seed,
 					_keepGoing,
-					_stop ?? 500
+					_stop ?? 500,
+					_license
 				);
 			}
 			catch (Exception ex)
