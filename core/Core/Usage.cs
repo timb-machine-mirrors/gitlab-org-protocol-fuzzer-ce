@@ -32,6 +32,26 @@ using System.Collections.Generic;
 
 namespace Peach.Core
 {
+	public class UsageAttribute : Attribute
+	{
+		public string Message { get; private set; }
+		
+		public UsageAttribute(string message)
+		{
+			Message = message;
+		}
+	}
+
+	public class LongDescriptionAttribute : Attribute
+	{
+		public string Text { get; private set; }
+		
+		public LongDescriptionAttribute(string text)
+		{
+			Text = text;
+		}
+	}
+
 	public static class Usage
 	{
 		private class PluginAlias : PluginAttribute
@@ -89,12 +109,13 @@ namespace Peach.Core
 
 			foreach (var type in ClassLoader.GetAllByAttribute<PluginAttribute>())
 			{
-				if (type.Key.Internal)
+				// TODO: deal with Beta
+				if (type.Key.Scope != PluginScope.Release)
 					continue;
 
 				var pluginType = type.Key.Type;
 
-				string fullName = type.Key.Type.Name + ": " + type.Key.Name;
+				var fullName = type.Key.Type.Name + ": " + type.Key.Name;
 				if (pluginsByName.ContainsKey(fullName))
 				{
 					AddDuplicate(dupes, type.Key.Type.Name, type.Key.Name, pluginsByName[fullName], type.Value);
@@ -113,7 +134,7 @@ namespace Peach.Core
 
 				var attrs = plugin[type.Value];
 
-				bool added = attrs.Add(type.Key);
+				var added = attrs.Add(type.Key);
 				System.Diagnostics.Debug.Assert(added);
 
 				foreach (var a in type.Value.GetAttributes<AliasAttribute>())
@@ -162,7 +183,7 @@ namespace Peach.Core
 
 					Console.WriteLine();
 
-					var desc = plugin.Key.GetAttributes<System.ComponentModel.DescriptionAttribute>(null).FirstOrDefault();
+					var desc = plugin.Key.GetAttributes<DescriptionAttribute>(null).FirstOrDefault();
 					if (desc != null)
 						Console.WriteLine("    [{0}]", desc.Description);
 

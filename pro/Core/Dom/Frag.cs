@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Xml;
 using NLog;
@@ -8,14 +9,13 @@ using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.Dom
 {
 	[PitParsable("Frag")]
-	[DataElement("Frag", DataElementTypes.All, Internal = true)]
-	[DescriptionAttribute("Fragmentation element")]
+	[DataElement("Frag", DataElementTypes.All, Scope = PluginScope.Beta)]
+	[Description("Fragmentation element")]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("fragLength", typeof(int), "Fragment size in bytes", "")]

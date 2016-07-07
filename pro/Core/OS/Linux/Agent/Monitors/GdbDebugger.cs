@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using NLog;
@@ -12,12 +9,10 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using Nustache.Core;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
-
 	// Notes regarding gdb-server usage
 	// http://stackoverflow.com/questions/75255/how-do-you-start-running-the-program-over-again-in-gdb-with-target-remote
 	// We might need to associate a command/script to restart the remote gdb-server?

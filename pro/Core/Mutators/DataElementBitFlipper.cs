@@ -3,11 +3,11 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.IO;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {

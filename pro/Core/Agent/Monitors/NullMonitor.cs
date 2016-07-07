@@ -1,14 +1,14 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using Peach.Core;
 using Peach.Core.Agent;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using NLog;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
-	[Monitor("Null")]
+	[Monitor("Null", Scope = PluginScope.Internal)]
 	[Description("A monitor that does reports no faults and optionally logs events to a file.")]
 	[Parameter("LogFile", typeof(string), "Log monitor events to the specified file.", "")]
 	[Parameter("OnCall", typeof(string), "Send message to monitor.", "")]

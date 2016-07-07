@@ -4,7 +4,7 @@ using System.IO;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.Core.OS.Windows.Debugger;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors

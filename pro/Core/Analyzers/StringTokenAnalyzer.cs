@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -35,14 +36,15 @@ using Peach.Core;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Peach.Core.Runtime;
 using Encoding = Peach.Core.Encoding;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("StringToken", true)]
 	[Analyzer("StringTokenAnalyzer")]
 	[Analyzer("stringtoken.StringTokenAnalyzer")]
+	[Usage("<infile> <outfile>")]
 	[Description("Generate a data model by tokenizing a text document.")]
 	[Parameter("Tokens", typeof(string), "List of character tokens", StringTokenAnalyzer.TOKENS)]
 	[Serializable]
@@ -73,20 +75,13 @@ namespace Peach.Pro.Core.Analyzers
 			this.args = args;
 		}
 
-		public override void asCommandLine(Dictionary<string, string> args)
+		public override void asCommandLine(List<string> args)
 		{
-			var extra = new List<string>();
-			for (int i = 0; i < args.Count; i++)
-				extra.Add(args[i.ToString()]);
+			if (args.Count != 2)
+				throw new SyntaxException("Missing required arguments.");
 
-			if (extra.Count < 2)
-			{
-				Console.WriteLine("Syntax: <infile> <outfile>");
-				return;
-			}
-
-			var inFile = extra[0];
-			var outFile = extra[1];
+			var inFile = args[0];
+			var outFile = args[1];
 			var data = new BitStream(File.ReadAllBytes(inFile));
 			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
 

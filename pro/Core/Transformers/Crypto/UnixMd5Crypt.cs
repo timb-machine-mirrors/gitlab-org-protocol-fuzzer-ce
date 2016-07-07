@@ -32,7 +32,7 @@ using System.IO;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 
 namespace Peach.Pro.Core.Transformers.Crypto
 {
