@@ -38,7 +38,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {

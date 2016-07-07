@@ -7,7 +7,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.Core.OS.Windows.Debugger;
 using Peach.Pro.OS.Windows.Agent.Monitors;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 
 namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 {
@@ -290,7 +290,7 @@ using Peach.Pro.OS.Windows.Agent.Monitors.WindowsDebug;
 using Peach.Pro.OS.Windows.Debuggers;
 using Monitor = Peach.Core.Agent.Monitor2;
 using Random = Peach.Core.Random;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 
 namespace Peach.Pro.OS.Windows.Agent.Monitors
 {

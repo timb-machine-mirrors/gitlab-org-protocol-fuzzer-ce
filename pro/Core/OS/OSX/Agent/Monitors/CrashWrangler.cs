@@ -34,16 +34,12 @@ using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 using Debug = System.Diagnostics.Debug;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using SysProcess = System.Diagnostics.Process;
 using Peach.Core;
 using Peach.Core.Agent;
-using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using NLog;
 
 namespace Peach.Pro.OS.OSX.Agent.Monitors

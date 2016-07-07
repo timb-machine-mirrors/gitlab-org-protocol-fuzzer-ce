@@ -29,11 +29,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Pro.Core.Fixups.Libraries;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {

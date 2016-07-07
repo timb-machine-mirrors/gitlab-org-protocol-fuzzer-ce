@@ -10,7 +10,7 @@ using Peach.Core.IO;
 namespace Peach.Pro.Core.Dom
 {
 	[PitParsable("VarNumber")]
-	[DataElement("VarNumber", DataElementTypes.NonDataElements, Internal = true)]
+	[DataElement("VarNumber", DataElementTypes.NonDataElements)]
 	[Parameter("name", typeof(string), "Element name", "")]
 	[Parameter("fieldId", typeof(string), "Element field ID", "")]
 	[Parameter("value", typeof(string), "Default value", "")]
@@ -80,23 +80,11 @@ namespace Peach.Pro.Core.Dom
 			}
 		}
 
-		public override bool hasLength
-		{
-			get
-			{
-				return false;
-			}
-		}
+		public override bool hasLength { get { return false; } }
 
-		public override bool isDeterministic
-		{
-			get
-			{
-				return true;
-			}
-		}
+		public override bool isDeterministic { get { return true; } }
 
-		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
+		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "VarNumber")
 				return null;

@@ -41,9 +41,9 @@ namespace PeachValidator
 
 		protected override int OnRun(List<string> args)
 		{
-			string pit = (args.Count > 0) ? args[0] : null;
-			string sample = (args.Count > 1) ? args[1] : null;
-			string save = (args.Count > 2) ? args[2] : null;
+			var pit = (args.Count > 0) ? args[0] : null;
+			var sample = (args.Count > 1) ? args[1] : null;
+			var save = (args.Count > 2) ? args[2] : null;
 
 			var pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 
@@ -56,11 +56,11 @@ namespace PeachValidator
 			return 0;
 		}
 
-		protected override int ReportError(bool showUsage, Exception ex)
+		protected override int ReportError(List<string> args, bool showUsage, Exception ex)
 		{
 			MessageBox.Show(ex.Message);
 			
-			return base.ReportError(showUsage, ex);
+			return base.ReportError(args, showUsage, ex);
 		}
 	}
 }

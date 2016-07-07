@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
@@ -8,15 +9,16 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.Text.RegularExpressions;
+using Peach.Core.Runtime;
 using String = Peach.Core.Dom.String;
 using XmlCharacterData = Peach.Core.Dom.XmlCharacterData;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
 	[Analyzer("Xml", true)]
 	[Analyzer("XmlAnalyzer")]
 	[Analyzer("xml.XmlAnalyzer")]
+	[Usage("<infile> <outfile>")]
 	[Description("Generate a data model based on an XML document.")]
 	[Serializable]
 	public class XmlAnalyzer : Analyzer
@@ -35,24 +37,17 @@ namespace Peach.Pro.Core.Analyzers
 		{
 		}
 
-		public override void asCommandLine(Dictionary<string, string> args)
+		public override void asCommandLine(List<string> args)
 		{
-			var extra = new List<string>();
-			for (int i = 0; i < args.Count; i++)
-				extra.Add(args[i.ToString()]);
+			if (args.Count != 2)
+				throw new SyntaxException("Missing required arguments.");
 
-			if (extra.Count < 2)
-			{
-				Console.WriteLine("Syntax: <infile> <outfile>");
-				return;
-			}
-
-			var inFile = extra[0];
-			var outFile = extra[1];
+			var inFile = args[0];
+			var outFile = args[1];
 			var data = new BitStream(File.ReadAllBytes(inFile));
 			var model = new DataModel(Path.GetFileName(inFile).Replace(".", "_"));
 
-			model.Add(new Peach.Core.Dom.String() { stringType = StringType.utf8 });
+			model.Add(new String() { stringType = StringType.utf8 });
 			model[0].DefaultValue = new Variant(data);
 
 			asDataElement(model[0], null);
@@ -76,7 +71,7 @@ namespace Peach.Pro.Core.Analyzers
 
 		public override void asDataElement(DataElement parent, Dictionary<DataElement, Position> positions)
 		{
-			var strElement = parent as Peach.Core.Dom.String;
+			var strElement = parent as String;
 			if (strElement == null)
 				throw new PeachException("Error, XmlAnalyzer analyzer only operates on String elements!");
 
@@ -154,7 +149,7 @@ namespace Peach.Pro.Core.Analyzers
 				elem.Add(attrElem);
 			}
 
-			foreach (System.Xml.XmlNode child in node.ChildNodes)
+			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child is XmlCDataSection)
 				{
@@ -184,15 +179,15 @@ namespace Peach.Pro.Core.Analyzers
 			}
 		}
 
-		private static Peach.Core.Dom.String makeString(string name, string value, StringType type)
+		private static String makeString(string name, string value, StringType type)
 		{
-			var str = new Peach.Core.Dom.String(name)
+			var str = new String(name)
 			{
 				stringType = type,
 				DefaultValue = new Variant(value),
 			};
 
-			var hint = new Peach.Core.Dom.Hint("Peach.TypeTransform", "false");
+			var hint = new Hint("Peach.TypeTransform", "false");
 			str.Hints.Add(hint.Name, hint);
 
 			return str;

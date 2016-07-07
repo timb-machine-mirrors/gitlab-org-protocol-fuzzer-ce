@@ -11,7 +11,6 @@ using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.PitTester;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace PitTool
 {
@@ -21,8 +20,8 @@ namespace PitTool
 		public string Usage { get; set; }
 		public string Description { get; set; }
 		public OptionSet Options { get; set; }
-		public Func<List<string>, int> Action { get; set; }
-		public Func<Command, int> Help { get; set; }
+		public Func<Command, List<string>, int> Action { get; set; }
+		public Func<Command, List<string>, int> Help { get; set; }
 
 		public string name
 		{
@@ -35,11 +34,11 @@ namespace PitTool
 		}
 	}
 
-	public class PitTool : BaseProgram
+	public partial class PitTool : BaseProgram
 	{
 		// global options
 		string _pitLibraryPath;
-		NamedCollection<Command> _cmds = new NamedCollection<Command>();
+		readonly NamedCollection<Command> _cmds = new NamedCollection<Command>();
 
 		// compile options
 		bool _fast;
@@ -141,73 +140,50 @@ namespace PitTool
 
 		OptionSet MakeCompileOptions()
 		{
-			var options = new OptionSet();
-			options.Add("fast", "Avoid slow compile operations", x => _fast = true);
+			var options = new OptionSet
+			{
+				{"fast", "Avoid slow compile operations", x => _fast = true}
+			};
 			return options;
 		}
 
 		OptionSet MakeTestOptions()
 		{
-			var options = new OptionSet();
-			options.Add(
-				"seed=",
-				"Sets the seed used by the random number generator",
-				v => _seed = uint.Parse(v)
-			);
-			options.Add(
-				"notest",
-				"Skip PitTest",
-				v => _notest = true
-			);
-			options.Add(
-				"nodata",
-				"Skip VerifyDataSets",
-				v => _nodata = true
-			);
-			options.Add(
-				"profile",
-				"Enable testing suitable for profiling",
-				v => _profile = true
-			);
-			options.Add(
-				"1|single",
-				"Run a single iteration",
-				v => _stop = 1
-			);
-			options.Add(
-				"stop=",
-				"Specify how many iterations to run",
-				v => _stop = Convert.ToUInt32(v)
-			);
-			options.Add(
-				"k|keepGoing",
-				"Don't stop on the first failure",
-				v => _keepGoing = true
-			);
+			var options = new OptionSet
+			{
+				{"seed=", "Sets the seed used by the random number generator", v => _seed = uint.Parse(v)},
+				{"notest", "Skip PitTest", v => _notest = true},
+				{"nodata", "Skip VerifyDataSets", v => _nodata = true},
+				{"profile", "Enable testing suitable for profiling", v => _profile = true},
+				{"1|single", "Run a single iteration", v => _stop = 1},
+				{"stop=", "Specify how many iterations to run", v => _stop = Convert.ToUInt32(v)},
+				{"k|keepGoing", "Don't stop on the first failure", v => _keepGoing = true}
+			};
 			return options;
 		}
 
 #if DEBUG
 		OptionSet MakeProtectOptions()
 		{
-			var options = new OptionSet();
-			options.Add("prefix=", "Prefix for resources in an assembly", x => _prefix = x);
-			options.Add("salt=", "Path to file containing salt", x => _salt = x);
+			var options = new OptionSet
+			{
+				{"prefix=", "Prefix for resources in an assembly", x => _prefix = x},
+				{"salt=", "Path to file containing salt", x => _salt = x}
+			};
 			return options;
 		}
 #endif
 
 		protected override int ShowUsage(List<string> args)
 		{
-			string first = null;
 			if (args != null)
 			{
-				first = args.FirstOrDefault();
+				var first = args.FirstOrDefault();
 				if (first != null)
 				{
 					Command cmd;
 					if (_cmds.TryGetValue(first, out cmd))
-						return ShowHelp(cmd);
+						return ShowHelp(cmd, args);
 				}
 			}
 
@@ -256,26 +232,26 @@ namespace PitTool
 			if (cmd.Options != null)
 				extra = cmd.Options.Parse(extra);
 
-			return cmd.Action(extra);
+			return cmd.Action(cmd, extra);
 		}
 
-		int Help(List<string> args)
+		int Help(Command cmd, List<string> args)
 		{
 			var key = args.FirstOrDefault();
 			if (key == null)
 				return ShowUsage(args);
 
-			Command cmd;
-			if (!_cmds.TryGetValue(key, out cmd))
+			Command found;
+			if (!_cmds.TryGetValue(key, out found))
 				throw new SyntaxException("Unknown command: {0}".Fmt(key));
 
-			return ShowHelp(cmd);
+			return ShowHelp(found, args);
 		}
 
-		int ShowHelp(Command cmd)
+		int ShowHelp(Command cmd, List<string> args)
 		{
 			if (cmd.Help != null)
-				return cmd.Help(cmd);
+				return cmd.Help(cmd, args.Skip(1).ToList());
 
 			Console.WriteLine("Usage:");
 			Console.WriteLine("  " + cmd.Usage.Fmt(Utilities.ExecutableName, cmd.Name));
@@ -299,13 +275,13 @@ namespace PitTool
 			return 0;
 		}
 
-		int Compile(List<string> args)
+		int Compile(Command cmd, List<string> args)
 		{
 			if (args.Count != 1)
 			{
 				Console.WriteLine("Missing required argument");
 				Console.WriteLine();
-				ShowHelp(_cmds["compile"]);
+				ShowHelp(cmd, args);
 				return 1;
 			}
 
@@ -343,13 +319,13 @@ namespace PitTool
 		}
 
 #if DEBUG
-		int Protect(List<string> args)
+		int Protect(Command cmd, List<string> args)
 		{
 			if (args.Count != 2)
 			{
 				Console.WriteLine("Missing required arguments");
 				Console.WriteLine();
-				ShowHelp(_cmds["protect"]);
+				ShowHelp(cmd, args);
 				return 1;
 			}
 
@@ -379,13 +355,13 @@ namespace PitTool
 		}
 #endif
 
-		int MakeTestAssembly(List<string> args)
+		int MakeTestAssembly(Command cmd, List<string> args)
 		{
 			if (args.Count != 2)
 			{
 				Console.WriteLine("Missing required arguments");
 				Console.WriteLine();
-				ShowHelp(_cmds["nunit"]);
+				ShowHelp(cmd, args);
 				return 1;
 			}
 
@@ -398,13 +374,13 @@ namespace PitTool
 			return 0;
 		}
 
-		int Ninja(List<string> args)
+		int Ninja(Command cmd, List<string> args)
 		{
 			if (args.Count != 3)
 			{
 				Console.WriteLine("Missing required arguments");
 				Console.WriteLine();
-				ShowHelp(_cmds["ninja"]);
+				ShowHelp(cmd, args);
 				return 1;
 			}
 
@@ -418,13 +394,13 @@ namespace PitTool
 			return 0;
 		}
 
-		int Test(List<string> args)
+		int Test(Command cmd, List<string> args)
 		{
 			if (args.Count != 1)
 			{
 				Console.WriteLine("Missing required argument");
 				Console.WriteLine();
-				ShowHelp(_cmds["test"]);
+				ShowHelp(cmd, args);
 				return 1;
 			}
 
@@ -464,13 +440,13 @@ namespace PitTool
 			return 0;
 		}
 
-		int Crack(List<string> args)
+		int Crack(Command cmd, List<string> args)
 		{
 			if (args.Count != 4)
 			{
 				Console.WriteLine("Missing required arguments");
 				Console.WriteLine();
-				ShowHelp(_cmds["crack"]);
+				ShowHelp(cmd, args);
 				return 1;
 			}
 
@@ -486,7 +462,7 @@ namespace PitTool
 			return 0;
 		}
 
-		int MakeXsd(List<string> args)
+		int MakeXsd(Command cmd, List<string> args)
 		{
 			using (var stream = File.OpenWrite("peach.xsd"))
 			{
@@ -494,94 +470,6 @@ namespace PitTool
 
 				Console.WriteLine("Successfully generated {0}", stream.Name);
 			}
-
-			return 0;
-		}
-
-		int Analyzer(List<string> args)
-		{
-			var name = args.FirstOrDefault();
-			if (name == null)
-			{
-				Console.WriteLine("Missing required arguments");
-				Console.WriteLine();
-				ShowHelp(_cmds["analyzer"]);
-				return 1;
-			}
-
-			var type = ClassLoader.FindPluginByName<AnalyzerAttribute>(name);
-			if (type == null)
-				throw new PeachException("Error, unable to locate analyzer named '{0}'.\n".Fmt(name));
-
-			if (!IsAnalyzerSupported(type))
-				throw new NotSupportedException("Analyzer is not configured to run from the command line.");
-
-			var analyzer = (Analyzer)Activator.CreateInstance(type);
-
-			InteractiveConsoleWatcher.WriteInfoMark();
-			Console.WriteLine("Starting Analyzer");
-
-			var dict = new Dictionary<string, string>();
-			for (var i = 1; i < args.Count; i++)
-				dict[(i - 1).ToString()] = args[i];
-
-			analyzer.asCommandLine(dict);
-
-			return 0;
-		}
-
-		bool IsAnalyzerSupported(Type type)
-		{
-			var field = type.GetField("supportCommandLine", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-			return field != null && (bool)field.GetValue(null);
-		}
-
-		bool IsAnalyzerObsolete(Type type)
-		{
-			return type.GetAttributes<ObsoleteAttribute>().Any();
-		}
-
-		string AnalyzerDescription(Type type)
-		{
-			var desc = type.GetAttributes<DescriptionAttribute>().SingleOrDefault();
-			if (desc != null)
-				return desc.Description;
-			return "";
-		}
-
-		int ShowAnalyzerHelp(Command cmd)
-		{
-			Console.WriteLine("Usage:");
-			Console.WriteLine("  " + cmd.Usage.Fmt(Utilities.ExecutableName, cmd.Name));
-			Console.WriteLine();
-
-			Console.WriteLine("Description:");
-			Console.WriteLine("  {0}", cmd.Description);
-			Console.WriteLine();
-
-			Console.WriteLine("Analyzers:");
-			var analyzers = from x in ClassLoader.GetAllByAttribute<AnalyzerAttribute>()
-							where
-								x.Key.IsDefault &&
-								IsAnalyzerSupported(x.Value) &&
-								!IsAnalyzerObsolete(x.Value)
-							select new { x.Key.Name, Description = AnalyzerDescription(x.Value) };
-			foreach (var analyzer in analyzers)
-			{
-				Console.WriteLine("  {0,-27}{1}", analyzer.Name, analyzer.Description);
-			}
-			Console.WriteLine();
-
-			if (cmd.Options != null)
-			{
-				Console.WriteLine("{0} Options:", cmd.Name);
-				cmd.Options.WriteOptionDescriptions(Console.Out);
-				Console.WriteLine();
-			}
-
-			Console.WriteLine("General Options:");
-			_options.WriteOptionDescriptions(Console.Out);
-			Console.WriteLine();
 
 			return 0;
 		}

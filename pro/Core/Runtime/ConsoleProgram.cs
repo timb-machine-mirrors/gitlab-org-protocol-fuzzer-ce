@@ -417,11 +417,7 @@ namespace Peach.Pro.Core.Runtime
 			InteractiveConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting Analyzer");
 
-			var args = new Dictionary<string, string>();
-			for (var i = 0; i < extra.Count; i++)
-				args[i.ToString()] = extra[i];
-
-			analyzerInstance.asCommandLine(args);
+			analyzerInstance.asCommandLine(extra);
 
 			return 0;
 		}
