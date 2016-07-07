@@ -19,7 +19,6 @@ using Peach.Core.Cracker;
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
-using Peach.Pro.Core.License;
 
 namespace Peach.Pro.PitTester
 {
@@ -144,8 +143,7 @@ namespace Peach.Pro.PitTester
 			string testPath,
 			uint? seed,
 			bool keepGoing,
-			uint stop,
-			ILicense license=null)
+			uint stop)
 		{
 			if (!File.Exists(testPath))
 				throw new FileNotFoundException("Invalid PitTestPath", testPath);
@@ -172,8 +170,7 @@ namespace Peach.Pro.PitTester
 					pitFile,
 					seed,
 					keepGoing,
-					stop,
-					license
+					stop
 				);
 			}
 			finally
@@ -189,8 +186,7 @@ namespace Peach.Pro.PitTester
 			string pitFile,
 			uint? seed,
 			bool keepGoing,
-			uint stop,
-			ILicense license)
+			uint stop)
 		{
 			if (testData.Tests.Any(x => x.SingleIteration))
 				stop = 1;
@@ -226,7 +222,7 @@ namespace Peach.Pro.PitTester
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser(license, libraryPath, pitFile);
+			var parser = new ProPitParser(null, libraryPath, pitFile);
 			var dom = parser.asParser(args, pitFile);
 
 			var errors = new List<Exception>();
@@ -452,7 +448,7 @@ namespace Peach.Pro.PitTester
 			}
 		}
 
-		public static void VerifyDataSets(string pitLibraryPath, string pitTestPath, ILicense license)
+		public static void VerifyDataSets(string pitLibraryPath, string pitTestPath)
 		{
 			var testData = TestData.Parse(pitTestPath);
 			if (!File.Exists(pitTestPath))
@@ -469,7 +465,7 @@ namespace Peach.Pro.PitTester
 					tmp.Populate();
 				}
 
-				DoVerifyDataSets(testData, pitLibraryPath, pitFile, license);
+				DoVerifyDataSets(testData, pitLibraryPath, pitFile);
 			}
 			finally
 			{
@@ -481,8 +477,7 @@ namespace Peach.Pro.PitTester
 		private static void DoVerifyDataSets(
 			TestData testData,
 			string pitLibraryPath,
-			string fileName,
-			ILicense license)
+			string fileName)
 		{
 			var defs = PitDefines.ParseFileWithDefaults(pitLibraryPath, fileName);
 
@@ -498,7 +493,7 @@ namespace Peach.Pro.PitTester
 			var args = new Dictionary<string, object>();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser(license, pitLibraryPath, fileName);
+			var parser = new ProPitParser(null, pitLibraryPath, fileName);
 			var dom = parser.asParser(args, fileName);
 
 			dom.context = new RunContext();
