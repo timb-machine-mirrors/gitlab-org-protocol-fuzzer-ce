@@ -4,7 +4,7 @@
 
 *Monitor Categories*: *Automation*, *Data collection*, *Fault detection*
 
-The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for specific signales/exceptions.
+The _Gdb_ monitor uses GDB to launch an executable and monitors the executing process for specific signals/exceptions.
 _Gdb_ is the main debugger for Linux and OS X operating systems.
 
 When a configured signal/exception is handled,
@@ -54,7 +54,7 @@ Restarts the process for each iteration, defaults to `false`.
 Script::
 +
 Script file used to drive GDB and perform crash analysis.
-This script setups GDB to run the target application, report back information such as child pid, and handle any signals.
+This script sets up GDB to run the target application, report back information such as child pid, and handle any signals.
 This script also performs crash anlysis and bucketing.
 An example script is provided in the examples section.
 +
