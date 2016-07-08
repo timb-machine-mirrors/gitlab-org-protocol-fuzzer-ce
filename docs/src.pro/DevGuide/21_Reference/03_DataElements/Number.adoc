@@ -2,42 +2,13 @@
 [[Number]]
 == Number
 
-// 01/30/2014: Seth & Mike: Outlined
-//  * bits
-//  * unaligned (1, 3, 5)
-//  * Speed of unaligned
-//  * little vs. big endian
-//  * valueType hex little vs. big
-//  * valueType string you can say 0xXXXXX
-//  * signed vs. unsigned
-//  * mutators
-//  * size not length
-//  * no variable length encoding supported
-//   * Implement yourself by making a custom data element that is a container with a number in it
-//     * So mutations still work
-
-// 03/06/2014: Josh: Updated
-//  * bits <- taken care of by size
-//  * unaligned (1, 3, 5) <- done
-//  * Speed of unaligned <- unclear on what to do here
-//  * little vs. big endian <- done
-//  * valueType hex little vs. big <- done
-//  * valueType string you can say 0xXXXXX <-done
-//  * signed vs. unsigned <- done
-//  * mutators  <- done
-//  * size not length <- done
-//  * no variable length encoding supported <- I don't know what any of this stuff is
-//   * Implement yourself by making a custom data element that is a container with a number in it
-//     * So mutations still work
-
-//  03/06/2014: Lynn
-//   * Added missing child elements, fixed child element formatting, and corrected spelling in comments
-
 The Number element defines a binary number of any arbitrary bit size from 1 to 64. Binary numbers are packed into a byte representation with a byte order of little-endian or big-endian.
 
 The Number element should not be used for character-based numbers, or ASCII numbers. Instead, use a xref:String[String] element.
 
 The Number element is a child element of xref:DataModel[DataModel], xref:Block[Block], or xref:Choice[Choice].
+
+See also xref:VarNumber[VarNumber] and xref:String[String].
 
 NOTE: While Peach supports unaligned data structures, using unaligned data incurs a performance penalty. The penalty stems from bit slicing that occurs behind the scenes.
 

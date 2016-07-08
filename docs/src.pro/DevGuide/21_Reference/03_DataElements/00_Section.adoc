@@ -138,6 +138,10 @@ xref:String[]::
 A _string_ defines a contiguous sequence of characters with encoding.
 Encodings include ASCII and many Unicode formats.
 
+xref:VarNumber[]::
++
+Allows modeling variable width _Numbers_. Size must be constrained using a size-of relationship or other method.
+
 xref:XmlAttribute[]::
 +
 The _XmlAttribute_ defines an XML attribute.
@@ -201,6 +205,8 @@ include::Sequence.adoc[]
 include::Stream.adoc[]
 
 include::String.adoc[]
+
+include::VarNumber.adoc[]
 
 include::XmlAttribute.adoc[]
 
