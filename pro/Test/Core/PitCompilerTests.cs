@@ -1046,7 +1046,7 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			var actual = compiler.Run().ToArray();
 
 			Assert.AreEqual(1, actual.Length);
-			StringAssert.StartsWith("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'false'", actual[0]);
+			StringAssert.StartsWith("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true'", actual[0]);
 		}
 
 		[Test]
