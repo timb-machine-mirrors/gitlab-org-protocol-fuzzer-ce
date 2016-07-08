@@ -1,7 +1,7 @@
 :toc!:
 == Choice ==
 
-The Choice element is a child element of link:DataModel.html[DataModel] or link:Block.html[Block].  Choice elements are used to indicate any of the sub-elements are valid but only one should be selected.  Much like a switch statement in programming languages.
+The Choice element is a child element of link:DataModel.html[DataModel] or link:Block.html[Block].  Choice elements are used to indicate any of the sub-elements are valid, but only one should be selected.  Much like a switch statement in programming languages.
 
 [source,xml]
 ----
@@ -50,7 +50,7 @@ If the first 8 bits are 1 then the remaining data is treated as a 32 bit number.
 If the first 8 bits are 2 then the remaining data is treated as a 255 bytes of binary data. 
 If the first 8 bits are 3 then the remaining data is treated as a 8 byte string. 
 
-When fuzzing Peach will chose one of the three types and fuzz it's output as an 8bit number followed by the corresponding type. Peach will attempt to fill all three types.  
+When fuzzing Peach will chose one of the three types and fuzz its output as an 8bit number followed by the corresponding type. Peach will attempt to fill all three types.  
 
 [source,xml]
 ----
@@ -79,7 +79,7 @@ When fuzzing Peach will chose one of the three types and fuzz it's output as an 
 
 ==== An Array of Choices ====
 
-The first example is good for making a single choice but what if there are many Type1 Type2 and Type3 blocks all following each other? Set minOccurs, maxOccurs, or occurs to specify the choice should be repeated. 
+The first example is good for making a single choice but what if there are many Type1, Type2, and Type3 blocks all following each other? Set minOccurs, maxOccurs, or occurs to specify the choice should be repeated. 
 
 
 This example attempts to crack at least 3 different choices and no more than 6. 
