@@ -1,7 +1,7 @@
 :toc!:
 == RawIPv4 Publisher
 
-The _RawIPv4_ publisher allows sending raw IPv4 packes with IP header.
+The _RawIPv4_ publisher allows sending raw IPv4 packets with IP header.
 
 NOTE: This publisher runs best on Linux and requires root privileges.
 

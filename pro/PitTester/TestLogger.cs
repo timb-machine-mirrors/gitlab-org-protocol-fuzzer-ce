@@ -75,13 +75,12 @@ namespace Peach.Pro.PitTester
 
 				var d = testData.Actions[index++];
 
-				// Wrong type means we can't cast and we can't keep going
-				if (typeof(T) != d.GetType())
-					throw new SoftException(ErrorFormat.Fmt(
-						"Action type mismatch.", 
-						ActionName, 
-						typeof(T).Name,
-						d.GetType().Name
+				if (d.ActionName != ActionName)
+					errors.Add(ErrorFormat.Fmt(
+						"Action name mismatch.",
+						ActionName,
+						ActionName,
+						d.ActionName
 						)
 					);
 
@@ -94,17 +93,18 @@ namespace Peach.Pro.PitTester
 						)
 					);
 
-				if (d.ActionName != ActionName)
-					errors.Add(ErrorFormat.Fmt(
-						"Action name mismatch.",
-						ActionName,
-						ActionName,
-						d.ActionName
-						)
-					);
-
 				if (errors.Any())
 					FireError(string.Join("\n", errors));
+
+				// Wrong type means we can't cast and we can't keep going
+				if (typeof(T) != d.GetType())
+					throw new SoftException(ErrorFormat.Fmt(
+						"Action type mismatch.",
+						ActionName,
+						typeof(T).Name,
+						d.GetType().Name
+						)
+					);
 
 				return (T)d;
 			}

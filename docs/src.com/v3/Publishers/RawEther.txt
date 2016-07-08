@@ -1,7 +1,7 @@
 :toc!:
 == RawEther Publisher
 
-The _RawEther_ publisher allows sending raw IPv6 packes with IP header.
+The _RawEther_ publisher allows sending raw IPv6 packets with IP header.
 
 NOTE: This publisher only runs on Linux with root privileges
 

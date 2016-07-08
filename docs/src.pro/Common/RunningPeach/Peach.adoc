@@ -2,7 +2,7 @@
 == The {peachcomd}
 
 This is the core Peach application which provides the core fuzzing
-capabilities and also some utilitily functions for the custom pit
+capabilities and also some utility functions for the custom pit
 developer. This application can be used to start the Peach Web Application
 and also to launch fuzzing jobs from the command line.
 
@@ -73,7 +73,7 @@ test_name::          Name of test to run (defaults to 'Default')
 --polite::
     Disable interactive console mode
 --range=S,F::
-    Perform a range of testcases start at test case S and 
+    Perform a range of testcases starting at test case S and 
     ending with test case F. Typically combined with the 
     --seed argument.
 --seed=SEED::
@@ -97,7 +97,7 @@ Syntax:
  peach -1 --debug <PEACH_PIT.xml | PEACH_CONFIG.peach> [test_name]
   
 This will perform a single iteration (-1) of your pit file while displaying
-alot of debugging information (--debug).  The debugging information is
+a lot of debugging information (--debug).  The debugging information is
 intended for custom pit developers.
 
 === Running Analyzers from Command Line
@@ -108,7 +108,7 @@ Syntax:
  peach --analyzer=Json json_input.json pit_output.xml
 
 Run an analyzer from the command line. Most analyzers will provide
-syntax help when run with no options. Analyzers are documented int
+syntax help when run with no options. Analyzers are documented in the
 SDK developer guide.
 
 ==== Generate XML Schema File
