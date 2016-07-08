@@ -62,7 +62,7 @@ Restarts the process for each iteration, defaults to `false`.
 Script::
 +
 Script file used to drive GDB and perform crash analysis.
-This script setups GDB to run the target application, report back information such as child pid, and handle any signals.
+This script sets up GDB to run the target application, report back information such as child pid, and handle any signals.
 This script also performs crash anlysis and bucketing.
 An example script is provided in the examples section.
 +
