@@ -82,8 +82,8 @@ namespace Peach.Core
 		[Obsolete("This property is obsolete and has been replaced by the Scope property.")]
 		public bool IsTest
 		{
-			get { return Scope != PluginScope.Release; }
-			set { Scope = PluginScope.Internal; }
+			get { return Scope == PluginScope.Internal; }
+			set { Scope = value ? PluginScope.Internal : PluginScope.Release; }
 		}
 
 		/// <summary>
@@ -94,7 +94,7 @@ namespace Peach.Core
 		public bool Internal
 		{
 			get { return Scope == PluginScope.Internal; }
-			set { Scope = PluginScope.Internal; }
+			set { Scope = value ? PluginScope.Internal : PluginScope.Release; }
 		}
 
 		#endregion

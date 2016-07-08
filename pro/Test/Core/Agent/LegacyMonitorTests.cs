@@ -6,6 +6,7 @@ using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 // Disable obsolete warnings
 using Peach.Core.Test;
