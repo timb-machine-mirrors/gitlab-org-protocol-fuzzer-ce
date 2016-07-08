@@ -24,8 +24,23 @@ NOTE: The regular expression syntax is consistent with the regular expression pa
 ----
 
 ----
-peach --analyzer=Regex "(\w+)(.)" input.txt output.xml
+pittool analyzer Regex "(\w+)(.)" input.txt output.xml
 ----
+
+=== Command Line Syntax
+
+----
+pittool analyzer Regex <regex> <input file> <output file>
+----
+
+regex:
+    Regular Expression to base tokens on
+
+input file::
+    Text file
+
+output file::
+    Generated PIT file
 
 === Attributes
 

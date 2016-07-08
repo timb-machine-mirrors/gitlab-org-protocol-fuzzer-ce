@@ -19,8 +19,20 @@ TIP: XML special characters (such as < = &lt;, > = &gt;, " = &quot;, & = &amp;) 
 ----
 
 ----
-peach --analyzer=Xml input.xml output.xml
+pittool analyzer Xml input.xml output.xml
 ----
+
+=== Command Line Syntax
+
+----
+pittool analyzer Xml <input file> <output file>
+----
+
+input file::
+    XML file
+
+output file::
+    Generated PIT file
 
 === Attributes
 

@@ -20,13 +20,13 @@ IMPORTANT: The JSON analyzer requires data from a String data type.
 ----
 
 ----
-peach --analyzer=Json input.txt output.xml
+pittool analyzer Json input.txt output.xml
 ----
 
 === Command Line Syntax
 
 ----
-peach --analyzer=Json <input file> <output file>
+pittool analyzer Json <input file> <output file>
 ----
 
 input file::
