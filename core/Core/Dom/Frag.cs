@@ -11,7 +11,7 @@ using Peach.Core.Dom;
 using Peach.Core.IO;
 using Logger = NLog.Logger;
 
-namespace Peach.Pro.Core.Dom
+namespace Peach.Core.Dom
 {
 	[PitParsable("Frag")]
 	[DataElement("Frag", DataElementTypes.All, Scope = PluginScope.Beta)]

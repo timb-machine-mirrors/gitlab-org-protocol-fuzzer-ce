@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 
-namespace Peach.Pro.Core.Dom
+namespace Peach.Core.Dom
 {
 	/// <summary>
 	/// Specialized version of Sequence for Fragmentation support.

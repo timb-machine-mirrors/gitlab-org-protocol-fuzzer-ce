@@ -55,6 +55,9 @@ xref:Flag[]::
 _Flag_ defines a specific _Flag_ in a flag set.
 _Flag_ elements have a bit position and bit length.
 
+xref:Frag[]::
+    Used to model protocol fragmentation
+
 xref:JsonArray[]::
 +
 _JsonArray_ is used to represent a JSON array.
@@ -149,32 +152,60 @@ xref:XmlElement[]::
 +
 _XmlElement_ defines an XML element.
 
+// Line between includes to make sure starting >>> always works
 :leveloffset: 2
 include::Asn1Type.adoc[]
+
 include::Blob.adoc[]
+
 include::Block.adoc[]
+
 include::Bool.adoc[]
+
 include::Choice.adoc[]
+
 include::DataModel.adoc[]
+
 include::Double.adoc[]
+
 include::Flag.adoc[]
+
 include::Flags.adoc[]
+
+include::Frag.adoc[]
+
 include::Json.adoc[]
+
 include::JsonArray.adoc[]
+
 include::JsonBlob.adoc[]
+
 include::JsonBool.adoc[]
+
 include::JsonDouble.adoc[]
+
 include::JsonInteger.adoc[]
+
 include::JsonObject.adoc[]
+
 include::JsonString.adoc[]
+
 include::Null.adoc[]
+
 include::Number.adoc[]
+
 include::Padding.adoc[]
+
 include::Sequence.adoc[]
+
 include::Stream.adoc[]
+
 include::String.adoc[]
+
 include::XmlAttribute.adoc[]
+
 include::XmlCharacterData.adoc[]
+
 include::XmlElement.adoc[]
 
 // end
