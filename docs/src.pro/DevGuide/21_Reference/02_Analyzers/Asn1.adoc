@@ -24,13 +24,13 @@ IMPORTANT: The ASN.1 analyzer requires data from a Blob data type.
 ----
 
 ----
-peach --analyzer=Asn1 input.bin output.xml
+pittool analyzer Asn1 input.bin output.xml
 ----
 
 === Command Line Syntax
 
 ----
-peach --analyzer=Asn1 <input file> <output file>
+pittool analyzer Asn1 <input file> <output file>
 ----
 
 input file::
@@ -64,10 +64,7 @@ Hex dump of sample file +asn1.bin+
 
 Output from running peach on the command line
 ----
-> peach --analyzer=Asn1 asn1.bin asn1.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
+> pittool analyzer Asn1 asn1.bin asn1.xml
 
 [*] Starting Analyzer
 ----

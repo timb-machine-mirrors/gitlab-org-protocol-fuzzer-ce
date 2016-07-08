@@ -148,7 +148,7 @@ namespace Peach.Pro.Core
 				VerifyConfig(defs, args);
 
 			if (doLint)
-				VerifyPitFiles(dom, true);
+				VerifyPitFiles(dom, new PitLintContext { IsTest = true });
 
 			return dom;
 		}
@@ -180,12 +180,22 @@ namespace Peach.Pro.Core
 				_errors.Add("Configuration file should not have platform specific defines.");
 		}
 
-		private void VerifyPitFiles(Peach.Core.Dom.Dom dom, bool isTest)
+		class PitLintContext
 		{
-			VerifyPit(dom.fileName, isTest);
+			public bool IsTest { get; set; }
+			public string StateModel { get; set; }
+			public bool NonDeterministicActions { get; set; }
+		}
+
+		private void VerifyPitFiles(Peach.Core.Dom.Dom dom, PitLintContext ctx)
+		{
+			VerifyPit(dom.fileName, ctx);
+
+			ctx.IsTest = false;
+
 			foreach (var ns in dom.ns)
 			{
-				VerifyPitFiles(ns, false);
+				VerifyPitFiles(ns, ctx);
 			}
 		}
 
@@ -298,7 +308,7 @@ namespace Peach.Pro.Core
 			return next;
 		}
 
-		private void VerifyPit(string fileName, bool isTest)
+		private void VerifyPit(string fileName, PitLintContext ctx)
 		{
 			var idxDeclaration = 0;
 #if DEBUG
@@ -387,7 +397,7 @@ namespace Peach.Pro.Core
 
 				var it = nav.Select("/p:Peach/p:Test", nsMgr);
 
-				var expected = isTest ? 1 : 0;
+				var expected = ctx.IsTest ? 1 : 0;
 
 				if (it.Count != expected)
 					_errors.Add("Number of <Test> elements is {0} but should be {1}.".Fmt(it.Count, expected));
@@ -401,6 +411,9 @@ namespace Peach.Pro.Core
 					var lifetime = it.Current.GetAttribute("targetLifetime", string.Empty);
 					if (string.IsNullOrEmpty(lifetime))
 						_errors.Add("<Test> element is missing targetLifetime attribute.");
+
+					var nonDeterminisitic = it.Current.GetAttribute("nonDeterministicActions", string.Empty);
+					ctx.NonDeterministicActions = !string.IsNullOrEmpty(nonDeterminisitic) && bool.Parse(nonDeterminisitic);
 
 #if DEBUG
 					if (!ShouldSkipRule(it, "Skip_Lifetime"))
@@ -423,6 +436,9 @@ namespace Peach.Pro.Core
 					if (loggers.Count != 0)
 						_errors.Add("Number of <Logger> elements is {0} but should be 0.".Fmt(loggers.Count));
 #endif
+					var stateModel = it.Current.Select("p:StateModel", nsMgr);
+					if (stateModel.Count == 1 && stateModel.MoveNext())
+						ctx.StateModel = stateModel.Current.GetAttribute("ref", string.Empty);
 
 					var pubs = it.Current.Select("p:Publisher", nsMgr);
 					while (pubs.MoveNext())
@@ -483,9 +499,15 @@ namespace Peach.Pro.Core
 				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
 				while (sm.MoveNext())
 				{
-					var smName = sm.Current.GetAttribute("name", "") ?? "<unknown>";
+					var smName = sm.Current.GetAttribute("name", "");
 
-					var actions = sm.Current.Select("//p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
+					if (!string.IsNullOrEmpty(ctx.StateModel) && !ctx.StateModel.EndsWith(smName))
+						continue;
+
+					if (string.IsNullOrEmpty(smName))
+						smName = "<unknown>";
+
+					var actions = sm.Current.Select("p:State/p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
 
 					var gotStart = false;
 					var gotEnd = false;
@@ -506,13 +528,18 @@ namespace Peach.Pro.Core
 
 					if (!gotEnd)
 						_errors.Add(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
-				}
 
-				var whenAction = nav.Select("/p:Peach/p:StateModel/p:State/p:Action[contains(@when, 'controlIteration')]", nsMgr);
-				while (whenAction.MoveNext())
-				{
-					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
-						_errors.Add("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+					var whenAction = sm.Current.Select("p:State/p:Action[@when]", nsMgr);
+					while (whenAction.MoveNext())
+					{
+						var when = whenAction.Current.GetAttribute("when", string.Empty);
+						if (when.Contains("controlIteration") && !ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
+							_errors.Add("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+
+						// "context.controlIteration" is deterministic, so allow that to pass the lint check
+						if (when != "context.controlIteration" && !ctx.NonDeterministicActions && !ShouldSkipRule(whenAction, "Allow_WhenNonDeterministicActions"))
+							_errors.Add("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true': {0}".Fmt(whenAction.Current.OuterXml));
+					}
 				}
 
 				var badValues = nav.Select("//*[contains(@value, '\n')]", nsMgr);

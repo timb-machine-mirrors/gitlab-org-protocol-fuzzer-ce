@@ -21,8 +21,20 @@ IMPORTANT: The String Token Analyzer only works at runtime and requires an attac
 ----
 
 ----
-peach --analyzer=Xml input.txt output.xml
+pittool analyzer StringToken input.txt output.xml
 ----
+
+=== Command Line Syntax
+
+----
+pittool analyzer StringToken <input file> <output file>
+----
+
+input file::
+    Text file
+
+output file::
+    Generated PIT file
 
 === Attributes
 

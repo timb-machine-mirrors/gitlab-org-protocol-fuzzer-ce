@@ -19,13 +19,13 @@ NOTE: This analyzer is intended to always be run from the command line.
 === Syntax
 
 ----
-peach --analyzer=Swagger swagger.json web_api_pit.xml
+pittool analyzer Swagger swagger.json web_api_pit.xml
 ----
 
 === Command Line Syntax
 
 ----
-peach --analyzer=Postman <input file> <output file>
+pittool analyzer Swagger <input file> <output file>
 ----
 
 input file::

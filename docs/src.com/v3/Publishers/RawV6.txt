@@ -1,7 +1,7 @@
 :toc!:
 == RawV6 Publisher
 
-The _RawV6_ publisher allows sending raw IPv6 packes without IP header.
+The _RawV6_ publisher allows sending raw IPv6 packets without IP header.
 
 NOTE: This publisher runs best on Linux and requires root privileges.
 
