@@ -29,7 +29,7 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class Frag : Block
 	{
-		protected static Logger Logger = LogManager.GetCurrentClassLogger();
+		protected static NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		public Frag()
 			: base()
