@@ -33,32 +33,58 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_SspiFixup[Sspi]|||Y|
 |xref:Fixups_TCPChecksumFixup[TCP Checksum] |X|||
 |xref:Fixups_UDPChecksumFixup[UDP Checksum]|X|||
+|xref:Fixups_UnixTimeFixup[Unix Time]|||X|
 |=======================================================
 
 :leveloffset: 2
 include::CiscoFixup.adoc[]
+
 include::CopyValueFixup.adoc[]
+
 include::CrcDualFixup.adoc[]
+
 include::CrcFixup.adoc[]
+
 include::ExpressionFixup.adoc[]
+
 include::FillValueFixup.adoc[]
+
 include::FromFileFixup.adoc[]
+
 include::IcmpChecksumFixup.adoc[]
+
 include::IcmpV6ChecksumFixup.adoc[]
+
 include::IsoFletcher16ChecksumFixup.adoc[]
+
 include::LRCFixup.adoc[]
+
 include::HMACFixup.adoc[]
+
 include::MD5Fixup.adoc[]
+
 include::ScriptFixup.adoc[]
+
 include::SequenceIncrementFixup.adoc[]
+
 include::SequenceRandomFixup.adoc[]
+
 include::SHA1Fixup.adoc[]
+
 include::SHA224Fixup.adoc[]
+
 include::SHA256Fixup.adoc[]
+
 include::SHA384Fixup.adoc[]
+
 include::SHA512Fixup.adoc[]
+
 include::SspiFixup.adoc[]
+
 include::TCPChecksumFixup.adoc[]
+
 include::UDPChecksumFixup.adoc[]
+
+include::UnixTimeFixup.adoc[]
 
 // end
