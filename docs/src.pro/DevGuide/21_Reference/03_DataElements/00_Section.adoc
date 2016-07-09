@@ -178,8 +178,6 @@ include::Flags.adoc[]
 
 include::Frag.adoc[]
 
-include::Json.adoc[]
-
 include::JsonArray.adoc[]
 
 include::JsonBlob.adoc[]

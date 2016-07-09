@@ -8,7 +8,7 @@ using System.ComponentModel;
 namespace Peach.Pro.Core.Transformers
 {
 	[Description("Null transformer. Returns that data unaltered.")]
-	[Transformer("Null", true)]
+	[Transformer("Null", true, Scope = PluginScope.Internal)]
 	[Serializable]
 	public class Null : Transformer
 	{
