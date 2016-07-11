@@ -227,7 +227,8 @@ namespace Peach.Pro.Test.Core.WebServices
 			var expected = new string[] { "StartIterationEvent", "ExitIterationEvent" };
 			var callParams = (from grp in p.Metadata.Monitors
 							  from monitor in grp.Items
-							  from param in monitor.Items
+							  from paramGroup in monitor.Items
+							  from param in paramGroup.Items
 							  where param.Type == ParameterType.Call
 							  select param).ToList();
 
