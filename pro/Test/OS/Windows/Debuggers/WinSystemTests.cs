@@ -133,17 +133,24 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 
 					var dbg = new SystemDebuggerInstance();
 
-					dbg.StartService("iphlpsvc", TimeSpan.FromSeconds(30));
-
-					for (int i = 0; i < 10; ++i)
+					try
 					{
-						Assert.True(dbg.IsRunning);
-						System.Threading.Thread.Sleep(100);
+						dbg.StartService("iphlpsvc", TimeSpan.FromSeconds(30));
+
+						for (int i = 0; i < 10; ++i)
+						{
+							Assert.True(dbg.IsRunning);
+							System.Threading.Thread.Sleep(100);
+						}
+
+						dbg.WaitForExit(0);
+
+						Assert.Null(dbg.Fault);
 					}
-
-					dbg.Dispose();
-
-					Assert.Null(dbg.Fault);
+					finally
+					{
+						dbg.Dispose();
+					}
 				}
 			}
 			finally
@@ -161,11 +168,12 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 		[Test]
 		public void BadProcess()
 		{
-			var dbg = new SystemDebuggerInstance();
+			using (var dbg = new SystemDebuggerInstance())
+			{
+				var ex = Assert.Throws<PeachException>(() => dbg.StartProcess("foo.exe"));
 
-			var ex = Assert.Throws<PeachException>(() => dbg.StartProcess("foo.exe"));
-
-			StringAssert.StartsWith("System debugger could not start process 'foo.exe'.", ex.Message);
+				StringAssert.StartsWith("System debugger could not start process 'foo.exe'.", ex.Message);
+			}
 		}
 
 
@@ -180,19 +188,24 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
 			};
 
-			dbg.StartProcess(Program);
-
-			for (int i = 0; i < 10; ++i)
+			try
 			{
-				if (!dbg.IsRunning)
-					break;
-				System.Threading.Thread.Sleep(500);
+				dbg.StartProcess(Program);
+
+				for (int i = 0; i < 10; ++i)
+				{
+					if (!dbg.IsRunning)
+						break;
+					System.Threading.Thread.Sleep(500);
+				}
+
+				Assert.False(dbg.IsRunning, "Debugger should not be running");
+				Assert.NotNull(dbg.Fault, "Debugger should have detected fault");
 			}
-
-			Assert.False(dbg.IsRunning, "Debugger should not be running");
-			Assert.NotNull(dbg.Fault, "Debugger should have detected fault");
-
-			dbg.Dispose();
+			finally
+			{
+				dbg.Dispose();
+			}
 		}
 
 		[Test]
@@ -206,9 +219,16 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
 			};
 
-			var ex = Assert.Throws<PeachException>(() => dbg.StartProcess("Foo.exe"));
+			try
+			{
+				var ex = Assert.Throws<PeachException>(() => dbg.StartProcess("Foo.exe"));
 
-			StringAssert.Contains("The system cannot find the file specified.", ex.Message);
+				StringAssert.Contains("The system cannot find the file specified.", ex.Message);
+			}
+			finally
+			{
+				dbg.Dispose();
+			}
 		}
 
 		[Test]
@@ -222,9 +242,16 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
 			};
 
-			var ex = Assert.Throws<PeachException>(() => dbg.AttachProcess("1234"));
+			try
+			{
+				var ex = Assert.Throws<PeachException>(() => dbg.AttachProcess("1234"));
 
-			StringAssert.Contains("Value does not fall within the expected range.", ex.Message);
+				StringAssert.Contains("Value does not fall within the expected range.", ex.Message);
+			}
+			finally
+			{
+				dbg.Dispose();
+			}
 		}
 
 		[Test]
@@ -238,18 +265,31 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
 			};
 
-			var exe = Utilities.GetAppResourcePath("CrashableServer.exe");
-			using (var p = ProcessHelper.Start(exe, "127.0.0.1 0", null, null))
+			try
 			{
-				dbg.AttachProcess(p.Id.ToString());
+				var exe = Utilities.GetAppResourcePath("CrashableServer.exe");
+				using (var p = ProcessHelper.Start(exe, "127.0.0.1 0", null, null))
+				{
+					dbg.AttachProcess(p.Id.ToString());
 
-				System.Threading.Thread.Sleep(1000);
+					for (var i = 0; i < 10; ++i)
+					{
+						if (dbg.IsRunning)
+							break;
 
-				Assert.True(dbg.IsRunning, "Debugger should be running");
+						System.Threading.Thread.Sleep(500);
+					}
 
+					Assert.True(dbg.IsRunning, "Debugger should be running");
+
+					dbg.WaitForExit(0);
+
+					Assert.Null(dbg.Fault, "Should not have detected fault");
+				}
+			}
+			finally
+			{
 				dbg.Dispose();
-
-				Assert.Null(dbg.Fault, "Should not have detected fault");
 			}
 		}
 
@@ -265,17 +305,29 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
 			};
 
-			var exe = Utilities.GetAppResourcePath("CrashableServer.exe");
-			dbg.StartProcess(exe + " 127.0.0.1 0");
+			try
+			{
+				var exe = Utilities.GetAppResourcePath("CrashableServer.exe");
+				dbg.StartProcess(exe + " 127.0.0.1 0");
 
-			System.Threading.Thread.Sleep(1000);
+				for (var i = 0; i < 10; ++i)
+				{
+					if (dbg.IsRunning)
+						break;
 
-			Assert.True(dbg.IsRunning, "Debugger should be running");
+					System.Threading.Thread.Sleep(500);
+				}
 
-			dbg.Dispose();
+				Assert.True(dbg.IsRunning, "Debugger should be running");
 
-			Assert.Null(dbg.Fault, "Should not have detected fault");
+				dbg.WaitForExit(0);
 
+				Assert.Null(dbg.Fault, "Should not have detected fault");
+			}
+			finally
+			{
+				dbg.Dispose();
+			}
 		}
 	}
 }
