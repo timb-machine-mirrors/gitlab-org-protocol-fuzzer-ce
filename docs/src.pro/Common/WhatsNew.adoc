@@ -32,15 +32,27 @@ TODO
 
 ==== Fremented Protocol Support
 
+TODO
+
 ==== Improvements to HTTP and REST Publishers
+
+TODO
 
 ==== APC Power Monitor
 
+TODO
+
 ==== SNMP Power Monitor
+
+TODO
 
 ==== Swagger Analyzer
 
+TODO
+
 ==== Postman Analyzer
+
+TODO
 
 ==== GDB Server Monitor
 
@@ -53,9 +65,15 @@ Both GDB monitors now support changing the script used to drive GDB during fuzzi
 
 === Breaking Changes
 
+TODO
+
 ==== Plugins Folder
 
+TODO
+
 ==== Sample Ninja
+
+TODO
 
 
 
