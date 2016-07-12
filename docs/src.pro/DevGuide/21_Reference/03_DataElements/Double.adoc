@@ -4,7 +4,7 @@
 
 The _Double_ element defines a floating-point number of 32 or 64 bits. Floating point values are packed into a byte representation with a byte order of little or big endian.
 
-The Double element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:Json[Json] or xref:Choice[Choice].
+The Double element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence] or xref:Choice[Choice].
 
 NOTE: The floating point representation used for the _Double_ element is based on the IEEE 754 floating point specification. For floating point values not conforming to IEEE 754, consider using a xref:Blob[Blob] data type as an alternative.
 

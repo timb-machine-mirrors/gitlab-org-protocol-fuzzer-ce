@@ -2,9 +2,9 @@
 [[Null]]
 == Null
 
-The _Null_ element defines an element which has no value. This element is most useful when used as a child of a xref:Json[Json] element.
+The _Null_ element defines an element which has no value.
 
-The Null element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:Json[Json] or xref:Choice[Choice].
+The Null element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence] or xref:Choice[Choice].
 
 === Syntax
 
