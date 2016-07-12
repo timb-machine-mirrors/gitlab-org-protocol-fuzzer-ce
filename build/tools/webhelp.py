@@ -1,4 +1,4 @@
-import os.path, shutil
+import os.path, shutil, re, sys
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs, Task
@@ -172,6 +172,8 @@ class xmllint(Task):
 	before  = [ 'webhelp' ]
 	vars    = [ 'XMLLINT_OPTS' ]
 
+fail_re = re.compile('^Error.*$', re.MULTILINE)
+
 @update_outputs
 class webhelp(Task):
 	run_str = '${XSLTPROC} --stringparam base.dir ${OUTPUT_DIR} ${WEBHELP_XSL} ${SRC}'
@@ -188,7 +190,56 @@ class webhelp(Task):
 
 		os.makedirs(self.generator.output_dir.abspath())
 
-		ret = super(webhelp, self).exec_command(cmd, **kw)
+		bld = self.generator.bld
+		try:
+			if not kw.get('cwd', None):
+				kw['cwd'] = bld.cwd
+		except AttributeError:
+			bld.cwd = kw['cwd'] = bld.variant_dir
+
+		subprocess = Utils.subprocess
+		kw['shell'] = isinstance(cmd, str)
+		Logs.debug('runner: %r' % (cmd,))
+		Logs.debug('runner_env: kw=%s' % kw)
+
+		if bld.logger:
+			bld.logger.info(cmd)
+
+		kw['stdout'] = subprocess.PIPE
+		kw['stderr'] = subprocess.PIPE
+
+		if Logs.verbose and not kw['shell'] and not Utils.check_exe(cmd[0]):
+			raise Errors.WafError("Program %s not found!" % cmd[0])
+
+		try:
+			p = subprocess.Popen(cmd, **kw)
+			(out, err) = p.communicate()
+			ret = p.returncode
+		except Exception as e:
+			raise Errors.WafError('Execution failure: %s' % str(e), ex=e)
+
+		if out:
+			if not isinstance(out, str):
+				out = out.decode(sys.stdout.encoding or 'iso8859-1')
+			if bld.logger:
+				bld.logger.debug('out: %s' % out)
+			else:
+				Logs.info(out, extra={'stream':sys.stdout, 'c1': ''})
+			if ret == 0:
+				m = fail_re.search(out)
+				if m:
+					ret = m.groups(1)
+		if err:
+			if not isinstance(err, str):
+				err = err.decode(sys.stdout.encoding or 'iso8859-1')
+			if bld.logger:
+				bld.logger.error('err: %s' % err)
+			else:
+				Logs.info(err, extra={'stream':sys.stderr, 'c1': ''})
+			if ret == 0:
+				m = fail_re.search(err)
+				if m:
+					ret = m.group(0)
 
 		if not ret:
 			# gather the list of output files from webhelp
