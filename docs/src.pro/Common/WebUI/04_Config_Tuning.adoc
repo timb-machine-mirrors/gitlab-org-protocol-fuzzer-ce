@@ -36,7 +36,7 @@ Exclude::
 +
 Don't perform any testing of this field.
 +
-CAUTION: Excluding fields from testing should be used judiciously as it can lead to undiscovered faults. It's our recommendation that all fields get tested.
+CAUTION: Excluding fields from testing should be used judiciously, as it may lead to missed faults. It's our recommendation that all fields get tested.
 Instead of excluding fields, consider tuning them to lower or lowest.
 
 Lowest:: Produce the least number of test cases for this field.
