@@ -22,7 +22,7 @@ Syntax:
     Specified port the web application runs on
 --plugins=PATH::
     Change the plugins folder location. Defaults to
-    Peach install folder '/Plugins'.
+    the 'Plugins' folder relative to the Peach installation.
 
 Starts Peach and provides a web application for configuring, running,
 and viewing results of a fuzzing job.

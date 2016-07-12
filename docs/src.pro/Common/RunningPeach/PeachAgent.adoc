@@ -4,7 +4,7 @@
 Starts a Peach Agent server process.
 
 A Peach Agent can be started on a remote machine (remote to Peach) to
-accept connections from a Peach instance to run various utility modules
+accept connections from a Peach instance. Agents run various utility modules
 called Monitors and also host remote Publishers. Peach Agents do not need
 any specific configuration outside of which port to listen on. All
 configuration is provided by a Peach instance.
