@@ -15,6 +15,7 @@ IMPORTANT: Fixups should be run after fuzzing and before processing fuzzed data.
 |xref:Fixups_CrcDualFixup[CrcDual]|X|||
 |xref:Fixups_ExpressionFixup[Expression] |||X|
 |xref:Fixups_FillValueFixup[FillValue]|||X|
+|xref:Fixups_FragSeqIncrementFixup[FragSeqIncrement]||||X
 |xref:Fixups_FromFileFixup[FromFile]|||X|
 |xref:Fixups_HMACFixup[Hmac]||X||
 |xref:Fixups_IcmpChecksumFixup[Icmp Checksum]|X|||
@@ -48,6 +49,8 @@ include::CrcFixup.adoc[]
 include::ExpressionFixup.adoc[]
 
 include::FillValueFixup.adoc[]
+
+include::FragSeqIncrementFixup.adoc[]
 
 include::FromFileFixup.adoc[]
 
