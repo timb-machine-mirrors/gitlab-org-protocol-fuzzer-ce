@@ -15,7 +15,7 @@ recommends using Mono .NET runtime version 4 from the mono project.
 . Unzip the Peach distribution to an appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
-such as `peach-pro-{BUILDTAG}-osx_release.zip`.
+such as +peach-pro-{BUILDTAG}-osx_release.zip+.
 
 . Install CrashWrangler.
 +
@@ -25,7 +25,7 @@ Here are instructions to install and compile CrashWrangler from the peach zip.
 
 .. Ensure XCode is installed.
 .. Open `Terminal.app`.
-.. Navigate to the folder where you extracted peach-pro-{BUILDTAG}-osx_release.zip.
+.. Navigate to the folder where you extracted +peach-pro-{BUILDTAG}-osx_release.zip+.
 .. Finish installing CrashWrangler using the following commands.
 +
 ----
