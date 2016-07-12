@@ -130,7 +130,9 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				"Windows Kits\\8.0\\Debuggers\\x64",
 				"Windows Kits\\8.0\\Debuggers\\x86",
 				"Windows Kits\\8.1\\Debuggers\\x64",
-				"Windows Kits\\8.1\\Debuggers\\x86"
+				"Windows Kits\\8.1\\Debuggers\\x86",
+				"Windows Kits\\10\\Debuggers\\x64",
+				"Windows Kits\\10\\Debuggers\\x86"
 			};
 
 			foreach (var pg in pgPaths)
