@@ -1,0 +1,21 @@
+[[PitTool_Crack]]
+== Pit Tool - Crack
+
+=== Syntax
+
+----
+Usage:
+  PitTool.exe crack [options] <PitPath> <DataModel> <SamplePath>
+
+Description:
+  Crack a sample file.
+
+General Options:
+  -h, --help                 Display this help and exit
+  -V, --version              Display version information and exit
+  -v, --verbose              Increase verbosity, can use multiple times
+      --plugins=VALUE        Specify the plugins path
+      --pits=VALUE           Specify the PitLibraryPath.
+----
+
+// end

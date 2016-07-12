@@ -1,0 +1,24 @@
+[[PitTool_Compile]]
+== Pit Tool - Compile
+
+=== Syntax
+
+----
+Usage:
+  PitTool.exe compile [options] <PitPath>
+
+Description:
+  Validate and compile pit into .meta.json and .ninja files.
+
+compile Options:
+      --fast                 Avoid slow compile operations
+
+General Options:
+  -h, --help                 Display this help and exit
+  -V, --version              Display version information and exit
+  -v, --verbose              Increase verbosity, can use multiple times
+      --plugins=VALUE        Specify the plugins path
+      --pits=VALUE           Specify the PitLibraryPath.
+----
+
+// end
