@@ -246,7 +246,7 @@ Was a fault detected? Called after xref:Rest-API-IterationFinished[IterationFini
 [[Rest-API-GetMonitorData]]
 ===== GET /Agent/GetMonitorData (Required)
 
-Return mointor data. Called when a fault has been detected on the current test case and the engine is collecting data from the agents/monitors. Data for each monitor that has been started is returned in the results of this call.
+Return monitor data. Called when a fault has been detected on the current test case and the engine is collecting data from the agents/monitors. Data for each monitor that has been started is returned in the results of this call.
 
 NOTE: GetMonitorData can be called even if xref:Rest-API-DetectedFault[DetectedFault] returns false if another peach component (agent, publisher, etc.) indicates a fault has occured.
 
