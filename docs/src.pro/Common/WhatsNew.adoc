@@ -1,7 +1,7 @@
 [[Brand_new_items]]
 == What's new in Peach Platform v4.0 (2016 Q2)
 
-This is our first release of 2016. It includes a good mix of new features, improvements, and new Pits.
+This is our second release of 2016. It includes a good mix of new features, improvements, and new Pits.
 The new Pits are available for licensing singularly or as part of a Pit Pack.
 If you are interested in using a new Pit that has been added to an existing Pit Pack already licensed,
 redownload Peach Fuzzer by visiting dl.peachfuzzer.com. 
