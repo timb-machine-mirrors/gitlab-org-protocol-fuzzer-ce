@@ -53,7 +53,10 @@ The Peach +--debug+ command line argument is the main method of debugging the cr
 [[debug-cracking]]
 ==== Debugging the Cracking Process
 
-When writing data models to consume data, both debugging and data validation need a detailed view into how cracking occurs. Peach provides two tools for debugging and validating that data is cracking correctly, the +--debug+ argument to Peach and the xref:Program_PeachValidator[Peach Validator] tool.
+When writing data models to consume data,
+a detailed view into how cracking occurs is useful for both debugging and for data validation.
+Peach provides two tools for debugging and validating that data is cracking correctly,
+the +--debug+ argument to Peach and the xref:Program_PeachValidator[Peach Validator] tool.
 
 * The +--debug+ argument enables verbose debugging messages from Peach, including the cracking process.
 
