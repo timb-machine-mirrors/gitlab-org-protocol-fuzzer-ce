@@ -49,6 +49,7 @@ namespace PitTool
 		string _salt;
 #endif
 
+#if DEBUG
 		// test options
 		uint? _seed;
 		bool _notest;
@@ -57,6 +58,7 @@ namespace PitTool
 		bool _profile;
 		uint? _stop;
 		readonly List<string> _errors = new List<string>();
+#endif
 
 		static int Main(string[] args)
 		{
@@ -89,6 +91,7 @@ namespace PitTool
 				Description = "Create a sample ninja database.",
 				Action = Ninja,
 			});
+#if DEBUG
 			_cmds.Add(new Command
 			{
 				Name = "test",
@@ -97,6 +100,7 @@ namespace PitTool
 				Options = MakeTestOptions(),
 				Action = Test,
 			});
+#endif
 #if DEBUG
 			_cmds.Add(new Command
 			{
@@ -149,6 +153,7 @@ namespace PitTool
 			return options;
 		}
 
+#if DEBUG
 		OptionSet MakeTestOptions()
 		{
 			var options = new OptionSet
@@ -163,6 +168,7 @@ namespace PitTool
 			};
 			return options;
 		}
+#endif
 
 #if DEBUG
 		OptionSet MakeProtectOptions()
@@ -398,6 +404,7 @@ namespace PitTool
 			return 0;
 		}
 
+#if DEBUG
 		int Test(Command cmd, List<string> args)
 		{
 			if (args.Count != 1)
@@ -443,6 +450,7 @@ namespace PitTool
 
 			return 0;
 		}
+#endif
 
 		int Crack(Command cmd, List<string> args)
 		{
@@ -478,6 +486,7 @@ namespace PitTool
 			return 0;
 		}
 
+#if DEBUG
 		void VerifyDataSets(string pitTestFile)
 		{
 			Console.WriteLine("Verifying pit data sets: {0}", pitTestFile);
@@ -540,6 +549,7 @@ namespace PitTool
 
 			Console.WriteLine();
 		}
+#endif
 
 		string ComputeVersionHash()
 		{
