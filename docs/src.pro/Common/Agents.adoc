@@ -1,13 +1,21 @@
 [[Agent]]
 == Agents
 
-Agents are processes that host Monitors locally or remotely. Monitors collect information and perform actions on behalf of the fuzzer.
+A Peach agent is a light weight process that can host many monitors.
+These monitors collect information and perform actions on behalf of the fuzzer, such as capturing packets or running debuggers.
+The Peach agent communicates over a network channel to the main Peach process where all captured information is reported.
+This allows the main Peach process to perform monitoring locally or on the device under test.
 
-An agent, or one or more processes that an agent hosts--such as a monitor or a publisher,  might require access at a higher level than a user.
+.Peach Agent Block Diagram
+image::{images}/Common/AgentDiagram.svg[align="center",scalewidth="70%"]
+
+An agent, or one or more processes that an agent hosts--such as a monitor or a publisher,
+might require access at a higher level than a user.
 
 * Unix systems sometimes require an Agent to run with root privileges.
 * Linux systems sometimes require an Agent to run with root privileges. On Ubuntu Linux
-systems, the following command can be used as an alternative to running the process from root. This command allows packets through the firewall using port 9001 (the port for remote agents).
+systems, the following command can be used as an alternative to running the process from root.
+This command allows packets through the firewall using port 9001 (the port for remote agents).
 +
 ----
  sudo ufw allow 9001
