@@ -22,7 +22,7 @@ as out of scope for real time monitoring.
 
 === Hardware Recommendations
 
-The following are generic hardware recommendations. Adjust as needed based on your needs.
+The following are generic hardware recommendations. Adjust based on your needs.
 
 ==== Local Target
 
@@ -47,7 +47,7 @@ Remote target fuzzing occurs when the target is not located on the machine runni
 | Recommended | 64bit | 2     | 8GB  | 60GB SSD
 |========
 
-TIP: It's possible to run Peach on 32bit operating systems, but it's not recommended as it places sevear limits on memory usage (max 2GB).
+TIP: It's possible to run Peach on 32bit operating systems, but it's not recommended as it places severe limits on memory usage (max 2GB).
 
 
 [[InstallLicenseGlobally]]
