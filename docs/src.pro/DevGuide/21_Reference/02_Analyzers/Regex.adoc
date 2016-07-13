@@ -33,7 +33,7 @@ pittool analyzer Regex "(\w+)(.)" input.txt output.xml
 pittool analyzer Regex <regex> <input file> <output file>
 ----
 
-regex:
+regex::
     Regular Expression to base tokens on
 
 input file::
@@ -99,9 +99,6 @@ This example uses the string tokenizer on an inline value.
 Output from the example using the string tokenizer and an inline value.
 ----
 > peach -1 --debug RegexAnalyzer.xml
-
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Web site running at: http://localhost:8889/
 

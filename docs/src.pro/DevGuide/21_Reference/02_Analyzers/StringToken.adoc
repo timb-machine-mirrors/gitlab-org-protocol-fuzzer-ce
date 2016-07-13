@@ -9,8 +9,6 @@ The tree allows Peach to perform mutations that can expose bugs in parsers.
 
 When run using the command line, the results of the generated model are saved to disk. Once saved, you can use and modify the results as needed.
 
-IMPORTANT: The String Token Analyzer only works at runtime and requires an attached Data Element.
-
 === Syntax
 
 [source,xml]
@@ -86,9 +84,6 @@ Output from the example that uses the string tokenizer on an inline value.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 26956.
 
 [R1,-,-] Performing iteration
@@ -151,9 +146,6 @@ This example uses the StringToken analyzer on a string with a custom set of toke
 Output from the example of the string that contains custom tokens.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 56835.
 

@@ -1,14 +1,14 @@
-[[PitTool_Makexsd]]
-== Pit Tool - Make XSD
+[[PitTool_Crack]]
+== Pit Tool - Crack
 
 === Syntax
 
 ----
 Usage:
-  PitTool.exe makexsd
+  PitTool.exe crack [options] <PitPath> <DataModel> <SamplePath>
 
 Description:
-  Generate a peach.xsd file.
+  Crack a sample file.
 
 General Options:
   -h, --help                 Display this help and exit
@@ -17,5 +17,14 @@ General Options:
       --plugins=VALUE        Specify the plugins path
       --pits=VALUE           Specify the PitLibraryPath.
 ----
+
+=== Parameters
+
+PitPath:: 
+  Fuzzing definition that refers to sample files.
+DataModel:: 
+  The DataModel used to crack each sample.
+SamplesPath:: 
+  The path to a folder containing the sample files to be used during fuzzing.
 
 // end

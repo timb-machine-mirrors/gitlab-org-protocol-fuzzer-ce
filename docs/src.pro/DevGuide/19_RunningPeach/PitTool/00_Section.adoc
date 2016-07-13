@@ -16,7 +16,6 @@ Commands:
   help                       Show help for commands.
   makexsd                    Generate a peach.xsd file.
   ninja                      Create a sample ninja database.
-  nunit                      Create an assembly that can be used by NUnit.
   test                       Run standard pit tests.
 
 General Options:
@@ -44,9 +43,6 @@ xref:PitTool_Makexsd[makexsd]::
 xref:PitTool_Ninja[ninja]::
 	Create a sample ninja database.
 
-xref:PitTool_Nunit[nunit]::
-	Create an assembly that can be used by NUnit.
-
 xref:PitTool_Test[test]::
 	Run standard pit tests.
 
@@ -68,11 +64,7 @@ include::Makexsd.adoc[]
 
 :leveloffset: 1
 <<<
-include::Ninja.adoc[]
-
-:leveloffset: 1
-<<<
-include::Nunit.adoc[]
+include::../../../Common/RunningPeach/Ninja.adoc[]
 
 :leveloffset: 1
 <<<

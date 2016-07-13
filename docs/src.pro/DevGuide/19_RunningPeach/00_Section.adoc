@@ -52,6 +52,6 @@ include::../../Common/RunningPeach/PeachCli.adoc[]
 
 :leveloffset: 1
 <<<
-include::../../Common/RunningPeach/PitTool/00_Section.adoc[]
+include::PitTool/00_Section.adoc[]
 
 // end

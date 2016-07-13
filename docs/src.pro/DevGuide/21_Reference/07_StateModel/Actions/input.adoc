@@ -180,9 +180,6 @@ Output from this example. Once Peach is started, use the netcat command (nc) to 
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 32331.
 
 [R1,-,-] Performing iteration

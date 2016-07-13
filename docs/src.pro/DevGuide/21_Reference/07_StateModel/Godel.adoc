@@ -99,8 +99,6 @@ Produces the following output:
 ----
 >peach -1 example.xml --debug
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 Godel.Core.GodelPitParser Attached godel node to Action 'SM.Initial.Action'.
 Godel.Core.GodelPitParser Attached godel node to State 'SM.Initial'.
 Godel.Core.GodelPitParser Attached godel node to StateModel 'SM'.
@@ -166,8 +164,6 @@ Produces the following output:
 ----
 >peach -1 example.xml --debug
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 Godel.Core.GodelPitParser Attached godel node to Action 'SM.Initial.Action'.
 Godel.Core.GodelPitParser Attached godel node to Action 'SM.Initial.Action_1'.
 

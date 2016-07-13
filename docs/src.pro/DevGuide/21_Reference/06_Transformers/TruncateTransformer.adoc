@@ -70,9 +70,6 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Deja vu Security
-
 [*] Web site running at: http://localhost:8888/
 
 [*] Test 'Default' starting with random seed 3082.

@@ -655,6 +655,13 @@ Peach Agent
   The Peach Agent functionality has been moved to a separate executable
   'PeachAgent.exe' or 'peachagent' on Linux/OS X.
 
+Running Analyzers from Command Line
+
+  This functionality has been moved to the PitTool.
+
+Generate XML Schema File
+
+  This functionality has been moved to the PitTool.
 ";
 
 			Console.WriteLine(syntax1);

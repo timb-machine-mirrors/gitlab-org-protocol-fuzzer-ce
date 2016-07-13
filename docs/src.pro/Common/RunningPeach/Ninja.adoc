@@ -28,7 +28,18 @@ the generated database file is `png.ninja`.
 === Syntax
 
 ----
-pittool ninja <PitPath> <DataModel> <SamplesPath>
+Usage:
+  PitTool.exe ninja <PitPath> <DataModel> <SamplesPath>
+
+Description:
+  Create a sample ninja database.
+
+General Options:
+  -h, --help                 Display this help and exit
+  -V, --version              Display version information and exit
+  -v, --verbose              Increase verbosity, can use multiple times
+      --plugins=VALUE        Specify the plugins path
+      --pits=VALUE           Specify the PitLibraryPath.
 ----
 
 === Parameters

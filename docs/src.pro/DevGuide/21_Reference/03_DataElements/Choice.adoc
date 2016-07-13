@@ -174,9 +174,6 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 10646.
 
 [R1,-,-] Performing iteration
@@ -286,9 +283,6 @@ Output from this example.
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 59860.
 

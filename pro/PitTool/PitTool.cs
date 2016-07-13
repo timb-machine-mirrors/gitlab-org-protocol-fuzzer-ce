@@ -97,6 +97,7 @@ namespace PitTool
 				Options = MakeTestOptions(),
 				Action = Test,
 			});
+#if DEBUG
 			_cmds.Add(new Command
 			{
 				Name = "nunit",
@@ -104,6 +105,7 @@ namespace PitTool
 				Description = "Create an assembly that can be used by NUnit.",
 				Action = MakeTestAssembly,
 			});
+#endif
 #if DEBUG
 			_cmds.Add(new Command
 			{
@@ -355,6 +357,7 @@ namespace PitTool
 		}
 #endif
 
+#if DEBUG
 		int MakeTestAssembly(Command cmd, List<string> args)
 		{
 			if (args.Count != 2)
@@ -373,6 +376,7 @@ namespace PitTool
 
 			return 0;
 		}
+#endif
 
 		int Ninja(Command cmd, List<string> args)
 		{

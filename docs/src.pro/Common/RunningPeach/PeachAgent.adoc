@@ -3,11 +3,10 @@
 
 Starts a Peach Agent server process.
 
-A Peach Agent can be started on a remote machine (remote to Peach) to
-accept connections from a Peach instance. Agents run various utility modules
-called Monitors and also host remote Publishers. Peach Agents do not need
-any specific configuration outside of which port to listen on. All
-configuration is provided by a Peach instance.
+A Peach Agent can be started on a remote machine (remote to Peach) to accept connections from a Peach instance. 
+Agents run various utility modules called Monitors and also host remote Publishers. 
+Peach Agents do not need any specific configuration outside of which port to listen on. 
+All configuration is provided by a Peach instance.
 
 === Licensing
 
@@ -16,7 +15,9 @@ In a typical deployment, only the machine running the core Peach process (Peach.
 
 === Syntax
 
- peachagent [--port=9001]
+----
+peachagent [--port=9001]
+----
 
 
 -h, --help::
@@ -41,4 +42,4 @@ In a typical deployment, only the machine running the core Peach process (Peach.
 --trace::
     Enable even more verbose debug messages.
 
-
+// end

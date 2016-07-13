@@ -148,9 +148,6 @@ For example, you might use multiple publishers to communicate with a network ser
 ----
 $ peach -1 --debug TwoPublisher.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 9324.
 Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
 

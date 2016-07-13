@@ -1,14 +1,18 @@
-[[PitTool_Crack]]
-== Pit Tool - Crack
+[[PitTool_Makexsd]]
+== Pit Tool - Make XSD
+
+Generate XML Schema file (peach.xsd). 
+This file is used for pit file validation and also intelliSense in XML editors. 
+The XSD only needs to be generated if custom extensions are added to Peach.
 
 === Syntax
 
 ----
 Usage:
-  PitTool.exe crack [options] <PitPath> <DataModel> <SamplePath>
+  PitTool.exe makexsd
 
 Description:
-  Crack a sample file.
+  Generate a peach.xsd file.
 
 General Options:
   -h, --help                 Display this help and exit
@@ -17,5 +21,9 @@ General Options:
       --plugins=VALUE        Specify the plugins path
       --pits=VALUE           Specify the PitLibraryPath.
 ----
+
+=== Parameters
+
+None
 
 // end

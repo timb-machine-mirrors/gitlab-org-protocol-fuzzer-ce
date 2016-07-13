@@ -16,14 +16,19 @@ using Peach.Pro.Core.MutationStrategies;
 using Action = Peach.Core.Dom.Action;
 using StateModel = Peach.Core.Dom.StateModel;
 using Peach.Core.Cracker;
+
+#if DEBUG
 using System.Reflection;
 using System.Reflection.Emit;
 using NUnit.Framework;
+#endif
 
 namespace Peach.Pro.PitTester
 {
+#if DEBUG
 	class QuickAttribute : CategoryAttribute { }
 	class SlowAttribute : CategoryAttribute { }
+#endif
 	
 	public static class ThePitTester
 	{
@@ -40,6 +45,7 @@ namespace Peach.Pro.PitTester
 				Console.Write(".");
 		}
 
+#if DEBUG
 		public static void MakeTestAssembly(
 			string pitLibraryPath,
 			string pitTestFile,
@@ -137,6 +143,16 @@ namespace Peach.Pro.PitTester
 			il.Emit(OpCodes.Call, testPitMethod);
 			il.Emit(OpCodes.Ret);
 		}
+#endif
+
+		public static void Ignore(string fmt, params string[] args)
+		{
+#if DEBUG
+			Assert.Ignore(fmt, args);
+#else
+			Console.WriteLine(fmt, args);
+#endif
+		}
 
 		public static void TestPit(
 			string libraryPath,
@@ -150,7 +166,7 @@ namespace Peach.Pro.PitTester
 
 			var testData = TestData.Parse(testPath);
 			if (testData.Tests.Any(x => x.Skip))
-				Assert.Ignore("Skipping test: {0}", testPath);
+				Ignore("Skipping test: {0}", testPath);
 
 			var cleanme = new List<IDisposable>();
 			var pitFile = Path.Combine(libraryPath, testData.Pit);
@@ -403,7 +419,7 @@ namespace Peach.Pro.PitTester
 		{
 			var testData = TestData.Parse(fileName);
 			if (testData.Tests.Any(x => x.Skip))
-				Assert.Ignore("Skipping test: {0}", fileName);
+				Ignore("Skipping test: {0}", fileName);
 
 			var pitFile = Path.Combine(pitLibraryPath, testData.Pit);
 			Console.WriteLine("PitFile: {0}", pitFile);

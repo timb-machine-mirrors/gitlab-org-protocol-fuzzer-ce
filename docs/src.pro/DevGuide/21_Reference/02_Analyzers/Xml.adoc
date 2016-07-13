@@ -7,7 +7,20 @@ When run using the command line, the results of the generated model are saved to
 
 This analyzer can be attached to a string.
 
-TIP: XML special characters (such as < = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values.
+[TIP]
+====
+The following XML special characters need to be encoded if they are inline values.
+
+[options="header"]
+|=======================
+|Symbol   |Name           |Escape Sequence
+|&quot;   |double-quote   |`&quot;`
+|&apos;   |single-quote   |`&apos;`
+|&lt;     |less-than      |`&lt;`
+|&gt;     |greater-than   |`&gt;`
+|&amp;    |ampersand      |`&amp;`
+|=======================
+====
 
 === Syntax
 
@@ -77,9 +90,6 @@ Output of the example using an inline value.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 22910.
 
 [R1,-,-] Performing iteration
@@ -137,9 +147,6 @@ This example uses the Xml analyzer on an inline value with encoded Xml character
 Output from the example using an inline value with encoded Xml characters.
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 44192.
 
@@ -200,9 +207,6 @@ This example uses the Xml analyzer on itself.
 Output from the example that uses the Xml analyzer on itself.
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 10150.
 
