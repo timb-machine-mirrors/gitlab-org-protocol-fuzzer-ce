@@ -63,10 +63,6 @@ xref:ref[ref]:: Reference to the source data element, containing the value to co
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -106,10 +102,6 @@ xref:ref[ref]:: Reference to the source data element, containing the value to co
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

@@ -125,10 +125,6 @@ The simplest block is an empty block. This definition produces no output.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -198,10 +194,6 @@ Blocks can be nested as deep as required. Blocks help create logical structure a
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -267,10 +259,6 @@ Assign blocks a friendly name to make them easier to understand and debug.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -333,10 +321,6 @@ NOTE: If a declared child element and a child element from the referenced contai
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -425,10 +409,6 @@ To use this template as a reference.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

@@ -119,10 +119,6 @@ The simplest sequence has no children.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -185,10 +181,6 @@ The output of a sequence with a single child
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -251,10 +243,6 @@ Assign sequences a friendly name to make them easier to understand and debug.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -327,10 +315,6 @@ Sequences can be nested as deep as required. Sequences help create logical struc
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -397,10 +381,6 @@ Sequences values can be altered from the state model using data fields.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

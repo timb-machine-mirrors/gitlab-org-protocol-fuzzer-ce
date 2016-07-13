@@ -98,10 +98,6 @@ Outputs a Json string with a single null value.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

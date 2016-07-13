@@ -161,43 +161,6 @@ Leaving us with this:
 </Test>
 ----
 
-=== Configure Logging
-
-Now that we are using monitors that can detect faults, we want to configure a logging mechanism to capture the results of our fuzzer run.
-
-Add the following to the +Test+ element at the bottom of our XML file:
-
-[source,xml]
-----
-<Logger class="Filesystem">
-    <Param name="Path" value="logs" />
-</Logger>
-----
-
-
-So it looks like this:
-
-[source,xml]
-----
-<Test name="Default">
-    <Agent ref="WinAgent" platform="windows"/>
-    <Agent ref="LinAgent" platform="linux"/>
-    <Agent ref="OsxAgent" platform="osx"/>
-
-    <StateModel ref="TheState"/>
-
-    <Publisher class="File">
-        <Param name="FileName" value="fuzzed.png"/>
-    </Publisher>
-
-    <Strategy class="Random"/>
-
-    <Logger class="Filesystem">
-        <Param name="Path" value="logs" />
-    </Logger>
-</Test>
-----
-
 == Running the Fuzzer
 
 Now, let's actually kick off our fuzzer for real!  Every 200 or so iterations, the strategy will switch to a different sample file.

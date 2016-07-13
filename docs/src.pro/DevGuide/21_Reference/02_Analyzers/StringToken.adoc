@@ -78,10 +78,6 @@ This example uses the string tokenizer on an inline value.
   <Test name="Default">
     <StateModel ref="TheState"/>
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -148,10 +144,6 @@ This example uses the StringToken analyzer on a string with a custom set of toke
   <Test name="Default">
     <StateModel ref="TheState"/>
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

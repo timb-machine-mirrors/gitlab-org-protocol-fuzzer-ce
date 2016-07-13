@@ -167,10 +167,6 @@ The following definition produces a zip file containing a single entry 'file1.tx
     <Publisher class="Zip">
       <Param name="FileName" value="fuzzed.zip" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -229,10 +225,6 @@ Streams are treated like blocks when used with publishers that are not stream aw
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -299,10 +291,6 @@ Produce a zip file containing multiple files.
     <Publisher class="Zip">
       <Param name="FileName" value="fuzzed.zip" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

@@ -85,10 +85,6 @@ Three outputs with Once set to false. The number is incremented before each acti
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -162,10 +158,6 @@ Three outputs with Once set to false and Offset to 5. The number is incremented 
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -238,10 +230,6 @@ Three outputs with Once set to true. Each action outputs the same incremented nu
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -316,10 +304,6 @@ The group parameter coordinates the incrementing process among the data elements
       <StateModel ref="TheState"/>
 
       <Publisher class="ConsoleHex" />
-
-      <Logger class="File">
-        <Param name="Path" value="logs"/>
-      </Logger>
     </Test>
 </Peach>
 ----

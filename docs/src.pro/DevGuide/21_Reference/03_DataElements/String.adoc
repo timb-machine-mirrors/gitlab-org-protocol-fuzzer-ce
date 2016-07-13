@@ -198,10 +198,6 @@ This example outputs a string with minimal attribute declarations. Other than th
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -259,10 +255,6 @@ This example outputs a string consisting of characters represented with Unicode 
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -321,10 +313,6 @@ This example outputs a null-terminated string.
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -382,10 +370,6 @@ This example outputs a string that is shorter than the required length. The stri
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -444,10 +428,6 @@ This example output a string that is shorter than the required length. The strin
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -506,10 +486,6 @@ This example outputs a string that contains carriage return and line feed charac
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -577,10 +553,6 @@ In this example, a the DataModel declares a String element that contains the ASC
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -653,10 +625,6 @@ Content-length: 10
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----

@@ -171,11 +171,7 @@ This is an example of dumb file fuzzing. Peach cracks the data from _sample.png_
 			<Param name="FileName" value="fuzzfile.bin" />
 		</Publisher>
 
-		<!-- Configure a logger to store collected information -->
-		<Logger class="Filesystem">
-			<Param name="Path" value="logtest" />
-		</Logger>
-	</Test>
+		<!-- Configure a logger to store collected information -->	</Test>
 </Peach>
 ----
 ==========================
@@ -205,12 +201,7 @@ A blob with a default value. Providing a default value does not set a fixed leng
   <Test name="Default">
     <StateModel ref="TheState"/>
 
-    <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
+    <Publisher class="ConsoleHex" name="ConsolePub"/>  </Test>
 </Peach>
 ----
 
@@ -268,12 +259,7 @@ A blob with size-of relationship:
   <Test name="Default">
     <StateModel ref="TheState"/>
 
-    <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
+    <Publisher class="ConsoleHex" name="ConsolePub"/>  </Test>
 </Peach>
 ----
 

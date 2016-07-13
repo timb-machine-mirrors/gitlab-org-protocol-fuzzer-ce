@@ -111,10 +111,6 @@ Produce Json string with a boolean value of true.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

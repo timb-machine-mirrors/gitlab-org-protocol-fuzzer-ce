@@ -90,10 +90,6 @@ This example uses Bz2Compress to compress a value, write the value to the consol
     <Publisher class="File" name="FilePubWrite">
       <Param name="FileName" value="compressed.bin" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

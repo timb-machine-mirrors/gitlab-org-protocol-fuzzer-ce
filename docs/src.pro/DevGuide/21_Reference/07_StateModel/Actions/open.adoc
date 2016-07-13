@@ -133,10 +133,6 @@ This is an example of the default implicit behavior of _open_. Note the absence 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt" />
     </Publisher>
-
-    <Logger class="Filesystem">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>
@@ -216,10 +212,6 @@ In this example, the _open_ and xref:Action_close[_close_] actions are used expl
       <Param name="Host" value="127.0.0.1" />
       <Param name="Port" value="31337" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs" />
-    </Logger>
   </Test>
   
 </Peach>

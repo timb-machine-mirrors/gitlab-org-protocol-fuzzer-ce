@@ -73,10 +73,6 @@ This example uses _JsEncode_ on an inline value and writes the transformed value
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

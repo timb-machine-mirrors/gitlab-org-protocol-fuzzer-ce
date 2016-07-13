@@ -155,10 +155,6 @@ This example runs on the Windows(R) Operating System, version XP or newer, with 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.png" />
     </Publisher>
-
-    <Logger class="Filesystem">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>
@@ -337,10 +333,6 @@ This example uses the _output_ action with multiple publishers to write two file
     <Publisher name="File2" class="File">
       <Param name="FileName" value="fuzzed2.txt" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>

@@ -127,10 +127,6 @@ Produce 32 bit (4 byte) floating point number with a default value of 5.1:
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -190,10 +186,6 @@ To use 64 bits (four byte) change the size to 64.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -267,10 +259,6 @@ To change the endianness of the floating point number set the endian attribute. 
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -343,10 +331,6 @@ is `"hex"`:
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

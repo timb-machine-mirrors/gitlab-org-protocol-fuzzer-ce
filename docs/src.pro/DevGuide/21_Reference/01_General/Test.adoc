@@ -57,9 +57,6 @@ NOTE: If the command-line for launching Peach does not include a test name, Peac
   <Strategy class="Random" />
 
   <!-- Log output to disk -->
-  <Logger class="File">
-    <Param name="Path" value="logs" />
-  </Logger>
 </Test>
 ----
 

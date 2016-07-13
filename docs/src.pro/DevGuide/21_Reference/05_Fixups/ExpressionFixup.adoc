@@ -98,10 +98,6 @@ data:: Referenced elements value as a byte array
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

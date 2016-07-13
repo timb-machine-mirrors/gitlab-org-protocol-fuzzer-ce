@@ -74,10 +74,6 @@ This example uses the zip analyzer to decompose a .docx file into its underlying
 		<Publisher class="Zip">
 			<Param name="FileName" value="fuzzed.docx" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -355,10 +351,6 @@ This example also maps all '.xml' files to the data model 'XmlModel' that furthe
 		<Publisher class="Zip">
 			<Param name="FileName" value="fuzzed.docx" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

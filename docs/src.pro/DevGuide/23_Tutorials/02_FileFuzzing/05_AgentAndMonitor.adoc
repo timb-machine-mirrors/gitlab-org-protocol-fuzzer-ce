@@ -135,62 +135,6 @@ Leaving us with this:
 
 Read more about: xref:Test[Test]
 
-=== Configure Logging
-
-Now that we are using monitors that can detect faults, we want to configure a logging mechanism
-to capture the results of our fuzzer run.
-
-To do this, add the following to the +<Test>+ element at the bottom of our XML file:
-
-[source,xml]
-----
-<Logger class="Filesystem">
-    <Param name="Path" value="logs" />
-</Logger>
-----
-
-So it looks like this:
-
-[source,xml]
-----
-<Test name="Default">
-    <Agent ref="WinAgent" platform="windows"/>
-    <Agent ref="LinAgent" platform="linux"/>
-    <Agent ref="OsxAgent" platform="osx"/>
-
-    <StateModel ref="TheState"/>
-
-    <Publisher class="File">
-        <Param name="FileName" value="fuzzed.wav"/>
-    </Publisher>
-
-    <Logger class="Filesystem">
-        <Param name="Path" value="logs" />
-    </Logger>
-</Test>
-----
-
-Read more about: xref:Test[Test], xref:Logger[Logger], xref:Loggers_File[File Logger]
-
-=== Testing the Fuzzer
-
-Let's go ahead and run the fuzzer!
-Open up a command window and navigate to the location of +wav.xml+.
-Now run the following command:
-
-----
-c:\wav>c:\peach\peach.exe -t wav.xml
-
-] Peach 3 Runtime
-] Copyright (c) Michael Eddington
-
-File parsed without errors.
-
-----
-
-Hopefully you got this output and no problems were found.
-If a problem was found go back through the prior sections and try and identify the problem.
-
 === Running the Fuzzer
 
 Now let's actually kick off our fuzzer for real!

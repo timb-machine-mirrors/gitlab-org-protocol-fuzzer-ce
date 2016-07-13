@@ -65,10 +65,6 @@ This fixup does not support any parameters.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

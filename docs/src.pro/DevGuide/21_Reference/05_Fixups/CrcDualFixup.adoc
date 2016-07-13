@@ -67,10 +67,6 @@ type:: Type of CRC to run [CRC32, CRC16, CRC_CCITT]. Defaults to CRC32.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

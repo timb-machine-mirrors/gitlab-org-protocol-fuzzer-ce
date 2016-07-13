@@ -64,12 +64,7 @@ Encoding:: Encoding scheme used on the data in the file. Values are
   <Test name="Default">
     <StateModel ref="TheState"/>
 
-    <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
+    <Publisher class="ConsoleHex"/>  </Test>
 </Peach>
 ----
 

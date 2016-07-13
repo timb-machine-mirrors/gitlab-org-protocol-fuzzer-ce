@@ -109,10 +109,6 @@ This example uses HtmlDecode on an inline value, writes the transformed value to
 			<Param name="FileName" value="decoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

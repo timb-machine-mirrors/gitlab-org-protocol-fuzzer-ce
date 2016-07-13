@@ -62,10 +62,6 @@ xref:ref[ref]:: Reference to the input data element used in the hash calculation
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

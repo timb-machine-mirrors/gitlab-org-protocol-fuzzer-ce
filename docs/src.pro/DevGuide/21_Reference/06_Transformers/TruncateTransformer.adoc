@@ -62,12 +62,7 @@ This example uses Truncate on an inline value and writes the transformed value t
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 
-		<Publisher class="ConsoleHex" name="ConsolePub"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
-	</Test>
+		<Publisher class="ConsoleHex" name="ConsolePub"/>	</Test>
 </Peach>
 ----
 

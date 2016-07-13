@@ -119,10 +119,6 @@ This is an example of the default implicit behavior of _close_.
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt" />
     </Publisher>
-
-    <Logger class="Filesystem">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>
@@ -207,10 +203,6 @@ And finally the target is launched using a _xref:Action_call[call]_ action with 
     <Publisher class="File">
       <Param name="FileName" value="fuzzfile.bin" />
     </Publisher>
-
-    <Logger class="Filesystem">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>

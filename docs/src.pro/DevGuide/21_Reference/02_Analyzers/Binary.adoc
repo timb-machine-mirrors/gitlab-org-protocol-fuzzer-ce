@@ -60,10 +60,6 @@ This example uses the binary analyzer on inline Blob data.
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -132,10 +128,6 @@ This example uses the binary analyzer on an external file of Blob data (example.
 	<Test name="Default">
 		<StateModel ref="TheState"/>
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -226,10 +218,6 @@ This example uses the binary analyzer on a value with a custom set of tokens def
   <Test name="Default">
     <StateModel ref="TheState"/>
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

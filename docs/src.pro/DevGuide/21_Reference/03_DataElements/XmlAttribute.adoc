@@ -115,10 +115,6 @@ The following example loads the +example.xml+ file into a xref:String[String] el
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -206,10 +202,6 @@ The following example converts binary data to a string format using a xref:Trans
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----

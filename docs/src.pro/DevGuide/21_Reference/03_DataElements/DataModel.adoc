@@ -93,10 +93,6 @@ An example DataModel named "HelloWorld" contains a single string and outputs "He
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -154,10 +150,6 @@ DataModels can reference other DataModels and inherit child elements with the re
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -226,10 +218,6 @@ When a reference (ref attribute) is supplied, the contents of the referenced Dat
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----

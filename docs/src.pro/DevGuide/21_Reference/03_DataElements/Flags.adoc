@@ -154,10 +154,6 @@ This example shows a real world example of a flag set by modeling a TCP packet (
 		<StateModel ref="TheStateModel" />
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
