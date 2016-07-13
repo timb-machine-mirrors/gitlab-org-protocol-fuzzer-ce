@@ -16,7 +16,7 @@ The following list identifies the support applications included with Peach Fuzze
 |xref:Program_Peach[Peach Command Line]        |`Peach.exe`          | The {peachcomd} for Peach Fuzzer.
 |xref:Program_PeachAgent[Peach Agent]          |`PeachAgent.exe`     | The Agent process for Peach Fuzzer.
 |xref:Program_PeachMinset[Minset]              |`PeachMinset.exe`    | Find the minimal set of sample files for use during fuzzing with the greatest code coverage for a given target.
-|xref:Program_PitTool[PitTool]                 |`PitTool.exe`        | Utilities useful for Pit development.
+|xref:PitTool_Ninja[PitTool - Sample Ninja]    |`PitTool.exe`        | Create a sample ninja database.
 |xref:Program_PeachMultiNodeCli[Peach Multi-Node CLI Tool]   |`sdk\tools\peachcli`    | Control and coordinate multiple Peach instances.
 |=======================
 
@@ -42,6 +42,6 @@ include::../../Common/RunningPeach/PeachCli.adoc[]
 
 :leveloffset: 1
 <<<
-include::../../Common/RunningPeach/PitTool/00_Section.adoc[]
+include::../../Common/RunningPeach/Ninja.adoc[]
 
 // end

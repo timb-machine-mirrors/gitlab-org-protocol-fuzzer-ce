@@ -7,7 +7,20 @@ When run using the command line, the results of the generated model are saved to
 
 This analyzer can be attached to a string.
 
-TIP: XML special characters (such as < = &lt;, > = &gt;, " = &quot;, & = &amp;) must be encoded if they are inline values.
+[TIP]
+====
+The following XML special characters need to be encoded if they are inline values.
+
+[options="header"]
+|=======================
+|Symbol   |Name           |Escape Sequence
+|&quot;   |double-quote   |`&quot;`
+|&apos;   |single-quote   |`&apos;`
+|&lt;     |less-than      |`&lt;`
+|&gt;     |greater-than   |`&gt;`
+|&amp;    |ampersand      |`&amp;`
+|=======================
+====
 
 === Syntax
 

@@ -33,7 +33,7 @@ pittool analyzer Regex "(\w+)(.)" input.txt output.xml
 pittool analyzer Regex <regex> <input file> <output file>
 ----
 
-regex:
+regex::
     Regular Expression to base tokens on
 
 input file::
