@@ -1,9 +1,15 @@
 [[Cracking]]
 === Cracking Data into the Data Model
 
-In Peach, cracking is parsing data into a data model to set the initial values. The two most common examples of cracking are loading a sample file from disk using the xref:Data[Data] element, and data received through a state model xref:Action_input[input action].
+In Peach, cracking is the process of parsing data into a data model where data elements have initial values set.
+The two most common examples of cracking are:
+loading a sample file from disk using the xref:Data[Data] element,
+and data received through a state model's xref:Action_input[input action].
 
-Cracking sample data into a model is a good way to verify that the model works correctly. Peach provides several features to support cracking. When building a Pit, Peach also provides methods to debug the cracking process.
+Cracking sample data into a model is a good way to verify that the model works correctly.
+Peach provides several features to support cracking.
+When building a Pit, 
+Peach also provides methods to debug the cracking process.
 
 ==== Features Specific to Cracking
 
