@@ -140,9 +140,6 @@ Output from this example.
 ----
 >peach -1 --debug DoubleExample1.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 12232.
 
 [R1,-,-] Performing iteration
@@ -202,9 +199,6 @@ Output from this example.
 
 ----
 >peach -1 --debug DoubleExample2.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 51105.
 
@@ -280,9 +274,6 @@ Output from this example.
 ----
 >peach -1 --debug DoubleEndianExample.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 35381.
 
 [R1,-,-] Performing iteration
@@ -355,9 +346,6 @@ Output from this example.
 
 ----
 >peach -1 --debug NumberEndianExample.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 53121.
 

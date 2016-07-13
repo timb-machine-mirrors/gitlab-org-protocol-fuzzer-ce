@@ -224,9 +224,6 @@ nc -vv 127.0.0.1 31337
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 32331.
 
 [R1,-,-] Performing iteration

@@ -144,9 +144,6 @@ Output from inline Blob data example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 62676.
 
 [R1,-,-] Performing iteration
@@ -262,9 +259,6 @@ This example uses the Asn.1 analyzer on an external file of Blob data (Cert.der)
 Output from the Blob data file example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 18200.
 

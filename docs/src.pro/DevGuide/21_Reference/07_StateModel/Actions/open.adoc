@@ -148,9 +148,6 @@ Output from executing the previous pit.
 ----
 > peach -1 --debug C:\temp\example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 18872.
 
 [R1,-,-] Performing iteration
@@ -238,9 +235,6 @@ Output from this example.
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 61010.
 

@@ -100,9 +100,6 @@ Output from the example using the string tokenizer and an inline value.
 ----
 > peach -1 --debug RegexAnalyzer.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Web site running at: http://localhost:8889/
 
 [*] Test 'Default' starting with random seed 43577.

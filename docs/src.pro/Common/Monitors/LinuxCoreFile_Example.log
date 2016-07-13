@@ -1,7 +1,5 @@
 $ peach --debug --seed=1 --range=1,1 example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Engine runTest: context.config.range == true, start: 1, stop: 1
 
 [*] Test 'Default' starting with random seed 1.

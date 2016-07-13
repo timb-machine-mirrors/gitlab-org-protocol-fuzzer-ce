@@ -113,9 +113,6 @@ This example prints a message when the _onStart_ expression is run.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 27537.
 
 [R1,-,-] Performing iteration
@@ -188,9 +185,6 @@ This example use the iteration state bag to simulate a for loop.
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 28742.
 

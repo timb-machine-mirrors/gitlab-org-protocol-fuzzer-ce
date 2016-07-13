@@ -98,9 +98,6 @@ When run with the +--debug+ argument, it produces the following output:
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.1.176.1
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 28899.
 
 [R1,-,-] Performing iteration
@@ -235,9 +232,6 @@ The next step is to review the +--debug+ output and see if we can spot the issue
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.1.176.1
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 44055.
 
@@ -381,9 +375,6 @@ With this change, let's review the +--debug+ output again.
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.1.176.1
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 59855.
 

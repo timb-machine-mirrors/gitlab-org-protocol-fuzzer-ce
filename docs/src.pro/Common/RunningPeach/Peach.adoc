@@ -299,15 +299,15 @@ This example shows how to run a fuzzing definition. The following command line l
 
 .Single Iteration with Debug Output
 ======================
-When testing a definition, we recommend running a single non-mutating iteration with debug output. 
+When testing a definition, we recommend running a single non-mutating iteration with debug output.
 
-The following command line launches Peach and fuzzes using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file. The command line combines the +-1+ and +--debug+ arguments to run a single iteration; the debugging information is included in the output. Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
+The following command line launches Peach and fuzzes using +pit.xml+ (and if it exists, +pit.xml.config+) as the configuration file. 
+The command line combines the +-1+ and +--debug+ arguments to run a single iteration; 
+the debugging information is included in the output. 
+Even more verbose output can be enabled by using +--trace+ instead of +--debug+.
 
 ----
 > peach -1 --debug samples\DebuggerWindows.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 27886.
 Peach.Core.Agent.Agent StartMonitor: Monitor WindowsDebugger

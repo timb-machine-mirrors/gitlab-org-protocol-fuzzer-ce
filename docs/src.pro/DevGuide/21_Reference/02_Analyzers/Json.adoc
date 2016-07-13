@@ -82,9 +82,6 @@ Output from inline example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 56481.
 
 [R1,-,-] Performing iteration
@@ -143,9 +140,6 @@ This example uses the JSON analyzer on an external file containing JSON encoded 
 Output from JSON data file example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 33175.
 

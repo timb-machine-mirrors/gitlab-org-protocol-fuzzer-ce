@@ -111,9 +111,6 @@ Output from this example.
 ----
 >peach -1 --debug NullExample1.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Web site running at: http://localhost:8888/
 
 [*] Test 'Default' starting with random seed 24442.

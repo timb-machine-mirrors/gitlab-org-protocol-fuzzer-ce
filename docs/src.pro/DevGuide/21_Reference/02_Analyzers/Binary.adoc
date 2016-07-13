@@ -73,8 +73,6 @@ Output from the inline Blob data example.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Analyzers.Binary Created 12 data elements from binary data.
 Peach.Core.Analyzers.Binary Created 12 data elements from binary data.
 
@@ -144,9 +142,6 @@ Output from the Blob data file example.
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 48471.
 
@@ -238,8 +233,6 @@ Output from the example that uses custom tokens.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 Peach.Core.Analyzers.Binary Created 18 data elements from binary data.
 Peach.Core.Analyzers.Binary Created 18 data elements from binary data.
 

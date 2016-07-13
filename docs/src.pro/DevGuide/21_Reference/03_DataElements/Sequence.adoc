@@ -132,9 +132,6 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 3808.
 
 [R1,-,-] Performing iteration
@@ -198,9 +195,6 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 40441.
 
 [R1,-,-] Performing iteration
@@ -263,9 +257,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 30169.
 
@@ -340,9 +331,6 @@ Output from this example.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 27277.
 
 [R1,-,-] Performing iteration
@@ -409,9 +397,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 24392.
 

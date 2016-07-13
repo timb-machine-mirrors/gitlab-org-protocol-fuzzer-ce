@@ -81,9 +81,6 @@ Output of the example using an inline value.
 ----
 >peach -1 --debug example.xml
 
-[[ Peach Pro v0.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 22910.
 
 [R1,-,-] Performing iteration
@@ -145,9 +142,6 @@ This example uses the Xml analyzer on an inline value with encoded Xml character
 Output from the example using an inline value with encoded Xml characters.
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 44192.
 
@@ -212,9 +206,6 @@ This example uses the Xml analyzer on itself.
 Output from the example that uses the Xml analyzer on itself.
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 10150.
 
