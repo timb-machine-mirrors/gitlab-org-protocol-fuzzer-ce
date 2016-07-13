@@ -15,8 +15,6 @@ xref:Analyzers_Asn1[Asn1]::
   Converts ASN.1 data in Blobs into a full data model.
 xref:Analyzers_Json[Json]::
   Generate a data model based on a JSON document.
-xref:Analyzers_Pdml[Pdml (beta)]::
-  Converts PDML to Data and State models.
 xref:Analyzers_Postman[Postman (beta)]::
   Convert Postman API collection to Peach Pit.
 xref:Analyzers_Regex[Regex]::
