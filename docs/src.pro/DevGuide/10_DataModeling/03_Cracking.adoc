@@ -16,11 +16,14 @@ Peach also provides methods to debug the cracking process.
 xref:token[token] attribute::
 +
 --
-A token is a string of one or more characters that is significant as a group. In Peach,
-one use of tokens is to identify a character or characters that separate strings in an
-input stream. When cracking data into a model, the input stream must include elements
-marked as tokens. Strings that have unknown lengths, but are separated by tokens, can be
-cracked at the appropriate locations.
+A token is a string of one or more characters that are significant as a group.
+In Peach,
+one use of tokens is to identify delimiters that separate strings in an input stream.
+When cracking data into a model,
+the input stream must include elements marked as tokens.
+Strings that have unknown lengths,
+but are separated by tokens,
+can be cracked at the appropriate locations.
 --
 
 xref:constraint[constraint] attribute::
