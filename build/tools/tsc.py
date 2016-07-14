@@ -12,19 +12,16 @@ def configure(conf):
 	conf.find_program('tsc')
 
 	cmd = v['TSC'] + ['--version']
-	try:
-		out, err = conf.cmd_and_log(cmd, output=0)
-	except Errors.WafError:
-		conf.fatal('Could not find tsc %r' % cmd)
+	out, err = conf.cmd_and_log(cmd, output=0)
 
 	version_re = re.compile(r'.*Version (?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)', re.I).search
 	match = version_re(out)
 	if match:
 		kw = match.groupdict()
 		if int(kw['major']) != 1 or int(kw['minor']) < 6:
-			conf.fatal('Wrong version for tsc. Expecting 1.6+, got: %(major)s.%(minor)s.%(patch)s' % kw) 
+			raise Errors.WafError('Wrong version for tsc. Expecting 1.6+, got: %(major)s.%(minor)s.%(patch)s' % kw) 
 	else:
-		conf.fatal('Could not determine version for tsc.')
+		raise Errors.WafError('Could not determine version for tsc.')
 
 @feature('tsc')
 @after_method('process_source')
