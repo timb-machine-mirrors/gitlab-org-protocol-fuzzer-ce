@@ -65,7 +65,7 @@ endif::peachug[]
 Peach includes a remote xref:Program_PeachAgent[agent server] that can be used to host Monitors and Publishers on remote machines. Usage of a remote agent requires a location URL of the following format:
 
  tcp://HOST:PORT
- 
+
 HOST:: Remote host the agent is running on
 PORT:: Remote port the agent is bound to (defaults to 9001)
 
@@ -209,7 +209,7 @@ Iteration starting. Called at the start of each test case.
 |Type |Name           |Description                 |Required |Schema
 |Query|isReproduction |Is current test case part of fault reproduction? | true | Boolean
 |Query|lastWasFault   |Was last iteration a fault? | true | Boolean
-|Query|iterationCount |DEPRICATED, always 0        | true | Integer
+|Query|iterationCount |DEPRECATED, always 0        | true | Integer
 |==========================
 
 ====== Responses
@@ -784,7 +784,7 @@ Argument for a call action.
 |Name  |Description                  |Required |Schema
 |name  |Argument/parameter name      |true     |String
 |data  |Binary data base64 encoded   |true     |Bytes
-|type  |DEPRICATED, always 'in'      |true     |String
+|type  |DEPRECATED, always 'in'      |true     |String
 |==========================
 
 [[Agent-Rest-Schema-Result]]
