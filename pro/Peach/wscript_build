@@ -26,7 +26,7 @@ def glob_from(*parts):
 
 python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.5', 'content')
 
-makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
+makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 
 app = bld(
 	features = 'cs',
@@ -37,6 +37,7 @@ app = bld(
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = {
 		python_stdlib[0] : python_stdlib[1],
+		bld.path : bld.path.ant_glob('Plugins/*'),
 	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
 	ide_custom_commands = [
@@ -52,13 +53,10 @@ if bld.env.MCS and bld.env.DEST_OS != 'win32':
 common = [
 	# Peach
 	'Peach.exe',
+	'PeachAgent.exe',
 	'Peach.Pro.Web',
+	'PitTool.exe',
 
-	# Peach Platform Suppoort
-	'Peach.Pro.OS.Windows.dll',
-	'Peach.Pro.OS.Linux.dll',
-	'Peach.Pro.OS.OSX.dll',
-	
 	# Include sample programs so sample pits work
 	'SimpleHttpServer',
 	'CrashableServer',
@@ -71,7 +69,6 @@ common = [
 
 	# Windows side-process helpers
 	'Peach.Pro.ComContainer.exe',
-	'Peach.Pro.WindowsDebugInstance.exe',
 
 	'VMware-VIX',        # VMWare VIX API
 	'CrashWrangler',
@@ -83,7 +80,6 @@ peach_pro = common + [
 	# Helper Programs
 	'PeachValidator.exe',
 	'PeachMinset.exe',
-	'PeachSampleNinja.exe',
 
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
@@ -106,8 +102,6 @@ internal = common + [
 	'Peach.Pro.Test.OS.OSX.dll',
 	'Peach.Pro.Test.OS.Windows.dll',
 	'Peach.Pro.Test.WebApi.exe',
-	'pitc.exe',
-	'PitTester.exe',
 	'UseAfterFree',
 ]
 

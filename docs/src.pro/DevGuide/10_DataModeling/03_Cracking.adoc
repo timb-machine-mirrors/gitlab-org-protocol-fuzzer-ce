@@ -1,20 +1,29 @@
 [[Cracking]]
 === Cracking Data into the Data Model
 
-In Peach, cracking is parsing data into a data model to set the initial values. The two most common examples of cracking are loading a sample file from disk using the xref:Data[Data] element, and data received through a state model xref:Action_input[input action].
+In Peach, cracking is the process of parsing data into a data model where data elements have initial values set.
+The two most common examples of cracking are:
+loading a sample file from disk using the xref:Data[Data] element,
+and data received through a state model's xref:Action_input[input action].
 
-Cracking sample data into a model is a good way to verify that the model works correctly. Peach provides several features to support cracking. When building a Pit, Peach also provides methods to debug the cracking process.
+Cracking sample data into a model is a good way to verify that the model works correctly.
+Peach provides several features to support cracking.
+When building a Pit, 
+Peach also provides methods to debug the cracking process.
 
 ==== Features Specific to Cracking
 
 xref:token[token] attribute::
 +
 --
-A token is a string of one or more characters that is significant as a group. In Peach,
-one use of tokens is to identify a character or characters that separate strings in an
-input stream. When cracking data into a model, the input stream must include elements
-marked as tokens. Strings that have unknown lengths, but are separated by tokens, can be
-cracked at the appropriate locations.
+A token is a string of one or more characters that are significant as a group.
+In Peach,
+one function of tokens is to identify delimiters that separate strings in an input stream.
+When cracking data into a model,
+the input stream must include elements marked as tokens.
+Strings that have unknown lengths,
+but are separated by tokens,
+can be cracked at the appropriate locations.
 --
 
 xref:constraint[constraint] attribute::
@@ -38,13 +47,13 @@ Analyzers provide code that generate or modify a data model. When compared to ge
 +--debug+ argument::
 +
 --
-The Peach +--debug+ command line argument is the main method of debugging the cracking process. The debug argument causes peach to provide detailed output for every step of the cracking process. See <<debug-cracking,Debugging the Cracking Process>> for information on how to use this output.
+The Peach +--debug+ command line argument is the main method of debugging the cracking process. The debug argument causes Peach to provide detailed output for every step of the cracking process. See <<debug-cracking,Debugging the Cracking Process>> for information on how to use this output.
 --
 
 [[debug-cracking]]
 ==== Debugging the Cracking Process
-
-When writing data models to consume data, both debugging and data validation need a detailed view into how cracking occurs. Peach provides two tools for debugging and validating that data is cracking correctly, the +--debug+ argument to Peach and the xref:Program_PeachValidator[Peach Validator] tool.
+When writing data models, it is useful to understand, in detail, how cracking occurs for both debugging and data validation. Peach provides two tools for debugging and validating that data is cracking correctly,
+the +--debug+ argument to Peach and the xref:Program_PeachValidator[Peach Validator] tool.
 
 * The +--debug+ argument enables verbose debugging messages from Peach, including the cracking process.
 
@@ -97,9 +106,6 @@ When run with the +--debug+ argument, it produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.1.176.1
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 28899.
 
@@ -235,9 +241,6 @@ The next step is to review the +--debug+ output and see if we can spot the issue
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.1.176.1
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 44055.
 
@@ -382,9 +385,6 @@ With this change, let's review the +--debug+ output again.
 ----
 > peach -1 --debug example.xml
 
-[[ Peach Pro v3.1.176.1
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 59855.
 
 [R1,-,-] Performing iteration
@@ -414,7 +414,7 @@ Peach.Core.Cracker.DataCracker getSize: <----- Deterministic: ???
 Peach.Core.Cracker.DataCracker Crack: Array 'PngModel.Chunk' Size: <null>, Bytes: 8/33546, Bits: 64/268368
 ----
 
-So far the cracking looks okay. Next is the first element of the array that caused issues in the prior run.
+Next is the first element of the array that caused issues in the prior run.
 
 ----
 Peach.Core.Dom.Array Crack: ======================
@@ -517,7 +517,7 @@ Peach.Core.Dom.DataElement Number 'PngModel.Chunk.Chunk_1.Checksum' value is: 42
 <2> The _Type_ field correctly cracks as +IDAT+.
 <3> The _Data_ field correctly cracks correctly.
 
-So far so good. Now look at the third chunk.
+Now examine the third chunk.
 
 ----
 Peach.Core.Dom.Array Crack: ======================
@@ -634,7 +634,7 @@ Peach.Core.Publishers.FilePublisher stop()
 <2> _Type_ is +IEND+.
 <3> Output length is the same size as the input file!
 
-The output looks good and the model outputted the correct number of bytes. Time to review things inside the Peach Validator.
+The output looks good and the model output the correct number of bytes. Time to review things inside the Peach Validator.
 
 image::{images}/DevGuide/DataModeling/Cracking_Validator6.png[]
 

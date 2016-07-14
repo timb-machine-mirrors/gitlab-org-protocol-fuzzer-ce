@@ -206,7 +206,7 @@ def verify_external(bld):
 
 def run_makexsd(bld):
 	if bld.is_install and bld.variant != 'doc':
-		makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
+		makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 		env = os.environ.copy()
 		env['TERM'] = 'xterm'
 		ret = bld.exec_command(makexsd, cwd=bld.env.BINDIR, env=env)

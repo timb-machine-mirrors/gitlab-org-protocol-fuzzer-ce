@@ -391,7 +391,7 @@ namespace Peach.Core.Xsd
 			/// Name of field to specify a default value for.
 			/// Format of name is: "Element" or "Block.Block.Element".
 			/// </summary>
-			[XmlAttribute(DataType="string", Namespace=XmlSchema.Namespace)]
+			[XmlAttribute(DataType = "string", Namespace = XmlSchema.Namespace)]
 			public string name { get; set; }
 
 			/// <summary>
@@ -522,7 +522,7 @@ namespace Peach.Core.Xsd
 
 		static XPathDocument GetXmlDoc(Assembly asm)
 		{
-			lock(Cache)
+			lock (Cache)
 			{
 				XPathDocument doc;
 				if (!Cache.TryGetValue(asm, out doc))
@@ -767,7 +767,7 @@ namespace Peach.Core.Xsd
 				}
 			}
 
-			var enumType = new XmlSchemaSimpleType {Content = restrictEnum};
+			var enumType = new XmlSchemaSimpleType { Content = restrictEnum };
 
 			var typeAttr = new XmlSchemaAttribute
 			{
@@ -829,7 +829,7 @@ namespace Peach.Core.Xsd
 				restrictEnum.Facets.Add(MakePluginFacet(item.Key, item.Value));
 			}
 
-			var enumType = new XmlSchemaSimpleType {Content = restrictEnum};
+			var enumType = new XmlSchemaSimpleType { Content = restrictEnum };
 
 			var restrictLen = new XmlSchemaSimpleTypeRestriction
 			{
@@ -837,13 +837,13 @@ namespace Peach.Core.Xsd
 			};
 			restrictLen.Facets.Add(new XmlSchemaMaxLengthFacet { Value = "1024" });
 
-			var userType = new XmlSchemaSimpleType {Content = restrictLen};
+			var userType = new XmlSchemaSimpleType { Content = restrictLen };
 
 			var union = new XmlSchemaSimpleTypeUnion();
 			union.BaseTypes.Add(userType);
 			union.BaseTypes.Add(enumType);
 
-			var schemaType = new XmlSchemaSimpleType {Content = union};
+			var schemaType = new XmlSchemaSimpleType { Content = union };
 
 			typeAttr.SchemaType = schemaType;
 
@@ -852,8 +852,7 @@ namespace Peach.Core.Xsd
 			if (!objElemCache.ContainsKey(typeof(PluginParam)))
 				AddElement("Param", typeof(PluginParam), null);
 
-
-			var schemaElem = new XmlSchemaElement {RefName = new XmlQualifiedName("Param", schema.TargetNamespace)};
+			var schemaElem = new XmlSchemaElement { RefName = new XmlQualifiedName("Param", schema.TargetNamespace) };
 
 			XmlSchemaGroupBase schemaParticle;
 
@@ -865,7 +864,7 @@ namespace Peach.Core.Xsd
 					MaxOccursString = "unbounded"
 				};
 
-				var transElem = new XmlSchemaElement {RefName = new XmlQualifiedName("Transformer", schema.TargetNamespace)};
+				var transElem = new XmlSchemaElement { RefName = new XmlQualifiedName("Transformer", schema.TargetNamespace) };
 				schemaParticle.Items.Add(transElem);
 			}
 			else
@@ -882,22 +881,23 @@ namespace Peach.Core.Xsd
 
 		private static IEnumerable<KeyValuePair<PluginAttribute, Type>> GetAllPlugins(PluginElementAttribute pluginAttr)
 		{
-			return ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => 
-				a.Type == pluginAttr.PluginType && 
-				a.IsDefault && 
-				!a.Internal).OrderBy(a => a.Key.Name);
+			return ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) =>
+				a.Type == pluginAttr.PluginType &&
+				a.IsDefault &&
+				a.Scope != PluginScope.Internal
+			).OrderBy(a => a.Key.Name);
 		}
 
 		private XmlSchemaObject MakePluginFacet(PluginAttribute pluginAttribute, Type type)
 		{
-			var facet = new XmlSchemaEnumerationFacet {Value = pluginAttribute.Name};
+			var facet = new XmlSchemaEnumerationFacet { Value = pluginAttribute.Name };
 
 			// Lame: For actions, everyone expects title case (SetProperty) but
 			// the schema expects camel case (setProperty).
 			if (pluginAttribute.Type == typeof(Action))
 				facet.Value = Char.ToLowerInvariant(facet.Value[0]) + facet.Value.Substring(1);
 
-			var descAttr = type.GetAttributes<System.ComponentModel.DescriptionAttribute>().FirstOrDefault();
+			var descAttr = type.GetAttributes<DescriptionAttribute>().FirstOrDefault();
 			if (descAttr != null)
 				facet.Annotate(descAttr.Description);
 			else
@@ -1117,7 +1117,7 @@ namespace Peach.Core.Xsd
 
 			var defaultValue = pi.GetAttributes<DefaultValueAttribute>().FirstOrDefault();
 
-			var attr = new XmlSchemaAttribute {Name = name};
+			var attr = new XmlSchemaAttribute { Name = name };
 			attr.Annotate(pi);
 
 			if (!string.IsNullOrEmpty(propAttr.DataType))
@@ -1175,7 +1175,7 @@ namespace Peach.Core.Xsd
 		{
 			name = paramAttr.name;
 
-			var attr = new XmlSchemaAttribute {Name = name};
+			var attr = new XmlSchemaAttribute { Name = name };
 			attr.Annotate(paramAttr.description);
 
 			if (IsSimpleType(paramAttr.type))
@@ -1299,7 +1299,7 @@ namespace Peach.Core.Xsd
 			{
 				var attr = item.GetAttributes<XmlEnumAttribute>().FirstOrDefault();
 
-				var facet = new XmlSchemaEnumerationFacet {Value = attr != null ? attr.Name : item.Name};
+				var facet = new XmlSchemaEnumerationFacet { Value = attr != null ? attr.Name : item.Name };
 				facet.Annotate(item);
 
 				content.Facets.Add(facet);
@@ -1410,7 +1410,7 @@ namespace Peach.Core.Xsd
 
 		XmlSchemaElement MakeDataElement(string name, Type type)
 		{
-			var schemaElem = new XmlSchemaElement {RefName = new XmlQualifiedName(name, schema.TargetNamespace)};
+			var schemaElem = new XmlSchemaElement { RefName = new XmlQualifiedName(name, schema.TargetNamespace) };
 
 			if (!objElemCache.ContainsKey(type))
 				AddDataElement(name, type);

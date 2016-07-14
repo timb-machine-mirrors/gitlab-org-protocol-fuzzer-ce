@@ -268,5 +268,147 @@ namespace Peach.Pro.Test.Core
 
 			Assert.IsEmpty(count);
 		}
+
+
+		[Test]
+		public void TestNullElements()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<StateModel name='SM' initialState='initial'>
+		<State name='initial'>
+			<Action name='output' type='output'>
+				<DataModel name='Request'>
+					<Choice name='Strategy'>
+						<Blob name='A' fieldId='A' value='aaaa'/>
+						<Blob name='B' fieldId='B' value='bbbb'/>
+					</Choice>
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+	<Test name='Default' maxOutputSize='200'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='1' />
+		</Strategy>
+	</Test>
+</Peach>
+";
+
+			var pit = new PitConfig
+			{
+				Config = new List<Param>(),
+				Agents = new List<Pro.Core.WebServices.Models.Agent>(),
+				Weights = new List<PitWeight>
+				{
+					new PitWeight {Id = "A", Weight = 0},
+					new PitWeight {Id = "B", Weight = 0},
+				}
+			};
+
+			var count = new Dictionary<string, int>();
+
+			Action<Engine> hooker = engine =>
+			{
+				engine.TestStarting += ctx =>
+				{
+					ctx.DataMutating += (c, actionData, element, mutator) =>
+					{
+						var name = element.fullName;
+						int cnt;
+						if (count.TryGetValue(name, out cnt))
+							++cnt;
+						count[name] = cnt;
+					};
+				};
+			};
+
+			var jobRequest = new JobRequest
+			{
+				Seed = 0,
+				RangeStop = 100,
+			};
+			RunTest(xml, pit, jobRequest, hooker);
+			var expected = new[] {
+				"Request.Strategy|99"
+			};
+			CollectionAssert.AreEqual(expected, count.Select(x => "{0}|{1}".Fmt(x.Key, x.Value.ToString())));
+		}
+
+
+		[Test]
+		public void TestStateLoop()
+		{
+			var loopCount = 5;
+			string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<StateModel name='SM' initialState='initial'>
+		<State name='initial' onStart='context.iterationStateStore[""countdown""] = {0}'>
+			<Action type='changeState' ref='loop'/>
+		</State>
+
+		<State name='loop' onStart='context.iterationStateStore[""countdown""] -= 1'>
+			<Action name='msg' type='output'>
+				<DataModel name='msg' fieldId='msg'>
+					<Number name='type' fieldId='type' size='8'/>
+					<Number name='value' fieldId='value' size='32'/>
+				</DataModel>
+			</Action>
+
+			<Action type='changeState' ref='loop' when='context.iterationStateStore[""countdown""] &gt; 0'/>
+		</State>
+	</StateModel>
+	<Test name='Default' maxOutputSize='200'>
+		<StateModel ref='SM'/>
+		<Publisher class='Null'/>
+		<Strategy class='Random'>
+			<Param name='MaxFieldsToMutate' value='1' />
+		</Strategy>
+	</Test>
+</Peach>
+".Fmt(loopCount);
+
+			var pit = new PitConfig
+			{
+				Config = new List<Param>(),
+				Agents = new List<Pro.Core.WebServices.Models.Agent>(),
+				Weights = new List<PitWeight>
+				{
+					new PitWeight {Id = "msg.type", Weight = 0},
+					new PitWeight {Id = "msg.value", Weight = 5},
+				}
+			};
+
+			var count = new Dictionary<string, int>();
+
+			Action<Engine> hooker = engine =>
+			{
+				engine.TestStarting += ctx =>
+				{
+					ctx.DataMutating += (c, actionData, element, mutator) =>
+					{
+						var name = element.fullName;
+						int cnt;
+						if (count.TryGetValue(name, out cnt))
+							++cnt;
+						count[name] = cnt;
+					};
+				};
+			};
+
+			var jobRequest = new JobRequest
+			{
+				Seed = 0,
+				RangeStop = 100,
+			};
+			RunTest(xml, pit, jobRequest, hooker);
+			var expected = new[] {
+				"msg.value|99"
+			};
+			var actual = count.Select(x => "{0}|{1}".Fmt(x.Key, x.Value.ToString()));
+			CollectionAssert.AreEqual(expected, actual);
+		}
 	}
 }

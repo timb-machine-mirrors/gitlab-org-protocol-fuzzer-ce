@@ -1,13 +1,21 @@
 [[Agent]]
 == Agents
 
-Agents are processes that host Monitors locally or remotely. Monitors collect information and perform actions on behalf of the fuzzer.
+A Peach agent is a light weight process that can host many monitors.
+These monitors collect information and perform actions on behalf of the fuzzer, such as capturing packets or running debuggers.
+The Peach agent communicates over a network channel to the main Peach process where all captured information is reported.
+This allows the main Peach process to perform monitoring locally or on the device under test.
 
-An agent, or one or more processes that an agent hosts--such as a monitor or a publisher,  might require access at a higher level than a user.
+.Peach Agent Block Diagram
+image::{images}/Common/AgentDiagram.svg[align="center",scalewidth="70%"]
+
+An agent, or one or more processes that an agent hosts--such as a monitor or a publisher,
+might require access at a higher level than a user.
 
 * Unix systems sometimes require an Agent to run with root privileges.
 * Linux systems sometimes require an Agent to run with root privileges. On Ubuntu Linux
-systems, the following command can be used as an alternative to running the process from root. This command allows packets through the firewall using port 9001 (the port for remote agents).
+systems, the following command can be used as an alternative to running the process from root.
+This command allows packets through the firewall using port 9001 (the port for remote agents).
 +
 ----
  sudo ufw allow 9001
@@ -24,7 +32,7 @@ LocalAgent (local)::
 	The agent is hosted in the current Peach process. This is the default channel.
 
 TCP REMOTING (tcp)::
-	The external Peach agent communicates using REST API calls over TCP. Peach can run as a TCP remoting agent using the +-a tcp+ argument.
+	The external Peach agent communicates using REST API calls over TCP. Peach can run as a TCP remoting agent using the xref:Program_PeachAgent[PeachAgent] program.
 
 ifdef::peachug[]
 
@@ -50,9 +58,32 @@ ifndef::peachug[]
 </Agent>
 ----
 
+endif::peachug[]
+
+==== Remote Agent
+
+Peach includes a remote xref:Program_PeachAgent[agent server] that can be used to host Monitors and Publishers on remote machines. Usage of a remote agent requires a location URL of the following format:
+
+ tcp://HOST:PORT
+
+HOST:: Remote host the agent is running on
+PORT:: Remote port the agent is bound to (defaults to 9001)
+
+Example:
+
+ tcp://192.168.1.100:9001
+
+ifndef::peachug[]
+
+.Configuring a local agent
+[source,xml]
+----
+<Agent name="local" location="tcp://192.168.1.100:9001">
+   <!-- Monitors -->
+</Agent>
+----
 
 ==== REST JSON Agent
-
 
 This agent is intended to communicate with custom remote agents written in other languages.
 
@@ -178,7 +209,7 @@ Iteration starting. Called at the start of each test case.
 |Type |Name           |Description                 |Required |Schema
 |Query|isReproduction |Is current test case part of fault reproduction? | true | Boolean
 |Query|lastWasFault   |Was last iteration a fault? | true | Boolean
-|Query|iterationCount |DEPRICATED, always 0        | true | Integer
+|Query|iterationCount |DEPRECATED, always 0        | true | Integer
 |==========================
 
 ====== Responses
@@ -215,7 +246,7 @@ Was a fault detected? Called after xref:Rest-API-IterationFinished[IterationFini
 [[Rest-API-GetMonitorData]]
 ===== GET /Agent/GetMonitorData (Required)
 
-Return mointor data. Called when a fault has been detected on the current test case and the engine is collecting data from the agents/monitors. Data for each monitor that has been started is returned in the results of this call.
+Return monitor data. Called when a fault has been detected on the current test case and the engine is collecting data from the agents/monitors. Data for each monitor that has been started is returned in the results of this call.
 
 NOTE: GetMonitorData can be called even if xref:Rest-API-DetectedFault[DetectedFault] returns false if another peach component (agent, publisher, etc.) indicates a fault has occured.
 
@@ -753,7 +784,7 @@ Argument for a call action.
 |Name  |Description                  |Required |Schema
 |name  |Argument/parameter name      |true     |String
 |data  |Binary data base64 encoded   |true     |Bytes
-|type  |DEPRICATED, always 'in'      |true     |String
+|type  |DEPRECATED, always 'in'      |true     |String
 |==========================
 
 [[Agent-Rest-Schema-Result]]

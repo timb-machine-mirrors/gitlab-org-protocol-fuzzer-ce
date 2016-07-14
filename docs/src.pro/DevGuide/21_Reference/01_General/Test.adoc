@@ -19,7 +19,7 @@
 // Reviewed 04/07/2014: Lynn
 // Major edits
 
-The Test element defines the tests that Peach runs during this fuzzing session. Peach requires at least one Test element for fuzzing to occur.
+The Test element defines the tests that Peach runs during a fuzzing session. Peach requires at least one Test element for fuzzing to occur.
 
 Test configures a specific fuzzing occurrence that combines a StateModel with a Publisher and other configuration options (such as including/excluding elements from being mutated, Agents, and fuzzing strategies).
 
@@ -57,9 +57,6 @@ NOTE: If the command-line for launching Peach does not include a test name, Peac
   <Strategy class="Random" />
 
   <!-- Log output to disk -->
-  <Logger class="File">
-    <Param name="Path" value="logs" />
-  </Logger>
 </Test>
 ----
 

@@ -265,6 +265,8 @@ namespace Peach.Core
 		private static readonly string PeachDirectory =
 			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
+		const string Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}";
+
 		/// <summary>
 		/// Configure NLog.
 		/// </summary>
@@ -282,7 +284,10 @@ namespace Peach.Core
 				return;
 			}
 
-			LogLevel logLevel;
+			var config = new LoggingConfiguration();
+
+			var logLevel = LogLevel.Warn;
+
 			switch (level)
 			{
 				case 0:
@@ -296,17 +301,30 @@ namespace Peach.Core
 					break;
 			}
 
-			var target = new ConsoleTarget
+			var target = new ColoredConsoleTarget
 			{
-				Layout = "${logger} ${message} ${exception:format=tostring}",
-				Error = true,
+				Layout = Layout,
+				ErrorStream = true,
 			};
 
-			var rule = new LoggingRule("*", logLevel, target);
-			var nconfig = new LoggingConfiguration();
-			nconfig.AddTarget("console", target);
-			nconfig.LoggingRules.Add(rule);
-			LogManager.Configuration = nconfig;
+			config.AddTarget("console", target);
+			config.LoggingRules.Add(new LoggingRule("*", logLevel, target));
+
+			var peachLog = Environment.GetEnvironmentVariable("PEACH_LOG");
+			if (!string.IsNullOrEmpty(peachLog))
+			{
+				var fileTarget = new FileTarget
+				{
+					Name = "FileTarget",
+					Layout = Layout,
+					FileName = peachLog,
+					Encoding = System.Text.Encoding.UTF8,
+				};
+				config.AddTarget("file", fileTarget);
+				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, fileTarget));
+			}
+
+			LogManager.Configuration = config;
 		}
 
 		public static Configuration GetUserConfig()

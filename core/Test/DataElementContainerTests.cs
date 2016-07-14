@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Peach.Core.Dom;
-using Peach.Core.Test;
 
 namespace Peach.Core.Test
 {
@@ -23,19 +21,6 @@ namespace Peach.Core.Test
 			<Blob name='Data' />
 		</Block>
 	</DataModel>
-
-	<StateModel name='TheStateModel' initialState='initial'>
-		<State name='initial'>
-		  <Action name='A1' type='output'>
-			<DataModel name='foo'><String value='1' /></DataModel>
-		  </Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default' maxOutputSize='200'>
-		<StateModel ref='TheStateModel'/>
-		<Publisher class='Null'/>
-	</Test>
 </Peach>
 ";
 			var dom = ParsePit(pit);
@@ -72,19 +57,6 @@ namespace Peach.Core.Test
 		<Block name='Item3'/>
 		<Block name='Item4'/>
 	</DataModel>
-
-	<StateModel name='TheStateModel' initialState='initial'>
-		<State name='initial'>
-		  <Action name='A1' type='output'>
-			<DataModel name='foo'><String value='1' /></DataModel>
-		  </Action>
-		</State>
-	</StateModel>
-
-	<Test name='Default' maxOutputSize='200'>
-		<StateModel ref='TheStateModel'/>
-		<Publisher class='Null'/>
-	</Test>
 </Peach>
 ";
 			var dom = ParsePit(pit);

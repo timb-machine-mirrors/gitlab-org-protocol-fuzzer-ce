@@ -125,10 +125,6 @@ The simplest block is an empty block. This definition produces no output.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -137,9 +133,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 59388.
 
@@ -198,10 +191,6 @@ Blocks can be nested as deep as required. Blocks help create logical structure a
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -210,9 +199,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 30169.
 
@@ -267,10 +253,6 @@ Assign blocks a friendly name to make them easier to understand and debug.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -279,9 +261,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 58326.
 
@@ -333,10 +312,6 @@ NOTE: If a declared child element and a child element from the referenced contai
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -356,9 +331,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 61348.
 
@@ -425,10 +397,6 @@ To use this template as a reference.
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" name="ConsolePub"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -437,9 +405,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 64782.
 

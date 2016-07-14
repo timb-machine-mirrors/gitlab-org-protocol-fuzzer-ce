@@ -1,63 +1,75 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
-
 using System;
 
 namespace Peach.Core.Dom
 {
+	/// <summary>
+	/// Flags to define what child elements are supported by
+	/// a DataElement.  Flags can be combined or used individually.
+	/// </summary>
+	/// <remarks>
+	/// Used primarily by the schema builder
+	/// </remarks>
 	[Flags]
 	public enum DataElementTypes
 	{
+		/// <summary>
+		/// No child elements
+		/// </summary>
 		None            = 0x00,
+		/// <summary>
+		/// Can contain child data elements
+		/// </summary>
 		DataElements    = 0x01,
+		/// <summary>
+		/// Can contain Parameter elements
+		/// </summary>
 		Parameter       = 0x02,
+		/// <summary>
+		/// Can contain Relation elements
+		/// </summary>
 		Relation        = 0x04,
+		/// <summary>
+		/// Can contain Transformer element
+		/// </summary>
 		Transformer     = 0x08,
+		/// <summary>
+		/// Can contain Fixup element
+		/// </summary>
 		Fixup           = 0x10,
+		/// <summary>
+		/// Can contain Hint elements
+		/// </summary>
 		Hint            = 0x20,
+		/// <summary>
+		/// Can contain Analyzer element
+		/// </summary>
 		Analyzer        = 0x40,
+		/// <summary>
+		/// Any child element except DataElements
+		/// </summary>
 		NonDataElements = 0xfe,
+		/// <summary>
+		/// All child elements
+		/// </summary>
 		All             = 0xff,
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class DataElementAttribute : Attribute
+	public class DataElementAttribute : PluginAttribute
 	{
 		public string elementName;
 		public DataElementTypes elementTypes;
 
 		public DataElementAttribute(string elementName)
+			: base(typeof(DataElement), elementName, true)
 		{
 			this.elementName = elementName;
 			this.elementTypes = DataElementTypes.All;
 		}
 
 		public DataElementAttribute(string elementName, DataElementTypes elementTypes)
+			: base(typeof(DataElement), elementName, true)
 		{
 			this.elementName = elementName;
 			this.elementTypes = elementTypes;

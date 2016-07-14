@@ -100,7 +100,8 @@
 <div class="row">
 	<div class="col-xs-12">
 		<div class="form-group input-group">
-			<input ng-model="search"
+			<input autocomplete="off"
+						 ng-model="search"
 						 type="text"
 						 class="form-control"
 						 placeholder="Search for fields..."
@@ -149,7 +150,8 @@
 			</div>
 			<div class="alert alert-warning"
 					 ng-show="hasLoaded && !hasData">
-				This pit cannot be tuned.
+				This pit cannot be tuned. 
+				See <a href="/docs/dev/PitTool_Compile.html">PitTool - Compile</a> for more information on how to enable tuning this pit.
 			</div>
 			<div class="alert alert-info"
 			     ng-show="hasLoaded && hasData && isTruncated">

@@ -1,8 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Peach.Core
 {
+	[AttributeUsage(AttributeTargets.Assembly)]
+	public class PluginAssemblyAttribute : Attribute
+	{
+	}
+
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public class ObsoleteParameterAttribute : Attribute
 	{
@@ -63,14 +67,11 @@ namespace Peach.Core
 		}
 	}
 
-	[Obsolete("This attribute is obsolete and has been replaced by the System.ComponentModel.DescriptionAttribute class.")]
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class DescriptionAttribute : System.ComponentModel.DescriptionAttribute
+	public enum PluginScope
 	{
-		public DescriptionAttribute(string description)
-			: base(description)
-		{
-		}
+		Release,
+		Beta,
+		Internal,
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
@@ -78,11 +79,22 @@ namespace Peach.Core
 	{
 		#region Obsolete Functions
 
-		[Obsolete("This property is obsolete and has been replaced by the Internal property.")]
+		[Obsolete("This property is obsolete and has been replaced by the Scope property.")]
 		public bool IsTest
 		{
-			get { return Internal; }
-			set { Internal = value; }
+			get { return Scope == PluginScope.Internal; }
+			set { Scope = value ? PluginScope.Internal : PluginScope.Release; }
+		}
+
+		/// <summary>
+		/// The scope of the plugin.
+		/// Internal plugins are omitted from schema generation.
+		/// </summary>
+		[Obsolete("This property is obsolete and has been replaced by the Scope peroperty.")]
+		public bool Internal
+		{
+			get { return Scope == PluginScope.Internal; }
+			set { Scope = value ? PluginScope.Internal : PluginScope.Release; }
 		}
 
 		#endregion
@@ -104,10 +116,11 @@ namespace Peach.Core
 		public bool IsDefault { get; private set; }
 
 		/// <summary>
-		/// Is this an internal plugin.
+		/// The scope of the plugin.
 		/// Internal plugins are omitted from schema generation.
+		/// Beta plugins are decorated as such in command line output.
 		/// </summary>
-		public bool Internal { get; set; }
+		public PluginScope Scope { get; set; }
 
 		/// <summary>
 		/// The operating systems that support this plugin.

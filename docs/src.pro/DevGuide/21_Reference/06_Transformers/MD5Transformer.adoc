@@ -71,10 +71,6 @@ This example uses MD5 on an inline value and writes the transformed value to the
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex" name="ConsolePub"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -83,9 +79,6 @@ This example uses MD5 on an inline value and writes the transformed value to the
 Output from this example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 58687.
 

@@ -10,7 +10,10 @@ using NUnit.Framework;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Peach.Pro.Core.Runtime;
+using Peach.Core;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Core.Test
 {
@@ -80,54 +83,40 @@ namespace Peach.Core.Test
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
-			if (!(LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0))
-			{
-				var consoleTarget = new ConsoleTarget
-				{
-					Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message} ${exception:format=tostring}"
-				};
+			var logLevel = 0;
 
+			var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
+			if (peachDebug == "1")
+				logLevel = 1;
 
-				var config = new LoggingConfiguration();
-				config.AddTarget("console", consoleTarget);
+			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
+			if (peachTrace == "1")
+				logLevel = 2;
 
-				var logLevel = LogLevel.Warn;
-
-				var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
-				if (peachDebug == "1")
-					logLevel = LogLevel.Debug;
-
-				var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
-				if (peachTrace == "1")
-					logLevel = LogLevel.Trace;
-
-				var rule = new LoggingRule("*", logLevel, consoleTarget);
-				config.LoggingRules.Add(rule);
-
-				var peachLog = Environment.GetEnvironmentVariable("PEACH_LOG");
-				if (!string.IsNullOrEmpty(peachLog))
-				{
-					var fileTarget = new FileTarget
-					{
-						Name = "FileTarget",
-						Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}",
-						FileName = peachLog,
-						Encoding = System.Text.Encoding.UTF8,
-					};
-					config.AddTarget("file", fileTarget);
-					config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, fileTarget));
-				}
-
-				LogManager.Configuration = config;
-			}
+			Utilities.ConfigureLogging(logLevel);
 		}
 
 		public static void EnableDebug()
 		{
 			var config = LogManager.Configuration;
-			var target = new ConsoleTarget { Layout = "${logger} ${message} ${exception:format=tostring}" };
+			var target = new ColoredConsoleTarget 
+			{ 
+				Layout = "${time} ${logger} ${message} ${exception:format=tostring}" 
+			};
 			var rule = new LoggingRule("*", LogLevel.Debug, target);
 			
+			config.AddTarget("debugConsole", target);
+			config.LoggingRules.Add(rule);
+
+			LogManager.Configuration = config;
+		}
+
+		public static void EnableTrace()
+		{
+			var config = LogManager.Configuration;
+			var target = new ConsoleTarget { Layout = "${time} ${logger} ${message} ${exception:format=tostring}" };
+			var rule = new LoggingRule("*", LogLevel.Trace, target);
+
 			config.AddTarget("debugConsole", target);
 			config.LoggingRules.Add(rule);
 
@@ -189,12 +178,7 @@ namespace Peach.Core.Test
 		{
 			DoSetUp();
 
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			// we need this to make the SingleInstance work
-			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
+			ClassLoader.Initialize();
 		}
 
 		[OneTimeTearDown]

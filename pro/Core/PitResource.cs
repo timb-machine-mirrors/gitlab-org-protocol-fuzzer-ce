@@ -66,7 +66,7 @@ namespace Peach.Pro.Core
 		{
 			if (pitLibraryPath == null)
 				return null;
-			
+
 			var path = Path.Combine(pitLibraryPath, "Peach.Pro.Pits.dll");
 			if (!File.Exists(path))
 				return null;
@@ -110,8 +110,10 @@ namespace Peach.Pro.Core
 				if (query.Any())
 				{
 					_pitFeature = query.First();
-					_feature = license.GetFeature(_pitFeature.Key);
+					if (license == null)
+						throw new PeachException("A valid license could not be found.");
 
+					_feature = license.GetFeature(_pitFeature.Key);
 					if (_feature == null)
 						throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(pitName));
 				}
@@ -121,7 +123,7 @@ namespace Peach.Pro.Core
 		public Stream Load(string path)
 		{
 			path = path.Replace("##PitLibraryPath##", _pitLibraryPath);
-			
+
 			Stream stream = null;
 
 			// try to load from assembly
@@ -197,6 +199,7 @@ namespace Peach.Pro.Core
 			}
 		}
 
+#if DEBUG
 		public static PitManifest EncryptResources(
 			ResourceRoot root,
 			string output,
@@ -271,6 +274,7 @@ namespace Peach.Pro.Core
 				module.DefineManifestResource(outputResourceName, output, ResourceAttributes.Public);
 			}
 		}
+#endif
 
 		public static Stream DecryptResource(
 			ResourceRoot root,

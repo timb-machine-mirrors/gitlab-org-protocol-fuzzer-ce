@@ -1,24 +1,15 @@
-
-/* ace default theme layout sections */
-.main-container {
-	position: static;
+html, 
+body {
+	height: 100%;
+	margin: 0;
 	padding: 0;
 }
 
-	.main-container:after {
-		background-color: #FFF;
-		bottom: 0;
-		content: "";
-		display: block;
-		max-width: inherit;
-		position: fixed;
-		top: 0;
-		width: 100%;
-		z-index: -2;
-	}
-
-.main-container > .main-container-inner {
+/* ace default theme layout sections */
+.main-container {
+	padding: 0;
 	position: relative;
+	min-height: 100%;
 }
 
 .container.main-container .sidebar.sidebar-fixed,
@@ -32,6 +23,23 @@
 	margin-top: 0;
 	min-height: 100%;
 	padding: 0;
+	padding-bottom: 80px;
+}
+
+footer {
+	position: absolute;
+	bottom: 0;
+	height: 60px;
+
+	text-align: center;
+	border-top: 2px double #E5E5E5;
+	padding-top: 10px;
+	left: 190px;
+	right: 12px;
+}
+
+.menu-min.sidebar ~ footer {
+	left: 43px;
 }
 
 .page-content {

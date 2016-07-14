@@ -11,7 +11,6 @@ Welcome to the file fuzzing tutorial. In this tutorial, we are going to build a 
  . xref:TutorialFileFuzzing_ConfigurePublisher[Configuring a publisher]
  . xref:TutorialFileFuzzing_AgentAndMonitor[Adding an agent and monitor]
  . xref:TutorialFileFuzzing_OptimizeTesting[Optimizing test count]
- . xref:TutorialFileFuzzing_RunningInParallel[Running in parallel]
 
 :leveloffset: 2
 include::01_DevelopmentEnvironment.adoc[]
@@ -20,6 +19,5 @@ include::03_CreateStateModel.adoc[]
 include::04_ConfigurePublisher.adoc[]
 include::05_AgentAndMonitor.adoc[]
 include::06_OptimizeTesting.adoc[]
-include::07_RunningInParallel.adoc[]
 
 // end

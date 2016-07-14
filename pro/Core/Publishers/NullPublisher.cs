@@ -6,7 +6,7 @@ using Peach.Core.IO;
 
 namespace Peach.Pro.Core.Publishers
 {
-	[Publisher("Null")]
+	[Publisher("Null", Scope = PluginScope.Internal)]
 	[Parameter("MaxOutputSize", typeof(uint?), "Error if output surpasses limit.", "")]
 	public class NullPublisher : Publisher
 	{

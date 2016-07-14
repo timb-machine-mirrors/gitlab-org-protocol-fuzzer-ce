@@ -38,7 +38,7 @@ using Peach.Core.Cracker;
 namespace Peach.Core
 {
 	[Serializable]
-	public abstract class Analyzer: IPitSerializable
+	public abstract class Analyzer : IPitSerializable
 	{
 		public static readonly bool supportParser = false;
 		public static readonly bool supportDataElement = false;
@@ -70,7 +70,7 @@ namespace Peach.Core
 		{
 			try
 			{
-				using(Stream fin = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				using (Stream fin = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				{
 					Dom.Dom ret = asParser(args, fin);
 					ret.fileName = fileName;
@@ -173,7 +173,7 @@ namespace Peach.Core
 			throw new NotImplementedException();
 		}
 
-		public virtual void asCommandLine(Dictionary<string, string> args)
+		public virtual void asCommandLine(List<string> args)
 		{
 			throw new NotImplementedException();
 		}
@@ -196,7 +196,6 @@ namespace Peach.Core
 		{
 		}
 	}
-
 }
 
 // end

@@ -4,7 +4,7 @@
 
 The _Double_ element defines a floating-point number of 32 or 64 bits. Floating point values are packed into a byte representation with a byte order of little or big endian.
 
-The Double element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:Json[Json] or xref:Choice[Choice].
+The Double element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence] or xref:Choice[Choice].
 
 NOTE: The floating point representation used for the _Double_ element is based on the IEEE 754 floating point specification. For floating point values not conforming to IEEE 754, consider using a xref:Blob[Blob] data type as an alternative.
 
@@ -127,10 +127,6 @@ Produce 32 bit (4 byte) floating point number with a default value of 5.1:
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -139,9 +135,6 @@ Output from this example.
 
 ----
 >peach -1 --debug DoubleExample1.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 12232.
 
@@ -190,10 +183,6 @@ To use 64 bits (four byte) change the size to 64.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -202,9 +191,6 @@ Output from this example.
 
 ----
 >peach -1 --debug DoubleExample2.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 51105.
 
@@ -267,10 +253,6 @@ To change the endianness of the floating point number set the endian attribute. 
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -279,9 +261,6 @@ Output from this example.
 
 ----
 >peach -1 --debug DoubleEndianExample.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 35381.
 
@@ -343,10 +322,6 @@ is `"hex"`:
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -355,9 +330,6 @@ Output from this example.
 
 ----
 >peach -1 --debug NumberEndianExample.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 53121.
 

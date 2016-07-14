@@ -21,11 +21,7 @@ namespace Peach.Pro.Test.WebApi
 		{
 			DoSetUp();
 
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			ClassLoader.LoadAssembly(typeof(BaseProgram).Assembly);
+			BaseProgram.Initialize();
 		}
 
 		[OneTimeTearDown]

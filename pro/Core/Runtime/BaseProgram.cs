@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -59,19 +60,23 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		void LoadAssemblies()
+		public void LoadAssemblies()
 		{
-			// Peach.Core.dll
-			ClassLoader.LoadAssembly(typeof(ClassLoader).Assembly);
-
-			// Peach.Pro.dll
-			ClassLoader.LoadAssembly(Assembly.GetExecutingAssembly());
-
 			var path =
 				_pluginsPath ??
 				Utilities.GetUserConfig().AppSettings.Settings.Get("Plugins") ??
 				Utilities.GetAppResourcePath("Plugins");
-			ClassLoader.LoadPlugins(Path.GetFullPath(path));
+			ClassLoader.Initialize(Path.GetFullPath(path));
+		}
+
+		/// <summary>
+		/// This is a hack so that other assemblies can ensure
+		/// that Peach.Pro is actually loaded before 
+		/// calling Initialize() on the ClassLoader
+		/// </summary>
+		public static void Initialize()
+		{
+			ClassLoader.Initialize();
 		}
 
 		private static Version ParseMonoVersion(string str)
@@ -137,7 +142,7 @@ namespace Peach.Pro.Core.Runtime
 			if (type == null)
 				return true;
 
-			var minVer = new Version(2, 10, 8);
+			var minVer = new Version(4, 0, 0);
 
 			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -198,15 +203,15 @@ namespace Peach.Pro.Core.Runtime
 			}
 			catch (OptionException ex)
 			{
-				return ReportError(true, ex);
+				return ReportError(args.ToList(), true, ex);
 			}
 			catch (SyntaxException ex)
 			{
-				return ReportError(ex.ShowUsage, ex);
+				return ReportError(args.ToList(), ex.ShowUsage, ex);
 			}
 			catch (Exception ex)
 			{
-				ReportError(false, ex);
+				ReportError(null, false, ex);
 				return 1;
 			}
 		}
@@ -267,7 +272,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 		}
 
-		protected virtual int ReportError(bool showUsage, Exception ex)
+		protected virtual int ReportError(List<string> args, bool showUsage, Exception ex)
 		{
 			if (ex is TargetInvocationException && ex.InnerException != null)
 				ex = ex.InnerException;
@@ -280,18 +285,14 @@ namespace Peach.Pro.Core.Runtime
 			Console.Error.WriteLine();
 
 			if (showUsage)
-				ShowUsage(null);
+				ShowUsage(args);
 	
 			return string.IsNullOrEmpty(ex.Message) ? 0 : 2;
 		}
 
 		protected virtual string UsageLine
 		{
-			get
-			{
-				var name = Assembly.GetEntryAssembly().GetName();
-				return "Usage: {0} [OPTION]...".Fmt(name.Name);
-			}
+			get { return "Usage: {0} [OPTION]...".Fmt(Utilities.ExecutableName); }
 		}
 
 		protected virtual string Synopsis
@@ -317,7 +318,7 @@ namespace Peach.Pro.Core.Runtime
 		protected virtual int ShowVersion(List<string> args)
 		{
 			var name = Assembly.GetEntryAssembly().GetName();
-			Console.WriteLine("{0}: Version {1}".Fmt(name.Name, name.Version));
+			Console.WriteLine("{0}: Version {1}".Fmt(Utilities.ExecutableName, name.Version));
 			return 0;
 		}
 

@@ -8,6 +8,10 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Xml;
 using System.Linq;
+using Peach.Core;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Core
 {

@@ -227,7 +227,9 @@ namespace Peach.Pro.Test.Core.WebServices
 			var expected = new string[] { "StartIterationEvent", "ExitIterationEvent" };
 			var callParams = (from grp in p.Metadata.Monitors
 							  from monitor in grp.Items
-							  from param in monitor.Items
+							  from paramGroup in monitor.Items
+							  where paramGroup.Items != null
+							  from param in paramGroup.Items
 							  where param.Type == ParameterType.Call
 							  select param).ToList();
 
@@ -892,6 +894,63 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("Foo", newPit.Agents[0].Monitors[0].Map[0].Value);
 			Assert.AreEqual("StartOnCall", newPit.Agents[0].Monitors[0].Map[1].Key);
 			Assert.AreEqual("Foo", newPit.Agents[0].Monitors[0].Map[1].Value);
+		}
+	
+		[Test]
+		public void TestDeletePitConfig()
+		{
+			var ent = _db.Entries.Single(x => x.Path == _originalPitPath);
+			var pit = _db.GetPitById(ent.Id);
+
+			var newName = "Delete";
+			var newDesc = "My copy of the img pit";
+
+			var tuple = _db.NewConfig(pit.PitUrl, newName, newDesc);
+			var expName = Path.Combine(_root.Path, PitDatabase.ConfigsDir, "Image", "Delete.peach");
+			Assert.IsTrue(File.Exists(expName));
+
+			_db.DeletePitById(tuple.Item2.Id);
+			Assert.IsFalse(File.Exists(expName));
+			Assert.IsNull(_db.GetPitById(tuple.Item2.Id));
+		}
+	
+		[Test]
+		public void TestRenamePitConfig()
+		{
+			var ent = _db.Entries.Single(x => x.Path == _originalPitPath);
+			var pit = _db.GetPitById(ent.Id);
+
+			var newName = "Start";
+			var newDesc = "My copy of the img pit";
+
+			// create a new config
+			var start = _db.NewConfig(pit.PitUrl, newName, newDesc);
+			var startPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, "Image", "Start.peach");
+			Assert.IsTrue(File.Exists(startPath));
+
+			// update the new config
+			var cfg = new PitConfig
+			{
+				Agents = new List<MAgent>(),
+				Config = new List<Param> {
+					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
+				},
+			};
+			_db.UpdatePitByUrl(start.Item1.PitUrl, cfg);
+
+			// copy the config to another
+			var finish = _db.NewConfig(start.Item2.PitUrl, "Finish", newDesc);
+			Assert.IsTrue(File.Exists(Path.Combine(_root.Path, PitDatabase.ConfigsDir, "Image", "Finish.peach")));
+
+			// delete the original config
+			_db.DeletePitById(start.Item2.Id);
+			Assert.IsFalse(File.Exists(startPath));
+			Assert.IsNull(_db.GetPitById(start.Item2.Id));
+
+			// check that the config was copied
+			var saved = PitDatabase.LoadPitConfig(finish.Item2.Path);
+			Assert.AreEqual("SomeMiscVariable", saved.Config[0].Key);
+			Assert.AreEqual("Foo Bar Baz", saved.Config[0].Value);
 		}
 	}
 }

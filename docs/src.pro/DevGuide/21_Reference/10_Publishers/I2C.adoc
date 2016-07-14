@@ -84,9 +84,6 @@ xref:Action_input[input]:: Data received via input is read from the I2C bus.
 		</Publisher>
 
 		<Strategy class="Random" />
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

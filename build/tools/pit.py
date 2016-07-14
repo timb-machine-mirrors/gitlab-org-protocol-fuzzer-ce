@@ -43,7 +43,7 @@ While every precaution has been taken in the preparation of this book, the publi
 Peach Fuzzer, LLC +
 1122 E Pike St +
 Suite 1064 +
-Seattle, WA 98112
+Seattle, WA 98122
 
 == ${PIT_DESCRIPTION}
 ${PIT_USAGE}

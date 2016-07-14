@@ -54,7 +54,7 @@ sudo apt-get install mono-complete
 . Unzip the Peach distribution to the appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
-such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 ==== Redhat Enterprise Linux (RHEL and CentOS)
 
@@ -101,7 +101,7 @@ sudo yum install mono-complete
 . Unzip the Peach distribution to the appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
-such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 
 [NOTE]
@@ -140,7 +140,7 @@ Or, from the command line run:
 . Unzip the Peach binary distribution to the appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
-such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 
 ==== Other Linux Distributions
@@ -154,6 +154,6 @@ The checklist follows:
 . Unzip the Peach distribution to an appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
-such as `peach-pro-{BUILDTAG}-linux_x86_64_release.zip`.
+such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 // end

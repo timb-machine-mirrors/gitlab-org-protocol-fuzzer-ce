@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using NLog;
@@ -12,34 +9,40 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using Nustache.Core;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
+	// Notes regarding gdb-server usage
+	// http://stackoverflow.com/questions/75255/how-do-you-start-running-the-program-over-again-in-gdb-with-target-remote
+	// We might need to associate a command/script to restart the remote gdb-server?
+
 	[Monitor("Gdb")]
 	[Alias("LinuxDebugger")]
 	[Description("Uses GDB to launch an executable, monitoring it for exceptions")]
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
-	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
-	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
+	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
+	[Parameter("HandleSignals", typeof(string), "Signals to consider faults. Space separated list of signals/exceptions to handle as faults.", "SIGSEGV SIGFPE SIGABRT SIGILL SIGPIPE SIGBUS SIGSYS SIGXCPU SIGXFSZ EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC")]
+	[Parameter("Script", typeof(string), "Script file used to drive GDB and perform crash analysis.", "")]
 	public class GdbDebugger : Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		static readonly string template = @"
+		static readonly protected string template_log_if_crash = @"
 define log_if_crash
  if ($_thread != 0x00)
   printf ""Crash detected, running exploitable.\n""
   set logging overwrite on
   set logging redirect on
-  set logging on {0}
+  set logging on {{gdbLog}}
   exploitable -v
   printf ""\n--- Info Frame ---\n\n""
   info frame
@@ -50,13 +53,16 @@ define log_if_crash
   set logging off
  end
 end
+";
+
+		static readonly string template = @"
 
 handle all nostop noprint
-handle SIGSEGV SIGFPE SIGABRT SIGILL SIGPIPE SIGBUS SIGSYS SIGXCPU SIGXFSZ EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC stop print
+handle {{handleSignals}} stop print
 
-file {1}
-set args {2}
-source {3}
+file {{executable}}
+set args {{arguments}}
+source {{exploitableScript}}
 
 python
 def on_start(evt):
@@ -65,33 +71,34 @@ def on_start(evt):
     os.close(h)
     with open(tmp, 'w') as f:
         f.write(str(gdb.inferiors()[0].pid))
-    os.renames(tmp, '{4}')
+    os.renames(tmp, '{{gdbPid}}')
     gdb.events.cont.disconnect(on_start)
 gdb.events.cont.connect(on_start)
 end
 
-printf ""starting inferior: '{1} {2}'\n""
+printf ""starting inferior: '{{executable}} {{arguments}}'\n""
 
 run
 log_if_crash
 quit
 ";
 
-		Process _gdb;
-		Process _inferior;
-		MonitorData _fault;
-		bool _messageExit = false;
-		bool _secondStart = false;
-		string _exploitable = null;
-		TempDirectory _tmpDir = null;
-		string _gdbCmd = null;
-		string _gdbPid = null;
-		string _gdbLog = null;
+		protected Process _gdb;
+		protected Process _inferior;
+		protected MonitorData _fault;
+		protected bool _messageExit = false;
+		protected bool _secondStart = false;
+		protected string _exploitable = null;
+		protected TempDirectory _tmpDir = null;
+		protected string _gdbCmd = null;
+		protected string _gdbPid = null;
+		protected string _gdbLog = null;
+		protected string _template = null;
 
-		Regex reHash = new Regex(@"^Hash: (\w+)\.(\w+)$", RegexOptions.Multiline);
-		Regex reClassification = new Regex(@"^Exploitability Classification: (.*)$", RegexOptions.Multiline);
-		Regex reDescription = new Regex(@"^Short description: (.*)$", RegexOptions.Multiline);
-		Regex reOther = new Regex(@"^Other tags: (.*)$", RegexOptions.Multiline);
+		protected Regex reHash = new Regex(@"^Hash: (\w+)\.(\w+)$", RegexOptions.Multiline);
+		protected Regex reClassification = new Regex(@"^Exploitability Classification: (.*)$", RegexOptions.Multiline);
+		protected Regex reDescription = new Regex(@"^Short description: (.*)$", RegexOptions.Multiline);
+		protected Regex reOther = new Regex(@"^Other tags: (.*)$", RegexOptions.Multiline);
 
 		public string GdbPath { get; private set; }
 		public string Executable { get; private set; }
@@ -103,22 +110,36 @@ quit
 		public string StartOnCall { get; private set; }
 		public string WaitForExitOnCall { get; private set; }
 		public int WaitForExitTimeout { get; private set; }
+		public string HandleSignals { get; private set; }
+		public string Script { get; private set; }
 
 		public GdbDebugger(string name)
 			: base(name)
 		{
 			_gdb = PlatformFactory<Process>.CreateInstance(logger);
 			_inferior = PlatformFactory<Process>.CreateInstance(logger);
+
+			_template = template_log_if_crash + template;
 		}
 
 		public override void StartMonitor(Dictionary<string, string> args)
 		{
+			if (!string.IsNullOrEmpty(Script))
+			{
+				if (File.Exists(Script))
+					_template = File.ReadAllText(Script);
+				else
+				{
+					throw new SoftException(string.Format("Error, Script file not found for Gdb monitor: {0}", Script));
+				}
+			}
+
 			base.StartMonitor(args);
 
 			_exploitable = FindExploitable();
 		}
 
-		string FindExploitable()
+		protected string FindExploitable()
 		{
 			var target = "gdb/exploitable/exploitable.py";
 
@@ -141,7 +162,7 @@ quit
 			throw new PeachException("Error, Gdb could not find '" + target + "' in search path.");
 		}
 
-		void _Start()
+		protected virtual void _Start()
 		{
 			if (File.Exists(_gdbPid))
 				File.Delete(_gdbPid);
@@ -179,14 +200,14 @@ quit
 			OnInternalEvent(EventArgs.Empty);
 		}
 
-		void _Stop()
+		protected virtual void _Stop()
 		{
 			_inferior.Shutdown();
 			_gdb.WaitForIdle(WaitForExitTimeout);
 			_inferior.Dispose();
 		}
 
-		MonitorData MakeFault(string type, string reason)
+		protected virtual MonitorData MakeFault(string type, string reason)
 		{
 			var ret = new MonitorData
 			{
@@ -274,6 +295,26 @@ quit
 			return _fault;
 		}
 
+		/// <summary>
+		/// Populate values that can be used in the mutashe gdb script template.
+		/// </summary>
+		/// <param name="locals"></param>
+		protected virtual void PopulateTemplateParameters(Dictionary<string, object> locals)
+		{
+			// Monitor Parameters
+			locals["executable"] = Executable;
+			locals["arguments"] = Arguments;
+			locals["gdbPath"] = GdbPath;
+			locals["restartOnEachTest"] = RestartOnEachTest;
+			locals["restartAfterFault"] = RestartAfterFault;
+			locals["faultOnEarlyExit"] = FaultOnEarlyExit;
+			locals["noCpuKill"] = NoCpuKill;
+			locals["startOnCall"] = StartOnCall;
+			locals["waitForExitOnCall"] = WaitForExitOnCall;
+			locals["waitForExitTimeout"] = WaitForExitTimeout;
+			locals["handleSignals"] = HandleSignals;
+		}
+
 		public override void SessionStarting()
 		{
 			_tmpDir = new TempDirectory();
@@ -281,10 +322,21 @@ quit
 			_gdbPid = Path.Combine(_tmpDir.Path, "gdb.pid");
 			_gdbLog = Path.Combine(_tmpDir.Path, "gdb.log");
 
-			string cmd = string.Format(template, _gdbLog, Executable, Arguments, _exploitable, _gdbPid);
+			var locals = new Dictionary<string, object>();
+
+			locals["gdbTempDir"] = _tmpDir;
+			locals["gdbLog"] = _gdbLog;
+			locals["gdbPid"] = _gdbPid;
+			locals["gdbCmd"] = _gdbCmd;
+			locals["exploitableScript"] = _exploitable;
+
+			PopulateTemplateParameters(locals);
+
+			var cmd = Render.StringToString(_template, locals);
 			File.WriteAllText(_gdbCmd, cmd);
 
 			logger.Debug("Wrote gdb commands to '{0}'", _gdbCmd);
+			logger.Trace(cmd);
 
 			if (StartOnCall == null && !RestartOnEachTest)
 				_Start();

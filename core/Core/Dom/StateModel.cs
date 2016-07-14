@@ -304,7 +304,7 @@ namespace Peach.Core.Dom
 							var key = element.Key;
 							if (!string.IsNullOrEmpty(element.Key) && !string.IsNullOrEmpty(prefix))
 								key = string.Join(".", prefix, element.Key);
-							yield return new KeyValuePair<string, DataElement>(key, element.Value);
+							yield return new KeyValuePair<string, DataElement>(key ?? "", element.Value);
 						}
 					}
 				}

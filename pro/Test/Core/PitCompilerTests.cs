@@ -7,7 +7,6 @@ using Peach.Pro.Core.WebServices.Models;
 using Peach.Core;
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace Peach.Pro.Test.Core
 {
@@ -803,6 +802,7 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			<!-- after -->
 			<Action type='call' method='InitializeIterationEvent' publisher='Peach.Agent' />
 			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<!-- PitLint: Allow_WhenNonDeterministicActions -->
 			<!-- PitLint: Allow_WhenControlIteration -->
 			<Action name='Act1' type='output' when='context.controlIteration'>
 				<DataModel ref='DM'/>
@@ -841,7 +841,7 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 <PitDefines>
 </PitDefines>
 ";
-			
+
 			var xmlPath = Path.Combine(_root.Path, "TestPitLintIgnore.xml");
 			File.WriteAllText(xmlPath, xml);
 
@@ -989,5 +989,170 @@ Field'/>
 			};
 			CollectionAssert.AreEqual(expected, actual);
 		}
+
+
+		[Test]
+		public void TestNonDeterministicActions()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<!--
+PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
+-->
+<Peach 
+	xmlns='http://peachfuzzer.com/2012/Peach'
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+	author='Peach Fuzzer, LLC'
+	description='PIT'>
+
+	<DataModel name='DM'>
+		<String name='str1' value='0' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='Act1' type='output' when='foo.bar()'>
+				<DataModel ref='DM'/>
+				<Data>
+					<Field name='str1' value='Hello'/>
+				</Data>
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535' targetLifetime='session'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null' name='null'>
+			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			const string xmlConfig = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+</PitDefines>
+";
+
+			var xmlPath = Path.Combine(_root.Path, "TestPitLintNonDeterministic.xml");
+			File.WriteAllText(xmlPath, xml);
+
+			var xmlConfigPath = Path.Combine(_root.Path, "TestPitLintNonDeterministic.xml.config");
+			File.WriteAllText(xmlConfigPath, xmlConfig);
+
+			var compiler = new PitCompiler(_root.Path, xmlPath);
+			var actual = compiler.Run().ToArray();
+
+			Assert.AreEqual(1, actual.Length);
+			StringAssert.StartsWith("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true'", actual[0]);
+		}
+
+		[Test]
+		public void TestOnlyCurrentStateModel()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<!--
+PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
+-->
+<Peach 
+	xmlns='http://peachfuzzer.com/2012/Peach'
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+	author='Peach Fuzzer, LLC'
+	description='PIT'>
+
+	<DataModel name='DM'>
+		<String name='str1' value='0' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
+		</State>
+	</StateModel>
+
+	<StateModel name='TheOtherState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Act1' type='output' when='foo.bar()'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535' targetLifetime='session'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null' name='null'>
+			<!-- PitLint: Allow_MissingParamValue=MaxOutputSize -->
+		</Publisher>
+	</Test>
+</Peach>
+";
+
+			const string xmlConfig = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+</PitDefines>
+";
+
+			var xmlPath = Path.Combine(_root.Path, "TestPitLintCurrentStateModel.xml");
+			File.WriteAllText(xmlPath, xml);
+
+			var xmlConfigPath = Path.Combine(_root.Path, "TestPitLintCurrentStateModel.xml.config");
+			File.WriteAllText(xmlConfigPath, xmlConfig);
+
+			var compiler = new PitCompiler(_root.Path, xmlPath);
+			var actual = compiler.Run().ToArray();
+
+			actual.ForEach(Console.WriteLine);
+			CollectionAssert.IsEmpty(actual);
+		}
+
+#if !DEBUG
+		[Test]
+		public void TestReleaseLint()
+		{
+			const string xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'>
+	<DataModel name='DM'>
+		<String name='str1' value='value' />
+	</DataModel>
+
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action name='Act1' type='output'>
+				<DataModel ref='DM' />
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent'/>
+		</State>
+	</StateModel>
+
+	<Test name='Default' maxOutputSize='65535' targetLifetime='iteration'>
+		<StateModel ref='TheState'/>
+		<Publisher class='Null' name='null' />
+		<Logger class='File' />
+	</Test>
+</Peach>
+";
+
+			const string xmlConfig = @"<?xml version='1.0' encoding='utf-8'?>
+<PitDefines>
+</PitDefines>
+";
+			var xmlPath = Path.Combine(_root.Path, "TestRelease.xml");
+			File.WriteAllText(xmlPath, xml);
+
+			var xmlConfigPath = Path.Combine(_root.Path, "TestRelease.xml.config");
+			File.WriteAllText(xmlConfigPath, xmlConfig);
+
+			var compiler = new PitCompiler(_root.Path, xmlPath);
+			var actual = compiler.Run().ToArray();
+
+			actual.ForEach(Console.WriteLine);
+			CollectionAssert.IsEmpty(actual);
+		}
+#endif
 	}
 }

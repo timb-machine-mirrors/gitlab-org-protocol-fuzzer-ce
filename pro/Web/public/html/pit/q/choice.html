@@ -8,7 +8,8 @@
 <div ng-repeat="choice in Question.choice"
 		 class="radio">
 	<label>
-		<input type="radio"
+		<input autocomplete="off"
+					 type="radio"
 					 ng-model="Question.value"
 					 ng-value="choice.value" />
 		{{choice.a}}

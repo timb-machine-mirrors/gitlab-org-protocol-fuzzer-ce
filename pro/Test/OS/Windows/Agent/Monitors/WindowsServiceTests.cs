@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceProcess;
+using Peach.Pro.Core.OS.Windows;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
@@ -59,6 +60,9 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[SetUp]
 		public void SetUp()
 		{
+			if (!Privilege.IsUserAdministrator())
+				Assert.Ignore("User is not an administrator.");
+
 			_ctrl = new ServiceController(Service);
 			SafeStop();
 		}

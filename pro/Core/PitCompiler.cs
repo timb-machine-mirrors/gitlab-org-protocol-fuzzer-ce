@@ -11,19 +11,32 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
+#if DEBUG
 using System.Xml.Schema;
+#endif
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core
 {
 	public class PitCompiler
 	{
+		class NinjaSample
+		{
+			public string SamplePath { get; set; }
+			public DataModel DataModel { get; set; }
+		}
+
 		private readonly string _pitLibraryPath;
 		private readonly string _pitPath;
 		private readonly string _pitMetaPath;
+		private readonly string _pitNinjaPath;
+		private readonly List<NinjaSample> _samples = new List<NinjaSample>();
 		private readonly List<string> _errors = new List<string>();
 
 		private const string Namespace = "http://peachfuzzer.com/2012/Peach";
+#if DEBUG
 		private const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";
+#endif
 
 		private static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]> {
 			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" } },
@@ -41,6 +54,7 @@ namespace Peach.Pro.Core
 			_pitLibraryPath = pitLibraryPath;
 			_pitPath = pitPath;
 			_pitMetaPath = MetaPath(pitPath);
+			_pitNinjaPath = NinjaPath(pitPath);
 		}
 
 		public static PitMetadata LoadMetadata(string pitPath)
@@ -57,12 +71,29 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		private static string MetaPath(string pitPath)
+		{
+			return Path.ChangeExtension(pitPath, ".meta.json");
+		}
+
+		private static string NinjaPath(string pitPath)
+		{
+			return Path.ChangeExtension(pitPath, ".ninja");
+		}
+
 		public int TotalNodes { get; private set; }
 
-		public IEnumerable<string> Run(bool verifyConfig = true, bool doLint = true)
+		public IEnumerable<string> Run(
+			bool verifyConfig = true,
+			bool doLint = true,
+			bool createMetadata = true,
+			bool createNinja = true)
 		{
 			var dom = Parse(verifyConfig, doLint);
-			SaveMetadata(dom);
+			if (createMetadata)
+				SaveMetadata(dom);
+			if (createNinja && _samples.Any())
+				CreateNinjaDatabase(dom);
 			return _errors;
 		}
 
@@ -78,6 +109,18 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		void CreateNinjaDatabase(Peach.Core.Dom.Dom dom)
+		{
+			using (var db = new SampleNinjaDatabase(_pitNinjaPath))
+			{
+				foreach (var sample in _samples)
+				{
+					sample.DataModel.dom = dom;
+					db.ProcessSample(sample.DataModel, sample.SamplePath);
+				}
+			}
+		}
+
 		class CustomParser : ProPitParser
 		{
 			protected override void handlePublishers(XmlNode node, Test parent)
@@ -90,11 +133,6 @@ namespace Peach.Pro.Core
 				};
 				parent.publishers.Add(pub);
 			}
-		}
-
-		private static string MetaPath(string pitPath)
-		{
-			return Path.ChangeExtension(pitPath, ".meta.json");
 		}
 
 		public Peach.Core.Dom.Dom Parse(bool verifyConfig, bool doLint)
@@ -114,9 +152,26 @@ namespace Peach.Pro.Core
 				VerifyConfig(defs, args);
 
 			if (doLint)
-				VerifyPitFiles(dom, true);
+				VerifyPitFiles(dom, new PitLintContext { IsTest = true });
 
 			return dom;
+		}
+
+		static IEnumerable<string> GetDataModels(Peach.Core.Dom.Dom dom, string prefix)
+		{
+			return dom.dataModels.Select(dm =>
+			{
+				if (!string.IsNullOrEmpty(dom.Name))
+					return "{0}{1}:{2}".Fmt(prefix, dom.Name, dm.Name);
+				return "{0}{1}".Fmt(prefix, dm.Name);
+			}).Concat(dom.ns.SelectMany(x => GetDataModels(x, x.Name + ":")));
+		}
+
+		public static void RaiseMissingDataModel(Peach.Core.Dom.Dom dom, string name, string pitPath)
+		{
+			var error = "DataModel '{0}' not found in '{1}'.\nAvailable models:\n".Fmt(name, pitPath);
+			var models = string.Join("\n", GetDataModels(dom, null).Select(x => "    {0}".Fmt(x)));
+			throw new ArgumentException(error + models);
 		}
 
 		private void VerifyConfig(PitDefines defs, IReadOnlyDictionary<string, object> args)
@@ -146,12 +201,22 @@ namespace Peach.Pro.Core
 				_errors.Add("Configuration file should not have platform specific defines.");
 		}
 
-		private void VerifyPitFiles(Peach.Core.Dom.Dom dom, bool isTest)
+		class PitLintContext
 		{
-			VerifyPit(dom.fileName, isTest);
+			public bool IsTest { get; set; }
+			public string StateModel { get; set; }
+			public bool NonDeterministicActions { get; set; }
+		}
+
+		private void VerifyPitFiles(Peach.Core.Dom.Dom dom, PitLintContext ctx)
+		{
+			VerifyPit(dom.fileName, ctx);
+
+			ctx.IsTest = false;
+
 			foreach (var ns in dom.ns)
 			{
-				VerifyPitFiles(ns, false);
+				VerifyPitFiles(ns, ctx);
 			}
 		}
 
@@ -168,6 +233,17 @@ namespace Peach.Pro.Core
 			{
 				foreach (var action in state.actions)
 				{
+					_samples.AddRange(
+						from actionData in action.allData
+						from data in actionData.allData
+						let file = data as DataFile
+						where file != null
+						select new NinjaSample
+						{
+							SamplePath = file.FileName,
+							DataModel = actionData.dataModel,
+						});
+
 					var node = new PitField();
 					foreach (var actionData in action.outputData)
 					{
@@ -184,10 +260,7 @@ namespace Peach.Pro.Core
 						{
 							var parent = node;
 							var parts = kv.Key.Split('.');
-							foreach (var part in parts)
-							{
-								parent = AddNode(parent, part);
-							}
+							parts.Aggregate(parent, AddNode);
 						}
 					}
 
@@ -256,10 +329,12 @@ namespace Peach.Pro.Core
 			return next;
 		}
 
-		private void VerifyPit(string fileName, bool isTest)
+		private void VerifyPit(string fileName, PitLintContext ctx)
 		{
 			var idxDeclaration = 0;
+#if DEBUG
 			var idxCopyright = 0;
+#endif
 			var idx = 0;
 
 			using (var rdr = XmlReader.Create(fileName))
@@ -276,6 +351,7 @@ namespace Peach.Pro.Core
 					{
 						idxDeclaration = idx;
 					}
+#if DEBUG
 					else if (rdr.NodeType == XmlNodeType.Comment)
 					{
 						idxCopyright = idx;
@@ -284,6 +360,7 @@ namespace Peach.Pro.Core
 						if (split.Length <= 1)
 							_errors.Add("Long form copyright message is missing.");
 					}
+#endif
 					else if (rdr.NodeType == XmlNodeType.Element)
 					{
 						if (rdr.Name != "Peach")
@@ -292,6 +369,7 @@ namespace Peach.Pro.Core
 							break;
 						}
 
+#if DEBUG
 						if (!rdr.MoveToAttribute("description"))
 							_errors.Add("Pit is missing description attribute.");
 						else if (string.IsNullOrEmpty(rdr.Value))
@@ -303,16 +381,17 @@ namespace Peach.Pro.Core
 							_errors.Add("Pit is missing author attribute.");
 						else if (author != rdr.Value)
 							_errors.Add("Pit author is '{0}' but should be '{1}'.".Fmt(rdr.Value, author));
+	
+						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
+							_errors.Add("Pit is missing xsi:schemaLocation attribute.");
+						else if (SchemaLocation != rdr.Value)
+							_errors.Add("Pit xsi:schemaLocation is '{0}' but should be '{1}'.".Fmt(rdr.Value, SchemaLocation));
+#endif
 
 						if (!rdr.MoveToAttribute("xmlns"))
 							_errors.Add("Pit is missing xmlns attribute.");
 						else if (Namespace != rdr.Value)
 							_errors.Add("Pit xmlns is '{0}' but should be '{1}'.".Fmt(rdr.Value, Namespace));
-
-						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
-							_errors.Add("Pit is missing xsi:schemaLocation attribute.");
-						else if (SchemaLocation != rdr.Value)
-							_errors.Add("Pit xsi:schemaLocation is '{0}' but should be '{1}'.".Fmt(rdr.Value, SchemaLocation));
 
 						break;
 					}
@@ -321,9 +400,10 @@ namespace Peach.Pro.Core
 				if (idxDeclaration != 1)
 					_errors.Add("Pit is missing xml declaration.");
 
+#if DEBUG
 				if (idxCopyright == 0)
 					_errors.Add("Pit is missing top level copyright message.");
-
+#endif
 			}
 
 			{
@@ -338,7 +418,7 @@ namespace Peach.Pro.Core
 
 				var it = nav.Select("/p:Peach/p:Test", nsMgr);
 
-				var expected = isTest ? 1 : 0;
+				var expected = ctx.IsTest ? 1 : 0;
 
 				if (it.Count != expected)
 					_errors.Add("Number of <Test> elements is {0} but should be {1}.".Fmt(it.Count, expected));
@@ -353,6 +433,10 @@ namespace Peach.Pro.Core
 					if (string.IsNullOrEmpty(lifetime))
 						_errors.Add("<Test> element is missing targetLifetime attribute.");
 
+					var nonDeterminisitic = it.Current.GetAttribute("nonDeterministicActions", string.Empty);
+					ctx.NonDeterministicActions = !string.IsNullOrEmpty(nonDeterminisitic) && bool.Parse(nonDeterminisitic);
+
+#if DEBUG
 					if (!ShouldSkipRule(it, "Skip_Lifetime"))
 					{
 						var parts = fileName.Split(Path.DirectorySeparatorChar);
@@ -372,6 +456,10 @@ namespace Peach.Pro.Core
 					var loggers = it.Current.Select("p:Logger", nsMgr);
 					if (loggers.Count != 0)
 						_errors.Add("Number of <Logger> elements is {0} but should be 0.".Fmt(loggers.Count));
+#endif
+					var stateModel = it.Current.Select("p:StateModel", nsMgr);
+					if (stateModel.Count == 1 && stateModel.MoveNext())
+						ctx.StateModel = stateModel.Current.GetAttribute("ref", string.Empty);
 
 					var pubs = it.Current.Select("p:Publisher", nsMgr);
 					while (pubs.MoveNext())
@@ -432,9 +520,15 @@ namespace Peach.Pro.Core
 				var sm = nav.Select("/p:Peach/p:StateModel", nsMgr);
 				while (sm.MoveNext())
 				{
-					var smName = sm.Current.GetAttribute("name", "") ?? "<unknown>";
+					var smName = sm.Current.GetAttribute("name", "");
 
-					var actions = sm.Current.Select("//p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
+					if (!string.IsNullOrEmpty(ctx.StateModel) && !ctx.StateModel.EndsWith(smName))
+						continue;
+
+					if (string.IsNullOrEmpty(smName))
+						smName = "<unknown>";
+
+					var actions = sm.Current.Select("p:State/p:Action[@type='call' and @publisher='Peach.Agent']", nsMgr);
 
 					var gotStart = false;
 					var gotEnd = false;
@@ -455,13 +549,18 @@ namespace Peach.Pro.Core
 
 					if (!gotEnd)
 						_errors.Add(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
-				}
 
-				var whenAction = nav.Select("/p:Peach/p:StateModel/p:State/p:Action[contains(@when, 'controlIteration')]", nsMgr);
-				while (whenAction.MoveNext())
-				{
-					if (!ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
-						_errors.Add("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+					var whenAction = sm.Current.Select("p:State/p:Action[@when]", nsMgr);
+					while (whenAction.MoveNext())
+					{
+						var when = whenAction.Current.GetAttribute("when", string.Empty);
+						if (when.Contains("controlIteration") && !ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
+							_errors.Add("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+
+						// "context.controlIteration" is deterministic, so allow that to pass the lint check
+						if (when != "context.controlIteration" && !ctx.NonDeterministicActions && !ShouldSkipRule(whenAction, "Allow_WhenNonDeterministicActions"))
+							_errors.Add("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true': {0}".Fmt(whenAction.Current.OuterXml));
+					}
 				}
 
 				var badValues = nav.Select("//*[contains(@value, '\n')]", nsMgr);

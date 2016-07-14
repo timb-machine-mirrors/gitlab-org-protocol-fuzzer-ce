@@ -32,6 +32,26 @@ using System.Collections.Generic;
 
 namespace Peach.Core
 {
+	public class UsageAttribute : Attribute
+	{
+		public string Message { get; private set; }
+
+		public UsageAttribute(string message)
+		{
+			Message = message;
+		}
+	}
+
+	public class LongDescriptionAttribute : Attribute
+	{
+		public string Text { get; private set; }
+
+		public LongDescriptionAttribute(string text)
+		{
+			Text = text;
+		}
+	}
+
 	public static class Usage
 	{
 		private class PluginAlias : PluginAttribute
@@ -82,31 +102,19 @@ namespace Peach.Core
 		{
 			var color = Console.ForegroundColor;
 
-			var domTypes = new SortedDictionary<string, Type>();
 			var dupes = new List<string>();
-
-			foreach (var type in ClassLoader.GetAllByAttribute<Peach.Core.Dom.DataElementAttribute>(null))
-			{
-				if (domTypes.ContainsKey(type.Key.elementName))
-				{
-					AddDuplicate(dupes, "Data element", type.Key.elementName, domTypes[type.Key.elementName], type.Value);
-					continue;
-				}
-
-				domTypes.Add(type.Key.elementName, type.Value);
-			}
 
 			var pluginsByName = new SortedDictionary<string, Type>();
 			var plugins = new SortedDictionary<Type, SortedDictionary<Type, SortedSet<PluginAttribute>>>(new TypeComparer());
 
 			foreach (var type in ClassLoader.GetAllByAttribute<PluginAttribute>())
 			{
-				if (type.Key.Internal)
+				if (type.Key.Scope == PluginScope.Internal)
 					continue;
 
 				var pluginType = type.Key.Type;
 
-				string fullName = type.Key.Type.Name + ": " + type.Key.Name;
+				var fullName = type.Key.Type.Name + ": " + type.Key.Name;
 				if (pluginsByName.ContainsKey(fullName))
 				{
 					AddDuplicate(dupes, type.Key.Type.Name, type.Key.Name, pluginsByName[fullName], type.Value);
@@ -125,29 +133,43 @@ namespace Peach.Core
 
 				var attrs = plugin[type.Value];
 
-				bool added = attrs.Add(type.Key);
+				var added = attrs.Add(type.Key);
 				System.Diagnostics.Debug.Assert(added);
 
 				foreach (var a in type.Value.GetAttributes<AliasAttribute>())
 					attrs.Add(new PluginAlias(type.Value, a.Name));
 			}
 
-			Console.WriteLine("----- Data Elements --------------------------------------------");
-			foreach (var elem in domTypes)
-			{
-				Console.WriteLine();
-				Console.WriteLine("  {0}", elem.Key);
-				PrintParams(elem.Value);
-			}
-
 			foreach (var kv in plugins)
 			{
+				var name = kv.Key.Name;
+
+				if (kv.Key.IsInterface && name[0] == 'I')
+					name = name.Substring(1);
+
+				var isLower = false;
+
+				for (var i = 0; i < name.Length; ++i)
+				{
+					var isUpper = char.IsUpper(name[i]);
+
+					if (isUpper && isLower)
+					{
+						name = name.Insert(i, " ");
+						++i;
+					}
+
+					isLower = !isUpper;
+				}
+
 				Console.WriteLine();
 				Console.WriteLine();
-				Console.WriteLine("----- {0}s --------------------------------------------", kv.Key.Name);
+				Console.WriteLine("-----{0}", name.PadRight(74, '-'));
 
 				foreach (var plugin in kv.Value)
 				{
+					var obsolete = plugin.Key.GetAttributes<ObsoleteAttribute>().SingleOrDefault();
+
 					Console.WriteLine();
 					Console.Write(" ");
 
@@ -158,13 +180,36 @@ namespace Peach.Core
 							Console.ForegroundColor = ConsoleColor.White;
 						Console.Write(attr.Name);
 						Console.ForegroundColor = color;
+
+						if (attr.IsDefault && attr.Scope == PluginScope.Beta)
+						{
+							Console.Write(" ");
+							Console.ForegroundColor = ConsoleColor.Yellow;
+							Console.Write("(beta)");
+							Console.ForegroundColor = color;
+						}
+
+						if (obsolete != null)
+						{
+							Console.Write(" ");
+							Console.ForegroundColor = ConsoleColor.Red;
+							Console.Write("(deprecated)");
+							Console.ForegroundColor = color;
+						}
 					}
 
 					Console.WriteLine();
 
-					var desc = plugin.Key.GetAttributes<System.ComponentModel.DescriptionAttribute>(null).FirstOrDefault();
+					var desc = plugin.Key.GetAttributes<DescriptionAttribute>().SingleOrDefault();
 					if (desc != null)
-						Console.WriteLine("    [{0}]", desc.Description);
+						Console.WriteLine("    {0}", desc.Description);
+
+					if (obsolete != null && !string.IsNullOrEmpty(obsolete.Message))
+					{
+						Console.ForegroundColor = ConsoleColor.Red;
+						Console.WriteLine("    {0}", obsolete.Message);
+						Console.ForegroundColor = color;
+					}
 
 					PrintParams(plugin.Key);
 				}

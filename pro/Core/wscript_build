@@ -47,6 +47,8 @@ deps = [
 	'websocket-sharp.dll',
 	'Dapper.dll',
 	'Aspose.Words.dll',
+	'Nustache.Core.dll',
+
 
 	'vtortola.WebSockets.dll',
 	'vtortola.WebSockets.Rfc6455.dll',

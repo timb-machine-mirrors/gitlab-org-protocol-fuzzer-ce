@@ -294,7 +294,7 @@ namespace Peach.Pro.Core
 				{
 					return ClassLoader
 						.GetAllByAttribute<MutationStrategyAttribute>(null)
-						.Where(kv => kv.Key.IsDefault && !kv.Key.Internal)
+						.Where(kv => kv.Key.IsDefault && kv.Key.Scope == PluginScope.Release)
 						.Select(kv => kv.Key.Name)
 						.ToArray();
 				}

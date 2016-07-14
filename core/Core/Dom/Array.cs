@@ -51,8 +51,6 @@ namespace Peach.Core.Dom
 	/// with different data. This is the post-expansion state.
 	/// </remarks>
 	[Serializable]
-	[DataElement("Array")]
-	[DataElementParentSupported(null)]
 	public class Array : Sequence
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();

@@ -103,10 +103,6 @@ This example uses Ipv4StringToOctet on an inline value, writes the transformed v
 			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -114,9 +110,6 @@ This example uses Ipv4StringToOctet on an inline value, writes the transformed v
 Output from this example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 2053.
 

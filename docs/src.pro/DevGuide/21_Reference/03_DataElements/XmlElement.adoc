@@ -137,10 +137,6 @@ The following example models an XML snippet with namespaces.
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -149,9 +145,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 50415.
 
@@ -204,10 +197,6 @@ The following example loads the +example.xml+ file into a xref:String[String] el
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -216,9 +205,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 1238.
 
@@ -291,10 +277,6 @@ The following example converts binary data to a string format using a xref:Trans
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="Console" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -303,9 +285,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 1238.
 

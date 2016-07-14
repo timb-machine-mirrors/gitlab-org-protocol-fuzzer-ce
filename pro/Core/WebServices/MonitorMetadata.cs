@@ -71,7 +71,7 @@ namespace Peach.Pro.Core.WebServices
 			public string OS { get; set; }
 			public Type Type { get; set; }
 			public bool Visited { get; set; }
-			public bool Internal { get; set; }
+			public PluginScope Scope { get; set; }
 		}
 
 		private class ParamInfo : INamed
@@ -125,17 +125,30 @@ namespace Peach.Pro.Core.WebServices
 				{
 					missing.Sort(MonitorSorter);
 
+					var missingNames = string.Join("', '",
+						missing
+							.Where(m => m.Scope != PluginScope.Internal)
+							.Select(m => m.Key)
+					);
+
 					// If GetGroupings() failed we already raised ErrorEventHandler
 					if (ret == null)
 						ret = new List<ParamDetail>();
-					else if (ErrorEventHandler != null && missing.Any(m => !m.Internal && m.Name != "Null"))
-							ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Missing metadata entries for the following monitors: '{0}'.".Fmt(string.Join("', '", missing.Where(m => !m.Internal).Select(m => m.Key))))));
+					else if (ErrorEventHandler != null && !string.IsNullOrEmpty(missingNames))
+					{
+						var ex = new ApplicationException(
+							"Missing metadata entries for the following monitors: '{0}'.".Fmt(missingNames)
+						);
+						var args = new ErrorEventArgs(ex);
+
+						ErrorEventHandler(this, args);
+					}
 
 					var grp = new ParamDetail
 					{
-							Name = "Other",
-							Type = ParameterType.Group,
-							Items = new List<ParamDetail>()
+						Name = "Other",
+						Type = ParameterType.Group,
+						Items = new List<ParamDetail>()
 					};
 
 					foreach (var monitor in missing)
@@ -175,12 +188,13 @@ namespace Peach.Pro.Core.WebServices
 				var rdr = new JsonTextReader(strm);
 				var s = new JsonSerializer();
 
-				try {
+				try
+				{
 					var result = s.Deserialize<GroupInfo>(rdr);
 					if (result != null)
 						return result;
 					else
-						return new GroupInfo { Groups = new List<NamedItem> (), Parameters = new Dictionary<string, List<NamedItem>> () };
+						return new GroupInfo { Groups = new List<NamedItem>(), Parameters = new Dictionary<string, List<NamedItem>>() };
 				}
 				catch (JsonReaderException ex)
 				{
@@ -188,7 +202,7 @@ namespace Peach.Pro.Core.WebServices
 						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Unable to parse monitor metadata resource. See line {0}, position {1}".Fmt(ex.LineNumber, ex.LinePosition), ex)));
 
 					return null;
-				} 
+				}
 				catch (Exception ex)
 				{
 					if (ErrorEventHandler != null)
@@ -273,7 +287,7 @@ namespace Peach.Pro.Core.WebServices
 						Description = GetDescription(kv),
 						OS = GetOS(kv.Key),
 						Type = kv.Value,
-						Internal = kv.Key.Internal,
+						Scope = kv.Key.Scope,
 						Visited = false
 					});
 				}
@@ -311,7 +325,7 @@ namespace Peach.Pro.Core.WebServices
 		private static bool FilterInternal(KeyValuePair<MonitorAttribute, Type> kv)
 		{
 #if !DEBUG
-			return !kv.Key.Internal;
+			return kv.Key.Scope != PluginScope.Internal;
 #else
 			return true;
 #endif

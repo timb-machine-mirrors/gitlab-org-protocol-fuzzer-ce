@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
@@ -133,6 +132,26 @@ namespace Peach.Pro.WebApi2.Controllers
 			catch (ArgumentException)
 			{
 				return BadRequest();
+			}
+		}
+
+		[Route("{id}")]
+		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified pit does not exist")]
+		[SwaggerResponse(HttpStatusCode.Forbidden, Description = "Access denied when deleting config")]
+		public IHttpActionResult Delete(string id)
+		{
+			try
+			{
+				_pitDatabase.DeletePitById(id);
+				return Ok();
+			}
+			catch (KeyNotFoundException)
+			{
+				return NotFound();
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return StatusCode(HttpStatusCode.Forbidden);
 			}
 		}
 	}

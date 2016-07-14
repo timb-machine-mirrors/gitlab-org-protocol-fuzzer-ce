@@ -10,5 +10,6 @@ namespace Peach {
 		expiration: string;
 		eulaAccepted: boolean;
 		eulas: string[];
+		version: string;
 	}
 }

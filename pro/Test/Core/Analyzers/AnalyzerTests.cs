@@ -1,13 +1,11 @@
-using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.Analyzers
 {
-	public class AnalyzerTests : DataModelCollector
+	public class AnalyzerTests
 	{
 		[Test]
 		[Peach]
@@ -39,19 +37,13 @@ namespace Peach.Pro.Test.Core.Analyzers
 	</Test>
 </Peach>";
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(this);
+			var dom = DataModelCollector.ParsePit(xml);
+			var config = new RunConfiguration {singleIteration = true};
+			var e = new Engine(null);
 			e.startFuzzing(dom, config);
 
-			Assert.AreEqual(1, dataModels.Count);
-
-			int numElements = dataModels[0].EnumerateAllElements().Count();
-
+			var dataModel = dom.tests[0].stateModel.states[0].actions[0].dataModel;
+			var numElements = dataModel.EnumerateAllElements().Count();
 			Assert.AreEqual(11, numElements);
 		}
 	}

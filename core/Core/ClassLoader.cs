@@ -42,39 +42,46 @@ namespace Peach.Core
 	{
 		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		static readonly object _mutex = new object();
-		public static Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
+		internal static readonly HashSet<Assembly> AssemblyCache = new HashSet<Assembly>();
 		static readonly Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
 		static readonly Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
-		static readonly string[] searchPath = GetSearchPath();
 
-		static string[] GetSearchPath()
+		public static void Initialize(params string[] pluginsPaths)
 		{
-			var ret = new List<string> {
-				Utilities.ExecutionDirectory,
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-			};
+			var scripting = new PythonScripting();
+			scripting.AddSearchPath(Path.Combine(Utilities.ExecutionDirectory, "Lib"));
 
-			return ret.Distinct().ToArray();
+			foreach (var path in pluginsPaths)
+			{
+				if (Directory.Exists(path))
+					LoadPlugins(path, scripting);
+			}
+
+			foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				var attr = asm.GetCustomAttribute<PluginAssemblyAttribute>();
+				if (attr != null)
+				{
+					logger.Trace("Loading plugins from: {0}", asm.FullName);
+					AssemblyCache.Add(asm);
+				}
+			}
 		}
 
-		public static void LoadPlugins(string pluginsPath)
+		private static void LoadPlugins(string pluginsPath, PythonScripting scripting)
 		{
-			if (!Directory.Exists(pluginsPath))
-				return;
-
 			foreach (var file in Directory.GetFiles(pluginsPath))
 			{
 				if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
 					continue;
 
-				if (AssemblyCache.ContainsKey(file))
-					continue;
+				logger.Trace("Loading plugins from: {0}", file);
 
 				try
 				{
 					var asm = Load(file);
 					asm.GetTypes(); // make sure we can load exported types.
-					AssemblyCache[asm.Location] = asm;
+					AssemblyCache.Add(asm);
 				}
 				catch (Exception ex)
 				{
@@ -83,18 +90,14 @@ namespace Peach.Core
 			}
 
 			var pys = Directory.GetFiles(pluginsPath, "*.py");
-			if (pys.Length == 0)
-				return;
-
-			var s = new PythonScripting();
-
-			s.AddSearchPath(pluginsPath);
+			if (pys.Any())
+				scripting.AddSearchPath(pluginsPath);
 
 			foreach (var py in pys)
 			{
 				try
 				{
-					s.ImportModule(Path.GetFileNameWithoutExtension(py));
+					scripting.ImportModule(Path.GetFileNameWithoutExtension(py));
 				}
 				catch (Exception ex)
 				{
@@ -132,21 +135,6 @@ namespace Peach.Core
 			 */
 
 			return Assembly.LoadFrom(fullPath);
-		}
-
-		public static string[] SearchPaths
-		{
-			get { return searchPath; }
-		}
-
-		public static void LoadAssembly(Assembly asm)
-		{
-			asm.GetExportedTypes(); // make sure we can load exported types.
-
-			lock (_mutex)
-			{
-				AssemblyCache[asm.Location] = asm;
-			}
 		}
 
 		/// <summary>
@@ -219,7 +207,7 @@ namespace Peach.Core
 				if (!AllByAttributeCache.TryGetValue(typeof(A), out types))
 				{
 					var typesList = new List<Type>();
-					foreach (var asm in AssemblyCache.Values)
+					foreach (var asm in AssemblyCache)
 					{
 						foreach (var type in asm.GetTypes())
 						{
@@ -309,7 +297,7 @@ namespace Peach.Core
 		{
 			lock (_mutex)
 			{
-				foreach (var asm in AssemblyCache.Values)
+				foreach (var asm in AssemblyCache)
 				{
 					//if (asm.IsDynamic)
 					//	continue;

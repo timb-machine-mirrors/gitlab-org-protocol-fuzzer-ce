@@ -263,10 +263,6 @@ This example requires a machine running the Windows(R) Operating system, version
     <Publisher class="File">
       <Param name="FileName" value="fuzzfile.bin" />
     </Publisher>
-
-    <Logger class="Filesystem">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>

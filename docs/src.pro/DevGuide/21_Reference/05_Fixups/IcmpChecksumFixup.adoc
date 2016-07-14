@@ -67,10 +67,6 @@ xref:ref[ref]:: The input data element used in the checksum calculation.
       <Param name="Interface" value="127.0.0.1"/>
       <Param name="Protocol" value="1"/>
      </Publisher>
-
-     <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -79,9 +75,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 37625.
 

@@ -26,6 +26,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |OS X
 |xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |X   |X   |OS X
 |xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |Linux, OS X
+|xref:Monitors_GdbServer[GdbServer]              |X   |X   |X   |Linux, OS X
 |xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |
 |xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |Linux
 |xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |

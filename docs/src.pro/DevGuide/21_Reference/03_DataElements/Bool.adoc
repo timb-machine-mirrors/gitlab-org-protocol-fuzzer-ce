@@ -6,7 +6,7 @@ The _Bool_ element defines a Boolean value (values 0 or 1) that represents eithe
 
 When not used in JSON strings, _Bool_ is a one-bit number with a value of 0 or 1.
 
-The Bool element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:Json[Json] or xref:Choice[Choice].
+The Bool element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence] or xref:Choice[Choice].
 
 === Syntax
 
@@ -111,10 +111,6 @@ Produce Json string with a boolean value of true.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -123,9 +119,6 @@ Output from this example.
 
 ----
 >peach -1 --debug BoolExample1.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 28925.
 

@@ -4,6 +4,74 @@
 	{
 		public const string GetLastRowId = "SELECT last_insert_rowid();";
 
+		public const string InsertNinjaSample = @"
+INSERT INTO Sample (
+	File, 
+	Hash
+) VALUES (
+	@File,
+	@Hash
+);" + GetLastRowId;
+
+		public const string InsertNinjaElement = @"
+INSERT INTO Element (
+	Name
+) VALUES (
+	@Name
+);" + GetLastRowId;
+
+		public const string InsertNinjaSampleElement = @"
+INSERT INTO SampleElement (
+	SampleId, 
+	ElementId, 
+	Data
+) VALUES (
+	@SampleId,
+	@ElementId,
+	@Data
+);" + GetLastRowId;
+
+		public const string DeleteNinjaSample = @"
+DELETE FROM SampleElement
+WHERE SampleId = @SampleId;
+
+DELETE FROM Sample
+WHERE SampleId = @SampleId;
+";
+
+		public const string SelectNinjaSample = @"
+SELECT * 
+FROM Sample 
+WHERE File = @File
+";
+
+		public const string SelectNinjaElement = @"
+SELECT ElementId
+FROM Element
+WHERE Name = @Name
+";
+
+		public const string SelectNinjaElementCount = @"
+SELECT
+	COUNT(*) as Count,
+	e.ElementId
+FROM
+	Element e,
+	SampleElement se
+WHERE
+	se.ElementId = e.ElementId AND
+	e.Name = @Name
+GROUP BY
+	se.ElementId
+";
+
+		public const string SelectNinjaData = @"
+SELECT Data 
+FROM SampleElement
+WHERE ElementId = @ElementId
+LIMIT 1 OFFSET @Offset 
+";
+		
 		public const string InsertJobLog = @"
 INSERT INTO [JobLog] (
 	JobId,

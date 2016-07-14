@@ -65,10 +65,6 @@ This fixup does not support any parameters.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -77,9 +73,6 @@ Output of this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 24885.
 
