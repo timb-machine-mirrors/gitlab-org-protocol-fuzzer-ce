@@ -228,6 +228,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var callParams = (from grp in p.Metadata.Monitors
 							  from monitor in grp.Items
 							  from paramGroup in monitor.Items
+							  where paramGroup.Items != null
 							  from param in paramGroup.Items
 							  where param.Type == ParameterType.Call
 							  select param).ToList();
