@@ -1,6 +1,14 @@
 [[PitTool_Compile]]
 == Pit Tool - Compile
 
+The Pit compiler is used by Pit developers to provide the following features:
+
+* Validation of Pit files against the xref:GeneralConfiguration[Peach XML Schema].
+* Verification of xref:PitDefines[PitDefines] in +.xml.config+ files.
+* Lint checks to enfore basic rules for +.xml+ files.
+* Generation of +.meta.json+ files used for xref:WebUI_Config_Tuning[tuning mutations] in the Peach Web Interface.
+* Generation of +.ninja+ databases used by the xref:Mutators_SampleNinjaMutator[Sample Ninja mutator].
+
 === Syntax
 
 ----
@@ -90,7 +98,12 @@ the following can be used to ignore errors about the
 
 === Generate Tuning Metadata
 
-TODO
+Peach offers the ability to tune the fuzzing process by allowing users to manually set a relative
+mutation weight on a field-by-field basis.
+To accomplish this task, +PitTool compile+ is used to generate metadata which includes the
+structure of the fields in a Pit.
+This metadata is used by the Peach Web Interface so that the tree of fields can be displayed and
+manipulated.
 
 === Generate Sample Ninja Database
 

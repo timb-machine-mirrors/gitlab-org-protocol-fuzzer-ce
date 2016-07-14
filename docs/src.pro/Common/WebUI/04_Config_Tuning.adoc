@@ -1,3 +1,4 @@
+[[WebUI_Config_Tuning]]
 ==== Tuning
 
 Tuning allows control of how testing is performed on a field-by-field basis.
