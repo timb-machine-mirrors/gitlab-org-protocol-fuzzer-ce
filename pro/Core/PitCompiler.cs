@@ -11,7 +11,9 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
+#if DEBUG
 using System.Xml.Schema;
+#endif
 using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core
@@ -32,7 +34,9 @@ namespace Peach.Pro.Core
 		private readonly List<string> _errors = new List<string>();
 
 		private const string Namespace = "http://peachfuzzer.com/2012/Peach";
+#if DEBUG
 		private const string SchemaLocation = "http://peachfuzzer.com/2012/Peach peach.xsd";
+#endif
 
 		private static readonly Dictionary<string, string[]> OptionalParams = new Dictionary<string, string[]> {
 			{ "RawEther", new[] { "MinMTU", "MaxMTU", "MinFrameSize", "MaxFrameSize", "PcapTimeout" } },
@@ -151,6 +155,23 @@ namespace Peach.Pro.Core
 				VerifyPitFiles(dom, new PitLintContext { IsTest = true });
 
 			return dom;
+		}
+
+		static IEnumerable<string> GetDataModels(Peach.Core.Dom.Dom dom, string prefix)
+		{
+			return dom.dataModels.Select(dm =>
+			{
+				if (!string.IsNullOrEmpty(dom.Name))
+					return "{0}{1}:{2}".Fmt(prefix, dom.Name, dm.Name);
+				return "{0}{1}".Fmt(prefix, dm.Name);
+			}).Concat(dom.ns.SelectMany(x => GetDataModels(x, x.Name + ":")));
+		}
+
+		public static void RaiseMissingDataModel(Peach.Core.Dom.Dom dom, string name, string pitPath)
+		{
+			var error = "DataModel '{0}' not found in '{1}'.\nAvailable models:\n".Fmt(name, pitPath);
+			var models = string.Join("\n", GetDataModels(dom, null).Select(x => "    {0}".Fmt(x)));
+			throw new ArgumentException(error + models);
 		}
 
 		private void VerifyConfig(PitDefines defs, IReadOnlyDictionary<string, object> args)

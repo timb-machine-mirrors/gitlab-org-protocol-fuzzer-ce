@@ -630,7 +630,7 @@ namespace Peach.Pro.PitTester
 			Console.WriteLine("Looking for data model: '{0}'", dataModelName);
 			var dm = dom.getRef(dataModelName, x => x.dataModels);
 			if (dm == null)
-				throw new PeachException("Data model not found: '{0}'".Fmt(dataModelName));
+				PitCompiler.RaiseMissingDataModel(dom, dataModelName, pitPath);
 
 			using (var sin = new FileStream(samplePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 			{
@@ -659,7 +659,13 @@ namespace Peach.Pro.PitTester
 							value = item.DefaultValue.ToString();
 
 						if (!string.IsNullOrEmpty(value))
-							valuePart = "[{0}]".Fmt(value);
+						{
+							valuePart = "[{0}]".Fmt(value
+								.Replace("\t", "\\t")
+								.Replace("\n", "\\n")
+								.Replace("\r", "\\r")
+							);
+						}
 					}
 
 					Console.WriteLine("{0}-{1} {2} '{3}' {4}", prefix, sep, item.elementType, item.Name, valuePart);
