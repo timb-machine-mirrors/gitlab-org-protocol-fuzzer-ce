@@ -23,6 +23,8 @@ def configure(conf):
 	else:
 		raise Errors.WafError('Could not determine version for tsc.')
 
+	v.append_value('supported_features', 'tsc')
+
 @feature('tsc')
 @after_method('process_source')
 def process_tsc(self):
