@@ -3,7 +3,7 @@
 
 The Pit compiler is used by Pit developers to provide the following features:
 
-* Validation of Pit files against the xref:GeneralConfiguration[Peach XML Schema].
+* Validation of Pit files against the xref:PeachPit[Peach XML Schema].
 * Verification of xref:PitDefines[PitDefines] in +.xml.config+ files.
 * Lint checks to enfore basic rules for +.xml+ files.
 * Generation of +.meta.json+ files used for xref:WebUI_Config_Tuning[tuning mutations] in the Peach Web Interface.
