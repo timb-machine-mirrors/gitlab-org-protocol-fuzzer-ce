@@ -241,7 +241,12 @@ namespace Peach.Pro.WebApi2
 				c.OperationFilter<CommonResponseFilter>();
 				c.SchemaFilter<RequiredParameterFilter>();
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
-			}).EnableSwaggerUi();
+			}).EnableSwaggerUi(c =>
+			{
+				// Prevent "Error" badge from showing up when the UI tries to
+				// GET http://online.swagger.io/validator?url=http://localhost:8888/swagger/docs/v1
+				c.DisableValidator();
+			});
 
 			var builder = new ContainerBuilder();
 
