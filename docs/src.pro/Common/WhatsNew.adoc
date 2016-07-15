@@ -170,6 +170,21 @@ See the xref:Monitors_Gdb[Gdb Monitor] and xref:Monitors_GdbServer[GdbServer Mon
 
 === Breaking Changes
 
+This release introduces a number of breaking changes and depricated features. This section contains a list
+of the major changes that have occured.
+
+==== Peach Agent
+
+The Peach Agent server process has been moved into it's own executable +PeachAgent.exe+ or +peachagent+. The old method of running +peach -a tcp+ is depricated.  See Running Peach for more information.
+
+==== Depricated Command Line Switches
+
+The following command line switches are depricated:
+
+-t:: The test switch has been removed.
+-c:: The count switch has been remvoed. The default and recommended strategy does not have this concept.
+-p:: Parallel switches have been removed. These are not needed with the default strategy.
+
 ==== Plugins Folder
 
 The location for plugins has changed in this release.
