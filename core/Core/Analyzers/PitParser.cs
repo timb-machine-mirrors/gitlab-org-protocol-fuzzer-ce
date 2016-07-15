@@ -986,7 +986,8 @@ namespace Peach.Core.Analyzers
 		/// </summary>
 		/// <param name="node">Node to read values from</param>
 		/// <param name="element">Element to set values on</param>
-		public void handleCommonDataElementValue(XmlNode node, DataElement element)
+		/// <param name="context">If element is detached (no parent) provide context Dom instance</param>
+		public void handleCommonDataElementValue(XmlNode node, DataElement element, Dom.Dom context = null)
 		{
 			if (!node.hasAttr("value"))
 				return;
@@ -1040,9 +1041,9 @@ namespace Peach.Core.Analyzers
 					localScope["self"] = element;
 					localScope["node"] = node;
 					localScope["Parser"] = this;
-					localScope["Context"] = ((DataModel)element.root).dom;
+					localScope["Context"] = context ?? ((DataModel)element.root).dom;
 
-					var obj = element.EvalExpression(value, localScope);
+					var obj = element.EvalExpression(value, localScope, context);
 
 					if (obj == null)
 						throw new PeachException("Error, the value of " + element.debugName + " is not a valid eval statement.");
@@ -1643,13 +1644,13 @@ namespace Peach.Core.Analyzers
 
 					DataElement tmp;
 					if (child.getAttr("valueType", "string").ToLower() == "string")
-						tmp = new Dom.String { stringType = StringType.utf8 };
+						tmp = new Dom.String {stringType = StringType.utf8};
 					else
 						tmp = new Blob();
-
+	
 					// Hack to call common value parsing code.
-					handleCommonDataElementValue(child, tmp);
-
+					handleCommonDataElementValue(child, tmp, dom);
+	
 					foreach (var fieldData in dataSet.OfType<DataField>())
 					{
 						fieldData.Fields.Remove(name);

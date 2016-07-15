@@ -1105,12 +1105,15 @@ namespace Peach.Core.Dom
 			set { hints = value; }
 		}
 
-		public object EvalExpression(string code, Dictionary<string, object> localScope)
+		public object EvalExpression(string code, Dictionary<string, object> localScope, Dom context = null)
 		{
-			var dm = (DataModel)root;
-			var dom = dm.dom ?? dm.actionData.action.parent.parent.parent;
+			if (context == null)
+			{
+				var dm = (DataModel) root;
+				context = dm.dom ?? dm.actionData.action.parent.parent.parent;
+			}
 
-			return dom.Python.Eval(code, localScope);
+			return context.Python.Eval(code, localScope);
 		}
 
 		/// <summary>
