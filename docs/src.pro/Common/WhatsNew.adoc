@@ -9,15 +9,42 @@ re-download Peach Fuzzer by visiting https://dl.peachfuzzer.com.
 
 === Fuzzing Definitions (Pits)
 
-Descriptions of the new Pits follow:
+Descriptions of the new/updated Pits follow:
 
-/////
-==== DTLS Server (SSL)
+==== HL7 v2 XML
 
-DTLS is a derivation of SSL protocol.
-It provides the same security services (integrity, authentication and confidentiality) as SSL/TLS but under the UDP protocol.
-This pit is available as part of SSL.
-/////
+TODO
+
+==== HL7 Network
+
+TODO
+
+==== DICOM Updates
+
+TODO
+
+==== SSL/TLS Expanded Cipher Support
+
+The cipher suites supported by the SSL/TLS pits have been expanded in this release. 
+The following table shows the current list of supported ciphers:
+
+[options="header",cols="1,2,1,1,1,1,1"]
+|========
+|ID        | Cipher Suite                       | Prot   |Key Ex | Au   | Enc        | Mac
+|0xC0,0xAC |ECDHE_ECDSA_WITH_AES_128_CCM        |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0xAE |ECDHE_ECDSA_WITH_AES_128_CCM_8      |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0xAD |ECDHE_ECDSA_WITH_AES_256_CCM        |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0xAF |ECDHE_ECDSA_WITH_AES_256_CCM_8      |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0x23 |ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 |TLSv1.2 |ECDH   |ECDSA |AES(128)    |SHA256
+|0xC0,0x09 |ECDHE_ECDSA_WITH_AES_128_CBC_SHA    |TLSv1.0 |ECDH   |ECDSA |AES(128)    |SHA1
+|0xC0,0x27 |ECDHE_RSA_WITH_AES_128_CBC_SHA256   |TLSv1.2 |ECDH   |RSA   |AES(128)    |SHA256
+|0xC0,0x13 |ECDHE_RSA_WITH_AES_128_CBC_SHA      |TLSv1.0 |ECDH   |RSA   |AES(128)    |SHA1
+|0x00,0x9C |AES128-GCM-SHA256                   |TLSv1.2 |RSA    |RSA   |AESGCM(128) |AEAD
+|0x00,0x3C |AES128-SHA256                       |TLSv1.2 |RSA    |RSA   |AES(128)    |SHA256
+|0x00,0x3D |AES256-SHA256                       |TLSv1.2 |RSA    |RSA   |AES(256)    |SHA256
+|0x00,0x2F |AES128-SHA                          |TLSv1.0 |RSA    |RSA   |AES(128)    |SHA1
+|0x00,0x35 |AES256-SHA                          |TLSv1.0 |RSA    |RSA   |AES(256)    |SHA1
+|========
 
 === Professional/Enterprise
 
@@ -62,27 +89,43 @@ endif::peachug[]
 
 ==== Fragmented Protocol Support
 
-TODO
-
-==== Improvements to HTTP and REST Publishers
-
-TODO
+This release instroduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.  The _Frag_ element, _outfrag_ action type, and _infrag_ action type have been added.  For more information about modeling fragmented protocols see the _Frag_ element documentation in the developer guide.
 
 ==== APC Power Monitor
 
-TODO
+The _APC Power_ monitor switches outlets on an APC power distribution unit (PDU) on and off via SNMPv1.
+This monitor is useful for automatically power cycling devices during a fuzzing session.
+APC's Switched Rack Power Distribution Unit (AC7900) is known to work with this monitor.
 
 ==== SNMP Power Monitor
 
-TODO
+The _SNMP Power_ monitor switches outlets on a power distribution unit (PDU) on and off via SNMPv1.
+This monitor is useful for automatically power cycling devices during a fuzzing session.
 
-==== Swagger Analyzer
+==== Web Fuzzing/RESTful Fuzzing Improvments
 
-TODO
+In this release we continue to add features related to web fuzzing and specifically RESTful service fuzzing.
+Changes include new analyzers to speed up creation of fuzzing definitions and also changes to the related publishers to enable fault detection on return status codes.
 
-==== Postman Analyzer
+===== Improvements to HTTP and REST Publishers
 
-TODO
+Both the HTTP and REST publishers have been updated this release cycle:
+
+* Fault on HTTP status code.  Status codes can be configured.
+* Fail on HTTP status code. Status codes can be configured.
+* Expose Headers collection for easy modification from Python scripts.
+
+===== Swagger Analyzer
+
+This analyzer converts Swagger API JSON into Peach Pits for fuzzing REST style web service endpoints.
+
+link:http://swagger.io[Swagger] is a popular method for representing your RESTful API, especially for documentation purposes. Many frameworks can export Swagger API representations which can then be converted into partial pits using this analyzer.
+
+===== Postman Analyzer
+
+This analyzer converts Postman Collections into Peach Pits for fuzzing REST style web service endpoints.
+
+link:https://www.getpostman.com[Postman] is a popular app used during development and testing of REST style web services. APIs are organized into Collections which can be converted into fuzzers using this analyzer.
 
 ==== GDB Server Monitor
 
