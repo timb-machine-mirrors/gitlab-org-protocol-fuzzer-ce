@@ -4,10 +4,43 @@
 A fixup computes a value based on one or more data elements.Since the value is
 based on other elements, each fixup tracks whenever a referenced element changes so it  can recompute its value. For example, the Crc32 fixup needs to know whenever the referenced element changes, so that a new CRC can be computed.
 
-Each Fixup implementation tells the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to its base class constructor.
-
 Each fixup implementation needs to implement a single function: fixupImpl().
 This function returns the result of the fixup computation.
+
+Since fixups compute their value from other elements, each fixup must register its dependent elements with the fuzzing engine.
+The tracking of dependent elements is important so that the fixup will recompute its value if any of its dependent elements is mutated.
+The common convention for specifying dependent elements to a fixup is to use a 'ref' parameter.
+
+Each Fixup implementation tells the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to its base class constructor.
+Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
+The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
+
+.Fixup that references a dependent element
+==========================
+Consider a custom fixup that needs to MD5 an element named 'DateHeader'.
+
+First, use a 'ref' param in the pit to tell the fixup the specific element to target.
+
+[source,xml]
+----
+<Fixup class="DateMd5">
+  <Param name="ref" value="DateHeader" />
+</Fixup>
+----
+
+Second, obtain the target element in the fixupImpl().
+
+[source,java]
+----
+protected override Variant fixupImpl()
+{
+  // Find the element specified in the 'ref' parameter
+  var dateHeaderElement = this.elements["ref"];
+  // Compute the MD5 of said element's value
+  return MD5(dateHeaderElement.Value);
+}
+----
+==========================
 
 It is important to maintain the element type information when returning results from a fixup.
 The data element type returned by the fixup should match the data element type of the resulting field; the only exception is a string that can be the resulting field when the fixup element inputs a number.
@@ -16,8 +49,6 @@ If the fixup evaluates to an integer, an int type should be returned.  Similarly
 
 Because the Crc fixup returns its value in an unsigned integer type, Peach outputs the bytes in the endian-ness defined on the parent data element.
 
-Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
-The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
 
 ==== Examples
 
