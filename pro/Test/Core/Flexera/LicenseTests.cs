@@ -4,11 +4,11 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 
-namespace Peach.Pro.Test.Core
+namespace Peach.Pro.Test.Core.Flexera
 {
 	[TestFixture]
 	[Quick]
-	internal class FlxLicenseTests
+	internal class LicenseTests
 	{
 		[Test]
 		public void TestCapabilityRequest()

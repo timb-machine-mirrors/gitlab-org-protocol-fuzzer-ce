@@ -21,17 +21,18 @@ bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
 bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
 
 subdirs = [
-	'pin',
-	'Renci.SshNet',
-	'TotalPhase/aardvark',
-	'TotalPhase/komodo',
-	'Managed.AndroidDebugBridge',
-	'VMware-VIX-1.13.0-1295980',
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
-	'sqlite-3.8.11.1',
-	'Portable.Licensing',
+	'FlexNet.Operations-2016.R2',
 	'libusbdotnet',
+	'Managed.AndroidDebugBridge',
+	'pin',
+	'Portable.Licensing',
+	'Renci.SshNet',
+	'sqlite-3.8.11.1',
+	'TotalPhase/aardvark',
+	'TotalPhase/komodo',
+	'VMware-VIX-1.13.0-1295980',
 ]
 
 bld.recurse(subdirs)
