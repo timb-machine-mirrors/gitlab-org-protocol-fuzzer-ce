@@ -13,15 +13,21 @@ Descriptions of the new/updated Pits follow:
 
 ==== HL7 v2 XML
 
-TODO
+Expanding on our Health Level Seven (HL7) support, this pit new fuzzes
+XML representations of health records. Pipehat-formatted records are
+already supported by an existing pit.
 
 ==== HL7 Network
 
-TODO
+HL7 records are commonly transported via Minimal Lower Layer Protocol
+(MLLP) and TCP. This new pit fuzzes both Content Receivers and Content
+Senders.
 
 ==== DICOM Updates
 
-TODO
+C-STORE fragmentation support has been added to support sending large
+DICOM files to targeted Service Class Providers. Improved field names
+to clarify presentation in the UI and reports.
 
 ==== SSL/TLS Expanded Cipher Support
 
