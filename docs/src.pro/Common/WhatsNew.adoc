@@ -1,10 +1,11 @@
 [[Brand_new_items]]
 == What's new in Peach Platform v4.0 (2016 Q2)
 
-This is our first release of 2016. It includes a good mix of new features, improvements, and new Pits.
+This is our second release of 2016.
+It includes a good mix of new features, improvements, and new Pits.
 The new Pits are available for licensing singularly or as part of a Pit Pack.
 If you are interested in using a new Pit that has been added to an existing Pit Pack already licensed,
-redownload Peach Fuzzer by visiting dl.peachfuzzer.com. 
+re-download Peach Fuzzer by visiting https://dl.peachfuzzer.com.
 
 === Fuzzing Definitions (Pits)
 
@@ -24,13 +25,15 @@ Descriptions of new features and improvements for Professional and Enterprise fo
 
 ==== New Major Version
 
-This release marks a new major version number for Peach. It includes a number of breaking changes and depricated elements/features. Make sure to checkout the Breaking Changes section of Whats New.
+This release marks a new major version number for Peach.
+It includes a number of breaking changes and deprecated elements/features.
+Make sure to checkout the Breaking Changes section of Whats New.
 
 ==== PitTool
 
 TODO
 
-==== Fremented Protocol Support
+==== Fragmented Protocol Support
 
 TODO
 
@@ -56,11 +59,13 @@ TODO
 
 ==== GDB Server Monitor
 
-Specific support for the GDB Server protocol. See xref:Monitors_GdbServer[GdbServer] monitor for more information.
+Specific support for the GDB Server protocol.
+See xref:Monitors_GdbServer[GdbServer] monitor for more information.
 
 ==== GDB Script Exposed
 
-Both GDB monitors now support changing the script used to drive GDB during fuzzing.  See xref:Monitors_Gdb[Gdb] and xref:Monitors_GdbServer[GdbServer] for more information.
+Both GDB monitors now support changing the script used to drive GDB during fuzzing.
+See xref:Monitors_Gdb[Gdb] and xref:Monitors_GdbServer[GdbServer] for more information.
 
 
 === Breaking Changes

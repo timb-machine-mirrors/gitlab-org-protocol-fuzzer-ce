@@ -41,7 +41,10 @@ namespace PitTool
 		readonly NamedCollection<Command> _cmds = new NamedCollection<Command>();
 
 		// compile options
-		bool _fast;
+		bool _no_verify;
+		bool _no_lint;
+		bool _no_meta;
+		bool _no_ninja;
 
 #if DEBUG
 		// protect options
@@ -49,6 +52,7 @@ namespace PitTool
 		string _salt;
 #endif
 
+#if DEBUG
 		// test options
 		uint? _seed;
 		bool _notest;
@@ -57,6 +61,7 @@ namespace PitTool
 		bool _profile;
 		uint? _stop;
 		readonly List<string> _errors = new List<string>();
+#endif
 
 		static int Main(string[] args)
 		{
@@ -89,6 +94,7 @@ namespace PitTool
 				Description = "Create a sample ninja database.",
 				Action = Ninja,
 			});
+#if DEBUG
 			_cmds.Add(new Command
 			{
 				Name = "test",
@@ -97,6 +103,7 @@ namespace PitTool
 				Options = MakeTestOptions(),
 				Action = Test,
 			});
+#endif
 #if DEBUG
 			_cmds.Add(new Command
 			{
@@ -144,11 +151,15 @@ namespace PitTool
 		{
 			var options = new OptionSet
 			{
-				{"fast", "Avoid slow compile operations", x => _fast = true}
+				{"no-verify", "Don't verify PitDefines.", x => _no_verify = true},
+				{"no-lint", "Don't perform lint checks.", x => _no_lint = true},
+				{"no-meta", "Don't generate metadata used for tuning.", x => _no_meta = true},
+				{"no-ninja", "Don't generate a sample ninja database.", x => _no_ninja = true},
 			};
 			return options;
 		}
 
+#if DEBUG
 		OptionSet MakeTestOptions()
 		{
 			var options = new OptionSet
@@ -163,6 +174,7 @@ namespace PitTool
 			};
 			return options;
 		}
+#endif
 
 #if DEBUG
 		OptionSet MakeProtectOptions()
@@ -289,20 +301,9 @@ namespace PitTool
 
 			var pitPath = args.First();
 
-			var verifyConfig = true;
-			var doLint = true;
-			var createMetadata = true;
-			var createNinja = true;
-
-			if (_fast)
-			{
-				createMetadata = false;
-				createNinja = false;
-			}
-
 			_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 			var compiler = new PitCompiler(_pitLibraryPath, pitPath);
-			var errors = compiler.Run(verifyConfig, doLint, createMetadata, createNinja);
+			var errors = compiler.Run(!_no_verify, !_no_lint, !_no_meta, !_no_ninja);
 
 			foreach (var error in errors)
 			{
@@ -398,6 +399,7 @@ namespace PitTool
 			return 0;
 		}
 
+#if DEBUG
 		int Test(Command cmd, List<string> args)
 		{
 			if (args.Count != 1)
@@ -443,10 +445,11 @@ namespace PitTool
 
 			return 0;
 		}
+#endif
 
 		int Crack(Command cmd, List<string> args)
 		{
-			if (args.Count != 4)
+			if (args.Count != 3)
 			{
 				Console.WriteLine("Missing required arguments");
 				Console.WriteLine();
@@ -462,7 +465,7 @@ namespace PitTool
 			// 1 = pit path
 			// 2 = data model
 			// 3 = sample path
-			ThePitTester.Crack(_pitLibraryPath, args[1], args[2], args[3]);
+			ThePitTester.Crack(_pitLibraryPath, args[0], args[1], args[2]);
 			return 0;
 		}
 
@@ -478,6 +481,7 @@ namespace PitTool
 			return 0;
 		}
 
+#if DEBUG
 		void VerifyDataSets(string pitTestFile)
 		{
 			Console.WriteLine("Verifying pit data sets: {0}", pitTestFile);
@@ -540,6 +544,7 @@ namespace PitTool
 
 			Console.WriteLine();
 		}
+#endif
 
 		string ComputeVersionHash()
 		{

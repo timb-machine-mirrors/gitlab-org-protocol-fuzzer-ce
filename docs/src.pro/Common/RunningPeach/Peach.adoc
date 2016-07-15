@@ -34,9 +34,8 @@ viewing results of a fuzzing job.
 A fuzzing run is started by by specifying the Peach Pit Configuration or
 Peach XML file and the name of a test to perform.
 
-If a run is interupted for some reason it can be restarted using the --skipto and
---seed parameters and
-providing the test # to start fuzzing at and
+If a run is interrupted for some reason it can be restarted using the --skipto 
+and --seed parameters to provide the test case to start fuzzing at and
 the seed of the first job.
 
 Syntax: 
@@ -293,16 +292,3 @@ We can use the second command line to perform either a specific iteration or a s
 > peach --seed 51816 --range 37566,37566
 ----
 ======================
-
-.Regenerating the Peach Schema File
-======================
-The Peach schema file, _peach.xsd_, provides intelliSense in supported editors (like Visual Studio and oXygen XML Editor). When adding extensions to Peach, generate a new schema file that includes these extensions.
-
-----
-> peach --makexsd
-----
-
-The output of this command is a new _peach.xsd_ file that contains any custom extensions.
-
-======================
-

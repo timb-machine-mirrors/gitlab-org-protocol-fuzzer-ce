@@ -16,7 +16,6 @@ Commands:
   help                       Show help for commands.
   makexsd                    Generate a peach.xsd file.
   ninja                      Create a sample ninja database.
-  test                       Run standard pit tests.
 
 General Options:
   -h, --help                 Display this help and exit
@@ -43,9 +42,6 @@ xref:PitTool_Makexsd[makexsd]::
 xref:PitTool_Ninja[ninja]::
 	Create a sample ninja database.
 
-xref:PitTool_Test[test]::
-	Run standard pit tests.
-
 :leveloffset: 1
 <<<
 include::Analyzer.adoc[]
@@ -65,9 +61,5 @@ include::Makexsd.adoc[]
 :leveloffset: 1
 <<<
 include::../../../Common/RunningPeach/Ninja.adoc[]
-
-:leveloffset: 1
-<<<
-include::Test.adoc[]
 
 // end

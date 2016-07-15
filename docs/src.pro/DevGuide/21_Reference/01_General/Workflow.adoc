@@ -25,7 +25,7 @@ This is the 10,000 ft view of what occurs to perform a fuzzing. This disregards 
 
 This section covers what happens during the "Run StateModel applying mutations as needed" step from the prior section.
 
-Peach is for the most part synchronous in operation. The only asynchronous calls occurr in the publishers themselves. For instance, a base publisher exists to deal with Stream objects which makes use of the async read/write methods. That async behavior is entirely contained in the publisher itself. All interactions between Agent, StateModel and Publishers are performed via synchronous blocking calls.
+Peach is for the most part synchronous in operation. The only asynchronous calls occur in the publishers themselves. For instance, a base publisher exists to deal with Stream objects which makes use of the async read/write methods. That async behavior is entirely contained in the publisher itself. All interactions between Agent, StateModel and Publishers are performed via synchronous blocking calls.
 
 The interaction between the action type 'input' may not appear this way as we offload the actual reading of bytes into the data cracker via the Publishers "WantBytes" call. So for the 'input' action you will see something like this if you are the publisher:
 

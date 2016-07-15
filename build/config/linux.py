@@ -14,6 +14,7 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
+	'tools.tsc',
 	'tools.version',
 	'tools.xcompile',
 ]
@@ -23,7 +24,6 @@ optional_tools = [
 	'tools.mdoc',
 	'tools.mkbundle',
 	'tools.test',
-	'tools.tsc',
 	'tools.zip',
 ]
 

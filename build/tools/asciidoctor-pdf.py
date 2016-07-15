@@ -5,7 +5,7 @@ from waflib.Task import Task, SKIP_ME, RUN_ME, ASK_LATER, update_outputs, Task
 from waflib import Utils, Errors, Logs, Context
 import os, shutil, re, sys
 
-re_xi = re.compile('''^(include|image)::(.*?.(adoc|png|PNG))\[''', re.M)
+re_xi = re.compile('''^(include|image)::(.*)\[''', re.M)
 
 def configure(conf):
 	j = os.path.join

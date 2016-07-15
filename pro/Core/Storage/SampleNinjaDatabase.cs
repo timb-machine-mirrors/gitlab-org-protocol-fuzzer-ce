@@ -112,11 +112,7 @@ namespace Peach.Pro.Core.Storage
 
 			var dataModel = dom.getRef(dataModelRef, x => x.dataModels);
 			if (dataModel == null)
-			{
-				var error = "DataModel '{0}' not found in '{1}'.\nAvailable models:\n".Fmt(dataModelRef, pitFile);
-				var models = string.Join("\n", GetDataModels(dom, null).Select(x => "    {0}".Fmt(x)));
-				throw new ArgumentException(error + models);
-			}
+				PitCompiler.RaiseMissingDataModel(dom, dataModelRef, pitFile);
 
 			var dbPath = System.IO.Path.ChangeExtension(pitFile, ".ninja");
 			using (var db = new SampleNinjaDatabase(dbPath))
@@ -149,16 +145,6 @@ namespace Peach.Pro.Core.Storage
 			}
 
 			return dbPath;
-		}
-
-		static IEnumerable<string> GetDataModels(Peach.Core.Dom.Dom dom, string prefix)
-		{
-			return dom.dataModels.Select(dm =>
-			{
-				if (!string.IsNullOrEmpty(dom.Name))
-					return "{0}{1}:{2}".Fmt(prefix, dom.Name, dm.Name);
-				return "{0}{1}".Fmt(prefix, dm.Name);
-			}).Concat(dom.ns.SelectMany(x => GetDataModels(x, x.Name + ":")));
 		}
 
 		public void ProcessSample(DataModel dataModel, string path)

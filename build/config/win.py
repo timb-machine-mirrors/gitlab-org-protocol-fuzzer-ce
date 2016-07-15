@@ -14,6 +14,7 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
+	'tools.tsc',
 	'tools.version',
 ]
 
@@ -22,7 +23,6 @@ optional_tools = [
 	'tools.msbuild',
 	'tools.msi',
 	'tools.test',
-	'tools.tsc',
 	'tools.zip',
 ]
 
