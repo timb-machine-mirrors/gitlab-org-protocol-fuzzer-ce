@@ -11,7 +11,8 @@ Since fixups compute their value from other elements, each fixup must register i
 The tracking of dependent elements is important so that the fixup will recompute its value if any of its dependent elements is mutated.
 The common convention for specifying dependent elements to a fixup is to use a 'ref' parameter.
 
-Each Fixup implementation tells the base Fixup class which parameters are other data elements by passing their data element parameters' names as arguments to its base class constructor.
+Each Fixup implementation must tell the base Fixup class which parameters refer to data elements.
+This accomplished by passing the appropriate parameter names to the base fixup constructor.
 Inside of fixupImpl(), the resolved data element references are obtained through the dictionary 'this.elements'.
 The key to this dictionary is the name of the parameter (eg: 'ref') and the value is the appropriate data element.
 
