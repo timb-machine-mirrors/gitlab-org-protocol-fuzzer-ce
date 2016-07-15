@@ -89,7 +89,17 @@ endif::peachug[]
 
 ==== Fragmented Protocol Support
 
-This release instroduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.  The _Frag_ element, _outfrag_ action type, and _infrag_ action type have been added.  For more information about modeling fragmented protocols see the _Frag_ element documentation in the developer guide.
+This release instroduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.
+The _Frag_ element, _outfrag_ action type, and _infrag_ action type have been added.
+
+ifdef::peachug[]
+For more information about modeling fragmented protocols,
+see the _Frag_ element documentation in the _Peach Fuzzer Professional: Developer Guide_.
+endif::peachug[]
+
+ifndef::peachug[]
+See the xref:Frag[Frag element] for more information.
+endif::peachug[]
 
 ==== APC Power Monitor
 
@@ -97,10 +107,14 @@ The _APC Power_ monitor switches outlets on an APC power distribution unit (PDU)
 This monitor is useful for automatically power cycling devices during a fuzzing session.
 APC's Switched Rack Power Distribution Unit (AC7900) is known to work with this monitor.
 
+See the xref:Monitors_ApcPower[ApcPower Monitor] for more information.
+
 ==== SNMP Power Monitor
 
 The _SNMP Power_ monitor switches outlets on a power distribution unit (PDU) on and off via SNMPv1.
 This monitor is useful for automatically power cycling devices during a fuzzing session.
+
+See the xref:Monitors_SnmpPower[SnmpPower Monitor] for more information.
 
 ==== Web Fuzzing/RESTful Fuzzing Improvments
 
@@ -115,29 +129,44 @@ Both the HTTP and REST publishers have been updated this release cycle:
 * Fail on HTTP status code. Status codes can be configured.
 * Expose Headers collection for easy modification from Python scripts.
 
+ifndef::peachug[]
+See the xref:Publishers_Http[Http Publisher] and xref:Publishers_Rest[Rest Publisher] for more information.
+endif::peachug[]
+
 ===== Swagger Analyzer
 
 This analyzer converts Swagger API JSON into Peach Pits for fuzzing REST style web service endpoints.
 
-link:http://swagger.io[Swagger] is a popular method for representing your RESTful API, especially for documentation purposes. Many frameworks can export Swagger API representations which can then be converted into partial pits using this analyzer.
+link:http://swagger.io[Swagger] is a popular method for representing your RESTful API,
+especially for documentation purposes.
+Many frameworks can export Swagger API representations which can then be converted into partial pits using this analyzer.
+
+ifndef::peachug[]
+See the xref:Analyzers_Swagger[Swagger Analyzer] for more information.
+endif::peachug[]
 
 ===== Postman Analyzer
 
 This analyzer converts Postman Collections into Peach Pits for fuzzing REST style web service endpoints.
 
-link:https://www.getpostman.com[Postman] is a popular app used during development and testing of REST style web services. APIs are organized into Collections which can be converted into fuzzers using this analyzer.
+link:https://www.getpostman.com[Postman] is a popular app used during development and testing of REST style web services.
+APIs are organized into Collections which can be converted into fuzzers using this analyzer.
+
+ifndef::peachug[]
+See the xref:Analyzers_Postman[Postman Analyzer] for more information.
+endif::peachug[]
 
 ==== GDB Server Monitor
 
 Specific support for the GDB Server protocol.
 
-See xref:Monitors_GdbServer[GdbServer] monitor for more information.
+See the xref:Monitors_GdbServer[GdbServer Monitor] for more information.
 
 ==== GDB Script Exposed
 
 Both GDB monitors now support changing the script used to drive GDB during fuzzing.
 
-See xref:Monitors_Gdb[Gdb] and xref:Monitors_GdbServer[GdbServer] for more information.
+See the xref:Monitors_Gdb[Gdb Monitor] and xref:Monitors_GdbServer[GdbServer Monitor] for more information.
 
 === Breaking Changes
 
