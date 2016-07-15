@@ -31,7 +31,34 @@ Make sure to checkout the Breaking Changes section of Whats New.
 
 ==== PitTool
 
-TODO
+PitTool is provided as an additional set of utilities useful for developing Peach pits.
+
+ifdef::peachug[]
+See the _Peach Fuzzer Professional: Developer Guide_ for more information.
+endif::peachug[]
+
+ifndef::peachug[]
+
+The tool supports the following commands:
+
+xref:PitTool_Analyzer[analyzer]::
+	Run a Peach analyzer.
+
+xref:PitTool_Compile[compile]::
+	Validate and compile pit into .meta.json and .ninja files.
+
+xref:PitTool_Crack[crack]::
+	Crack a sample file.
+
+xref:PitTool_Makexsd[makexsd]::
+	Generate a peach.xsd file.
+
+xref:PitTool_Ninja[ninja]::
+	Create a sample ninja database.
+
+See xref:Program_PitTool[PitTool] for more information.
+
+endif::peachug[]
 
 ==== Fragmented Protocol Support
 
@@ -60,26 +87,55 @@ TODO
 ==== GDB Server Monitor
 
 Specific support for the GDB Server protocol.
+
 See xref:Monitors_GdbServer[GdbServer] monitor for more information.
 
 ==== GDB Script Exposed
 
 Both GDB monitors now support changing the script used to drive GDB during fuzzing.
-See xref:Monitors_Gdb[Gdb] and xref:Monitors_GdbServer[GdbServer] for more information.
 
+See xref:Monitors_Gdb[Gdb] and xref:Monitors_GdbServer[GdbServer] for more information.
 
 === Breaking Changes
 
-TODO
-
 ==== Plugins Folder
 
-TODO
+The location for plugins has changed in this release.
+In the past, plugins were discovered and loaded from the same folder as the Peach assemblies.
+Now, plugins are loaded from a separate +Plugins+ folder under the Peach installation folder.
+
+ifdef::peachug[]
+See the _Peach Fuzzer Professional: Developer Guide_ for more information.
+endif::peachug[]
+
+ifndef::peachug[]
+See xref:Extend_Plugins[Peach Plug-ins] for more information.
+endif::peachug[]
 
 ==== Sample Ninja
 
-TODO
+The Sample Ninja database creation tool (named +PeachSampleNinja.exe+ in the past)
+has been merged into the new +PitTool.exe+.
 
+See xref:PitTool_Ninja[PitTool - Ninja] for more information.
 
+[NOTE]
+====
+If you have existing Sample Ninja databases, 
+these will need to be re-created since the schema has changed.
+Also be aware that the extension for the database file has changed from +.xml.ninja+ to +.ninja+.
+====
+
+==== [Description] Attribute
+
+The +DescriptionAttribute+ defined in +Peach.Core.dll+ was deprected in the past and has now been removed.
+Use the +System.ComponentModel.DescriptionAttribute+ instead,
+which has identical functionality.
+
+==== Analyzer Plugins
+
+The API for command line based Analyzers has changed. 
+The +asCommandLine+ method now takes a +List<string> args+ instead of a 
++Dictionary<string, string> args+.
 
 // end

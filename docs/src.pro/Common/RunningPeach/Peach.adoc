@@ -12,7 +12,7 @@ Please submit any bugs to support@peachfuzzer.com.
 
 === Peach Web Application
 
-Syntax: 
+==== Syntax
 
 ----
 peach [options]
@@ -34,9 +34,11 @@ viewing results of a fuzzing job.
 A fuzzing run is started by by specifying the Peach Pit Configuration or
 Peach XML file and the name of a test to perform.
 
-If a run is interrupted, it can be restarted by providing the last successful test case and the seed of the test session. Use the --skipto and --seed parameters to provide this information. 
+If a run is interrupted,
+it can be restarted by providing the last successful test case and the seed of the test session.
+Use the --skipto and --seed parameters to provide this information. 
 
-Syntax: 
+==== Syntax
 
 ----
 peach [options] <PEACH_PIT.xml | PEACH_CONFIG.peach> [test_name]
@@ -92,7 +94,7 @@ test_name::
 
 === Debug Peach XML File
 
-Syntax: 
+==== Syntax
 
 ----
 peach -1 --debug <PEACH_PIT.xml | PEACH_CONFIG.peach> [test_name]
@@ -104,18 +106,17 @@ The debugging information is intended for custom pit developers.
 
 === Display List of Network Capture Devices
 
-Syntax: 
+==== Syntax
 
 ----
 peach --showdevices
 ----
 
-Display a list of all known devices Peach can perform network capture
-on.
+Display a list of all known devices Peach can perform network capture on.
 
 === Display Known Elements
 
-Syntax: 
+==== Syntax
 
 ---- 
 peach --showenv
@@ -254,11 +255,14 @@ Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
 
 .Replay Existing Test Sequence
 ======================
-Once you find a faulting condition, you may want to replicate the exact test (or sequence of tests) to recreate the issue. Peach can reproduce exact test sequences given the following information:
+Once you find a faulting condition,
+you may want to replicate the exact test (or sequence of tests) to recreate the issue.
+Peach can reproduce exact test sequences given the following information:
 
 . Exact version of Peach. This is found in the log file +status.txt+.
 . Seed number used. This is also found in the log file +status.txt+.
 . Same/similar pit file. Data and state models must be the same.
+. If datasets are used, they must be the same set and have the same contents.
 
 .status.txt
 ----
