@@ -1,12 +1,18 @@
 [[Extend_Plugins]]
 === Peach Plug-ins
 
-If your target has something in its data model that Peach does not support (like a custom checksum algorithm or a custom data format), you may need to extend Peach's functionality by using Peach plugins.
+If your target has something in its data model that Peach does not support
+(like a custom checksum algorithm or a custom data format),
+you may need to extend Peach's functionality by using Peach plugins.
 
-Peach plugins take a C# dictionary as a construction argument.
-This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
+Peach plugins are either C# class libraries or python files that implement C# classes.
+Custom Peach plugins should be placed in the +Plugins+ subdirectory of the Peach installation folder.
+When Peach starts it scans all +.dll+ and +.py+ files in the folder looking for plugins.
 
 To see a list of all detected plugins and their parameters, run `peach --showenv`.
+
+All Peach plugins take a C# dictionary as a construction argument.
+This argument dictionary is populated with the Param elements names and values defined in the Peach Pit.
 
 Peach plugins use ParameterAttribute to define all of their supported configuration arguments (name, type, description, and optional default value).
 
