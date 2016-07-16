@@ -13,7 +13,7 @@ Descriptions of the new/updated Pits follow:
 
 ==== HL7 v2 XML
 
-Expanding on our Health Level Seven (HL7) support, this pit new fuzzes
+Expanding on our Health Level Seven (HL7) support, this new pit fuzzes
 XML representations of health records. Pipehat-formatted records are
 already supported by an existing pit.
 
@@ -22,6 +22,13 @@ already supported by an existing pit.
 HL7 records are commonly transported via Minimal Lower Layer Protocol
 (MLLP) and TCP. This new pit fuzzes both Content Receivers and Content
 Senders.
+
+==== ZIP and CAB
+
+We've added new pits for the ZIP and CAB archival file formats. As
+with the other file-fuzzing pits, they both start from a configurable
+set of sample files and generate test cases by parsing and mutating
+them.
 
 ==== DICOM Updates
 
