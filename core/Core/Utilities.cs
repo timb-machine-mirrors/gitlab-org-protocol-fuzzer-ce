@@ -286,12 +286,12 @@ namespace Peach.Core
 
 			var config = new LoggingConfiguration();
 
-			var logLevel = LogLevel.Warn;
+			LogLevel logLevel;
 
 			switch (level)
 			{
 				case 0:
-					logLevel = LogLevel.Info;
+					logLevel = LogLevel.Off;
 					break;
 				case 1:
 					logLevel = LogLevel.Debug;
@@ -301,14 +301,17 @@ namespace Peach.Core
 					break;
 			}
 
-			var target = new ColoredConsoleTarget
+			if (logLevel.CompareTo(LogLevel.Off) != 0)
 			{
-				Layout = Layout,
-				ErrorStream = true,
-			};
+				var target = new ColoredConsoleTarget
+				{
+					Layout = Layout,
+					ErrorStream = true,
+				};
 
-			config.AddTarget("console", target);
-			config.LoggingRules.Add(new LoggingRule("*", logLevel, target));
+				config.AddTarget("console", target);
+				config.LoggingRules.Add(new LoggingRule("*", logLevel, target));
+			}
 
 			var peachLog = Environment.GetEnvironmentVariable("PEACH_LOG");
 			if (!string.IsNullOrEmpty(peachLog))
