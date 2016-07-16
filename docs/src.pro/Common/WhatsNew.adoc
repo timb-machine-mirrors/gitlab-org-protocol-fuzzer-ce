@@ -13,15 +13,21 @@ Descriptions of the new/updated Pits follow:
 
 ==== HL7 v2 XML
 
-TODO
+Expanding on our Health Level Seven (HL7) support, this pit new fuzzes
+XML representations of health records. Pipehat-formatted records are
+already supported by an existing pit.
 
 ==== HL7 Network
 
-TODO
+HL7 records are commonly transported via Minimal Lower Layer Protocol
+(MLLP) and TCP. This new pit fuzzes both Content Receivers and Content
+Senders.
 
 ==== DICOM Updates
 
-TODO
+C-STORE fragmentation support has been added to support sending large
+DICOM files to targeted Service Class Providers. Improved field names
+to clarify presentation in the UI and reports.
 
 ==== SSL/TLS Expanded Cipher Support
 
@@ -169,6 +175,21 @@ Both GDB monitors now support changing the script used to drive GDB during fuzzi
 See the xref:Monitors_Gdb[Gdb Monitor] and xref:Monitors_GdbServer[GdbServer Monitor] for more information.
 
 === Breaking Changes
+
+This release introduces a number of breaking changes and depricated features. This section contains a list
+of the major changes that have occured.
+
+==== Peach Agent
+
+The Peach Agent server process has been moved into it's own executable +PeachAgent.exe+ or +peachagent+. The old method of running +peach -a tcp+ is depricated.  See Running Peach for more information.
+
+==== Depricated Command Line Switches
+
+The following command line switches are depricated:
+
+-t:: The test switch has been removed.
+-c:: The count switch has been remvoed. The default and recommended strategy does not have this concept.
+-p:: Parallel switches have been removed. These are not needed with the default strategy.
 
 ==== Plugins Folder
 

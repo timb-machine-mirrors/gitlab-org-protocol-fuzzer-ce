@@ -253,6 +253,7 @@ Peach.Core.Agent.Monitors.WindowsDebuggerHybrid _StopDebugger
 ----
 ======================
 
+[[Replay_Existing_Test_Sequence]]
 .Replay Existing Test Sequence
 ======================
 Once you find a faulting condition,
