@@ -219,9 +219,11 @@ these will need to be re-created since the schema has changed.
 Also be aware that the extension for the database file has changed from +.xml.ninja+ to +.ninja+.
 ====
 
+ifndef::peachug[]
+
 ==== [Description] Attribute
 
-The +DescriptionAttribute+ defined in +Peach.Core.dll+ was deprected in the past and has now been removed.
+The +DescriptionAttribute+ defined in +Peach.Core.dll+ was deprecated in the past and has now been removed.
 Use the +System.ComponentModel.DescriptionAttribute+ instead,
 which has identical functionality.
 
@@ -230,5 +232,7 @@ which has identical functionality.
 The API for command line based Analyzers has changed. 
 The +asCommandLine+ method now takes a +List<string> args+ instead of a 
 +Dictionary<string, string> args+.
+
+endif::peachug[]
 
 // end
