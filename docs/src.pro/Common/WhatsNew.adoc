@@ -188,7 +188,10 @@ of the major changes that have occured.
 
 ==== Peach Agent
 
-The Peach Agent server process has been moved into it's own executable +PeachAgent.exe+ or +peachagent+. The old method of running +peach -a tcp+ is deprecated.  See Running Peach for more information.
+The Peach Agent server process has been moved into a separate executable (+PeachAgent.exe+).
+The old method of running +peach -a tcp+ is deprecated.
+
+See xref:RunningPeach[Running Peach] for more information.
 
 ==== Deprecated Command Line Switches
 
