@@ -187,10 +187,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected virtual bool VerifyCompatibility()
 		{
-			if (!HasSupportedKernel())
-				return false;
-
-			return HasSupportedMonoRuntime();
+			return HasSupportedKernel() && HasSupportedMonoRuntime();
 		}
 
 		public int Run(string[] args)
