@@ -9,15 +9,48 @@ re-download Peach Fuzzer by visiting https://dl.peachfuzzer.com.
 
 === Fuzzing Definitions (Pits)
 
-Descriptions of the new Pits follow:
+Descriptions of the new/updated Pits follow:
 
-/////
-==== DTLS Server (SSL)
+==== HL7 v2 XML
 
-DTLS is a derivation of SSL protocol.
-It provides the same security services (integrity, authentication and confidentiality) as SSL/TLS but under the UDP protocol.
-This pit is available as part of SSL.
-/////
+Expanding on our Health Level Seven (HL7) support, this pit new fuzzes
+XML representations of health records. Pipehat-formatted records are
+already supported by an existing pit.
+
+==== HL7 Network
+
+HL7 records are commonly transported via Minimal Lower Layer Protocol
+(MLLP) and TCP. This new pit fuzzes both Content Receivers and Content
+Senders.
+
+==== DICOM Updates
+
+C-STORE fragmentation support has been added to support sending large
+DICOM files to targeted Service Class Providers. Improved field names
+to clarify presentation in the UI and reports.
+
+==== SSL/TLS Expanded Cipher Support
+
+The cipher suites supported by the SSL/TLS pits have been expanded in this release. 
+The following table shows the current list of supported ciphers:
+
+[options="header",cols="1,2,1,1,1,1,1"]
+|========
+|ID        | Cipher Suite                       | Prot   |Key Ex | Au   | Enc        | Mac
+|0xC0,0xAC |ECDHE_ECDSA_WITH_AES_128_CCM        |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0xAE |ECDHE_ECDSA_WITH_AES_128_CCM_8      |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0xAD |ECDHE_ECDSA_WITH_AES_256_CCM        |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0xAF |ECDHE_ECDSA_WITH_AES_256_CCM_8      |TLSv1.2 |ECDH   |ECDSA |AESCCM(128) |AEAD
+|0xC0,0x23 |ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 |TLSv1.2 |ECDH   |ECDSA |AES(128)    |SHA256
+|0xC0,0x09 |ECDHE_ECDSA_WITH_AES_128_CBC_SHA    |TLSv1.0 |ECDH   |ECDSA |AES(128)    |SHA1
+|0xC0,0x27 |ECDHE_RSA_WITH_AES_128_CBC_SHA256   |TLSv1.2 |ECDH   |RSA   |AES(128)    |SHA256
+|0xC0,0x13 |ECDHE_RSA_WITH_AES_128_CBC_SHA      |TLSv1.0 |ECDH   |RSA   |AES(128)    |SHA1
+|0x00,0x9C |AES128-GCM-SHA256                   |TLSv1.2 |RSA    |RSA   |AESGCM(128) |AEAD
+|0x00,0x3C |AES128-SHA256                       |TLSv1.2 |RSA    |RSA   |AES(128)    |SHA256
+|0x00,0x3D |AES256-SHA256                       |TLSv1.2 |RSA    |RSA   |AES(256)    |SHA256
+|0x00,0x2F |AES128-SHA                          |TLSv1.0 |RSA    |RSA   |AES(128)    |SHA1
+|0x00,0x35 |AES256-SHA                          |TLSv1.0 |RSA    |RSA   |AES(256)    |SHA1
+|========
 
 === Professional/Enterprise
 
@@ -31,55 +64,171 @@ Make sure to checkout the Breaking Changes section of Whats New.
 
 ==== PitTool
 
-TODO
+PitTool is provided as an additional set of utilities useful for developing Peach pits.
+
+ifdef::peachug[]
+See the _Peach Fuzzer Professional: Developer Guide_ for more information.
+endif::peachug[]
+
+ifndef::peachug[]
+
+The tool supports the following commands:
+
+xref:PitTool_Analyzer[analyzer]::
+	Run a Peach analyzer.
+
+xref:PitTool_Compile[compile]::
+	Validate and compile pit into .meta.json and .ninja files.
+
+xref:PitTool_Crack[crack]::
+	Crack a sample file.
+
+xref:PitTool_Makexsd[makexsd]::
+	Generate a peach.xsd file.
+
+xref:PitTool_Ninja[ninja]::
+	Create a sample ninja database.
+
+See xref:Program_PitTool[PitTool] for more information.
+
+endif::peachug[]
 
 ==== Fragmented Protocol Support
 
-TODO
+This release instroduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.
+The _Frag_ element, _outfrag_ action type, and _infrag_ action type have been added.
 
-==== Improvements to HTTP and REST Publishers
+ifdef::peachug[]
+For more information about modeling fragmented protocols,
+see the _Frag_ element documentation in the _Peach Fuzzer Professional: Developer Guide_.
+endif::peachug[]
 
-TODO
+ifndef::peachug[]
+See the xref:Frag[Frag element] for more information.
+endif::peachug[]
 
 ==== APC Power Monitor
 
-TODO
+The _APC Power_ monitor switches outlets on an APC power distribution unit (PDU) on and off via SNMPv1.
+This monitor is useful for automatically power cycling devices during a fuzzing session.
+APC's Switched Rack Power Distribution Unit (AC7900) is known to work with this monitor.
+
+See the xref:Monitors_ApcPower[ApcPower Monitor] for more information.
 
 ==== SNMP Power Monitor
 
-TODO
+The _SNMP Power_ monitor switches outlets on a power distribution unit (PDU) on and off via SNMPv1.
+This monitor is useful for automatically power cycling devices during a fuzzing session.
 
-==== Swagger Analyzer
+See the xref:Monitors_SnmpPower[SnmpPower Monitor] for more information.
 
-TODO
+==== Web Fuzzing/RESTful Fuzzing Improvments
 
-==== Postman Analyzer
+In this release we continue to add features related to web fuzzing and specifically RESTful service fuzzing.
+Changes include new analyzers to speed up creation of fuzzing definitions and also changes to the related publishers to enable fault detection on return status codes.
 
-TODO
+===== Improvements to HTTP and REST Publishers
+
+Both the HTTP and REST publishers have been updated this release cycle:
+
+* Fault on HTTP status code.  Status codes can be configured.
+* Fail on HTTP status code. Status codes can be configured.
+* Expose Headers collection for easy modification from Python scripts.
+
+ifndef::peachug[]
+See the xref:Publishers_Http[Http Publisher] and xref:Publishers_Rest[Rest Publisher] for more information.
+endif::peachug[]
+
+===== Swagger Analyzer
+
+This analyzer converts Swagger API JSON into Peach Pits for fuzzing REST style web service endpoints.
+
+link:http://swagger.io[Swagger] is a popular method for representing your RESTful API,
+especially for documentation purposes.
+Many frameworks can export Swagger API representations which can then be converted into partial pits using this analyzer.
+
+ifndef::peachug[]
+See the xref:Analyzers_Swagger[Swagger Analyzer] for more information.
+endif::peachug[]
+
+===== Postman Analyzer
+
+This analyzer converts Postman Collections into Peach Pits for fuzzing REST style web service endpoints.
+
+link:https://www.getpostman.com[Postman] is a popular app used during development and testing of REST style web services.
+APIs are organized into Collections which can be converted into fuzzers using this analyzer.
+
+ifndef::peachug[]
+See the xref:Analyzers_Postman[Postman Analyzer] for more information.
+endif::peachug[]
 
 ==== GDB Server Monitor
 
 Specific support for the GDB Server protocol.
-See xref:Monitors_GdbServer[GdbServer] monitor for more information.
+
+See the xref:Monitors_GdbServer[GdbServer Monitor] for more information.
 
 ==== GDB Script Exposed
 
 Both GDB monitors now support changing the script used to drive GDB during fuzzing.
-See xref:Monitors_Gdb[Gdb] and xref:Monitors_GdbServer[GdbServer] for more information.
 
+See the xref:Monitors_Gdb[Gdb Monitor] and xref:Monitors_GdbServer[GdbServer Monitor] for more information.
 
 === Breaking Changes
 
-TODO
+This release introduces a number of breaking changes and depricated features. This section contains a list
+of the major changes that have occured.
+
+==== Peach Agent
+
+The Peach Agent server process has been moved into it's own executable +PeachAgent.exe+ or +peachagent+. The old method of running +peach -a tcp+ is depricated.  See Running Peach for more information.
+
+==== Depricated Command Line Switches
+
+The following command line switches are depricated:
+
+-t:: The test switch has been removed.
+-c:: The count switch has been remvoed. The default and recommended strategy does not have this concept.
+-p:: Parallel switches have been removed. These are not needed with the default strategy.
 
 ==== Plugins Folder
 
-TODO
+The location for plugins has changed in this release.
+In the past, plugins were discovered and loaded from the same folder as the Peach assemblies.
+Now, plugins are loaded from a separate +Plugins+ folder under the Peach installation folder.
+
+ifdef::peachug[]
+See the _Peach Fuzzer Professional: Developer Guide_ for more information.
+endif::peachug[]
+
+ifndef::peachug[]
+See xref:Extend_Plugins[Peach Plug-ins] for more information.
+endif::peachug[]
 
 ==== Sample Ninja
 
-TODO
+The Sample Ninja database creation tool (named +PeachSampleNinja.exe+ in the past)
+has been merged into the new +PitTool.exe+.
 
+See xref:PitTool_Ninja[PitTool - Ninja] for more information.
 
+[NOTE]
+====
+If you have existing Sample Ninja databases, 
+these will need to be re-created since the schema has changed.
+Also be aware that the extension for the database file has changed from +.xml.ninja+ to +.ninja+.
+====
+
+==== [Description] Attribute
+
+The +DescriptionAttribute+ defined in +Peach.Core.dll+ was deprected in the past and has now been removed.
+Use the +System.ComponentModel.DescriptionAttribute+ instead,
+which has identical functionality.
+
+==== Analyzer Plugins
+
+The API for command line based Analyzers has changed. 
+The +asCommandLine+ method now takes a +List<string> args+ instead of a 
++Dictionary<string, string> args+.
 
 // end
