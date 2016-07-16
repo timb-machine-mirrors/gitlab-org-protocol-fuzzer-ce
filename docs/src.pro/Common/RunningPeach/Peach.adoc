@@ -12,6 +12,9 @@ Please submit any bugs to support@peachfuzzer.com.
 
 === Peach Web Application
 
+Starts Peach and provides a web application for configuring, running, and 
+viewing results of a fuzzing job.
+
 ==== Syntax
 
 ----
@@ -25,9 +28,6 @@ peach [options]
 --plugins=PATH::
     Change the plugins folder location. 
     Defaults to the 'Plugins' folder relative to the Peach installation.
-
-Starts Peach and provides a web application for configuring, running, and 
-viewing results of a fuzzing job.
 
 === Fuzzing from Command Line
 
@@ -94,17 +94,20 @@ test_name::
 
 === Debug Peach XML File
 
+This will perform a single iteration (-1) of your pit file while 
+displaying a lot of debugging information (--debug).
+The debugging information is intended for custom pit developers.
+
 ==== Syntax
 
 ----
 peach -1 --debug <PEACH_PIT.xml | PEACH_CONFIG.peach> [test_name]
 ----
-  
-This will perform a single iteration (-1) of your pit file while 
-displaying a lot of debugging information (--debug).
-The debugging information is intended for custom pit developers.
+ 
 
 === Display List of Network Capture Devices
+
+Display a list of all known devices Peach can perform network capture on.
 
 ==== Syntax
 
@@ -112,15 +115,7 @@ The debugging information is intended for custom pit developers.
 peach --showdevices
 ----
 
-Display a list of all known devices Peach can perform network capture on.
-
 === Display Known Elements
-
-==== Syntax
-
----- 
-peach --showenv
-----
 
 Print a list of all known: 
 
@@ -139,6 +134,12 @@ Print a list of all known:
 
 The list includes any associated parameters along with a description and default values. 
 This can be used to verify that custom extensions are found.
+
+==== Syntax
+
+---- 
+peach --showenv
+----
 
 === Peach Agent
 
