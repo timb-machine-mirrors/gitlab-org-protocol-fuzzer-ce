@@ -69,6 +69,12 @@ This release marks a new major version number for Peach.
 It includes a number of breaking changes and deprecated elements/features.
 Make sure to checkout the Breaking Changes section of Whats New.
 
+==== Edit/Copy/Delete Pit Configuration
+
+It is now possible to edit, copy, or delete an existing Pit configuration
+from the Library page in the Peach Web Interface.
+Hover over a Pit configuration to find the new icons that enable this functionality.
+
 ==== PitTool
 
 PitTool is provided as an additional set of utilities useful for developing Peach pits.
