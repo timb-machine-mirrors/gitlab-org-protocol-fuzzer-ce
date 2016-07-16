@@ -188,7 +188,7 @@ The Peach Agent server process has been moved into it's own executable +PeachAge
 The following command line switches are deprecated:
 
 -t:: The test switch has been removed.
--c:: The count switch has been remvoed. The default and recommended strategy does not have this concept.
+-c:: The count switch has been removed. The default and recommended strategy do not have this concept.
 -p:: Parallel switches have been removed. These are not needed with the default strategy.
 
 ==== Plugins Folder
