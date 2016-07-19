@@ -7,7 +7,7 @@ Peach has the following features that aid in reproducing faults that occur durin
 * Automatic fault reproduction
 * Replay the fuzzing session
 
-When a fault is detected at the end of a test case, peach automatically enters reproduction mode.
+When a fault is detected at the end of a test case, Peach automatically enters reproduction mode.
 How Peach implements fault reproduction depends on the type of target being fuzzed.
 
 .Fault Reproduction Flow Chart
