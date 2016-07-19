@@ -1,52 +1,90 @@
 [[Agent]]
 == Agents
 
-A Peach agent is a light weight process that can host many monitors.
-These monitors collect information and perform actions on behalf of the fuzzer, such as capturing packets or running debuggers.
+A Peach agent is a light weight process that can host multiple monitors.
+These monitors perform tasks such as fault detection, data collection and automation.
+
 The Peach agent communicates over a network channel to the main Peach process where all captured information is reported.
 This allows the main Peach process to perform monitoring locally or on the device under test.
+
+Monitors that perform fault detection provide methods to identify when a problem with the target under test during testing. For example, you might use a debugger monitor to detect when a target crashes and collect information about the crash. Peach finds more issues when robust fault detection is configured.
+
+Data collection monitors are used to gather additional information about a fault that has occured. This can include taking a network capture of the test traffic, collecting log files and running scripts to collect information about the target state. The goal is to collect any information that will be useful in tracking down the root cause of the faulting condition.
+
+Automation monitors are used to automate the target and target environment. This can include startup automation such as configuring an environment and starting the target. Restarting the environment when a fault occurs so testing can continue. And finally shutting down the target/environment when testing has completed. Some configurations may also require triggering the target to connect/consume data.
 
 .Peach Agent Block Diagram
 image::{images}/Common/AgentDiagram.svg[align="center",scalewidth="70%"]
 
-An agent, or one or more processes that an agent hosts--such as a monitor or a publisher,
-might require access at a higher level than a user.
+.Agent Privileges
+****
 
-* Unix systems sometimes require an Agent to run with root privileges.
-* Linux systems sometimes require an Agent to run with root privileges. On Ubuntu Linux
-systems, the following command can be used as an alternative to running the process from root.
-This command allows packets through the firewall using port 9001 (the port for remote agents).
-+
+Some monitors or publishers hosted by an agent process sometimes require heightened privileges.
+If you receive an error regarding permissions, try running the agent with root or administrative priviledges.
+
+*OS X/Linux/Unix*
+
+On OS X, Linux and other Unix systems, a process can be launched as root using the 'sudo' utility.
+
+For local agents:
+
+ sudo ./peach
+ 
+For remote agents:
+
+ sudo ./peachagent
+
+*Windows*
+
+On Windows a process can be started with administrator rights by right-clicking and selecting "Run as Adminsitrator". Optionally the user can be given additional needed priviledges by the system administrator.
+
+*Privileged Monitors*
+
+Which monitors require additional privileges depends on the specific OS and privileges of the user, but typically the following require special rights:
+
+ * PageHeap (Windows)
+ * NetworkCapture (OS X/Linux/Unix)
+
+****
+
+.Network Firewall
+****
+
+Many modern operating systems such as Windows and Linux come with a firewall that prevents incoming or outgoing network traffic. 
+This can prevent a remote agent from communicating with Peach.
+On Windows the user is asked when program first runs if a firewall rule should be added.
+
+On Linux, specifically Ubuntu distributions, this command allows packets through the firewall using port 9001 (default the port for remote agents).
+
 ----
- sudo ufw allow 9001
+sudo ufw allow 9001
 ----
 
-* Windows systems sometimes require an Agent to run with administrative privileges.
+****
 
-The following monitors/processes require these heightened privileges:
-PageHeap and NetworkCapture.
 
 === Agent Channels
 
-LocalAgent (local)::
-	The agent is hosted in the current Peach process. This is the default channel.
+Local Agent (local)::
+	The agent is hosted in the current Peach process. This is the default channel. An example agent URL is +local://+
 
-TCP REMOTING (tcp)::
-	The external Peach agent communicates using REST API calls over TCP. Peach can run as a TCP remoting agent using the xref:Program_PeachAgent[PeachAgent] program.
+Remote Agent (tcp)::
+	The external Peach agent communicates using network calls over TCP. Peach can run as a remote agent using the xref:Program_PeachAgent[PeachAgent] program. Remote agents do not require a valid license and are only used to host monitors or remote publishers. An example agent URL is +tcp://192.168.1.2:9002+
 
 ifdef::peachug[]
 
-REST JSON (http)::
-	The agent protocol uses REST style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the +Agent+ topic in the +Extending Peach+ section of the _Peach Professional Developer Guide_.
-
-REST JSON (http)::
-	The agent protocol uses REST style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the Peach Developer Guide.
+Custom Agent (RESTful API) (http)::
+	This agent protocol uses RESTful style calls over HTTP. This channel is best suited for custom Peach agents. For more information, see the +Agent+ topic in the +Extending Peach+ section of the _Peach Professional Developer Guide_. An example agent URL is +tcp://192.168.1.2:8080+
 
 endif::peachug[]
 
 ==== Local Agent
 
 The peach runtime supports a local agent that runs in process. LocalAgent is the default agent unless another agent type is specified.
+
+Agent URL:
+
+ local://
 
 ifndef::peachug[]
 
@@ -63,6 +101,8 @@ endif::peachug[]
 ==== Remote Agent
 
 Peach includes a remote xref:Program_PeachAgent[agent server] that can be used to host Monitors and Publishers on remote machines. Usage of a remote agent requires a location URL of the following format:
+
+Agent URL:
 
  tcp://HOST:PORT
 

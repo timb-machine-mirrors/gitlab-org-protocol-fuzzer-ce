@@ -241,7 +241,7 @@ namespace Peach.Pro.Core.Runtime
 				else
 					Console.WriteLine("An incompatible terminal type '{0}' was detected.", term);
 
-				Console.WriteLine("Change your terminal type to 'linux', 'xterm' or 'rxvt' and try again.");
+				Console.WriteLine("Change your terminal type to 'linux', 'xterm', or 'rxvt' and try again.");
 				return false;
 			}
 		}

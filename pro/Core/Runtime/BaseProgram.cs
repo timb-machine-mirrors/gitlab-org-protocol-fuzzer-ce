@@ -79,7 +79,7 @@ namespace Peach.Pro.Core.Runtime
 			ClassLoader.Initialize();
 		}
 
-		private static Version ParseMonoVersion(string str)
+		Version ParseMonoVersion(string str)
 		{
 			// Example version string:
 			// 3.2.8 (Debian 3.2.8+dfsg-4ubuntu1)
@@ -96,7 +96,7 @@ namespace Peach.Pro.Core.Runtime
 			return ret;
 		}
 
-		private static bool SupportedKernel()
+		bool HasSupportedKernel()
 		{
 			if (Platform.GetOS() != Platform.OS.Linux)
 				return true;
@@ -131,11 +131,8 @@ namespace Peach.Pro.Core.Runtime
 			return true;
 		}
 
-		protected virtual bool VerifyCompatibility()
+		bool HasSupportedMonoRuntime()
 		{
-			if (!SupportedKernel())
-				return false;
-
 			var type = Type.GetType("Mono.Runtime");
 
 			// If we are not on mono, no checks need to be performed.
@@ -145,7 +142,6 @@ namespace Peach.Pro.Core.Runtime
 			var minVer = new Version(4, 0, 0);
 
 			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
-
 			if (mi == null)
 			{
 				Console.WriteLine("Unable to locate the version of mono installed.");
@@ -153,7 +149,6 @@ namespace Peach.Pro.Core.Runtime
 			else
 			{
 				var str = mi.Invoke(null, null) as string;
-
 				if (str == null)
 				{
 					Console.WriteLine("Unable to query the version of mono installed.");
@@ -161,20 +156,38 @@ namespace Peach.Pro.Core.Runtime
 				else
 				{
 					var ver = ParseMonoVersion(str);
-
 					if (ver == null || ver < minVer)
 					{
 						Console.WriteLine("The installed mono version {0} is not supported.", str);
 					}
 					else
 					{
-						return true;
+						return HasMonoPosix();
 					}
 				}
 			}
 
 			Console.WriteLine("Ensure mono version {0} or newer is installed and try again.", minVer);
 			return false;
+		}
+
+		bool HasMonoPosix()
+		{
+			try
+			{
+				Mono.Unix.Native.Stdlib.GetLastError();
+				return true;
+			}
+			catch (Exception)
+			{
+				Console.WriteLine("libMonoPosixHelper is not installed properly.");
+				return false;
+			}
+		}
+
+		protected virtual bool VerifyCompatibility()
+		{
+			return HasSupportedKernel() && HasSupportedMonoRuntime();
 		}
 
 		public int Run(string[] args)
@@ -281,12 +294,12 @@ namespace Peach.Pro.Core.Runtime
 				Console.Error.WriteLine(ex);
 			else if (!string.IsNullOrEmpty(ex.Message))
 				Console.Error.WriteLine(ex.Message);
-	
+
 			Console.Error.WriteLine();
 
 			if (showUsage)
 				ShowUsage(args);
-	
+
 			return string.IsNullOrEmpty(ex.Message) ? 0 : 2;
 		}
 

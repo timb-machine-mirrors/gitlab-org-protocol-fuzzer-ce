@@ -166,7 +166,7 @@ namespace Peach.Core
 				Console.WriteLine();
 				Console.WriteLine("-----{0}", name.PadRight(74, '-'));
 
-				foreach (var plugin in kv.Value)
+				foreach (var plugin in kv.Value.OrderBy(x => x.Value.Single(y => y.IsDefault).Name))
 				{
 					var obsolete = plugin.Key.GetAttributes<ObsoleteAttribute>().SingleOrDefault();
 

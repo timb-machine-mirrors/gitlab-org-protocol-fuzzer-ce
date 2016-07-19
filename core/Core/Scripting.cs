@@ -35,6 +35,7 @@ using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Math;
 using System.IO;
+using NLog;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -53,6 +54,8 @@ namespace Peach.Core
 	/// </summary>
 	public abstract class Scripting
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		#region Private Members
 
 		private readonly Dictionary<string, object> _modules = new Dictionary<string, object>();
@@ -216,6 +219,7 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
+				logger.Debug(ex, "Failed to execute expression [{0}], {1}.".Fmt(code, ex.Message));
 				throw new SoftException("Failed to execute expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
 			finally
@@ -279,6 +283,7 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
+				logger.Debug(ex, "Failed to evaluate expression [{0}], {1}.".Fmt(code, ex.Message));
 				throw new SoftException("Failed to evaluate expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
 		}
