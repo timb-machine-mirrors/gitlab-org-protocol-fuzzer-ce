@@ -22,7 +22,7 @@ namespace Peach.Pro.Test.Core.Flexera
 		private static void RunHost(string hostId, string rightsId, string feature)
 		{
 			using (var licensing = LicensingFactory.GetLicensing(
-				Peach.Pro.Core.IdentityClient.IdentityData, null, hostId))
+				Pro.Core.IdentityClient.IdentityData, null, hostId))
 			{
 				licensing.LicenseManager.Reset();
 
