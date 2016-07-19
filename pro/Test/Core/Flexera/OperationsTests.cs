@@ -1,33 +1,18 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using FlexNet.Operations;
+using NUnit.Framework;
 using Peach.Core.Test;
-using FlexNet.Operations.ProductPackagingService;
-using System;
-using System.Net;
-using System.Linq;
 
-namespace Flexera
+namespace Peach.Pro.Test.Core.Flexera
 {
 	[TestFixture]
 	[Quick]
 	public class OperationsTests
 	{
-		const string Url = "https://flex1253-fno-uat.flexnetoperations.com/flexnet/services/ProductPackagingService";
-		const string Username = "frank@peachfuzzer.com";
-		const string Password = "dJ,E7Htot8JEw";
-		
 		[Test]
 		public void BasicTest()
 		{
-			var uri = new Uri(Url);
-			var netCredential = new NetworkCredential(Username, Password);
-			var credentials = netCredential.GetCredential(uri, "Basic");
-
-			var service = new ProductPackagingService
-			{
-				Url = Url,
-				Credentials = credentials,
-				PreAuthenticate = true,
-			};
+			var service = Factory.Create<ProductPackagingService>(EnvironmentType.UAT);
 
 			var query = service.getFeaturesQuery(new getFeaturesQueryRequestType
 			{
@@ -52,7 +37,7 @@ namespace Flexera
 			string featureId;
 			if (!query.responseData.Any())
 			{
-				var feature = service.createFeature(new featureDataType[]
+				var feature = service.createFeature(new[]
 				{
 					new featureDataType
 					{
@@ -107,7 +92,7 @@ namespace Flexera
 			//});
 			//Assert.AreEqual(StatusType.SUCCESS, product.statusInfo.status, product.statusInfo.reason);
 
-			var result = service.deleteFeature(new deleteFeatureDataType[]
+			var result = service.deleteFeature(new[]
 			{
 				new deleteFeatureDataType
 				{
