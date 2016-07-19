@@ -3,6 +3,7 @@ using FlxDotNetClient;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Test.Core.Flexera
 {
@@ -10,6 +11,9 @@ namespace Peach.Pro.Test.Core.Flexera
 	[Quick]
 	internal class LicenseTests
 	{
+		const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/deviceservices";
+		//const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/instances/D2TW8ES08Z6V/request";
+
 		[Test]
 		public void TestCapabilityRequest()
 		{
@@ -21,8 +25,7 @@ namespace Peach.Pro.Test.Core.Flexera
 
 		private static void RunHost(string hostId, string rightsId, string feature)
 		{
-			using (var licensing = LicensingFactory.GetLicensing(
-				Pro.Core.IdentityClient.IdentityData, null, hostId))
+			using (var licensing = LicensingFactory.GetLicensing(IdentityClient_UAT.IdentityData, null, hostId))
 			{
 				licensing.LicenseManager.Reset();
 
@@ -125,8 +128,5 @@ namespace Peach.Pro.Test.Core.Flexera
 				}
 			}
 		}
-
-		const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/deviceservices";
-		//const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/instances/D2TW8ES08Z6V/request";
 	}
 }
