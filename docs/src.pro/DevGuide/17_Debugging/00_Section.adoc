@@ -32,8 +32,6 @@ Peach provides a tool to perform validation and lint checking that can assist in
 pittool compile pit_file.xml
 ----
 
-If a stack trace prints, record the stack trace where the improper error handling occurred.
-
 === The pit doesn't run properly
 
 During the testing and building phase, run the first iteration only. The +-1+
