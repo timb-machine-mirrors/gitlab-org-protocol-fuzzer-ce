@@ -1,7 +1,7 @@
 [[Recipe_StaticIpSetup]]
 === Setting a Static IPv4 Address
 
-The main application of this for automated fuzzing sessions is to ensure the IP address on the target system is the same every time it runs. Different operating systems have different ways of implementing it.
+While running automated fuzzing sessions, use this to ensure the IP address on the target system is the same every time it runs. Different operating systems have different ways of implementing it.
 
 The information for Windows and Ubuntu Linux systems is provided. The workflow for other Unix-based systems, such as OS X, CentOS, and SUSE Linux, are similar.
 

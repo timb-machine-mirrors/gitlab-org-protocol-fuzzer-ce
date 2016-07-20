@@ -108,7 +108,7 @@ endif::peachug[]
 
 ==== Fragmented Protocol Support
 
-This release instroduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.
+This release introduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.
 The _Frag_ element, _outfrag_ action type, and _infrag_ action type have been added.
 
 ifdef::peachug[]
