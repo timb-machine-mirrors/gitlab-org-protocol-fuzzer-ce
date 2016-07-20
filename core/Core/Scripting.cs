@@ -33,7 +33,7 @@ using System.Threading;
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Math;
+using System.Numerics;
 using System.IO;
 using Peach.Core.IO;
 
@@ -265,28 +265,21 @@ namespace Peach.Core
 			{
 				var obj = compiled.Execute(scope);
 
-				// changing this to be sane (using as instead of is) causes weird compiler issues!
-				// you've been warned.
 				if (obj is BigInteger)
 				{
-					var bint = (BigInteger) obj;
+					try
+					{
+						var bint = (BigInteger)obj;
 
-					int i32;
-					uint ui32;
-					long i64;
-					ulong ui64;
+						if (bint.Sign < 0)
+							return (long)bint;
 
-					if (bint.AsInt32(out i32))
-						return i32;
-
-					if (bint.AsInt64(out i64))
-						return i64;
-
-					if (bint.AsUInt32(out ui32))
-						return ui32;
-
-					if (bint.AsUInt64(out ui64))
-						return ui64;
+						return (ulong)bint;
+					}
+					catch (Exception ex)
+					{
+						throw new SoftException(ex);
+					}
 				}
 
 				return obj;
@@ -306,6 +299,28 @@ namespace Peach.Core
 
 				throw new SoftException("Failed to evaluate expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
+		}
+
+		public static Variant ToVariant(object data)
+		{
+			var asBytes = data as byte[];
+			if (asBytes != null)
+				return new Variant(asBytes);
+
+			var asString = data as string;
+			if (asString != null)
+				return new Variant(asString);
+
+			if (data is int)
+				return new Variant((int)data);
+
+			if (data is long)
+				return new Variant((long)data);
+
+			if (data is ulong)
+				return new Variant((ulong)data);
+
+			return null;
 		}
 
 		#endregion

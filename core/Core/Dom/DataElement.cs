@@ -1037,7 +1037,7 @@ namespace Peach.Core.Dom
 
 		public string elementType { get; private set; }
 
-		public string debugName { get; private set; }
+		public string debugName { get; internal set; }
 
 		/// <summary>
 		/// Fully qualified name of DataElement to

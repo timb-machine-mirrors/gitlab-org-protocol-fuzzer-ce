@@ -31,6 +31,8 @@ using System.IO;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
+using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Core.Test;
 
@@ -626,6 +628,39 @@ namespace Peach.Pro.Test.Core
 
 				Assert.AreEqual(4, offset);
 			}
+		}
+
+
+		[Test]
+		public void ExpressionGetSetUlong()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Number size='64' signed='false' endian='big'>
+			<Relation type='offset' of='Item' expressionGet='offset &amp; 0x00ffffffffffffff' expressionSet='offset | 0xff00000000000000' />
+		</Number>
+		<Blob name='Item' length='1' />
+	</DataModel>
+
+	<DataModel name='DM2' ref='DM1' />
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+
+			var val = dom.dataModels[0].Value.ToArray();
+
+			Assert.AreEqual(new byte[] { 0xff, 0, 0, 0, 0, 0, 0, 8, 0 }, val);
+
+			var data = new BitStream(new byte[] { 0xff, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0xff });
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[1], data);
+
+			var blob = (Blob)dom.dataModels[1][1];
+
+			Assert.AreEqual(new byte[] { 0xff }, ((BitwiseStream)blob.DefaultValue).ToArray());
 		}
 	}
 }
