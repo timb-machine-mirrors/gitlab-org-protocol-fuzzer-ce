@@ -38,11 +38,6 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		/// </summary>
 		public string OperationId { get; set; }
 
-		public WebApiOperation()
-		{
-			Parameters = new List<WebApiParameter>();
-		}
-
 		/// <summary>
 		/// body element for this WebApiOperation. Maybe null.
 		/// </summary>
@@ -56,17 +51,35 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		/// <summary>
 		/// HTTP Method for operation
 		/// </summary>
-		public string Method 
-		{ 
+		public string Method
+		{
 			get { return Type.ToString(); }
 			set
 			{
 				WebApiOperationType type;
 				if (!WebApiOperationType.TryParse(value, out type))
-					throw new PeachException("Invalid method found: "+value);
-				
+					throw new PeachException("Invalid method found: " + value);
+
 				Type = type;
-			} 
+			}
+		}
+
+		public WebApiOperation()
+		{
+			Parameters = new List<WebApiParameter>();
+		}
+
+		/// <summary>
+		/// Regular expression to match path w/o query
+		/// </summary>
+		/// <returns></returns>
+		public Regex PathRegex()
+		{
+			var operation = this;
+			var urlRegex = operation.Parameters.Where(item => item.In == WebApiParameterIn.Path).
+				Aggregate(Path.Path, (current, part) => current.Replace("{" + part.Name + "}", "(?<" + part.Name + ">[^/]+)"));
+
+			return new Regex(urlRegex);
 		}
 
 		/// <summary>
