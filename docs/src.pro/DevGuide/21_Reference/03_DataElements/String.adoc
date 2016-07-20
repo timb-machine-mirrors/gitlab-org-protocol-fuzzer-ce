@@ -59,8 +59,8 @@ xref:length[length]:: Length of the string, typically expressed as bytes. The de
 xref:lengthType[lengthType]:: Units of measure of the length attribute. Valid values are bits-in multiples of 8, bytes, and chars. The default value is bytes.
 
 type::
-	Character encoding type, defaults to _ascii_. Valid options are: ascii, utf7, utf8, utf16, utf16be, utf32. 	+
-	Before strings are output, they are first encoded. The default encoding is 7-bit ascii, also known as latin-1. Most common Unicode encodings are supported.
+	Character encoding type, defaults to _utf8_. Valid options are: ascii, utf7, utf8, utf16, utf16be, utf32. 	+
+	Before strings are output, they are first encoded. The default encoding is utf-8. Most common ASCII and Unicode encodings are supported.
 
 xref:value[value]:: The default value, defaults to "".
 

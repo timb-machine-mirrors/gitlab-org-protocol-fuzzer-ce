@@ -237,6 +237,21 @@ Also be aware that the extension for the database file has changed from +.xml.ni
 
 ifndef::peachug[]
 
+==== String Data Element
+
+The default character encoding for String data elements has been changed from ASCII to UTF-8.
+This will enable unicode mutations on all String elements that do not have the encoding explicitly defined.
+To change the default encoding back to ascii, the following xml can be added to the top of your pit.
+
+[source,xml]
+----
+<Defaults>
+  <String type="ascii" />
+</Defaults>
+----
+
+See the xref:String[String] and xref:Defaults[Defaults] for more information.
+
 ==== [Description] Attribute
 
 The +DescriptionAttribute+ defined in +Peach.Core.dll+ was deprecated in the past and has now been removed.
