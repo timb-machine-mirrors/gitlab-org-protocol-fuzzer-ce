@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Xml;
 using NLog;
 
@@ -38,14 +39,14 @@ namespace Peach.Core.Dom
 	/// </summary>
 	[Serializable]
 	[Relation("count", true)]
-	[System.ComponentModel.Description("Array count relation")]
+	[Description("Array count relation")]
 	[Parameter("of", typeof(string), "Element used to generate relation value", "")]
 	[Parameter("expressionGet", typeof(string), "Scripting expression that is run when getting the value", "")]
 	[Parameter("expressionSet", typeof(string), "Scripting expression that is run when setting the value", "")]
 	public class CountRelation : Relation
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger(); 
-		protected bool _isRecursing = false;
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger(); 
+		protected bool _isRecursing;
 
 		public CountRelation(DataElement parent)
 			: base(parent)
@@ -76,20 +77,30 @@ namespace Peach.Core.Dom
 			{
 				_isRecursing = true;
 
-				long count = (long)From.DefaultValue;
+				var count = From.DefaultValue;
 
-				if (_expressionGet != null)
+				if (_expressionGet == null)
+					return (long)count;
+
+				var state = new Dictionary<string, object>
 				{
-					Dictionary<string, object> state = new Dictionary<string, object>();
-					state["count"] = count;
-					state["value"] = count;
-					state["self"] = From;
+					{ "self", From }
+				};
 
-					object value = From.EvalExpression(_expressionGet, state);
-					count = Convert.ToInt64(value);
+				if (count.GetVariantType() == Variant.VariantType.ULong)
+				{
+					state["count"] = (ulong)count;
+					state["value"] = (ulong)count;
+				}
+				else
+				{
+					state["count"] = (long)count;
+					state["value"] = (long)count;
 				}
 
-				return count;
+				var value = From.EvalExpression(_expressionGet, state);
+
+				return Convert.ToInt64(value);
 			}
 			finally
 			{
@@ -102,64 +113,44 @@ namespace Peach.Core.Dom
 			if (_isRecursing)
 				return new Variant(0);
 
+			if (Of == null)
+			{
+				logger.Error("Error, Of returned null");
+				return null;
+			}
+
 			try
 			{
 				_isRecursing = true;
 
-				if (Of == null)
-				{
-					logger.Error("Error, Of returned null");
-					return null;
-				}
-
-				Array OfArray = Of as Array;
+				var OfArray = Of as Array;
 
 				if (OfArray == null)
 				{
-					logger.Error(
-						string.Format("Count Relation requires '{0}' to be an array.  Set the minOccurs and maxOccurs properties.",
-						OfName));
-
+					logger.Error("Count Relation requires '{0}' to be an array.  Set the minOccurs and maxOccurs properties.", OfName);
 					return null;
 				}
 
-				int count = OfArray.GetCountOverride();
+				var count = OfArray.GetCountOverride();
 
-				if (_expressionSet != null)
+				if (_expressionSet == null)
+					return new Variant(count);
+
+				var state = new Dictionary<string, object>
 				{
-					Dictionary<string, object> state = new Dictionary<string, object>();
-					state["count"] = count;
-					state["value"] = count;
-					state["self"] = From;
+					{ "self", From },
+					{ "count", count },
+					{ "value", count }
+				};
 
-					object value = From.EvalExpression(_expressionSet, state);
-					count = Convert.ToInt32(value);
-				}
+				var value = From.EvalExpression(_expressionSet, state);
 
-				return new Variant(count);
+				return Scripting.ToVariant(value);
 			}
 			finally
 			{
 				_isRecursing = false;
 			}
-		}
-
-		public override void SetValue(Variant value)
-		{
-			int count = (int)value;
-
-			if (_expressionSet != null)
-			{
-				Dictionary<string, object> state = new Dictionary<string, object>();
-				state["count"] = count;
-				state["value"] = count;
-				state["self"] = From;
-
-				object newValue = From.EvalExpression(_expressionSet, state);
-				count = Convert.ToInt32(newValue);
-			}
-
-			From.DefaultValue = new Variant(count);
 		}
 	}
 }

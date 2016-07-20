@@ -1043,12 +1043,26 @@ namespace Peach.Core.Analyzers
 					localScope["Parser"] = this;
 					localScope["Context"] = context ?? ((DataModel)element.root).dom;
 
-					var obj = element.EvalExpression(value, localScope, context);
+					object obj;
+
+					try
+					{
+						obj = element.EvalExpression(value, localScope, context);
+					}
+					catch (SoftException ex)
+					{
+						throw new PeachException(ex.Message, ex);
+					}
 
 					if (obj == null)
-						throw new PeachException("Error, the value of " + element.debugName + " is not a valid eval statement.");
+						throw new PeachException("Error, the value of the eval statement of " + element.debugName + " returned null.");
 
-					element.DefaultValue = new Variant(obj.ToString());
+					var asVariant = Scripting.ToVariant(obj);
+
+					if (asVariant == null)
+						throw new PeachException("Error, the value of the eval statement of " + element.debugName + " returned unsupported type '" + obj.GetType() +"'.");
+
+					element.DefaultValue = asVariant;
 					break;
 				case "string":
 					// No action requried, default behaviour
@@ -1647,7 +1661,9 @@ namespace Peach.Core.Analyzers
 						tmp = new Dom.String {stringType = StringType.utf8};
 					else
 						tmp = new Blob();
-	
+
+					tmp.debugName = "Field '{0}'".Fmt(name);
+
 					// Hack to call common value parsing code.
 					handleCommonDataElementValue(child, tmp, dom);
 	
