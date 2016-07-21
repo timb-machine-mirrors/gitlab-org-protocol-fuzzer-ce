@@ -12,7 +12,18 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 	/// </summary>
 	public class WebApiPath
 	{
+		/// <summary>
+		/// Full path with format identifiers
+		/// </summary>
+		/// <remarks>
+		/// Path with format id's for any WebApiParameters of 
+		/// type Path. e.g. /foo/{FooId}/list
+		/// </remarks>
 		public string Path { get; set; }
+
+		/// <summary>
+		/// Operations that can occur on this path
+		/// </summary>
 		public List<WebApiOperation> Operations { get; set; }
 
 		public WebApiPath()

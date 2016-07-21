@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,8 +30,19 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 	/// </summary>
 	public class WebApiOperation
 	{
+		/// <summary>
+		/// Path this operation is for.
+		/// </summary>
 		public WebApiPath Path { get; set; }
+
+		/// <summary>
+		/// Type of operation (HTTP Verb)
+		/// </summary>
 		public WebApiOperationType Type { get; set; }
+
+		/// <summary>
+		/// Parameters for this operation.
+		/// </summary>
 		public List<WebApiParameter> Parameters { get; set; }
 
 		/// <summary>
@@ -57,7 +69,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			set
 			{
 				WebApiOperationType type;
-				if (!WebApiOperationType.TryParse(value, out type))
+				if (!Enum.TryParse(value, out type))
 					throw new PeachException("Invalid method found: " + value);
 
 				Type = type;
@@ -86,12 +98,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		/// Set raw text onto body property.
 		/// </summary>
 		/// <param name="body"></param>
-		public void SetRawBody(string body)
+		public void SetRawBody(byte[] body)
 		{
-			if (string.IsNullOrEmpty(body))
+			if (body == null)
 				return;
 
-			Body = new Peach.Core.Dom.String("body") { DefaultValue = new Variant(body) };
+			Body = new Blob("body") { DefaultValue = new Variant(body) };
 		}
 
 		/// <summary>
@@ -132,6 +144,22 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			analyzer.asDataElement(json, new Dictionary<DataElement, Position>());
 
 			Body = block[0];
+		}
+
+		public WebApiOperation ShallowClone()
+		{
+			var newOp = new WebApiOperation
+			{
+				Method = Method,
+				Path = Path,
+				Body = Body,
+				Call = Call,
+				OperationId = OperationId,
+				Type = Type,
+				Parameters = Parameters
+			};
+
+			return newOp;
 		}
 	}
 }

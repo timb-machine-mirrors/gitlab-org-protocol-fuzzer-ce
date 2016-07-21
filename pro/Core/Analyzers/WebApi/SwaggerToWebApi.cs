@@ -100,15 +100,14 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		static WebApiParameter ConvertParameter(JObject param, List<DataModel> models)
 		{
 			JToken token;
-			var apiParam = new WebApiParameter();
+			var apiParam = new WebApiParameter {Name = param["name"].Value<string>()};
 
-			apiParam.Name = param["name"].Value<string>();
 
 			var sbIn = new StringBuilder(param["in"].Value<string>());
 			sbIn[0] = sbIn[0].ToUpperInvariant();
 
 			WebApiParameterIn paramIn;
-			if (!WebApiParameterIn.TryParse(sbIn.ToString(), out paramIn))
+			if (!Enum.TryParse(sbIn.ToString(), out paramIn))
 				throw new ApplicationException("Error parsing swagger param in \"" + param["in"].Value<string>() + "\".");
 
 			apiParam.In = paramIn;
@@ -119,7 +118,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				sbType[0] = sbType[0].ToUpperInvariant();
 
 				WebApiParameterType paramType;
-				if (!WebApiParameterType.TryParse(sbType.ToString(), out paramType))
+				if (!Enum.TryParse(sbType.ToString(), out paramType))
 					throw new ApplicationException("Error parsing swagger param type \"" + param["tpe"].Value<string>() + "\".");
 
 				apiParam.Type = paramType;
@@ -130,10 +129,37 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			else
 				apiParam.Required = false;
 
-			if (apiParam.In == WebApiParameterIn.Body)
+			switch (apiParam.In)
 			{
-				var swaggerRef = NameFromSwaggerRef(param["schema"]["$ref"].Value<string>());
-				apiParam.DataElement = models.First(i => i.Name == swaggerRef)[0].Clone();
+				case  WebApiParameterIn.Body:
+					var swaggerRef = NameFromSwaggerRef(param["schema"]["$ref"].Value<string>());
+					apiParam.DataElement = models.First(i => i.Name == swaggerRef)[0].Clone();
+					break;
+
+				default:
+
+					switch (apiParam.Type)
+					{
+						case WebApiParameterType.File:
+							apiParam.DataElement = new Blob();
+							break;
+
+						case WebApiParameterType.Array:
+							apiParam.DataElement = new Sequence();
+							break;
+
+						case WebApiParameterType.Boolean:
+							apiParam.DataElement = new Bool();
+							break;
+
+						case WebApiParameterType.Integer:
+						case WebApiParameterType.Number:
+						case WebApiParameterType.String:
+							apiParam.DataElement = new Peach.Core.Dom.String();
+							break;
+					}
+
+					break;
 			}
 
 			return apiParam;
