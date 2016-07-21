@@ -1,30 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Web.Http;
-using Microsoft.Owin;
 using Owin;
-using Peach.Pro.Test.WebProxy.TestTarget;
-using Owin;
-using System.Web.Http;
-using Microsoft.Owin;
+using Autofac;
+using Autofac.Integration.WebApi;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.Hosting.Tracing;
-using System.Web.Http;
 using Peach.Pro.Core;
-using SimpleInjector;
-using SimpleInjector.Integration.WebApi;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.Pro.Test.WebProxy.TestTarget
 {
-	public class TestTargetServer
+	public class TestTargetServer : IWebStatus
 	{
+		readonly WebStartup _startup;
+		IDisposable _server;
+
+		public static string BaseUrl;
+
+		public TestTargetServer()
+		{
+			_startup = new WebStartup();
+		}
+
 		class NullTraceOutputFactory : ITraceOutputFactory
 		{
 			public TextWriter Create(string outputFile)
@@ -33,10 +32,23 @@ namespace Peach.Pro.Test.WebProxy.TestTarget
 			}
 		}
 
-		public static string BaseUrl = "http://localhost:9000";
-		public static IDisposable StartServer()
+		public static IDisposable StartServer(int port = 8001)
 		{
-			//return WebApp.Start<TestTargetServer>(url: BaseUrl);
+			return new TestTargetServer().Start(port);
+		}
+
+		public void Start(int? port)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IDisposable Start(int port = 8001)
+		{
+			BaseUrl = string.Format("http://127.0.0.1:{0}/", port);
+			Uri = new Uri(BaseUrl);
+
+			// Owin adds a TextWriterTraceListener during startup
+			// we need to replace it to avoid spewing to console
 
 			var options = new StartOptions(BaseUrl);
 			options.Settings.Add(
@@ -44,64 +56,55 @@ namespace Peach.Pro.Test.WebProxy.TestTarget
 				typeof(NullTraceOutputFactory).AssemblyQualifiedName
 			);
 
-			return WebApp.Start(options, new TestTargetServer().OnStartup);
+			_server = WebApp.Start(options, _startup.OnStartup);
+
+			return this;
 		}
 
-		private void OnStartup(IAppBuilder appBuilder)
+		public Uri Uri
 		{
-			// Configure Web API for self-host. 
-			var config = new HttpConfiguration();
+			get;
+			private set;
+		}
 
-			config.Formatters.JsonFormatter.SerializerSettings = JsonUtilities.GetSettings();
-			config.MapHttpAttributeRoutes();
+		public void Dispose()
+		{
+			if (_startup != null)
+				_startup.Dispose();
 
-			var container = new SimpleInjector.Container();
-			container.Options.DefaultScopedLifestyle = new WebApiRequestLifestyle();
-			container.RegisterSingleton(new ValuesController());
-			container.RegisterWebApiControllers(config);
-			container.Verify();
-
-			config.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);
-
-			appBuilder.UseWebApi(config);
+			if (_server != null)
+				_server.Dispose();
 		}
 	}
 
-	[RoutePrefix(Prefix)]
-	public class ValuesController : ApiController
+	public class WebStartup : IDisposable
 	{
-		public const string Prefix = "/api/values";
-
-		// GET api/values 
-		[Route("")]
-		public IEnumerable<string> Get()
+		public void OnStartup(IAppBuilder app)
 		{
-			return new string[] { "value1", "value2" };
+			var cfg = new HttpConfiguration();
+
+			cfg.Formatters.JsonFormatter.SerializerSettings = JsonUtilities.GetSettings();
+
+			cfg.MapHttpAttributeRoutes();
+
+			var builder = new ContainerBuilder();
+
+			//builder.RegisterInstance(new Controllers.ValuesController());
+
+			builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+			builder.RegisterWebApiFilterProvider(cfg);
+
+			var container = builder.Build();
+			cfg.DependencyResolver = new AutofacWebApiDependencyResolver(container);
+
+			app.UseAutofacMiddleware(container);
+			app.UseAutofacWebApi(cfg);
+			app.UseWebApi(cfg);
+
 		}
 
-		// GET api/values/5 
-		[Route("{id}")]
-		public string Get(int id)
-		{
-			return "value";
-		}
-
-		// POST api/values 
-		[Route("")]
-		public void Post([FromBody]string value)
+		public void Dispose()
 		{
 		}
-
-		// PUT api/values/5 
-		[Route("{id}")]
-		public void Put(int id, [FromBody]string value)
-		{
-		}
-
-		// DELETE api/values/5 
-		[Route("{id}")]
-		public void Delete(int id)
-		{
-		}
-	} 
+	}
 }
