@@ -41,7 +41,7 @@ namespace Peach.Core.Dom
 	/// </summary>
 	[Serializable]
 	[Relation("offset", true)]
-	[Description("Byte offset relation")]
+	[System.ComponentModel.Description("Byte offset relation")]
 	[Parameter("of", typeof(string), "Element used to generate relation value", "")]
 	[Parameter("expressionGet", typeof(string), "Scripting expression that is run when getting the value", "")]
 	[Parameter("expressionSet", typeof(string), "Scripting expression that is run when setting the value", "")]
