@@ -30,7 +30,6 @@ subdirs = [
 	'Web',
 	'WebApi2',
 	'WebApiFuzzer',
-	'WindowsDebugInstance',
 	'Worker',
 	'XmlGenerator',
 ]
