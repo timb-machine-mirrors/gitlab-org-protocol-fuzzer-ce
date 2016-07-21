@@ -55,6 +55,9 @@ xref:Flag[]::
 _Flag_ defines a specific _Flag_ in a flag set.
 _Flag_ elements have a bit position and bit length.
 
+xref:Frag[]::
+    Used to model protocol fragmentation
+
 xref:JsonArray[]::
 +
 _JsonArray_ is used to represent a JSON array.
@@ -135,40 +138,78 @@ xref:String[]::
 A _string_ defines a contiguous sequence of characters with encoding.
 Encodings include ASCII and many Unicode formats.
 
+xref:VarNumber[]::
++
+Allows modeling variable width _Numbers_. Size must be constrained using a size-of relationship or other method.
+
 xref:XmlAttribute[]::
 +
 The _XmlAttribute_ defines an XML attribute.
+This element is only valid as a child of xref:XmlElement[].
+
+xref:XmlCharacterData[]::
++
+The _XmlCharacterData_ element defines an XML CDATA section.
 This element is only valid as a child of xref:XmlElement[].
 
 xref:XmlElement[]::
 +
 _XmlElement_ defines an XML element.
 
+// Line between includes to make sure starting >>> always works
 :leveloffset: 2
 include::Asn1Type.adoc[]
+
 include::Blob.adoc[]
+
 include::Block.adoc[]
+
 include::Bool.adoc[]
+
 include::Choice.adoc[]
+
 include::DataModel.adoc[]
+
 include::Double.adoc[]
+
 include::Flag.adoc[]
+
 include::Flags.adoc[]
-include::Json.adoc[]
+
+include::Frag.adoc[]
+
 include::JsonArray.adoc[]
+
 include::JsonBlob.adoc[]
+
 include::JsonBool.adoc[]
+
 include::JsonDouble.adoc[]
+
 include::JsonInteger.adoc[]
+
 include::JsonObject.adoc[]
+
 include::JsonString.adoc[]
+
 include::Null.adoc[]
+
 include::Number.adoc[]
+
 include::Padding.adoc[]
+
 include::Sequence.adoc[]
+
 include::Stream.adoc[]
+
 include::String.adoc[]
+
+include::VarNumber.adoc[]
+
 include::XmlAttribute.adoc[]
+
+include::XmlCharacterData.adoc[]
+
 include::XmlElement.adoc[]
 
 // end

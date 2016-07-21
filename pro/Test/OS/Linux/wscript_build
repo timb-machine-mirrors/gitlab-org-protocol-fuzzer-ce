@@ -8,7 +8,7 @@ deps = [
 	'NLog.dll',
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
-	'Peach.Pro.OS.Linux.dll',
+	'Peach.Pro.dll',
 	'SharpPcap.dll',
 	'PacketDotNet.dll',	
 ]

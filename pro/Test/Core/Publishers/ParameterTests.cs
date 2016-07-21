@@ -557,5 +557,39 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Assert.AreEqual("Publisher 'Regex' could not set parameter 'Expr'.  The value '(' is not a valid regular expression.", ex.Message);
 		}
+
+		[Publisher("Exclusive")]
+		[Parameter("Param1", typeof(string), "desc", "")]
+		[Parameter("Param2", typeof(string), "desc", "")]
+		[Parameter("Param3", typeof(string), "desc", "")]
+		class ExclusivePlugin : MyBaseClass
+		{
+			public string Param1 { get; set; }
+			public string Param2 { get; set; }
+			public string Param3 { get; set; }
+		}
+
+		[Test]
+		public void TestExclusiveNone()
+		{
+			var plugin = new ExclusivePlugin();
+			var ex = Assert.Throws<PeachException>(() => ParameterParser.EnsureOne(plugin, "Param1", "Param2", "Param3"));
+			Assert.AreEqual("Publisher 'Exclusive' requires one of the following parameters be set: 'Param1', 'Param2', 'Param3'.", ex.Message);
+		}
+
+		[Test]
+		public void TestExclusiveOne()
+		{
+			var plugin = new ExclusivePlugin { Param2 = "foo" };
+			Assert.DoesNotThrow(() => ParameterParser.EnsureOne(plugin, "Param1", "Param2", "Param3"));
+		}
+
+		[Test]
+		public void TestExclusiveMany()
+		{
+			var plugin = new ExclusivePlugin { Param2 = "foo", Param3 = "bar" };
+			var ex = Assert.Throws<PeachException>(() => ParameterParser.EnsureOne(plugin, "Param1", "Param2", "Param3"));
+			Assert.AreEqual("Publisher 'Exclusive' only suports one of the following parameters be set at the same time: 'Param2', 'Param3'.", ex.Message);
+		}
 	}
 }

@@ -17,6 +17,8 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
+using Moq;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Test.Core.Runtime
 {
@@ -100,9 +102,9 @@ namespace Peach.Pro.Test.Core.Runtime
 
 			_loggingConfig = LogManager.Configuration;
 
-			var target = new ConsoleTarget
+			var target = new ColoredConsoleTarget
 			{
-				Layout = "${time} ${logger} ${message}"
+				Layout = "${time} ${logger} ${message} ${exception:format=tostring}"
 			};
 
 			var config = new LoggingConfiguration();
@@ -135,8 +137,10 @@ namespace Peach.Pro.Test.Core.Runtime
 				var pitPath = Path.Combine(pitLibraryPath, "Test.peach");
 				PitDatabase.SavePitConfig(pitPath, pitConfig);
 
+				var license = new Mock<ILicense>();
+
 				_job = new Job(jobRequest, pitPath);
-				JobRunner = new JobRunner(_job, pitLibraryPath, pitPath);
+				JobRunner = new JobRunner(license.Object, _job, pitLibraryPath, pitPath);
 				_thread = new Thread(() =>
 				{
 					try
@@ -330,69 +334,6 @@ namespace Peach.Pro.Test.Core.Runtime
 				var job = runner.GetJob();
 				Assert.IsFalse(File.Exists(job.DebugLogPath));
 			}
-		}
-
-		[Test]
-		public void TestWeights()
-		{
-			var pit = new PitConfig {
-				OriginalPit = "Test.xml",
-				Config = new List<Param>(),
-				Agents = new List<MAgent>(),
-				Weights = new List<PitWeight> {
-					new PitWeight { Id = "initial.output1.DM.off", Weight = 0 },
-					new PitWeight { Id = "initial.output1.DM.lowest", Weight = 1 },
-					new PitWeight { Id = "initial.output1.DM.low", Weight = 2 },
-					new PitWeight { Id = "initial.output1.DM.normal", Weight = 3 },
-					new PitWeight { Id = "initial.output1.DM.high", Weight = 4 },
-					new PitWeight { Id = "initial.output1.DM.highest", Weight = 5 },
-					new PitWeight { Id = "initial.output2.DM.array.off", Weight = 0 },
-					new PitWeight { Id = "initial.output2.DM.array.lowest", Weight = 1 },
-					new PitWeight { Id = "initial.output2.DM.array.low", Weight = 2 },
-					new PitWeight { Id = "initial.output2.DM.array.normal", Weight = 3 },
-					new PitWeight { Id = "initial.output2.DM.array.high", Weight = 4 },
-					new PitWeight { Id = "initial.output2.DM.array.highest", Weight = 5 },
-				}
-			};
-
-			var count = new Dictionary<string, int>();
-
-			Action<Engine> hooker = engine =>
-			{
-				engine.TestStarting += ctx =>
-				{
-					ctx.DataMutating += (c, actionData, element, mutator) =>
-					{
-						int cnt;
-						if (!count.TryGetValue(element.Name, out cnt))
-							cnt = 0;
-						else
-							++cnt;
-
-						count[element.Name] = cnt;
-					};
-				};
-			};
-
-			var jobRequest = new JobRequest {
-				Seed = 0,
-				RangeStop = 100,
-			};
-			using (var runner = new SafeRunner(_tmpDir.Path, pit, jobRequest, hooker))
-			{
-				runner.WaitForFinish(60);
-				runner.VerifyDatabase(1);
-			}
-
-			foreach (var x in count)
-				Console.WriteLine("Elem: {0}, Count: {1}", x.Key, x.Value);
-
-			Assert.Less(count["lowest"], count["low"]);
-			Assert.Less(count["low"], count["normal"]);
-			Assert.Less(count["normal"], count["high"]);
-			Assert.Less(count["high"], count["highest"]);
-
-			Assert.False(count.ContainsKey("off"), "off shouldn't be mutated");
 		}
 	}
 }

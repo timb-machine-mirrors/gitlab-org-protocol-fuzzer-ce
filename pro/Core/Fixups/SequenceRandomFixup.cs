@@ -29,10 +29,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 using Random = Peach.Core.Random;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
@@ -67,20 +67,6 @@ namespace Peach.Pro.Core.Fixups
 				throw new PeachException("SequenceRandomFixup has non numeric parent '" + parent.fullName + "'.");
 
 			object obj;
-
-			if (ctx.controlRecordingIteration)
-			{
-				var dm = parent.root as DataModel;
-				if (dm != null && dm.actionData != null)
-				{
-					// Allow value to be overridden via the stateStore using key:
-					// Peach.VolatileOverride.StateName.ActionName.ModelName.Path.To.Element
-					var key = "Peach.VolatileOverride.{0}.{1}".Fmt(dm.actionData.outputName, parent.fullName);
-
-					if (ctx.stateStore.TryGetValue(key, out obj))
-						return (Variant) obj;
-				}
-			}
 
 			Random rng;
 

@@ -6,6 +6,7 @@ using NLog;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 // Disable obsolete warnings
 using Peach.Core.Test;
@@ -133,7 +134,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var pe = Assert.Throws<PeachException>(() =>  e.startFuzzing(dom, cfg));
 
-			Assert.AreEqual("Fault detected on control record iteration.", pe.Message);
+			Assert.AreEqual("Fault detected on control recording iteration.", pe.Message);
 			Assert.AreEqual(1, faults.Count);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
 			Assert.That(faults[0].title, Is.StringStarting("Process output matched FaulOnRegex"));
@@ -150,7 +151,7 @@ namespace Peach.Pro.Test.Core.Agent
 	}
 
 	[Monitor("LegacyRunCommand", true, IsTest = true)]
-	[Peach.Core.Description("Launches the specified command to perform a utility function")]
+	[Description("Launches the specified command to perform a utility function")]
 	[Parameter("Command", typeof(string), "Command line command to run")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("When", typeof(When), "Period _When the command should be ran (OnCall, OnStart, OnEnd, OnIterationStart, OnIterationEnd, OnFault, OnIterationStartAfterFault)", "OnCall")]

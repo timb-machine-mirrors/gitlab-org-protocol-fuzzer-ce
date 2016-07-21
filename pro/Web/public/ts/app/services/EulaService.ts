@@ -19,8 +19,8 @@ namespace Peach {
 		}
 
 		public Verify(): ng.IPromise<ILicense> {
-			return this.LoadLicense().then((l : ILicense) => {
-				return this.VerifyLicense(l);
+			return this.LoadLicense().then(license => {
+				return this.VerifyLicense(license);
 			});
 		}
 
@@ -54,58 +54,31 @@ namespace Peach {
 				});
 			}
 
+
 			if (license.eulaAccepted) {
 				const ret = this.$q.defer<ILicense>();
 				ret.resolve(license);
 				return ret.promise;
 			}
 
-			let template: string;
-			let developer = false;
-
-			switch (license.version) {
-				case LicenseVersion.Enterprise:
-				case LicenseVersion.Distributed:
-					template = C.Templates.Eula.Enterprise;
-					break;
-				case LicenseVersion.ProfessionalWithConsulting:
-				case LicenseVersion.Professional:
-				case LicenseVersion.Developer:
-					template = C.Templates.Eula.Professional;
-					developer = true;
-					break;
-				case LicenseVersion.TrialAllPits:
-				case LicenseVersion.Trial:
-					template = C.Templates.Eula.Trial;
-					break;
-				case LicenseVersion.Academic:
-					template = C.Templates.Eula.Acedemic;
-					break;
-				case LicenseVersion.TestSuites:
-				case LicenseVersion.Studio:
-				default:
-					template = C.Templates.Eula.Professional;
-					break;
-			}
-
-			let result = this.DisplayEula(template);
-
-			if (developer) {
-				return result.then(() => {
-					return this.DisplayEula(C.Templates.Eula.Developer).then(() => {
-						return this.AcceptEula();
+			let promise: ng.IPromise<ILicense> = null;
+			for (var type of license.eulas) {
+				if (!promise) {
+					promise = this.DisplayEula(type);
+				} else {
+					promise = promise.then(() => {
+						return this.DisplayEula(type);
 					});
-				});
+				}
 			}
-
-			return result.then(() => {
-				return this.AcceptEula();
-			});
+			return promise.then(() => {
+				return this.AcceptEula()
+			})
 		}
 
-		private DisplayEula(url: string): ng.IPromise<any> {
+		private DisplayEula(type: string): ng.IPromise<any> {
 			return this.$modal.open({
-				templateUrl: url,
+				templateUrl: `html/eula/${type}.html`,
 				controller: EulaController,
 				controllerAs: C.ViewModel,
 				backdrop: 'static',

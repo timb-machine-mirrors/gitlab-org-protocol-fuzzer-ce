@@ -15,7 +15,7 @@ using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.Runtime
 {
-	public class Worker : Program
+	public class Worker : BaseProgram
 	{
 		string _pitLibraryPath;
 		string _query;
@@ -90,10 +90,10 @@ namespace Peach.Pro.Core.Runtime
 		{
 			// Override logging so that we force messages to stderr instead of stdout
 
-			Target target = new ConsoleTarget
+			Target target = new ColoredConsoleTarget
 			{
-				Layout = "${longdate} ${logger} ${message}",
-				Error = true,
+				Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}",
+				ErrorStream = true,
 			};
 
 			if (!syncLogging)
@@ -109,21 +109,27 @@ namespace Peach.Pro.Core.Runtime
 			Configuration.LogLevel = LogLevel;
 		}
 
-		protected override void OnRun(List<string> args)
+		protected override int OnRun(List<string> args)
 		{
 			if (!string.IsNullOrEmpty(_query))
 			{
 				RunQuery();
-				return;
+				return 0;
 			}
 
 			if (args.Count == 0)
 				throw new SyntaxException("Missing <pit> argument.");
 
+			PrepareLicensing(_pitLibraryPath);
+			if (!_license.IsValid)
+				return -1;
+
 			if (_init)
 				InitJob(args.First());
 			else
 				RunJob(args.First());
+
+			return 0;
 		}
 
 		Job InitJob(string pitFile)
@@ -169,7 +175,7 @@ namespace Peach.Pro.Core.Runtime
 				job = db.GetJob(_guid.Value) ?? InitJob(pitFile);
 			}
 
-			var runner = new JobRunner(job, _pitLibraryPath, pitFile);
+			var runner = new JobRunner(_license, job, _pitLibraryPath, pitFile);
 			var evtReady = new AutoResetEvent(false);
 			var engineTask = Task.Factory.StartNew(() => runner.Run(evtReady), TaskCreationOptions.LongRunning);
 			if (!evtReady.WaitOne(1000))

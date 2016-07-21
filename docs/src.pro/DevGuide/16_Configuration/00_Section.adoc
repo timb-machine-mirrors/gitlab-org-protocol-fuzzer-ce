@@ -1,3 +1,4 @@
+[[PitDefines]]
 == Configuration Files
 
 Most Peach pits contain configurable information. For example, a network Pit might store source and destination IP addresses for the network. Some configuration settings apply to a specific operating system.

@@ -104,10 +104,6 @@ This example uses UrlEncode on an inline value, writes the transformed value to 
 			<Param name="FileName" value="encoded.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -117,9 +113,6 @@ Output from this example.
 ----
 > peach -1 --debug example.xml
 
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 29519.
 

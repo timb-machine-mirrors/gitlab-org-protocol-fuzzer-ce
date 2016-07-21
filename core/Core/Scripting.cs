@@ -33,8 +33,9 @@ using System.Threading;
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Math;
+using System.Numerics;
 using System.IO;
+using NLog;
 using Peach.Core.IO;
 
 namespace Peach.Core
@@ -43,46 +44,30 @@ namespace Peach.Core
 	{
 		protected override ScriptEngine GetEngine()
 		{
-			// Need to add python stdlib to search path
-			var engine = IronPython.Hosting.Python.CreateEngine();
-			var paths = engine.GetSearchPaths();
-
-			foreach (string path in ClassLoader.SearchPaths)
-				paths.Add(Path.Combine(path, "Lib"));
-
-			engine.SetSearchPaths(paths);
-
-			return engine;
-		}
-	}
-
-	public class RubyScripting : Scripting
-	{
-		protected override ScriptEngine GetEngine()
-		{
-			return IronRuby.Ruby.CreateEngine();
+			return Python.CreateEngine();
 		}
 	}
 
 	/// <summary>
 	/// Scripting class provides easy to use
-	/// methods for using Python/Ruby with Peach.
+	/// methods for using Python with Peach.
 	/// </summary>
 	public abstract class Scripting
 	{
+		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		#region Private Members
 
-		private Dictionary<string, object> modules;
-		private ScriptEngine engine;
+		private readonly Dictionary<string, object> _modules = new Dictionary<string, object>();
+		private readonly ScriptEngine _engine;
 
 		#endregion
 
 		#region Constructor
 
-		public Scripting()
+		protected Scripting()
 		{
-			modules = new Dictionary<string, object>();
-			engine = GetEngine();
+			_engine = GetEngine();
 		}
 
 		#endregion
@@ -97,16 +82,13 @@ namespace Peach.Core
 
 		public void ImportModule(string module)
 		{
-			if (!modules.ContainsKey(module))
-				modules.Add(module, engine.ImportModule(module));
+			if (!_modules.ContainsKey(module))
+				_modules.Add(module, _engine.ImportModule(module));
 		}
 
 		public IEnumerable<string> Modules
 		{
-			get
-			{
-				return modules.Keys;
-			}
+			get { return _modules.Keys; }
 		}
 
 		#endregion
@@ -115,21 +97,17 @@ namespace Peach.Core
 
 		public void AddSearchPath(string path)
 		{
-			var paths = engine.GetSearchPaths();
-
+			var paths = _engine.GetSearchPaths();
 			if (!paths.Contains(path))
 			{
 				paths.Add(path);
-				engine.SetSearchPaths(paths);
+				_engine.SetSearchPaths(paths);
 			}
 		}
 
 		public IEnumerable<string> Paths
 		{
-			get
-			{
-				return engine.GetSearchPaths();
-			}
+			get { return _engine.GetSearchPaths(); }
 		}
 
 		#endregion
@@ -196,7 +174,7 @@ namespace Peach.Core
 		/// <summary>
 		/// Global scope for this instance of scripting
 		/// </summary>
-		ScriptScope _scope = null;
+		ScriptScope _scope;
 
 		/// <summary>
 		/// Create the global scope, or return existing one
@@ -206,9 +184,9 @@ namespace Peach.Core
 		{
 			if (_scope == null)
 			{
-				_scope = engine.CreateScope();
+				_scope = _engine.CreateScope();
 
-				Apply(_scope, modules);
+				Apply(_scope, _modules);
 			}
 
 			return _scope;
@@ -241,6 +219,7 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
+				logger.Debug(ex, "Failed to execute expression [{0}], {1}.".Fmt(code, ex.Message));
 				throw new SoftException("Failed to execute expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
 			finally
@@ -265,28 +244,21 @@ namespace Peach.Core
 			{
 				var obj = compiled.Execute(scope);
 
-				// changing this to be sane (using as instead of is) causes weird compiler issues!
-				// you've been warned.
 				if (obj is BigInteger)
 				{
-					var bint = (BigInteger) obj;
+					try
+					{
+						var bint = (BigInteger)obj;
 
-					int i32;
-					uint ui32;
-					long i64;
-					ulong ui64;
+						if (bint.Sign < 0)
+							return (long)bint;
 
-					if (bint.AsInt32(out i32))
-						return i32;
-
-					if (bint.AsInt64(out i64))
-						return i64;
-
-					if (bint.AsUInt32(out ui32))
-						return ui32;
-
-					if (bint.AsUInt64(out ui64))
-						return ui64;
+						return (ulong)bint;
+					}
+					catch (Exception ex)
+					{
+						throw new SoftException(ex);
+					}
 				}
 
 				return obj;
@@ -304,8 +276,31 @@ namespace Peach.Core
 				if (ex.GetBaseException() is ThreadAbortException)
 					throw;
 
+				logger.Debug(ex, "Failed to evaluate expression [{0}], {1}.".Fmt(code, ex.Message));
 				throw new SoftException("Failed to evaluate expression [{0}], {1}.".Fmt(code, ex.Message), ex);
 			}
+		}
+
+		public static Variant ToVariant(object data)
+		{
+			var asBytes = data as byte[];
+			if (asBytes != null)
+				return new Variant(asBytes);
+
+			var asString = data as string;
+			if (asString != null)
+				return new Variant(asString);
+
+			if (data is int)
+				return new Variant((int)data);
+
+			if (data is long)
+				return new Variant((long)data);
+
+			if (data is ulong)
+				return new Variant((ulong)data);
+
+			return null;
 		}
 
 		#endregion
@@ -327,18 +322,6 @@ namespace Peach.Core
 		}
 
 		/// <summary>
-		/// Clear out our scope object. This is very slow!
-		/// </summary>
-		/// <param name="scope"></param>
-		private void CleanupScope(ScriptScope scope)
-		{
-			// Clean up any internal state created by the scope
-			var names = scope.GetVariableNames().ToList();
-			foreach (var name in names)
-				scope.RemoveVariable(name);
-		}
-
-		/// <summary>
 		/// Remove local scope items from global scope. This is quick.
 		/// </summary>
 		/// <param name="scope"></param>
@@ -353,8 +336,8 @@ namespace Peach.Core
 		{
 			foreach (var item in vars)
 			{
-				string name = item.Key;
-				object value = item.Value;
+				var name = item.Key;
+				var value = item.Value;
 
 				var bs = value as BitwiseStream;
 				if (bs != null)
@@ -363,7 +346,7 @@ namespace Peach.Core
 					var offset = 0;
 					var count = buffer.Length;
 
-					bs.Seek(0, System.IO.SeekOrigin.Begin);
+					bs.Seek(0, SeekOrigin.Begin);
 
 					int nread;
 					while ((nread = bs.Read(buffer, offset, count)) != 0)

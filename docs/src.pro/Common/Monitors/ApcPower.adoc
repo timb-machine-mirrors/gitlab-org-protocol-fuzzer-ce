@@ -19,7 +19,7 @@ The monitor can reset the power outlets at the following points in time:
 * When a specified call is received from the state model
 
 TIP: The xref:Monitors_IpPower9258[IpPower9258 Monitor] provides
- similar features, specifically for IP Power 9258 devices. The
+ similar features, specific to the IP Power 9258 devices. The
  xref:Monitors_SnmpPower[SnmpPower Monitor] is designed to work with
  non-APC PDUs that can be controlled via SNMPv1. For controlling power
  to a device by wiring through a relay, Peach provides a monitor for

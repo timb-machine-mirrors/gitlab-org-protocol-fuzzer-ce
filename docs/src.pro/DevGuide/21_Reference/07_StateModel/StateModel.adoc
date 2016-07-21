@@ -117,10 +117,6 @@ Peach can uses a single state and three actions for a simple file fuzzer.
     <Publisher class="File">
       <Param name="FileName" value="fuzzfile.bin" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>
@@ -182,9 +178,6 @@ The sample executable _CrashableServer.exe_ is included with the Peach distribut
 			<Param name="Host" value="127.0.0.1" />
 			<Param name="Port" value="4244" />
 		</Publisher>
-		<Logger class="File">
-			<Param name="Path" value="Logs" />
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -328,10 +321,6 @@ This example uses the iteration state bag to simulate a "do while" or "do until"
     <StateModel ref="State"/>
     
     <Publisher class="Console"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logtest" />
-    </Logger>
   </Test>
   
 </Peach>
@@ -339,9 +328,6 @@ This example uses the iteration state bag to simulate a "do while" or "do until"
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 28742.
 

@@ -98,10 +98,6 @@ data:: Referenced elements value as a byte array
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -138,9 +134,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 25461.
 

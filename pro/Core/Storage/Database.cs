@@ -70,27 +70,6 @@ namespace Peach.Pro.Core.Storage
 		}
 	}
 
-	public class SqliteConnectionBuilder
-	{
-		public string DataSource { get; set; }
-		public bool ForeignKeys { get; set; }
-		public bool UseWAL { get; set; }
-
-		public SQLiteConnection Create()
-		{
-			var parts = new List<string>
-			{
-				"Data Source=\"{0}\"".Fmt(DataSource),
-				"Foreign Keys={0}".Fmt(ForeignKeys),
-			};
-			if (UseWAL)
-				parts.Add("PRAGMA journal_mode=WAL");
-
-			var cnnString = string.Join(";", parts);
-			return new SQLiteConnection(cnnString);
-		}
-	}
-
 	public delegate void MigrationHandler();
 
 	public abstract class Database : IDisposable
@@ -142,19 +121,22 @@ namespace Peach.Pro.Core.Storage
 		{
 			Path = path;
 
-			var builder = new SqliteConnectionBuilder 
+			var builder = new SQLiteConnectionStringBuilder
 			{
 				DataSource = Path,
 				ForeignKeys = true,
-				UseWAL = useWal,
+				JournalMode = useWal ? SQLiteJournalModeEnum.Wal : SQLiteJournalModeEnum.Default,
+				SyncMode = SynchronizationModes.Normal,
 			};
 
-			var sqliteConnection = builder.Create();
+			var isInitialized = IsInitialized;
+
+			var sqliteConnection = new SQLiteConnection(builder.ConnectionString);
 			sqliteConnection.SetExtendedResultCodes(true);
 			Connection = sqliteConnection;
 			Connection.Open();
 			
-			if (!IsInitialized)
+			if (!isInitialized)
 				Initialize();
 		}
 
@@ -291,7 +273,7 @@ namespace Peach.Pro.Core.Storage
 				var values = columns.Select(pi =>
 				{
 					var value = pi.GetValue(item, null);
-					return value == null ? "<NULL>" : value.ToString();
+					return value == null ? "<NULL>" : ToString(value);
 				}).ToArray();
 				for (var i = 0; i < values.Length; i++)
 				{
@@ -311,6 +293,14 @@ namespace Peach.Pro.Core.Storage
 			{
 				Console.WriteLine(finalFmt, row);
 			}
+		}
+
+		static string ToString(object value)
+		{
+			var bytes = value as byte[];
+			if (bytes != null)
+				return BitConverter.ToString(bytes);
+			return value.ToString();
 		}
 
 		#region Unit Test Helpers

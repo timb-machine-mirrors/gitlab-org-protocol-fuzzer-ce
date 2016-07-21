@@ -139,12 +139,7 @@ Other places  evaluation expressions occur in relations:
     <Publisher class="File" name="FilePubRead">
       <Param name="FileName" value="encrypted.bin" />
       <Param name="Overwrite" value="false" />
-    </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
+    </Publisher>  </Test>
 </Peach>
 ----
 <1> The expression is executed before the output action starts.

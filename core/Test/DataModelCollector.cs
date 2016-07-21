@@ -11,9 +11,9 @@ namespace Peach.Core.Test
 {
 	public class DataModelCollector : Watcher
 	{
-		public static Dom.Dom ParsePit(string xml)
+		public static Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
 		{
-			return new PitParser().asParser(null, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
+			return new PitParser().asParser(args, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
 		}
 
 		public static void VerifyRoundTrip(string xml)
@@ -79,27 +79,12 @@ namespace Peach.Core.Test
 		protected List<string> iterStrategies = null;
 		protected List<string> allStrategies = null;
 		protected bool cloneActions = false;
-		private SingleInstance _si;
 
 		[SetUp]
 		public void SetUp()
 		{
-			// Ensure only 1 instance of this test runs at a time
-			_si = SingleInstance.CreateInstance(GetType().FullName);
-			_si.Lock();
-
 			cloneActions = false;
 			ResetContainers();
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			if (_si != null)
-			{
-				_si.Dispose();
-				_si = null;
-			}
 		}
 
 		protected void ResetContainers()

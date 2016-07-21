@@ -6,6 +6,7 @@ using Peach.Core.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using NLog;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -13,6 +14,8 @@ namespace Peach.Core.Dom.Actions
 	[Serializable]
 	public class Input : Action
 	{
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		protected BitStream _inputData;
 
 		public ActionData data { get; set; }

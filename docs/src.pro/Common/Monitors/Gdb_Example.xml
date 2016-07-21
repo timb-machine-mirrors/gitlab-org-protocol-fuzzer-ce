@@ -36,10 +36,5 @@
   <Publisher class="TcpListener">
     <Param name="Interface" value="127.0.0.1" />
     <Param name="Port" value="80"/>
-  </Publisher>
-
-  <Logger class="File">
-    <Param name="Path" value="logs"/>
-  </Logger>
-</Test>
+  </Publisher></Test>
 </Peach>

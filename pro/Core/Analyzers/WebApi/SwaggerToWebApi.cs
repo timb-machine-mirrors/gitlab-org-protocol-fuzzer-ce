@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using IronRuby.Runtime;
-using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Dom;
@@ -104,7 +100,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 
 
 			var sbIn = new StringBuilder(param["in"].Value<string>());
-			sbIn[0] = sbIn[0].ToUpperInvariant();
+			sbIn[0] = char.ToUpperInvariant(sbIn[0]);
 
 			WebApiParameterIn paramIn;
 			if (!Enum.TryParse(sbIn.ToString(), out paramIn))
@@ -115,7 +111,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			if (param.TryGetValue("type", out token))
 			{
 				var sbType = new StringBuilder(param["type"].Value<string>());
-				sbType[0] = sbType[0].ToUpperInvariant();
+				sbType[0] = char.ToUpperInvariant(sbType[0]);
 
 				WebApiParameterType paramType;
 				if (!Enum.TryParse(sbType.ToString(), out paramType))
@@ -233,6 +229,22 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		{
 			var jsonObject = new JsonObject(name);
 			jsonObject.PropertyName = propertyName;
+
+			JToken value;
+			if (obj.TryGetValue("allOf", out value))
+			{
+				var allOfArray = (JArray) value;
+				var allOf = (JObject) allOfArray[0];
+				var allOfRef = allOf["$ref"];
+
+				var swaggerRef = GetSwaggerRef(allOfRef.Value<string>(), (JObject)obj.Root["definitions"]);
+				jsonObject = DefinitionObject(name, propertyName, swaggerRef);
+
+				if (allOfArray.Count > 1)
+					obj = (JObject)allOfArray[1];
+				else
+					return jsonObject;
+			}
 
 			foreach (var item in (JObject)obj["properties"])
 			{

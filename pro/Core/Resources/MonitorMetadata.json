@@ -6,6 +6,7 @@
         "CrashReporter",
         "CrashWrangler",
         "Gdb",
+        "GdbServer",
         "LinuxCoreFile",
         "Memory",
         "PageHeap",
@@ -261,6 +262,41 @@
         ]
       }
     ],
+    "GdbServer": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Target",
+          "LocalExecutable",
+          "RemoteExecutable",
+          "",
+          "GdbPath"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartOnEachTest",
+          "RestartAfterFault",
+          "",
+          "StartOnCall",
+          "WaitForExitOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "NoCpuKill",
+          "FaultOnEarlyExit",
+          "",
+          "WaitForExitTimeout",
+          "",
+          "HandleSignals",
+          "Script"
+        ]
+      }
+    ],
     "Gdb": [
       {
         "Name": "Core Parameters",
@@ -288,7 +324,10 @@
           "NoCpuKill",
           "FaultOnEarlyExit",
           "",
-          "WaitForExitTimeout"
+          "WaitForExitTimeout",
+          "",
+          "HandleSignals",
+          "Script"
         ]
       }
     ],
@@ -725,9 +764,7 @@
           "",
           "ConnectTimeout",
           "",
-          "SymbolsPath",
-          "IgnoreFirstChanceGuardPage",
-          "IgnoreSecondChanceGuardPage"
+          "SymbolsPath"
         ]
       }
     ],

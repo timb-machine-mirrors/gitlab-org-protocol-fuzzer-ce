@@ -15,6 +15,7 @@ deps = [
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Configuration.dll',
+	'System.ServiceProcess.dll',
 
 	'Portable.Licensing.dll',
 	'SocketHttpListener.dll',
@@ -25,9 +26,6 @@ deps = [
 	'Ionic.Zip.dll',
 
 	'IronPython.dll',
-	'IronRuby.dll',
-	'IronRuby.Libraries.dll',
-	'IronRuby.Libraries.Yaml.dll',
 
 	'Microsoft.Dynamic.dll',
 	'Microsoft.CSharp.dll',
@@ -49,6 +47,8 @@ deps = [
 	'websocket-sharp.dll',
 	'Dapper.dll',
 	'Aspose.Words.dll',
+	'Nustache.Core.dll',
+
 
 	'vtortola.WebSockets.dll',
 	'vtortola.WebSockets.Rfc6455.dll',
@@ -58,6 +58,9 @@ deps = [
 
 	'SharpSnmpLib.Full.dll',
 	'SharpSnmpLib.Portable.dll',
+
+	'Microsoft.Diagnostics.Runtime.dll',
+	'Patterns.Logging.dll',
 ]
 
 if bld.env.TARGET in ['win']:
@@ -65,7 +68,7 @@ if bld.env.TARGET in ['win']:
 else:
 	embed = ''
 
-bld(
+asm = bld(
 	features = 'cs',
 	unsafe = True,
 	use = deps,
@@ -75,4 +78,17 @@ bld(
 	ide_content = 'WebServices/Models/Model.cd',
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
+	install_755 = {},
 )
+
+if 'win' in bld.env['supported_features']:
+	deps.extend([
+		'UIAutomationClient.dll',
+		'UIAutomationTypes.dll',
+	])
+	root = bld.path.find_or_declare('OS/Windows')
+	asm.install_755[root] = root.ant_glob('Debuggers/DebugEngine/*.dll')
+
+if 'linux' in bld.env['supported_features']:
+	root = bld.path.find_or_declare('OS/Linux')
+	asm.install_755[root] = root.ant_glob('gdb/**/*')

@@ -1,35 +1,20 @@
 using Peach.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
+using Peach.Core.Runtime;
+using Peach.Pro.Core.Runtime;
 
 namespace Peach.CrashTestDummy
 {
-	public class Program
+	public class Program : BaseProgram
 	{
 		[STAThread]
 		static int Main(string[] args)
 		{
-			if (args.Any(i => i == "--gui"))
-				return RunGui(args);
-
-			Console.WriteLine("Opening mutex...");
-			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
-			{
-				for (int i = 0; i < 20; i++)
-				{
-					Console.WriteLine("Waiting for mutex...");
-					if (mutex.TryLock())
-					{
-						Console.WriteLine("Mutex acquired");
-						break;
-					}
-					Thread.Sleep(1000);
-				}
-			}
-			Console.WriteLine("Mutex released");
-			return 0;
+			return new Program().Run(args);
 		}
 
 		class InvisibleForm : Form
@@ -63,13 +48,38 @@ namespace Peach.CrashTestDummy
 			}
 		}
 
-		static int RunGui(string[] args)
+		static int RunGui(List<string> args)
 		{
 			Console.WriteLine("Running gui");
 			var ignore = args.Any(i => i == "--noclose");
 			Application.Run(new InvisibleForm(ignore));
 			Console.WriteLine("Exiting");
 			return 0;
+		}
+
+		protected override int OnRun(List<string> args)
+		{
+			Console.WriteLine("Opening mutex...");
+			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
+			{
+				for (int i = 0; i < 20; i++)
+				{
+					Console.WriteLine("Waiting for mutex...");
+					if (mutex.TryLock())
+					{
+						Console.WriteLine("Mutex acquired");
+						break;
+					}
+					Thread.Sleep(1000);
+				}
+			}
+			Console.WriteLine("Mutex released");
+			return 0;
+		}
+
+		protected override void AddCustomOptions(OptionSet options)
+		{
+			options.Add("gui", x => _cmd = RunGui);
 		}
 	}
 }

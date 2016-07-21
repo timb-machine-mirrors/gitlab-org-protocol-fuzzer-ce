@@ -28,6 +28,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Xml;
 using NLog;
 
@@ -39,7 +41,7 @@ namespace Peach.Core.Dom
 	/// </summary>
 	[Serializable]
 	[Relation("offset", true)]
-	[System.ComponentModel.Description("Byte offset relation")]
+	[Description("Byte offset relation")]
 	[Parameter("of", typeof(string), "Element used to generate relation value", "")]
 	[Parameter("expressionGet", typeof(string), "Scripting expression that is run when getting the value", "")]
 	[Parameter("expressionSet", typeof(string), "Scripting expression that is run when setting the value", "")]
@@ -50,7 +52,7 @@ namespace Peach.Core.Dom
 		[Serializable]
 		private class RelativeBinding : Binding
 		{
-			OffsetRelation rel;
+			private readonly OffsetRelation rel;
 
 			public RelativeBinding(OffsetRelation rel, DataElement parent)
 				: base(parent)
@@ -64,11 +66,15 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		private Binding commonAncestor;
-		private RelativeBinding relativeElement;
+		private readonly Binding commonAncestor;
+		private readonly RelativeBinding relativeElement;
 
+		// This is local only state, don't copy to prevent cloned objects
+		// from getting into the wrong state if the clone happens
+		// when a relation is being evaulated
+		[NonSerialized]
 		private bool _isRecursing;
 
 		public bool isRelativeOffset
@@ -94,9 +100,6 @@ namespace Peach.Core.Dom
 		{
 			commonAncestor = new Binding(parent);
 			relativeElement = new RelativeBinding(this, parent);
-
-			parent.relations.Add(commonAncestor);
-			parent.relations.Add(relativeElement);
 		}
 
 		public override void WritePit(XmlWriter pit)
@@ -162,20 +165,31 @@ namespace Peach.Core.Dom
 			try
 			{
 				_isRecursing = true;
-				long offset = (long)From.DefaultValue;
 
-				if (_expressionGet != null)
+				var offset = From.DefaultValue;
+
+				if (_expressionGet == null)
+					return (long)offset;
+
+				var state = new Dictionary<string, object>
 				{
-					Dictionary<string, object> state = new Dictionary<string, object>();
-					state["offset"] = offset;
-					state["value"] = offset;
-					state["self"] = From;
+					{ "self", From }
+				};
 
-					object value = From.EvalExpression(_expressionGet, state);
-					offset = Convert.ToInt64(value);
+				if (offset.GetVariantType() == Variant.VariantType.ULong)
+				{
+					state["offset"] = (ulong)offset;
+					state["value"] = (ulong)offset;
+				}
+				else
+				{
+					state["offset"] = (long)offset;
+					state["value"] = (long)offset;
 				}
 
-				return offset;
+				var value = From.EvalExpression(_expressionGet, state);
+
+				return Convert.ToInt64(value);
 			}
 			finally
 			{
@@ -188,32 +202,33 @@ namespace Peach.Core.Dom
 			if (_isRecursing)
 				return new Variant(0);
 
+			if (Of == null)
+			{
+				logger.Error("Error, Of returned null");
+				return null;
+			}
+
+			_isRecursing = true;
+
 			try
 			{
-				if (Of == null)
-				{
-					logger.Error("Error, Of returned null");
-					return null;
-				}
-
-				_isRecursing = true;
-
 				// calculateOffset can throw PeachException during mutations
 				// we will catch and return null;
-				long offset = calculateOffset() / 8;
+				var offset = calculateOffset() / 8;
 
-				if (_expressionSet != null)
+				if (_expressionSet == null)
+					return new Variant(offset);
+
+				var state = new Dictionary<string, object>
 				{
-					Dictionary<string, object> state = new Dictionary<string, object>();
-					state["offset"] = offset;
-					state["value"] = offset;
-					state["self"] = From;
+					{ "self", From },
+					{ "offset", offset },
+					{ "value", offset }
+				};
 
-					object value = From.EvalExpression(_expressionSet, state);
-					offset = Convert.ToInt32(value);
-				}
+				var value = From.EvalExpression(_expressionSet, state);
 
-				return new Variant(offset);
+				return Scripting.ToVariant(value);
 			}
 			catch (PeachException ex)
 			{
@@ -226,39 +241,23 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public override void SetValue(Variant value)
-		{
-			int offset = (int)value;
-
-			if (_expressionSet != null)
-			{
-				Dictionary<string, object> state = new Dictionary<string, object>();
-				state["offset"] = offset;
-				state["value"] = offset;
-				state["self"] = From;
-
-				object newValue = From.EvalExpression(_expressionSet, state);
-				offset = Convert.ToInt32(newValue);
-			}
-
-			From.DefaultValue = new Variant(offset);
-		}
-
 		/// <summary>
 		/// Caluclate the offset in bytes between two data elements.
 		/// </summary>
 		/// <returns>Returns the offset in bits between two elements.  Return can be negative.</returns>
 		private long calculateOffset()
 		{
-			System.Diagnostics.Debug.Assert(_isRecursing);
+			Debug.Assert(_isRecursing);
 			var where = commonAncestor.Of;
 			if (where == null)
 				Error("could not locate common ancestor");
 
+			Debug.Assert(where != null);
+
 			var stream = where.Value;
 
 			long fromPosition = 0;
-			long toPosition = 0;
+			long toPosition;
 
 			if (isRelativeOffset)
 			{
@@ -286,7 +285,7 @@ namespace Peach.Core.Dom
 
 		private void Error(string error)
 		{
-			string msg = string.Format(
+			var msg = string.Format(
 				"Error, unable to calculate offset between {0} and {1}, {2}.",
 				From.debugName,
 				Of.debugName,

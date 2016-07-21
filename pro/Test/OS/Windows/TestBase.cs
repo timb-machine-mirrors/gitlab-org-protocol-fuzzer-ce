@@ -1,6 +1,11 @@
 ﻿using System.Reflection;
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Test;
+using Peach.Pro.Core.Runtime;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Pro.Test.OS.Windows
 {
@@ -11,6 +16,8 @@ namespace Peach.Pro.Test.OS.Windows
 		public void SetUp()
 		{
 			DoSetUp();
+
+			BaseProgram.Initialize();
 		}
 
 		[OneTimeTearDown]

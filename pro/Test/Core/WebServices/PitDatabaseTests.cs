@@ -14,6 +14,8 @@ using File = System.IO.File;
 using Monitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Core.Test;
+using Peach.Pro.Core.License;
+using Moq;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -34,7 +36,21 @@ namespace Peach.Pro.Test.Core.WebServices
 		PitDatabase _db;
 		string _originalPitPath;
 
-		static string modelExample =
+		static string dataModelExample =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach xmlns='http://peachfuzzer.com/2012/Peach'
+       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+       xsi:schemaLocation='http://peachfuzzer.com/2012/Peach peach.xsd'
+       author='Pit Author Name'
+       description='IMG PIT'
+       version='0.0.1'>
+	<DataModel name='DM'>
+		<String value='Hello World' />
+	</DataModel>
+</Peach>
+";
+
+		static string stateModelExample =
 @"<?xml version='1.0' encoding='utf-8'?>
 <Peach xmlns='http://peachfuzzer.com/2012/Peach'
        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -43,9 +59,17 @@ namespace Peach.Pro.Test.Core.WebServices
        description='IMG PIT'
        version='0.0.1'>
 
-	<DataModel name='DM'>
-		<String value='Hello World' />
-	</DataModel>
+	<Include ns='DM' src='##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='call' method='StartIterationEvent' publisher='Peach.Agent' />
+			<Action type='output'>
+				<DataModel name='DM:DM'/>
+			</Action>
+			<Action type='call' method='ExitIterationEvent' publisher='Peach.Agent' />
+		</State>
+	</StateModel>
 </Peach>
 ";
 
@@ -57,6 +81,8 @@ namespace Peach.Pro.Test.Core.WebServices
        author='Pit Author Name'
        version='0.0.1'>
 
+	<Include ns='SM' src='##PitLibraryPath##/_Common/Models/Image/IMG_State.xml' />
+
 	<Agent name='TheAgent'>
 		<Monitor class='RunCommand'>
 			<Param name='Command' value='Foo'/>
@@ -64,20 +90,10 @@ namespace Peach.Pro.Test.Core.WebServices
 		</Monitor>
 	</Agent>
 
-	<Include ns='DM' src='file:##PitLibraryPath##/_Common/Models/Image/IMG_Data.xml' />
-
-	<StateModel name='SM' initialState='Initial'>
-		<State name='Initial'>
-			<Action type='output'>
-				<DataModel name='DM:DM'/>
-			</Action>
-		</State>
-	</StateModel>
-
 	<Test name='Default'>
 		<Agent ref='TheAgent'/>
 		<Strategy class='Random'/>
-		<StateModel ref='SM' />
+		<StateModel ref='SM:SM' />
 		<Publisher class='Null'/>
 	</Test>
 </Peach>
@@ -122,6 +138,18 @@ namespace Peach.Pro.Test.Core.WebServices
 		[SetUp]
 		public void SetUp()
 		{
+			// On-disk directory structure:
+			// ##PitLibraryPath## (tmpdir)
+			//   _Common
+			//     Models
+			//       Image
+ 			//         IMG_Data.xml
+			//   Image
+			//     IMG.xml
+			//     IMG.xml.config
+			//   Configs
+			//     IMG.peach      OriginalPit = Image/IMG.xml
+
 			_root = new TempDirectory();
 
 			var cat = Path.Combine(_root.Path, "Image");
@@ -132,11 +160,14 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			_originalPitPath = Path.Combine(cat, "IMG.xml");
 
-			File.WriteAllText(Path.Combine(mod, "IMG_Data.xml"), modelExample);
+			File.WriteAllText(Path.Combine(mod, "IMG_State.xml"), stateModelExample);
+			File.WriteAllText(Path.Combine(mod, "IMG_Data.xml"), dataModelExample);
 			File.WriteAllText(_originalPitPath, pitExample);
 			File.WriteAllText(_originalPitPath + ".config", configExample);
 
-			_db = new PitDatabase();
+			var license = new Mock<ILicense>();
+
+			_db = new PitDatabase(license.Object);
 			_db.ValidationEventHandler += OnValidationEvent;
 			_db.Load(_root.Path);
 		}
@@ -191,6 +222,22 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual(1, libs[2].Versions[0].Version);
 			Assert.True(libs[2].Versions[0].Locked);
 			Assert.AreEqual(0, libs[2].Versions[0].Pits.Count);
+
+			// Metadata
+			var expected = new string[] { "StartIterationEvent", "ExitIterationEvent" };
+			var callParams = (from grp in p.Metadata.Monitors
+							  from monitor in grp.Items
+							  from paramGroup in monitor.Items
+							  where paramGroup.Items != null
+							  from param in paramGroup.Items
+							  where param.Type == ParameterType.Call
+							  select param).ToList();
+
+			Assert.IsNotEmpty(callParams);
+			foreach (var param in callParams)
+			{
+				CollectionAssert.AreEqual(expected, param.Options);
+			}
 		}
 
 		[Test]
@@ -217,16 +264,16 @@ namespace Peach.Pro.Test.Core.WebServices
 		}
 
 		[Test]
-		public void TestCopyPro()
+		public void TestNewConfig()
 		{
-			var ent = _db.Entries.First(x => x.Path == _originalPitPath);
-			var lib = _db.Libraries.ElementAt(1);
+			var lib = _db.Libraries.Single(x => x.Name == "Pits");
+			var ent = _db.Entries.Single(x => x.Path == _originalPitPath);
 			var pit = _db.GetPitById(ent.Id);
 
 			var newName = "IMG Copy";
 			var newDesc = "My copy of the img pit";
 
-			var tuple = _db.CopyPit(pit.PitUrl, newName, newDesc);
+			var tuple = _db.NewConfig(pit.PitUrl, newName, newDesc);
 			Assert.NotNull(tuple.Item1);
 			Assert.NotNull(tuple.Item2);
 
@@ -252,7 +299,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newName = "Foo.Mine";
 			var newDesc = "My copy of the img pit";
 
-			var tuple = _db.CopyPit(pit.PitUrl, newName, newDesc);
+			var tuple = _db.NewConfig(pit.PitUrl, newName, newDesc);
 			var newPit = _db.GetPitByUrl(tuple.Item1.PitUrl);
 
 			Assert.AreEqual(newName, newPit.Name);
@@ -266,7 +313,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var newName = "../../../Foo";
 			var newDesc = "My copy of the img pit";
 
-			var ex = Assert.Throws<ArgumentException>(() => _db.CopyPit(pit.PitUrl, newName, newDesc));
+			var ex = Assert.Throws<ArgumentException>(() => _db.NewConfig(pit.PitUrl, newName, newDesc));
 			Assert.AreEqual("name", ex.ParamName);
 		}
 
@@ -281,7 +328,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			try
 			{
 				// Linux lets everything but '/' be in a file name
-				_db.CopyPit(pit.PitUrl, newName, newDesc);
+				_db.NewConfig(pit.PitUrl, newName, newDesc);
 
 				if (Platform.GetOS() == Platform.OS.Windows)
 					Assert.Fail("Should throw");
@@ -301,7 +348,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		public void TestSetPitConfig()
 		{
 			var ent = _db.Entries.First();
-			var tuple = _db.CopyPit(ent.PitUrl, "IMG Copy", "Desc");
+			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
 			var cfg = new PitConfig {
 				Agents = new List<MAgent>(),
 				Config = new List<Param> {
@@ -331,7 +378,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var ent = _db.Entries.First();
 			Assert.NotNull(ent);
 
-			var tuple = _db.CopyPit(ent.PitUrl, "IMG Copy", "Desc");
+			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
 
 			var cfg = new PitConfig {
 				Config = new List<Param>(),
@@ -476,7 +523,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			var ent = _db.Entries.First();
 			Assert.NotNull(ent);
 
-			var tuple = _db.CopyPit(ent.PitUrl, "IMG Copy", "Desc");
+			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
 
 			var agents = JsonConvert.DeserializeObject<List<MAgent>>(json);
 			Assert.NotNull(agents);
@@ -562,7 +609,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			File.Delete(path);
 
-			_db.Load(_root.Path);
+			_db.Load(_root.Path); 
 			Assert.AreEqual(1, _db.Entries.Count());
 
 			Assert.Null(_db.Entries.FirstOrDefault(e => e.PitConfig.Name == "My"));
@@ -604,7 +651,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				var monitor = agent.monitors.First();
 				Assert.AreEqual("local://", agent.location);
 				Assert.AreEqual(false, monitor.parameters.Any(x => x.Key == "WaitForExitTimeout"), "WaitForExitTimeout should be omitted");
-				Assert.AreEqual("http://127.0.0.1:89/", (string)monitor.parameters.Single(x => x.Key == "Arguments").Value);
+				Assert.AreEqual("true", (string)monitor.parameters.Single(x => x.Key == "UseNLog").Value);
 
 				var config = new RunConfiguration
 				{
@@ -623,6 +670,28 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestMigrateConfig()
 		{
+			// Extract .peach from .xml
+			//
+			// Before:
+			//   ##PitLibraryPath##
+			//     Image
+			//       IMG.xml
+			//       IMG.xml.config
+			//     User
+			//       Image
+			//         IMG.xml
+			// ----
+			// After:
+			//   ##PitLibraryPath##
+			//     Image
+			//       IMG.xml
+			//       IMG.xml.config
+			//     Configs
+			//       Image
+			//         IMG.xml         (backup)
+			//         IMG.xml.config  (backup)
+			//         IMG.peach       OriginalPit = file://##PitLibraryPath##/Image/IMG.xml
+			// ----
 			var category = "Image";
 			var legacyDir = Path.Combine(_root.Path, PitDatabase.LegacyDir, category);
 			Directory.CreateDirectory(legacyDir);
@@ -683,6 +752,24 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestMigrateCustom()
 		{
+			// Split .xml into (.peach, .xml)
+			//
+			// Before:
+			//   ##PitLibraryPath##
+			//     User
+			//       Customer
+			//         IMG.xml
+			//         IMG.xml.config
+			// ----
+			// After:
+			//   ##PitLibraryPath##
+			//     Customer
+			//       IMG.xml
+			//       IMG.xml.config
+			//     Configs
+			//       Customer
+			//         IMG.peach       OriginalPit = file://##PitLibraryPath##/Customer/IMG.xml
+			// ----
 			var category = "Customer";
 			var legacyDir = Path.Combine(_root.Path, PitDatabase.LegacyDir, category);
 			Directory.CreateDirectory(legacyDir);
@@ -807,6 +894,63 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("Foo", newPit.Agents[0].Monitors[0].Map[0].Value);
 			Assert.AreEqual("StartOnCall", newPit.Agents[0].Monitors[0].Map[1].Key);
 			Assert.AreEqual("Foo", newPit.Agents[0].Monitors[0].Map[1].Value);
+		}
+	
+		[Test]
+		public void TestDeletePitConfig()
+		{
+			var ent = _db.Entries.Single(x => x.Path == _originalPitPath);
+			var pit = _db.GetPitById(ent.Id);
+
+			var newName = "Delete";
+			var newDesc = "My copy of the img pit";
+
+			var tuple = _db.NewConfig(pit.PitUrl, newName, newDesc);
+			var expName = Path.Combine(_root.Path, PitDatabase.ConfigsDir, "Image", "Delete.peach");
+			Assert.IsTrue(File.Exists(expName));
+
+			_db.DeletePitById(tuple.Item2.Id);
+			Assert.IsFalse(File.Exists(expName));
+			Assert.IsNull(_db.GetPitById(tuple.Item2.Id));
+		}
+	
+		[Test]
+		public void TestRenamePitConfig()
+		{
+			var ent = _db.Entries.Single(x => x.Path == _originalPitPath);
+			var pit = _db.GetPitById(ent.Id);
+
+			var newName = "Start";
+			var newDesc = "My copy of the img pit";
+
+			// create a new config
+			var start = _db.NewConfig(pit.PitUrl, newName, newDesc);
+			var startPath = Path.Combine(_root.Path, PitDatabase.ConfigsDir, "Image", "Start.peach");
+			Assert.IsTrue(File.Exists(startPath));
+
+			// update the new config
+			var cfg = new PitConfig
+			{
+				Agents = new List<MAgent>(),
+				Config = new List<Param> {
+					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
+				},
+			};
+			_db.UpdatePitByUrl(start.Item1.PitUrl, cfg);
+
+			// copy the config to another
+			var finish = _db.NewConfig(start.Item2.PitUrl, "Finish", newDesc);
+			Assert.IsTrue(File.Exists(Path.Combine(_root.Path, PitDatabase.ConfigsDir, "Image", "Finish.peach")));
+
+			// delete the original config
+			_db.DeletePitById(start.Item2.Id);
+			Assert.IsFalse(File.Exists(startPath));
+			Assert.IsNull(_db.GetPitById(start.Item2.Id));
+
+			// check that the config was copied
+			var saved = PitDatabase.LoadPitConfig(finish.Item2.Path);
+			Assert.AreEqual("SomeMiscVariable", saved.Config[0].Key);
+			Assert.AreEqual("Foo Bar Baz", saved.Config[0].Value);
 		}
 	}
 }

@@ -154,10 +154,6 @@ This example shows a real world example of a flag set by modeling a TCP packet (
 		<StateModel ref="TheStateModel" />
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -166,9 +162,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 17543.
 

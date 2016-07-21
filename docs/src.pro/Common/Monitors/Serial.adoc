@@ -8,7 +8,7 @@ The _Serial Port_ monitor can be used to perform
 data collection,
 fault detection,
 or automation,
-based on the specified parameters.
+based on specified parameters.
 
 The default usage of the _Serial Port_ monitor is data collection.
 The data received via the serial port is logged when a fault occurs.
@@ -32,7 +32,7 @@ Additionally,
 Peach supports multiple _Serial Port_ monitors in a pit,
 allowing for more complex configurations.
 This can be used to monitor multiple serial ports.
-Multiple monitors may also be configured to use the same port to allow for fault detection,
+Multiple monitors may also be configured to use the same port, allowing for fault detection,
 automation,
 and/or data collection to occur on a single port.
 

@@ -6,12 +6,10 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Configuration.dll',
+	'System.Numerics.dll',
 	'System.Xml.dll',
 
 	'IronPython.dll',
-	'IronRuby.dll',
-	'IronRuby.Libraries.dll',
-	'IronRuby.Libraries.Yaml.dll',
 
 	'Microsoft.Dynamic.dll',
 	'Microsoft.CSharp.dll',

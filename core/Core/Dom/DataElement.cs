@@ -989,7 +989,9 @@ namespace Peach.Core.Dom
 			if (name.IndexOf('.') > -1)
 				throw new PeachException("Error, DataElements cannot contain a period in their name. \"" + name + "\"");
 
-			elementType = GetType().GetAttributes<DataElementAttribute>(null).First().elementName;
+			var attr = GetType().GetAttributes<DataElementAttribute>().FirstOrDefault();
+
+			elementType = attr != null ? attr.elementName : GetType().Name;
 
 			_relations = new RelationContainer(this);
 			_name = name;
@@ -1037,12 +1039,7 @@ namespace Peach.Core.Dom
 
 		public string elementType { get; private set; }
 
-		private string _debugName = "debugName is uninitialized";
-		public string debugName { get { return _debugName;  }
-			private set
-			{
-				_debugName = value;
-			} }
+		public string debugName { get; internal set; }
 
 		/// <summary>
 		/// Fully qualified name of DataElement to
@@ -1108,12 +1105,15 @@ namespace Peach.Core.Dom
 			set { hints = value; }
 		}
 
-		public object EvalExpression(string code, Dictionary<string, object> localScope)
+		public object EvalExpression(string code, Dictionary<string, object> localScope, Dom context = null)
 		{
-			var dm = (DataModel)root;
-			var dom = dm.dom ?? dm.actionData.action.parent.parent.parent;
+			if (context == null)
+			{
+				var dm = (DataModel) root;
+				context = dm.dom ?? dm.actionData.action.parent.parent.parent;
+			}
 
-			return dom.Python.Eval(code, localScope);
+			return context.Python.Eval(code, localScope);
 		}
 
 		/// <summary>
@@ -1655,8 +1655,13 @@ namespace Peach.Core.Dom
 			if (MutatedValue != null && mutationFlags.HasFlag(MutateOverride.Relations))
 				return MutatedValue;
 
-			foreach (var r in relations.From<Relation>())
+			for (var i = 0; i < relations.Count; ++i)
 			{
+				// Only interested in "From" relations
+				var r = relations[i] as Relation;
+				if (r == null || r.From != this)
+					continue;
+
 				// CalculateFromValue can return null sometimes
 				// when mutations mess up the relation.
 				// In that case use the exsiting value for this element.

@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using SysProcess = System.Diagnostics.Process;
 using NUnit.Framework;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using Peach.Core.IO;
 
@@ -66,23 +65,25 @@ namespace Peach.Core.Test
 			return new StreamReader(stream).ReadToEnd();
 		}
 
-		public static SysProcess StartAgent(string protocol)
+		public static SysProcess StartAgent(string protocol, string pluginsPath)
 		{
 			var startEvent = new ManualResetEvent(false);
 			var process = new SysProcess();
 			var peach = Utilities.GetAppResourcePath("Peach.exe");
-
-			if (Platform.GetOS() == Platform.OS.Windows)
+			var args = new List<string>
 			{
-				process.StartInfo.FileName = peach;
-				process.StartInfo.Arguments = "-a " + protocol;
-			}
-			else
-			{
-				process.StartInfo.FileName = "mono";
-				process.StartInfo.Arguments = "--debug {0} -a {1}".Fmt(peach, protocol);
-			}
+				peach,
+				"-a", 
+				protocol,
+				"--plugins",
+				pluginsPath,
+			};
 
+			if (Platform.GetOS() != Platform.OS.Windows)
+				args.Insert(0, "mono");
+
+			process.StartInfo.FileName = args.First();
+			process.StartInfo.Arguments = string.Join(" ", args.Skip(1));
 			process.StartInfo.CreateNoWindow = true;
 			process.StartInfo.RedirectStandardInput = true;
 			process.StartInfo.RedirectStandardOutput = true;

@@ -1,31 +1,4 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,6 +8,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Dom.XPath;
+using Peach.Core.IO;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.PitParserTests
@@ -44,52 +18,81 @@ namespace Peach.Pro.Test.Core.PitParserTests
 	[Peach]
 	class XmlTests
 	{
-        //[Test]
-        //public void NumberDefaults()
-        //{
-        //    string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
-        //        "	<Defaults>" +
-        //        "		<Number size=\"8\" endian=\"big\" signed=\"true\"/>" +
-        //        "	</Defaults>" +
-        //        "	<DataModel name=\"TheDataModel\">" +
-        //        "		<Number name=\"TheNumber\" size=\"8\"/>" +
-        //        "	</DataModel>" +
-        //        "</Peach>";
+		//[Test]
+		//public void NumberDefaults()
+		//{
+		//    string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+		//        "	<Defaults>" +
+		//        "		<Number size=\"8\" endian=\"big\" signed=\"true\"/>" +
+		//        "	</Defaults>" +
+		//        "	<DataModel name=\"TheDataModel\">" +
+		//        "		<Number name=\"TheNumber\" size=\"8\"/>" +
+		//        "	</DataModel>" +
+		//        "</Peach>";
 
-        //    PitParser parser = new PitParser();
-        //    Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-        //    Number num = dom.dataModels[0][0] as Number;
+		//    PitParser parser = new PitParser();
+		//    Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+		//    Number num = dom.dataModels[0][0] as Number;
 
-        //    Assert.IsTrue(num.Signed);
-        //    Assert.IsFalse(num.LittleEndian);
-        //}
+		//    Assert.IsTrue(num.Signed);
+		//    Assert.IsFalse(num.LittleEndian);
+		//}
 
-        [Test]
-        public void BasicXmlElement()
-        {
-            string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
-                "	<DataModel name=\"TheDataModel\">" +
-                "		<XmlElement elementName=\"Foo\">"+
-                "           <XmlAttribute attributeName=\"bar\">"+
-                "               <String value=\"attribute value\"/> "+
-                "           </XmlAttribute>"+
-                "		    <XmlElement elementName=\"ChildElement\">" +
-                "               <XmlAttribute attributeName=\"name\">" +
-                "                   <String value=\"attribute value\"/> " +
-                "               </XmlAttribute>" +
-                "           </XmlElement>" +
-                "       </XmlElement>" +
-                "	</DataModel>" +
-                "</Peach>";
+		[Test]
+		public void BasicXmlElement()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<XmlElement elementName=\"Foo\">" +
+				"           <XmlAttribute attributeName=\"bar\">" +
+				"               <String value=\"attribute value\"/> " +
+				"           </XmlAttribute>" +
+				"		    <XmlElement elementName=\"ChildElement\">" +
+				"               <XmlAttribute attributeName=\"name\">" +
+				"                   <String value=\"attribute value\"/> " +
+				"               </XmlAttribute>" +
+				"           </XmlElement>" +
+				"       </XmlElement>" +
+				"	</DataModel>" +
+				"</Peach>";
 
-            PitParser parser = new PitParser();
-            Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-            var elem = dom.dataModels[0][0];
+			PitParser parser = new PitParser();
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var elem = dom.dataModels[0][0];
 
-            Assert.NotNull(elem);
-            Assert.IsTrue(elem is Peach.Core.Dom.XmlElement);
-            Assert.AreEqual(2, ((Peach.Core.Dom.XmlElement)elem).Count);
-        }
+			Assert.NotNull(elem);
+			Assert.IsTrue(elem is Peach.Core.Dom.XmlElement);
+			Assert.AreEqual(2, ((Peach.Core.Dom.XmlElement)elem).Count);
+		}
+
+		[Test]
+		public void BasicXmlCharacterData()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+				"	<DataModel name=\"TheDataModel\">" +
+				"		<XmlElement elementName=\"Foo\">" +
+				"           <XmlAttribute attributeName=\"bar\">" +
+				"               <String value=\"attribute value\"/> " +
+				"           </XmlAttribute>" +
+				"		    <XmlCharacterData>" +
+				"               <String value=\"Value of the CDATA\"/> " +
+				"           </XmlCharacterData>" +
+				"       </XmlElement>" +
+				"	</DataModel>" +
+				"</Peach>";
+
+			PitParser parser = new PitParser();
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var elem = dom.dataModels[0][0];
+
+			var stream = elem.Value;
+			var outXml = new BitReader(stream).ReadString();
+
+			Assert.NotNull(elem);
+			Assert.IsTrue(elem is Peach.Core.Dom.XmlElement);
+			Assert.AreEqual(2, ((Peach.Core.Dom.XmlElement)elem).Count);
+			Assert.AreEqual("<Foo bar=\"attribute value\"><![CDATA[Value of the CDATA]]></Foo>", outXml);
+		}
 
 		[Test]
 		public void BlockXmlElement()

@@ -148,6 +148,8 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public class Test : INamed, IOwned<Dom>
 	{
+		static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		#region Obsolete Functions
 
 		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
@@ -373,11 +375,20 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			foreach (var element in stateModel.TuningTraverse())
+			if (weights.Count > 0)
 			{
-				SelectWeight item;
-				if (weights.TryGetValue(element.Key, out item))
-					element.Value.Weight = item.Weight;
+				foreach (var element in stateModel.TuningTraverse())
+				{
+					SelectWeight item;
+					if (weights.TryGetValue(element.Key, out item))
+					{
+						element.Value.Weight = item.Weight;
+					}
+					else
+					{
+						Logger.Trace("Missing weight specification for: {0}", element.Key);
+					}
+				}
 			}
 
 			// disable mutations for elements in a final state

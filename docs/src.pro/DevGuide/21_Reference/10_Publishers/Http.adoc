@@ -2,16 +2,6 @@
 [[Publishers_Http]]
 == Http Publisher
 
-// 02/13/2014: Seth & Adam: Outlined
-//  Params are good
-//  give full put to run for example
-//  examples to show, fuzzing a get with an input action!
-//  examples: setting cookies for a get
-//  example: doing a post
-
-// 02/14/2014: Jordyn
-//   Added full examples for post,cookie and input
-
 _Http_ publisher sends data over HTTP via a valid HTTP method type.
 
 _Http_ supports the following features:
@@ -22,6 +12,8 @@ _Http_ supports the following features:
  * Fuzzing and dynamic setting of query strings
  * Optional cookie support
  * SSL
+
+See also the xref:Publishers_Rest[Rest] publisher.
 
 === Syntax
 
@@ -67,6 +59,10 @@ xref:Action_open[open]:: Open and initialize the socket.
 xref:Action_close[close]:: Close and clean up the socket.
 xref:Action_output[output]:: Data sent via output is written to the open socket.
 xref:Action_input[input]:: Data received via input is read from the open socket.
+
+=== Scripting
+
+The Http publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See the xref:Publishers_Rest[Rest] publisher examples.
 
 === Examples
 

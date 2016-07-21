@@ -41,7 +41,6 @@ using SysProcess = System.Diagnostics.Process;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
-using NLog.Targets.Wrappers;
 
 namespace Peach.Core
 {
@@ -258,7 +257,7 @@ namespace Peach.Core
 	}
 
 	/// <summary>
-	/// Some utility methods that be usefull
+	/// Some utility methods that can be useful
 	/// </summary>
 	public class Utilities
 	{
@@ -266,41 +265,33 @@ namespace Peach.Core
 		private static readonly string PeachDirectory =
 			AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
+		const string Layout = "${longdate} ${logger} ${message} ${exception:format=tostring}";
+
 		/// <summary>
 		/// Configure NLog.
 		/// </summary>
 		/// <remarks>
-		/// Level &lt; 0 --&gt; Clear Config
-		/// Level = 0 --&gt; Do nothing
+		/// Level = 0 --&gt; Info
 		/// Level = 1 --&gt; Debug
-		/// Leven &gt; 1 --&gt; Trace
+		/// Level &gt; 1 --&gt; Trace
 		/// </remarks>
 		/// <param name="level"></param>
 		public static void ConfigureLogging(int level)
 		{
-			if (level < 0)
-			{
-				// Need to reset configuration to null for NLog 2.0 on mono
-				// so we don't hang on exit.
-				LogManager.Flush();
-				LogManager.Configuration = null;
-				return;
-			}
-
-			if (level == 0)
-				return;
-
 			if (LogManager.Configuration != null && LogManager.Configuration.LoggingRules.Count > 0)
 			{
 				Console.Error.WriteLine("Logging was configured by a .config file, not changing the configuration.");
 				return;
 			}
 
+			var config = new LoggingConfiguration();
+
 			LogLevel logLevel;
+
 			switch (level)
 			{
 				case 0:
-					logLevel = LogLevel.Info;
+					logLevel = LogLevel.Off;
 					break;
 				case 1:
 					logLevel = LogLevel.Debug;
@@ -310,17 +301,33 @@ namespace Peach.Core
 					break;
 			}
 
-			var target = new ConsoleTarget
+			if (logLevel.CompareTo(LogLevel.Off) != 0)
 			{
-				Layout = "${logger} ${message}",
-				Error = true,
-			};
+				var target = new ColoredConsoleTarget
+				{
+					Layout = Layout,
+					ErrorStream = true,
+				};
 
-			var rule = new LoggingRule("*", logLevel, target);
-			var nconfig = new LoggingConfiguration();
-			nconfig.AddTarget("console", target);
-			nconfig.LoggingRules.Add(rule);
-			LogManager.Configuration = nconfig;
+				config.AddTarget("console", target);
+				config.LoggingRules.Add(new LoggingRule("*", logLevel, target));
+			}
+
+			var peachLog = Environment.GetEnvironmentVariable("PEACH_LOG");
+			if (!string.IsNullOrEmpty(peachLog))
+			{
+				var fileTarget = new FileTarget
+				{
+					Name = "FileTarget",
+					Layout = Layout,
+					FileName = peachLog,
+					Encoding = System.Text.Encoding.UTF8,
+				};
+				config.AddTarget("file", fileTarget);
+				config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, fileTarget));
+			}
+
+			LogManager.Configuration = config;
 		}
 
 		public static Configuration GetUserConfig()
@@ -375,7 +382,7 @@ namespace Peach.Core
 
 		/// <summary>
 		/// Returns the name of the currently running executable.
-		/// Equavilant to argv[0] in C/C++.
+		/// Equivalent to argv[0] in C/C++.
 		/// </summary>
 		public static string ExecutableName
 		{
@@ -390,11 +397,9 @@ namespace Peach.Core
 		public static string LoadStringResource(Assembly asm, string fullName)
 		{
 			using (var stream = asm.GetManifestResourceStream(fullName))
+			using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
 			{
-				using (var reader = new StreamReader(stream, System.Text.Encoding.UTF8))
-				{
-					return reader.ReadToEnd();
-				}
+				return reader.ReadToEnd();
 			}
 		}
 
@@ -413,11 +418,9 @@ namespace Peach.Core
 		{
 			var path = Path.Combine(ExecutionDirectory, targetFile);
 			using (var sout = new FileStream(path, FileMode.Create))
+			using (var sin = asm.GetManifestResourceStream(fullName))
 			{
-				using (var sin = asm.GetManifestResourceStream(fullName))
-				{
-					sin.CopyTo(sout);
-				}
+				sin.CopyTo(sout);
 			}
 		}
 

@@ -338,7 +338,7 @@ namespace Peach.Core.Agent.Channels
 				Logger.Warn("Ignoring {0} calling '{1}' on {2} monitor {3}: {4}",
 					ex.GetType().Name, what, mon.Class, mon.Name, ex.Message);
 
-				Logger.Trace("\n{0}", ex);
+				Logger.Trace(ex, "\n{0}", ex);
 			}
 		}
 	}

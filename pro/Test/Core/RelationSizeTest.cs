@@ -1,30 +1,4 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
 
 using System;
 using System.Collections.Generic;
@@ -1057,6 +1031,38 @@ namespace Peach.Pro.Test.Core
 			cracker.CrackData(dm, new BitStream(payload));
 
 			Assert.AreEqual(payload, dm.Value.ToArray());
+		}
+
+		[Test]
+		public void ExpressionGetSetUlong()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Number size='64' signed='false' endian='big'>
+			<Relation type='size' of='Item' expressionGet='size &amp; 0x00ffffffffffffff' expressionSet='size | 0xff00000000000000' />
+		</Number>
+		<Blob name='Item' valueType='hex' value='00 00 00' />
+	</DataModel>
+
+	<DataModel name='DM2' ref='DM1' />
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+
+			var val = dom.dataModels[0].Value.ToArray();
+
+			Assert.AreEqual(new byte[] { 0xff, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0 }, val);
+
+			var data = new BitStream(new byte[] { 0xff, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0 });
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[1], data);
+
+			var blob = (Blob)dom.dataModels[1][1];
+
+			Assert.AreEqual(new byte[] { 0, 0, 0, 0}, ((BitwiseStream)blob.DefaultValue).ToArray());
 		}
 	}
 }

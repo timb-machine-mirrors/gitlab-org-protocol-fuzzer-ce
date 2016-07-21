@@ -1,30 +1,4 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
 
 using System.IO;
 using NUnit.Framework;
@@ -314,10 +288,10 @@ namespace Peach.Pro.Test.Core.CrackingTests
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 			"	<DataModel name=\"TheDataModel\">" +
-			"      <Block name=\"10\">" +
-			"         <Number name=\"14\" signed=\"false\" size=\"32\"/>" +
-			"         <Number name=\"15\" signed=\"false\" size=\"32\">" +
-			"           <Relation type=\"size\" of=\"10\"/>" +
+			"      <Block name=\"Elem10\">" +
+			"         <Number name=\"Elem14\" signed=\"false\" size=\"32\"/>" +
+			"         <Number name=\"Elem15\" signed=\"false\" size=\"32\">" +
+			"           <Relation type=\"size\" of=\"Elem10\"/>" +
 			"         </Number>" +
 			"         <Blob name='blob'/>" +
 			"      </Block>" +
@@ -332,7 +306,7 @@ namespace Peach.Pro.Test.Core.CrackingTests
 			DataCracker cracker = new DataCracker();
 			cracker.CrackData(dom.dataModels[0], data);
 
-			var elem = dom.dataModels[0].find("TheDataModel.10.blob");
+			var elem = dom.dataModels[0].find("TheDataModel.Elem10.blob");
 			Assert.NotNull(elem);
 			Assert.AreEqual(16, elem.Value.LengthBits);
 		}

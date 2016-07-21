@@ -8,23 +8,8 @@ namespace Peach {
 		isExpired: boolean;
 		errorText: string;
 		expiration: string;
-		version: string;
 		eulaAccepted: boolean;
+		eulas: string[];
+		version: string;
 	}
-
-	export var LicenseVersion = {
-		Enterprise: '',
-		Distributed: '',
-		ProfessionalWithConsulting: '',
-		Professional: '',
-		TrialAllPits: '',
-		Trial: '',
-		Academic: '',
-		TestSuites: '',
-		Studio: '',
-		Developer: '',
-		Unknown: ''
-	};
-	MakeLowerEnum(LicenseVersion);
 }
- 

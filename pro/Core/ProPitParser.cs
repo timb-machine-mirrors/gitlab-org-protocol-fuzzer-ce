@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -7,6 +8,7 @@ using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Dom.Actions;
 using Peach.Pro.Core.Godel;
+using Peach.Pro.Core.License;
 using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
 using StateModel = Peach.Pro.Core.Godel.StateModel;
@@ -18,7 +20,24 @@ namespace Peach.Pro.Core
 	/// </summary>
 	public class ProPitParser : PitParser
 	{
-		static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+		private readonly IPitResource _pitResource;
+
+		public ProPitParser(
+			ILicense license,
+			string pitLibraryPath,
+			string pitPath,
+			ResourceRoot root = null)
+		{
+			_pitResource = new PitResource(license, pitLibraryPath, pitPath, root);
+		}
+
+		// should only be used for unit tests
+		internal ProPitParser()
+		{
+			_pitResource = new FilePitResource();
+		}
 
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
@@ -76,7 +95,7 @@ namespace Peach.Pro.Core
 
 			foreach (var stateModel in godelDom.stateModels)
 			{
-				var sm = (StateModel) stateModel;
+				var sm = (StateModel)stateModel;
 				foreach (var item in sm.godel)
 				{
 					if (!string.IsNullOrEmpty(item.refName))
@@ -129,6 +148,34 @@ namespace Peach.Pro.Core
 
 				sm.godel = newList;
 			}
+		}
+
+		protected override void handleInclude(Peach.Core.Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
+		{
+			var ns = child.getAttrString("ns");
+			var src = child.getAttrString("src")
+				.Replace("file:", "");
+
+			var stream = _pitResource.Load(src);
+			if (stream == null)
+				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
+
+			Peach.Core.Dom.Dom newDom;
+			using (stream)
+			{
+				var dataName = Path.GetFileNameWithoutExtension(src);
+				newDom = asParser(args, new StreamReader(stream), dataName, true);
+				newDom.fileName = src;
+			}
+
+			newDom.Name = ns;
+			dom.ns.Add(newDom);
+
+			foreach (var item in newDom.Python.Paths)
+				dom.Python.AddSearchPath(item);
+
+			foreach (var item in newDom.Python.Modules)
+				dom.Python.ImportModule(item);
 		}
 
 		private void deferParse(StateModel sm, string fullName, XmlNode node)

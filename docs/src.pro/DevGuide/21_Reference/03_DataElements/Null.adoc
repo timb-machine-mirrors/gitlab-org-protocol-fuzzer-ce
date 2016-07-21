@@ -2,9 +2,9 @@
 [[Null]]
 == Null
 
-The _Null_ element defines an element which has no value. This element is most useful when used as a child of a xref:Json[Json] element.
+The _Null_ element defines an element which has no value.
 
-The Null element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence], xref:Json[Json] or xref:Choice[Choice].
+The Null element is a child element of xref:DataModel[DataModel], xref:Block[Block], xref:Sequence[Sequence] or xref:Choice[Choice].
 
 === Syntax
 
@@ -98,10 +98,6 @@ Outputs a Json string with a single null value.
 		<StateModel ref="TheState"/>
 
 		<Publisher class="ConsoleHex"/>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -110,9 +106,6 @@ Output from this example.
 
 ----
 >peach -1 --debug NullExample1.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Web site running at: http://localhost:8888/
 

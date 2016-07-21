@@ -107,10 +107,6 @@ This example uses NetBiosDecode on an inline value, writes the transformed value
 			<Param name="FileName" value="encrypted.bin" />
 			<Param name="Overwrite" value="false" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -118,9 +114,6 @@ This example uses NetBiosDecode on an inline value, writes the transformed value
 Output from this example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 54340.
 

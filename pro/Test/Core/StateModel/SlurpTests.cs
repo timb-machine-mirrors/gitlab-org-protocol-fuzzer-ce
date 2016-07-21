@@ -5,6 +5,8 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Test;
+using System.Collections.Generic;
+using Peach.Core.IO;
 
 namespace Peach.Pro.Test.Core.StateModel
 {
@@ -16,47 +18,44 @@ namespace Peach.Pro.Test.Core.StateModel
 		[Test]
 		public void Test1()
 		{
-			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-				"<Peach>" +
-				"   <DataModel name=\"TheDataModel1\">" +
-				"       <String name=\"String1\" value=\"1234567890\"/>" +
-				"   </DataModel>" +
-				"   <DataModel name=\"TheDataModel2\">" +
-				"       <String name=\"String2\" value=\"Hello World!\"/>" +
-				"   </DataModel>" +
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel1'>
+		<String name='String1' value='1234567890'/>
+	</DataModel>
+	<DataModel name='TheDataModel2'>
+		<String name='String2' value='Hello World!'/>
+	</DataModel>
 
-				"   <StateModel name=\"TheStateModel\" initialState=\"InitialState\">" +
-				"       <State name=\"InitialState\">" +
-				"           <Action name=\"Action1\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel1\"/>" +
-				"           </Action>" +
-				
-				"           <Action name=\"Action2\" type=\"slurp\" valueXpath=\"//String1\" setXpath=\"//String2\" />"+
+	<StateModel name='TheStateModel' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action name='Action1' type='output'>
+				<DataModel ref='TheDataModel1'/>
+			</Action>
 
-				"           <Action name=\"Action3\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel2\"/>" +
-				"           </Action>" +
+			<Action name='Action2' type='slurp' valueXpath='//String1' setXpath='//String2' />
 
-				"           <Action name=\"Action4\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel2\"/>" +
-				"           </Action>" +
-				"       </State>" +
-				"   </StateModel>" +
+			<Action name='Action3' type='output'>
+				<DataModel ref='TheDataModel2'/>
+			</Action>
 
-				"   <Test name=\"Default\">" +
-				"       <StateModel ref=\"TheStateModel\"/>" +
-				"       <Publisher class=\"Null\"/>" +
-				"       <Strategy class=\"RandomDeterministic\"/>" +
-				"   </Test>" +
-				"</Peach>";
+			<Action name='Action4' type='output'>
+				<DataModel ref='TheDataModel2'/>
+			</Action>
+		</State>
+	</StateModel>
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+	<Test name='Default'>
+		<StateModel ref='TheStateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='RandomDeterministic'/>
+	</Test>
+</Peach>";
 
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
 			e.startFuzzing(dom, config);
 
 			var stateModel = dom.tests[0].stateModel;
@@ -69,47 +68,44 @@ namespace Peach.Pro.Test.Core.StateModel
 		[Test]
 		public void Test2()
 		{
-			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-				"<Peach>" +
-				"   <DataModel name=\"TheDataModel1\">" +
-				"       <String name=\"String1\" value=\"1234567890\"/>" +
-				"   </DataModel>" +
-				"   <DataModel name=\"TheDataModel2\">" +
-				"       <String name=\"String2\" value=\"Hello World!\"/>" +
-				"   </DataModel>" +
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel1'>
+		<String name='String1' value='1234567890'/>
+	</DataModel>
+	<DataModel name='TheDataModel2'>
+		<String name='String2' value='Hello World!'/>
+	</DataModel>
 
-				"   <StateModel name=\"TheStateModel\" initialState=\"InitialState\">" +
-				"       <State name=\"InitialState\">" +
-				"           <Action name=\"Action1\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel1\"/>" +
-				"           </Action>" +
+	<StateModel name='TheStateModel' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action name='Action1' type='output'>
+				<DataModel ref='TheDataModel1'/>
+			</Action>
 
-				"           <Action name=\"Action2\" type=\"slurp\" valueXpath=\"//Action1/TheDataModel1/String1\" setXpath=\"//String2\" />" +
+			<Action name='Action2' type='slurp' valueXpath='//Action1/TheDataModel1/String1' setXpath='//String2' />
 
-				"           <Action name=\"Action3\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel1\"/>" +
-				"           </Action>" +
+			<Action name='Action3' type='output'>
+				<DataModel ref='TheDataModel1'/>
+			</Action>
 
-				"           <Action name=\"Action4\" type=\"output\">" +
-				"               <DataModel ref=\"TheDataModel2\"/>" +
-				"           </Action>" +
-				"       </State>" +
-				"   </StateModel>" +
+			<Action name='Action4' type='output'>
+				<DataModel ref='TheDataModel2'/>
+			</Action>
+		</State>
+	</StateModel>
 
-				"   <Test name=\"Default\">" +
-				"       <StateModel ref=\"TheStateModel\"/>" +
-				"       <Publisher class=\"Null\"/>" +
-				"       <Strategy class=\"RandomDeterministic\"/>" +
-				"   </Test>" +
-				"</Peach>";
+	<Test name='Default'>
+		<StateModel ref='TheStateModel'/>
+		<Publisher class='Null'/>
+		<Strategy class='RandomDeterministic'/>
+	</Test>
+</Peach>";
 
-			PitParser parser = new PitParser();
-			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
-
-			RunConfiguration config = new RunConfiguration();
-			config.singleIteration = true;
-
-			Engine e = new Engine(null);
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
 			e.startFuzzing(dom, config);
 
 			var stateModel = dom.tests[0].stateModel;
@@ -164,12 +160,7 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-
-			var config = new RunConfiguration
-			{
-				singleIteration = true,
-			};
-
+			var config = new RunConfiguration { singleIteration = true, };
 			var engine = new Engine(null);
 			engine.startFuzzing(dom, config);
 
@@ -270,7 +261,7 @@ namespace Peach.Pro.Test.Core.StateModel
 		[Test]
 		public void SlurpInScopeChoice()
 		{
-			// Ensure that slurp will only get values for elected choice elements
+			// Ensure that slurp will only get values for selected choice elements
 			// even if multiple elements of that name exist in non-selected
 			// or out of scope choice elements
 
@@ -379,12 +370,7 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-
-			var config = new RunConfiguration
-			{
-				singleIteration = true,
-			};
-
+			var config = new RunConfiguration { singleIteration = true, };
 			var engine = new Engine(null);
 			engine.startFuzzing(dom, config);
 
@@ -448,12 +434,7 @@ namespace Peach.Pro.Test.Core.StateModel
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
-
-			var config = new RunConfiguration
-			{
-				singleIteration = true,
-			};
-
+			var config = new RunConfiguration { singleIteration = true, };
 			var engine = new Engine(null);
 			engine.startFuzzing(dom, config);
 
@@ -508,7 +489,7 @@ namespace Peach.Pro.Test.Core.StateModel
 			var dom = DataModelCollector.ParsePit(xml);
 			var config = new RunConfiguration { singleIteration = true };
 			var engine = new Engine(null);
-			
+
 			var ex = Assert.Throws<PeachException>(() => engine.startFuzzing(dom, config));
 
 			Assert.AreEqual("Error, slurp valueXpath is not a valid xpath selector. [//01-source]", ex.Message);
@@ -544,6 +525,93 @@ namespace Peach.Pro.Test.Core.StateModel
 			var ex = Assert.Throws<PeachException>(() => engine.startFuzzing(dom, config));
 
 			Assert.AreEqual("Error, slurp setXpath is not a valid xpath selector. [//01-target]", ex.Message);
+		}
+
+		[Test]
+		public void TestCache()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel1'>
+		<String name='String1' value='1234567890'/>
+	</DataModel>
+	<DataModel name='TheDataModel2'>
+		<String name='String2' value='Hello World!'/>
+	</DataModel>
+
+	<StateModel name='TheStateModel' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action name='Action1' type='output'>
+				<DataModel ref='TheDataModel1'/>
+			</Action>
+
+			<Action name='Action2' type='slurp' valueXpath='//String1' setXpath='//String2' />
+
+			<Action name='Action3' type='output'>
+				<DataModel ref='TheDataModel2'/>
+			</Action>
+
+			<Action name='Action4' type='output'>
+				<DataModel ref='TheDataModel2'/>
+				<Data><Field name='String2' value='Foo' /></Data>
+				<Data><Field name='String2' value='Bar' /></Data>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheStateModel'/>
+		<Publisher class='Null'/>
+		<Exclude/>
+		<Strategy class='RandomStrategy'>
+			<Param name='SwitchCount' value='2'/>
+		</Strategy>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 0,
+				rangeStop = 10,
+			};
+			var e = new Engine(null);
+			var results = new List<string>();
+			e.IterationFinished += (context, iteration) =>
+			{
+				var sm = context.test.stateModel;
+				var initial = sm.initialState;
+
+				var dm0 = initial.actions[0].dataModel;
+				var dm2 = initial.actions[2].dataModel;
+				var dm3 = initial.actions[3].dataModel;
+
+				var result = string.Join("|",
+					StringValue(dm0.Value),
+					StringValue(dm2.Value),
+					StringValue(dm3.Value)
+				); 
+
+				results.Add(result);
+			};
+
+			var stateModel = dom.tests[0].stateModel;
+			var state = stateModel.initialState;
+	
+			var source = System.Text.Encoding.ASCII.GetString(state.actions[0].dataModel.Value.ToArray());
+			var value = "{0}|{0}|{0}".Fmt(source);
+			var expected = Enumerable.Repeat(value, 15);
+
+			e.startFuzzing(dom, config);
+
+			CollectionAssert.AreEqual(expected, results);
+		}
+
+		string StringValue(BitwiseStream bs)
+		{
+			return System.Text.Encoding.ASCII.GetString(bs.ToArray());
 		}
 	}
 }

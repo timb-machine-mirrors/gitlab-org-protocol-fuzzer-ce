@@ -75,6 +75,7 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_Tcp[TcpClient]
  * xref:Publishers_TcpListener[TcpListener]
  * xref:Publishers_Udp[Udp]
+ * xref:Publishers_Usb[Usb]
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  * xref:Publishers_Zip[Zip]
@@ -140,18 +141,12 @@ For example, you might use multiple publishers to communicate with a network ser
 			<Param name="Host" value="localhost"/>
 			<Param name="Port" value="54321"/>
 		</Publisher>
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
 
 ----
 $ peach -1 --debug TwoPublisher.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 9324.
 Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
@@ -216,6 +211,7 @@ include::SslListener.adoc[]
 include::Tcp.adoc[]
 include::TcpListener.adoc[]
 include::Udp.adoc[]
+include::Usb.adoc[]
 include::WebService.adoc[]
 include::WebSocket.adoc[]
 include::Zip.adoc[]

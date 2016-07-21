@@ -33,8 +33,9 @@ namespace Peach {
 				});
 			});
 
-			this.eulaService.Verify().then((license : ILicense) => {
+			this.eulaService.Verify().then(license => {
 				this.license = license;
+				this.Version = license.version;
 			});
 		}
 
@@ -43,6 +44,7 @@ namespace Peach {
 		private license: ILicense;
 		public Metrics = C.MetricsList;
 		public WizardTracks = Peach.WizardTracks;
+		public Version: string;
 
 		private get LicenseExpiration(): moment.Moment {
 			if (_.isUndefined(this.license)) {

@@ -22,7 +22,7 @@ for a in System.AppDomain.CurrentDomain.GetAssemblies():
 # Create wrappers for class attributes we will use
 SerializableAttr = clrtype.attribute(System.SerializableAttribute)
 LoggerAttr = clrtype.attribute(Peach.Core.LoggerAttribute)
-DescriptionAttr = clrtype.attribute(Peach.Core.DescriptionAttribute)
+DescriptionAttr = clrtype.attribute(System.ComponentModel.DescriptionAttribute)
 ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
 class PythonLogger(BasePythonLogger):

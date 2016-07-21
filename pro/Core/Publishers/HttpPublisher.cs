@@ -1,30 +1,4 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
 
 using System;
 using System.Collections.Generic;
@@ -73,7 +47,10 @@ namespace Peach.Pro.Core.Publishers
 		protected CookieContainer CookieJar = new CookieContainer();
 		protected HttpWebResponse Response { get; set; }
 		protected string Query { get; set; }
-		protected Dictionary<string, string> Headers = new Dictionary<string, string>();
+
+		// Allow access from scripting
+		public Dictionary<string, string> Headers = new Dictionary<string, string>();
+
 		protected CredentialCache Credentials;
 
 		public HttpPublisher(Dictionary<string, Variant> args)
@@ -399,13 +376,47 @@ namespace Peach.Pro.Core.Publishers
 
 			if (FaultOnStatusCodes.Contains((int)Response.StatusCode))
 			{
+				var sb = new StringBuilder();
+
+				sb.AppendFormat("HTTP/{0} {1} {2}\r\n", Response.ProtocolVersion, (int)Response.StatusCode, Response.StatusDescription);
+
+				for (var i = 0; i < Response.Headers.Count; ++i)
+				{
+					sb.AppendFormat("{0}: {1}\r\n", Response.Headers.Keys[i], Response.Headers[i]);
+				}
+
+				sb.AppendFormat("\r\n");
+
+				try
+				{
+					var stream = Response.GetResponseStream();
+
+					if (stream != null)
+					{
+						var ch = Response.CharacterSet;
+						if (string.IsNullOrEmpty(ch))
+							ch = "utf-8";
+
+						using (var rdr = new StreamReader(stream, System.Text.Encoding.GetEncoding(ch)))
+						{
+							string line;
+							while ((line = rdr.ReadLine()) != null)
+								sb.AppendLine(line);
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					sb.Append("Error reading reponse from server.");
+					sb.AppendLine();
+					sb.Append(ex.Message);
+					sb.AppendLine();
+				}
+
 				var fault = new FaultSummary
 				{
 					Title = "Fault on status code {0} ({1})".Fmt((int)Response.StatusCode, Response.StatusCode),
-					Description = "Publisher has been configured to fault when one " + 
-						"or more HTTP status codes are detected.\n" +
-						"During this test case the status code {0} ({1}) " +
-						"was detected causing this fault.".Fmt((int) Response.StatusCode, Response.StatusCode),
+					Description = sb.ToString(),
 					MajorHash = FaultSummary.Hash(Response.StatusCode.ToString()),
 					MinorHash = FaultSummary.Hash(string.Format("{0} {1} {2}", request.Method, request.RequestUri, Response.StatusCode)),
 					Exploitablity = "Unknown"

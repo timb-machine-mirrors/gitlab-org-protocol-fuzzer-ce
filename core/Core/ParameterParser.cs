@@ -11,6 +11,20 @@ namespace Peach.Core
 {
 	public static class ParameterParser
 	{
+		public static void EnsureOne<T>(T obj, params string[] parameters)
+		{
+			var values = parameters
+				.Select(p => new { Name = p, Value = GetParamValue(obj, p) })
+				.Where(i => !string.IsNullOrEmpty(i.Value))
+				.ToList();
+
+			if (values.Count == 0)
+				RaiseError(typeof(T), "requires one of the following parameters be set: '{0}'.", string.Join("', '", parameters));
+
+			if (values.Count > 1)
+				RaiseError(typeof(T), "only suports one of the following parameters be set at the same time: '{0}'.", string.Join("', '", values.Select(v => v.Name)));
+		}
+
 		/// <summary>
 		/// Parses a dictionary of arguments, similiar to python kwargs.
 		/// For each parameter attribute on 'T', the appropriate property
@@ -295,5 +309,17 @@ namespace Peach.Core
 			throw new PeachException(msg, ex);
 		}
 
+		private static string GetParamValue<T>(T obj, string paramName)
+		{
+			var pi = typeof(T).GetProperty(paramName);
+			if (pi == null)
+				throw new ArgumentException("{0} doesn't have a property named '{1}'.".Fmt(typeof(T).Name, paramName), "paramName");
+
+			var ret = pi.GetValue(obj);
+			if (ret == null)
+				return null;
+
+			return ret.ToString();
+		}
 	}
 }

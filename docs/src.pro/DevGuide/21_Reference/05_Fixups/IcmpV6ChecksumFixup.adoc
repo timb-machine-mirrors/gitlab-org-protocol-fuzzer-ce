@@ -71,12 +71,7 @@ dst:: Destination IPv6 address of the remote machine.
       <Param name="Host" value="::1"/>
       <Param name="Interface" value="::1"/>
       <Param name="Protocol" value="1"/>
-    </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
+    </Publisher>  </Test>
 </Peach>
 ----
 
@@ -84,9 +79,6 @@ Output from this example.
 
 ----
 >peach -1 --debug DocSample.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 43286.
 

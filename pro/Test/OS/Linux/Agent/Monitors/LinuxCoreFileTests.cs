@@ -276,7 +276,8 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			var ex = Assert.Throws<PeachException>(() => runner.Run());
 
-			StringAssert.Contains("The specified log folder is too long, it must be less than 60 characters.", ex.Message);
+			StringAssert.Contains("The specified log folder is too long, it must be less than 60 characters", ex.Message);
+			StringAssert.Contains(path, ex.Message);
 		}
 
 		[Test]
