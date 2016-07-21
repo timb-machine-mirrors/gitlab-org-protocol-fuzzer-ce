@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Web.Http;
 
 namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
@@ -10,7 +6,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 	[RoutePrefix(Prefix)]
 	public class ValuesController : ApiController
 	{
-		public const string Prefix = "/api/values";
+		public const string Prefix = "api/values";
 
 		// GET api/values 
 		[Route("")]
