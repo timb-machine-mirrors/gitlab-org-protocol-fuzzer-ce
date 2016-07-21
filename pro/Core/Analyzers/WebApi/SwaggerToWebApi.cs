@@ -129,37 +129,10 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			else
 				apiParam.Required = false;
 
-			switch (apiParam.In)
+			if (apiParam.In == WebApiParameterIn.Body)
 			{
-				case  WebApiParameterIn.Body:
 					var swaggerRef = NameFromSwaggerRef(param["schema"]["$ref"].Value<string>());
 					apiParam.DataElement = models.First(i => i.Name == swaggerRef)[0].Clone();
-					break;
-
-				default:
-
-					switch (apiParam.Type)
-					{
-						case WebApiParameterType.File:
-							apiParam.DataElement = new Blob();
-							break;
-
-						case WebApiParameterType.Array:
-							apiParam.DataElement = new Sequence();
-							break;
-
-						case WebApiParameterType.Boolean:
-							apiParam.DataElement = new Bool();
-							break;
-
-						case WebApiParameterType.Integer:
-						case WebApiParameterType.Number:
-						case WebApiParameterType.String:
-							apiParam.DataElement = new Peach.Core.Dom.String();
-							break;
-					}
-
-					break;
 			}
 
 			return apiParam;

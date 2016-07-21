@@ -168,7 +168,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			{
 				var id = Guid.NewGuid().ToString();
 
-				var param = new ActionParameter(id) {dataModel = dom.dataModels["WebApiString"]};
+				var param = new ActionParameter(id) {dataModel = (DataModel)dom.dataModels["WebApiString"].Clone()};
 				part.DataElement = param.dataModel;
 
 				var dataSet = new DataSet() {Name = Guid.NewGuid().ToString()};
@@ -184,8 +184,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			{
 				var id = Guid.NewGuid().ToString();
 
-				var param = new ActionParameter(id);
-				param.dataModel = dom.dataModels["WebApiString"];
+				var param = new ActionParameter(id) {dataModel = (DataModel)dom.dataModels["WebApiString"].Clone()};
 				part.DataElement = param.dataModel;
 
 				var dataSet = new DataSet() { Name = Guid.NewGuid().ToString() };
@@ -201,13 +200,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			if (body != null)
 			{
 				var model = new DataModel(call.Name + "_Body");
-				model.Add(body.DataElement);
+				model.Add(body.DataElement.Clone());
 				dom.dataModels.Add(model);
 
 				var id = Guid.NewGuid().ToString();
 
-				var param = new ActionParameter(id);
-				param.dataModel = model;
+				var param = new ActionParameter(id) {dataModel = model};
 
 				call.parameters.Add(param);
 			}

@@ -1037,7 +1037,12 @@ namespace Peach.Core.Dom
 
 		public string elementType { get; private set; }
 
-		public string debugName { get; private set; }
+		private string _debugName = "debugName is uninitialized";
+		public string debugName { get { return _debugName;  }
+			private set
+			{
+				_debugName = value;
+			} }
 
 		/// <summary>
 		/// Fully qualified name of DataElement to
