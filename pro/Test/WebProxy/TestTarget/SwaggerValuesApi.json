@@ -1,0 +1,192 @@
+﻿{
+    "swagger": "2.0",
+    "info": {
+        "title": "Peach Test API",
+        "description": "Move your app forward with the Uber API",
+        "version": "1.0.0"
+    },
+    "host": "localhost:9001",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/api",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/values": {
+            "get": {
+                "operationId": "GetAllValues",
+                "summary": "Values",
+                "description": "Get all values",
+                "tags": [
+                    "Value"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Value",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Value"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "CreateValue",
+                "summary": "Create a new value",
+                "description": "Yup",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "in": "formData",
+                        "description": "It's a value dude",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "Value"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/values/{id}": {
+            "get": {
+                "operationId": "GetValueById",
+                "summary": "Values",
+                "description": "Get specific value",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of value",
+                        "type": "number",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "Value"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Value",
+                        "schema": {
+                            "$ref": "#/definitions/Value"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "UpdateValueById",
+                "summary": "Create a new value",
+                "description": "Yup",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of value",
+                        "type": "number",
+                        "required": true
+                    },
+                    {
+                        "name": "value",
+                        "in": "formData",
+                        "description": "It's a value dude",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "Value"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "DeleteValueById",
+                "summary": "Values",
+                "description": "Get specific value",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of value",
+                        "type": "number",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "Value"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Value",
+                        "schema": {
+                            "$ref": "#/definitions/Value"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Value": {
+            "type": "string"
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
