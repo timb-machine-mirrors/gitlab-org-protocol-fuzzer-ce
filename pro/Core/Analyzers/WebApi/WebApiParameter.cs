@@ -32,6 +32,27 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 	public class WebApiParameter
 	{
 		/// <summary>
+		/// Parameter from Swagger definition
+		/// </summary>
+		/// <remarks>
+		/// When used by the web api proxy, new parameter
+		/// is generated based on the request data.  In such
+		/// a case this property is set to the matching swagger
+		/// definition which can be used to identify differences
+		/// between a documented possible operation and the actual
+		/// request received by the proxy.
+		/// 
+		/// This property will be null if parameter comes from a 
+		/// swagger definition
+		/// </remarks>
+		public WebApiParameter ShadowParameter { get; set; }
+
+		/// <summary>
+		/// Was this instance created via a swagger spec
+		/// </summary>
+		public bool FromSwagger { get; set; }
+
+		/// <summary>
 		/// Format identifier for path replacements
 		/// </summary>
 		public int PathFormatId { get; set; }
@@ -82,5 +103,10 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		/// DataElement for this parameter
 		/// </summary>
 		public DataElement DataElement { get; set; }
+
+		public WebApiParameter()
+		{
+			FromSwagger = false;
+		}
 	}
 }

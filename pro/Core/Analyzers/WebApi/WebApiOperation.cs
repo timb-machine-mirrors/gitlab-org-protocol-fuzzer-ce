@@ -82,6 +82,11 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		public Call Call { get; set; }
 
 		/// <summary>
+		/// DataModel for this operation. Contains all parameters and body.
+		/// </summary>
+		public DataModel DataModel { get; set; }
+
+		/// <summary>
 		/// HTTP Method for operation
 		/// </summary>
 		public string Method
