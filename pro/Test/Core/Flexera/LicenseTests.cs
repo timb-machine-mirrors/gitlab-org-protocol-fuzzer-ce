@@ -11,26 +11,22 @@ namespace Peach.Pro.Test.Core.Flexera
 	[Quick]
 	internal class LicenseTests
 	{
-		const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/deviceservices";
-		//const string ServerUrl = "https://flex1205.compliance.flexnetoperations.com/instances/D2TW8ES08Z6V/request";
+		const string ServerUrl = "https://flex1253-uat.compliance.flexnetoperations.com/instances/278QV9C68FEK/request";
 
 		[Test]
 		public void TestCapabilityRequest()
 		{
-			var rightsId = "0c37-14b5-1d14-4c3a-a784-8879-91e4-d6a8";
-			var feature = "Acme-Peach-Run-Job-Metered";
-			RunHost("TEST-1", rightsId, feature);
-			RunHost("TEST-2", rightsId, feature);
+			var feature = "Test-Metered";
+			RunHost("TEST-1", "3489-9efc-c700-48e0-b96e-1518-7b43-9644", feature);
+			RunHost("TEST-2", "821a-de30-c29c-4ae9-a195-3f76-4d9c-cc6a", feature);
 		}
 
 		private static void RunHost(string hostId, string rightsId, string feature)
 		{
 			using (var licensing = LicensingFactory.GetLicensing(IdentityClient_UAT.IdentityData, null, hostId))
 			{
-				licensing.LicenseManager.Reset();
-
 				Console.WriteLine("RunHost> request {0}, {1}", hostId, feature);
-				DoRequest(licensing, rightsId, feature, 1);
+				DoRequest(licensing, rightsId, feature, 10);
 				Console.WriteLine("----------");
 
 				var acquired = 0;
@@ -51,7 +47,7 @@ namespace Peach.Pro.Test.Core.Flexera
 				{
 					licensing.LicenseManager.ReturnAllLicenses();
 				}
-				Assert.AreEqual(2, acquired);
+				Assert.AreEqual(10, acquired);
 
 				//Console.WriteLine("RunHost> return {0}, {1}", hostId, feature);
 				//DoRequest(licensing, rightsId, feature, -2);
@@ -65,8 +61,8 @@ namespace Peach.Pro.Test.Core.Flexera
 			var options = licensing.LicenseManager.CreateCapabilityRequestOptions();
 			options.Operation = CapabilityRequestOperation.Request;
 			options.AddRightsId(rightsId, 1);
-			options.RequestorId = "FlxLicenseTests";
-			var data = new FeatureData(feature, "4", count);
+			options.RequestorId = "LicenseTests";
+			var data = new FeatureData(feature, "1.0", count);
 			options.AddDesiredFeature(data);
 			options.ForceResponse = true;
 
