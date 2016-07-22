@@ -31,6 +31,27 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 	public class WebApiOperation
 	{
 		/// <summary>
+		/// Operation from Swagger definition if it exists.
+		/// </summary>
+		/// <remarks>
+		/// When used by the web api proxy, new operation
+		/// is generated based on the request data.  In such
+		/// a case this property is set to the matching swagger
+		/// definition which can be used to identify differences
+		/// between a documented possible operation and the actual
+		/// request received by the proxy.
+		/// 
+		/// This property will be null if Operation comes from a 
+		/// swagger definition
+		/// </remarks>
+		public WebApiOperation ShadowOperation { get; set; }
+
+		/// <summary>
+		/// Was this instance created via a swagger spec
+		/// </summary>
+		public bool FromSwagger { get; set; }
+
+		/// <summary>
 		/// Path this operation is for.
 		/// </summary>
 		public WebApiPath Path { get; set; }
@@ -79,6 +100,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		public WebApiOperation()
 		{
 			Parameters = new List<WebApiParameter>();
+			FromSwagger = false;
 		}
 
 		/// <summary>

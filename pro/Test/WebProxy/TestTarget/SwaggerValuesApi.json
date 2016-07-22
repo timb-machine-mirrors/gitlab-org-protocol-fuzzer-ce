@@ -149,6 +149,20 @@
                         "description": "It's a value dude",
                         "type": "string",
                         "required": true
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter string",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "x-peachy",
+                        "in": "header",
+                        "description": "Test out headers",
+                        "type": "string",
+                        "required": false
                     }
                 ],
                 "tags": [
