@@ -29,11 +29,14 @@ namespace Peach.Pro.Test.Core.Flexera
 				DoRequest(licensing, rightsId, feature, 10);
 				Console.WriteLine("----------");
 
+				DumpTrustedStore(licensing);
+
 				var acquired = 0;
 				try
 				{
 					while (true)
 					{
+						Console.WriteLine("Acquire: {0}", feature);
 						licensing.LicenseManager.Acquire(feature);
 						acquired++;
 					}
@@ -49,9 +52,7 @@ namespace Peach.Pro.Test.Core.Flexera
 				}
 				Assert.AreEqual(10, acquired);
 
-				//Console.WriteLine("RunHost> return {0}, {1}", hostId, feature);
-				//DoRequest(licensing, rightsId, feature, -2);
-				//Console.WriteLine("----------");
+				DumpTrustedStore(licensing);
 			}
 			Console.WriteLine("##########");
 		}
@@ -76,11 +77,11 @@ namespace Peach.Pro.Test.Core.Flexera
 				.SendBinaryMessage(binRequest, out binResponse);
 
 			var response = licensing.LicenseManager.ProcessCapabilityResponse(binResponse);
-			DumpResponse(response, licensing);
+			DumpResponse(response);
 			return response;
 		}
 
-		private static void DumpResponse(ICapabilityResponse response, ILicensing licensing)
+		private static void DumpResponse(ICapabilityResponse response)
 		{
 			Console.WriteLine("---Response---: {0}", response == null ? "<null>" : response.ToString());
 			if (response != null)
@@ -106,7 +107,10 @@ namespace Peach.Pro.Test.Core.Flexera
 					);
 				}
 			}
+		}
 
+		private static void DumpTrustedStore(ILicensing licensing)
+		{
 			Console.WriteLine("---LicenseManager---");
 
 			Console.WriteLine("Features");
