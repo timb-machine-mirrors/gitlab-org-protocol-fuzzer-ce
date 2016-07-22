@@ -5,7 +5,7 @@
         "description": "Move your app forward with the Uber API",
         "version": "1.0.0"
     },
-    "host": "localhost:9001",
+    "host": "localhost:8002",
     "schemes": [
         "http"
     ],
@@ -19,6 +19,22 @@
                 "operationId": "GetAllValues",
                 "summary": "Values",
                 "description": "Get all values",
+                "parameters": [
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter string",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "x-peachy",
+                        "in": "header",
+                        "description": "Test out headers",
+                        "type": "string",
+                        "required": false
+                    }
+                ],
                 "tags": [
                     "Value"
                 ],
@@ -81,6 +97,20 @@
                         "description": "ID of value",
                         "type": "number",
                         "required": true
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter string",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "name": "x-peachy",
+                        "in": "header",
+                        "description": "Test out headers",
+                        "type": "string",
+                        "required": false
                     }
                 ],
                 "tags": [

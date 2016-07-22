@@ -180,11 +180,43 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				call.parameters.Add(param);
 			}
 
-			foreach (var part in operation.Parameters.Where(item => item.In == WebApiParameterIn.Query).OrderBy(item => item.PathFormatId))
+			foreach (var part in operation.Parameters.Where(item => item.In == WebApiParameterIn.Query))
 			{
 				var id = Guid.NewGuid().ToString();
 
-				var param = new ActionParameter(id) {dataModel = (DataModel)dom.dataModels["WebApiString"].Clone()};
+				var param = new ActionParameter(id) { dataModel = (DataModel)dom.dataModels["WebApiString"].Clone() };
+				part.DataElement = param.dataModel;
+
+				var dataSet = new DataSet() { Name = Guid.NewGuid().ToString() };
+				var data = new DataField(dataSet);
+				data.Fields.Add(new DataField.Field() { Name = "Value" });
+				dataSet.Add(data);
+				param.dataSets.Add(dataSet);
+
+				call.parameters.Add(param);
+			}
+
+			foreach (var part in operation.Parameters.Where(item => item.In == WebApiParameterIn.Header))
+			{
+				var id = Guid.NewGuid().ToString();
+
+				var param = new ActionParameter(id) { dataModel = (DataModel)dom.dataModels["WebApiString"].Clone() };
+				part.DataElement = param.dataModel;
+
+				var dataSet = new DataSet() { Name = Guid.NewGuid().ToString() };
+				var data = new DataField(dataSet);
+				data.Fields.Add(new DataField.Field() { Name = "Value" });
+				dataSet.Add(data);
+				param.dataSets.Add(dataSet);
+
+				call.parameters.Add(param);
+			}
+
+			foreach (var part in operation.Parameters.Where(item => item.In == WebApiParameterIn.FormData))
+			{
+				var id = Guid.NewGuid().ToString();
+
+				var param = new ActionParameter(id) { dataModel = (DataModel)dom.dataModels["WebApiString"].Clone() };
 				part.DataElement = param.dataModel;
 
 				var dataSet = new DataSet() { Name = Guid.NewGuid().ToString() };
