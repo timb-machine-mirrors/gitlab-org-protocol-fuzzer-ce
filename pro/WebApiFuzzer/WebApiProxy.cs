@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using NLog;
 using Peach.Core;
@@ -38,11 +39,19 @@ namespace PeachWebApiFuzzer
 		/// </summary>
 		private OnRequestInspector _onRequestInspector;
 
+		private readonly ProxyServer _proxy;
+
 		public ProcessRequests ProcessRequests { get; set; }
 
 		public WebApiProxy()
 		{
 			ProcessRequests = new ProcessRequests();
+			_proxy = new ProxyServer();
+		}
+
+		public IEnumerable<ProxyEndPoint> ProxyEndPoints
+		{
+			get { return _proxy.ProxyEndPoints; }
 		}
 
 		/// <summary>
@@ -55,14 +64,14 @@ namespace PeachWebApiFuzzer
 			_onRequestInspector = onRequestInspector;
 
 			// listen to client request & server response events
-			ProxyServer.BeforeRequest += OnRequest;
+			_proxy.BeforeRequest += OnRequest;
 
 			var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, 8001, false);
 
 			//Add an explicit endpoint where the client is aware of the proxy
 			//So client would send request in a proxy friendly manner
-			ProxyServer.AddEndPoint(explicitEndPoint);
-			ProxyServer.Start();
+			_proxy.AddEndPoint(explicitEndPoint);
+			_proxy.Start();
 
 			//Only explicit proxies can be set as a system proxy!
 			//ProxyServer.SetAsSystemHttpProxy(explicitEndPoint);
@@ -74,28 +83,29 @@ namespace PeachWebApiFuzzer
 		public void Dispose()
 		{
 			//Unsubscribe & Quit
-			ProxyServer.BeforeRequest -= OnRequest;
-			ProxyServer.Stop();
+			_proxy.BeforeRequest -= OnRequest;
+			_proxy.Stop();
+			_proxy.Dispose();
 		}
 
 		//Test On Request, intecept requests
 		//Read browser URL send back to proxy by the injection script in OnResponse event
-		public void OnRequest(object sender, SessionEventArgs e)
+		public async Task OnRequest(object sender, SessionEventArgs e)
 		{
 #if DEBUG
 			// Code to allow unit tests to work correctly
-			if (e.ProxySession.Request.Url.StartsWith("http://localhost.:"))
+			if (e.WebSession.Request.Url.StartsWith("http://localhost.:"))
 			{
-				var newUrl = e.ProxySession.Request.Url.Replace("http://localhost.:", "http://localhost:");
-				e.ProxySession.Request.RequestUri = new Uri(newUrl);
+				var newUrl = e.WebSession.Request.Url.Replace("http://localhost.:", "http://localhost:");
+				e.WebSession.Request.RequestUri = new Uri(newUrl);
 			}
 #endif
 
-			Console.WriteLine(e.ProxySession.Request.Url);
+			Console.WriteLine(e.WebSession.Request.Url);
 
 			// 1. Get WebApiOperation
 
-			var op = ProcessRequests.PopulateWebApiFromRequest(e);
+			var op = await ProcessRequests.PopulateWebApiFromRequest(e);
 			if (op == null)
 			{
 				logger.Debug("Request not found in swagger, skipping");
