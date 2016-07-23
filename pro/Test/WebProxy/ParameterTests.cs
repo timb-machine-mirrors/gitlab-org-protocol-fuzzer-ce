@@ -23,8 +23,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestSwaggerPath()
 		{
-			_op = null;
-
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/api/values/5").Result;
 
@@ -43,8 +41,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestSwaggerQuery()
 		{
-			_op = null;
-
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/api/values?filter=foo").Result;
 
@@ -63,8 +59,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestSwaggerHeader()
 		{
-			_op = null;
-
 			var client = GetHttpClient();
 			var headers = client.DefaultRequestHeaders;
 			headers.Add("X-Peachy", "Testing 1..2..3..");
@@ -86,8 +80,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestSwaggerFormData()
 		{
-			_op = null;
-
 			var content = new FormUrlEncodedContent(new[] 
 			{
 				new KeyValuePair<string, string>("value", "Foo Bar")
@@ -111,8 +103,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestSwaggerParameters()
 		{
-			_op = null;
-
 			var content = new FormUrlEncodedContent(new[] 
 			{
 				new KeyValuePair<string, string>("value", "Foo Bar")
@@ -161,8 +151,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestPath()
 		{
-			_op = null;
-
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
 
@@ -181,8 +169,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestQuery()
 		{
-			_op = null;
-
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values?filter=foo").Result;
 
@@ -201,8 +187,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestHeader()
 		{
-			_op = null;
-
 			var client = GetHttpClient();
 			var headers = client.DefaultRequestHeaders;
 			headers.Add("X-Peachy", "Testing 1..2..3..");
@@ -224,8 +208,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestFormData()
 		{
-			_op = null;
-
 			var content = new FormUrlEncodedContent(new[] 
 			{
 				new KeyValuePair<string, string>("value", "Foo Bar")
@@ -249,8 +231,6 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestParameters()
 		{
-			_op = null;
-
 			var content = new FormUrlEncodedContent(new[] 
 			{
 				new KeyValuePair<string, string>("value", "Foo Bar")
