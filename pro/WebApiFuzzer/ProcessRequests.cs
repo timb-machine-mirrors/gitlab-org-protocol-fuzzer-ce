@@ -17,6 +17,10 @@ using Double = Peach.Core.Dom.Double;
 
 namespace PeachWebApiFuzzer
 {
+	/// <summary>
+	/// Methods to process requests intercepted by the
+	/// web api proxy.
+	/// </summary>
 	public class ProcessRequests
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -36,9 +40,6 @@ namespace PeachWebApiFuzzer
 				Collection = new WebApiCollection();
 
 			Collection.EndPoints.Add(apiEndPoint);
-
-			//var dom = new Dom();
-			//WebApiToDom.Convert(dom, Collection);
 		}
 
 		/// <summary>
