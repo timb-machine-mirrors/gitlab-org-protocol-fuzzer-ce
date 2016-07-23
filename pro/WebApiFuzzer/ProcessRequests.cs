@@ -11,6 +11,7 @@ using Peach.Core.Dom;
 using Peach.Pro.Core.Analyzers;
 using Peach.Pro.Core.Analyzers.WebApi;
 using Titanium.Web.Proxy.EventArguments;
+using Titanium.Web.Proxy.Http;
 using Titanium.Web.Proxy.Network;
 using Double = Peach.Core.Dom.Double;
 
@@ -78,11 +79,11 @@ namespace PeachWebApiFuzzer
 		/// </summary>
 		/// <param name="e"></param>
 		/// <returns>Clone of WebApiOperation with only Parameters used by current request.</returns>
-		public WebApiOperation PopulateWebApiFromRequest(SessionEventArgs e)
+		public async Task<WebApiOperation> PopulateWebApiFromRequest(SessionEventArgs e)
 		{
 			try
 			{
-				var request = e.ProxySession.Request;
+				var request = e.WebSession.Request;
 				var activeParameters = new List<WebApiParameter>();
 
 				var op = GetOperation(request);
@@ -188,20 +189,20 @@ namespace PeachWebApiFuzzer
 				{
 					logger.Trace("PopulateWebApiFromRequest: Header: " + param.Name);
 
-					var header = headers.First(i => i.Name.ToLower() == param.Name.ToLower());
+					var header = headers.First(i => i.Value.Name.ToLower() == param.Name.ToLower());
 					var elem = param.DataElement;
 
 					if (elem is DataModel)
 						elem = ((DataModel)elem)[0];
 
 					if (elem is Peach.Core.Dom.String)
-						elem.DefaultValue = new Variant(header.Value);
+						elem.DefaultValue = new Variant(header.Value.Value);
 
 					else if (elem is Double)
-						elem.DefaultValue = new Variant(float.Parse(header.Value));
+						elem.DefaultValue = new Variant(float.Parse(header.Value.Value));
 
 					else if (elem is Number)
-						elem.DefaultValue = new Variant(int.Parse(header.Value));
+						elem.DefaultValue = new Variant(int.Parse(header.Value.Value));
 
 					else
 						throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
@@ -218,7 +219,7 @@ namespace PeachWebApiFuzzer
 
 					if (bodyForm == null)
 					{
-						bodyForm = HttpUtility.ParseQueryString(e.GetRequestBodyAsString());
+						bodyForm = HttpUtility.ParseQueryString(await e.GetRequestBodyAsString());
 					}
 
 					var value = bodyForm[param.Name];
@@ -269,7 +270,7 @@ namespace PeachWebApiFuzzer
 					{
 						logger.Trace("PopulateWebApiFromRequest: Binary Body");
 
-						param.DataElement.DefaultValue = new Variant(e.GetRequestBody());
+						param.DataElement.DefaultValue = new Variant(await e.GetRequestBody());
 
 						activeParameters.Add(param);
 						continue;
@@ -283,7 +284,7 @@ namespace PeachWebApiFuzzer
 						logger.Trace("PopulateWebApiFromRequest: JSON Body");
 
 						var block = new Block { new Peach.Core.Dom.String() };
-						block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
+						block[0].DefaultValue = new Variant(await e.GetRequestBodyAsString());
 
 						var jsonAnalyzer = new JsonAnalyzer();
 						jsonAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
@@ -299,7 +300,7 @@ namespace PeachWebApiFuzzer
 						logger.Trace("PopulateWebApiFromRequest: XML Body");
 
 						var block = new Block { new Peach.Core.Dom.String() };
-						block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
+						block[0].DefaultValue = new Variant(await e.GetRequestBodyAsString());
 
 						var xmlAnalyzer = new XmlAnalyzer();
 						xmlAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
@@ -339,7 +340,7 @@ namespace PeachWebApiFuzzer
 		{
 			try
 			{
-				var request = e.ProxySession.Request;
+				var request = e.WebSession.Request;
 				var path = op.Path;
 
 				// Path
@@ -421,20 +422,20 @@ namespace PeachWebApiFuzzer
 				{
 					logger.Trace("PopulateWebApiFromRequest: Header: " + param.Name);
 
-					var header = headers.First(i => i.Name == param.Name);
+					var header = headers.First(i => i.Value.Name == param.Name);
 					var elem = param.DataElement;
 
 					if (elem is DataModel)
 						elem = ((DataModel)elem)[0];
 
 					if (elem is Peach.Core.Dom.String)
-						elem.DefaultValue = new Variant(header.Value);
+						elem.DefaultValue = new Variant(header.Value.Value);
 
 					else if (elem is Double)
-						elem.DefaultValue = new Variant(float.Parse(header.Value));
+						elem.DefaultValue = new Variant(float.Parse(header.Value.Value));
 
 					else if (elem is Number)
-						elem.DefaultValue = new Variant(int.Parse(header.Value));
+						elem.DefaultValue = new Variant(int.Parse(header.Value.Value));
 
 					else
 						throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
