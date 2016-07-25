@@ -284,13 +284,17 @@ namespace Peach.Core
 		/// Engine instance for this run
 		/// </summary>
 		[NonSerialized]
+		[Obsolete]
 		public Engine engine = null;
 
 		/// <summary>
 		/// Dom to use for this run
 		/// </summary>
-		[NonSerialized]
-		public Dom.Dom dom = null;
+		[Obsolete]
+		public Dom.Dom dom
+		{
+			get { return test != null ? test.parent : null; }
+		}
 
 		/// <summary>
 		/// Current test being run

@@ -50,13 +50,11 @@ namespace Peach.Core
 		public virtual void Initialize(RunContext context, Engine engine)
 		{
 			Context = context;
-			Engine = engine;
 		}
 
 		public virtual void Finalize(RunContext context, Engine engine)
 		{
 			Context = null;
-			Engine = null;
 		}
 
 		public RunContext Context
@@ -65,10 +63,10 @@ namespace Peach.Core
 			private set;
 		}
 
+		[Obsolete]
 		public Engine Engine
 		{
-			get;
-			private set;
+			get { return Context.engine; }
 		}
 
 		public abstract bool UsesRandomSeed
