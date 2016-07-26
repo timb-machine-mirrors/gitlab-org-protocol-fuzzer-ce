@@ -221,12 +221,12 @@ namespace Peach.Pro.Test.Core
 						count[name] = cnt;
 					};
 
-					forMutation = ctx.dom.stateModels[0]
+					forMutation = ctx.test.stateModel
 						.TuningTraverse()
 						.Select(x => "{0} -> {1}".Fmt(x.Value.fullName, x.Key))
 						.ToList();
 
-					forDisplay = ctx.dom.stateModels[0]
+					forDisplay = ctx.test.stateModel
 						.TuningTraverse(true)
 						.Select(x => "{0} -> {1}".Fmt(x.Value.fullName, x.Key))
 						.ToList();

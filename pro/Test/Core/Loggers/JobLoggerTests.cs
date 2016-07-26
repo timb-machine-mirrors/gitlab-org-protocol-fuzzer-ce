@@ -930,12 +930,8 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			var e = new Engine(null);
 
-			e.TestStarting += ctx =>
-			{
-				ctx.engine.Fault += e_Fault;
-				ctx.engine.ReproFault += e_ReproFault;
-			};
-
+			e.Fault += e_Fault;
+			e.ReproFault += e_ReproFault;
 			e.IterationStarting += (ctx, it, tot) =>
 			{
 				if (it == 2)
@@ -957,11 +953,11 @@ namespace Peach.Pro.Test.Core.Loggers
 
 		void VerifyFaults(string dir, RunContext context, uint currentIteration)
 		{
-			var pub = context.dom.tests[0].publishers[0] as TestPub;
+			var pub = context.test.publishers[0] as TestPub;
 			Assert.NotNull(pub);
 			Assert.AreEqual(6, pub.outputs.Count);
 
-			var logger = context.dom.tests[0].loggers[0] as JobLogger;
+			var logger = context.test.loggers[0] as JobLogger;
 			Assert.NotNull(logger);
 
 			var subdir = Directory.EnumerateDirectories(logger.BasePath).FirstOrDefault();

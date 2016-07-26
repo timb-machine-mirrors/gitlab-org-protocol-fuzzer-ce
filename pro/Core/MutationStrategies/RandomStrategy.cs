@@ -24,89 +24,8 @@ namespace Peach.Pro.Core.MutationStrategies
 	[Parameter("MaxFieldsToMutate", typeof(int), "Maximum fields to mutate at once.", "6")]
 	[Parameter("StateMutation", typeof(bool), "Enable state mutations.", "false")]
 	[Parameter("Weighting", typeof(int), "Controls mutation weight evaulation.", "10")]
-	public class RandomStrategy : MutationStrategy
+	public class RandomStrategy : WeightedMutationStrategy
 	{
-		[DebuggerDisplay("{InstanceName} {ElementName} Mutators = {Mutators.Count}")]
-		protected class MutableItem : INamed, IWeighted
-		{
-			#region Obsolete Functions
-
-			[Obsolete("This property is obsolete and has been replaced by the Name property.")]
-			public string name { get { return Name; } }
-
-			#endregion
-
-			public MutableItem(string instanceName, string elementName, ElementWeight weight)
-				: this(instanceName, elementName, new Mutator[0])
-			{
-				Weight = (int)weight;
-			}
-
-			public MutableItem(string instanceName, string elementName, ICollection<Mutator> mutators)
-			{
-				InstanceName = instanceName;
-				ElementName = elementName;
-				Mutators = new WeightedList<Mutator>(mutators);
-				Weight = 1;
-			}
-
-			public string Name { get { return InstanceName; } }
-			public int Weight { get; set; }
-			public string InstanceName { get; private set; }
-			public string ElementName { get; private set; }
-			public WeightedList<Mutator> Mutators { get; private set; }
-			public int SelectionWeight { get { return Mutators.SelectionWeight; } }
-
-			public int TransformWeight(Func<int, int> how)
-			{
-				return Weight * Mutators.TransformWeight(how);
-			}
-		}
-
-		[DebuggerDisplay("{Name} Count = {Count}")]
-		[DebuggerTypeProxy(typeof(DebugView))]
-		protected class MutationScope : WeightedList<MutableItem>
-		{
-			class DebugView
-			{
-				readonly MutationScope _obj;
-
-				public DebugView(MutationScope obj)
-				{
-					_obj = obj;
-				}
-
-				[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-				public MutableItem[] Items
-				{
-					get { return _obj.ToArray(); }
-				}
-			}
-
-			public MutationScope(string name)
-			{
-				Name = name;
-			}
-
-			public MutationScope(string name, IEnumerable<MutableItem> collection)
-				: base(collection)
-			{
-				Name = name;
-			}
-
-			public string Name
-			{
-				get;
-				private set;
-			}
-
-			public int ChildScopes
-			{
-				get;
-				set;
-			}
-		}
-
 		[DebuggerDisplay("{Name} - {Options.Count} Options")]
 		protected class DataSetTracker : INamed
 		{
@@ -220,11 +139,6 @@ namespace Peach.Pro.Core.MutationStrategies
 		/// </summary>
 		uint iteration;
 
-		/// <summary>
-		/// Maximum number of fields to mutate at once.
-		/// </summary>
-		int maxFieldsToMutate = 6;
-
 		bool stateMutations;
 
 		readonly List<string> mutationHistory = new List<string>();
@@ -235,7 +149,7 @@ namespace Peach.Pro.Core.MutationStrategies
 			if (args.ContainsKey("SwitchCount"))
 				switchCount = uint.Parse((string)args["SwitchCount"]);
 			if (args.ContainsKey("MaxFieldsToMutate"))
-				maxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
+				MaxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
 			if (args.ContainsKey("StateMutation"))
 				stateMutations = bool.Parse((string)args["StateMutation"]);
 
@@ -329,27 +243,6 @@ namespace Peach.Pro.Core.MutationStrategies
 		}
 
 		#endregion
-
-		int GetMutationCount()
-		{
-			while (true)
-			{
-				// For half bell curves, sigma should be 1/3 of our range
-				var sigma = maxFieldsToMutate / 3.0;
-
-				var num = Random.NextGaussian(0, sigma);
-
-				// Only want half a bell curve
-				num = Math.Abs(num);
-
-				var asInt = (int)Math.Floor(num) + 1;
-
-				if (asInt > maxFieldsToMutate)
-					continue;
-
-				return asInt;
-			}
-		}
 
 		void IterationStarting(RunContext context, uint currentIteration, uint? totalIterations)
 		{

@@ -254,8 +254,7 @@ namespace Peach.Core
 
 			_context.config = config;
 			_context.test = test;
-			_context.dom = dom;
-			_context.dom.context = _context;
+			dom.context = _context;
 
 			try
 			{
@@ -312,8 +311,7 @@ namespace Peach.Core
 				using (var evt = new AutoResetEvent(false))
 					_timer.Dispose(evt);
 
-				_context.dom.context = null;
-				_context.dom = null;
+				dom.context = null;
 				_context.test = null;
 				_context.config = null;
 			}

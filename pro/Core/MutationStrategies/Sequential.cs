@@ -45,8 +45,8 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			context.ActionStarting += ActionStarting;
 			context.StateStarting += StateStarting;
-			context.engine.IterationFinished += new Engine.IterationFinishedEventHandler(engine_IterationFinished);
-			context.engine.IterationStarting += new Engine.IterationStartingEventHandler(engine_IterationStarting);
+			engine.IterationFinished += engine_IterationFinished;
+			engine.IterationStarting += engine_IterationStarting;
 			_mutators = new List<Type>();
 
 			_mutators.AddRange(EnumerateValidMutators().Where(
@@ -80,8 +80,8 @@ namespace Peach.Pro.Core.MutationStrategies
 
 			context.ActionStarting -= ActionStarting;
 			context.StateStarting -= StateStarting;
-			context.engine.IterationStarting -= engine_IterationStarting;
-			context.engine.IterationFinished -= engine_IterationFinished;
+			engine.IterationStarting -= engine_IterationStarting;
+			engine.IterationFinished -= engine_IterationFinished;
 		}
 
 		protected virtual void OnDataModelRecorded()
