@@ -211,11 +211,57 @@
                     }
                 }
             }
+        },
+        "/values/complex": {
+            "post": {
+                "operationId": "CreateComplexValue",
+                "summary": "Create a new complex value",
+                "description": "Yup",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "in": "body",
+                        "description": "It's a value dude",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ComplexValue"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Value"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "Value": {
             "type": "string"
+        },
+        "ComplexValue": {
+            "type": "object",
+            "properties": {
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "extraValue": {
+                    "$ref": "#/definitions/Value"
+                }
+            }
         },
         "Error": {
             "type": "object",

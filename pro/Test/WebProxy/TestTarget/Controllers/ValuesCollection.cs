@@ -15,6 +15,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 		public static string Value = null;
 		public static int Id = -1;
 		public static string X_Peachy = null;
+		public static ComplexValue ComplexValue = null;
 
 		public static void Clear()
 		{
@@ -64,6 +65,20 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 			return new StatusCodeResult(HttpStatusCode.Created, this);
 		}
 
+		// POST api/values/complex
+		[Route("complex")]
+		public StatusCodeResult PostComplex(ComplexValue data)
+		{
+			Clear();
+			ComplexValue = data;
+
+			if (Request.Headers.Contains("X-Peachy"))
+				X_Peachy = Request.Headers.GetValues("X-Peachy").First();
+
+			System.Diagnostics.Debug.Assert(data != null);
+			return new StatusCodeResult(HttpStatusCode.Created, this);
+		}
+
 		// PUT api/values/5 
 		[Route("{id}")]
 		public StatusCodeResult Put(int id, [FromBody]Value value, [FromUri]string filter = null)
@@ -94,5 +109,12 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 	public class Value
 	{
 		public string value { get; set; }
+	}
+
+	public class ComplexValue
+	{
+		public string[] values { get; set; }
+
+		public Value extraValue { get; set; }
 	}
 }

@@ -37,9 +37,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		/// <returns></returns>
 		public Regex PathRegex()
 		{
-			var operation = Operations.First();
-			var urlRegex = operation.Parameters.Where(item => item.In == WebApiParameterIn.Path).
-				Aggregate(Path, (current, part) => current.Replace("{" + part.Name + "}", "(?<"+part.Name+">[^/]+)"));
+			var urlRegex = "^" + Regex.Replace(Path, @"{([^{}/]+)}", @"(?<$1>[^/?]+)");
 
 			return new Regex(urlRegex);
 		}

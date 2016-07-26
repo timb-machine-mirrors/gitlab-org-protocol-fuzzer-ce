@@ -34,9 +34,14 @@ namespace PeachWebApiFuzzer
 		public delegate void OnRequestInspector(object sender, SessionEventArgs e, WebApiOperation op);
 
 		/// <summary>
-		/// Hook used to inspect requests.
+		/// Inspect request after WebApiOperation but before fuzzing.
 		/// </summary>
-		private OnRequestInspector _onRequestInspector;
+		private OnRequestInspector _onRequestInspectorPre;
+
+		/// <summary>
+		/// Inspect request after fuzzing
+		/// </summary>
+		private OnRequestInspector _onRequestInspectorPost;
 
 		public ProcessRequests ProcessRequests { get; set; }
 
@@ -48,11 +53,13 @@ namespace PeachWebApiFuzzer
 		/// <summary>
 		/// Start proxy in background worker thread
 		/// </summary>
-		/// <param name="onRequestInspector">Hook used to inspect requests. Used by unit tests.</param>
+		/// <param name="onRequestInspectorPre">Hook used to inspect requests pre-fuzzing. Used by unit tests.</param>
+		/// <param name="onRequestInspectorPost">Hook used to inspect requests post-fuzzing. Used by unit tests.</param>
 		/// <returns></returns>
-		public WebApiProxy Start(OnRequestInspector onRequestInspector = null)
+		public WebApiProxy Start(OnRequestInspector onRequestInspectorPre = null, OnRequestInspector onRequestInspectorPost = null)
 		{
-			_onRequestInspector = onRequestInspector;
+			_onRequestInspectorPre = onRequestInspectorPre;
+			_onRequestInspectorPost = onRequestInspectorPost;
 
 			// listen to client request & server response events
 			ProxyServer.BeforeRequest += OnRequest;
@@ -82,34 +89,55 @@ namespace PeachWebApiFuzzer
 		//Read browser URL send back to proxy by the injection script in OnResponse event
 		public void OnRequest(object sender, SessionEventArgs e)
 		{
-#if DEBUG
-			// Code to allow unit tests to work correctly
-			if (e.ProxySession.Request.Url.StartsWith("http://localhost.:"))
+			try
 			{
-				var newUrl = e.ProxySession.Request.Url.Replace("http://localhost.:", "http://localhost:");
-				e.ProxySession.Request.RequestUri = new Uri(newUrl);
-			}
+#if DEBUG
+				// Code to allow unit tests to work correctly
+				if (e.ProxySession.Request.Url.StartsWith("http://localhost.:"))
+				{
+					var newUrl = e.ProxySession.Request.Url.Replace("http://localhost.:", "http://localhost:");
+					e.ProxySession.Request.RequestUri = new Uri(newUrl);
+				}
 #endif
 
-			Console.WriteLine(e.ProxySession.Request.Url);
+				logger.Trace("OnRequest: {0}", e.ProxySession.Request.Url);
 
-			// 1. Get WebApiOperation
+				byte[] body = null;
+				
+				var contentLength = e.ProxySession.Request.RequestHeaders.FirstOrDefault(h => h.Name.ToLower() == "content-length");
+				if(contentLength != null && int.Parse(contentLength.Value) > 0)
+					body = e.GetRequestBody();
 
-			var op = ProcessRequests.PopulateWebApiFromRequest(e);
-			if (op == null)
-			{
-				logger.Debug("Request not found in swagger, skipping");
-				return;
+				// 1. Get WebApiOperation
+
+				var op = ProcessRequests.PopulateWebApiFromRequest(e, body);
+				if (op == null)
+				{
+					logger.Error("Unable to convert request to web api operation.");
+					return;
+				}
+
+				// Call hook, this allows unit tests to function
+
+				if (_onRequestInspectorPre != null)
+					_onRequestInspectorPre(sender, e, op);
+
+				// 2. Fuzz
+
+				// 3. Update e.ProxySession.Request
+
+				ProcessRequests.PopulateRequestFromWebApi(e, body, op);
+
+				// Call hook, this allows unit tests to function
+
+				if (_onRequestInspectorPost != null)
+					_onRequestInspectorPost(sender, e, op);
 			}
-
-			if (_onRequestInspector != null)
-				_onRequestInspector(sender, e, op);
-
-			// 2. Convert to dom
-
-			// 3. Fuzz
-
-			// 4. Update e.ProxySession.Request
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Exception during OnRequest: {0}", ex.Message);
+				throw;
+			}
 		}
 	}
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using NLog;
+using PacketDotNet.Utils;
 using Peach.Core;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
@@ -14,6 +16,7 @@ using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Models;
 using Titanium.Web.Proxy.Network;
 using Double = Peach.Core.Dom.Double;
+using Encoding = System.Text.Encoding;
 
 namespace PeachWebApiFuzzer
 {
@@ -74,12 +77,22 @@ namespace PeachWebApiFuzzer
 			return op;
 		}
 
+		public DataElement GetDefaultElement(Variant defaultValue = null)
+		{
+			var elem = new Peach.Core.Dom.String() {DefaultValue = defaultValue};
+			elem.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));
+
+			return elem;
+
+		}
+
 		/// <summary>
 		/// Find matching WebApiOperation, clone and update with data from request.
 		/// </summary>
 		/// <param name="e"></param>
+		/// <param name="body"></param>
 		/// <returns>Clone of WebApiOperation with only Parameters used by current request.</returns>
-		public WebApiOperation PopulateWebApiFromRequest(SessionEventArgs e)
+		public WebApiOperation PopulateWebApiFromRequest(SessionEventArgs e, byte[] body)
 		{
 			try
 			{
@@ -114,7 +127,7 @@ namespace PeachWebApiFuzzer
 
 						var value = group.Value;
 
-						param.DataElement = new Peach.Core.Dom.String{ DefaultValue = new Variant(value)};
+						param.DataElement = GetDefaultElement(new Variant(value));
 						param.ShadowParameter = param;
 					}
 				}
@@ -122,7 +135,8 @@ namespace PeachWebApiFuzzer
 				{
 					var paths = pathString.Split('/');
 					var cnt = 0;
-
+					var apiPath = new WebApiPath();
+					
 					foreach (var path in paths)
 					{
 						if (string.IsNullOrEmpty(path))
@@ -134,8 +148,10 @@ namespace PeachWebApiFuzzer
 							Name = path.ToLower(),
 							Required = false,
 							PathFormatId = cnt,
-							DataElement = new Peach.Core.Dom.String { DefaultValue = new Variant(path) }
+							DataElement = GetDefaultElement(new Variant(path))
 						};
+
+						apiPath.Path += "/{" + param.Name + "}";
 
 						cnt++;
 						op.Parameters.Add(param);
@@ -152,7 +168,7 @@ namespace PeachWebApiFuzzer
 						In = WebApiParameterIn.Query,
 						Name = key.ToLower(),
 						Required = false,
-						DataElement = new Peach.Core.Dom.String {DefaultValue = new Variant(query[key])}
+						DataElement = GetDefaultElement(new Variant(query[key]))
 					};
 
 					if (op.ShadowOperation != null)
@@ -171,7 +187,7 @@ namespace PeachWebApiFuzzer
 						In = WebApiParameterIn.Header,
 						Name = header.Name.ToLower(),
 						Required = false,
-						DataElement = new Peach.Core.Dom.String {DefaultValue = new Variant(header.Value)}
+						DataElement = GetDefaultElement(new Variant(header.Value))
 					};
 
 					if (op.ShadowOperation != null)
@@ -190,7 +206,7 @@ namespace PeachWebApiFuzzer
 
 				if (contentType == "application/x-www-form-urlencoded")
 				{
-					var bodyForm = HttpUtility.ParseQueryString(e.GetRequestBodyAsString());
+					var bodyForm = HttpUtility.ParseQueryString(Encoding.UTF8.GetString(body));
 					foreach (var key in bodyForm.AllKeys)
 					{
 						var param = new WebApiParameter
@@ -198,7 +214,7 @@ namespace PeachWebApiFuzzer
 							In = WebApiParameterIn.FormData,
 							Name = key,
 							Required = false,
-							DataElement = new Peach.Core.Dom.String { DefaultValue = new Variant(bodyForm[key]) }
+							DataElement = GetDefaultElement(new Variant(bodyForm[key]))
 						};
 
 						if (op.ShadowOperation != null)
@@ -218,7 +234,7 @@ namespace PeachWebApiFuzzer
 					};
 
 					var block = new Block { new Peach.Core.Dom.String() };
-					block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
+					block[0].DefaultValue = new Variant(Encoding.UTF8.GetString(body));
 
 					var jsonAnalyzer = new JsonAnalyzer();
 					jsonAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
@@ -241,7 +257,7 @@ namespace PeachWebApiFuzzer
 					};
 
 					var block = new Block { new Peach.Core.Dom.String() };
-					block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
+					block[0].DefaultValue = new Variant(Encoding.UTF8.GetString(body));
 
 					var xmlAnalyzer = new XmlAnalyzer();
 					xmlAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
@@ -261,16 +277,8 @@ namespace PeachWebApiFuzzer
 						In = WebApiParameterIn.Body,
 						Name = "unknownBody",
 						Required = true,
-						DataElement = new Blob { DefaultValue = new Variant(e.GetRequestBody()) }
+						DataElement = new Blob { DefaultValue = new Variant(body) }
 					};
-
-					var block = new Block { new Peach.Core.Dom.String() };
-					block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
-
-					var xmlAnalyzer = new XmlAnalyzer();
-					xmlAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
-
-					param.DataElement = block[0];
 
 					if (op.ShadowOperation != null)
 						param.ShadowParameter = op.ShadowOperation.Parameters.FirstOrDefault(
@@ -310,8 +318,15 @@ namespace PeachWebApiFuzzer
 
 			foreach (var param in op.Parameters.OrderBy(i => i.In))
 			{
-				if (param.DataElement.parent != null)
+				if (param.DataElement != null && param.DataElement.parent != null)
+				{
 					dm.Remove(param.DataElement.parent, false);
+				}
+				else if (param.DataElement == null)
+				{
+					param.DataElement = new Peach.Core.Dom.String();
+					param.DataElement.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));
+				}
 
 				dm.Add(param.DataElement);
 			}
@@ -326,8 +341,9 @@ namespace PeachWebApiFuzzer
 		/// Typical flow is to mutate, then convert op into request
 		/// </remarks>
 		/// <param name="e"></param>
+		/// <param name="body"></param>
 		/// <param name="op"></param>
-		public void PopulateRequestFromWebApi(SessionEventArgs e, WebApiOperation op)
+		public void PopulateRequestFromWebApi(SessionEventArgs e, byte[] body, WebApiOperation op)
 		{
 			try
 			{
@@ -339,25 +355,8 @@ namespace PeachWebApiFuzzer
 				var newPath = path.Path;
 				foreach (var param in op.Parameters.Where(p => p.In == WebApiParameterIn.Path))
 				{
-					logger.Trace("PopulateWebApiFromRequest: Setting param: " + param.Name);
-
-					string value;
-					var elem = param.DataElement;
-
-					if (elem is DataModel)
-						elem = ((DataModel)elem)[0];
-
-					if (elem is Peach.Core.Dom.String)
-						value = (string)elem.DefaultValue;
-
-					else
-					{
-						logger.Trace("Failed to set param.DataElement.  Unknown element type: {0} For {1} {2}, {3}",
-							param.DataElement, op.Method, op.Path.Path, param.Name);
-						throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
-					}
-
-					newPath = newPath.Replace("{" + param.PathFormatId + "}", value);
+					var value = (string)param.DataElement.InternalValue;
+					newPath = newPath.Replace("{" + param.Name + "}", value);
 				}
 
 				// Query string
@@ -365,29 +364,7 @@ namespace PeachWebApiFuzzer
 				var queryString = new StringBuilder();
 				foreach (var param in op.Parameters.Where(p => p.In == WebApiParameterIn.Query))
 				{
-					logger.Trace("PopulateWebApiFromRequest: Query string: " + param.Name);
-
-					string value;
-					var elem = param.DataElement;
-					if (elem == null)
-					{
-						logger.Trace("Error, param.DataElement is null: {0} For {1} {2}, {3}",
-							param.DataElement, op.Method, op.Path.Path, param.Name);
-						throw new ApplicationException("Error, param.DataElement is null");
-					}
-
-					if (elem is DataModel)
-						elem = ((DataModel)elem)[0];
-
-					if (elem is Peach.Core.Dom.String)
-						value = (string)elem.DefaultValue;
-
-					else
-					{
-						logger.Trace("Failed to set param.DataElement.  Unknown element type: {0} For {1} {2}, {3}",
-							param.DataElement, op.Method, op.Path.Path, param.Name);
-						throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
-					}
+					var value = (string)param.DataElement.InternalValue;
 
 					if (queryString.Length == 0)
 						queryString.Append(string.Format("{0}={1}",
@@ -399,10 +376,14 @@ namespace PeachWebApiFuzzer
 							HttpUtility.UrlEncode(value)));
 				}
 
-				var url = string.Format("{0}://{1}:{2}/{3}?{4}",
-					request.RequestUri.Scheme, request.RequestUri.Host, request.RequestUri.Port, newPath, queryString);
-
-				logger.Trace("New Url: {0}", url);
+				var url = string.Format("{0}://{1}:{2}{3}{4}{5}{6}",
+					request.RequestUri.Scheme, 
+					request.RequestUri.Host, 
+					request.RequestUri.Port, 
+					newPath.StartsWith("/") ? "" : "/",
+					newPath, 
+					queryString.Length > 0 ? "?" : "",
+					queryString);
 
 				request.RequestUri = new Uri(url);
 
@@ -411,148 +392,58 @@ namespace PeachWebApiFuzzer
 				var headers = request.RequestHeaders;
 				foreach (var param in op.Parameters.Where(p => p.In == WebApiParameterIn.Header))
 				{
-					logger.Trace("PopulateWebApiFromRequest: Header: " + param.Name);
-
-					var header = headers.First(i => i.Name == param.Name);
-					var elem = param.DataElement;
-
-					if (elem is DataModel)
-						elem = ((DataModel)elem)[0];
-
-					if (elem is Peach.Core.Dom.String)
-						elem.DefaultValue = new Variant(header.Value);
-
-					else if (elem is Double)
-						elem.DefaultValue = new Variant(float.Parse(header.Value));
-
-					else if (elem is Number)
-						elem.DefaultValue = new Variant(int.Parse(header.Value));
-
-					else
-						throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
+					var header = headers.First(i => i.Name.ToLower() == param.Name.ToLower());
+					header.Value = (string)param.DataElement.InternalValue;
 				}
 
-				// TODO -- CONTINEU WITH THIS METHOD!
-
-				/*
 				// Form Data
 
-				System.Collections.Specialized.NameValueCollection bodyForm = null;
-
+				StringBuilder bodyForm = null;
 				foreach (var param in op.Parameters.Where(p => p.In == WebApiParameterIn.FormData))
 				{
-					logger.Trace("PopulateWebApiFromRequest: Form Data: " + param.Name);
-
 					if (bodyForm == null)
-					{
-						bodyForm = HttpUtility.ParseQueryString(e.GetRequestBodyAsString());
-					}
+						bodyForm = new StringBuilder();
 
-					var value = bodyForm[param.Name];
-					if (value == null)
-					{
-						if (param.Required)
-						{
-							logger.Error("PopulateWebApiFromRequest: Unable to find required body form parameter: {0} {1}, {2}",
-								op.Method, op.Path.Path, param.Name);
-						}
-
-						activeParameters.Add(param);
-						continue;
-					}
-
-					var elem = param.DataElement;
-
-					if (elem is DataModel)
-					{
-						logger.Error("PopulateWebApiFromRequest: param.DataElement shouldn't be a DataModel for: {0} {1}, {2}",
-							op.Method, op.Path.Path, param.Name);
-
-						elem = ((DataModel)elem)[0];
-					}
-
-					if (elem is Peach.Core.Dom.String)
-						elem.DefaultValue = new Variant(value);
-
-					else if (elem is Double)
-						elem.DefaultValue = new Variant(float.Parse(value));
-
-					else if (elem is Number)
-						elem.DefaultValue = new Variant(int.Parse(value));
-
+					if (bodyForm.Length == 0)
+						bodyForm.Append(string.Format("{0}={1}",
+							HttpUtility.UrlEncode(param.Name),
+							HttpUtility.UrlEncode((string)param.DataElement.InternalValue)));
 					else
-						throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
+						bodyForm.Append(string.Format("&{0}={1}",
+							HttpUtility.UrlEncode(param.Name),
+							HttpUtility.UrlEncode((string)param.DataElement.InternalValue)));
+				}
 
-					activeParameters.Add(param);
+				if (bodyForm != null)
+				{
+					e.SetRequestBodyString(bodyForm.ToString());
+					var contentLength = e.ProxySession.Request.RequestHeaders.First(h => h.Name.ToLower() == "content-length");
+					contentLength.Value = bodyForm.Length.ToString();
+
+					return;
 				}
 
 				// Body
-
+				
 				foreach (var param in op.Parameters.Where(p => p.In == WebApiParameterIn.Body))
 				{
-					logger.Trace("PopulateWebApiFromRequest: Body: " + param.Name);
+					var outStream = param.DataElement.Value;
 
-					if (param.DataElement is Blob)
-					{
-						logger.Trace("PopulateWebApiFromRequest: Binary Body");
+					var buff = new byte[outStream.Length];
 
-						param.DataElement.DefaultValue = new Variant(e.GetRequestBody());
+					outStream.Position = 0;
+					outStream.Read(buff, 0, buff.Length);
+					e.SetRequestBody(buff);
 
-						activeParameters.Add(param);
-						continue;
-					}
+					var contentLength = e.ProxySession.Request.RequestHeaders.First(h => h.Name.ToLower() == "content-length");
+					contentLength.Value = buff.Length.ToString();
 
-					// MIKE: I wonder if there is any benefit to using the Swagger definition
-					//       when parsing the body.
-
-					if (param.DataElement is Peach.Pro.Core.Dom.IJsonElement)
-					{
-						logger.Trace("PopulateWebApiFromRequest: JSON Body");
-
-						var block = new Block { new Peach.Core.Dom.String() };
-						block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
-
-						var jsonAnalyzer = new JsonAnalyzer();
-						jsonAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
-
-						param.DataElement = block[0];
-
-						activeParameters.Add(param);
-						continue;
-					}
-
-					if (param.DataElement is XmlElement)
-					{
-						logger.Trace("PopulateWebApiFromRequest: XML Body");
-
-						var block = new Block { new Peach.Core.Dom.String() };
-						block[0].DefaultValue = new Variant(e.GetRequestBodyAsString());
-
-						var xmlAnalyzer = new XmlAnalyzer();
-						xmlAnalyzer.asDataElement(block, new Dictionary<DataElement, Position>());
-
-						param.DataElement = block[0];
-
-						activeParameters.Add(param);
-						continue;
-					}
-
-					logger.Trace("Failed to set param.DataElement.  Unknown element type: {0} For {1} {2}, {3}",
-						param.DataElement, op.Method, op.Path.Path, param.Name);
-					throw new ApplicationException("Failed to set param.DataElement.  Unknown element type: " + param.DataElement);
+					return;
 				}
-				
-				logger.Trace("PopulateWebApiFromRequest: Returning op");
-
-				op.Parameters = activeParameters;
-				 
-				return op;
-				 */
 			}
 			catch (Exception ex)
 			{
 				logger.Error("PopulateWebApiFromRequest: Exception: {0}", ex.Message);
-				//return null;
 			}
 		}
 
@@ -572,6 +463,5 @@ namespace PeachWebApiFuzzer
 
 			return Collection.EndPoints.FirstOrDefault(ep => ep.Host == host);
 		}
-
 	}
 }

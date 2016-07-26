@@ -37,6 +37,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		{
 			var endPoint = new WebApiEndPoint {Host = swagger["host"].Value<string>()};
 			var models = ConvertDefinitions(swagger);
+			var basePath = swagger["basePath"].Value<string>();
 
 			foreach (var scheme in (JArray) swagger["schemes"])
 			{
@@ -48,16 +49,24 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			}
 
 			foreach (KeyValuePair<string, JToken> path in ((JObject)swagger["paths"]))
-				endPoint.Paths.Add(ConvertPath(path.Key, (JObject)path.Value, models));
+				endPoint.Paths.Add(ConvertPath(path.Key, (JObject)path.Value, models, basePath));
 
 			return endPoint;
 		}
 
-		static WebApiPath ConvertPath(string pathPropertyName, JObject path, List<DataModel> models)
+		static WebApiPath ConvertPath(string pathPropertyName, JObject path, List<DataElement> models, string basePath)
 		{
 			var apiPath = new WebApiPath();
 
-			apiPath.Path = pathPropertyName;
+			if (basePath != null)
+			{
+				if (pathPropertyName.StartsWith("/"))
+					apiPath.Path = basePath + pathPropertyName;
+				else
+					apiPath.Path = basePath + "/" + pathPropertyName;
+			}
+			else
+				apiPath.Path = pathPropertyName;
 
 			foreach (KeyValuePair<string, JToken> opKeyValue in path)
 			{
@@ -70,7 +79,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			return apiPath;
 		}
 
-		static WebApiOperation ConvertOperation(string opKey, JObject op, List<DataModel> models)
+		static WebApiOperation ConvertOperation(string opKey, JObject op, List<DataElement> models)
 		{
 			JToken token;
 			var apiOp = new WebApiOperation();
@@ -93,7 +102,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			return apiOp;
 		}
 
-		static WebApiParameter ConvertParameter(JObject param, List<DataModel> models)
+		static WebApiParameter ConvertParameter(JObject param, List<DataElement> models)
 		{
 			JToken token;
 			var apiParam = new WebApiParameter {Name = param["name"].Value<string>()};
@@ -128,49 +137,51 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			if (apiParam.In == WebApiParameterIn.Body)
 			{
 					var swaggerRef = NameFromSwaggerRef(param["schema"]["$ref"].Value<string>());
-					apiParam.DataElement = models.First(i => i.Name == swaggerRef)[0].Clone();
+					apiParam.DataElement = models.First(i => ((IJsonElement)i).PropertyName == swaggerRef).Clone();
+			}
+			else
+			{
+				apiParam.DataElement = new Peach.Core.Dom.String();
+				apiParam.DataElement.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));
 			}
 
 			return apiParam;
 		}
 
-		static List<DataModel> ConvertDefinitions(JObject json)
+		static List<DataElement> ConvertDefinitions(JObject json)
 		{
-			var models = new List<DataModel>();
+			var models = new List<DataElement>();
 			var definitions = (JObject) json["definitions"];
+
 			foreach (var def in definitions)
 			{
 				var item = (JObject) definitions[def.Key];
 				var name = def.Key.Replace(".", "_");
-				var model = new DataModel(name);
+				DataElement elem = null;
 
 				switch (item["type"].Value<string>())
 				{
 					case "object":
-						model.Add(DefinitionObject(name, def.Key, item));
-						models.Add(model);
+						elem = DefinitionObject(name, def.Key, item);
 						break;
 					case "array":
-						model.Add(DefinitionArray(name, def.Key, item));
-						models.Add(model);
+						elem = DefinitionArray(name, def.Key, item);
 						break;
 					case "string":
-						model.Add(DefinitionString(name, def.Key, item));
-						models.Add(model);
+						elem = DefinitionString(name, def.Key, item);
 						break;
 					case "integer":
-						model.Add(DefinitionInteger(name, def.Key, item));
-						models.Add(model);
+						elem = DefinitionInteger(name, def.Key, item);
 						break;
 					case "number":
-						model.Add(DefinitionNumber(name, def.Key, item));
-						models.Add(model);
+						elem = DefinitionNumber(name, def.Key, item);
 						break;
 					case "boolean":
-						model.Add(DefinitionBoolean(name, def.Key, item));
-						models.Add(model);
+						elem = DefinitionBoolean(name, def.Key, item);
 						break;
 				}
+
+				models.Add(elem);
 			}
 
 			return models;
