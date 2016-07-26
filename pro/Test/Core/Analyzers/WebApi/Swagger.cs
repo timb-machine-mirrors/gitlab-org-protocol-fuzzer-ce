@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using NUnit.Framework;
 using Peach.Core.Test;
-using Peach.Pro.Core.Analyzers.WebApi;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Test.Core.Analyzers.WebApi
 {

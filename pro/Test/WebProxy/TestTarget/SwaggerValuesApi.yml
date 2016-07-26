@@ -184,7 +184,7 @@ definitions:
         type: array
         items:
           type: string
-      value:
+      extraValue:
         $ref: '#/definitions/Value'
     
   Error:

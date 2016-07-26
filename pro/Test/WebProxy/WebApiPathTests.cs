@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Pro.Core.Analyzers.WebApi;
+using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
 using Titanium.Web.Proxy.EventArguments;
