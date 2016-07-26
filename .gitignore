@@ -15,6 +15,7 @@ packages/
 
 # Visual Studio 2015
 *.VC.db
+*.VC.opendb
 .vs/
 
 # python generated files

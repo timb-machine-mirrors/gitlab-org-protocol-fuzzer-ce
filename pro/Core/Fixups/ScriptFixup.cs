@@ -25,21 +25,20 @@ namespace Peach.Pro.Core.Fixups
 	public class ScriptFixup : Fixup
 	{
 		[NonSerialized]
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		[NonSerialized]
-		dynamic _pythonFixup = null;
+		dynamic _pythonFixup;
 
 		public ScriptFixup(DataElement parent, Dictionary<string, Variant> args)
 			: base(parent, args, "ref")
 		{
 			try
 			{
-				Dictionary<string, object> state = new Dictionary<string, object>();
-				state["fixupSelf"] = this;
+				var state = new Dictionary<string, object> { { "fixupSelf", this } };
 
 				_pythonFixup = parent.EvalExpression(
-					string.Format("{0}(fixupSelf)",
-					(string)args["class"]),
+					string.Format("{0}(fixupSelf)", (string)args["class"]),
 					state);
 
 				if (_pythonFixup == null)
@@ -59,36 +58,28 @@ namespace Peach.Pro.Core.Fixups
 		{
 			if (_pythonFixup == null)
 			{
-				Dictionary<string, object> state = new Dictionary<string, object>();
-				state["fixupSelf"] = this;
+				var state = new Dictionary<string, object> { { "fixupSelf", this } };
 
 				_pythonFixup = parent.EvalExpression(
-					string.Format("{0}(fixupSelf)",
-					(string)args["class"]),
+					string.Format("{0}(fixupSelf)", (string)args["class"]),
 					state);
 			}
 
 			var from = elements["ref"];
 
-			logger.Trace("fixupImpl(): ref: " + from.GetHashCode().ToString());
+			logger.Trace("fixupImpl(): ref: " + from.GetHashCode());
 
 			object data = _pythonFixup.fixup(from);
 
-			if (data is byte[])
-			{
-				return new Variant((byte[])data);
-			}
-			else if (data is string)
-			{
-				return new Variant((string)data);
-			}
-			else if (data is int)
-			{
-				return new Variant((int)data);
-			}
+			if (data == null)
+				throw new PeachException("Error, script fixup returned null.");
 
-			logger.Error("Error, unknown type [" + data.GetType().ToString() + "].");
-			throw new ApplicationException("Error, unknown type [" + data.GetType().ToString() + "].");
+			var asVariant = Scripting.ToVariant(data);
+
+			if (asVariant == null)
+				throw new PeachException("Error, script fixup returned unknown type '{0}'.".Fmt(data.GetType()));
+
+			return asVariant;
 		}
 	}
 }

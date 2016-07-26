@@ -59,7 +59,7 @@ generate a fault if the specified regular expression matches the command output.
 The default value is unspecified.
 
 Timeout::
-Maximum time period, in seconds, for the process to run.
+Maximum time period, in milliseconds, for the process to run.
 Generate a fault if the command runs longer than the specified value.
 This feature is disabled by specifying `-1` for the time period.
 The default value is `-1`.

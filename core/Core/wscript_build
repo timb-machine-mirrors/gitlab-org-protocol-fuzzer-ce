@@ -6,6 +6,7 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Configuration.dll',
+	'System.Numerics.dll',
 	'System.Xml.dll',
 
 	'IronPython.dll',

@@ -31,7 +31,7 @@ peach [options]
 
 === Fuzzing from Command Line
 
-A fuzzing run is started by by specifying the Peach Pit Configuration or
+A fuzzing run is started by specifying the Peach Pit Configuration or
 Peach XML file and the name of a test to perform.
 
 If a run is interrupted,
@@ -77,7 +77,7 @@ test_name::
 --polite::
     Disable interactive console mode
 --range=S,F::
-    Perform a range of testcases starting at test case S and ending with test case F. 
+    Perform a range of test cases starting at test case S and ending with test case F. 
     Typically combined with the --seed argument.
 --seed=SEED::
     Set the fuzzing jobs seed. 

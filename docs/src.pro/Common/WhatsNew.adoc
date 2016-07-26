@@ -108,7 +108,7 @@ endif::peachug[]
 
 ==== Fragmented Protocol Support
 
-This release instroduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.
+This release introduces a new element and two new action types allowing fragmented protocols to be easily modeled and fuzzed.
 The _Frag_ element, _outfrag_ action type, and _infrag_ action type have been added.
 
 ifdef::peachug[]
@@ -236,6 +236,21 @@ Also be aware that the extension for the database file has changed from +.xml.ni
 ====
 
 ifndef::peachug[]
+
+==== String Data Element
+
+The default character encoding for String data elements has been changed from ASCII to UTF-8.
+This will enable unicode mutations on all String elements that do not have the encoding explicitly defined.
+To change the default encoding back to ascii, the following xml can be added to the top of your pit.
+
+[source,xml]
+----
+<Defaults>
+  <String type="ascii" />
+</Defaults>
+----
+
+See the xref:String[String] and xref:Defaults[Defaults] for more information.
 
 ==== [Description] Attribute
 
