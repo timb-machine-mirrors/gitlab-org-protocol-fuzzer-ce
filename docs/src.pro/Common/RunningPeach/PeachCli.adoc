@@ -5,7 +5,7 @@ This tool is used to control multiple Peach instances at once.
 The tool can be used via the command line or as an interactive
 tool.
 
-The tool utilizes the Peach WebApi API to perform all actions.
+The tool utilizes the Peach REST API to perform all actions.
 
 === Installation
 

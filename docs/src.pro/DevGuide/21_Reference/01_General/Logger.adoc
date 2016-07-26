@@ -6,7 +6,7 @@ Loggers allow adding additional logging methods into Peach.  Every Peach fuzzing
 * Integration into end-user systems
 * Custom notification (SMS, Email, Pager)
 
-NOTE: It may be easier to use the WebApi API for performing integration work.
+NOTE: It may be easier to use the Peach REST API for performing integration work.
 
 [[Loggers_File]]
 === File
