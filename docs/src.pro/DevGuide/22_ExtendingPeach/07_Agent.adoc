@@ -3,14 +3,14 @@
 
 Custom agents are useful when the target system does not support a .NET runtime (like Mono) or the device is too slow (speed is a common problem for embedded devices that require running a native agent in C/C++).
 
-Agents in Peach communicate over protocols called channels.  While you can develop custom channel protocols, an existing channel usually creates a custom Peach agent. Agents can be written in any language; To make it easy to author your own, Peach comes with some example implementations designed for languages like as Python and C++. The REST based protocol (which transmits data in JSON messages) is the easiest channel protocol to use with custom agents.
+Agents in Peach communicate over protocols called channels.  While you can develop custom channel protocols, an existing channel usually creates a custom Peach agent. Agents can be written in any language; To make it easy to author your own, Peach comes with some example implementations designed for languages like as Python and C++. The WebApi based protocol (which transmits data in JSON messages) is the easiest channel protocol to use with custom agents.
 
 When you write a custom publisher, we recommend you start with one of the examples in the SDK and extend it to meet your requirements. The examples in the SDK already implement the agent channel protocol with stub methods ready to be implemented. If this is not an option, the following example channel sessions can be used as documentation for the protocol. The second example includes the use of a remote publisher.
 
 .Sample session
 =========================
 
-This example shows a complete agent session using the REST JSON agent channel (protocol prefix _http_) with matching pit.
+This example shows a complete agent session using the WebApi JSON agent channel (protocol prefix _http_) with matching pit.
 
 [source,xml]
 ----

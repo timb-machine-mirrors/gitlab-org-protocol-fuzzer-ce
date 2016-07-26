@@ -1,8 +1,8 @@
 <<<
-[[Publishers_Rest]]
-== Rest Publisher
+[[Publishers_WebApi]]
+== WebApi Publisher
 
-The _Rest_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (REST) architecture. This publisher communicates using HTTP as the underlying transport.
+The _WebApi_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (WebApi) architecture. This publisher communicates using HTTP as the underlying transport.
 
 This publisher supports sending body data as:
 
@@ -10,7 +10,7 @@ This publisher supports sending body data as:
  * XML when models contain XmlElement
  * As raw binary data when a custom content type is provided
 
-Similar to the xref:Publishers_Http[Http] publisher, the _Rest_ publisher supports setting headers by using a special action type 'call' syntax.
+Similar to the xref:Publishers_Http[Http] publisher, the _WebApi_ publisher supports setting headers by using a special action type 'call' syntax.
 See the examples section for an example of setting a custom header field.
 
 Several analyzers are useful when building Pits for RESTful APIs:
@@ -35,10 +35,10 @@ TIP: By default the publisher will attempt to detect the body content type and s
 [source,xml]
 ----
 <!-- AUtomatically detect content type -->
-<Publisher class="Rest"/>
+<Publisher class="WebApi"/>
 
 <!-- Custom content type header -->
-<Publisher class="Rest">
+<Publisher class="WebApi">
     <Param name="ContentType" value="application/octet-stream" />
 </Publisher>
 ----
@@ -69,11 +69,17 @@ FaultOnStatusCodes:: Comma separated list of status codes that are faults. Defau
 Timeout:: How long to wait in milliseconds for data/connection. the default value is 3,000.
 IgnoreCertErrors:: Allow HTTPS regardless of cert status. The default value is true.
 
+Proxy::
+    Set the HTTP proxy URL to use. Default is none. Example: +http://192.168.1.1:8080+. +
+     +
+    Please note that the host +localhost+ and IP 127.0.0.1 will bypass the provided proxy. This is a behaviour hardcoded into the underlying http networking code. For a discussion of options to deal with this limitation see the following article: link:http://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/MonitorLocalTraffic[Fiddler - Monitoring Local Traffic].
+
+
 === Actions
 
 xref:Action_call[call]::
 +
-Call actions are used to perform REST calls.
+Call actions are used to perform WebApi calls.
 +
 The method attribute contains both the HTTP method (GET, POST, etc.) and the URL.
 The URL portion of the method attribute can contain parameter substitution tokens.
@@ -107,11 +113,11 @@ An example of settings headers both via Python and also the +call+ action are pr
 
 === Scripting
 
-The Rest publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See example _Setting Custom Authentication Header via Python_ below.
+The WebApi publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See example _Setting Custom Authentication Header via Python_ below.
 
 === Example
 
-.Calling Rest Services with Result
+.Calling WebApi Services with Result
 ===================================
 
 The following example provides three fragments using the GET and POST methods. 
@@ -205,7 +211,7 @@ For the GET request, the Result element is used to capture any returned data.
 
 <Test name="Default">
     <StateModel ref="Default" />
-    <Publisher class="Rest" />
+    <Publisher class="WebApi" />
 </Test>
 
 </Peach>
@@ -268,7 +274,7 @@ The following example provides three fragments using the GET and POST methods.
 
 <Test name="Default">
     <StateModel ref="Default" />
-    <Publisher class="Rest" />
+    <Publisher class="WebApi" />
 </Test>
 
 </Peach>
@@ -322,7 +328,7 @@ The following example provides three fragments using the GET and POST methods.
 <Test name="Default">
 
     <StateModel ref="Default"/>
-    <Publisher class="Rest">
+    <Publisher class="WebApi">
         <Param name="ContentType" value="application/octet-stream" />
     </Publisher>
 
@@ -398,7 +404,7 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
 
 <Test name="Default">
     <StateModel ref="Default" />
-    <Publisher class="Rest" />
+    <Publisher class="WebApi" />
 </Test>
 
 </Peach>
@@ -425,7 +431,7 @@ AWS_SECRET_KEY = "OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV"
 
 def AwsAuthGen(context, action):
 
-    # Get the Publisher (RestPublisher)
+    # Get the Publisher (WebApiPublisher)
     if action.publisher:
         publisher = context.test.publishers[action.publisher]
     else:
@@ -507,7 +513,7 @@ def AwsAuthGen(context, action):
 
   <Test name="Default" maxOutputSize="20000000">
     <StateModel ref="TheStateModel"/>
-    <Publisher class="Rest">
+    <Publisher class="WebApi">
       <Param name="FaultOnStatusCodes" value="500,501,502,503,504,505" />
     </Publisher>
   </Test>
