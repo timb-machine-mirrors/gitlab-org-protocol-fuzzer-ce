@@ -41,7 +41,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			const string xml = @"
 <WebProxy>
 	<Route url='*' />
-	<Route url='/foo/bar' mutate='false' swagger='/tmp/swagger/json' baseUrl='google.com' />
+	<Route url='/foo/bar' mutate='false' swagger='/tmp/swagger/json' baseUrl='google.com' faultOnStatusCodes='500,501' />
 </WebProxy>
 ";
 
@@ -58,6 +58,9 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.AreEqual(false, obj.Routes[1].Mutate);
 			Assert.AreEqual("/tmp/swagger/json", obj.Routes[1].Swagger);
 			Assert.AreEqual("google.com", obj.Routes[1].BaseUrl);
+			Assert.AreEqual(2, obj.Routes[1].FaultOnStatusCodes.Count);
+			Assert.AreEqual(500, obj.Routes[1].FaultOnStatusCodes[0]);
+			Assert.AreEqual(501, obj.Routes[1].FaultOnStatusCodes[1]);
 		}
 	}
 }
