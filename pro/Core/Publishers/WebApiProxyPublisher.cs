@@ -53,8 +53,10 @@ namespace Peach.Pro.Core.Publishers
 		{
 		}
 
-		protected override Variant OnCall(string method, List<BitwiseStream> args)
+		protected override Variant OnCall(string method, List<ActionParameter> args)
 		{
+			// Could hack in sending COntext to WebApiProxy here. Hacky hack hack.
+
 			return null;
 		}
 	}
