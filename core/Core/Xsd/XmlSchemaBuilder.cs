@@ -978,10 +978,46 @@ namespace Peach.Core.Xsd
 				var pluginAttr = pi.GetAttributes<PluginElementAttribute>().FirstOrDefault();
 				if (pluginAttr != null)
 				{
-					var elems = MakeElement(pluginAttr.ElementName, null, pi, pluginAttr);
+					if (pluginAttr.ElementName == null)
+					{
+						var impls = ClassLoader.GetAllByAttribute<PluginAttribute>((t, a) => a.Type == pluginAttr.PluginType).ToList();
 
-					foreach (var elem in elems)
-						schemaParticle.Items.Add(elem);
+						var elemChoice = new XmlSchemaChoice();
+
+						foreach (var item in impls)
+						{
+							var name = item.Key.Name;
+							var destType = item.Value;
+
+							var schemaElem = new XmlSchemaElement();
+							if (name != type.Name)
+							{
+								schemaElem.Name = name;
+								schemaElem.SchemaTypeName = new XmlQualifiedName(destType.Name, schema.TargetNamespace);
+
+								if (!objTypeCache.ContainsKey(destType))
+									AddComplexType(destType.Name, destType, null);
+							}
+							else
+							{
+								schemaElem.RefName = new XmlQualifiedName(destType.Name, schema.TargetNamespace);
+
+								if (!objElemCache.ContainsKey(destType))
+									AddElement(name, destType, null);
+							}
+
+							elemChoice.Items.Add(schemaElem);
+						}
+
+						schemaParticle.Items.Add(elemChoice);
+					}
+					else
+					{
+						var elems = MakeElement(pluginAttr.ElementName, null, pi, pluginAttr);
+
+						foreach (var elem in elems)
+							schemaParticle.Items.Add(elem);
+					}
 				}
 			}
 
