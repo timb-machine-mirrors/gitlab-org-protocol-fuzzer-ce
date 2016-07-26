@@ -10,7 +10,7 @@ using Peach.Core.Dom;
 
 namespace Peach.Pro.Core.MutationStrategies
 {
-	[MutationStrategy("Sequential", true)]
+	[MutationStrategy("Sequential")]
 	[Serializable]
 	public class Sequential : MutationStrategy
 	{
