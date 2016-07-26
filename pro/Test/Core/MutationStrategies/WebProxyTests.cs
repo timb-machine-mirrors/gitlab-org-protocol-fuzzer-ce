@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Core.Test;
 using Peach.Pro.Core;
@@ -45,7 +47,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 </WebProxy>
 ";
 
-			var obj = XmlTools.Deserialize<WebProxyModel>(new StringReader(xml));
+			var obj = XmlTools.Deserialize<WebProxyOptions>(new StringReader(xml));
 
 			Assert.NotNull(obj);
 			Assert.NotNull(obj.Routes);
@@ -62,5 +64,37 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.AreEqual(500, obj.Routes[1].FaultOnStatusCodes[0]);
 			Assert.AreEqual(501, obj.Routes[1].FaultOnStatusCodes[1]);
 		}
+
+		[Test]
+		public void TestPit()
+		{
+			const string xml = @"
+<Peach>
+	<Test name='Default'>
+		<WebProxy>
+			<Route url='/p/jobs' swagger='foo.json' />
+		</WebProxy>
+		<Strategy class='WebProxy' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+			var dom = ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var sm = (WebProxyStateModel)dom.tests[0].stateModel;
+			var routes = sm.Options.Routes;
+
+			Assert.AreEqual(2, routes.Count);
+			Assert.AreEqual("/p/jobs", routes[0].Url);
+			Assert.AreEqual("*", routes[1].Url);
+		}
+
+		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
+		{
+			return new ProPitParser().asParser(args, new MemoryStream(Encoding.UTF8.GetBytes(xml)));
+		}
+
 	}
 }

@@ -9,6 +9,7 @@ using Peach.Core.Dom;
 using Peach.Pro.Core.Dom.Actions;
 using Peach.Pro.Core.Godel;
 using Peach.Pro.Core.License;
+using Peach.Pro.Core.WebApi;
 using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
 using StateModel = Peach.Pro.Core.Godel.StateModel;
@@ -254,6 +255,16 @@ namespace Peach.Pro.Core
 			}
 
 			return stateModel;
+		}
+
+		protected override void handleTestChild(XmlNode node, Test test)
+		{
+			if (node.Name == "WebProxy")
+			{
+				var opts = XmlTools.Deserialize<WebProxyOptions>(new StringReader(node.OuterXml));
+
+				test.stateModel = new WebProxyStateModel(opts);
+			}
 		}
 	}
 }
