@@ -32,6 +32,7 @@ namespace Peach.Pro.Test.WebProxy
 	{
 		public static string BaseUrl = "http://localhost.:8002";
 		protected IDisposable _server;
+		protected string SwaggerFile = null;
 
 		/// <summary>
 		/// Get an instance of HTTP Client
@@ -51,6 +52,19 @@ namespace Peach.Pro.Test.WebProxy
 
 			return new HttpClient(handler);
 		}
+
+		public static string GetValuesJson()
+		{
+			var assembly = Assembly.GetExecutingAssembly();
+			using (var textStream =
+				new StreamReader(
+					assembly.GetManifestResourceStream(
+						"Peach.Pro.Test.WebProxy.TestTarget.SwaggerValuesApi.json")))
+			{
+				return textStream.ReadToEnd();
+			}
+		}
+
 
 		public string StreamVariantToString(Variant v)
 		{
@@ -73,6 +87,9 @@ namespace Peach.Pro.Test.WebProxy
 		{
 			BaseProgram.Initialize();
 			_server = TestTargetServer.StartServer();
+
+			SwaggerFile = Path.GetTempFileName();
+			File.WriteAllText(SwaggerFile, GetValuesJson());
 		}
 
 		[OneTimeTearDown]
@@ -80,6 +97,9 @@ namespace Peach.Pro.Test.WebProxy
 		{
 			if (_server != null)
 				_server.Dispose();
+
+			if (SwaggerFile != null)
+				File.Delete(SwaggerFile);
 
 			_server = null;
 		}
@@ -134,6 +154,7 @@ namespace Peach.Pro.Test.WebProxy
 			if (singleIteration)
 				cfg.singleIteration = true;
 
+			this.dom = dom;
 			e.startFuzzing(dom, cfg);
 		}
 
@@ -142,12 +163,15 @@ namespace Peach.Pro.Test.WebProxy
 			RunEngine(ParsePit(xml), pitFilename);
 		}
 
+		protected Dom dom;
+
 		protected void RunEngine(Dom dom, string pitFilename)
 		{
 			var e = new Engine(this);
 			var cfg = new RunConfiguration();
 			cfg.pitFile = pitFilename;
 
+			this.dom = dom;
 			e.startFuzzing(dom, cfg);
 		}
 
