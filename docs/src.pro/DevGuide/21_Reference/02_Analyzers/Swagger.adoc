@@ -2,7 +2,7 @@
 
 == Swagger Analyzer
 
-This analyzer converts Swagger API JSON into Peach Pits for fuzzing REST style web service endpoints.
+This analyzer converts Swagger API JSON into Peach Pits for fuzzing WebApi style web service endpoints.
 
 link:http://swagger.io[Swagger] is a popular method for representing your RESTful API, especially for documentation purposes. Many frameworks can export Swagger API representations which can then be converted into partial pits using this analyzer.
 
