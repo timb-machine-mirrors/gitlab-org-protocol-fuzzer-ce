@@ -215,10 +215,7 @@ namespace Peach.Core
 		{
 			_currentThread = Thread.CurrentThread;
 			_watcher = watcher;
-			_context = new RunContext
-			{
-				engine = this,
-			};
+			_context = new RunContext();
 			_timer = new Timer(OnTimer);
 			_timerCount = 0;
 		}

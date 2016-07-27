@@ -281,13 +281,6 @@ namespace Peach.Core
 		public RunConfiguration config = null;
 
 		/// <summary>
-		/// Engine instance for this run
-		/// </summary>
-		[NonSerialized]
-		[Obsolete]
-		public Engine engine = null;
-
-		/// <summary>
 		/// Dom to use for this run
 		/// </summary>
 		[Obsolete]
