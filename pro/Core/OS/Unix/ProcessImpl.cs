@@ -244,7 +244,8 @@ namespace Peach.Pro.Core.OS.Unix
 			}
 			finally
 			{
-				listener.Stop();
+				// Don't call listener.Stop() since after it closes the open socket a new one is opened
+				listener.Server.Close();
 			}
 		}
 

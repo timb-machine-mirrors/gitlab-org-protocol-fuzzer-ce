@@ -30,7 +30,7 @@ def prepare(conf):
 	env = conf.env
 	j = os.path.join
 
-	env['MSVC_VERSIONS'] = ['msvc 12.0', 'msvc 11.0', 'msvc 10.0', 'wsdk 7.1' ]
+	env['MSVC_VERSIONS'] = ['msvc 14.0', 'msvc 12.0', 'msvc 11.0', 'msvc 10.0', 'wsdk 7.1' ]
 	env['MSVC_TARGETS']  = 'x64' in env.SUBARCH and [ 'x64', 'x86_amd64' ] or [ 'x86' ]
 
 	env['PIN_VER'] = 'pin-2.14-71313-msvc12-windows'
