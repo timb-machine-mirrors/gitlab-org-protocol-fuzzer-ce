@@ -68,7 +68,6 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_RawV4[RawV4]
  * xref:Publishers_RawV6[RawV6]
  * xref:Publishers_Remote[Remote]
- * xref:Publishers_Rest[Rest]
  * xref:Publishers_SerialPort[SerialPort]
  * xref:Publishers_Ssl[SslClient]
  * xref:Publishers_SslListener[SslListener]
@@ -76,6 +75,7 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_TcpListener[TcpListener]
  * xref:Publishers_Udp[Udp]
  * xref:Publishers_Usb[Usb]
+ * xref:Publishers_WebApi[WebApi]
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  * xref:Publishers_Zip[Zip]
@@ -191,29 +191,53 @@ Peach.Core.Publishers.TcpClientPublisher stop()
 
 :leveloffset: 2
 include::AndroidMonkey.adoc[]
+
 include::CAN.adoc[]
+
 include::Com.adoc[]
+
 include::Console.adoc[]
+
 include::ConsoleHex.adoc[]
+
 include::File.adoc[]
+
 include::FilePerIteration.adoc[]
+
 include::Http.adoc[]
+
 include::I2C.adoc[]
+
 include::RawEther.adoc[]
+
 include::RawIPv4.adoc[]
+
 include::RawV4.adoc[]
+
 include::RawV6.adoc[]
+
 include::Remote.adoc[]
-include::Rest.adoc[]
+
 include::Serial.adoc[]
+
 include::Ssl.adoc[]
+
 include::SslListener.adoc[]
+
 include::Tcp.adoc[]
+
 include::TcpListener.adoc[]
+
 include::Udp.adoc[]
+
 include::Usb.adoc[]
+
+include::WebApi.adoc[]
+
 include::WebService.adoc[]
+
 include::WebSocket.adoc[]
+
 include::Zip.adoc[]
 
 // end

@@ -27,6 +27,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("IgnoreCertErrors", typeof(bool), "Allow https regardless of cert status (defaults to true)", "true")]
 	[Parameter("FailureStatusCodes", typeof(int[]), "Comma separated list of status codes that are failures causing current test case to stop.", "400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,500,501,502,503,504,505")]
 	[Parameter("FaultOnStatusCodes", typeof(int[]), "Comma separated list of status codes that are faults. Defaults to none.", "")]
+	[Parameter("Proxy", typeof(string), "HTTP proxy address (http://192.168.1.1). Defaults to none.", "")]
 	public class HttpPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -38,6 +39,7 @@ namespace Peach.Pro.Core.Publishers
 		public string Password { get; protected set; }
 		public string Domain { get; protected set; }
 		public string BaseUrl { get; protected set; }
+		public string Proxy { get; protected set; }
 		public int[] FaultOnStatusCodes { get; protected set; }
 		public int[] FailureStatusCodes { get; protected set; }
 		public bool Cookies { get; protected set; }
@@ -302,6 +304,9 @@ namespace Peach.Pro.Core.Publishers
 			request.Method = Method;
 			request.Timeout = Timeout;
 			request.ServicePoint.Expect100Continue = false;
+
+			if (!string.IsNullOrEmpty(Proxy))
+				request.Proxy = new WebProxy(new Uri(Proxy), false);
 
 			if (Cookies)
 				request.CookieContainer = CookieJar;

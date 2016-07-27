@@ -2,9 +2,9 @@
 
 == Postman Analyzer
 
-This analyzer converts Postman Collections into Peach Pits for fuzzing REST style web service endpoints.
+This analyzer converts Postman Collections into Peach Pits for fuzzing WebApi style web service endpoints.
 
-link:https://www.getpostman.com[Postman] is a popular app used during development and testing of REST style web services. APIs are organized into Collections which can be converted into fuzzers using this analyzer.
+link:https://www.getpostman.com[Postman] is a popular app used during development and testing of WebApi style web services. APIs are organized into Collections which can be converted into fuzzers using this analyzer.
 
 After converting, some manual work is usually needed to have a fully working pit.  This includes:
 

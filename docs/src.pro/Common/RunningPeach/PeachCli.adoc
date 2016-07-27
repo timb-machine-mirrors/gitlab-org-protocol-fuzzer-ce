@@ -29,7 +29,7 @@ that will be controlled from this tool.  Instances can be
 placed into groups. An instance can be part of more than one
 group.
 
-A master instance is configured to pull configurations from.
+Configurations are pulled from a master instance configured in instances.py.
 Typically the master instance is running locally, but it can
 also be one of the fuzzing instances.
 
