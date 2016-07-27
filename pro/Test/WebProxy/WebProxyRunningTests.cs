@@ -40,7 +40,6 @@ namespace Peach.Pro.Test.WebProxy
 	</Test>
 </Peach>";
 
-			//RunEngine(xml);
 			Task.Run(() =>
 			{
 				try
@@ -57,6 +56,9 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+			response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+			response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+			response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 		}
