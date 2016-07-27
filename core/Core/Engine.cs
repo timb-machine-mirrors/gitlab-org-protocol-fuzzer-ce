@@ -668,7 +668,7 @@ namespace Peach.Core
 							fault.controlRecordingIteration = context.controlRecordingIteration;
 						}
 
-						if (context.reproducingFault)
+						if (context.reproducingFault || context.disableReproduction)
 						{
 							// Notify loggers first
 							OnFault(iterationCount, test.stateModel, context.faults.ToArray());

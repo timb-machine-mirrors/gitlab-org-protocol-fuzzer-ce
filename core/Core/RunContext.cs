@@ -432,6 +432,8 @@ namespace Peach.Core
 
 		#region Reproduce Fault
 
+		public bool disableReproduction = false;
+
 		/// <summary>
 		/// True when we have found a fault and are in the process
 		/// of reproducing it.
