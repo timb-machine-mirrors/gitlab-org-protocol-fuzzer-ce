@@ -1032,6 +1032,38 @@ namespace Peach.Pro.Test.Core
 
 			Assert.AreEqual(payload, dm.Value.ToArray());
 		}
+
+		[Test]
+		public void ExpressionGetSetUlong()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM1'>
+		<Number size='64' signed='false' endian='big'>
+			<Relation type='size' of='Item' expressionGet='size &amp; 0x00ffffffffffffff' expressionSet='size | 0xff00000000000000' />
+		</Number>
+		<Blob name='Item' valueType='hex' value='00 00 00' />
+	</DataModel>
+
+	<DataModel name='DM2' ref='DM1' />
+</Peach>
+";
+
+			var dom = ParsePit(xml);
+
+			var val = dom.dataModels[0].Value.ToArray();
+
+			Assert.AreEqual(new byte[] { 0xff, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0 }, val);
+
+			var data = new BitStream(new byte[] { 0xff, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0 });
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[1], data);
+
+			var blob = (Blob)dom.dataModels[1][1];
+
+			Assert.AreEqual(new byte[] { 0, 0, 0, 0}, ((BitwiseStream)blob.DefaultValue).ToArray());
+		}
 	}
 }
 

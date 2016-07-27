@@ -200,44 +200,53 @@ namespace Peach.Pro.Core.OS.Unix
 		{
 			var listener = new TcpListener(IPAddress.Loopback, 0);
 			listener.Start();
-			var local = (IPEndPoint)listener.LocalEndpoint;
 
-			_logger.Trace("CreateProcess(): TcpListener bound to: {0}", local);
-
-			var args = string.Join(" ",
-				"--debugger-agent=transport=dt_socket,address=127.0.0.1:{0},setpgid=y".Fmt(local.Port),
-				Utilities.GetAppResourcePath("PeachTrampoline.exe"),
-				executable,
-				arguments
-			);
-
-			var si = new System.Diagnostics.ProcessStartInfo
+			try
 			{
-				FileName = "mono",
-				Arguments = args,
-				UseShellExecute = false,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				WorkingDirectory = workingDirectory ?? "",
-			};
+				var local = (IPEndPoint)listener.LocalEndpoint;
 
-			if (environment != null)
-				environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
+				_logger.Trace("CreateProcess(): TcpListener bound to: {0}", local);
 
-			_logger.Debug("CreateProcess(): \"{0} {1}\"", executable, arguments);
-			var process = SysProcess.Start(si);
+				var args = string.Join(" ",
+					"--debugger-agent=transport=dt_socket,address=127.0.0.1:{0},setpgid=y".Fmt(local.Port),
+					Utilities.GetAppResourcePath("PeachTrampoline.exe"),
+					executable,
+					arguments
+				);
 
-			var task = listener.AcceptTcpClientAsync();
-			while (!task.Wait(TimeSpan.FromMilliseconds(100)))
-			{
-				if (process.HasExited)
-					throw new PeachException("Failed to start with exit code: {0}".Fmt(process.ExitCode));
+				var si = new System.Diagnostics.ProcessStartInfo
+				{
+					FileName = "mono",
+					Arguments = args,
+					UseShellExecute = false,
+					RedirectStandardInput = true,
+					RedirectStandardOutput = true,
+					RedirectStandardError = true,
+					WorkingDirectory = workingDirectory ?? "",
+				};
+
+				if (environment != null)
+					environment.ForEach(x => si.EnvironmentVariables[x.Key] = x.Value);
+
+				_logger.Debug("CreateProcess(): \"{0} {1}\"", executable, arguments);
+				var process = SysProcess.Start(si);
+
+				var task = listener.AcceptTcpClientAsync();
+				while (!task.Wait(TimeSpan.FromMilliseconds(100)))
+				{
+					if (process.HasExited)
+						throw new PeachException("Failed to start with exit code: {0}".Fmt(process.ExitCode));
+				}
+
+				DebuggerServer(task.Result);
+
+				return MakeOwnedProcess(process);
 			}
-
-			DebuggerServer(task.Result);
-
-			return MakeOwnedProcess(process);
+			finally
+			{
+				// Don't call listener.Stop() since after it closes the open socket a new one is opened
+				listener.Server.Close();
+			}
 		}
 
 		private void DebuggerServer(TcpClient tcp)

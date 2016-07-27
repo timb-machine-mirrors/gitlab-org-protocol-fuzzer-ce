@@ -91,7 +91,7 @@ namespace Peach.Core.Dom
 	[Parameter("lengthType", typeof(LengthType), "Units of the length attribute", "bytes")]
 	[Parameter("nullTerminated", typeof(bool), "Is string null terminated?", "false")]
 	[Parameter("padCharacter", typeof(char), "Character to pad length with.", "")]
-	[Parameter("type", typeof(StringType), "Type of string (encoding)", "ascii")]
+	[Parameter("type", typeof(StringType), "Type of string (encoding)", "utf8")]
 	[Parameter("value", typeof(string), "Default value", "")]
 	[Parameter("valueType", typeof(ValueType), "Format of value attribute", "string")]
 	[Parameter("token", typeof(bool), "Is element a token", "false")]
@@ -103,10 +103,10 @@ namespace Peach.Core.Dom
 	[Serializable]
 	public class String : DataElement
 	{
-		protected StringType _type = StringType.ascii;
+		protected StringType _type = StringType.utf8;
 		protected bool _nullTerminated = false;
 		protected char _padCharacter = '\0';
-		protected Encoding encoding = Encoding.ASCII;
+		protected Encoding encoding = Encoding.UTF8;
 
 		public String()
 			: base()

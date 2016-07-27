@@ -40,6 +40,8 @@
 #pragma warning (disable : 4054)  // type_cast from fucntion pointer to data pointer
 #pragma warning (disable : 4305)  // 'type cast' : truncation from 'HANDLE' to 'pid_t'
 #pragma warning (disable : 4306)  // 'type cast' : conversion from 'int' to 'HANDLE' of greater size
+#pragma warning (disable : 4311)  // 'type cast': pointer truncation from 'HANDLE' to 'pid_t'
+#pragma warning (disable : 4312)  // 'type cast': conversion from 'int' to 'HANDLE' of greater size
 #endif
 
 #include <sys/types.h>
