@@ -1,4 +1,5 @@
 using System;
+using FlexNet.Operations;
 using FlxDotNetClient;
 using NUnit.Framework;
 using Peach.Core;
@@ -11,22 +12,115 @@ namespace Peach.Pro.Test.Core.Flexera
 	[Quick]
 	internal class LicenseTests
 	{
-		const string ServerUrl = "https://flex1253-uat.compliance.flexnetoperations.com/instances/278QV9C68FEK/request";
-
 		[Test]
-		public void TestCapabilityRequest()
+		public void TestMeteredUsage()
 		{
-			var feature = "Test-Metered";
-			RunHost("TEST-1", "3489-9efc-c700-48e0-b96e-1518-7b43-9644", feature);
-			RunHost("TEST-2", "821a-de30-c29c-4ae9-a195-3f76-4d9c-cc6a", feature);
+			RunHost(
+				"https://flex1253.compliance.flexnetoperations.com/instances/LBSECNM5BMBG/request",
+				"TEST-1", 
+				"b7d7-7241-e5f6-41fc-9a85-96bf-75e8-a1c6", 
+				"Test-Metered", 
+				10, 
+				10
+			);
 		}
 
-		private static void RunHost(string hostId, string rightsId, string feature)
+		[Test]
+		public void TestPrepaidUsage()
 		{
-			using (var licensing = LicensingFactory.GetLicensing(IdentityClient_UAT.IdentityData, null, hostId))
+			ReplenishLineItem(
+				"5e7b-a5d7-b366-443f-b087-1926-3422-7fa1",
+				"95b4-af92-9c68-4973-aebc-43cc-d1cf-6685",
+				10
+			);
+
+			RunHost(
+				"https://flex1253.compliance.flexnetoperations.com/instances/WV26ZW5K4GRP/request",
+				"TEST-2",
+				"8171-8bf5-9803-470b-82ad-9f49-c56b-1cba", 
+				"Test-Metered", 
+				15, 
+				10
+			);
+		}
+
+		private void ReplenishLineItem(string entitlementId, string activationId, int increment)
+		{
+			using (var service = Factory.Create<EntitlementOrderService>(EnvironmentType.Production))
+			{
+				var query = service.getEntitlementLineItemPropertiesQuery(new searchEntitlementLineItemPropertiesRequestType
+				{
+					pageNumber = "1",
+					batchSize = "1",
+					queryParams = new searchActivatableItemDataType
+					{
+						entitlementId = new SimpleQueryType
+						{
+							searchType = simpleSearchType.EQUALS,
+							value = entitlementId
+						},
+						activationId = new SimpleQueryType
+						{
+							searchType = simpleSearchType.EQUALS,
+							value = activationId
+						},
+					},
+					entitlementLineItemResponseConfig = new entitlementLineItemResponseConfigRequestType
+					{
+						entitlementId = true,
+						entitlementIdSpecified = true,
+						activationId = true,
+						activationIdSpecified = true,
+						numberOfCopies = true,
+						numberOfCopiesSpecified = true,
+					}
+				});
+
+				Assert.AreEqual(StatusType.SUCCESS, query.statusInfo.status, query.statusInfo.reason);
+
+				var lineItem = query.entitlementLineItem[0];
+				var count = Convert.ToInt32(lineItem.numberOfCopies) + increment;
+
+				var update = service.updateEntitlementLineItem(new[]
+				{
+					new updateEntitlementLineItemDataType
+					{
+						entitlementIdentifier = new entitlementIdentifierType
+						{
+							uniqueId = lineItem.entitlementId.uniqueId
+						},
+						autoDeploy = true,
+						autoDeploySpecified = true,
+						lineItemData = new[]
+						{
+							new updateLineItemDataType
+							{
+								lineItemIdentifier = new entitlementLineItemIdentifierType
+								{
+									uniqueId = lineItem.activationId.uniqueId
+								},
+								numberOfCopies = count.ToString(),
+							}
+						}
+					}
+				});
+
+				Assert.AreEqual(StatusType.SUCCESS, update.statusInfo.status, update.statusInfo.reason);
+			}
+		}
+
+		private static void RunHost(
+			string serverUrl, 
+			string hostId,
+			string rightsId, 
+			string feature, 
+			int count, 
+			int expected)
+		{
+			using (var licensing = LicensingFactory.GetLicensing(IdentityClient_Production.IdentityData, null, hostId))
 			{
 				Console.WriteLine("RunHost> request {0}, {1}", hostId, feature);
-				DoRequest(licensing, rightsId, feature, 10);
+				DoRequest(licensing, serverUrl, rightsId, feature, count);
 				Console.WriteLine("----------");
 
 				DumpTrustedStore(licensing);
@@ -50,20 +144,27 @@ namespace Peach.Pro.Test.Core.Flexera
 				{
 					licensing.LicenseManager.ReturnAllLicenses();
 				}
-				Assert.AreEqual(10, acquired);
+				Assert.AreEqual(expected, acquired);
 
 				DumpTrustedStore(licensing);
 			}
 			Console.WriteLine("##########");
 		}
 
-		private static ICapabilityResponse DoRequest(ILicensing licensing, string rightsId, string feature, int count)
+		private static ICapabilityResponse DoRequest(
+			ILicensing licensing, 
+			string serverUrl, 
+			string rightsId, 
+			string feature, 
+			int count)
 		{
 			var options = licensing.LicenseManager.CreateCapabilityRequestOptions();
 			options.Operation = CapabilityRequestOperation.Request;
 			options.AddRightsId(rightsId, 1);
 			options.RequestorId = "LicenseTests";
-			var data = new FeatureData(feature, "1.0", count);
+			var featureOptions = licensing.LicenseManager.CreateDesiredFeatureOptions();
+			featureOptions.PartialFulfillment = true;
+			var data = new FeatureData(feature, "1.0", count, featureOptions);
 			options.AddDesiredFeature(data);
 			options.ForceResponse = true;
 
@@ -73,7 +174,7 @@ namespace Peach.Pro.Test.Core.Flexera
 			//Console.WriteLine("Sending request: {0} bytes", binRequest.Length);
 
 			byte[] binResponse;
-			CommFactory.Create(ServerUrl)
+			CommFactory.Create(serverUrl)
 				.SendBinaryMessage(binRequest, out binResponse);
 
 			var response = licensing.LicenseManager.ProcessCapabilityResponse(binResponse);
@@ -99,9 +200,9 @@ namespace Peach.Pro.Test.Core.Flexera
 				Console.WriteLine("Features");
 				foreach (var feature in response.FeatureCollection)
 				{
-					Console.WriteLine("    {0} v{1}: {2}, available: {3}", 
-						feature.Name, 
-						feature.Version, 
+					Console.WriteLine("    {0} v{1}: {2}, available: {3}",
+						feature.Name,
+						feature.Version,
 						feature.Count,
 						feature.AvailableAcquisitionCount
 					);
