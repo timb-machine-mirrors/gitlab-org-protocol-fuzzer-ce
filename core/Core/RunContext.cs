@@ -290,6 +290,13 @@ namespace Peach.Core
 		}
 
 		/// <summary>
+		/// Engine instance for this run
+		/// </summary>
+		[Obsolete]
+		[NonSerialized]
+		public Engine engine = null;
+
+		/// <summary>
 		/// Current test being run
 		/// </summary>
 		/// <remarks>
