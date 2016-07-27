@@ -18,8 +18,8 @@ using Random = Peach.Core.Random;
 namespace Peach.Pro.Core.MutationStrategies
 {
 	[DefaultMutationStrategy]
-	[MutationStrategy("Random", true)]
-	[MutationStrategy("RandomStrategy")]
+	[MutationStrategy("Random")]
+	[Alias("RandomStrategy")]
 	[Parameter("SwitchCount", typeof(int), "Number of iterations to perform per-mutator befor switching.", "200")]
 	[Parameter("MaxFieldsToMutate", typeof(int), "Maximum fields to mutate at once.", "6")]
 	[Parameter("StateMutation", typeof(bool), "Enable state mutations.", "false")]

@@ -135,10 +135,32 @@ namespace Peach.Core.Dom
 		public Platform.OS platform { get; set; }
 	}
 
-	public class StateModelRef
+	public interface IStateModelRef
+	{
+		void WritePit(XmlWriter pit);
+	}
+
+	[StateModelRef("StateModel")]
+	public class StateModelRef : IStateModelRef
 	{
 		[XmlAttribute("ref")]
 		public string refName { get; set; }
+
+		public void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("StateModel");
+			pit.WriteAttributeString("ref", refName);
+			pit.WriteEndElement();
+		}
+	}
+
+	public class StateModelRefAttribute : PluginAttribute
+	{
+		public StateModelRefAttribute(string name)
+			: base(typeof(IStateModelRef), name, true)
+		{
+			Scope = PluginScope.Internal;
+		}
 	}
 
 	/// <summary>
@@ -303,8 +325,12 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
-		[XmlElement("StateModel")]
-		public StateModelRef stateModelRef { get; set; }
+		[PluginElement(typeof(IStateModelRef))]
+		public IStateModelRef stateModelRef
+		{
+			get { throw new NotSupportedException(); }
+			set { throw new NotSupportedException(); }
+		}
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
@@ -455,12 +481,9 @@ namespace Peach.Core.Dom
 				}
 			}
 
+
 			if (stateModelRef != null)
-			{
-				pit.WriteStartElement("StateModel");
-				pit.WriteAttributeString("ref", stateModelRef.refName);
-				pit.WriteEndElement();
-			}
+				stateModelRef.WritePit(pit);
 
 			pit.WriteEndElement();
 		}

@@ -7,6 +7,8 @@ using Logger = NLog.Logger;
 
 namespace Peach.Pro.Core.MutationStrategies
 {
+	[MutationStrategy("WebProxy")]
+	[Serializable]
 	public class WebProxyStrategy : WeightedMutationStrategy
 	{
 		private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();

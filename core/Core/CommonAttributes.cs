@@ -169,6 +169,13 @@ namespace Peach.Core
 			PluginType = pluginType;
 			ElementName = PluginName;
 		}
+
+		public PluginElementAttribute(Type pluginType)
+		{
+			AttributeName = null;
+			PluginType = pluginType;
+			ElementName = null;
+		}
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]

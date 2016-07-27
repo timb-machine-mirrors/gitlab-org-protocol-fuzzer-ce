@@ -268,11 +268,17 @@ namespace Peach.Core
 	{
 	}
 
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public class MutationStrategyAttribute : PluginAttribute
 	{
-		public MutationStrategyAttribute(string name, bool isDefault = false)
-			: base(typeof(MutationStrategy), name, isDefault)
+		[Obsolete("This constructor is obsolete. Use the constructor without isDefault instead.")]
+		public MutationStrategyAttribute(string name, bool isDefault)
+			: base(typeof(MutationStrategy), name, true)
+		{
+		}
+
+		public MutationStrategyAttribute(string name)
+			: base(typeof(MutationStrategy), name, true)
 		{
 		}
 	}

@@ -157,7 +157,7 @@ namespace Peach.Core.Dom
 		/// This will start the initial State.
 		/// </remarks>
 		/// <param name="context"></param>
-		public void Run(RunContext context)
+		public virtual void Run(RunContext context)
 		{
 			var currentState = initialState;
 
