@@ -35,20 +35,6 @@ namespace Peach.Pro.Core.Publishers
 		{
 		}
 
-		protected override void OnStart()
-		{
-			base.OnStart();
-
-			_proxy = new WebApiProxy();
-			_proxy.Start();
-		}
-
-		protected override void OnStop()
-		{
-			base.OnStop();
-			_proxy.Dispose();
-		}
-
 		protected override void OnOutput(BitwiseStream data)
 		{
 		}
