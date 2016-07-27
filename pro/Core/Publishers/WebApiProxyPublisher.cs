@@ -30,7 +30,8 @@ namespace Peach.Pro.Core.Publishers
 		public WebProxyStateModel Model { get; set; }
 
 		private WebApiProxy _proxy = null;
-		private AutoResetEvent _requestEvent = new AutoResetEvent(false);
+		private AutoResetEvent _iterationStarting = new AutoResetEvent(false);
+		private AutoResetEvent _iterationFinished = new AutoResetEvent(false);
 
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -45,7 +46,8 @@ namespace Peach.Pro.Core.Publishers
 			{
 				Options = Model.Options,
 				Context = Context,
-				SeenRequest = _requestEvent
+				IterationFinishedEvent = _iterationFinished,
+				IterationStartingEvent = _iterationStarting
 			};
 
 			_proxy.Start();
@@ -63,8 +65,9 @@ namespace Peach.Pro.Core.Publishers
 		{
 			base.OnOpen();
 
-			logger.Trace("OnOuput: Waiting on _requestEvent");
-			_requestEvent.WaitOne();
+			_iterationStarting.Set();
+			logger.Trace("OnOuput: Waiting on _iterationFinished");
+			_iterationFinished.WaitOne();
 		}
 
 		protected override Variant OnCall(string method, List<ActionParameter> args)
