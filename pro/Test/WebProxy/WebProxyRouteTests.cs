@@ -112,8 +112,8 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient(null, (sender, e, op) =>
 			{
-				url = e.ProxySession.Request.Url;
-				e.ProxySession.Request.RequestUri = new Uri(e.ProxySession.Request.Url.Replace(rewriteUrl, BaseUrl.Replace(".", "")));
+				url = e.WebSession.Request.Url;
+				e.WebSession.Request.RequestUri = new Uri(e.WebSession.Request.Url.Replace(rewriteUrl, BaseUrl.Replace(".", "")));
 			});
 
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
@@ -153,7 +153,7 @@ namespace Peach.Pro.Test.WebProxy
 			context.test.strategy = new WebProxyStrategy(new Dictionary<string, Variant>());
 			context.test.strategy.Initialize(context, engine);
 
-			var version = string.Empty;
+			Version version = null;
 
 			_proxy.Context = context;
 			_proxy.Options.Routes.Clear();
@@ -166,8 +166,8 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient(null, (sender, e, op) =>
 			{
-				version = e.ProxySession.Request.HttpVersion;
-				e.ProxySession.Request.HttpVersion = "HTTP/1.1";
+				version = e.WebSession.Request.HttpVersion;
+				e.WebSession.Request.HttpVersion = new Version(1, 1);
 			});
 
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
