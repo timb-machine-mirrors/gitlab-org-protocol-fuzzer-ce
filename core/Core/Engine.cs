@@ -217,7 +217,9 @@ namespace Peach.Core
 			_watcher = watcher;
 			_context = new RunContext
 			{
+#pragma warning disable 612
 				engine = this,
+#pragma warning restore 612
 			};
 			_timer = new Timer(OnTimer);
 			_timerCount = 0;

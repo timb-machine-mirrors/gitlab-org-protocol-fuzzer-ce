@@ -365,8 +365,6 @@ namespace Peach.Pro.Test.WebProxy
 				new KeyValuePair<string, string>("value", "Foo Bar")
 			});
 
-			SessionEventArgs eventArgs = null;
-
 			var client = GetHttpClient((s, e, o) =>
 			{
 				var p = o.Parameters.First(i => i.In == WebApiParameterIn.Path);
@@ -384,8 +382,6 @@ namespace Peach.Pro.Test.WebProxy
 				p = o.Parameters.First(i => i.In == WebApiParameterIn.FormData);
 				Assert.AreEqual("Foo Bar", (string)p.DataElement.DefaultValue);
 				p.DataElement.MutatedValue = new Variant("Form_Modified");
-
-				eventArgs = e;
 			});
 
 			var headers = client.DefaultRequestHeaders;
