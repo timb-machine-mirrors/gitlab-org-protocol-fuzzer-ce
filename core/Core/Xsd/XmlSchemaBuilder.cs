@@ -1398,7 +1398,7 @@ namespace Peach.Core.Xsd
 			}
 
 			var schemaElem = new XmlSchemaElement();
-			schemaElem.MinOccursString = defaultValue != null ? "0" : "1";
+			schemaElem.MinOccursString = isArray || defaultValue != null ? "0" : "1";
 			schemaElem.MaxOccursString = isArray ? "unbounded" : "1";
 
 			if (type == typeof(DataModel))
