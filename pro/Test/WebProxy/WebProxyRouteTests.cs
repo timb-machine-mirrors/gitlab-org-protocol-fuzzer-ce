@@ -29,8 +29,8 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestNonMutable()
 		{
-			_proxy.Model.Routes.Clear();
-			_proxy.Model.Routes.Add(new WebProxyRoute
+			_proxy.Options.Routes.Clear();
+			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
 				Url = "*",
 				Mutate = false
@@ -61,14 +61,14 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestRouteMatch()
 		{
-			_proxy.Model.Routes.Clear();
-			_proxy.Model.Routes.Add(new WebProxyRoute
+			_proxy.Options.Routes.Clear();
+			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
 				Url = "*/unknown?api/*",
 				Mutate = true
 			});
 
-			_proxy.Model.Routes.Add(new WebProxyRoute
+			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
 				Url = "*",
 				Mutate = false
@@ -102,8 +102,8 @@ namespace Peach.Pro.Test.WebProxy
 			const string rewriteUrl = "http://location:9999";
 			var url = string.Empty;
 
-			_proxy.Model.Routes.Clear();
-			_proxy.Model.Routes.Add(new WebProxyRoute
+			_proxy.Options.Routes.Clear();
+			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
 				Url = "*/unknown?api/*",
 				Mutate = true,
@@ -156,8 +156,8 @@ namespace Peach.Pro.Test.WebProxy
 			var version = string.Empty;
 
 			_proxy.Context = context;
-			_proxy.Model.Routes.Clear();
-			_proxy.Model.Routes.Add(new WebProxyRoute
+			_proxy.Options.Routes.Clear();
+			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
 				Url = "*/unknown?api/*",
 				Mutate = true,
