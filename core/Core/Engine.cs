@@ -218,7 +218,7 @@ namespace Peach.Core
 			_context = new RunContext
 			{
 #pragma warning disable 612
-				engine = this,
+				engine = this
 #pragma warning restore 612
 			};
 			_timer = new Timer(OnTimer);
@@ -668,7 +668,7 @@ namespace Peach.Core
 							fault.controlRecordingIteration = context.controlRecordingIteration;
 						}
 
-						if (context.reproducingFault)
+						if (context.reproducingFault || context.disableReproduction)
 						{
 							// Notify loggers first
 							OnFault(iterationCount, test.stateModel, context.faults.ToArray());

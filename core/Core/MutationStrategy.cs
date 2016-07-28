@@ -63,12 +63,6 @@ namespace Peach.Core
 			private set;
 		}
 
-		[Obsolete]
-		public Engine Engine
-		{
-			get { return Context.engine; }
-		}
-
 		public abstract bool UsesRandomSeed
 		{
 			get;

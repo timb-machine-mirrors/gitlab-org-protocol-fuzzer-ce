@@ -18,6 +18,7 @@ namespace Peach.Pro.Core.MutationStrategies
 		public WebProxyStrategy(Dictionary<string, Variant> args)
 			: base(args)
 		{
+			MaxFieldsToMutate = 2;
 		}
 
 		public override bool UsesRandomSeed
