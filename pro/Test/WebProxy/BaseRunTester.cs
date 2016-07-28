@@ -141,18 +141,23 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.AreEqual(expected, actual);
 		}
 
-		protected void RunEngine(string xml, bool singleIteration = false)
+		protected void RunEngine(string xml, bool singleIteration = false, int rangeStop = -1)
 		{
 			RunEngine(ParsePit(xml), singleIteration);
 		}
 
-		protected void RunEngine(Dom dom, bool singleIteration)
+		protected void RunEngine(Dom dom, bool singleIteration, int rangeStop = -1)
 		{
 			var e = new Engine(this);
 
 			var cfg = new RunConfiguration();
 			if (singleIteration)
 				cfg.singleIteration = true;
+			if (rangeStop > -1)
+			{
+				cfg.rangeStart = 1;
+				cfg.rangeStop = (uint)rangeStop;
+			}
 
 			this.dom = dom;
 			e.startFuzzing(dom, cfg);
