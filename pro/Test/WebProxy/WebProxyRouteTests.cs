@@ -1,25 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Analyzers;
-using Peach.Core.Dom;
+using Peach.Core.Test;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
-using Peach.Pro.Test.WebProxy.TestTarget;
-using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
-using Titanium.Web.Proxy.EventArguments;
-using ASCIIEncoding = Peach.Core.ASCIIEncoding;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -29,6 +17,7 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestNonMutable()
 		{
+			_proxy.Context = null;
 			_proxy.Options.Routes.Clear();
 			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
@@ -61,6 +50,7 @@ namespace Peach.Pro.Test.WebProxy
 		[Test]
 		public void TestRouteMatch()
 		{
+			_proxy.Context = null;
 			_proxy.Options.Routes.Clear();
 			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
@@ -102,6 +92,7 @@ namespace Peach.Pro.Test.WebProxy
 			const string rewriteUrl = "http://location:9999";
 			var url = string.Empty;
 
+			_proxy.Context = null;
 			_proxy.Options.Routes.Clear();
 			_proxy.Options.Routes.Add(new WebProxyRoute
 			{
@@ -145,15 +136,15 @@ namespace Peach.Pro.Test.WebProxy
 	</Test>
 </Peach>";
 
-			var parser = new PitParser();
-			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var dom = DataModelCollector.ParsePit(xml);
 
 			var context = new RunContext {test = dom.tests[0],config = new RunConfiguration()};
 			var engine = new Engine(new ConsoleWatcher());
 			context.test.strategy = new WebProxyStrategy(new Dictionary<string, Variant>());
 			context.test.strategy.Initialize(context, engine);
+			context.controlRecordingIteration = true;
 
-			Version version = null;
+			string method = null;
 
 			_proxy.Context = context;
 			_proxy.Options.Routes.Clear();
@@ -161,19 +152,19 @@ namespace Peach.Pro.Test.WebProxy
 			{
 				Url = "*/unknown?api/*",
 				Mutate = true,
-				OnRequest= "setattr(request, 'HttpVersion', '1.6')"
+				OnRequest= "setattr(request, 'Method', 'FOOBAR')"
 			});
 
 			var client = GetHttpClient(null, (sender, e, op) =>
 			{
-				version = e.WebSession.Request.HttpVersion;
-				e.WebSession.Request.HttpVersion = new Version(1, 1);
+				method = e.WebSession.Request.Method;
+				e.WebSession.Request.Method = "GET";
 			});
 
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.AreEqual("1.6", version);
+			Assert.AreEqual("FOOBAR", method);
 		}
 	}
 }

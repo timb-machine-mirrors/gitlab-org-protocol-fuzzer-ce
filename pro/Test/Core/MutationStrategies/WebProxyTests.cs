@@ -91,6 +91,29 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.AreEqual("*", routes[1].Url);
 		}
 
+		[Test]
+		public void TestNoRoutes()
+		{
+			const string xml = @"
+<Peach>
+	<Test name='Default'>
+		<WebProxy />
+		<Strategy class='WebProxy' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+			var dom = ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var sm = (WebProxyStateModel)dom.tests[0].stateModel;
+			var routes = sm.Options.Routes;
+
+			Assert.AreEqual(1, routes.Count);
+			Assert.AreEqual("*", routes[0].Url);
+		}
+
 		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
 		{
 			return new ProPitParser().asParser(args, new MemoryStream(Encoding.UTF8.GetBytes(xml)));

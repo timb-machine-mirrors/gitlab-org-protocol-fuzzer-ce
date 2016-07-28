@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
-using Peach.Pro.Test.WebProxy.TestTarget;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
-using Titanium.Web.Proxy.EventArguments;
+using Peach.Core.Test;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -131,7 +123,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
 			Assert.AreEqual("{\"values\":[\"A\",\"B\",\"C\",\"D\"],\"extraValue\":{\"value\":\"Hello extra value\"}}",
-				StreamVariantToString(param.DataElement.DefaultValue));
+				param.DataElement.DefaultValue.BitsToString());
 			Assert.AreEqual(complexValue.extraValue.value, ValuesController.ComplexValue.extraValue.value);
 			Assert.AreEqual(complexValue.values.Length, ValuesController.ComplexValue.values.Length);
 
@@ -163,7 +155,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
 			Assert.AreEqual("<ComplexValue xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/Peach.Pro.Test.WebProxy.TestTarget.Controllers\"><extraValue><value>Hello extra value</value></extraValue><values xmlns:d2p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><d2p1:string>A</d2p1:string><d2p1:string>B</d2p1:string><d2p1:string>C</d2p1:string><d2p1:string>D</d2p1:string></values></ComplexValue>",
-				StreamVariantToString(param.DataElement.DefaultValue));
+				param.DataElement.DefaultValue.BitsToString());
 			Assert.AreEqual(complexValue.extraValue.value, ValuesController.ComplexValue.extraValue.value);
 			Assert.AreEqual(complexValue.values.Length, ValuesController.ComplexValue.values.Length);
 

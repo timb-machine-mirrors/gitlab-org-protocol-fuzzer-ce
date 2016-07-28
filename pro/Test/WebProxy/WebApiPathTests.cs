@@ -1,27 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using NUnit.Framework;
-using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
-using Peach.Pro.Test.WebProxy.TestTarget;
-using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
-using Titanium.Web.Proxy.EventArguments;
 
 namespace Peach.Pro.Test.WebProxy
 {
 	[TestFixture]
 	public class WebApiPathTests
 	{
-		private WebApiEndPoint _endPoint = null;
+		private WebApiEndPoint _endPoint;
 
 		[OneTimeSetUp]
 		public virtual void Init()
