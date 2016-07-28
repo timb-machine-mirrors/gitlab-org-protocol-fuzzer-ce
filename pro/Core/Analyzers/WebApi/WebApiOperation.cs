@@ -54,6 +54,30 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		public Call Call { get; set; }
 
 		/// <summary>
+		/// DataModel for this operation. Contains all parameters and body.
+		/// </summary>
+		public DataModel DataModel { get; set; }
+
+		private Regex _namePathRegex = new Regex(@"[/{}]");
+
+		/// <summary>
+		/// Generate a reasonable name for operation
+		/// </summary>
+		public string Name
+		{
+			get
+			{
+				if (OperationId != null)
+					return OperationId;
+
+				if (Path != null)
+					return Method + _namePathRegex.Replace(Path.Path, "");
+
+				return null;
+			}
+		}
+
+		/// <summary>
 		/// HTTP Method for operation
 		/// </summary>
 		public string Method 

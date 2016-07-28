@@ -444,7 +444,6 @@ namespace Peach.Core.Dom
 			//foreach (var obj in includedMutators)
 			//	obj.WritePit(pit);
 
-
 			if (agentRef != null)
 			{
 				foreach (var agent in agentRef)
@@ -455,12 +454,8 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			if (stateModelRef != null)
-			{
-				pit.WriteStartElement("StateModel");
-				pit.WriteAttributeString("ref", stateModelRef.refName);
-				pit.WriteEndElement();
-			}
+			if (stateModel != null)
+				stateModel.WritePit(pit);
 
 			pit.WriteEndElement();
 		}
