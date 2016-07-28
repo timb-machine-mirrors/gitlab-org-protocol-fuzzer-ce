@@ -80,11 +80,13 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				throw new ApplicationException("Error parsing swagger operation type \"" + opKey + "\".");
 
 			apiOp.Type = opType;
-			apiOp.OperationId = op["operationId"].Value<string>();
+
+			if(op.TryGetValue("operationId", out token))
+				apiOp.OperationId = token.Value<string>();
 
 			if (op.TryGetValue("parameters", out token))
 			{
-				foreach (var param in (JArray) op["parameters"])
+				foreach (var param in (JArray) token)
 				{
 					apiOp.Parameters.Add(ConvertParameter((JObject) param, models));
 				}
