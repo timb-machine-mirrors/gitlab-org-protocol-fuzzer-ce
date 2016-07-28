@@ -44,6 +44,19 @@ namespace Peach.Pro.Test.Core.Flexera
 			);
 		}
 
+		[Test]
+		public void TestLocalLicenseServer_Metered()
+		{
+			RunHost(
+				"http://10.0.1.96:7070/request",
+				"TEST-3",
+				"98c6-3b2c-a5de-4eab-8ad2-7a1c-cc2d-9369",
+				"Test-Metered",
+				10,
+				10
+			);
+		}
+
 		private void ReplenishLineItem(string entitlementId, string activationId, int increment)
 		{
 			using (var service = Factory.Create<EntitlementOrderService>(EnvironmentType.Production))
