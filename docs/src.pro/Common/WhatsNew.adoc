@@ -135,7 +135,7 @@ This monitor is useful for automatically power cycling devices during a fuzzing 
 
 See the xref:Monitors_SnmpPower[SnmpPower Monitor] for more information.
 
-==== Web Fuzzing/RESTful Fuzzing Improvments
+==== Web Fuzzing/RESTful Fuzzing Improvements
 
 In this release we continue to add features related to web fuzzing and specifically RESTful service fuzzing.
 Changes include new analyzers to speed up creation of fuzzing definitions and also changes to the related publishers to enable fault detection on return status codes.
@@ -194,7 +194,7 @@ See the xref:Monitors_Gdb[Gdb Monitor] and xref:Monitors_GdbServer[GdbServer Mon
 === Breaking Changes
 
 This release introduces a number of breaking changes and deprecated features. This section contains a list
-of the major changes that have occured.
+of the major changes that have occurred.
 
 ==== Peach Agent
 
