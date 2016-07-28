@@ -146,7 +146,7 @@ namespace Peach.Core.Dom
 		[XmlAttribute("ref")]
 		public string refName { get; set; }
 
-		public void WritePit(XmlWriter pit)
+		public virtual void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("StateModel");
 			pit.WriteAttributeString("ref", refName);
@@ -326,11 +326,7 @@ namespace Peach.Core.Dom
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
 		[PluginElement(typeof(IStateModelRef))]
-		public IStateModelRef stateModelRef
-		{
-			get { throw new NotSupportedException(); }
-			set { throw new NotSupportedException(); }
-		}
+		public IStateModelRef stateModelRef { get; set; }
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
@@ -470,6 +466,7 @@ namespace Peach.Core.Dom
 			//foreach (var obj in includedMutators)
 			//	obj.WritePit(pit);
 
+
 			if (agentRef != null)
 			{
 				foreach (var agent in agentRef)
@@ -480,8 +477,8 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			if (stateModel != null)
-				stateModel.WritePit(pit);
+			if (stateModelRef != null)
+				stateModelRef.WritePit(pit);
 
 			pit.WriteEndElement();
 		}

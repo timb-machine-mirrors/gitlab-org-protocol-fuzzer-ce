@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -66,29 +67,84 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 		}
 
 		[Test]
-		public void TestPit()
+		public void TestSerialize()
 		{
 			const string xml = @"
 <Peach>
 	<Test name='Default'>
 		<WebProxy>
-			<Route url='/p/jobs' swagger='foo.json' />
+			<Route url='*' />
+			<Route url='/foo/bar' mutate='false' baseUrl='google.com' faultOnStatusCodes='500,501' />
+		</WebProxy>
+
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+
+
+			var dom = ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = System.Text.Encoding.UTF8,
+				Indent = true
+			};
+
+			using (var sout = new MemoryStream())
+			{
+				using (var xmlWriter = XmlWriter.Create(sout, settings))
+				{
+					xmlWriter.WriteStartDocument();
+
+					dom.tests[0].WritePit(xmlWriter);
+
+					xmlWriter.WriteEndDocument();
+				}
+
+				var pitOut = Encoding.UTF8.GetString(sout.ToArray(), 3, (int)sout.Length-3);
+				//File.WriteAllText(@"c:\temp\pitout.xml", pitOut);
+
+				Assert.AreEqual("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Test name=\"Default\" maxOutputSize=\"1073741824\">\r\n  <WebProxy>\r\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"True\" baseUrl=\"\" faultOnStateCodes=\"\" />\r\n    <Route url=\"/foo/bar\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"google.com\" faultOnStateCodes=\"500,501\" />\r\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"\" faultOnStateCodes=\"500,501\" />\r\n  </WebProxy>\r\n</Test>", pitOut);
+			}
+		}
+
+		[Test]
+		public void TestPit()
+		{
+			var fileName = Path.GetTempFileName();
+			try
+			{
+
+				File.WriteAllText(fileName, "{\"a\":\"b\"}");
+
+				var xml = @"
+<Peach>
+	<Test name='Default'>
+		<WebProxy>
+			<Route url='/p/jobs' swagger='" + fileName + @"' />
 		</WebProxy>
 		<Strategy class='WebProxy' />
 		<Publisher class='Null' />
 	</Test>
 </Peach>";
 
-			var dom = ParsePit(xml);
+				var dom = ParsePit(xml);
 
-			Assert.NotNull(dom);
+				Assert.NotNull(dom);
 
-			var sm = (WebProxyStateModel)dom.tests[0].stateModel;
-			var routes = sm.Options.Routes;
+				var sm = (WebProxyStateModel) dom.tests[0].stateModel;
+				var routes = sm.Options.Routes;
 
-			Assert.AreEqual(2, routes.Count);
-			Assert.AreEqual("/p/jobs", routes[0].Url);
-			Assert.AreEqual("*", routes[1].Url);
+				Assert.AreEqual(2, routes.Count);
+				Assert.AreEqual("/p/jobs", routes[0].Url);
+				Assert.AreEqual("*", routes[1].Url);
+			}
+			finally
+			{
+				File.Delete(fileName);
+			}
 		}
 
 		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)

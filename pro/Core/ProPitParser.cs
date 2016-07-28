@@ -264,6 +264,7 @@ namespace Peach.Pro.Core
 				var opts = XmlTools.Deserialize<WebProxyOptions>(new StringReader(node.OuterXml));
 
 				test.stateModel = new WebProxyStateModel(opts);
+				test.stateModelRef = test.stateModel.CreateStateModelRef();
 			}
 		}
 	}
