@@ -1,9 +1,5 @@
 ﻿using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
-using Peach.Core;
-using Peach.Core.Test;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -12,6 +8,15 @@ namespace Peach.Pro.Test.WebProxy
 	{
 		[Test]
 		public void TestOnRequest()
+		{
+			var client = GetHttpClient();
+			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+		}
+
+/*		[Test]
+		public void TestFaulting()
 		{
 			const string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Peach>
@@ -24,22 +29,29 @@ namespace Peach.Pro.Test.WebProxy
 	</Test>
 </Peach>";
 
-			var dom = DataModelCollector.ParsePit(xml);
-			var e = new Engine(null);
-
-			var cfg = new RunConfiguration { singleIteration = true };
-
-			Task.Run(() =>
+			var task = Task.Run(() =>
 			{
-				e.startFuzzing(dom, cfg);
+				try
+				{
+					RunEngine(xml, false, 2);
+				}
+				catch (Exception)
+				{
+					System.Diagnostics.Debugger.Break();
+				}
 			});
 
 			Thread.Sleep(2000);
 
 			var client = GetHttpClient();
+			
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
-
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-		}
+			
+			response = client.GetAsync(BaseUrl + "/unknown/api/errors/500").Result;
+			Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+
+			task.Wait();
+		} */
 	}
 }

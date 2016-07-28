@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
-using Peach.Core.IO;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebApi.Proxy;
 
@@ -14,24 +14,23 @@ namespace Peach.Pro.Core.Publishers
 	/// to the web api proxy. And perhaps to start it.
 	/// </summary>
 	[Publisher("WebApiProxy", Scope = PluginScope.Internal)]
-	[Parameter("Proxy", typeof(string), "Use an HTTP proxy in the format of 'http://192.168.1.1:8080'. Default none.", "")]
-	[Parameter("IgnoreCertErrors", typeof(bool), "Allow https regardless of cert status (defaults to true)", "true")]
-	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
+	[Parameter("Port", typeof(int), "Port to listen on", "8001")]
 	public class WebApiProxyPublisher : Publisher
 	{
-		public bool IgnoreCertErrors { get; protected set; }
-		public int Timeout{ get; protected set; }
-		public string Proxy{ get; protected set; }
+		public string Proxy { get; set; }
 
-		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		protected override NLog.Logger Logger { get { return logger; } }
+		private static readonly NLog.Logger ClassLogger = LogManager.GetCurrentClassLogger();
+		protected override NLog.Logger Logger { get { return ClassLogger; } }
 
 		public RunContext Context { get; set; }
 		public WebProxyStateModel Model { get; set; }
+		public int Port { get; set; }
 
-		private WebApiProxy _proxy = null;
-		private AutoResetEvent _iterationStarting = new AutoResetEvent(false);
-		private AutoResetEvent _iterationFinished = new AutoResetEvent(false);
+		private WebApiProxy _proxy;
+		private readonly AutoResetEvent _iterationStarting = new AutoResetEvent(false);
+		private readonly AutoResetEvent _iterationFinished = new AutoResetEvent(false);
+
+		internal Action<WebApiOperation> RequestEvent { get; set; }
 
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -47,10 +46,20 @@ namespace Peach.Pro.Core.Publishers
 				Options = Model.Options,
 				Context = Context,
 				IterationFinishedEvent = _iterationFinished,
-				IterationStartingEvent = _iterationStarting
+				IterationStartingEvent = _iterationStarting,
+				Port = Port
 			};
 
-			_proxy.Start();
+			if (RequestEvent != null)
+			{
+				_proxy.Start((s, e, a) => { RequestEvent(a); });
+			}
+			else
+			{
+				_proxy.Start();
+			}
+
+			Port = _proxy.Port;
 		}
 
 		protected override void OnStop()
@@ -66,7 +75,7 @@ namespace Peach.Pro.Core.Publishers
 			base.OnOpen();
 
 			_iterationStarting.Set();
-			logger.Trace("OnOuput: Waiting on _iterationFinished");
+			Logger.Trace("OnOuput: Waiting on _iterationFinished");
 			_iterationFinished.WaitOne();
 		}
 

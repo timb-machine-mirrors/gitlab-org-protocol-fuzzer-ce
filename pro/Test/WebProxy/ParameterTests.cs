@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using NUnit.Framework;
-using Peach.Core;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
 using Peach.Core.Test;
@@ -12,7 +11,7 @@ using Peach.Core.Test;
 namespace Peach.Pro.Test.WebProxy
 {
 	[TestFixture]
-	public class ParameterTests : BaseTester
+	public class ParameterTests : BaseRunTester
 	{
 		[Test]
 		public void TestSwaggerPath()
@@ -21,13 +20,16 @@ namespace Peach.Pro.Test.WebProxy
 			var response = client.GetAsync(BaseUrl + "/api/values/5").Result;
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.AreEqual("/api/values/{id}", _opPre.Path.Path);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Path);
+			var op = GetOp();
+
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.AreEqual("/api/values/{id}", op.Path.Path);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Path);
 
 			Assert.AreEqual(WebApiParameterIn.Path, param.In);
 			Assert.AreEqual("5", (string)param.DataElement.DefaultValue);
@@ -39,14 +41,15 @@ namespace Peach.Pro.Test.WebProxy
 		{
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/api/values?filter=foo").Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Query);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Query);
 
 			Assert.AreEqual(WebApiParameterIn.Query, param.In);
 			Assert.AreEqual("foo", (string)param.DataElement.DefaultValue);
@@ -61,14 +64,15 @@ namespace Peach.Pro.Test.WebProxy
 			headers.Add("X-Peachy", "Testing 1..2..3..");
 
 			var response = client.GetAsync(BaseUrl + "/api/values").Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Header && i.Name == "x-peachy");
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Header && i.Name == "x-peachy");
 
 			Assert.AreEqual(WebApiParameterIn.Header, param.In);
 			Assert.AreEqual("Testing 1..2..3..", (string)param.DataElement.DefaultValue);
@@ -85,14 +89,15 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient();
 			var response = client.PostAsync(BaseUrl + "/api/values", content).Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.FormData);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.FormData);
 
 			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
 			Assert.AreEqual("Foo Bar", (string)param.DataElement.DefaultValue);
@@ -112,14 +117,15 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient();
 			var response = client.PostAsync(BaseUrl + "/api/values/complex", content).Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Body);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Body);
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
 			Assert.AreEqual("{\"values\":[\"A\",\"B\",\"C\",\"D\"],\"extraValue\":{\"value\":\"Hello extra value\"}}",
@@ -144,14 +150,15 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient();
 			var response = client.PostAsync(BaseUrl + "/api/values/complex", content).Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Body);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Body);
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
 			Assert.AreEqual("<ComplexValue xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/Peach.Pro.Test.WebProxy.TestTarget.Controllers\"><extraValue><value>Hello extra value</value></extraValue><values xmlns:d2p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><d2p1:string>A</d2p1:string><d2p1:string>B</d2p1:string><d2p1:string>C</d2p1:string><d2p1:string>D</d2p1:string></values></ComplexValue>",
@@ -176,34 +183,35 @@ namespace Peach.Pro.Test.WebProxy
 			headers.Add("X-Peachy", "Testing 1..2..3..");
 
 			var response = client.PutAsync(BaseUrl + "/api/values/5?filter=foo", content).Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(4, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(4, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Path);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Path);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Path, param.In);
 			Assert.AreEqual("5", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual(5, ValuesController.Id);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Query);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.Query);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Query, param.In);
 			Assert.AreEqual("foo", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual("foo", ValuesController.Filter);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Header);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.Header);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Header, param.In);
 			Assert.AreEqual("Testing 1..2..3..", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual("Testing 1..2..3..", ValuesController.X_Peachy);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.FormData);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.FormData);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
@@ -217,14 +225,15 @@ namespace Peach.Pro.Test.WebProxy
 		{
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.Null(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Path && i.Name == "5");
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Path && i.Name == "5");
 
 			Assert.AreEqual(WebApiParameterIn.Path, param.In);
 			Assert.Null(param.ShadowParameter);
@@ -237,14 +246,15 @@ namespace Peach.Pro.Test.WebProxy
 		{
 			var client = GetHttpClient();
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values?filter=foo").Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.Null(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Query);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Query);
 
 			Assert.AreEqual(WebApiParameterIn.Query, param.In);
 			Assert.Null(param.ShadowParameter);
@@ -260,14 +270,15 @@ namespace Peach.Pro.Test.WebProxy
 			headers.Add("X-Peachy", "Testing 1..2..3..");
 
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values").Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.Null(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Header && i.Name == "x-peachy");
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Header && i.Name == "x-peachy");
 
 			Assert.AreEqual(WebApiParameterIn.Header, param.In);
 			Assert.Null(param.ShadowParameter);
@@ -285,14 +296,15 @@ namespace Peach.Pro.Test.WebProxy
 
 			var client = GetHttpClient();
 			var response = client.PostAsync(BaseUrl + "/unknown/api/values", content).Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.Null(_opPre.ShadowOperation);
-			Assert.LessOrEqual(1, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.FormData);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.FormData);
 
 			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
 			Assert.Null(param.ShadowParameter);
@@ -313,35 +325,36 @@ namespace Peach.Pro.Test.WebProxy
 			headers.Add("X-Peachy", "Testing 1..2..3..");
 
 			var response = client.PutAsync(BaseUrl + "/unknown/api/values/5?filter=foo", content).Result;
+			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.Path);
-			Assert.Null(_opPre.ShadowOperation);
-			Assert.LessOrEqual(4, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(4, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Path && i.Name == "5");
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Path && i.Name == "5");
 			Assert.NotNull(param);
 			Assert.Null(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Path, param.In);
 			Assert.AreEqual("5", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual(5, NoSwaggerValuesController.Id);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Query);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.Query);
 			Assert.NotNull(param);
 			Assert.Null(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Query, param.In);
 			Assert.AreEqual("foo", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual("foo", NoSwaggerValuesController.Filter);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Header);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.Header);
 			Assert.NotNull(param);
 			Assert.Null(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Header, param.In);
 			Assert.AreEqual("Testing 1..2..3..", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual("Testing 1..2..3..", NoSwaggerValuesController.X_Peachy);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.FormData);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.FormData);
 			Assert.NotNull(param);
 			Assert.Null(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
@@ -349,9 +362,37 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.AreEqual("Foo Bar", NoSwaggerValuesController.Value);
 		}
 
+		/*
 		[Test]
 		public void TestChangingParameters()
 		{
+						var xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Peach>
+	<Test name=""Default"" maxOutputSize=""65000"">
+		<WebProxy>
+			<Route url=""*"" swagger=""" + SwaggerFile + @""" onRequest=""context.iterationStateStore.Add('op', op)"" /> 
+		</WebProxy>
+		<Strategy class=""WebProxy"" />
+		<Publisher class=""WebApiProxy"" />
+	</Test>
+</Peach>";
+
+			Task.Run(() =>
+			{
+				try
+				{
+					RunEngine(xml);
+				}
+				catch (Exception)
+				{
+					System.Diagnostics.Debugger.Break();
+				}
+			});
+
+			Thread.Sleep(2000);
+
+			var context = dom.context;
+
 			var content = new FormUrlEncodedContent(new[] 
 			{
 				new KeyValuePair<string, string>("value", "Foo Bar")
@@ -380,39 +421,41 @@ namespace Peach.Pro.Test.WebProxy
 			headers.Add("X-Peachy", "Testing 1..2..3..");
 
 			var response = client.PutAsync(BaseUrl + "/api/values/5?filter=foo", content).Result;
+			var op = (WebApiOperation)context.iterationStateStore["op"];
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-			Assert.NotNull(_opPre);
-			Assert.NotNull(_opPre.ShadowOperation);
-			Assert.LessOrEqual(4, _opPre.Parameters.Count);
+			Assert.NotNull(op);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(4, op.Parameters.Count);
 
-			var param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Path);
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Path);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Path, param.In);
 			Assert.AreEqual("100", (string)param.DataElement.MutatedValue);
 			Assert.AreEqual(100, ValuesController.Id);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Query);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.Query);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Query, param.In);
 			Assert.AreEqual("Query_Modified", (string)param.DataElement.MutatedValue);
 			Assert.AreEqual("Query_Modified", ValuesController.Filter);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.Header);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.Header);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.Header, param.In);
 			Assert.AreEqual("Header_Modified", (string)param.DataElement.MutatedValue);
 			Assert.AreEqual("Header_Modified", ValuesController.X_Peachy);
 
-			param = _opPre.Parameters.First(i => i.In == WebApiParameterIn.FormData);
+			param = op.Parameters.First(i => i.In == WebApiParameterIn.FormData);
 			Assert.NotNull(param);
 			Assert.NotNull(param.ShadowParameter);
 			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
 			Assert.AreEqual("Form_Modified", (string)param.DataElement.MutatedValue);
 			Assert.AreEqual("Form_Modified", ValuesController.Value);
 		}
+		 */
 	}
 }
