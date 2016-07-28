@@ -709,7 +709,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				var ex = Assert.Throws<PeachException>(() => pub.Call(method, args));
 
-				Assert.AreEqual("The Rest publisher does not support call actions when run on remote agents.", ex.Message);
+				Assert.AreEqual("The WebApi publisher does not support call actions when run on remote agents.", ex.Message);
 			}
 			finally
 			{
