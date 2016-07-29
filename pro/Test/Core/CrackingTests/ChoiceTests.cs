@@ -1305,6 +1305,48 @@ namespace Peach.Pro.Test.Core.CrackingTests
 				Assert.True(choice.choiceElements[0].GetHashCode() == ch.GetHashCode());
 			}
 		}
+
+		[Test]
+		public void TestAnalyzer()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<Choice name='CH'>
+			<String name='Value'>
+				<Analyzer class='StringToken' />
+			</String>
+			<Block name='NoValue' />
+		</Choice>
+	</DataModel>
+</Peach>
+";
+
+			var dom = DataModelCollector.ParsePit(xml);
+
+			Assert.NotNull(dom);
+
+			var cracker = new DataCracker();
+			var bs = new BitStream(Encoding.ASCII.GetBytes("Hello|World"));
+
+			cracker.CrackData(dom.dataModels[0], bs);
+
+			var choice = (Choice)dom.dataModels[0][0];
+
+			Assert.That(choice.SelectedElement, Is.InstanceOf<Block>());
+
+			var children = choice.SelectedElement.PreOrderTraverse().Select(i => i.fullName).ToList();
+
+			Assert.AreEqual(new[]
+			{
+				"DM.CH.Value",
+				"DM.CH.Value.Value",
+				"DM.CH.Value.Value.Pre",
+				"DM.CH.Value.Value.Token",
+				"DM.CH.Value.Value.Post"
+			},
+			children);
+		}
 	}
 }
 
