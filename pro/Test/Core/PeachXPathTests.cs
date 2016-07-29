@@ -405,7 +405,7 @@ namespace Peach.Pro.Test.Core
 				"				<Param>" +
 				"					<DataModel name=\"DM_Param2\" ref=\"TheDataModel\" />" +
 				"				</Param>" +
-				"				<Result>" +
+				"				<Result name=\"Result\">" +
 				"					<DataModel name=\"DM_Result\" ref=\"TheDataModel\" />" +
 				"				</Result>" +
 				"			</Action>" +
@@ -438,7 +438,7 @@ namespace Peach.Pro.Test.Core
 			Assert.AreEqual(findMe, ((PeachXPathNavigator)iter.Current).CurrentNode);
 			Assert.IsFalse(iter.MoveNext());
 
-			iter = navi.Select("//DM_Result//FindMe");
+			iter = navi.Select("//Result/DM_Result//FindMe");
 			findMe = action.result.dataModel[0];
 
 			Assert.IsTrue(iter.MoveNext());

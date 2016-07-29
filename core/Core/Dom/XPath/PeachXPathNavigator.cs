@@ -332,7 +332,10 @@ namespace Peach.Core.Dom.XPath
 				if (actionData == null)
 					return null;
 
-				return new ModelEntry(actionData, 0);
+				if (actionData.Name == null)
+					return new ModelEntry(actionData.dataModel);
+
+				return new ActionParamEntry(actionData, 0);
 			}
 
 			public override Entry GetNext()
@@ -433,14 +436,14 @@ namespace Peach.Core.Dom.XPath
 
 		#endregion
 
-		#region Data Model Entry
+		#region Action Param Entry
 
-		class ModelEntry : Entry
+		class ActionParamEntry : Entry
 		{
 			private readonly ActionData _actionData;
 
-			public ModelEntry(ActionData actionData, int index)
-				: base(actionData.dataModel, index)
+			public ActionParamEntry(ActionData actionData, int index)
+				: base(actionData, index)
 			{
 				_actionData = actionData;
 
@@ -457,7 +460,7 @@ namespace Peach.Core.Dom.XPath
 				if (_actionData.dataModel.Count == 0)
 					return null;
 
-				return ElementEntry.Make(_actionData.dataModel);
+				return new ModelEntry(_actionData.dataModel);
 			}
 
 			public override Entry GetNext()
@@ -468,7 +471,7 @@ namespace Peach.Core.Dom.XPath
 				if (next == null)
 					return null;
 
-				return new ModelEntry(next, idx);
+				return new ActionParamEntry(next, idx);
 			}
 
 			public override Entry GetPrev()
@@ -482,12 +485,57 @@ namespace Peach.Core.Dom.XPath
 				if (next == null)
 					return null;
 
-				return new ModelEntry(next, idx);
+				return new ActionParamEntry(next, idx);
 			}
 
 			public override Entry GetFirstAttr()
 			{
-				return new ElementAttrEntry(_actionData.dataModel, 0);
+				return new NamedAttrEntry(_actionData);
+			}
+		}
+
+		#endregion
+
+		#region Data Model Entry
+
+		class ModelEntry : Entry
+		{
+			private readonly DataModel _dataModel;
+
+			public ModelEntry(DataModel dataModel)
+				: base(dataModel, 0)
+			{
+				_dataModel = dataModel;
+
+				var idx = Name.LastIndexOf(':');
+				if (idx > 0)
+				{
+					NamespaceUri = Name.Substring(0, idx);
+					LocalName = Name.Substring(idx + 1);
+				}
+			}
+
+			public override Entry GetFirstChild()
+			{
+				if (_dataModel.Count == 0)
+					return null;
+
+				return ElementEntry.Make(_dataModel);
+			}
+
+			public override Entry GetNext()
+			{
+				return null;
+			}
+
+			public override Entry GetPrev()
+			{
+				return null;
+			}
+
+			public override Entry GetFirstAttr()
+			{
+				return new ElementAttrEntry(_dataModel, 0);
 			}
 		}
 
