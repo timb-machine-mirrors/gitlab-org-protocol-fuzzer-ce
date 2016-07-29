@@ -167,7 +167,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			{
 				case "GET":
 				case "POST":
-					call.result = new ActionResult();
+					call.result = new ActionResult("Result");
 					call.result.dataModel = dom.dataModels["WebApiResult"];
 					break;
 			}
