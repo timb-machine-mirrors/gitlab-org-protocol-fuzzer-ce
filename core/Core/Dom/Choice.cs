@@ -511,6 +511,20 @@ namespace Peach.Core.Dom
 			orig.tmpChoiceElements = null;
 			choiceElements = orig.choiceElements;
 		}
+
+		public override DataElement this[int index]
+		{
+			get { return base[index]; }
+			set
+			{
+				var update = IndexOf(SelectedElement) == index;
+
+				base[index] = value;
+
+				if (update)
+					_selectedElement = value;
+			}
+		}
 	}
 }
 
