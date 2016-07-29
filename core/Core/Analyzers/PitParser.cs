@@ -1376,7 +1376,9 @@ namespace Peach.Core.Analyzers
 
 		protected virtual void handleActionResult(XmlNode node, Dom.Actions.Call action)
 		{
-			action.result = new ActionResult()
+			var name = node.getAttr("name", "Result");
+
+			action.result = new ActionResult(name)
 			{
 				action = action
 			};
