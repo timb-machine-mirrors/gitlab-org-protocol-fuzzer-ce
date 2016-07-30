@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,12 +14,15 @@ using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget;
+using Titanium.Web.Proxy.EventArguments;
 
 namespace Peach.Pro.Test.WebProxy
 {
 	public class BaseRunTester
 	{
 		public string BaseUrl { get { return "http://testhost"; } }
+
+		public delegate void HookRequestEvent(SessionEventArgs e, RunContext context, WebApiOperation op);
 
 		protected RunContext Context;
 		protected IWebStatus Server;
@@ -58,8 +62,77 @@ namespace Peach.Pro.Test.WebProxy
 			return Ops.FirstOrDefault();
 		}
 
+		public void RunEngine(string xml, HookRequestEvent hookRequestEventPre = null, HookRequestEvent hookRequestEventPost = null)
+		{
+			var dom = new ProPitParser().asParser(null, new StringReader(xml));
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			Ops.Clear();
+
+			e.TestStarting += ctx =>
+			{
+				Context = ctx;
+
+				var pub = (WebApiProxyPublisher)ctx.test.publishers[0];
+
+				pub.RequestEventPre += (eventArgs, op) =>
+				{
+					Ops.Add(op);
+
+					if (hookRequestEventPre != null)
+						hookRequestEventPre(eventArgs, ctx, op);
+					
+				};
+
+				if (hookRequestEventPost != null)
+				{
+					pub.RequestEventPost += (eventArgs, op) => hookRequestEventPost(eventArgs, ctx, op);
+				}
+
+				ctx.StateModelStarting += (c, sm) =>
+				{
+					Port = pub.Port;
+
+					Monitor.Pulse(e);
+					Monitor.Exit(e);
+				};
+			};
+
+			Exception engineException = null;
+
+			lock (e)
+			{
+				Engine = Task.Run(() =>
+				{
+					Monitor.Enter(e);
+
+					try
+					{
+						e.startFuzzing(dom, cfg);
+					}
+					catch(Exception ex)
+					{
+						Monitor.Pulse(e);
+						engineException = ex;
+					}
+					finally
+					{
+						if (Monitor.IsEntered(e))
+							Monitor.Exit(e);
+					}
+				});
+
+				Monitor.Wait(e);
+				System.Diagnostics.Debugger.Break();
+			}
+
+			if (engineException != null)
+				throw new ApplicationException("Engine exception", engineException); 
+		}
+
 		[SetUp]
-		public void SetUp()
+		public virtual void SetUp()
 		{
 			var xml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
@@ -78,57 +151,13 @@ namespace Peach.Pro.Test.WebProxy
 	</Test>
 </Peach>".Fmt(SwaggerFile, Server.Uri);
 
-			var dom = new ProPitParser().asParser(null, new StringReader(xml));
-			var cfg = new RunConfiguration { singleIteration = true };
-			var e = new Engine(null);
-
-			Ops.Clear();
-
-			e.TestStarting += ctx =>
-			{
-				Context = ctx;
-
-				var pub = (WebApiProxyPublisher)ctx.test.publishers[0];
-
-				pub.RequestEvent += op =>
-				{
-					Ops.Add(op);
-				};
-
-				ctx.StateModelStarting += (c, sm) =>
-				{
-					Port = pub.Port;
-
-					Monitor.Pulse(e);
-					Monitor.Exit(e);
-				};
-			};
-
-			lock (e)
-			{
-				Engine = Task.Run(() =>
-				{
-					Monitor.Enter(e);
-
-					try
-					{
-						e.startFuzzing(dom, cfg);
-					}
-					finally
-					{
-						if (Monitor.IsEntered(e))
-							Monitor.Exit(e);
-					}
-				});
-
-				Monitor.Wait(e);
-			}
+			RunEngine(xml);
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			Engine.Wait();
+			Assert.IsTrue(Engine.Wait(10000));			
 		}
 
 		[OneTimeSetUp]

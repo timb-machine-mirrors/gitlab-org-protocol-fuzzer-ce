@@ -6,6 +6,7 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebApi.Proxy;
+using Titanium.Web.Proxy.EventArguments;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -30,7 +31,8 @@ namespace Peach.Pro.Core.Publishers
 		private readonly AutoResetEvent _iterationStarting = new AutoResetEvent(false);
 		private readonly AutoResetEvent _iterationFinished = new AutoResetEvent(false);
 
-		internal Action<WebApiOperation> RequestEvent { get; set; }
+		internal Action<SessionEventArgs, WebApiOperation> RequestEventPre { get; set; }
+		internal Action<SessionEventArgs, WebApiOperation> RequestEventPost { get; set; }
 
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -50,9 +52,17 @@ namespace Peach.Pro.Core.Publishers
 				Port = Port
 			};
 
-			if (RequestEvent != null)
+			if (RequestEventPre != null && RequestEventPost != null)
 			{
-				_proxy.Start((s, e, a) => { RequestEvent(a); });
+				_proxy.Start((s, e, a) => { RequestEventPre(e, a); }, (s, e, a) => { RequestEventPost(e, a); });
+			}
+			else if (RequestEventPre != null)
+			{
+				_proxy.Start((s, e, a) => { RequestEventPre(e, a); });
+			}
+			else if (RequestEventPost != null)
+			{
+				_proxy.Start(null, (s, e, a) => { RequestEventPost(e, a); });
 			}
 			else
 			{
