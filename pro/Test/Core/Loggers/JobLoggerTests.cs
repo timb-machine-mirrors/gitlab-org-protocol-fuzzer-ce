@@ -574,6 +574,67 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
+		public void TestBadUnicodeDescription()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String value='Hello World' fieldId='Test' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' faultWaitTime='0'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+		<Logger class='File' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 1,
+				pitFile = "Test"
+			};
+
+			var e = new Engine(null);
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (ctx.controlIteration)
+					return;
+
+				ctx.Fault("Title", "Desc\xd800", "MajorHash", "MinorHash", "Exploitability", "Source");
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(cfg.id);
+				Assert.NotNull(job);
+				Assert.AreEqual(1, job.FaultCount);
+
+				using (var jobDb = new JobDatabase(job.DatabasePath))
+				{
+					var faults = jobDb.LoadTable<FaultDetail>().ToList();
+
+					Assert.AreEqual(1, faults.Count);
+					Assert.AreEqual("Desc�", faults[0].Description);
+				}
+			}
+		}
+
+		[Test]
 		public void TestFaultFile()
 		{
 			const string xml = @"
