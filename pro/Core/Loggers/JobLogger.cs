@@ -589,7 +589,7 @@ namespace Peach.Pro.Core.Loggers
 				// Put description at beginning of list
 				if (!string.IsNullOrEmpty(fault.description))
 				{
-					ret.Assets.Add(MakeFileAsset(fault, "description.txt", Encoding.UTF8.GetBytes(fault.description)));
+					ret.Assets.Add(MakeFileAsset(fault, "description.txt", System.Text.Encoding.UTF8.GetBytes(fault.description)));
 				}
 
 				// Put collected data second

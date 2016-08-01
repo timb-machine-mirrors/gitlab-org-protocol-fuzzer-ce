@@ -12,7 +12,7 @@ namespace Peach.Pro.Test.WebProxy
 		[OneTimeSetUp]
 		public virtual void Init()
 		{
-			var swagger = BaseTester.GetValuesJson();
+			var swagger = BaseRunTester.GetValuesJson();
 			_endPoint = SwaggerToWebApi.Convert(swagger);
 		}
 
