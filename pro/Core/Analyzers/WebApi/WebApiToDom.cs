@@ -26,6 +26,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			dom.tests.Add(test);
 			dom.stateModels.Add(new StateModel() { Name = "Default" });
 			test.stateModel = dom.stateModels[0];
+			test.stateModelRef = new StateModelRef() {refName = test.stateModel.Name};
 
 			var publisher = new RestPublisher(new Dictionary<string, Variant>())
 			{
@@ -97,7 +98,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			var call = new Call
 			{
 				Name = operation.Name,
-				method = string.Format("{0} {1}", operation.Type, BuildPathAndQuery(operation))
+				method = string.Format("{0} ##TargetUrl##{1}", operation.Type, BuildPathAndQuery(operation))
 			};
 
 			for (var cnt = 0; state.actions.ContainsKey(call.Name); cnt++ )

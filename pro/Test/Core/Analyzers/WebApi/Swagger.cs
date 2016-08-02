@@ -153,7 +153,7 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 						xml.WriteEndDocument();
 					}
 				}
-			}
+			});
 		}
 
 		private string json_hackazon = @"{
