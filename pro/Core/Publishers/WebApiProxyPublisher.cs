@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using NLog;
 using Peach.Core;
-using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
-using Peach.Pro.Core.WebApi.Proxy;
+using Titanium.Web.Proxy;
 using Titanium.Web.Proxy.EventArguments;
+using Titanium.Web.Proxy.Models;
+using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -16,23 +20,45 @@ namespace Peach.Pro.Core.Publishers
 	/// </summary>
 	[Publisher("WebApiProxy", Scope = PluginScope.Internal)]
 	[Parameter("Port", typeof(int), "Port to listen on", "8001")]
+	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default infinite)", "-1")]
 	public class WebApiProxyPublisher : Publisher
 	{
-		public string Proxy { get; set; }
+		public class BaseArgs : IDisposable
+		{
+			public WebProxyRoute Route { get; set; }
+			public SessionEventArgs Session { get; set; }
+
+			public void Dispose()
+			{
+				lock (Session)
+					Monitor.Pulse(Session);
+			}
+		}
+
+		public class RequestArgs : BaseArgs
+		{
+			public byte[] Body { get; set; }
+		}
+
+		public class ResponseArgs : BaseArgs
+		{
+			public bool Fault { get; set; }
+
+			public string Request { get; set;}
+			public string Response { get; set;}
+		}
+
+		private readonly ProxyServer _proxy = new ProxyServer();
+		private readonly BlockingCollection<RequestArgs> _requests = new BlockingCollection<RequestArgs>();
+		private readonly BlockingCollection<ResponseArgs> _responses = new BlockingCollection<ResponseArgs>();
 
 		private static readonly NLog.Logger ClassLogger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return ClassLogger; } }
 
-		public RunContext Context { get; set; }
 		public WebProxyStateModel Model { get; set; }
+
 		public int Port { get; set; }
-
-		private WebApiProxy _proxy;
-		private readonly AutoResetEvent _iterationStarting = new AutoResetEvent(false);
-		private readonly AutoResetEvent _iterationFinished = new AutoResetEvent(false);
-
-		internal Action<SessionEventArgs, WebApiOperation> RequestEventPre { get; set; }
-		internal Action<SessionEventArgs, WebApiOperation> RequestEventPost { get; set; }
+		public int Timeout { get; set; }
 
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -41,59 +67,136 @@ namespace Peach.Pro.Core.Publishers
 
 		protected override void OnStart()
 		{
-			base.OnStart();
+			// listen to client request & server response events
+			_proxy.BeforeRequest += OnRequest;
+			_proxy.BeforeResponse += OnResponse;
 
-			_proxy = new WebApiProxy
-			{
-				Options = Model.Options,
-				Context = Context,
-				IterationFinishedEvent = _iterationFinished,
-				IterationStartingEvent = _iterationStarting,
-				Port = Port
-			};
+			var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, Port, false);
 
-			if (RequestEventPre != null && RequestEventPost != null)
-			{
-				_proxy.Start((s, e, a) => { RequestEventPre(e, a); }, (s, e, a) => { RequestEventPost(e, a); });
-			}
-			else if (RequestEventPre != null)
-			{
-				_proxy.Start((s, e, a) => { RequestEventPre(e, a); });
-			}
-			else if (RequestEventPost != null)
-			{
-				_proxy.Start(null, (s, e, a) => { RequestEventPost(e, a); });
-			}
-			else
-			{
-				_proxy.Start();
-			}
+			//Add an explicit endpoint where the client is aware of the proxy
+			//So client would send request in a proxy friendly manner
+			_proxy.AddEndPoint(explicitEndPoint);
+			_proxy.Start();
 
-			Port = _proxy.Port;
+			// Update ephemeral port
+			Port = _proxy.ProxyEndPoints[0].Port;
 		}
 
 		protected override void OnStop()
 		{
-			base.OnStop();
-
-			_proxy.Dispose();
-			_proxy = null;
+			_proxy.Stop();
 		}
 
-		protected override void OnOpen()
+		public RequestArgs GetRequest()
 		{
-			base.OnOpen();
-
-			_iterationStarting.Set();
-			Logger.Trace("OnOuput: Waiting on _iterationFinished");
-			_iterationFinished.WaitOne();
+			RequestArgs ret;
+			if (!_requests.TryTake(out ret, Timeout))
+				throw new TimeoutException();
+			return ret;
 		}
 
-		protected override Variant OnCall(string method, List<ActionParameter> args)
+		public ResponseArgs GetResponse()
 		{
-			// Could hack in sending COntext to WebApiProxy here. Hacky hack hack.
+			ResponseArgs ret;
+			if (!_responses.TryTake(out ret, Timeout))
+				throw new TimeoutException();
+			return ret;
+		}
+
+		private WebProxyRoute FindRoute(string url)
+		{
+			foreach (var r in Model.Options.Routes)
+			{
+				var urlRexex = "^" + r.Url.Replace("*", ".*").Replace("?", ".") + "$";
+				if (!Regex.Match(url, urlRexex).Success)
+					continue;
+
+				return ObjectCopier.Clone(r);
+			}
 
 			return null;
+		}
+
+		private async Task OnRequest(object sender, SessionEventArgs e)
+		{
+			var req = e.WebSession.Request;
+
+			var route = FindRoute(req.Url);
+			if (route == null)
+				return;
+
+			var body = req.ContentLength >= 0
+				? await e.GetRequestBody()
+				: null;
+
+			e.DisposingEvent += OnDisposing;
+			e.State = route;
+
+			var msg = new RequestArgs
+			{
+				Session = e,
+				Route = route,
+				Body = body
+			};
+
+			lock (e)
+			{
+				// Send RequestArgs to Engine thread
+				_requests.Add(msg);
+
+				// Wait for Engine thread to finish
+				Monitor.Wait(e);
+			}
+
+			if (msg.Body != null)
+				await e.SetRequestBody(body);
+		}
+
+		private async Task OnResponse(object sender, SessionEventArgs e)
+		{
+			var route = (WebProxyRoute)e.State;
+			var statusCode = int.Parse(e.WebSession.Response.ResponseStatusCode);
+
+			var msg = new ResponseArgs
+			{
+				Session = e,
+				Route = route,
+			};
+
+			if (route.FaultOnStatusCodes != null  && route.FaultOnStatusCodes.Contains(statusCode))
+			{
+				msg.Fault = true;
+				msg.Request = await e.GetRequestBodyAsString();
+				msg.Response = await e.GetResponseBodyAsString();
+			}
+
+			lock (e)
+			{
+				// If we are delivering this to the engine as a response
+				// we don't need to know when it gets disposed anymore
+				e.DisposingEvent -= OnDisposing;
+				_responses.Add(msg);
+				Monitor.Wait(e);
+			}
+		}
+
+		private void OnDisposing(object sender, SessionEventArgs e)
+		{
+			// OnDisposing is called if request is completed and we
+			// have not signalled completion the the engine thread
+
+			var msg = new ResponseArgs
+			{
+				Session = e,
+				Route = (WebProxyRoute)e.State
+			};
+
+			lock (e)
+			{
+				e.DisposingEvent -= OnDisposing;
+				_responses.Add(msg);
+				Monitor.Wait(e);
+			}
 		}
 	}
 }

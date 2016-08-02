@@ -75,8 +75,9 @@ namespace Peach.Pro.Test.WebProxy
 				Context = ctx;
 
 				var pub = (WebApiProxyPublisher)ctx.test.publishers[0];
+				var stateModel = (WebProxyStateModel)ctx.test.stateModel;
 
-				pub.RequestEventPre += (eventArgs, op) =>
+				stateModel.RequestEventPre += (eventArgs, op) =>
 				{
 					Ops.Add(op);
 
@@ -87,7 +88,7 @@ namespace Peach.Pro.Test.WebProxy
 
 				if (hookRequestEventPost != null)
 				{
-					pub.RequestEventPost += (eventArgs, op) => hookRequestEventPost(eventArgs, ctx, op);
+					stateModel.RequestEventPost += (eventArgs, op) => hookRequestEventPost(eventArgs, ctx, op);
 				}
 
 				ctx.StateModelStarting += (c, sm) =>
@@ -113,7 +114,8 @@ namespace Peach.Pro.Test.WebProxy
 					}
 					catch(Exception ex)
 					{
-						Monitor.Pulse(e);
+						if (Monitor.IsEntered(e))
+							Monitor.Pulse(e);
 						engineException = ex;
 					}
 					finally
