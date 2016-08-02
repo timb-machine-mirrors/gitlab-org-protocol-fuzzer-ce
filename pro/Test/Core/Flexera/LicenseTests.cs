@@ -1,11 +1,13 @@
 using System;
-using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using FlexNet.Operations;
 using FlxDotNetClient;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core.License;
+using Usage = FlexNet.Operations.Usage;
 
 namespace Peach.Pro.Test.Core.Flexera
 {
@@ -36,22 +38,20 @@ namespace Peach.Pro.Test.Core.Flexera
 		}
 
 		[Test]
-		public void TestUsage()
+		public void TestMeteredUsage()
 		{
 			const string Pit = "PeachPit-Net-HTTP_Server";
 			var cfg = new TestConfig
 			{
-				LicensePath = null,
-				//ActivationId = "Activation-1",
-				//LicenseUrl = "http://10.0.1.96:9090/request",
+				LicensePath = _tmpDir.Path,
 				IdentityData = IdentityClient_Production.IdentityData,
 				ActivationId = "6075-cf0e-3d4e-4849-a4e6-564d-5e62-ff6c",
 				LicenseUrl = "https://flex1253.compliance.flexnetoperations.com/instances/LBSECNM5BMBG/request",
-				//IdentityData = IdentityClient_UAT.IdentityData,
-				//ActivationId = "581c-2d04-da28-4398-bdc7-86bf-d9e7-7f6b",
-				//LicenseUrl = "https://flex1253-uat.compliance.flexnetoperations.com/instances/8WNX99BWA413/request"
 			};
 
+			var before = GetUsage("Test-Metered", "Peach-TestCase");
+
+			const int POOL = 20;
 			using (var license = new FlexeraLicense(cfg))
 			{
 				license.Activate();
@@ -62,59 +62,81 @@ namespace Peach.Pro.Test.Core.Flexera
 				using (var lease = license.CanExportPit())
 					Assert.IsFalse(lease.IsValid);
 
-				var sw1 = Stopwatch.StartNew();
-				for (int i = 0; i < 10010; i++)
+				using (var job = license.NewJob(Pit, "TestMeteredUsage", _tmpDir.Path, POOL))
 				{
-					var sw2 = Stopwatch.StartNew();
-					Assert.IsTrue(license.CanExecuteTestCase(Pit, "TestUsage", _tmpDir.Path));
-					sw2.Stop();
-					Console.WriteLine("Acquire: {0}", sw2.Elapsed);
+					for (var i = 0; i < (POOL + 10); i++)
+					{
+						Console.WriteLine("{0}", i);
+						Assert.IsTrue(job.CanExecuteTestCase());
+					}
+
+					using (var lease = license.CanUsePit(Pit))
+						Assert.IsTrue(lease.IsValid);
+
+					using (var lease = license.CanExportPit())
+						Assert.IsFalse(lease.IsValid);
 				}
-				sw1.Stop();
-				Console.WriteLine("Total: {0}", sw1.Elapsed);
-
-				using (var lease = license.CanUsePit(Pit))
-					Assert.IsTrue(lease.IsValid);
-
-				using (var lease = license.CanExportPit())
-					Assert.IsFalse(lease.IsValid);
-
-				license.Reconcile(Pit, "TestUsage", _tmpDir.Path);
 			}
-		}
 
-		[Test]
-		public void TestMeteredUsage()
-		{
-			RunHost(
-				"http://10.0.1.96:9090/request",
-				//"https://flex1253.compliance.flexnetoperations.com/instances/LBSECNM5BMBG/request",
-				"TEST-1",
-				"b7d7-7241-e5f6-41fc-9a85-96bf-75e8-a1c6",
-				"Peach-TestCase",
-				10,
-				10
-			);
+			Thread.Sleep(10000);
+
+			var after = GetUsage("Test-Metered", "Peach-TestCase");
+			var delta = Convert.ToInt32(after.usageSinceReset - before.usageSinceReset);
+
+			Assert.AreEqual(POOL + 10, delta);
 		}
 
 		[Test]
 		public void TestPrepaidUsage()
 		{
-			//ReplenishLineItem(
-			//	"5e7b-a5d7-b366-443f-b087-1926-3422-7fa1",
-			//	"95b4-af92-9c68-4973-aebc-43cc-d1cf-6685",
-			//	10
-			//);
+			const int POOL = 20;
+			const string Pit = "PeachPit-Net-HTTP_Server";
+			var cfg = new TestConfig
+			{
+				LicensePath = _tmpDir.Path,
+				IdentityData = IdentityClient_Production.IdentityData,
+				ActivationId = "7b7f-90aa-035f-4f39-bceb-1578-7a71-70ed",
+				LicenseUrl = "https://flex1253.compliance.flexnetoperations.com/instances/WV26ZW5K4GRP/request",
+			};
 
-			RunHost(
-				"http://10.0.1.96:9090/request",
-				//"https://flex1253.compliance.flexnetoperations.com/instances/WV26ZW5K4GRP/request",
-				"TEST-2",
-				"8171-8bf5-9803-470b-82ad-9f49-c56b-1cba",
-				"Peach-TestCase",
-				15,
-				10
+			ResetUsage(cfg.ActivationId, cfg.LicenseUrl);
+
+			ReplenishLineItem(
+				"5e7b-a5d7-b366-443f-b087-1926-3422-7fa1",
+				"6171-07f4-6b39-45fd-bf30-f20e-c039-62e0",
+				20
 			);
+
+			Console.WriteLine("Waiting...");
+			Thread.Sleep(10000);
+			Console.WriteLine();
+
+			using (var license = new FlexeraLicense(cfg))
+			{
+				license.Activate();
+
+				using (var lease = license.CanUsePit(Pit))
+					Assert.IsTrue(lease.IsValid);
+
+				using (var lease = license.CanExportPit())
+					Assert.IsTrue(lease.IsValid);
+
+				using (var job = license.NewJob(Pit, "TestPrepaidUsage", _tmpDir.Path, POOL))
+				{
+					for (var i = 0; i < POOL; i++)
+						Assert.IsTrue(job.CanExecuteTestCase());
+
+					// detection is delayed by one block
+					Assert.IsTrue(job.CanExecuteTestCase());
+					Assert.IsFalse(job.CanExecuteTestCase());
+
+					using (var lease = license.CanUsePit(Pit))
+						Assert.IsTrue(lease.IsValid);
+
+					using (var lease = license.CanExportPit())
+						Assert.IsTrue(lease.IsValid);
+				}
+			}
 		}
 
 		[Test]
@@ -130,7 +152,57 @@ namespace Peach.Pro.Test.Core.Flexera
 			);
 		}
 
-		private void ReplenishLineItem(string entitlementId, string activationId, int increment)
+		void ResetUsage(string rightsId, string serverUrl)
+		{
+			var usage = GetUsage("Test-Prepaid", "Peach-TestCase");
+			var entitled = Convert.ToInt32(usage.entitled);
+			var used = Convert.ToInt32(usage.usageSinceReset);
+			var count = entitled - used;
+
+			Console.WriteLine("ResetUsage: entitled: {0}, used: {1}, count: {2}", entitled, used, count);
+
+			if (count <= 0)
+				return;
+
+			using (var licensing = LicensingFactory.GetLicensing(IdentityClient_Production.IdentityData, null, rightsId))
+			{
+				var options = licensing.LicenseManager.CreateCapabilityRequestOptions();
+				options.Operation = CapabilityRequestOperation.Request;
+				options.AddRightsId(rightsId, 1);
+				var featureOptions = licensing.LicenseManager.CreateDesiredFeatureOptions();
+				featureOptions.PartialFulfillment = true;
+				var data = new FeatureData("Peach-TestCase", "1", count, featureOptions);
+				options.AddDesiredFeature(data);
+				options.ForceResponse = true;
+
+				var request = licensing.LicenseManager.CreateCapabilityRequest(options);
+				var binRequest = request.ToArray();
+
+				byte[] binResponse;
+				CommFactory.Create(serverUrl)
+					.SendBinaryMessage(binRequest, out binResponse);
+
+				var response = licensing.LicenseManager.ProcessCapabilityResponse(binResponse);
+				DumpResponse(response);
+			}
+		}
+
+		Usage GetUsage(string orgName, string meter)
+		{
+			using (var service = Factory.Create<UsageService>(EnvironmentType.Production))
+			{
+				var usage = service.getUsage(new GetUsageRequest
+				{
+					orgName = orgName
+				});
+
+				Assert.AreEqual(StatusType.SUCCESS, usage.statusInfoType.status, usage.statusInfoType.reason);
+
+				return usage.usages.Single(x => x.meter == meter);
+			}
+		}
+
+		private void ReplenishLineItem(string entitlementId, string activationId, int more)
 		{
 			using (var service = Factory.Create<EntitlementOrderService>(EnvironmentType.Production))
 			{
@@ -165,7 +237,9 @@ namespace Peach.Pro.Test.Core.Flexera
 				Assert.AreEqual(StatusType.SUCCESS, query.statusInfo.status, query.statusInfo.reason);
 
 				var lineItem = query.entitlementLineItem[0];
-				var count = Convert.ToInt32(lineItem.numberOfCopies) + increment;
+				var count = Convert.ToInt32(lineItem.numberOfCopies) + more;
+
+				Console.WriteLine("Replenishing: {0}", count);
 
 				var update = service.updateEntitlementLineItem(new[]
 				{
@@ -259,7 +333,8 @@ namespace Peach.Pro.Test.Core.Flexera
 			options.AcquisitionId = "pit:config"; // Pit:Config
 			options.RequestorId = "LicenseTests"; // JobID
 			var featureOptions = licensing.LicenseManager.CreateDesiredFeatureOptions();
-			featureOptions.PartialFulfillment = true;			var data = new FeatureData(feature, "1.0", count, featureOptions);
+			featureOptions.PartialFulfillment = true;
+			var data = new FeatureData(feature, "1.0", count, featureOptions);
 			options.AddDesiredFeature(data);
 			options.ForceResponse = true;
 

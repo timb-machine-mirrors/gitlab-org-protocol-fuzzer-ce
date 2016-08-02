@@ -53,7 +53,7 @@ deps = [
 	'websocket-sharp.dll',
 ]
 
-top = bld.path.parent.parent.parent
+top = bld.path.parent.parent
 flexnet = 'flexnet_client-2016.03.0'
 
 if bld.env.TARGET in ['win']:
