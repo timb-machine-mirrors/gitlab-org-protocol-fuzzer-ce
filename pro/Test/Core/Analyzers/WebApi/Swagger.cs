@@ -34,6 +34,218 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 		[Test]
 		[Peach]
 		[Quick]
+		public void TestEmptyObject()
+		{
+			var swaggerJson = @"
+{
+    ""swagger"": ""2.0"",
+    ""info"": {
+        ""title"": ""XXX"",
+        ""description"": ""XXX"",
+        ""version"": ""1.0.0""
+    },
+    ""host"": ""localhost:8002"",
+    ""schemes"": [
+        ""http""
+    ],
+    ""basePath"": ""/api"",
+    ""produces"": [
+        ""application/json""
+    ],
+    ""paths"": {
+        ""/values"": {
+            ""get"": {
+                ""operationId"": ""GetAllValues"",
+                ""summary"": ""Values"",
+                ""description"": ""Get all values"",
+                ""responses"": {
+                    ""200"": {
+                        ""description"": ""Value"",
+                        ""schema"": {
+                            ""$ref"": ""#/definitions/EmptyObject""
+                        }
+                    }
+                }
+            }
+        }
+    },
+    ""definitions"": {
+        ""EmptyObject"": {
+            ""type"": ""object""
+        }
+    }
+}
+";
+			var apiEndPoint = SwaggerToWebApi.Convert(swaggerJson);
+
+			var apiCollection = new WebApiCollection();
+			apiCollection.EndPoints.Add(apiEndPoint);
+
+			var dom = new Peach.Core.Dom.Dom();
+			WebApiToDom.Convert(dom, apiCollection);
+
+			Assert.AreEqual(1, dom.tests[0].stateModel.initialState.actions.Count);
+
+			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
+			Assert.NotNull(call);
+			Assert.AreEqual(18, call.method.IndexOf("values"));
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true
+			};
+
+			Assert.DoesNotThrow(() =>
+			{
+				using (var sout = new MemoryStream())
+				{
+					using (var xml = XmlWriter.Create(sout, settings))
+					{
+						xml.WriteStartDocument();
+						dom.WritePit(xml);
+						xml.WriteEndDocument();
+					}
+				}
+			});
+		}
+		[Test]
+		[Peach]
+		[Quick]
+		public void TestNoDefinitions()
+		{
+			var swaggerJson = @"
+{
+    ""swagger"": ""2.0"",
+    ""info"": {
+        ""title"": ""XXX"",
+        ""description"": ""XXX"",
+        ""version"": ""1.0.0""
+    },
+    ""host"": ""localhost:8002"",
+    ""schemes"": [
+        ""http""
+    ],
+    ""basePath"": ""/api"",
+    ""produces"": [
+        ""application/json""
+    ],
+    ""paths"": {
+        ""/values"": {
+            ""get"": {
+                ""operationId"": ""GetAllValues"",
+                ""summary"": ""Values"",
+                ""description"": ""Get all values"",
+                ""responses"": {
+                    ""200"": {
+                        ""description"": ""Value"",
+                        ""schema"": {
+                            ""type"": ""string""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+";
+			var apiEndPoint = SwaggerToWebApi.Convert(swaggerJson);
+
+			var apiCollection = new WebApiCollection();
+			apiCollection.EndPoints.Add(apiEndPoint);
+
+			var dom = new Peach.Core.Dom.Dom();
+			WebApiToDom.Convert(dom, apiCollection);
+
+			Assert.AreEqual(1, dom.tests[0].stateModel.initialState.actions.Count);
+
+			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
+			Assert.NotNull(call);
+			Assert.AreEqual(18, call.method.IndexOf("values"));
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true
+			};
+
+			Assert.DoesNotThrow(() =>
+			{
+				using (var sout = new MemoryStream())
+				{
+					using (var xml = XmlWriter.Create(sout, settings))
+					{
+						xml.WriteStartDocument();
+						dom.WritePit(xml);
+						xml.WriteEndDocument();
+					}
+				}
+			});
+		}
+		[Test]
+		[Peach]
+		[Quick]
+		public void TestMinimumSwagger()
+		{
+			var swaggerJson = @"
+{
+    ""swagger"": ""2.0"",
+    ""info"": {
+        ""title"": ""XXX"",
+        ""version"": ""1.0.0""
+    },
+    ""paths"": {
+        ""/values"": {
+            ""get"": {
+                ""responses"": {
+                    ""200"": {
+                        ""description"": ""Value"",
+                        ""schema"": {
+                            ""type"": ""string""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}";
+			var apiEndPoint = SwaggerToWebApi.Convert(swaggerJson);
+
+			var apiCollection = new WebApiCollection();
+			apiCollection.EndPoints.Add(apiEndPoint);
+
+			var dom = new Peach.Core.Dom.Dom();
+			WebApiToDom.Convert(dom, apiCollection);
+
+			Assert.AreEqual(1, dom.tests[0].stateModel.initialState.actions.Count);
+
+			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
+			Assert.NotNull(call);
+			Assert.AreEqual(18, call.method.IndexOf("values"));
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true
+			};
+
+			Assert.DoesNotThrow(() =>
+			{
+				using (var sout = new MemoryStream())
+				{
+					using (var xml = XmlWriter.Create(sout, settings))
+					{
+						xml.WriteStartDocument();
+						dom.WritePit(xml);
+						xml.WriteEndDocument();
+					}
+				}
+			});
+		}
+
+		[Test]
+		[Peach]
+		[Quick]
 		public void TestWebApiToDom_PeachApi()
 		{
 			var apiEndPoint = SwaggerToWebApi.Convert(swagger2_PeachApi);
