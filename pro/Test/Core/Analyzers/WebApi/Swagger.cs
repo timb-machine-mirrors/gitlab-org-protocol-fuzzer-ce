@@ -88,7 +88,7 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 
 			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
 			Assert.NotNull(call);
-			Assert.AreEqual(18, call.method.IndexOf("values"));
+			Assert.AreEqual(22, call.method.IndexOf("values"));
 
 			var settings = new XmlWriterSettings
 			{
@@ -161,7 +161,7 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 
 			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
 			Assert.NotNull(call);
-			Assert.AreEqual(18, call.method.IndexOf("values"));
+			Assert.AreEqual(22, call.method.IndexOf("values"));
 
 			var settings = new XmlWriterSettings
 			{
