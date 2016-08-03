@@ -51,7 +51,6 @@ namespace Peach.Pro.Test.Core.Flexera
 
 			var before = GetUsage("Test-Metered", "Peach-TestCase");
 
-			const int POOL = 20;
 			using (var license = new FlexeraLicense(cfg))
 			{
 				license.Activate();
@@ -62,13 +61,16 @@ namespace Peach.Pro.Test.Core.Flexera
 				using (var lease = license.CanExportPit())
 					Assert.IsFalse(lease.IsValid);
 
-				using (var job = license.NewJob(Pit, "TestMeteredUsage", _tmpDir.Path, POOL))
+				using (var job = (FlexeraLicense.JobLicense)license.NewJob(Pit, "TestMeteredUsage", _tmpDir.Path))
 				{
-					for (var i = 0; i < (POOL + 10); i++)
-					{
-						Console.WriteLine("{0}", i);
+					for (var i = 0; i < 10; i++)
 						Assert.IsTrue(job.CanExecuteTestCase());
-					}
+
+					// force a license check
+					job.LastCheckTime = DateTime.MinValue;
+
+					for (var i = 0; i < 10; i++)
+						Assert.IsTrue(job.CanExecuteTestCase());
 
 					using (var lease = license.CanUsePit(Pit))
 						Assert.IsTrue(lease.IsValid);
@@ -78,18 +80,18 @@ namespace Peach.Pro.Test.Core.Flexera
 				}
 			}
 
-			Thread.Sleep(10000);
+			// We need to wait for the Flexera backend to process the usage reports
+			// 10 seconds seems to fail sometimes.
+			Thread.Sleep(20000);
 
 			var after = GetUsage("Test-Metered", "Peach-TestCase");
 			var delta = Convert.ToInt32(after.usageSinceReset - before.usageSinceReset);
-
-			Assert.AreEqual(POOL + 10, delta);
+			Assert.AreEqual(20, delta, "before: {0}, after: {1}".Fmt(before.usageSinceReset, after.usageSinceReset));
 		}
 
 		[Test]
 		public void TestPrepaidUsage()
 		{
-			const int POOL = 20;
 			const string Pit = "PeachPit-Net-HTTP_Server";
 			var cfg = new TestConfig
 			{
@@ -121,13 +123,20 @@ namespace Peach.Pro.Test.Core.Flexera
 				using (var lease = license.CanExportPit())
 					Assert.IsTrue(lease.IsValid);
 
-				using (var job = license.NewJob(Pit, "TestPrepaidUsage", _tmpDir.Path, POOL))
+				using (var job = (FlexeraLicense.JobLicense)license.NewJob(Pit, "TestPrepaidUsage", _tmpDir.Path))
 				{
-					for (var i = 0; i < POOL; i++)
+					for (var i = 0; i < 5; i++)
 						Assert.IsTrue(job.CanExecuteTestCase());
 
-					// detection is delayed by one block
-					Assert.IsTrue(job.CanExecuteTestCase());
+					// force a license check
+					job.LastCheckTime = DateTime.MinValue;
+
+					for (var i = 0; i < 20; i++)
+						Assert.IsTrue(job.CanExecuteTestCase());
+
+					// force a license check
+					job.LastCheckTime = DateTime.MinValue;
+
 					Assert.IsFalse(job.CanExecuteTestCase());
 
 					using (var lease = license.CanUsePit(Pit))
