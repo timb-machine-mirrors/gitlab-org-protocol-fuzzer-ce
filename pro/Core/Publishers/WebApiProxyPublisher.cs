@@ -100,6 +100,11 @@ namespace Peach.Pro.Core.Publishers
 			ResponseArgs ret;
 			if (!_responses.TryTake(out ret, Timeout))
 				throw new TimeoutException();
+
+			// We should never have more than one response
+			// in the queue at a time.
+			System.Diagnostics.Debug.Assert(_responses.Count == 0);
+
 			return ret;
 		}
 
