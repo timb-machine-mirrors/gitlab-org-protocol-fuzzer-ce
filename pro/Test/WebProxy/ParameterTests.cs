@@ -24,6 +24,7 @@ namespace Peach.Pro.Test.WebProxy
 			var op = GetOp();
 
 			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.AreEqual("/api/values/{id}", op.Path.Path);
@@ -45,6 +46,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -68,6 +70,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -93,6 +96,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -121,6 +125,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -154,6 +159,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -187,6 +193,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("PUT", op.Method);
 			Assert.NotNull(op.ShadowOperation);
 			Assert.LessOrEqual(4, op.Parameters.Count);
 
@@ -229,6 +236,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -250,6 +258,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -274,6 +283,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -300,6 +310,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
 			Assert.LessOrEqual(1, op.Parameters.Count);
@@ -329,6 +340,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			Assert.NotNull(op);
+			Assert.AreEqual("PUT", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
 			Assert.LessOrEqual(4, op.Parameters.Count);
