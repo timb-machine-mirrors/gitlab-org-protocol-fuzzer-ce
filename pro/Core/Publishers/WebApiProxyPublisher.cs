@@ -163,12 +163,21 @@ namespace Peach.Pro.Core.Publishers
 				Route = route,
 			};
 
+			// Not sure if this is what we want to do long term, but currently
+			// we are testing for a fault in the proxy worker thread so we only
+			// grab the response body when a fault occurs.
+			// If we never call GetResponseBody() then the response will be
+			// automatically streamed to the client and is probably more performant.
 			if (route.FaultOnStatusCodes != null  && route.FaultOnStatusCodes.Contains(statusCode))
 			{
 				msg.Fault = true;
 				msg.Request = await e.GetRequestBodyAsString();
 				msg.Response = await e.GetResponseBodyAsString();
 			}
+
+			// Even if there is no fault, we need to signal the response was
+			// successfully received so the user can know the fuzzed
+			// request has been completly processed by the server.
 
 			lock (e)
 			{
