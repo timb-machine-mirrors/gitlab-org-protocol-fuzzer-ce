@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 
-using NUnit.Core;
 using NUnit.Framework;
 
 using Org.BouncyCastle.Math;
@@ -121,22 +120,6 @@ namespace Org.BouncyCastle.Bcpg.OpenPgp.Tests
         private PgpSecretKeyRingBundle LoadSecretKeyCollection(string keyName)
         {
             return new PgpSecretKeyRingBundle(SimpleTest.GetTestDataAsStream("openpgp.unicode." + keyName));
-        }
-
-        public static void Main(string[] args)
-        {
-            Suite.Run(new NullListener(), NUnit.Core.TestFilter.Empty);
-        }
-
-        [Suite]
-        public static TestSuite Suite
-        {
-            get
-            {
-                TestSuite suite = new TestSuite("Unicode Password Tests");
-                suite.Add(new PgpUnicodeTest());
-                return suite;
-            }
         }
     }
 }
