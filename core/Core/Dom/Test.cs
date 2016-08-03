@@ -457,15 +457,22 @@ namespace Peach.Core.Dom
 			if(MaxBackSearch != 80)
 				pit.WriteAttributeString("maxBackSearch", MaxBackSearch.ToString());
 
-			//foreach (var obj in publishers)
-			//	obj.WritePit(pit);
+			// TODO - Make this work for real
+			// Quick hack to make Swagger/Postman analyzers work better
+			foreach (var obj in publishers)
+			{
+				if (obj.GetType().Name != "RestPublisher") continue;
+
+				pit.WriteStartElement("Publisher");
+				pit.WriteAttributeString("class", "WebApi");
+				pit.WriteEndElement();
+			}
 
 			//foreach (var obj in weights)
 			//	obj.WritePit(pit);
 
 			//foreach (var obj in includedMutators)
 			//	obj.WritePit(pit);
-
 
 			if (agentRef != null)
 			{
