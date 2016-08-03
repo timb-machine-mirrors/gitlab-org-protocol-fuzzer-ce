@@ -4,9 +4,11 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using NUnit.Framework;
+using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
 using Peach.Core.Test;
+using Peach.Pro.Core.Dom;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -133,8 +135,11 @@ namespace Peach.Pro.Test.WebProxy
 			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Body);
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
+			Assert.IsTrue(param.DataElement is JsonObject);
 			Assert.AreEqual("{\"values\":[\"A\",\"B\",\"C\",\"D\"],\"extraValue\":{\"value\":\"Hello extra value\"}}",
-				param.DataElement.DefaultValue.BitsToString());
+				(string)param.DataElement.DefaultValue);
+			Assert.AreEqual((string)param.DataElement.DefaultValue, (string)param.DataElement.InternalValue);
+			Assert.AreEqual((string)param.DataElement.DefaultValue, param.DataElement.Value.BitsToString());
 			Assert.AreEqual(complexValue.extraValue.value, ValuesController.ComplexValue.extraValue.value);
 			Assert.AreEqual(complexValue.values.Length, ValuesController.ComplexValue.values.Length);
 
@@ -167,8 +172,11 @@ namespace Peach.Pro.Test.WebProxy
 			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Body);
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
+			Assert.IsTrue(param.DataElement is XmlElement);
 			Assert.AreEqual("<ComplexValue xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/Peach.Pro.Test.WebProxy.TestTarget.Controllers\"><extraValue><value>Hello extra value</value></extraValue><values xmlns:d2p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><d2p1:string>A</d2p1:string><d2p1:string>B</d2p1:string><d2p1:string>C</d2p1:string><d2p1:string>D</d2p1:string></values></ComplexValue>",
-				param.DataElement.DefaultValue.BitsToString());
+				(string)param.DataElement.DefaultValue);
+			Assert.AreEqual((string)param.DataElement.DefaultValue, param.DataElement.InternalValue.BitsToString());
+			Assert.AreEqual((string)param.DataElement.DefaultValue, param.DataElement.Value.BitsToString());
 			Assert.AreEqual(complexValue.extraValue.value, ValuesController.ComplexValue.extraValue.value);
 			Assert.AreEqual(complexValue.values.Length, ValuesController.ComplexValue.values.Length);
 

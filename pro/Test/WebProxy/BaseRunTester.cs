@@ -126,7 +126,6 @@ namespace Peach.Pro.Test.WebProxy
 				});
 
 				Monitor.Wait(e);
-				System.Diagnostics.Debugger.Break();
 			}
 
 			if (engineException != null)
