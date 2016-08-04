@@ -25,7 +25,7 @@
                                 Welcome to the Peach Fuzzer download site!
                             </p>
                             <p>
-                                After uploading a valid license file, you will be able to access the Peach Fuzzer downloads.
+                                After authenticating using your operations portal credentials, you will be able to access the Peach Fuzzer downloads.
                             </p>
                             <hr />
 
@@ -34,20 +34,25 @@
 							{ 
 								%>
 								<p style="background-color:#FFC2C2">
-									Error, your license did not validate. Please contact <strong>support@peachfuzzer.com</strong> for assistance.
+									Incorrect username or password.  Please check and try again. If login issues persist please contact <strong>support@peachfuzzer.com</strong> for assistance.
 	                            </p>
 	                            <hr />
-								<% 
+							<% 
 							} 
 							%>
 
                             <p>
-                                <asp:FileUpload ID="LicenseFile" runat="server" />
-                                <br /><br />
-                                <asp:Button ID="Button1" runat="server" Text="Upload License" OnClick="Upload_Click" />
+                                Username:
+								<asp:TextBox ID="TextBoxUser" runat="server"></asp:TextBox>
+                                <br />Password:
+								<asp:TextBox ID="TextBoxPassword" runat="server" TextMode="Password"></asp:TextBox>
+                            </p>
+							<p>
+                                <br />
+                                <asp:Button ID="Button1" runat="server" Text="Login" OnClick="Login_Click" />
                             </p>
 						<hr>
-						<p><small>Copyright (c) 2015 Peach Fuzzer, LLC. All rights reserved.</small></p>
+						<p><small>Copyright (c) 2016 Peach Fuzzer, LLC. All rights reserved.</small></p>
 						</td></tr>
 					</tbody></table>
 				</td></tr>

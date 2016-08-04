@@ -3,7 +3,7 @@
 <%@ Import Namespace="PeachDownloader" %>
 <%
     // If license has not been validated, send to validate page
-    if (!(bool)Session["LicenseValidation"])
+    if (!(bool)Session[SessionKeys.Authenticated])
     {
         Response.Redirect("Default.aspx", true);
     }
@@ -52,7 +52,7 @@
 					<ul class="nav">
 <!--						<li><a href="main.html">Home</a></li> -->
 						<li class="active"><a href="#">Downloads</a></li>
-						<li><a href="Licensing.aspx">Licensing</a></li>
+						<li><a href="https://flex1253-fno.flexnetoperations.com/flexnet/operationsportal/logon.do">Licensing Portal</a></li>
 						<!--<li><a href="training.html">Training</a></li>
 						<li><a href="support.html">Support</a></li>-->
 						<li class="divider-vertical"></li>
@@ -70,8 +70,6 @@
 		<div id="left-panel-content">
 			<ul>
 				<%
-					var linfo = Session["License"] as LicenseInfo;
-					
 					foreach (var version in GetReleases().Reverse())
 					{
 						if (selectedVersion == null)
@@ -111,14 +109,10 @@
 					foreach (var build in _downloads[product].Keys.Where(k => k.ToString().StartsWith(selectedVersion ?? string.Empty)))
 					{
 						var release = _downloads[product][build];
-						
-						// If trial license, only show build with trial pits
-						if (linfo.Trial && string.IsNullOrEmpty(release.trial) && release.Version<2)
-							continue;
 
-						var pits = release.pits;
-						if (linfo.Trial)
-							pits = release.trial;
+						if (release.Version < 2)
+							continue;
+						
 			%>
 
 				<div class="row-fluid">
@@ -133,25 +127,6 @@
 								</thead>
 								<tbody>
 								<%
-										
-							// Don't display pits download for academic license
-							if(!linfo.Academic && release.Version<2)
-							{ 
-									%>
-									<tr>
-										<td><%= pits  %></td>
-										<td></td>
-
-										<td><%=FileSize(release.basePath, pits) %>MB</td>
-										<td>
-											<a href="License.aspx?p=<%= Server.UrlEncode(product)%>&b=<%= Server.UrlEncode(build.ToString())%>&f=<%= Server.UrlEncode(pits)%>" alt="Download"><span class="icon-download"></span></a>
-										</td>
-											<%
-							}
-								%>
-									</tr>
-
-						<%
 							foreach (var file in release.files)
 							{
 
@@ -196,7 +171,7 @@
 	
 	// When redirected back to this page from the license acceptance, allow download.
 	
-    if ((bool)Session["AcceptLicense"] && Request["p"] != null)
+    if ((bool)Session[SessionKeys.AcceptLicense] && Request["p"] != null)
     {
         %><iframe width="1" height="1" src="dl.aspx?p=<%= Server.UrlEncode(Request["p"]) %>&b=<%= Server.UrlEncode(Request["b"]) %>&f=<%= Server.UrlEncode(Request["f"]) %>" /><%
     }

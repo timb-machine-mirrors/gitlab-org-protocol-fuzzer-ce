@@ -9,8 +9,8 @@ namespace PeachDownloader
 {
 	public partial class Downloads : Page
 	{
-		private const string ProductPro = "Peach Professional";
-		private const string ProductEnt = "Peach Enterprise";
+		//private const string ProductPro = "Peach Professional";
+		//private const string ProductEnt = "Peach Enterprise";
 		private const string ProductStudio = "Peach Studio";
 
 		protected SortedDictionary<string, SortedDictionary<Build, JsonRelease>> _downloads = new SortedDictionary<string, SortedDictionary<Build, JsonRelease>>();
@@ -18,7 +18,7 @@ namespace PeachDownloader
 		protected void Page_Load(object sender, EventArgs e)
 		{
 		    var downloads = new SortedDictionary<string, SortedDictionary<string, JsonRelease>>();
-			foreach (var buildDir in Directory.EnumerateDirectories((string)Application["Downloads"]))
+			foreach (var buildDir in Directory.EnumerateDirectories((string)Application[SessionKeys.Downloads]))
 			{
 				try
 				{
@@ -33,12 +33,9 @@ namespace PeachDownloader
 					//       the release.product will be "Peach Studio" and should show up for all license
 					//       types.
 
-					// Only show enterprise products to enterprise customers
-					if (release.product == ProductEnt && !(bool)Session["LicenseEnt"])
-						continue;
+					// TODO - What version for PPU users?
 
-					// Only show professional products to pro customers
-					if (release.product == ProductPro && !(bool)Session["LicensePro"])
+					if (release.product != ProductStudio)
 						continue;
 
 					if (!_downloads.ContainsKey(release.product))
@@ -56,7 +53,7 @@ namespace PeachDownloader
 				}
 			}
 
-			Session["Downloads"] = downloads;
+			Session[SessionKeys.Downloads] = downloads;
 		}
 
 

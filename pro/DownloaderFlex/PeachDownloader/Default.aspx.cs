@@ -10,45 +10,21 @@ namespace PeachDownloader
 
 		}
 
-		bool VerifyLicense(string xml)
+		protected void Login_Click(object sender, EventArgs e)
 		{
-			var linfo = LicenseInfo.Validate(xml);
-			if (linfo == null)
-				return false;
+			var operations = new Operations(TextBoxUser.Text, TextBoxPassword.Text);
+			var result = operations.ValidateCredentials();
 
-			Session["LicensePro"] = linfo.Professional;
-			Session["LicenseTrial"] = linfo.Trial;
-			Session["LicenseEnt"] = linfo.Enterprise;
-			Session["Academic"] = linfo.Academic;
-			Session["License"] = linfo;
-			Session["LicenseXml"] = xml;
-
-			return true;
-		}
-
-		protected void Upload_Click(object sender, EventArgs e)
-		{
-			if ((LicenseFile.PostedFile != null) && (LicenseFile.PostedFile.ContentLength > 0))
+			if (result)
 			{
-				string licenseXml = null;
-
-				using (var sin = new StreamReader(LicenseFile.PostedFile.InputStream))
-					licenseXml = sin.ReadToEnd();
-
-				if (VerifyLicense(licenseXml))
-				{
-					Session["LicenseValidation"] = true;
-					Response.Redirect("Downloads.aspx", true);
-				}
-				else
-				{
-					Session["LicenseValidation"] = false;
-					Response.Redirect("Default.aspx?error=Validation+Failed", true);
-				}
+				Session[SessionKeys.Authenticated] = true;
+				Session[SessionKeys.Operations] = operations;
+				Response.Redirect("Downloads.aspx", true);
 			}
 			else
 			{
-				Response.Write("Please select a file to upload.");
+				Session[SessionKeys.Authenticated] = false;
+				Response.Redirect("Default.aspx?error=true", true);
 			}
 		}
 	}

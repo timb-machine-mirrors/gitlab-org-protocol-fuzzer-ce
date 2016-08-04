@@ -16,7 +16,7 @@ namespace PeachDownloader
 
 		protected void AcceptLicense_Click(object sender, EventArgs e)
 		{
-			Session["AcceptLicense"] = true;
+			Session[SessionKeys.AcceptLicense] = true;
 			Response.Redirect("Downloads.aspx?p="+Server.UrlEncode(Request["p"])+
 				"&b="+Server.UrlEncode(Request["b"])+
 				"&f="+Server.UrlEncode(Request["f"]), true);
