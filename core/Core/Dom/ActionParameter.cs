@@ -64,6 +64,9 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("Param");
 
+			if(!string.IsNullOrEmpty(Name))
+				pit.WriteAttributeString("name", Name);
+
 			if(type != Type.In)
 				pit.WriteAttributeString("type", type.ToString());
 
@@ -71,7 +74,8 @@ namespace Peach.Core.Dom
 			pit.WriteAttributeString("ref", dataModel.Name);
 			pit.WriteEndElement();
 
-			// todo - handle data sets
+			foreach (var data in allData)
+				data.WritePit(pit);
 
 			pit.WriteEndElement();
 		}

@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using NUnit.Framework;
+using Peach.Core.Dom;
 using Peach.Core.Test;
 using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Test.Core.Analyzers.WebApi
 {
-	public class Swagger
+	public class SwaggerTests
 	{
 		[Test]
 		[Peach]
@@ -182,6 +183,7 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 				}
 			});
 		}
+
 		[Test]
 		[Peach]
 		[Quick]
@@ -239,6 +241,208 @@ namespace Peach.Pro.Test.Core.Analyzers.WebApi
 						dom.WritePit(xml);
 						xml.WriteEndDocument();
 					}
+				}
+			});
+		}
+
+		[Test]
+		[Peach]
+		[Quick]
+		public void TestParameterReference()
+		{
+			var swaggerJson = @"
+{
+    ""swagger"": ""2.0"",
+    ""info"": {
+        ""title"": ""XXX"",
+        ""version"": ""1.0.0""
+    },
+    ""basePath"": ""/api"",
+    ""parameters"": {
+        ""namesParam"": {
+            ""name"": ""names"",
+            ""in"": ""query"",
+            ""required"": true,
+            ""type"": ""array"",
+            ""items"": {
+                ""type"": ""string""
+            },
+            ""collectionFormat"": ""csv""
+        }
+    },
+    ""paths"": {
+        ""/values/{id}"": {
+            ""get"": {
+                ""parameters"": [
+                    {
+                        ""name"": ""id"",
+                        ""in"": ""path"",
+                        ""required"": true,
+                        ""type"": ""string""
+                    },
+                    {
+                        ""$ref"": ""#/parameters/namesParam""
+                    }
+                ],
+                ""responses"": {
+                    ""200"": {
+                        ""description"": ""Value"",
+                        ""schema"": {
+                            ""type"": ""string""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+";
+			var apiEndPoint = SwaggerToWebApi.Convert(swaggerJson);
+
+			var apiCollection = new WebApiCollection();
+			apiCollection.EndPoints.Add(apiEndPoint);
+			var op = apiEndPoint.Paths[0].Operations[0];
+
+			var dom = new Peach.Core.Dom.Dom();
+			WebApiToDom.Convert(dom, apiCollection);
+
+			Assert.AreEqual(1, dom.tests[0].stateModel.initialState.actions.Count);
+
+			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
+			Assert.NotNull(call);
+			Assert.AreEqual(22, call.method.IndexOf("values"));
+			Assert.NotNull(op);
+			Assert.AreEqual(2, op.Parameters.Count);
+			Assert.NotNull(op.Parameters.FirstOrDefault(p => p.Name == "id"));
+			Assert.NotNull(op.Parameters.FirstOrDefault(p => p.Name == "names"));
+			Assert.AreEqual(2, call.parameters.Count);
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true
+			};
+
+			Assert.DoesNotThrow(() =>
+			{
+				using (var sout = new MemoryStream())
+				{
+					using (var xml = XmlWriter.Create(sout, settings))
+					{
+						xml.WriteStartDocument();
+						dom.WritePit(xml);
+						xml.WriteEndDocument();
+					}
+				}
+			});
+		}
+
+		[Test]
+		[Peach]
+		[Quick]
+		public void TestParameterDefault()
+		{
+			var swaggerJson = @"
+{
+    ""swagger"": ""2.0"",
+    ""info"": {
+        ""title"": ""XXX"",
+        ""version"": ""1.0.0""
+    },
+    ""basePath"": ""/api"",
+    ""paths"": {
+        ""/values/{id}"": {
+            ""get"": {
+                ""parameters"": [
+                    {
+                        ""name"": ""id"",
+                        ""in"": ""path"",
+                        ""required"": true,
+                        ""type"": ""string"",
+                        ""default"": ""600""
+                    },
+                    {
+                        ""name"": ""query"",
+                        ""in"": ""query"",
+                        ""required"": true,
+                        ""type"": ""string"",
+                        ""default"": ""aaa""
+                    },
+                    {
+                        ""name"": ""header"",
+                        ""in"": ""header"",
+                        ""required"": true,
+                        ""type"": ""string"",
+                        ""default"": ""bbb""
+                    },
+                    {
+                        ""name"": ""body"",
+                        ""in"": ""formData"",
+                        ""required"": true,
+                        ""type"": ""string"",
+                        ""default"": ""ccc""
+                    },
+                ],
+                ""responses"": {
+                    ""200"": {
+                        ""description"": ""Value"",
+                        ""schema"": {
+                            ""type"": ""string""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}";
+			var apiEndPoint = SwaggerToWebApi.Convert(swaggerJson);
+
+			var apiCollection = new WebApiCollection();
+			apiCollection.EndPoints.Add(apiEndPoint);
+			var op = apiEndPoint.Paths[0].Operations[0];
+
+			var dom = new Peach.Core.Dom.Dom();
+			WebApiToDom.Convert(dom, apiCollection);
+
+			Assert.AreEqual(1, dom.tests[0].stateModel.initialState.actions.Count);
+
+			var call = dom.tests[0].stateModel.initialState.actions[0] as Peach.Core.Dom.Actions.Call;
+			Assert.NotNull(call);
+			Assert.AreEqual(22, call.method.IndexOf("values"));
+			Assert.NotNull(op);
+			Assert.AreEqual(4, op.Parameters.Count);
+			Assert.NotNull(op.Parameters.FirstOrDefault(p => p.Name == "id"));
+			Assert.NotNull(op.Parameters.FirstOrDefault(p => p.Name == "query"));
+			Assert.NotNull(op.Parameters.FirstOrDefault(p => p.Name == "header"));
+			Assert.NotNull(op.Parameters.FirstOrDefault(p => p.Name == "body"));
+			Assert.AreEqual(4, call.parameters.Count);
+			Assert.AreEqual("600", (string)((DataField)call.parameters[0].allData.FirstOrDefault()).Fields[0].Value);
+			Assert.AreEqual("aaa", (string)((DataField)call.parameters[1].allData.FirstOrDefault()).Fields[0].Value);
+			Assert.AreEqual("bbb", (string)((DataField)call.parameters[2].allData.FirstOrDefault()).Fields[0].Value);
+			Assert.AreEqual("ccc", (string)((DataField)call.parameters[3].allData.FirstOrDefault()).Fields[0].Value);
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true
+			};
+
+			Assert.DoesNotThrow(() =>
+			{
+				using (var sout = new MemoryStream())
+				{
+					using (var xml = XmlWriter.Create(sout, settings))
+					{
+						xml.WriteStartDocument();
+						dom.WritePit(xml);
+						xml.WriteEndDocument();
+					}
+
+					var str = Encoding.UTF8.GetString(sout.ToArray());
+					Assert.IsTrue(str.IndexOf("value=\"600\"") > 0);
+					Assert.IsTrue(str.IndexOf("value=\"aaa\"") > 0);
+					Assert.IsTrue(str.IndexOf("value=\"bbb\"") > 0);
+					Assert.IsTrue(str.IndexOf("value=\"ccc\"") > 0);
 				}
 			});
 		}

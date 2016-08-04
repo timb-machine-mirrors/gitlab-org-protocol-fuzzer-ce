@@ -31,7 +31,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using System.Xml;
 using Peach.Core.Cracker;
 using Peach.Core.IO;
 
@@ -56,6 +56,8 @@ namespace Peach.Core.Dom
 		bool Ignore { get; set; }
 
 		string FieldId { get; }
+
+		void WritePit(XmlWriter pit);
 	}
 
 	[Serializable]
@@ -92,6 +94,11 @@ namespace Peach.Core.Dom
 
 		public bool Ignore { get; set; }
 		public string FieldId { get; private set; }
+
+		public void WritePit(XmlWriter pit)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	/// <summary>
@@ -146,6 +153,14 @@ namespace Peach.Core.Dom
 		}
 
 		public string FileName { get; private set; }
+
+		public override void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Data");
+			pit.WriteAttributeString("fileName", FileName);
+			WritePitInternals(pit);
+			pit.WriteEndElement();
+		}
 	}
 
 	/// <summary>
@@ -208,6 +223,53 @@ namespace Peach.Core.Dom
 
 			model.evaulateAnalyzers();
 		}
+
+		public virtual void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("Data");
+
+			WritePitInternals(pit);
+
+			pit.WriteEndElement();
+		}
+
+		protected void WritePitInternals(XmlWriter pit)
+		{
+			if (!string.IsNullOrEmpty(Name))
+				pit.WriteAttributeString("name", Name);
+
+			if (!string.IsNullOrEmpty(FieldId))
+				pit.WriteAttributeString("fieldId", FieldId);
+
+			foreach (var field in Fields)
+			{
+				pit.WriteStartElement("Field");
+				pit.WriteAttributeString("name", field.Name);
+
+				if (field.Value != null)
+				{
+					switch (field.Value.GetVariantType())
+					{
+						case Variant.VariantType.BitStream:
+						case Variant.VariantType.ByteString:
+							pit.WriteAttributeString("valueType", "hex");
+							pit.WriteAttributeString("value", field.Value.ToString());
+							break;
+
+						default:
+							pit.WriteAttributeString("value", field.Value.ToString());
+							break;
+					}
+				}
+				else
+				{
+					pit.WriteAttributeString("value", "");
+				}
+
+				pit.WriteEndElement();
+			}
+		}
+
 
 		protected static void ApplyField(Action action, DataElementContainer model, string field, Variant value)
 		{
