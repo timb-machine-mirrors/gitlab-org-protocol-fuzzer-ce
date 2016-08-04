@@ -84,7 +84,7 @@ namespace Peach.Pro.Core
 		private readonly string _pitLibraryPath;
 		private readonly ResourceRoot _root;
 		private readonly KeyValuePair<string, PitManifestFeature> _pitFeature;
-		private readonly IFeature _feature;
+		private readonly byte[] _key;
 
 		public PitResource(
 			ILicense license,
@@ -113,8 +113,8 @@ namespace Peach.Pro.Core
 					if (license == null)
 						throw new PeachException("A valid license could not be found.");
 
-					_feature = license.GetFeature(_pitFeature.Key);
-					if (_feature == null)
+					_key = license.CanUsePit(_pitFeature.Key);
+					if (_key == null)
 						throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(pitName));
 				}
 			}
@@ -133,7 +133,7 @@ namespace Peach.Pro.Core
 					_root,
 					_pitFeature,
 					path.Substring(_pitLibraryPath.Length + 1), // skip 1st '.'
-					_feature.Key
+					_key
 				);
 			}
 

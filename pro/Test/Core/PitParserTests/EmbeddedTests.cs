@@ -52,7 +52,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
 
 			var license = new Mock<ILicense>();
-			license.Setup(x => x.GetFeature(featureName))
+			license.Setup(x => x.CanUsePit(featureName))
 				   .Returns(() => null);
 
 			var encryptedRoot = new ResourceRoot
@@ -89,13 +89,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
 
-			var feature = new Mock<IFeature>();
-			feature.SetupGet(x => x.Key)
-				   .Returns(master.Features[featureName].Key);
-
 			var license = new Mock<ILicense>();
-			license.Setup(x => x.GetFeature(featureName))
-				   .Returns(feature.Object);
+			license.Setup(x => x.CanUsePit(featureName))
+				   .Returns(master.Features[featureName].Key);
 
 			var encryptedRoot = new ResourceRoot
 			{

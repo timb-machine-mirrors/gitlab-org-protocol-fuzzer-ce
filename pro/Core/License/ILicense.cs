@@ -6,20 +6,11 @@ namespace Peach.Pro.Core.License
 {
 	public enum EulaType
 	{
-		Acedemic,
+		Academic,
 		Developer,
 		Enterprise,
 		Professional,
 		Trial,
-	}
-
-	public static class FeatureNames
-	{
-		public const string Android = "Peach-Android";
-		public const string Engine = "Peach-Engine";
-		public const string Edition = "Peach-Edition";
-		public const string ExportPit = "Peach-ExportPit";
-		public const string CustomPit = "Peach-CustomPit";
 	}
 
 	public interface ILicense
@@ -35,30 +26,15 @@ namespace Peach.Pro.Core.License
 		string EulaText { get; }
 		IEnumerable<EulaType> Eulas { get; }
 
-		IEnumerable<IFeature> Features { get; }
-
-		/// <summary>
-		/// Get a feature by name.
-		/// <list type="bullet">
-		/// <item>Peach-Android</item>
-		/// <item>Peach-Engine</item>
-		/// <item>Peach-ExportPit</item>
-		/// <item>PeachPit-Custom</item>
-		/// <item>PeachPit-$CATEGORY-$PIT</item>
-		/// </list>
-		/// </summary>
-		/// <returns>The feature.</returns>
-		/// <param name="name">Feature name.</param>
-		IFeature GetFeature(string name);
+		IEnumerable<string> AvailablePits { get; }
+		byte[] CanUsePit(string name);
+		bool CanUseCustomPit();
+		IJobLicense NewJob(string pit, string config, string job);
 	}
 
-	public interface IFeature : IDisposable
+	public interface IJobLicense : IDisposable
 	{
-		string Name { get; }
-		byte[] Key { get; }
-
-		bool Acquire();
-		// Call Dispose() to release the license
+		bool CanExecuteTestCase();
 	}
 
 	public static class LicenseExtensions
