@@ -338,7 +338,7 @@ namespace Peach.Pro.Core.Publishers
 
 					foreach (var s in protocols)
 					{
-						var buff = UTF8Encoding.UTF8.GetBytes(s);
+						var buff = Encoding.UTF8.GetBytes(s);
 						TlsUtilities.WriteUint8((byte)buff.Length, innerStream);
 						innerStream.Write(buff, 0, buff.Length);
 					}

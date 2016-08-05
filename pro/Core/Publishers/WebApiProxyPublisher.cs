@@ -71,7 +71,7 @@ namespace Peach.Pro.Core.Publishers
 			_proxy.BeforeRequest += OnRequest;
 			_proxy.BeforeResponse += OnResponse;
 
-			var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, Port, false);
+			var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, Port);
 
 			//Add an explicit endpoint where the client is aware of the proxy
 			//So client would send request in a proxy friendly manner
