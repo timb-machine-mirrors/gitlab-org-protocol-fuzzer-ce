@@ -2,6 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
+using System.Web.Configuration;
+using Ionic.Zip;
 using NLog;
 
 namespace PeachDownloader
@@ -12,6 +16,13 @@ namespace PeachDownloader
 	public partial class dl : System.Web.UI.Page
 	{
 		static Logger logger = LogManager.GetCurrentClassLogger();
+		private static string licenseConfig = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+    <appSettings>
+        <add key=""licenseUrl"" value=""{0}"" />
+        <add key=""activationId"" value=""{1}"" />
+    </appSettings>
+</configuration>";
 
 		protected void Page_Load(object sender, EventArgs e)
 		{
@@ -30,6 +41,13 @@ namespace PeachDownloader
 				return;
 			}
 
+			if (string.IsNullOrEmpty((string)Session[SessionKeys.ActivationId]))
+			{
+				logger.Error("Error 10002.1: ActivationId is null or empty");
+				Response.Write("Error: 10002.1");
+				return;
+			}
+
 			Session[SessionKeys.AcceptLicense] = false;
 
 			var downloads = Session[SessionKeys.Downloads] as SortedDictionary<string, SortedDictionary<string, JsonRelease>>;
@@ -43,6 +61,13 @@ namespace PeachDownloader
 			var product = Request["p"];
 			var build = Request["b"];
 			var file = Request["f"];
+
+			if (string.IsNullOrEmpty(product) || string.IsNullOrEmpty(build) || string.IsNullOrEmpty(file))
+			{
+				logger.Error("Error 10002.2: missing one of product, build or file");
+				Response.Write("Error: 10002.2");
+				return;
+			}
 
 			// Validate product, build
 			if (!downloads.ContainsKey(product) || !downloads[product].ContainsKey(build))
@@ -86,15 +111,28 @@ namespace PeachDownloader
 
 			if (rel.Version == 2)
 			{
+				var dlFile = string.Empty;
+
 				try
 				{
-					var dlFile = Path.Combine(rel.basePath, file);
+					// Build download
+					dlFile = BuildDownload(Path.Combine(rel.basePath, file));
+				}
+				catch (Exception ex)
+				{
+					logger.Error("Error 10006: {0}", ex.ToString());
+					Response.Write("Error: 1006");
+					return;
+				}
+
+				try
+				{
 					if (!File.Exists(dlFile))
 						logger.Error("dlFile doesn not exist '{0}'", dlFile);
 
 					using (var sout = new FileStream(dlFile, FileMode.Open, FileAccess.Read))
 					{
-						var buff = new byte[1024*10];
+						var buff = new byte[1024 * 10];
 						int readLength;
 
 						do
@@ -120,6 +158,13 @@ namespace PeachDownloader
 					Response.Write("Error: 10007");
 					return;
 				}
+				finally
+				{
+					// Remove generated file.
+
+					if (File.Exists(dlFile))
+						File.Delete(dlFile);
+				}
 			}
 
 			logger.Error("Error 10008: Unkown version: {0}", rel.Version);
@@ -135,6 +180,42 @@ namespace PeachDownloader
 		bool ValidateFile(JsonRelease release, string file)
 		{
 			return release.files.Contains(file);
+		}
+
+		string BuildDownload(string file)
+		{
+			var outFile = Path.Combine(WebConfigurationManager.AppSettings["TempFolder"],
+				Guid.NewGuid().ToString());
+
+			Debug.Assert(File.Exists(file));
+			Debug.Assert(!File.Exists(outFile));
+
+			File.Copy(file, outFile);
+
+			try
+			{
+				using (var outZip = new ZipFile(outFile))
+				{
+					var aid = (string)Session[SessionKeys.ActivationId];
+					var activations = (List<Operations.Activation>)Session[SessionKeys.Activations];
+					var activation = activations.FirstOrDefault(a => a.ActivationId == aid);
+					Session[SessionKeys.Activations] = null;
+
+					var licenseFile = string.Format(licenseConfig, 
+						activation.LicenseServerUrl,
+						activation.ActivationId);
+
+					outZip.AddEntry("Peach.exe.license.config", Encoding.UTF8.GetBytes(licenseFile));
+
+					outZip.Save(outFile);
+					return outFile;
+				}
+			}
+			catch
+			{
+				File.Delete(outFile);
+				throw;
+			}
 		}
 	}
 }

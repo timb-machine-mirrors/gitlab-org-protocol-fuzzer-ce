@@ -11,5 +11,7 @@ namespace PeachDownloader
 		public static string Operations = "Peach.Operations";
 		public static string AcceptLicense = "Peach.AcceptedLicense";
 		public static string Downloads = "Peach.Downloads";
+		public static string ActivationId = "Peach.ActivationId";
+		public static string Activations = "Peach.Activations";
 	}
 }

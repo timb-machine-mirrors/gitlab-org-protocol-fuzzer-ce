@@ -1,15 +1,24 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Downloads.aspx.cs" Inherits="PeachDownloader.Downloads" %>
-<%@ Import namespace="System.Linq" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="SelectActivationId.aspx.cs" Inherits="PeachDownloader.SelectActivationId" %>
 <%@ Import Namespace="PeachDownloader" %>
 <%
-    // If license has not been validated, send to validate page
-    if (!(bool)Session[SessionKeys.Authenticated])
-    {
-        Response.Redirect("Default.aspx", true);
-    }
 
-    var selectedVersion = Request.QueryString["v"];
-    
+// If license has not been validated, send to validate page
+if (!(bool)Session[SessionKeys.Authenticated])
+{
+    Response.Redirect("Default.aspx", true);
+}
+
+if (!string.IsNullOrEmpty(Request["a"]))
+{
+	Session[SessionKeys.ActivationId] = Request["a"];
+	Response.Redirect(string.Format("License.aspx?p={0}&b={1}&f={2}",
+		Server.UrlEncode(Request["p"]),
+		Server.UrlEncode(Request["b"]),
+		Server.UrlEncode(Request["f"])));
+}
+
+Session[SessionKeys.ActivationId] = string.Empty;
+
 %>
 <!DOCTYPE html>
 <%="<!--[if lt IE 7]><html class=\"no-js lt-ie9 lt-ie8 lt-ie7\"><![endif]-->"%>
@@ -17,7 +26,7 @@
 <%="<!--[if IE 8]><html class=\"no-js lt-ie9\"><![endif]-->"%>
 <%="<!--[if gt IE 8]><!--><html class=\"no-js\"><!--<![endif]-->"%>
 <head>
-	<meta http-equiv="Content-Language" content="en">
+	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<title>
 		Peach Customer Portal
@@ -50,7 +59,6 @@
 
 				<div class="nav-collapse collapse">
 					<ul class="nav">
-<!--						<li><a href="main.html">Home</a></li> -->
 						<li class="active"><a href="#">Downloads</a></li>
 						<li><a target="_blank" href="https://flex1253-fno.flexnetoperations.com/flexnet/operationsportal/logon.do">Licensing Portal</a></li>
 						<!--<li><a href="training.html">Training</a></li>
@@ -69,28 +77,9 @@
 	<nav id="left-panel">
 		<div id="left-panel-content">
 			<ul>
-				<%
-					foreach (var version in GetReleases().Reverse())
-					{
-						if (selectedVersion == null)
-							selectedVersion = version;
-
-						if (version == selectedVersion)
-						{
-							%><li class="active"><%
-						}
-						else
-						{
-							%><li><%
-						}
-						%>
-
-					<a href="Downloads.aspx?v=<%=version %>"><span class="icon-circle-blank"></span><%=version %></a>
+				<li class="active">
+					<a href="#"><span class="icon-info-sign"></span>Information</a>
 				</li>
-						<%
-						
-					} 
-				%>
 			</ul>
 		</div>
 		<div class="icon-caret-down"></div>
@@ -98,83 +87,90 @@
 	</nav>
 	<!-- / Left navigation panel -->
 	
+	<!-- Page content
+		================================================== -->
 	<section class="container">
-		<div class="row-fluid">
+
+		<!-- Content here
+			================================================== -->
+		<!-- ================================================== -->
+		<section class="row-fluid">
+		
+			<div class="well widget-pie-charts">
+				<div class="box no-border non-collapsible">
+    <%
+	    var operations = (Operations)Session[SessionKeys.Operations];
+	    var activations = operations.ActivationIds();
+	    Session[SessionKeys.Activations] = activations;
+
+		// Auto select single activation id
+	    if (activations != null && activations.Count == 1)
+	    {
+		    var act = activations[0];
+			var url = string.Format("SelectActivationId.aspx?p={0}&b={1}&f={2}&a={3}",
+				Server.UrlEncode(Request["p"]),
+				Server.UrlEncode(Request["b"]),
+				Server.UrlEncode(Request["f"]),
+				Server.UrlEncode(act.ActivationId));
 			
-			<div class="span6">
-			
+			Response.Redirect(url);
+	    }
+		
+	    if (activations == null || activations.Count == 0)
+	    {
+		    %>
+			<h3> Error, no activations found for your account/organization. Please contact sales@peachfuzzer.com for assistance. </h3>
 			<%
-				foreach (var product in _downloads.Keys)
-				{
-					foreach (var build in _downloads[product].Keys.Where(k => k.ToString().StartsWith(selectedVersion ?? string.Empty)))
-					{
-						var release = _downloads[product][build];
-
-						if (release.Version < 2)
-							continue;
-						
+	    }
+	    else
+	    {
 			%>
+			
+			<h4>Select One of the Following Activations</h4>
 
-				<div class="row-fluid">
-					<div class="span12">
-						<h3 class="box-header">
-							 <% if (release.nightly){ %>Nightly<% } else {%>Stable<%} %> v<%=build %> (<%=release.date %>)
-						</h3>
-						<div class="box" style="padding-bottom: 10px">
-							<table class="table table-hover">
-								<thead>
-									<tr><th>Download</th></tr>
-								</thead>
-								<tbody>
-								<%
-							foreach (var file in release.files)
-							{
+			<p>Your download will be pre-configured to use the selected
+			activation id.  The activation id and license server URL can be modified after download by editting the
+			<i>Peach.exe.license.config</i> file.</p>
+			
+			<br/>
 
-						%>                                                              
-									<tr>
-										<td><%=file %></td>
-										<td></td>
-										<td><%=FileSize(release.basePath, file) %>MB</td>
-										<td>
-											<a href="SelectActivationId.aspx?p=<%= Server.UrlEncode(product)%>&b=<%= Server.UrlEncode(build.ToString())%>&f=<%= Server.UrlEncode(file)%>" alt="Download"><span class="icon-download"></span></a>
-										</td>
-									</tr>
-						<%
-							}
-						%>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
+			<table>
+			<tr><th>Organization</th><th>Activation ID</th><th>Product</th></tr>
+		    <%
+			
+		    foreach (var act in activations)
+		    {
+				var url = string.Format("SelectActivationId.aspx?p={0}&b={1}&f={2}&a={3}",
+					Server.UrlEncode(Request["p"]),
+					Server.UrlEncode(Request["b"]),
+					Server.UrlEncode(Request["f"]),
+					Server.UrlEncode(act.ActivationId));
 				
-			<%
-						}
-					}
+				%>
+				<tr>
+					<td><%= Server.HtmlEncode(act.OrgName) %></td>
+					<td><a href="<%= url %>"><%= act.ActivationId %></a></td>
+					<td><%= Server.HtmlEncode(act.Product) %></td>
+				</tr>
+				<%
+		    }
+			
 			%>
-
-
-				<!-- ================================================== -->
-
+	    </table><%
+	    }
+    %>
+				</div>
 			</div>
-		</div>
+
+		</section>
 		<!-- / Content here -->
 		
 		<!-- Page footer
 			================================================== -->
 		<footer id="main-footer">
-			Copyright &copy; 2014 <a href="http://www.peachfuzzer.com">Peach Fuzzer, LLC</a>, all rights reserved.
+			Copyright &copy; 2016 <a href="http://www.peachfuzzer.com">Peach Fuzzer, LLC</a>, all rights reserved.
 		</footer>
 		<!-- / Page footer -->
 	</section>
-<%
-	
-	// When redirected back to this page from the license acceptance, allow download.
-	
-    if ((bool)Session[SessionKeys.AcceptLicense] && Request["p"] != null)
-    {
-        %><iframe width="1" height="1" src="dl.aspx?p=<%= Server.UrlEncode(Request["p"]) %>&b=<%= Server.UrlEncode(Request["b"]) %>&f=<%= Server.UrlEncode(Request["f"]) %>" /><%
-    }
-%>
 </body>
 </html>
