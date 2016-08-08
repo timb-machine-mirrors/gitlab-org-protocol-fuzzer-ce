@@ -330,7 +330,7 @@ namespace Peach.Core
 			LogManager.Configuration = config;
 		}
 
-		public static Configuration GetUserConfig()
+		public static Configuration GetUserConfig(string suffix = ".user.config")
 		{
 			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 			var userFile = new ExeConfigurationFileMap
@@ -338,7 +338,7 @@ namespace Peach.Core
 				ExeConfigFilename = Path.Combine(
 					Path.GetDirectoryName(appConfig.FilePath),
 					Path.GetFileNameWithoutExtension(appConfig.FilePath)
-				) + ".user.config"
+				) + suffix
 			};
 			return ConfigurationManager.OpenMappedExeConfiguration(userFile, ConfigurationUserLevel.None);
 		}
