@@ -158,7 +158,8 @@ namespace Peach.Pro.Test.WebProxy
 		[TearDown]
 		public void TearDown()
 		{
-			Assert.IsTrue(Engine.Wait(10000));			
+			if (Engine != null)
+				Assert.IsTrue(Engine.Wait(10000));
 		}
 
 		[OneTimeSetUp]
