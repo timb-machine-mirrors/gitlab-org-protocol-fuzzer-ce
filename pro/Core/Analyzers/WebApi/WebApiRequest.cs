@@ -38,6 +38,8 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			foreach (var header in headers.Split('\n'))
 			{
 				var token = header.IndexOf(": ");
+				if (token < 0) continue;
+
 				var name = header.Substring(0, token);
 				var value = header.Substring(token + 2);
 
