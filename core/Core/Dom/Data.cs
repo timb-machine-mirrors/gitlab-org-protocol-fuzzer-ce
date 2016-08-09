@@ -235,8 +235,8 @@ namespace Peach.Core.Dom
 
 		protected void WritePitInternals(XmlWriter pit)
 		{
-			if (!string.IsNullOrEmpty(Name))
-				pit.WriteAttributeString("name", Name);
+			//if (!string.IsNullOrEmpty(Name))
+			//	pit.WriteAttributeString("name", Name);
 
 			if (!string.IsNullOrEmpty(FieldId))
 				pit.WriteAttributeString("fieldId", FieldId);
