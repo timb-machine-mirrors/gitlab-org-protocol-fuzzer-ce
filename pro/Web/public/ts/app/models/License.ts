@@ -2,14 +2,19 @@
 
 namespace Peach {
 	export interface ILicense {
-		isValid: boolean;
-		isInvalid: boolean;
-		isMissing: boolean;
-		isExpired: boolean;
+		status: string;
 		errorText: string;
 		expiration: string;
 		eulaAccepted: boolean;
 		eulas: string[];
 		version: string;
 	}
+
+	export var LicenseStatus = {
+		Missing   : '',
+		Expired   : '',
+		Invalid   : '',
+		Valid     : ''
+	};
+	MakeLowerEnum(LicenseStatus);
 }

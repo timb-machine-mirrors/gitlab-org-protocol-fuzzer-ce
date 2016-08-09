@@ -116,6 +116,10 @@ namespace Peach.Pro.Core
 					if (_key == null)
 						throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(pitName));
 				}
+				else if (!license.CanUseCustomPit())
+				{
+					throw new PeachException("Your license does not include support for custom pits. Contact Peach Fuzzer sales for more information.");
+				}
 			}
 		}
 
@@ -126,7 +130,7 @@ namespace Peach.Pro.Core
 			Stream stream = null;
 
 			// try to load from assembly
-			if (_root != null && path.StartsWith(_pitLibraryPath))
+			if (_root != null && _key != null && path.StartsWith(_pitLibraryPath))
 			{
 				stream = PitResourceLoader.DecryptResource(
 					_root,

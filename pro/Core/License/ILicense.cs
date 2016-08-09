@@ -13,12 +13,17 @@ namespace Peach.Pro.Core.License
 		Trial,
 	}
 
+	public enum LicenseStatus
+	{
+		Missing,
+		Expired,
+		Invalid,
+		Valid
+	}
+
 	public interface ILicense
 	{
-		bool IsMissing { get; }
-		bool IsExpired { get; }
-		bool IsInvalid { get; }
-		bool IsValid { get; }
+		LicenseStatus Status { get; }
 		string ErrorText { get; }
 		DateTime Expiration { get; }
 
@@ -51,7 +56,12 @@ namespace Peach.Pro.Core.License
 
 		public static bool IsNearingExpiration(this ILicense license)
 		{
-			return license.IsValid && license.Expiration < DateTime.Now.AddDays(30);
+			return license.IsValid() && license.Expiration < DateTime.Now.AddDays(30);
+		}
+
+		public static bool IsValid(this ILicense license)
+		{
+			return license.Status == LicenseStatus.Valid;
 		}
 	}
 }

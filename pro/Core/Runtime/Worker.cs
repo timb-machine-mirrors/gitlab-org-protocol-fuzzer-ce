@@ -10,6 +10,7 @@ using NLog.Targets;
 using NLog.Targets.Wrappers;
 using Peach.Core;
 using Peach.Core.Runtime;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
 
@@ -121,7 +122,7 @@ namespace Peach.Pro.Core.Runtime
 				throw new SyntaxException("Missing <pit> argument.");
 
 			PrepareLicensing(_pitLibraryPath);
-			if (!_license.IsValid)
+			if (_license.Status != LicenseStatus.Invalid)
 				return -1;
 
 			if (_init)

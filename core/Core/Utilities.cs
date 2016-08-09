@@ -330,15 +330,22 @@ namespace Peach.Core
 			LogManager.Configuration = config;
 		}
 
-		public static Configuration GetUserConfig(string suffix = ".user.config")
+		public static Configuration GetUserConfig()
 		{
 			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-			var userFile = new ExeConfigurationFileMap
-			{
-				ExeConfigFilename = Path.Combine(
+			return GetUserConfig(
+				Path.Combine(
 					Path.GetDirectoryName(appConfig.FilePath),
 					Path.GetFileNameWithoutExtension(appConfig.FilePath)
-				) + suffix
+				) + ".user.config"
+			);
+		}
+
+		public static Configuration GetUserConfig(string filename)
+		{
+			var userFile = new ExeConfigurationFileMap
+			{
+				ExeConfigFilename = filename
 			};
 			return ConfigurationManager.OpenMappedExeConfiguration(userFile, ConfigurationUserLevel.None);
 		}

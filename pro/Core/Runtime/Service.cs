@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Peach.Core.Runtime;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core.Runtime
@@ -24,7 +25,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override int OnRun(List<string> args)
 		{
-			if (!_license.IsValid)
+			if (_license.Status != LicenseStatus.Valid)
 				return -1;
 
 			// Ensure pit library exists
