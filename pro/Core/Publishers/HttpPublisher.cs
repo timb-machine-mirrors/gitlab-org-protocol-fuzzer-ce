@@ -78,7 +78,6 @@ namespace Peach.Pro.Core.Publishers
 			}
 			if (IgnoreCertErrors)
 			{
-				logger.Info("Ignoring Certificate Validation Check Errors");
 				ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 			}
 		}
