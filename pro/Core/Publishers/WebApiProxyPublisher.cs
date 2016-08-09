@@ -122,6 +122,12 @@ namespace Peach.Pro.Core.Publishers
 			return null;
 		}
 
+		public class SessionState
+		{
+			public WebProxyRoute Route;
+			public WebApiOperation Op;
+		}
+
 		private async Task OnRequest(object sender, SessionEventArgs e)
 		{
 			var req = e.WebSession.Request;
@@ -135,7 +141,7 @@ namespace Peach.Pro.Core.Publishers
 				: null;
 
 			e.DisposingEvent += OnDisposing;
-			e.State = route;
+			e.State = new SessionState {Route = route};
 
 			var msg = new RequestArgs
 			{
@@ -159,7 +165,8 @@ namespace Peach.Pro.Core.Publishers
 
 		private async Task OnResponse(object sender, SessionEventArgs e)
 		{
-			var route = (WebProxyRoute)e.State;
+			var op = ((SessionState)e.State).Op;
+			var route = ((SessionState)e.State).Route;
 			var statusCode = int.Parse(e.WebSession.Response.ResponseStatusCode);
 
 			var msg = new ResponseArgs
@@ -176,7 +183,7 @@ namespace Peach.Pro.Core.Publishers
 			if (route.FaultOnStatusCodes != null  && route.FaultOnStatusCodes.Contains(statusCode))
 			{
 				msg.Fault = true;
-				msg.Request = await e.GetRequestBodyAsString();
+				msg.Request = e.WebSession.Request.ContentLength > 0 ? await e.GetRequestBodyAsString() : string.Empty;
 				msg.Response = await e.GetResponseBodyAsString();
 			}
 
@@ -202,7 +209,7 @@ namespace Peach.Pro.Core.Publishers
 			var msg = new ResponseArgs
 			{
 				Session = e,
-				Route = (WebProxyRoute)e.State
+				Route = ((SessionState)e.State).Route
 			};
 
 			lock (e)
