@@ -3,6 +3,7 @@ using System.IO;
 using Peach.Core;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -22,6 +23,8 @@ namespace Peach.Pro.Core.WebServices
 		bool Kill();
 
 		EventHandler InternalEvent { set; }
+
+		bool ProxyEvent(IProxyEvent args);
 	}
 
 	public abstract class BaseJobMonitor
