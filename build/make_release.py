@@ -292,7 +292,7 @@ if __name__ == "__main__":
 			product = r['product'],
 			build = buildtag,
 			nightly = c.nightly,
-			version = 2,
+			version = 3,
 			date = '%s/%s/%s' % (d.day, d.month, d.year),
 			pit_archives = pit_archives,
 			packs = packs,
