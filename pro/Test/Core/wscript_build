@@ -5,6 +5,7 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'Castle.Core.dll',
 	'Dapper.dll',
+	'FlexNet.Library.dll',
 	'FlexNet.Operations.dll',
 	'FlxClientCommon.dll',
 	'FlxLicensingClient.dll',
