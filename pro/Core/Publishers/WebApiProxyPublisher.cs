@@ -23,8 +23,10 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default infinite)", "-1")]
 	public class WebApiProxyPublisher : Publisher
 	{
-		public class BaseArgs : IDisposable
+		public class BaseArgs : IProxyEvent
 		{
+			public bool Handled { get; set; }
+
 			public WebProxyRoute Route { get; set; }
 			public SessionEventArgs Session { get; set; }
 
@@ -44,17 +46,19 @@ namespace Peach.Pro.Core.Publishers
 			public bool Fault { get; set; }
 
 			public string Request { get; set;}
-			public string Response { get; set;}
+			public byte[] Response { get; set;}
 		}
 
 		private readonly ProxyServer _proxy = new ProxyServer();
-		private readonly BlockingCollection<RequestArgs> _requests = new BlockingCollection<RequestArgs>();
+		private readonly BlockingCollection<IProxyEvent> _requests = new BlockingCollection<IProxyEvent>();
 		private readonly BlockingCollection<ResponseArgs> _responses = new BlockingCollection<ResponseArgs>();
 
 		private static readonly NLog.Logger ClassLogger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return ClassLogger; } }
 
 		public WebProxyStateModel Model { get; set; }
+
+		public BlockingCollection<IProxyEvent> Requests { get { return _requests; } }
 
 		public int Port { get; set; }
 		public int Timeout { get; set; }
@@ -84,13 +88,22 @@ namespace Peach.Pro.Core.Publishers
 		protected override void OnStop()
 		{
 			_proxy.Stop();
+
+			_requests.CompleteAdding();
+
+			foreach (var item in _requests)
+			{
+				item.Handled = false;
+				item.Dispose();
+			}
 		}
 
-		public RequestArgs GetRequest()
+		public IProxyEvent GetRequest()
 		{
-			RequestArgs ret;
+			IProxyEvent ret;
 			if (!_requests.TryTake(out ret, Timeout))
 				throw new TimeoutException();
+			ret.Handled = true;
 			return ret;
 		}
 
@@ -104,6 +117,7 @@ namespace Peach.Pro.Core.Publishers
 			// in the queue at a time.
 			System.Diagnostics.Debug.Assert(_responses.Count == 0);
 
+			ret.Handled = true;
 			return ret;
 		}
 
@@ -138,7 +152,6 @@ namespace Peach.Pro.Core.Publishers
 			if(req.ContentLength >= 0)
 				await e.GetRequestBody();
 
-			e.DisposingEvent += OnDisposing;
 			e.State = new SessionState {Route = route};
 
 			var msg = new RequestArgs
@@ -147,14 +160,32 @@ namespace Peach.Pro.Core.Publishers
 				Route = route,
 			};
 
-			lock (e)
-			{
-				// Send RequestArgs to Engine thread
-				_requests.Add(msg);
+			var abort = false;
 
-				// Wait for Engine thread to finish
-				Monitor.Wait(e);
+			try
+			{
+				lock (e)
+				{
+					// Send RequestArgs to Engine thread
+					_requests.Add(msg);
+
+					// Wait for Engine thread to finish
+					Monitor.Wait(e);
+				}
 			}
+			catch (InvalidOperationException)
+			{
+				// We are stopped!
+				abort = true;
+			}
+
+			if (abort)
+			{
+				await e.Ok("");
+				return;
+			}
+
+			e.DisposingEvent += OnDisposing;
 
 			if (req.RequestBody != null)
 				await e.SetRequestBody(req.RequestBody);
@@ -162,7 +193,6 @@ namespace Peach.Pro.Core.Publishers
 
 		private async Task OnResponse(object sender, SessionEventArgs e)
 		{
-			var op = ((SessionState)e.State).Op;
 			var route = ((SessionState)e.State).Route;
 			var statusCode = int.Parse(e.WebSession.Response.ResponseStatusCode);
 
@@ -181,7 +211,7 @@ namespace Peach.Pro.Core.Publishers
 			{
 				msg.Fault = true;
 				msg.Request = e.WebSession.Request.ContentLength > 0 ? await e.GetRequestBodyAsString() : string.Empty;
-				msg.Response = await e.GetResponseBodyAsString();
+				msg.Response = await e.GetResponseBody();
 			}
 
 			// Even if there is no fault, we need to signal the response was

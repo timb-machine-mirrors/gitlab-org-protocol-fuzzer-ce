@@ -35,6 +35,7 @@ deps = [
 	'System.Core.dll',
 	'System.Net.Http.dll',
 	'System.Net.Http.Formatting.dll',
+	'System.Net.Http.WebRequest.dll',
 	'System.Web.dll',
 	'System.Web.Cors.dll',
 	'System.Web.Http.dll',

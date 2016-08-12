@@ -8,6 +8,7 @@ using SysProcess = System.Diagnostics.Process;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -78,6 +79,11 @@ namespace Peach.Pro.Core.WebServices
 					return false;
 				}
 			}
+		}
+
+		public bool ProxyEvent(IProxyEvent args)
+		{
+			return false;
 		}
 
 		// used by unit tests

@@ -18,6 +18,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.License;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -889,6 +890,11 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 		}
 
 		public bool Kill()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool ProxyEvent(IProxyEvent args)
 		{
 			throw new NotImplementedException();
 		}

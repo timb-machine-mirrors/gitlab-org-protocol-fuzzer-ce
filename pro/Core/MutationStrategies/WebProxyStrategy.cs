@@ -15,11 +15,15 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		private readonly List<Type> _dataMutators = new List<Type>();
 
+		private uint _iteration;
+
 		public WebProxyStrategy(Dictionary<string, Variant> args)
 			: base(args)
 		{
 			MaxFieldsToMutate = 2;
 		}
+
+		public bool ControlRecordIteration { get; set; }
 
 		public override bool UsesRandomSeed
 		{
@@ -38,8 +42,18 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		public override uint Iteration
 		{
-			get;
-			set;
+			get
+			{
+				return _iteration;
+			}
+			set
+			{
+				Context.controlIteration |= ControlRecordIteration;
+				Context.controlRecordingIteration |= ControlRecordIteration;
+
+				ControlRecordIteration = false;
+				_iteration = value;
+			}
 		}
 
 		public override void Initialize(RunContext context, Engine engine)
