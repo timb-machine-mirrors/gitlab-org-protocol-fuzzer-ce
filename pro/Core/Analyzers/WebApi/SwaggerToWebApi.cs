@@ -35,20 +35,30 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		/// <returns></returns>
 		public static WebApiEndPoint Convert(JObject swagger)
 		{
-			var endPoint = new WebApiEndPoint {Host = swagger["host"].Value<string>()};
+			var endPoint = new WebApiEndPoint();
 			var models = ConvertDefinitions(swagger);
+			JToken token;
 
-			foreach (var scheme in (JArray) swagger["schemes"])
+			if(swagger.TryGetValue("host", out token))
+				endPoint.Host = token.Value<string>();
+
+			if (swagger.TryGetValue("schemes", out token))
 			{
-				WebApiScheme s;
-				if (!WebApiScheme.TryParse(scheme.Value<string>().ToUpper(), out s))
-					throw new ApplicationException("Error parsing swagger schme \"" + scheme.Value<string>() + "\".");
+				foreach (var scheme in (JArray) token)
+				{
+					WebApiScheme s;
+					if (!WebApiScheme.TryParse(scheme.Value<string>().ToUpper(), out s))
+						throw new ApplicationException("Error parsing swagger schme \"" + scheme.Value<string>() + "\".");
 
-				endPoint.Schemes.Add(s);
+					endPoint.Schemes.Add(s);
+				}
 			}
 
-			foreach (KeyValuePair<string, JToken> path in ((JObject)swagger["paths"]))
-				endPoint.Paths.Add(ConvertPath(path.Key, (JObject)path.Value, models));
+			if (swagger.TryGetValue("paths", out token))
+			{
+				foreach (KeyValuePair<string, JToken> path in ((JObject) token))
+					endPoint.Paths.Add(ConvertPath(path.Key, (JObject) path.Value, models));
+			}
 
 			return endPoint;
 		}
@@ -80,11 +90,13 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				throw new ApplicationException("Error parsing swagger operation type \"" + opKey + "\".");
 
 			apiOp.Type = opType;
-			apiOp.OperationId = op["operationId"].Value<string>();
+
+			if(op.TryGetValue("operationId", out token))
+				apiOp.OperationId = token.Value<string>();
 
 			if (op.TryGetValue("parameters", out token))
 			{
-				foreach (var param in (JArray) op["parameters"])
+				foreach (var param in (JArray) token)
 				{
 					apiOp.Parameters.Add(ConvertParameter((JObject) param, models));
 				}
@@ -138,7 +150,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		static List<DataModel> ConvertDefinitions(JObject json)
 		{
 			var models = new List<DataModel>();
-			var definitions = (JObject) json["definitions"];
+			JToken token;
+			
+			if(!json.TryGetValue("definitions", out token))
+				return models;
+
+			var definitions = (JObject) token;
 			foreach (var def in definitions)
 			{
 				var item = (JObject) definitions[def.Key];
@@ -247,9 +264,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 					return jsonObject;
 			}
 
-			foreach (var item in (JObject)obj["properties"])
+			if (obj.TryGetValue("properties", out value))
 			{
-				jsonObject.Add((DataElement)DefinitionToElement(item.Key.Replace(".", "_"), item.Key, (JObject)item.Value));
+				foreach (var item in (JObject) obj["properties"])
+				{
+					jsonObject.Add((DataElement) DefinitionToElement(item.Key.Replace(".", "_"), item.Key, (JObject) item.Value));
+				}
 			}
 
 			return jsonObject;

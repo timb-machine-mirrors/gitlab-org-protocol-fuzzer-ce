@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using NLog;
 using Peach.Core;
@@ -21,6 +22,7 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Username", typeof(string), "Optional username for authentication", "")]
 	[Parameter("Password", typeof(string), "Optional password for authentication", "")]
 	[Parameter("Domain", typeof(string), "Optional domain for authentication", "")]
+	[Parameter("ClientCertificate", typeof(string), "Optional client certificate filename for authentication", "")]
 	[Parameter("Cookies", typeof(bool), "Track cookies (defaults to true)", "true")]
 	[Parameter("CookiesAcrossIterations", typeof(bool), "Track cookies across iterations (defaults to false)", "false")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default 3000)", "3000")]
@@ -40,6 +42,7 @@ namespace Peach.Pro.Core.Publishers
 		public string Domain { get; protected set; }
 		public string BaseUrl { get; protected set; }
 		public string Proxy { get; protected set; }
+		public string ClientCertificate { get; protected set; }
 		public int[] FaultOnStatusCodes { get; protected set; }
 		public int[] FailureStatusCodes { get; protected set; }
 		public bool Cookies { get; protected set; }
@@ -49,6 +52,7 @@ namespace Peach.Pro.Core.Publishers
 		protected CookieContainer CookieJar = new CookieContainer();
 		protected HttpWebResponse Response { get; set; }
 		protected string Query { get; set; }
+		protected X509Certificate _clientCertificate = null;
 
 		// Allow access from scripting
 		public Dictionary<string, string> Headers = new Dictionary<string, string>();
@@ -75,7 +79,16 @@ namespace Peach.Pro.Core.Publishers
 					Credentials.Add(baseUrl, "NTLM", new NetworkCredential(Username, Password, Domain));
 					Credentials.Add(baseUrl, "Digest", new NetworkCredential(Username, Password, Domain));
 				}
+
+				if (!string.IsNullOrEmpty(ClientCertificate))
+				{
+					if (!File.Exists(ClientCertificate))
+						throw new PeachException(string.Format("Client certificate file '{0}' not found.", ClientCertificate));
+
+					_clientCertificate = X509Certificate.CreateFromCertFile(ClientCertificate);
+				}
 			}
+
 			if (IgnoreCertErrors)
 			{
 				logger.Info("Ignoring Certificate Validation Check Errors");
@@ -313,6 +326,9 @@ namespace Peach.Pro.Core.Publishers
 
 			if (Credentials != null)
 				request.Credentials = Credentials;
+
+			if (_clientCertificate != null)
+				request.ClientCertificates.Add(_clientCertificate);
 
 			foreach (var kv in Headers)
 			{

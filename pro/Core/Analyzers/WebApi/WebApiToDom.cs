@@ -26,7 +26,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			dom.tests.Add(test);
 			dom.stateModels.Add(new StateModel() { Name = "Default" });
 			test.stateModel = dom.stateModels[0];
-			test.stateModelRef = new StateModelRef() { refName = test.stateModel.Name };
+			test.stateModelRef = new StateModelRef() {refName = test.stateModel.Name};
 
 			var publisher = new RestPublisher(new Dictionary<string, Variant>())
 			{
@@ -97,12 +97,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		{
 			var call = new Call
 			{
-				Name = operation.OperationId,
-				method = string.Format("{0} {1}", operation.Type, BuildPathAndQuery(operation))
+				Name = operation.Name,
+				method = string.Format("{0} ##TargetUrl##{1}", operation.Type, BuildPathAndQuery(operation))
 			};
 
 			for (var cnt = 0; state.actions.ContainsKey(call.Name); cnt++ )
-				call.Name = operation.OperationId + "_" + cnt;
+				call.Name = operation.Name + "_" + cnt;
 
 			ParametersToPeach(dom, call, operation);
 
@@ -120,7 +120,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			{
 				case WebApiOperationType.GET:
 				case WebApiOperationType.POST:
-					call.result = new ActionResult();
+					call.result = new ActionResult("Result");
 					call.result.dataModel = dom.dataModels["WebApiResult"];
 					break;
 			}
