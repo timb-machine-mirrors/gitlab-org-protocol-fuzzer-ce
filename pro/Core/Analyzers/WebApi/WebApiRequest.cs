@@ -127,19 +127,27 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				var keyValuePair = keyValue.Split('=');
 
 				var key = HttpUtility.UrlDecode(keyValuePair[0], Encoding.UTF8);
-				var value = HttpUtility.UrlDecode(keyValuePair[1], Encoding.UTF8);
+				var value = string.Empty;
+				if (keyValuePair.Length == 2)
+				{
+					HttpUtility.UrlDecode(keyValuePair[1], Encoding.UTF8);
 
-				if (Guid.TryParse(value, out guid))
-				{
-					apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.GuidType));
-				}
-				else if (long.TryParse(value, out l))
-				{
-					apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.IntType));
+					if (Guid.TryParse(value, out guid))
+					{
+						apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.GuidType));
+					}
+					else if (long.TryParse(value, out l))
+					{
+						apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.IntType));
+					}
+					else
+					{
+						apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.StringType));
+					}
 				}
 				else
 				{
-					apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.StringType));
+					apiUrl.Params.Add(new WebApiUrlParam(key, value, WebApiUrlPartType.EmptyType));
 				}
 			}
 

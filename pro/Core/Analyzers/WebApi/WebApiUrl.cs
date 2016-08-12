@@ -13,7 +13,8 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 	{
 		StringType,
 		IntType,
-		GuidType
+		GuidType,
+		EmptyType
 	}
 
 	class WebApiUrlPart
@@ -89,8 +90,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			{
 				var param = Params[cnt];
 
-				sb.AppendFormat("{0}={{{1}}}&",
-					System.Web.HttpUtility.UrlEncode(param.Name), fuzzedParamCount);
+				if(param.Type == WebApiUrlPartType.EmptyType)
+					sb.AppendFormat("{0}&",
+						System.Web.HttpUtility.UrlEncode(param.Name));
+				else
+					sb.AppendFormat("{0}={{{1}}}&",
+						System.Web.HttpUtility.UrlEncode(param.Name), fuzzedParamCount);
 
 				fuzzedParamCount++;
 			}
@@ -108,9 +113,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				data.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));
 				data.DefaultValue = new Variant(part.Value);
 
-				var param = new ActionParameter(id);
-				param.dataModel = new DataModel(id);
-				param.dataModel.Add(data);
+				var param = new ActionParameter(id) {dataModel = new DataModel(id) {data}};
 
 				call.parameters.Add(param);
 				dom.dataModels.Add(param.dataModel);
@@ -118,15 +121,15 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 
 			foreach (var param in Params)
 			{
+				if (param.Type == WebApiUrlPartType.EmptyType) continue;
+
 				var id = Guid.NewGuid().ToString();
 
 				var data = new Peach.Core.Dom.String("value");
 				data.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));
 				data.DefaultValue = new Variant(param.Value);
 
-				var p = new ActionParameter(id);
-				p.dataModel = new DataModel(id);
-				p.dataModel.Add(data);
+				var p = new ActionParameter(id) {dataModel = new DataModel(id) {data}};
 
 				call.parameters.Add(p);
 				dom.dataModels.Add(p.dataModel);
