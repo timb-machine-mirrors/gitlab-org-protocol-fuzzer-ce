@@ -60,7 +60,7 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public override string outputName { get { return base.outputName + ".In"; } }
 
-		public void WritePit(XmlWriter pit)
+		public virtual void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("Param");
 

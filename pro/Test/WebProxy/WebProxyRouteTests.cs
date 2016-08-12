@@ -108,7 +108,10 @@ namespace Peach.Pro.Test.WebProxy
 
 			foreach (var param in op.Parameters)
 			{
-				Assert.IsTrue(param.DataElement.isMutable);
+				if(param.Name == "content-length" || param.Name == "host")
+					Assert.IsFalse(param.DataElement.isMutable);
+				else
+					Assert.IsTrue(param.DataElement.isMutable);
 			}
 		}
 

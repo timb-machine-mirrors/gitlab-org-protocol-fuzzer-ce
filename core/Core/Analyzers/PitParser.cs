@@ -1466,7 +1466,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "property", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
+		public virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
 		{
 			var dom = data.action.parent.parent.parent;
 

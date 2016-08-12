@@ -461,7 +461,7 @@ namespace Peach.Core.Dom
 			// Quick hack to make Swagger/Postman analyzers work better
 			foreach (var obj in publishers)
 			{
-				if (obj.GetType().Name != "RestPublisher") continue;
+				if (obj.GetType().Name != "WebApiPublisher") continue;
 
 				pit.WriteStartElement("Publisher");
 				pit.WriteAttributeString("class", "WebApi");

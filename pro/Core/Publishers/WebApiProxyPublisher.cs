@@ -37,7 +37,6 @@ namespace Peach.Pro.Core.Publishers
 
 		public class RequestArgs : BaseArgs
 		{
-			public byte[] Body { get; set; }
 		}
 
 		public class ResponseArgs : BaseArgs
@@ -136,9 +135,8 @@ namespace Peach.Pro.Core.Publishers
 			if (route == null)
 				return;
 
-			var body = req.ContentLength >= 0
-				? await e.GetRequestBody()
-				: null;
+			if(req.ContentLength >= 0)
+				await e.GetRequestBody();
 
 			e.DisposingEvent += OnDisposing;
 			e.State = new SessionState {Route = route};
@@ -147,7 +145,6 @@ namespace Peach.Pro.Core.Publishers
 			{
 				Session = e,
 				Route = route,
-				Body = body
 			};
 
 			lock (e)
@@ -159,8 +156,8 @@ namespace Peach.Pro.Core.Publishers
 				Monitor.Wait(e);
 			}
 
-			if (msg.Body != null)
-				await e.SetRequestBody(body);
+			if (req.RequestBody != null)
+				await e.SetRequestBody(req.RequestBody);
 		}
 
 		private async Task OnResponse(object sender, SessionEventArgs e)

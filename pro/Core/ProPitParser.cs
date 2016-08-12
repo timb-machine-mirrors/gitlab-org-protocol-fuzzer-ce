@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Dom.Actions;
+using Peach.Pro.Core.Dom.Actions.Web;
 using Peach.Pro.Core.Godel;
 using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebApi;
@@ -205,9 +207,31 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		private string[] _webChildElementNames = {"Path", "Query", "FormData", "Header", "Body"};
+
 		protected override Action handleAction(XmlNode node, State parent)
 		{
 			var action = base.handleAction(node, parent);
+
+			if (action.type == "web")
+			{
+				if (!node.hasAttr("url"))
+					throw new PeachException("Error, Action of type 'web' must have a 'url' attribute.");
+				if (!node.hasAttr("method"))
+					throw new PeachException("Error, Action of type 'web' must have a 'method' attribute.");
+
+				var webAction = (WebAction) action;
+				webAction.url = node.getAttrString("url");
+				webAction.method = node.getAttrString("method");
+
+				foreach (XmlNode child in node)
+				{
+					if (_webChildElementNames.Contains(child.Name))
+						webAction.parameters.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if(child.Name == "Response")
+						handleActionResponse(child, webAction);
+				}
+			}
 
 			foreach (XmlNode child in node)
 			{
@@ -227,6 +251,21 @@ namespace Peach.Pro.Core
 
 			return action;
 		}
+
+		protected void handleActionResponse(XmlNode node, WebAction action)
+		{
+			action.result = new ActionWebResponse()
+			{
+				action = action
+			};
+
+			// Data model is not required.
+			if (node.ChildNodes.Count > 0)
+				handleActionData(node, action.result, "<Response> child of ", false);
+			else
+				action.result.dataModel = new DataModel("NULL");
+		}
+
 
 		protected override State handleState(XmlNode node, Peach.Core.Dom.StateModel parent)
 		{
