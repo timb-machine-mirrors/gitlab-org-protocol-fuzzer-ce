@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using Moq;
 using NUnit.Framework;
 using Peach.Core;
@@ -58,14 +61,8 @@ namespace Peach.Pro.Test.WebProxy
 			}
 		}
 
-		internal class SessionSetUpEvt : BaseProxyEvent { }
-		internal class SessionTearDownEvt : BaseProxyEvent { }
 		internal class TestSetUpEvt : BaseProxyEvent { }
 		internal class TestTearDownEvt : BaseProxyEvent { }
-		internal class TestEvt : BaseProxyEvent
-		{
-			public string Name { get; set; }
-		}
 
 		[OneTimeSetUp]
 		public void SessionSetUp()
@@ -75,7 +72,7 @@ namespace Peach.Pro.Test.WebProxy
 			// SessionSetUp event will return when the
 			// proxy is running and ready to accept connections
 
-			Assert.True(_monitor.ProxyEvent(new SessionSetUpEvt()), "Session SetUp Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new SessionStartProxyEvent()), "Session SetUp Event Failed!");
 
 			Assert.IsNotNull(_proxyUri, "Proxy uri should not be null");
 
@@ -88,7 +85,7 @@ namespace Peach.Pro.Test.WebProxy
 		[OneTimeTearDown]
 		public void SessionTearDown()
 		{
-			Assert.True(_monitor.ProxyEvent(new SessionTearDownEvt()), "Session TearDown Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new SessionStopProxyEvent()), "Session TearDown Event Failed!");
 
 			StopJob();
 		}
@@ -106,10 +103,53 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
-		[Repeat(100)]
-		public void Test()
+		[Repeat(10)]
+		public void Test1()
 		{
-			Assert.True(_monitor.ProxyEvent(new TestEvt { Name = "TestName" }), "Test Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new TestProxyEvent { Name = "Test1" }), "Test Event Failed!");
+
+			var client = GetHttpClient();
+			var response1 = client.GetAsync("http://testhost/unknown/api/values/5").Result;
+			Assert.NotNull(response1);
+			var response2 = client.GetAsync("http://testhost/unknown/api/values/6").Result;
+			Assert.NotNull(response2);
+		}
+
+		[Test]
+		[Repeat(10)]
+		public void Test2()
+		{
+			Assert.True(_monitor.ProxyEvent(new TestProxyEvent { Name = "Test2" }), "Test Event Failed!");
+
+			var client = GetHttpClient();
+
+			try
+			{
+				var content = new FormUrlEncodedContent(new[] 
+				{
+					new KeyValuePair<string, string>("value", "Foo Bar")
+				});
+				var response = client.PutAsync("http://testhost/unknown/api/values/5?filter=foo", content).Result;
+				Assert.NotNull(response);
+			}
+			catch
+			{
+				// Eat errors
+			}
+
+			try
+			{
+				var content = new FormUrlEncodedContent(new[] 
+				{
+					new KeyValuePair<string, string>("value", "Foo Bar")
+				});
+				var response = client.PutAsync("http://testhost/unknown/api/values/6?filter=foo", content).Result;
+				Assert.NotNull(response);
+			}
+			catch
+			{
+				// Eat errors
+			}
 		}
 
 		private void StartJob()
@@ -149,7 +189,7 @@ namespace Peach.Pro.Test.WebProxy
 			};
 
 			File.WriteAllText(Path.Combine(_tmpDir.Path, "Rest.peach"), Config);
-			File.WriteAllText(Path.Combine(_tmpDir.Path, "Rest.xml".Fmt(_server.Uri)), Pit);
+			File.WriteAllText(Path.Combine(_tmpDir.Path, "Rest.xml"), Pit.Fmt(_server.Uri));
 
 			Assert.IsNull(_proxyUri, "Proxy uri should null");
 
@@ -179,5 +219,21 @@ namespace Peach.Pro.Test.WebProxy
 				_tmpDir = null;
 			}
 		}
+
+		public HttpClient GetHttpClient()
+		{
+			var cookies = new CookieContainer();
+			var handler = new HttpClientHandler
+			{
+				CookieContainer = cookies,
+				UseCookies = true,
+				UseDefaultCredentials = false,
+				Proxy = new System.Net.WebProxy(_proxyUri, false, new string[] { }),
+				UseProxy = true,
+			};
+
+			return new HttpClient(handler);
+		}
+
 	}
 }
