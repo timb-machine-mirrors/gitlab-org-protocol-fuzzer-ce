@@ -22,6 +22,7 @@ using System.Diagnostics;
 using Peach.Pro.Core.Dom.Actions;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
+using Peach.Pro.Core.License;
 
 namespace Peach.Pro.Core.Loggers
 {
@@ -94,6 +95,8 @@ namespace Peach.Pro.Core.Loggers
 		Exception _caught;
 		Target _tempTarget;
 		Message _lastMessage;
+		IJobLicense _license;
+		ulong _counter;
 
 		enum Category { Faults, Reproducing, NonReproducible }
 
@@ -115,8 +118,9 @@ namespace Peach.Pro.Core.Loggers
 			BasePath = Path.GetFullPath((string)path);
 		}
 
-		public void Initialize(RunConfiguration config)
+		public void Initialize(RunConfiguration config, IJobLicense license)
 		{
+			_license = license;
 			_tempTarget = new DatabaseTarget(config.id) { Layout = DebugLogLayout };
 			ConfigureLogging(null, _tempTarget);
 		}
@@ -248,6 +252,12 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
+			if (_license != null)
+			{
+				_license.Dispose();
+				_license = null;
+			}
+
 			Job job;
 			if (_cache != null)
 			{
@@ -299,6 +309,17 @@ namespace Peach.Pro.Core.Loggers
 			uint currentIteration,
 			uint? totalIterations)
 		{
+			if (!context.controlIteration && !context.controlRecordingIteration)
+			{
+				if (_counter >= 100)
+				{
+					Debug.Assert(_license != null);
+					if (!_license.CanExecuteTestCase())
+						throw new PeachException("License does not allow anymore test case executions");
+				}
+				_counter++;
+			}
+			
 			_states.Clear();
 
 			var mode = JobMode.Fuzzing;

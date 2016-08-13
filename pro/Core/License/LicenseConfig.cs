@@ -1,6 +1,4 @@
-using System;
 using System.Configuration;
-using System.IO;
 using Peach.Core;
 
 namespace Peach.Pro.Core.License
@@ -10,7 +8,6 @@ namespace Peach.Pro.Core.License
 		string ActivationId { get; set; }
 		byte[] IdentityData { get; }
 		string LicenseUrl { get; set; }
-		string LicensePath { get; set; }
 		PitManifest Manifest { get; set; }
 	}
 
@@ -33,30 +30,6 @@ namespace Peach.Pro.Core.License
 
 		public PitManifest Manifest { get; set; }
 
-		public string LicensePath
-		{
-			get
-			{
-				var path = GetConfig(Keys.LicensePath);
-				if (path != null)
-					return path;
-
-				if (Platform.GetOS() == Platform.OS.OSX)
-				{
-					// El Capitan introduced SIP which prevents users from creating files
-					// in "system" directories, such as "/usr/share".
-					return "/Library/Application Support/Peach";
-				}
-
-				return Path.Combine(
-					Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-					"Peach"
-					);
-			}
-
-			set { SetConfig(Keys.LicensePath, value); }
-		}
-
 		public string LicenseUrl
 		{
 			get { return GetConfig(Keys.LicenseUrl); }
@@ -68,14 +41,19 @@ namespace Peach.Pro.Core.License
 			get { return IdentityClient_Production.IdentityData; }
 		}
 
+		public bool DetectConfig
+		{
+			get { return Utilities.DetectConfig(ConfigFilename); }
+		}
+
 		string GetConfig(string name)
 		{
-			return Utilities.GetUserConfig(ConfigFilename).AppSettings.Settings.Get(name);
+			return Utilities.OpenConfig(ConfigFilename).AppSettings.Settings.Get(name);
 		}
 
 		void SetConfig(string name, string value)
 		{
-			var config = Utilities.GetUserConfig(ConfigFilename);
+			var config = Utilities.OpenConfig(ConfigFilename);
 			var settings = config.AppSettings.Settings;
 			settings.Set(name, value);
 			config.Save(ConfigurationSaveMode.Modified);

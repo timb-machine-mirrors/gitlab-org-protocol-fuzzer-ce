@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Peach.Core;
 using Peach.Core.Runtime;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 
 namespace PitTool

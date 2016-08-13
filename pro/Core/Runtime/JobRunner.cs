@@ -76,7 +76,8 @@ namespace Peach.Pro.Core.Runtime
 			{
 				_currentThread = Thread.CurrentThread;
 
-				_jobLogger.Initialize(_config);
+				var jobLicense = _license.NewJob(_config.pitFile, _pitConfig.Name, _config.id.ToString());
+				_jobLogger.Initialize(_config, jobLicense);
 
 				evtReady.Set();
 

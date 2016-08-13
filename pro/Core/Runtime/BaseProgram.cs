@@ -28,6 +28,8 @@ namespace Peach.Pro.Core.Runtime
 
 	public abstract class BaseProgram
 	{
+		static readonly NLog.Logger _logger = LogManager.GetCurrentClassLogger();
+
 		// PitLibraryPath, IJobMonitor
 		public Func<ILicense, string, IJobMonitor, IWebStatus> CreateWeb { get; set; }
 
@@ -46,17 +48,30 @@ namespace Peach.Pro.Core.Runtime
 
 			if (root == null)
 			{
+				_logger.Trace("No license detected");
 				_license = new PortableLicense(null, null);
 			}
 			else
 			{
-				var manifest = PitResourceLoader.LoadManifest(root);
-				var secrets = PitResourceLoader.LoadManifest(new ResourceRoot
+				var config = new LicenseConfig();
+				config.Manifest = PitResourceLoader.LoadManifest(root);
+				if (config.DetectConfig)
 				{
-					Assembly = Assembly.GetExecutingAssembly(),
-					Prefix = "Peach.Pro.Core.Resources"
-				});
-				_license = new PortableLicense(manifest, secrets);
+					_logger.Trace("Using FlexeraLicense");
+					var license = new FlexeraLicense(config);
+					license.Activate();
+					_license = license;
+				}
+				else
+				{
+					var secrets = PitResourceLoader.LoadManifest(new ResourceRoot
+					{
+						Assembly = Assembly.GetExecutingAssembly(),
+						Prefix = "Peach.Pro.Core.Resources"
+					});
+					_logger.Trace("Using PortableLicense");
+					_license = new PortableLicense(config.Manifest, secrets);
+				}
 			}
 		}
 
