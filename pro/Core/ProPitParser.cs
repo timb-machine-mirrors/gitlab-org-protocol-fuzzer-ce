@@ -305,6 +305,9 @@ namespace Peach.Pro.Core
 				test.stateModel = new WebProxyStateModel(opts);
 				test.stateModelRef = test.stateModel.CreateStateModelRef();
 				test.stateModel.parent = test.parent;
+
+				foreach (var map in opts.ContentTypeMap)
+					map.DataModel = (DataModel) test.parent.getRef(map.Ref, (DataElementContainer)null );
 			}
 		}
 	}
