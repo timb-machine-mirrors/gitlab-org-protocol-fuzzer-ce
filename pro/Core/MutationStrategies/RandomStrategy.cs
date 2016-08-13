@@ -76,47 +76,9 @@ namespace Peach.Pro.Core.MutationStrategies
 		Random randomDataSet;
 
 		/// <summary>
-		/// Mutators that affect the data model
-		/// </summary>
-		List<Type> dataMutators = new List<Type>();
-
-		/// <summary>
 		/// Mutators that affect the state model
 		/// </summary>
 		List<Mutator> stateMutators = new List<Mutator>();
-
-		/// <summary>
-		/// Used on control record iterations to collect
-		/// mutable elements across all states and actions.
-		/// </summary>
-		MutationScope mutationScopeGlobal;
-
-		/// <summary>
-		/// Used on control record iterations to collect
-		/// mutable elements on a per state basis.
-		/// </summary>
-		List<MutationScope> mutationScopeState;
-
-		/// <summary>
-		/// Used on control record iterations to collect
-		/// mutable elements on a per action basis.
-		/// </summary>
-		List<MutationScope> mutationScopeAction;
-
-		/// <summary>
-		/// List of all mutable items at each mutation scope.
-		/// </summary>
-		WeightedList<MutationScope> mutableItems = new WeightedList<MutationScope>();
-
-		/// <summary>
-		/// Controls how weights are applied to the weighted list.
-		/// </summary>
-		readonly Func<int, int> _tuneWeights;
-
-		/// <summary>
-		/// The selected mutations for a given fuzzing iteration
-		/// </summary>
-		MutableItem[] mutations;
 
 		/// <summary>
 		/// The currently selected state model mutator.
@@ -141,32 +103,13 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		bool stateMutations;
 
-		readonly List<string> mutationHistory = new List<string>();
-
 		public RandomStrategy(Dictionary<string, Variant> args)
 			: base(args)
 		{
 			if (args.ContainsKey("SwitchCount"))
 				switchCount = uint.Parse((string)args["SwitchCount"]);
-			if (args.ContainsKey("MaxFieldsToMutate"))
-				MaxFieldsToMutate = int.Parse((string)args["MaxFieldsToMutate"]);
 			if (args.ContainsKey("StateMutation"))
 				stateMutations = bool.Parse((string)args["StateMutation"]);
-
-			var weighting = 10;
-			if (args.ContainsKey("Weighting"))
-				weighting = int.Parse((string)args["Weighting"]);
-
-			if (weighting < 1)        // If param<1, weight=1
-				_tuneWeights = x => 1;
-			else if (weighting == 1)  // If param=1, weight=SelectionWeight
-				_tuneWeights = x => x;
-			else                      // If param>1, weight=LOG(SelectionWeight,param)
-				_tuneWeights = x => (int)Math.Round(Math.Log(x, weighting)) + 1;
-
-			mutationScopeGlobal = new MutationScope("All");
-			mutationScopeState = new List<MutationScope>();
-			mutationScopeAction = new List<MutationScope>();
 		}
 
 		#region Mutation Strategy Overrides
@@ -504,97 +447,6 @@ namespace Peach.Pro.Core.MutationStrategies
 		}
 
 		#endregion
-
-		private void RecordDataModel(Action action)
-		{
-			var scopeState = mutationScopeState.Last();
-
-			var name = "Run_{0}.{1}.{2}".Fmt(action.parent.runCount, action.parent.Name, action.Name);
-			var scopeAction = new MutationScope(name);
-
-			foreach (var item in action.outputData)
-			{
-				var allElements = new List<DataElement>();
-				RecursevlyGetElements(item.dataModel, allElements);
-
-				foreach (var elem in allElements)
-				{
-					if (elem.Weight == ElementWeight.Off)
-						continue;
-
-					var rec = new MutableItem(item.instanceName, elem.fullName, elem.Weight);
-					var e = elem;
-
-					rec.Mutators.AddRange(dataMutators
-						.Where(m => SupportedDataElement(m, e))
-						.Select(m => GetMutatorInstance(m, e))
-						.Where(m => m.SelectionWeight > 0));
-
-					if (rec.Mutators.Count > 0)
-					{
-						mutationScopeGlobal.Add(rec);
-						scopeState.Add(rec);
-						scopeAction.Add(rec);
-					}
-				}
-			}
-
-			mutationScopeAction.Add(scopeAction);
-
-			// If the action scope has mutable items, then the
-			// state scope has a valid child scope.  This is
-			// used later to prune empty state scopes.
-			if (scopeAction.Count > 0)
-				scopeState.ChildScopes += 1;
-		}
-
-		[Conditional("DEBUG")]
-		void RecordMutation(string instanceName, string elementName, string mutatorName)
-		{
-			mutationHistory.Add(instanceName + "." + elementName + " + " + mutatorName);
-		}
-
-		private void ApplyMutation(ActionData data)
-		{
-			var instanceName = data.instanceName;
-
-			foreach (var item in mutations)
-			{
-				if (item.InstanceName != instanceName)
-					continue;
-
-				var elem = data.dataModel.find(item.ElementName);
-				if (elem != null && elem.mutationFlags == MutateOverride.None)
-				{
-					var mutator = Random.WeightedChoice(item.Mutators);
-					Context.OnDataMutating(data, elem, mutator);
-					logger.Debug("Action_Starting: Fuzzing: {0}", item.ElementName);
-					logger.Debug("Action_Starting: Mutator: {0}", mutator.Name);
-					mutator.randomMutation(elem);
-
-					RecordMutation(instanceName, item.ElementName, mutator.Name);
-
-					// Trigger re-generation of data
-					// needed for Frag element.
-					//var obj = data.dataModel.Value;
-				}
-				else
-				{
-					logger.Debug("Action_Starting: Skipping Fuzzing: {0}", item.ElementName);
-				}
-			}
-		}
-
-		private void MutateDataModel(Action action)
-		{
-			// MutateDataModel should only be called after ParseDataModel
-			Debug.Assert(Iteration > 0);
-
-			foreach (var item in action.outputData)
-			{
-				ApplyMutation(item);
-			}
-		}
 
 		public override State MutateChangingState(State nextState)
 		{

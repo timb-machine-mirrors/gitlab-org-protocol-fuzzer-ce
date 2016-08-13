@@ -28,12 +28,14 @@ namespace Peach
 			}
 			catch (Exception)
 			{
-				System.Diagnostics.Debugger.Break();
+				if (System.Diagnostics.Debugger.IsAttached)
+					System.Diagnostics.Debugger.Break();
 				throw;
 			}
 			finally
 			{
-				System.Diagnostics.Debugger.Break();
+				if (System.Diagnostics.Debugger.IsAttached)
+					System.Diagnostics.Debugger.Break();
 			}
 		}
 	}
