@@ -59,7 +59,9 @@ namespace Peach.Pro.Core.Runtime
 				{
 					_logger.Trace("Using FlexeraLicense");
 					var license = new FlexeraLicense(config);
+					Console.Write("Activating license...");
 					license.Activate();
+					Console.WriteLine("  Done!");
 					_license = license;
 				}
 				else
