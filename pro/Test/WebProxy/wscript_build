@@ -29,7 +29,6 @@ deps = [
 	'Peach.Pro.dll',
 	'Peach.Pro.Test.dll',
 	'Peach.Pro.WebApi2.dll',
-	'PeachWebApiFuzzer.exe',
 
 	'System.dll',
 	'System.Core.dll',
