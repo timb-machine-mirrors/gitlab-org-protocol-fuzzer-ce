@@ -1466,7 +1466,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "property", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
+		public virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
 		{
 			var dom = data.action.parent.parent.parent;
 
@@ -1758,10 +1758,12 @@ namespace Peach.Core.Analyzers
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "Logger")
+				{
 					test.loggers.Add(handlePlugin<Logger, LoggerAttribute>(child, null, false));
+				}
 
 				// Include
-				if (child.Name == "Include")
+				else if (child.Name == "Include")
 				{
 					var attr = child.getAttr("ref", null);
 
@@ -1777,7 +1779,7 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Exclude
-				if (child.Name == "Exclude")
+				else if (child.Name == "Exclude")
 				{
 					var attr = child.getAttr("ref", null);
 
@@ -1793,7 +1795,7 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Weight
-				if (child.Name == "Weight")
+				else if (child.Name == "Weight")
 				{
 					var attr = child.getAttrString("xpath");
 					var val = child.getAttrString("weight");
@@ -1806,13 +1808,13 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Strategy
-				if (child.Name == "Strategy")
+				else if (child.Name == "Strategy")
 				{
 					test.strategy = handlePlugin<MutationStrategy, MutationStrategyAttribute>(child, null, false);
 				}
 
 				// Agent
-				if (child.Name == "Agent")
+				else if (child.Name == "Agent")
 				{
 					var refName = child.getAttrString("ref");
 
@@ -1858,7 +1860,7 @@ namespace Peach.Core.Analyzers
 				}
 
 				// StateModel
-				if (child.Name == "StateModel")
+				else if (child.Name == "StateModel")
 				{
 					string strRef = child.getAttrString("ref");
 
@@ -1872,13 +1874,13 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Publisher
-				if (child.Name == "Publisher")
+				else if (child.Name == "Publisher")
 				{
 					handlePublishers(child, test);
 				}
 
 				// Mutator
-				if (child.Name == "Mutators")
+				else if (child.Name == "Mutators")
 				{
 					string mode = child.getAttrString("mode");
 
@@ -1896,6 +1898,11 @@ namespace Peach.Core.Analyzers
 							throw new PeachException("Error, Mutators element has invalid 'mode' attribute '" + mode + "'");
 					}
 				}
+
+				else
+				{
+					handleTestChild(child, test);
+				}
 			}
 
 			if (test.stateModel == null)
@@ -1912,6 +1919,10 @@ namespace Peach.Core.Analyzers
 			return test;
 		}
 
+		protected virtual void handleTestChild(XmlNode node, Test test)
+		{
+			
+		}
 		protected virtual void handlePublishers(XmlNode node, Dom.Test parent)
 		{
 			var cls = node.getAttrString("class");

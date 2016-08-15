@@ -142,9 +142,13 @@ namespace Peach.Pro.Core.Publishers
 					CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
 					CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
 					CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
-					CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-					CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-					CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_PSK_WITH_CHACHA20_POLY1305_SHA256,
+					CipherSuite.DRAFT_TLS_RSA_PSK_WITH_CHACHA20_POLY1305_SHA256,
 					CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
 					CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
 					CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
@@ -241,14 +245,6 @@ namespace Peach.Pro.Core.Publishers
 					CipherSuite.TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384,
 					CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_GCM_SHA384,
 					CipherSuite.TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384,
-					CipherSuite.TLS_DHE_PSK_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_DHE_RSA_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_ECDHE_ECDSA_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_ECDHE_PSK_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_ECDHE_RSA_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_PSK_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_RSA_PSK_WITH_ESTREAM_SALSA20_SHA1,
-					CipherSuite.TLS_RSA_WITH_ESTREAM_SALSA20_SHA1,
 					CipherSuite.TLS_RSA_WITH_NULL_MD5,
 					CipherSuite.TLS_DHE_PSK_WITH_NULL_SHA,
 					CipherSuite.TLS_ECDH_ECDSA_WITH_NULL_SHA,
@@ -280,14 +276,6 @@ namespace Peach.Pro.Core.Publishers
 					CipherSuite.TLS_PSK_WITH_RC4_128_SHA,
 					CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
 					CipherSuite.TLS_RSA_PSK_WITH_RC4_128_SHA,
-					CipherSuite.TLS_DHE_PSK_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_DHE_RSA_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_ECDHE_ECDSA_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_ECDHE_PSK_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_ECDHE_RSA_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_PSK_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_RSA_PSK_WITH_SALSA20_SHA1,
-					CipherSuite.TLS_RSA_WITH_SALSA20_SHA1,
 					CipherSuite.TLS_DH_DSS_WITH_SEED_CBC_SHA,
 					CipherSuite.TLS_DH_RSA_WITH_SEED_CBC_SHA,
 					CipherSuite.TLS_DHE_DSS_WITH_SEED_CBC_SHA,
@@ -350,7 +338,7 @@ namespace Peach.Pro.Core.Publishers
 
 					foreach (var s in protocols)
 					{
-						var buff = UTF8Encoding.UTF8.GetBytes(s);
+						var buff = Encoding.UTF8.GetBytes(s);
 						TlsUtilities.WriteUint8((byte)buff.Length, innerStream);
 						innerStream.Write(buff, 0, buff.Length);
 					}

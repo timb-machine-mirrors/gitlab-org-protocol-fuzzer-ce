@@ -21,6 +21,7 @@ bld(
 		'/nowarn:0414', # Field assigned but never used
 		'/nowarn:0219', # Variable assigned but never used
 		'/nowarn:0618', # Calling obsolete function
+		'/nowarn:0672', # Member overrides obsolete member
 	],
 	version = False,
 	csdoc = False,

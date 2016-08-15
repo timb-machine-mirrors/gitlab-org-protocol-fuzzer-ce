@@ -29,6 +29,8 @@ namespace Peach.Pro.Core.Analyzers
 		public new static readonly bool supportTopLevel = false;
 		private static readonly Regex nameSanitizerRegex = new Regex(@"[:\.]");
 
+		private bool useFieldId = false;
+
 		public XmlAnalyzer()
 		{
 		}
@@ -74,6 +76,8 @@ namespace Peach.Pro.Core.Analyzers
 			var strElement = parent as String;
 			if (strElement == null)
 				throw new PeachException("Error, XmlAnalyzer analyzer only operates on String elements!");
+
+			useFieldId = !string.IsNullOrEmpty(parent.FieldId);
 
 			var doc = new XmlDocument();
 
@@ -145,6 +149,9 @@ namespace Peach.Pro.Core.Analyzers
 					ns = attr.NamespaceURI,
 				};
 
+				if (useFieldId)
+					attrElem.FieldId = attrElem.Name;
+
 				attrElem.Add(strElem);
 				elem.Add(attrElem);
 			}
@@ -159,11 +166,16 @@ namespace Peach.Pro.Core.Analyzers
 					var childElem = new XmlCharacterData(elem.UniqueName("CDATA"));
 					childElem.Add(data);
 
+					if (useFieldId)
+						childElem.FieldId = childElem.Name;
+
 					elem.Add(childElem);
 				}
 				else if (child.Name == "#text")
 				{
 					var str = makeString("Value", child.Value, type);
+					if (useFieldId)
+						str.FieldId = str.Name;
 					elem.Add(str);
 				}
 				else if (!child.Name.StartsWith("#"))
@@ -171,6 +183,8 @@ namespace Peach.Pro.Core.Analyzers
 					var name = sanitizeXmlName(child.Name);
 					var childName = elem.UniqueName(name);
 					var childElem = new Peach.Core.Dom.XmlElement(childName);
+					if (useFieldId)
+						childElem.FieldId = childElem.Name;
 
 					elem.Add(childElem);
 

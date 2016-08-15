@@ -7,7 +7,7 @@ using Random = Peach.Core.Random;
 
 namespace Peach.Pro.Core.MutationStrategies
 {
-	[MutationStrategy("RandomDeterministic", true)]
+	[MutationStrategy("RandomDeterministic")]
 	[Serializable]
 	public class RandomDeterministicStrategy : Sequential
 	{

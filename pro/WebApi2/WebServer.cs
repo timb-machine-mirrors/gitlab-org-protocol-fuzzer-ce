@@ -24,7 +24,27 @@ using System.Reflection;
 
 namespace Peach.Pro.WebApi2
 {
-	public class WebServer : IWebStatus
+	public class WebServer : BaseWebServer
+	{
+		public WebServer(ILicense license, string pitLibraryPath, IJobMonitor jobMonitor)
+			: base(new WebStartup(
+					license,
+					new WebContext(pitLibraryPath),
+					jobMonitor,
+					ctx =>
+					{
+						var pitdb = new PitDatabase(license);
+						if (!string.IsNullOrEmpty(pitLibraryPath))
+							pitdb.Load(pitLibraryPath);
+						return pitdb;
+					}
+				))
+			{
+				
+			}
+	}
+
+	public class BaseWebServer : IWebStatus
 	{
 		// If we use "+" on mono, there is a 10 sec startup & shutdown delay
 		// as we try and resolve the ip for dns name "+"
@@ -37,23 +57,12 @@ namespace Peach.Pro.WebApi2
 		private const int ERROR_ALREADY_EXISTS = 183;
 		// ReSharper restore InconsistentNaming
 
-		readonly WebStartup _startup;
+		readonly IWebStartup _startup;
 		IDisposable _server;
 
-		public WebServer(ILicense license, string pitLibraryPath, IJobMonitor jobMonitor)
+		public BaseWebServer(IWebStartup startup)
 		{
-			_startup = new WebStartup(
-				license,
-				new WebContext(pitLibraryPath),
-				jobMonitor,
-				ctx =>
-				{
-					var pitdb = new PitDatabase(license);
-					if (!string.IsNullOrEmpty(pitLibraryPath))
-						pitdb.Load(pitLibraryPath);
-					return pitdb;
-				}
-			);
+			_startup = startup;
 		}
 
 		public void Start(int? port)
@@ -195,7 +204,12 @@ namespace Peach.Pro.WebApi2
 		}
 	}
 
-	public class WebStartup : IDisposable
+	public interface IWebStartup : IDisposable
+	{
+		void OnStartup(IAppBuilder app);
+	}
+
+	public class WebStartup : IWebStartup
 	{
 		readonly ILicense _license;
 		readonly IWebContext _context;

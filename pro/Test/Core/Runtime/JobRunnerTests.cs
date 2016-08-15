@@ -335,5 +335,36 @@ namespace Peach.Pro.Test.Core.Runtime
 				Assert.IsFalse(File.Exists(job.DebugLogPath));
 			}
 		}
+
+		[Test]
+		public void TestUnhandledException()
+		{
+			var jobRequest = new JobRequest
+			{
+				RangeStart = 1,
+				RangeStop = 1
+			};
+
+			Action<Engine> hook = e =>
+			{
+				e.IterationStarting += (ctx, it, tot) =>
+				{
+					if (ctx.controlIteration)
+						return;
+
+					throw new InvalidOperationException("Message Goes Here");
+				};
+			};
+
+			using (var runner = new SafeRunner(_tmpDir.Path, PitDefault, jobRequest, hook))
+			{
+				runner.WaitUntil(JobStatus.Stopped);
+
+				var job = runner.GetJob();
+
+				Assert.NotNull(job);
+				Assert.AreEqual("Message Goes Here", job.Result);
+			}
+		}
 	}
 }

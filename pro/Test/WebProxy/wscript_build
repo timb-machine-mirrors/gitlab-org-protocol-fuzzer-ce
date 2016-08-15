@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+deps = [
+	'Autofac.dll',
+	'Autofac.Integration.Owin.dll',
+	'Autofac.Integration.WebApi.dll',
+	'Autofac.Integration.WebApi.Owin.dll',
+
+	'Castle.Core.dll',
+
+	'Ionic.Zip.dll',
+
+	'Microsoft.Owin.StaticFiles.dll',
+	'Microsoft.Owin.FileSystems.dll',
+	'Microsoft.Owin.Host.HttpListener.dll',
+	'Microsoft.Owin.Hosting.dll',
+	'Microsoft.Owin.dll',
+	'Microsoft.CSharp.dll',
+	'Microsoft.Owin.Testing.dll',
+	'Moq.dll',
+
+	'Newtonsoft.Json.dll',
+	'NLog.dll',
+	'nunit.framework.dll',
+	'Owin.dll',
+	
+	'Peach.Core.dll',
+	'Peach.Core.Test.dll',
+	'Peach.Pro.dll',
+	'Peach.Pro.Test.dll',
+	'Peach.Pro.WebApi2.dll',
+	'PeachWebApiFuzzer.exe',
+
+	'System.dll',
+	'System.Core.dll',
+	'System.Net.Http.dll',
+	'System.Net.Http.Formatting.dll',
+	'System.Net.Http.WebRequest.dll',
+	'System.Web.dll',
+	'System.Web.Cors.dll',
+	'System.Web.Http.dll',
+	'System.Web.Http.Cors.dll',
+	'System.Web.Http.Owin.dll',
+	'System.Xml.dll',
+
+	'Titanium.Web.Proxy.dll',
+]
+
+bld(
+	features = 'cs test',
+	use = deps,
+	source = bld.path.ant_glob('**/*.cs'),
+	resource = bld.path.ant_glob('**/*.json **/*.yml'),
+	name = 'Peach.Pro.Test.WebProxy.exe',
+	csdoc = False,
+	csflags = [
+		# The following are remapped in Peach's app.config:
+		# System.Web.Http v5.2.2 -> v5.2.3
+		# System.Net.Http.Formatting v5.2.2 -> v5.2.3
+		# Microsoft.Owin v2.0.2 -> v3.0.1
+		'/nowarn:1701', # The two assembly references have differing build and/or revision numbers
+		'/nowarn:1702', # The two assembly references have differing build and/or revision numbers
+	],
+)

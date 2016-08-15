@@ -27,6 +27,7 @@ subdirs = [
 	'sqlite-3.8.11.1',
 	'Portable.Licensing',
 	'libusbdotnet',
+        'Titanium-Web-Proxy/Titanium.Web.Proxy',
 ]
 
 bld.recurse(subdirs)

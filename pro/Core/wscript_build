@@ -61,6 +61,8 @@ deps = [
 
 	'Microsoft.Diagnostics.Runtime.dll',
 	'Patterns.Logging.dll',
+
+	'Titanium.Web.Proxy.dll',
 ]
 
 if bld.env.TARGET in ['win']:

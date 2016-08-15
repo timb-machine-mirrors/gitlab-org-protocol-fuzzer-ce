@@ -115,6 +115,9 @@ namespace Peach.Pro.Core.Mutators
 			if (root == null)
 				return null;
 
+			if (root.actionData == null)
+				return null;
+
 			var dom = root.actionData.action.parent.parent.parent;
 			return dom.context.config.pitFile;
 		}
