@@ -1,4 +1,6 @@
+using System;
 using System.Configuration;
+using System.IO;
 using Peach.Core;
 
 namespace Peach.Pro.Core.License
@@ -8,6 +10,7 @@ namespace Peach.Pro.Core.License
 		string ActivationId { get; set; }
 		byte[] IdentityData { get; }
 		string LicenseUrl { get; set; }
+		string LicensePath { get; set; }
 		PitManifest Manifest { get; set; }
 	}
 
@@ -34,6 +37,30 @@ namespace Peach.Pro.Core.License
 		{
 			get { return GetConfig(Keys.LicenseUrl); }
 			set { SetConfig(Keys.LicenseUrl, value); }
+		}
+
+		public string LicensePath
+		{
+			get
+			{
+				var path = GetConfig(Keys.LicensePath);
+				if (path != null)
+					return path;
+
+				path = Path.Combine(
+					Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+					"Peach"
+				);
+
+				if (!Directory.Exists(path))
+					Directory.CreateDirectory(path);
+
+				return path;
+			}
+			set
+			{
+				SetConfig(Keys.LicensePath, value);
+			}
 		}
 
 		public byte[] IdentityData
