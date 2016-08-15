@@ -935,7 +935,11 @@ namespace Peach.Pro.Core.Loggers
 			};
 
 			var oldTarget = _tempTarget;
-			_tempTarget = new AsyncTargetWrapper(target) { Name = target.Name };
+			_tempTarget = new AsyncTargetWrapper(target)
+			{
+				Name = target.Name,
+				OverflowAction = AsyncTargetWrapperOverflowAction.Block
+			};
 
 			ConfigureLogging(oldTarget, _tempTarget);
 

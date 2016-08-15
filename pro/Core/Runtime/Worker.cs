@@ -97,7 +97,12 @@ namespace Peach.Pro.Core.Runtime
 			};
 
 			if (!syncLogging)
-				target = new AsyncTargetWrapper(target);
+			{
+				target = new AsyncTargetWrapper(target)
+				{
+					OverflowAction = AsyncTargetWrapperOverflowAction.Block
+				};
+			}
 
 			var rule = new LoggingRule("*", LogLevel, target);
 
