@@ -11,6 +11,7 @@ using Titanium.Web.Proxy;
 using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Models;
 using Monitor = System.Threading.Monitor;
+using Uri = System.Uri;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -79,6 +80,17 @@ namespace Peach.Pro.Core.Publishers
 			//Add an explicit endpoint where the client is aware of the proxy
 			//So client would send request in a proxy friendly manner
 			_proxy.AddEndPoint(explicitEndPoint);
+
+			if (!string.IsNullOrEmpty(Model.Options.Proxy))
+			{
+				Uri uri;
+				if (!Uri.TryCreate(Model.Options.Proxy, UriKind.Absolute, out uri))
+					throw new PeachException("The specified proxy '{0}' is not a valid uri.".Fmt(Model.Options.Proxy));
+
+				_proxy.ExternalHttpProxy = new ExternalProxy { HostName = uri.DnsSafeHost, Port = uri.Port };
+				_proxy.ExternalHttpsProxy = _proxy.ExternalHttpProxy;
+			}
+
 			_proxy.Start();
 
 			// Update ephemeral port
