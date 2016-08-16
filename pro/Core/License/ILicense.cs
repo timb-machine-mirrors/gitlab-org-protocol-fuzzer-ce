@@ -21,6 +21,15 @@ namespace Peach.Pro.Core.License
 		Valid
 	}
 
+	public class PitFeature
+	{
+		public string Path { get; set; }
+		public string Name { get; set; }
+		public byte[] Key { get; set; }
+		public bool IsCustom { get; set; }
+		public bool IsValid { get; set; }
+	}
+
 	public interface ILicense
 	{
 		LicenseStatus Status { get; }
@@ -32,8 +41,7 @@ namespace Peach.Pro.Core.License
 		IEnumerable<EulaType> Eulas { get; }
 
 		IEnumerable<string> AvailablePits { get; }
-		byte[] CanUsePit(string name);
-		bool CanUseCustomPit();
+		PitFeature CanUsePit(string path);
 		IJobLicense NewJob(string pit, string config, string job);
 	}
 

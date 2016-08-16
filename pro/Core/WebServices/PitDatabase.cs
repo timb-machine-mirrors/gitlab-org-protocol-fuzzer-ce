@@ -406,7 +406,7 @@ namespace Peach.Pro.Core.WebServices
 						try
 						{
 							var item = AddEntry(lib, file);
-							if (LoadEventHandler != null)
+							if (item != null && LoadEventHandler != null)
 								LoadEventHandler(this, item);
 						}
 						catch (Exception ex)
@@ -424,6 +424,11 @@ namespace Peach.Pro.Core.WebServices
 		private PitDetail AddEntry(LibraryDetail lib, string fileName)
 		{
 			var detail = MakePitDetail(fileName, lib.Library.Locked);
+
+			var feature = _license.CanUsePit(detail.PitConfig.OriginalPit);
+			if (!feature.IsValid)
+				return null;
+
 			_entries.Add(detail);
 
 			// To maintain compatibility with older jobs, we need to continue

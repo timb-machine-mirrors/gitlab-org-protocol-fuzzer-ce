@@ -43,6 +43,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		public void TestUnlicensedPit()
 		{
 			var featureName = "PeachPit-Net-DNP3_Slave";
+			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
+
 			ExtractDirectory(_tmpDir.Path, "Net");
 			ExtractFile(_tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
 			ExtractDirectory(_tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
@@ -52,16 +54,18 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
 
 			var license = new Mock<ILicense>();
-			license.Setup(x => x.CanUsePit(featureName))
-				   .Returns(() => null);
+			license.Setup(x => x.CanUsePit(pitFile))
+				   .Returns(() => new PitFeature
+				   {
+					   Name = featureName,
+					   Path = pitFile,
+				   });
 
 			var encryptedRoot = new ResourceRoot
 			{
 				Assembly = LoadAssembly(encrypted),
 				Prefix = ResourceRoot.Prefix
 			};
-
-			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
 
 			Assert.That(() =>
 			{
@@ -73,7 +77,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				);
 			},
 				Throws.TypeOf<PeachException>()
-					.With.Message.Contains("Your license does not include support for 'Net/DNP3_Slave.xml'.")
+					.With.Message.Contains("Your license does not include support for 'PeachPit-Net-DNP3_Slave'.")
 			);
 		}
 
@@ -81,6 +85,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		public void TestLoadFromAssembly()
 		{
 			var featureName = "PeachPit-Net-DNP3_Slave";
+			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
+			var pitConfigFile = pitFile + ".config";
+
 			ExtractDirectory(_tmpDir.Path, "Net");
 			ExtractFile(_tmpDir.Path, "DNP3.py", "_Common", "Models", "Net");
 			ExtractDirectory(_tmpDir.Path, "_Common", "Samples", "Net", "DNP3");
@@ -90,17 +97,20 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var master = PitResourceLoader.EncryptResources(ResourceRoot, encrypted, MasterSalt);
 
 			var license = new Mock<ILicense>();
-			license.Setup(x => x.CanUsePit(featureName))
-				   .Returns(master.Features[featureName].Key);
+			license.Setup(x => x.CanUsePit(pitFile))
+				   .Returns(new PitFeature
+				   {
+					   Path = pitFile,
+					   Name = featureName,
+					   IsValid = true,
+					   Key = master.Features[featureName].Key
+				   });
 
 			var encryptedRoot = new ResourceRoot
 			{
 				Assembly = LoadAssembly(encrypted),
 				Prefix = ResourceRoot.Prefix
 			};
-
-			var pitFile = Path.Combine(_tmpDir.Path, "Net", "DNP3_Slave.xml");
-			var pitConfigFile = pitFile + ".config";
 
 			var defs = PitDefines.ParseFile(pitConfigFile, _tmpDir.Path, new Dictionary<string, string> {
 				{"Source", "0"},
@@ -177,7 +187,6 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				Assembly = LoadAssembly(encrypted),
 				Prefix = ResourceRoot.Prefix
 			};
-			var manifest = PitResourceLoader.LoadManifest(root);
 
 			{
 				var actual = GetFirstLine(root.Assembly, featureName, asset1);
@@ -189,23 +198,20 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				Assert.AreNotEqual(expected, actual);
 			}
 
-			var feature = manifest.Features[featureName];
-			using (var stream = PitResourceLoader.DecryptResource(
-				root,
-				new KeyValuePair<string, PitManifestFeature>(featureName, feature),
-				asset1,
-				master.Features[featureName].Key))
+			var feature = new PitFeature
+			{
+				Name = featureName,
+				Path = featureName,
+				IsValid = true,
+				Key = master.Features[featureName].Key			};
+			using (var stream = PitResourceLoader.DecryptResource(root, feature, asset1))
 			using (var reader = new StreamReader(stream))
 			{
 				var actual = reader.ReadLine();
 				Assert.AreEqual(expected, actual);
 			}
 
-			using (var stream = PitResourceLoader.DecryptResource(
-				root,
-				new KeyValuePair<string, PitManifestFeature>(featureName, feature),
-				asset2,
-				master.Features[featureName].Key))
+			using (var stream = PitResourceLoader.DecryptResource(root, feature, asset2))
 			using (var reader = new StreamReader(stream))
 			{
 				var actual = reader.ReadLine();
@@ -214,12 +220,14 @@ namespace Peach.Pro.Test.Core.PitParserTests
 
 			// other features use different passwords
 			// this should fail since we are using the wrong password
-			var otherFeature = manifest.Features[otherFeatureName];
-			using (var stream = PitResourceLoader.DecryptResource(
-				root,
-				new KeyValuePair<string, PitManifestFeature>(otherFeatureName, otherFeature),
-				asset1,
-				master.Features[featureName].Key))
+			var otherFeature = new PitFeature
+			{
+				Name = otherFeatureName,
+				Path = otherFeatureName,
+				IsValid = true,
+				Key = master.Features[featureName].Key
+			};
+			using (var stream = PitResourceLoader.DecryptResource(root, otherFeature, asset1))
 			{
 				Assert.IsNull(stream);
 			}

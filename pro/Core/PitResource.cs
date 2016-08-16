@@ -82,8 +82,7 @@ namespace Peach.Pro.Core
 	{
 		private readonly string _pitLibraryPath;
 		private readonly ResourceRoot _root;
-		private readonly KeyValuePair<string, PitManifestFeature> _pitFeature;
-		private readonly byte[] _key;
+		private readonly PitFeature _pitFeature;
 
 		public PitResource(
 			ILicense license,
@@ -99,26 +98,15 @@ namespace Peach.Pro.Core
 
 			if (root != null)
 			{
-				var manifest = PitResourceLoader.LoadManifest(root);
-				var pitName = string.Join("/",
-					Path.GetFileName(Path.GetDirectoryName(pitPath)),
-					Path.GetFileName(pitPath)
-				);
+				if (license == null)
+					throw new PeachException("A valid license could not be found.");
 
-				var query = manifest.Features.Where(x => x.Value.Pit == pitName);
-				if (query.Any())
+				_pitFeature = license.CanUsePit(pitPath);
+				if (!_pitFeature.IsValid)
 				{
-					_pitFeature = query.First();
-					if (license == null)
-						throw new PeachException("A valid license could not be found.");
-
-					_key = license.CanUsePit(_pitFeature.Key);
-					if (_key == null)
-						throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(pitName));
-				}
-				else if (!license.CanUseCustomPit())
-				{
-					throw new PeachException("Your license does not include support for custom pits. Contact Peach Fuzzer sales for more information.");
+					if (_pitFeature.IsCustom)
+						throw new PeachException("Your license does not include support for custom pits. Contact Peach Fuzzer sales for more information.");
+					throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(_pitFeature.Name));
 				}
 			}
 		}
@@ -130,13 +118,15 @@ namespace Peach.Pro.Core
 			Stream stream = null;
 
 			// try to load from assembly
-			if (_root != null && _key != null && path.StartsWith(_pitLibraryPath))
+			if (_root != null && 
+			    _pitFeature != null && 
+			    _pitFeature.Key != null && 
+			    path.StartsWith(_pitLibraryPath))
 			{
 				stream = PitResourceLoader.DecryptResource(
 					_root,
 					_pitFeature,
-					path.Substring(_pitLibraryPath.Length + 1), // skip 1st '.'
-					_key
+					path.Substring(_pitLibraryPath.Length + 1) // skip 1st '.'
 				);
 			}
 
@@ -281,14 +271,13 @@ namespace Peach.Pro.Core
 
 		public static Stream DecryptResource(
 			ResourceRoot root,
-			KeyValuePair<string, PitManifestFeature> feature,
-			string asset,
-			byte[] key)
+			PitFeature feature,
+			string asset)
 		{
-			var rawAssetName = feature.Key + "." + asset;
+			var rawAssetName = feature.Name + "." + asset;
 			var resourceName = MakeFullName(root.Prefix, rawAssetName);
 
-			var cipher = MakeCipher(resourceName, key, false);
+			var cipher = MakeCipher(resourceName, feature.Key, false);
 
 			var output = new MemoryStream();
 			using (var input = root.Assembly.GetManifestResourceStream(resourceName))
