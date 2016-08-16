@@ -61,9 +61,6 @@ namespace Peach.Pro.Test.WebProxy
 			}
 		}
 
-		internal class TestSetUpEvt : BaseProxyEvent { }
-		internal class TestTearDownEvt : BaseProxyEvent { }
-
 		[OneTimeSetUp]
 		public void SessionSetUp()
 		{
@@ -72,7 +69,7 @@ namespace Peach.Pro.Test.WebProxy
 			// SessionSetUp event will return when the
 			// proxy is running and ready to accept connections
 
-			Assert.True(_monitor.ProxyEvent(new SessionStartProxyEvent()), "Session SetUp Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new SessionSetUpProxyEvent()), "Session SetUp Event Failed!");
 
 			Assert.IsNotNull(_proxyUri, "Proxy uri should not be null");
 
@@ -85,7 +82,7 @@ namespace Peach.Pro.Test.WebProxy
 		[OneTimeTearDown]
 		public void SessionTearDown()
 		{
-			Assert.True(_monitor.ProxyEvent(new SessionStopProxyEvent()), "Session TearDown Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new SessionTearDownProxyEvent()), "Session TearDown Event Failed!");
 
 			StopJob();
 		}
@@ -93,13 +90,13 @@ namespace Peach.Pro.Test.WebProxy
 		[SetUp]
 		public void SetUp()
 		{
-			Assert.True(_monitor.ProxyEvent(new TestSetUpEvt()), "SetUp Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new TestSetUpProxyEvent()), "SetUp Event Failed!");
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
-			Assert.True(_monitor.ProxyEvent(new TestTearDownEvt()), "TearDown Event Failed!");
+			Assert.True(_monitor.ProxyEvent(new TestTearDownProxyEvent()), "TearDown Event Failed!");
 		}
 
 		[Test]
