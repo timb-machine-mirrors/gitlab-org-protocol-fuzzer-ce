@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Peach.Core;
+using Peach.Pro.Core.WebApi.Proxy;
+using Titanium.Web.Proxy;
+using Titanium.Web.Proxy.Models;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -58,50 +62,52 @@ namespace Peach.Pro.Test.WebProxy
 		} */
 
 		[Test]
-		public void TestStartIterationEvent()
+		public void TestProxy()
 		{
-			var xml = @"<?xml version='1.0' encoding='utf-8'?>
-<Peach>
-	<Agent name='local'>
-		<Monitor class='WebClient'>
-			<Param name='SetUpCommand' value='' />
-			<Param name='SetUpArguments' value='' />
-			<Param name='SetUpTimeout' value='' />
+			using (var p = new ProxyServer())
+			{
+				p.AddEndPoint(new ExplicitProxyEndPoint(IPAddress.Loopback, 0));
+				p.Start();
 
-			<Param name='TestCommand' value='' />
-			<Param name='TestArguments' value='' />
-			<Param name='TestTimeout' value='' />
+				var count = 0;
 
-			<Param name='TearDownCommand' value='' />
-			<Param name='TearDownArguments' value='' />
-			<Param name='TearDownTimeout' value='' />
+				p.BeforeRequest += (o, e) => 
+				{
+					var req = e.WebSession.Request;
 
-			<Param name='Proxy' value='127.0.0.1:0' />
-		</Monitor>
-	</Agent>
+					req.RequestUri = req.RequestUri.Rewrite(Server.Uri.ToString());
 
-	<Test name='Default' maxOutputSize='65000'>
-		<WebProxy>
-			<Route
-				url='*' mutate='false'
-				baseUrl='{0}'
-			/> 
-		</WebProxy>
-		<Strategy class='WebProxy' />
-		<Publisher class='WebApiProxy'>
-			<Param name='Port' value='0' />
-		</Publisher>
-	</Test>
-</Peach>".Fmt(Server.Uri);
+					++count;
 
-			RunEngine(xml);
+					return Task.FromResult(0);
+				};
 
-			var client = GetHttpClient();
-			var headers = client.DefaultRequestHeaders;
-			headers.Add("X-Peachy", "Testing 1..2..3..");
+				var xml = @"<?xml version='1.0' encoding='utf-8'?>
+	<Peach>
+		<Test name='Default' maxOutputSize='65000'>
+			<WebProxy proxy='http://127.0.0.1:{0}'>
+				<Route
+					url='*' mutate='false'
+				/> 
+			</WebProxy>
+			<Strategy class='WebProxy' />
+			<Publisher class='WebApiProxy'>
+				<Param name='Port' value='0' />
+			</Publisher>
+		</Test>
+	</Peach>".Fmt(p.ProxyEndPoints[0].Port);
 
-			var response = client.GetAsync(BaseUrl + "/start").Result;
-			Assert.NotNull(response);
+				RunEngine(xml);
+
+				var client = GetHttpClient();
+				var headers = client.DefaultRequestHeaders;
+				headers.Add("X-Peachy", "Testing 1..2..3..");
+
+				var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+				Assert.NotNull(response);
+
+				Assert.AreEqual(1, count);
+			}
 		}
 	}
 }

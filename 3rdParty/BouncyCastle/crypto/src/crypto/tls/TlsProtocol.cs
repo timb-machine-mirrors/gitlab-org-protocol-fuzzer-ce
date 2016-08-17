@@ -488,9 +488,7 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
                 if (!mRecordStream.ReadRecord())
                 {
-                    // TODO It would be nicer to allow graceful connection close if between records
-    //                this.FailWithError(AlertLevel.warning, AlertDescription.close_notify);
-                    throw new EndOfStreamException();
+                    this.FailWithError(AlertLevel.warning, AlertDescription.close_notify, "Stream is closed", null);
                 }
             }
             catch (TlsFatalAlert e)
@@ -859,7 +857,8 @@ namespace Org.BouncyCastle.Crypto.Tls
 
             byte[] error = new byte[]{ alertLevel, alertDescription };
 
-            SafeWriteRecord(ContentType.alert, error, 0, 2);
+            if (alertDescription != AlertDescription.close_notify)
+                SafeWriteRecord(ContentType.alert, error, 0, 2);
         }
 
         protected virtual void RaiseWarning(byte alertDescription, string message)
