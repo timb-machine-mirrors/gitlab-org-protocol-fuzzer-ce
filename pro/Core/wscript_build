@@ -48,7 +48,7 @@ deps = [
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Xml.dll',
-	'Titanium-Web-Proxy/Titanium.Web.Proxy',
+	'Titanium.Web.Proxy.dll',
 	'vtortola.WebSockets.dll',
 	'vtortola.WebSockets.Rfc6455.dll',
 	'websocket-sharp.dll',
