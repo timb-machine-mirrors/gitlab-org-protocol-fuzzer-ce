@@ -391,6 +391,7 @@ namespace Peach.Pro.Core.Runtime
 
 			InteractiveConsoleWatcher.WriteInfoMark();
 			Console.WriteLine("Starting Analyzer");
+			Console.WriteLine();
 
 			analyzerInstance.asCommandLine(extra);
 
