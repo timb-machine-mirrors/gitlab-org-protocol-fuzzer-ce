@@ -157,7 +157,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		public void ToPeach(Peach.Core.Dom.Dom dom)
 		{
 			var apiUrl = AnalyzeUrl();
-			var call = new Call() { Name = Guid.NewGuid().ToString() };
+			var call = new Call() { Name = WebApiToDom.GenerateName() };
 
 			call.method = string.Format("{0} {1}", Method, apiUrl.GetMethodUrl());
 

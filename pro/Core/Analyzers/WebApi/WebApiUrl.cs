@@ -107,7 +107,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		{
 			foreach (var part in FuzzedParts)
 			{
-				var id = Guid.NewGuid().ToString();
+				var id = WebApiToDom.GenerateName();
 
 				var data = new Peach.Core.Dom.String("value");
 				data.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));
@@ -123,7 +123,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 			{
 				if (param.Type == WebApiUrlPartType.EmptyType) continue;
 
-				var id = Guid.NewGuid().ToString();
+				var id = WebApiToDom.GenerateName();
 
 				var data = new Peach.Core.Dom.String("value");
 				data.Hints.Add("Peach.TypeTransform", new Hint("Peach.TypeTransform", "false"));

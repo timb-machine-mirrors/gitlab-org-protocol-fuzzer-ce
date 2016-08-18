@@ -13,8 +13,13 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 	/// <summary>
 	/// Convert a WebApiCollection to Peach Dom
 	/// </summary>
-	public class WebApiToDom
+	public static class WebApiToDom
 	{
+		public static string GenerateName()
+		{
+			return "ID_" + Guid.NewGuid().ToString().Replace('-', '_');
+		}
+
 		public static Test Convert(Peach.Core.Dom.Dom dom, WebApiCollection apiCollection)
 		{
 			var test = new Test
@@ -30,7 +35,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 
 			var publisher = new RestPublisher(new Dictionary<string, Variant>())
 			{
-				Name = Guid.NewGuid().ToString()
+				Name = GenerateName()
 			};
 
 			test.publishers.Add(publisher);
@@ -75,7 +80,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 
 		public static void Convert(Peach.Core.Dom.Dom dom, StateModel stateModel, WebApiEndPoint endPoint)
 		{
-			var state = new State() {Name = Guid.NewGuid().ToString()};
+			var state = new State { Name = GenerateName() };
 			stateModel.states.Add(state);
 
 			foreach (var path in endPoint.Paths)
@@ -166,12 +171,12 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 		{
 			foreach (var part in operation.Parameters.Where(item => item.In == WebApiParameterIn.Path).OrderBy(item => item.PathFormatId))
 			{
-				var id = Guid.NewGuid().ToString();
+				var id = GenerateName();
 
 				var param = new ActionParameter(id) {dataModel = dom.dataModels["WebApiString"]};
 				part.DataElement = param.dataModel;
 
-				var dataSet = new DataSet() {Name = Guid.NewGuid().ToString()};
+				var dataSet = new DataSet { Name = GenerateName() };
 				var data = new DataField(dataSet);
 				data.Fields.Add(new DataField.Field() { Name = "Value" });
 				dataSet.Add(data);
@@ -182,13 +187,13 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 
 			foreach (var part in operation.Parameters.Where(item => item.In == WebApiParameterIn.Query).OrderBy(item => item.PathFormatId))
 			{
-				var id = Guid.NewGuid().ToString();
+				var id = GenerateName();
 
 				var param = new ActionParameter(id);
 				param.dataModel = dom.dataModels["WebApiString"];
 				part.DataElement = param.dataModel;
 
-				var dataSet = new DataSet() { Name = Guid.NewGuid().ToString() };
+				var dataSet = new DataSet{ Name = GenerateName() };
 				var data = new DataField(dataSet);
 				data.Fields.Add(new DataField.Field() { Name = "Value" });
 				dataSet.Add(data);
@@ -204,7 +209,7 @@ namespace Peach.Pro.Core.Analyzers.WebApi
 				model.Add(body.DataElement);
 				dom.dataModels.Add(model);
 
-				var id = Guid.NewGuid().ToString();
+				var id = GenerateName();
 
 				var param = new ActionParameter(id);
 				param.dataModel = model;
