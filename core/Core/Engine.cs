@@ -217,7 +217,9 @@ namespace Peach.Core
 			_watcher = watcher;
 			_context = new RunContext
 			{
-				engine = this,
+#pragma warning disable 612
+				engine = this
+#pragma warning restore 612
 			};
 			_timer = new Timer(OnTimer);
 			_timerCount = 0;
@@ -254,8 +256,7 @@ namespace Peach.Core
 
 			_context.config = config;
 			_context.test = test;
-			_context.dom = dom;
-			_context.dom.context = _context;
+			dom.context = _context;
 
 			try
 			{
@@ -312,8 +313,7 @@ namespace Peach.Core
 				using (var evt = new AutoResetEvent(false))
 					_timer.Dispose(evt);
 
-				_context.dom.context = null;
-				_context.dom = null;
+				dom.context = null;
 				_context.test = null;
 				_context.config = null;
 			}
@@ -668,7 +668,7 @@ namespace Peach.Core
 							fault.controlRecordingIteration = context.controlRecordingIteration;
 						}
 
-						if (context.reproducingFault)
+						if (context.reproducingFault || context.disableReproduction)
 						{
 							// Notify loggers first
 							OnFault(iterationCount, test.stateModel, context.faults.ToArray());

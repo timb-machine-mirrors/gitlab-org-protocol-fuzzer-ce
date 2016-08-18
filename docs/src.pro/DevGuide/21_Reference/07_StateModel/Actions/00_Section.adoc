@@ -22,7 +22,7 @@ The following is the default order in which Actions are performed when fuzzing:
 
 . _start_ - Implicit, once per session
 . _open_ - Implicit, once per iteration
-. Explicit actions (_accept_, _input_, _output_, etc.)
+. Explicit actions (_accept_, _input_, _output_, _web_, etc.)
 . _close_ - Implicit, once per iteration
 . _stop_ - Implicit, once per session
 ****
@@ -114,6 +114,7 @@ type:: Action type. The following enumeration summarizes the available action ty
 * xref:Action_slurp[slurp] - copies a value from a data element in one DataModel to a data element in another DataModel.
 * xref:Action_start[start] - causes a Publisher to perform its initialization tasks.
 * xref:Action_stop[stop] - causes a Publisher to perform final cleanup.
+* xref:Action_web[web] - sent web api/http requests via WebApi publisher.
 
 _Required Based on Type:_
 
@@ -211,6 +212,8 @@ include::call.adoc[]
 include::getProperty.adoc[]
 
 include::setProperty.adoc[]
+
+include::web.adoc[]
 
 include::slurp.adoc[]
 

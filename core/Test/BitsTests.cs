@@ -214,6 +214,14 @@ namespace Peach.Core.Test
 			return ret;
 		}
 
+		public static string BitsToString(this BitwiseStream v)
+		{
+			var bs = (BitwiseStream)v;
+			bs.Seek(0, SeekOrigin.Begin);
+			var ret = new BitReader(bs).ReadString();
+			return ret;
+		}
+
 		/// <summary>
 		/// Formats a BitStream according to the format string. Supported
 		/// arguments are byte[], numbers and strings.

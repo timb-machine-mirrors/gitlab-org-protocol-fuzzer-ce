@@ -135,10 +135,32 @@ namespace Peach.Core.Dom
 		public Platform.OS platform { get; set; }
 	}
 
-	public class StateModelRef
+	public interface IStateModelRef
+	{
+		void WritePit(XmlWriter pit);
+	}
+
+	[StateModelRef("StateModel")]
+	public class StateModelRef : IStateModelRef
 	{
 		[XmlAttribute("ref")]
 		public string refName { get; set; }
+
+		public virtual void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("StateModel");
+			pit.WriteAttributeString("ref", refName);
+			pit.WriteEndElement();
+		}
+	}
+
+	public class StateModelRefAttribute : PluginAttribute
+	{
+		public StateModelRefAttribute(string name)
+			: base(typeof(IStateModelRef), name, true)
+		{
+			Scope = PluginScope.Internal;
+		}
 	}
 
 	/// <summary>
@@ -303,8 +325,8 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
-		[XmlElement("StateModel")]
-		public StateModelRef stateModelRef { get; set; }
+		[PluginElement(typeof(IStateModelRef))]
+		public IStateModelRef stateModelRef { get; set; }
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
@@ -439,7 +461,7 @@ namespace Peach.Core.Dom
 			// Quick hack to make Swagger/Postman analyzers work better
 			foreach (var obj in publishers)
 			{
-				if (obj.GetType().Name != "RestPublisher") continue;
+				if (obj.GetType().Name != "WebApiPublisher") continue;
 
 				pit.WriteStartElement("Publisher");
 				pit.WriteAttributeString("class", "WebApi");
@@ -463,11 +485,7 @@ namespace Peach.Core.Dom
 			}
 
 			if (stateModelRef != null)
-			{
-				pit.WriteStartElement("StateModel");
-				pit.WriteAttributeString("ref", stateModelRef.refName);
-				pit.WriteEndElement();
-			}
+				stateModelRef.WritePit(pit);
 
 			pit.WriteEndElement();
 		}

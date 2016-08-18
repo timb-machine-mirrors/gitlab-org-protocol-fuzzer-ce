@@ -157,7 +157,7 @@ namespace Peach.Core.Dom
 		/// This will start the initial State.
 		/// </remarks>
 		/// <param name="context"></param>
-		public void Run(RunContext context)
+		public virtual void Run(RunContext context)
 		{
 			var currentState = initialState;
 
@@ -324,7 +324,22 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public void WritePit(XmlWriter pit)
+		/// <summary>
+		/// Create a StateModelRef for this State Model
+		/// </summary>
+		/// <remarks>
+		/// This allows different state model types to create
+		/// specific StateModelRef instances for themselves.
+		/// 
+		/// Example is WebProxyModel.
+		/// </remarks>
+		/// <returns></returns>
+		public virtual IStateModelRef CreateStateModelRef()
+		{
+			return new StateModelRef {refName = Name};
+		}
+
+		public virtual void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("StateModel");
 

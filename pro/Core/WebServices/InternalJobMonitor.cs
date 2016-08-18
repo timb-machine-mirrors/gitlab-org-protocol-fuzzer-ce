@@ -4,6 +4,7 @@ using Peach.Core;
 using Peach.Pro.Core.License;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.WebServices
@@ -14,6 +15,9 @@ namespace Peach.Pro.Core.WebServices
 		volatile JobRunner _runner;
 		Thread _thread;
 		ILicense _license;
+
+		// For unit tests
+		internal Action<Engine> TestHook { get; set; }
 
 		public InternalJobMonitor(ILicense license)
 		{
@@ -94,6 +98,16 @@ namespace Peach.Pro.Core.WebServices
 			Logger.Trace("<<< Dispose");
 		}
 
+		public bool ProxyEvent(IProxyEvent args)
+		{
+			lock (this)
+			{
+				args.Handled = IsRunning && _runner.ProxyEvent(args);
+			}
+
+			return args.Handled;
+		}
+
 		protected override void OnStart(Job job)
 		{
 			var evtReady = new AutoResetEvent(false);
@@ -102,7 +116,7 @@ namespace Peach.Pro.Core.WebServices
 			{
 				try
 				{
-					_runner.Run(evtReady);
+					_runner.Run(evtReady, TestHook);
 				}
 				catch (Exception ex)
 				{
@@ -118,6 +132,7 @@ namespace Peach.Pro.Core.WebServices
 				if (InternalEvent != null)
 					InternalEvent(this, EventArgs.Empty);
 			});
+
 			_thread.Start();
 			if (!evtReady.WaitOne(1000))
 				throw new PeachException("Timeout waiting for job to start");

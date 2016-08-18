@@ -30,6 +30,7 @@ subdirs = [
 	'Portable.Licensing',
 	'Renci.SshNet',
 	'sqlite-3.8.11.1',
+	'Titanium-Web-Proxy/Titanium.Web.Proxy',
 	'TotalPhase/aardvark',
 	'TotalPhase/komodo',
 	'VMware-VIX-1.13.0-1295980',

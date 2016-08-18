@@ -81,7 +81,7 @@ namespace Peach.Core
 			});
 		}
 
-		private T WrapFault<T>(Func<T> fn)
+		protected T WrapFault<T>(Func<T> fn)
 		{
 			try
 			{

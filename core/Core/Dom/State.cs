@@ -137,7 +137,7 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// How many times has this state run
 		/// </summary>
-		public uint runCount { get; private set; }
+		public uint runCount { get; set; }
 
 		protected virtual void RunScript(string expr)
 		{

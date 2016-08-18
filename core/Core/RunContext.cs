@@ -281,16 +281,20 @@ namespace Peach.Core
 		public RunConfiguration config = null;
 
 		/// <summary>
-		/// Engine instance for this run
-		/// </summary>
-		[NonSerialized]
-		public Engine engine = null;
-
-		/// <summary>
 		/// Dom to use for this run
 		/// </summary>
+		[Obsolete]
+		public Dom.Dom dom
+		{
+			get { return test != null ? test.parent : null; }
+		}
+
+		/// <summary>
+		/// Engine instance for this run
+		/// </summary>
+		[Obsolete]
 		[NonSerialized]
-		public Dom.Dom dom = null;
+		public Engine engine = null;
 
 		/// <summary>
 		/// Current test being run
@@ -427,6 +431,8 @@ namespace Peach.Core
 		#endregion
 
 		#region Reproduce Fault
+
+		public bool disableReproduction = false;
 
 		/// <summary>
 		/// True when we have found a fault and are in the process

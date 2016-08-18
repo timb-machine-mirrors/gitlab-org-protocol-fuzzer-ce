@@ -1,4 +1,6 @@
 ﻿//using System.Diagnostics;
+
+using System;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.WebApi2;
 
@@ -12,13 +14,29 @@ namespace Peach
 	{
 		static int Main(string[] args)
 		{
-			//Debugger.Launch();
-
-			return new ConsoleProgram
+			try
 			{
-				CreateWeb = (license, pitLibraryPath, jobMonitor) => 
-					new WebServer(license, pitLibraryPath, jobMonitor)
-			}.Run(args);
+
+				//Debugger.Launch();
+
+				return new ConsoleProgram
+				{
+					CreateWeb = (license, pitLibraryPath, jobMonitor) =>
+						new WebServer(license, pitLibraryPath, jobMonitor)
+				}.Run(args);
+
+			}
+			catch (Exception)
+			{
+				if (System.Diagnostics.Debugger.IsAttached)
+					System.Diagnostics.Debugger.Break();
+				throw;
+			}
+			finally
+			{
+				if (System.Diagnostics.Debugger.IsAttached)
+					System.Diagnostics.Debugger.Break();
+			}
 		}
 	}
 }

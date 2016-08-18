@@ -2,18 +2,21 @@
 [[Publishers_WebApi]]
 == WebApi Publisher
 
-The _WebApi_ Publisher  is an I/O adapter that communicates using the Representational State Transfer (WebApi) architecture. This publisher communicates using HTTP as the underlying transport.
+The _WebApi_ Publisher  is an I/O adapter that communicates with various web API/HTTP end points.  This publisher is used with the xref:Action_web[web] action type.
 
-This publisher supports sending body data as:
+This is the recommended method to perform web requests using Peach.  The +Rest+ and +Http+ publishers are depricated.
 
- * JSON when models contain Json elements (JsonString, JsonObject, etc.) or the deprecated Json element.
- * XML when models contain XmlElement
- * As raw binary data when a custom content type is provided
+This publisher, in combination with the xref:Action_web[web] action gives full control over:
 
-Similar to the xref:Publishers_Http[Http] publisher, the _WebApi_ publisher supports setting headers by using a special action type 'call' syntax.
-See the examples section for an example of setting a custom header field.
+ * Path
+ * Query string
+ * Form data
+ * Body
+ ** Json
+ ** XML
+ ** Binary
 
-Several analyzers are useful when building Pits for RESTful APIs:
+Several analyzers are useful when building Pits for for use with this publisher:
 
 xref:Analyzers_Json[Json]::
     Converts JSON documents or strings into Peach data models.
@@ -25,22 +28,22 @@ xref:Analyzers_Postman[Postman]::
 xref:Analyzers_Swagger[Swagger]::
     Converts Swagger JSON to Peach Pits
 
+xref:Analyzers_WebRecordProxy[WebRecordProxy]::
+    Recording proxy captures web requests and generates full pit.
+    This makes creating the base pit easy, simply use as your HTTP proxy.
+
+xref:Analyzers_Xml[Xml]::
+    Converts XML documents or string into Peach data models.
+    Can be used both inside of DataModels with the String element or also via the command line.
+
 
 TIP: SSL/TLS is supported, just use +https+ as the protocol in the URL.
-
-TIP: By default the publisher will attempt to detect the body content type and set the correct ContentType header.
 
 === Syntax
 
 [source,xml]
 ----
-<!-- AUtomatically detect content type -->
 <Publisher class="WebApi"/>
-
-<!-- Custom content type header -->
-<Publisher class="WebApi">
-    <Param name="ContentType" value="application/octet-stream" />
-</Publisher>
 ----
 
 === Parameters
@@ -50,8 +53,6 @@ _Required:_
 There are no required parameters.
 
 _Optional:_
-
-ContentType:: Value for content-type header.  Set this to allow sending of binary data.
 
 BaseUrl:: Base URL is used by some authentication types. Only used as part of authentication.
 Username:: Username for authentication
@@ -77,43 +78,19 @@ Proxy::
 
 === Actions
 
-xref:Action_call[call]::
+xref:Action_web[web]::
 +
-Call actions are used to perform WebApi calls.
+Web actions are used to perform WebApi calls.
 +
-The method attribute contains both the HTTP method (GET, POST, etc.) and the URL.
-The URL portion of the method attribute can contain parameter substitution tokens.
-These tokens are replaced with the parameters provided.
-One additional parameter can be provided that is used for the body of the request.
+This action provides full control over the HTTP request.
+The 'method' attribute contains the HTTP method (GET, POST, etc.).
+The 'url' attribute contians the URL with optional parameter substitution tokens.
+These tokens are replaced with the parameters provided by the 'Path' elements.
 +
-* The format of the method attribute is: +METHOD URL+
-* This example places a call that expects to receive a single parameter: +GET /product/{0}+
-* This example places a call that expects to receive two parameters: +GET /invoices?start_date={0}&end_date={1}+
+* This example places a call that expects to receive a single parameter: +http://localhost/product/{id}+
+* Query parameters are set using 'Query' elements.
 +
-A final Param can be added to provide the body content if needed.
-+
-This action also supports the xref:Action_call[Result] element to capture the response paylaod.
-+
-TIP: The order of the parameters is important. In order they are matched to the substitutions of {0}, then {1}, etc.  The final Param (optional) is used for the body payload.
-
-xref:Action_call[call]::
-+
-Call actions are used to set HTTP headers.
-+
-To set a header using a call action you must:
-+
-* Set the method to "Header"
-* Have two parameters named +Name+ and +Value+
-* The +Name+ parameter is the header key name
-* The +Value+ parameter is the value for the header
-+
-By default they are fuzzed. This can be disabled using the +mutable+ attribute on the data model and data elements or using the +Include/Exclude+ elements in the +Test+ portion of the xml.
-+
-An example of settings headers both via Python and also the +call+ action are provided in the Example section.
-
-=== Scripting
-
-The WebApi publisher exposes a public Headers dictionary that can be used to add/remove headers from Python scripting code.  See example _Setting Custom Authentication Header via Python_ below.
+This action also supports the xref:web_Response[Response] element to capture the response status code, headers and body.
 
 === Example
 
@@ -137,12 +114,6 @@ For the GET request, the Result element is used to capture any returned data.
     </JsonObject>
 </DataModel>
 
-<DataModel name="WebApiString">
-	<String name="value" value="">
-		<Hint name="Peach.TypeTransform" value="false" />
-	</String>
-</DataModel>
-
 <DataModel name="WebApiResult">
 	<Choice name="ResultOrEmpty">
 		<String name="Result">
@@ -154,57 +125,28 @@ For the GET request, the Result element is used to capture any returned data.
 
 <StateModel name="Default" initialState="FirstState">
     <State name="FirstState">
-        <Action type="call" method="GET http://www.example.com/product/{0}">
-            <!-- {0} -->
-            <Param name="Id">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="1"/>
-				</Data>
-            </Param>
+        <Action type="web" method="GET" url="http://www.example.com/product/{id}">
+            <Path name="Id" id="id" value="1"/>
 
-            <!-- Capture Response (optional) -->
-            <Result>
+            <Response />
                 <DataModel ref="WebApiResult" />
-            </Result>
+            </Response>
         </Action>
 
-        <Action type="call" method="GET http://www.example.com/invoices?start_date={0}&amp;end_data={1}">
-            <!-- {0} -->
-            <Param name="StartDate">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="11-21-2011"/>
-				</Data>
-            </Param>
+        <Action type="web" method="GET" url="http://www.example.com/invoices">
+            <Query name="StartDate" id="start_date" value="11-21-2011" />
+            <Query name="EndDate" id="end_date" value="11-21-2015" />
 
-            <!-- {1} -->
-            <Param name="EndDate">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="11-21-2015"/>
-				</Data>
-            </Param>
-
-            <!-- Capture Response (optional) -->
-            <Result>
+            <Response>
                 <DataModel ref="WebApiResult" />
-            </Result>
+            </Response>
         </Action>
 
-        <Action type="call" method="POST http://www.example.com/product/{0}">
-            <!-- {0} -->
-            <Param name="Id">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="100"/>
-				</Data>
-            </Param>
-
-            <!-- POST Body -->
-            <Param name="PostData">
+        <Action type="call" method="POST" url="http://www.example.com/product/{id}">
+            <Path name="Id" id="id" value="100" />
+            <Body name="PostData">
                 <DataModel ref="PostData" />
-            </Param>
+            </Body>
         </Action>
     </State>
 </StateModel>
@@ -231,12 +173,6 @@ The following example provides three fragments using the GET and POST methods.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
-<DataModel name="WebApiString">
-	<String name="value" value="">
-		<Hint name="Peach.TypeTransform" value="false" />
-	</String>
-</DataModel>
-
 <DataModel name="PostData">
     <XmlElement elementName="Product">
         <XmlAttribute attributeName="Name">
@@ -254,19 +190,12 @@ The following example provides three fragments using the GET and POST methods.
 <StateModel name="Default" initialState="FirstState">
     <State name="FirstState">
 
-        <Action type="call" method="POST http://www.example.com/product/{0}">
-            <!-- {0} -->
-            <Param name="Id">
-                <DataModel ref="WebApiString" />
-                <Data>
-                    <Field name="value" value="1" />
-                </Data>
-            </Param>
+        <Action type="web" method="POST" url="http://www.example.com/product/{id}">
+            <Path name="Id" id="id" value="1"/>
 
-            <!-- POST Body -->
-            <Param name="PostData">
+            <Body name="PostData">
                 <DataModel ref="PostData" />
-            </Param>
+            </Body>
         </Action>
         
     </State>
@@ -293,12 +222,6 @@ The following example provides three fragments using the GET and POST methods.
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
-<DataModel name="WebApiString">
-	<String name="value" value="">
-		<Hint name="Peach.TypeTransform" value="false" />
-	</String>
-</DataModel>
-
 <DataModel name="PostData">
     <Blob />
 </DataModel>
@@ -306,20 +229,12 @@ The following example provides three fragments using the GET and POST methods.
 <StateModel name="Default" initialState="FirstState">
     <State name="FirstState">
 
-        <Action type="call" method="POST http://www.example.com/product/{0}/image">
-            <!-- {0} -->
-            <Param name="Id">
-                <DataModel ref="WebApiString" />
-                <Data>
-                    <Field name="value" value="1" />
-                </Data>
-            </Param>
-
-            <!-- POST Body -->
-            <Param name="PostData">
+        <Action type="web" method="POST" url="http://www.example.com/product/{id}/image">
+            <Path name="Id" id="id" value="1"/>
+            <Body name="PostData">
                 <DataModel ref="PostData" />
                 <Data fileName="image.png" />
-            </Param>
+            </Body>
         </Action>
         
     </State>
@@ -328,12 +243,9 @@ The following example provides three fragments using the GET and POST methods.
 <Test name="Default">
 
     <StateModel ref="Default"/>
-    <Publisher class="WebApi">
-        <Param name="ContentType" value="application/octet-stream" />
-    </Publisher>
+    <Publisher class="WebApi"/>
 
 </Test>
-
 </Peach>
 ----
 ===================================
@@ -350,53 +262,13 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://peachfuzzer.com/2012/Peach peach.xsd">
 
-<DataModel name="WebApiString">
-	<String name="value" value="">
-		<Hint name="Peach.TypeTransform" value="false" />
-	</String>
-</DataModel>
-
-<DataModel name="WebApiResult">
-	<Choice name="ResultOrEmpty">
-		<String name="Result">
-			<Analyzer class="Json" />
-		</String>
-		<Block name="Empty" />
-	</Choice>
-</DataModel>
-
 <StateModel name="Default" initialState="FirstState">
     <State name="FirstState">
 	
-		<!-- Add X-CustomHeader header -->
-		<Action type="call" method="Header">
-            <Param name="Name">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="X-CustomHeader"/>
-				</Data>
-            </Param>
-            <Param name="Value">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="Hello World!"/>
-				</Data>
-            </Param>
-		</Action>
-	
-        <Action type="call" method="GET http://www.example.com/product/{0}">
-            <!-- {0} -->
-            <Param name="Id">
-                <DataModel ref="WebApiString" />
-				<Data>
-					<Field name="value" value="1"/>
-				</Data>
-            </Param>
-
-            <!-- Capture Response (optional) -->
-            <Result>
-                <DataModel ref="WebApiResult" />
-            </Result>
+        <Action type="web" method="GET" url="http://www.example.com/product/{id}">
+            <Path name="Id" id="id" value="1"/>
+            <Header name="x-custom" id="X-CustomHeader" value="Hello World!" />
+            <Response/>
         </Action>
 		
     </State>
@@ -500,12 +372,12 @@ def AwsAuthGen(context, action):
   <StateModel name="TheStateModel" initialState="Initial">
     <State name="Initial">
 
-      <Action type="call" method="PUT http://XXXXX.s3.amazonaws.com/?policy"
+      <Action type="web" method="PUT" url="http://XXXXX.s3.amazonaws.com/?policy"
               onStart="aws_s3_example.AwsAuthGen(context, action)">
             
-        <Param name="Body">
+        <Body name="Body">
           <DataModel ref="Policy" />
-        </Param>
+        </Body>
       </Action>
       
     </State>

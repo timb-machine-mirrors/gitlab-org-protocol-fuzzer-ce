@@ -610,7 +610,9 @@ namespace Peach.Pro.Core.Loggers
 				// Put description at beginning of list
 				if (!string.IsNullOrEmpty(fault.description))
 				{
-					ret.Assets.Add(MakeFileAsset(fault, "description.txt", Encoding.UTF8.GetBytes(fault.description)));
+					// Use System.Text.Encoding so invalid chars get substituted with '?'
+					var desc = System.Text.Encoding.UTF8.GetBytes(fault.description);
+					ret.Assets.Add(MakeFileAsset(fault, "description.txt", desc));
 				}
 
 				// Put collected data second
@@ -954,7 +956,11 @@ namespace Peach.Pro.Core.Loggers
 			};
 
 			var oldTarget = _tempTarget;
-			_tempTarget = new AsyncTargetWrapper(target) { Name = target.Name };
+			_tempTarget = new AsyncTargetWrapper(target)
+			{
+				Name = target.Name,
+				OverflowAction = AsyncTargetWrapperOverflowAction.Block
+			};
 
 			ConfigureLogging(oldTarget, _tempTarget);
 

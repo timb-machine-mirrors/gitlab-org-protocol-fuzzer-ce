@@ -7,11 +7,13 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Lextm.SharpSnmpLib.Messaging;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
+using TimeoutException = System.TimeoutException;
 
 namespace Peach.Pro.Core.Publishers
 {
@@ -91,7 +93,6 @@ namespace Peach.Pro.Core.Publishers
 
 			if (IgnoreCertErrors)
 			{
-				logger.Info("Ignoring Certificate Validation Check Errors");
 				ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 			}
 		}
@@ -309,23 +310,10 @@ namespace Peach.Pro.Core.Publishers
 			}
 		}
 
-		private Stream TryCreateClient(Uri url, BitwiseStream data)
+		protected virtual HttpWebRequest GetRequest(Uri url, BitwiseStream data)
 		{
-			Logger.Trace("TryCreateClient> {0} {1}", Method, SafeUrlString(url));
-
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
-			request.Timeout = Timeout;
-			request.ServicePoint.Expect100Continue = false;
-
-			if (!string.IsNullOrEmpty(Proxy))
-				request.Proxy = new WebProxy(new Uri(Proxy), false);
-
-			if (Cookies)
-				request.CookieContainer = CookieJar;
-
-			if (Credentials != null)
-				request.Credentials = Credentials;
 
 			if (_clientCertificate != null)
 				request.ClientCertificates.Add(_clientCertificate);
@@ -380,16 +368,43 @@ namespace Peach.Pro.Core.Publishers
 				request.ContentLength = 0;
 			}
 
+			return request;
+		}
+
+		protected virtual void OnResponse(HttpWebResponse response)
+		{
+		}
+
+		private Stream TryCreateClient(Uri url, BitwiseStream data)
+		{
+			Logger.Trace("TryCreateClient> {0} {1}", Method, SafeUrlString(url));
+
+			var request = GetRequest(url, data);
+
+			request.Timeout = Timeout;
+			request.ServicePoint.Expect100Continue = false;
+
+			if (!string.IsNullOrEmpty(Proxy))
+				request.Proxy = new WebProxy(new Uri(Proxy), false);
+
+			if (Cookies)
+				request.CookieContainer = CookieJar;
+
+			if (Credentials != null)
+				request.Credentials = Credentials;
+
 			WebException exception = null;
 
 			try
 			{
 				Response = (HttpWebResponse)request.GetResponse();
+				OnResponse(Response);
 			}
 			catch (WebException wex)
 			{
 				exception = wex;
 				Response = (HttpWebResponse) wex.Response;
+				OnResponse(Response);
 
 				if (Response == null)
 					throw;

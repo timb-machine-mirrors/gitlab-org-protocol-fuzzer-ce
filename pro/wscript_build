@@ -27,6 +27,7 @@ subdirs = [
 	'Test/OS/OSX',
 	'Test/OS/Windows',
 	'Test/WebApi',
+	'Test/WebProxy',
 	'Validator',
 	'Web',
 	'WebApi2',

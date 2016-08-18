@@ -1,6 +1,8 @@
 <<<
 [[Publishers_Http]]
-== Http Publisher
+== Http Publisher (Depricated)
+
+This publisher is depricated, please see xref:Publishers_WebApi[WebApi publisher].
 
 _Http_ publisher sends data over HTTP via a valid HTTP method type.
 
