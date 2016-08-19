@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Linq;
 using System.Xml;
 
 namespace Peach.Core.Dom
 {
 	[Serializable]
-	public class ActionParameter : ActionData
+	public class ActionParameter : ActionData, IActionDataXpath
 	{
 		public ActionParameter(string name)
 		{
@@ -80,5 +81,9 @@ namespace Peach.Core.Dom
 			pit.WriteEndElement();
 		}
 
+		public virtual IEnumerable<ActionData> XpathData
+		{
+			get { return Enumerable.Empty<ActionData>(); }
+		}
 	}
 }

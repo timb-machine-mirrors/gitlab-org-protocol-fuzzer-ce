@@ -54,12 +54,17 @@ namespace Peach.Core.Dom
 	public delegate void ActionStartingEventHandler(Action action);
 	public delegate void ActionFinishedEventHandler(Action action);
 
+	public interface IActionDataXpath
+	{
+		IEnumerable<ActionData> XpathData { get; }
+	}
+
 	/// <summary>
 	/// Base class for state model actions such as sending output, calling a method, etc.
 	/// </summary>
 	[DebuggerDisplay("{name}: {type}")]
 	[Serializable]
-	public abstract class Action : INamed, IFieldNamed
+	public abstract class Action : INamed, IFieldNamed, IActionDataXpath
 	{
 		#region Obsolete Functions
 
@@ -250,6 +255,18 @@ namespace Peach.Core.Dom
 		/// <param name="publisher"></param>
 		/// <param name="context"></param>
 		protected abstract void OnRun(Publisher publisher, RunContext context);
+
+		/// <summary>
+		/// All Data (DataModels &amp; DataSets) used by this action
+		/// that should be nagivable via xpath
+		/// </summary>
+		public virtual IEnumerable<ActionData> XpathData
+		{
+			get
+			{
+				return allData;
+			}
+		}
 
 		/// <summary>
 		/// All Data (DataModels &amp; DataSets) used by this action.
