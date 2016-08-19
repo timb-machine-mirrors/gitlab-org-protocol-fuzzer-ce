@@ -1258,6 +1258,8 @@ namespace Peach.Core.Analyzers
 			var stateModel = CreateStateModel();
 			stateModel.Name = name;
 			stateModel.parent = parent;
+			stateModel.initialStateName = initialState;
+			stateModel.finalStateName = finalState;
 
 			foreach (XmlNode child in node.ChildNodes)
 			{
