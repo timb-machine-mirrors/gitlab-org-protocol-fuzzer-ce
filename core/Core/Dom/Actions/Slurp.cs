@@ -125,7 +125,7 @@ namespace Peach.Core.Dom.Actions
 			{
 				var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
 				if (setElement == null)
-					throw new PeachException("Error, slurp setXpath did not return a Data Element. [" + valueXpath + "]");
+					continue;
 
 				var sink = new SlurpElement(setElement);
 				diagnostic.Sinks.Add(sink);
