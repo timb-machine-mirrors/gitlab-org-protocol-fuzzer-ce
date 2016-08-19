@@ -40,7 +40,6 @@ namespace Peach.Pro.WebApi2
 					}
 				))
 			{
-				
 			}
 	}
 

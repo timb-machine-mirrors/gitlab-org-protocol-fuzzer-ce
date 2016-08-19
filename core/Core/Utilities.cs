@@ -41,6 +41,7 @@ using SysProcess = System.Diagnostics.Process;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using NLog.Conditions;
 
 namespace Peach.Core
 {
@@ -308,6 +309,11 @@ namespace Peach.Core
 					Layout = Layout,
 					ErrorStream = true,
 				};
+				target.RowHighlightingRules.Add(new ConsoleRowHighlightingRule
+				{
+					Condition = ConditionParser.ParseExpression("level == LogLevel.Trace"),
+					ForegroundColor = ConsoleOutputColor.Gray,
+				});
 
 				config.AddTarget("console", target);
 				config.LoggingRules.Add(new LoggingRule("*", logLevel, target));
@@ -333,14 +339,24 @@ namespace Peach.Core
 		public static Configuration GetUserConfig()
 		{
 			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			return OpenConfig(Path.GetFileNameWithoutExtension(appConfig.FilePath) + ".user.config");
+		}
+
+		public static Configuration OpenConfig(string filename)
+		{
+			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 			var userFile = new ExeConfigurationFileMap
 			{
-				ExeConfigFilename = Path.Combine(
-					Path.GetDirectoryName(appConfig.FilePath),
-					Path.GetFileNameWithoutExtension(appConfig.FilePath)
-				) + ".user.config"
+				ExeConfigFilename = Path.Combine(Path.GetDirectoryName(appConfig.FilePath), filename)
 			};
 			return ConfigurationManager.OpenMappedExeConfiguration(userFile, ConfigurationUserLevel.None);
+		}
+
+		public static bool DetectConfig(string filename)
+		{
+			var appConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			var path = Path.Combine(Path.GetDirectoryName(appConfig.FilePath), filename);
+			return File.Exists(path);
 		}
 
 		public static string FindProgram(string path, string program, string parameter)
@@ -360,8 +376,8 @@ namespace Peach.Core
 			}
 
 			throw new PeachException("Error, unable to locate '{0}'{1} '{2}' parameter.".Fmt(
-				program, 
-				path != null ? " in specified" : ", please specify using", 
+				program,
+				path != null ? " in specified" : ", please specify using",
 				parameter));
 		}
 
@@ -493,7 +509,7 @@ namespace Peach.Core
 		public static bool TcpPortAvailable(int port)
 		{
 			var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-	
+
 			var listeners = ipGlobalProperties.GetActiveTcpListeners();
 			if (listeners.Any(endp => endp.Port == port))
 				return false;
@@ -666,7 +682,7 @@ namespace Peach.Core
 			HexDump(inputFunc, outputFunc, bytesPerLine, startAddress: startAddress);
 		}
 
-		public static string HexDump(Stream input, int bytesPerLine = 16, int maxOutputSize = 1024*8, long startAddress = 0)
+		public static string HexDump(Stream input, int bytesPerLine = 16, int maxOutputSize = 1024 * 8, long startAddress = 0)
 		{
 			var sb = new StringBuilder();
 			var pos = input.Position;

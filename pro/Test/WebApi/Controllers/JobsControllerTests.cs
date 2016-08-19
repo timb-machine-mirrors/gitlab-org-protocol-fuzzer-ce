@@ -34,7 +34,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		protected override Mock<ILicense> CreateLicense()
 		{
 			var license = base.CreateLicense();
-			license.Setup(x => x.IsValid).Returns(true);
+			license.Setup(x => x.Status).Returns(LicenseStatus.Valid);
 			license.Setup(x => x.EulaAccepted).Returns(true);
 			return license;
 		}

@@ -15,19 +15,25 @@ bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 # Be.HexBox is not nugetable yet
 bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 
+flexnet = 'flexnet_client-2016.03.0'
+
+bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
+bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
+
 subdirs = [
-	'pin',
-	'Renci.SshNet',
-	'TotalPhase/aardvark',
-	'TotalPhase/komodo',
-	'Managed.AndroidDebugBridge',
-	'VMware-VIX-1.13.0-1295980',
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
-	'sqlite-3.8.11.1',
-	'Portable.Licensing',
+	'FlexNet.Operations-2016.R2',
 	'libusbdotnet',
-        'Titanium-Web-Proxy/Titanium.Web.Proxy',
+	'Managed.AndroidDebugBridge',
+	'pin',
+	'Portable.Licensing',
+	'Renci.SshNet',
+	'sqlite-3.8.11.1',
+	'Titanium-Web-Proxy/Titanium.Web.Proxy',
+	'TotalPhase/aardvark',
+	'TotalPhase/komodo',
+	'VMware-VIX-1.13.0-1295980',
 ]
 
 bld.recurse(subdirs)

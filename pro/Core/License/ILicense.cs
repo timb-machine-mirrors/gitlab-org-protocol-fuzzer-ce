@@ -6,28 +6,33 @@ namespace Peach.Pro.Core.License
 {
 	public enum EulaType
 	{
-		Acedemic,
+		Academic,
 		Developer,
 		Enterprise,
 		Professional,
 		Trial,
 	}
 
-	public static class FeatureNames
+	public enum LicenseStatus
 	{
-		public const string Android = "Peach-Android";
-		public const string Engine = "Peach-Engine";
-		public const string Edition = "Peach-Edition";
-		public const string ExportPit = "Peach-ExportPit";
-		public const string CustomPit = "Peach-CustomPit";
+		Missing,
+		Expired,
+		Invalid,
+		Valid
+	}
+
+	public class PitFeature
+	{
+		public string Path { get; set; }
+		public string Name { get; set; }
+		public byte[] Key { get; set; }
+		public bool IsCustom { get; set; }
+		public bool IsValid { get; set; }
 	}
 
 	public interface ILicense
 	{
-		bool IsMissing { get; }
-		bool IsExpired { get; }
-		bool IsInvalid { get; }
-		bool IsValid { get; }
+		LicenseStatus Status { get; }
 		string ErrorText { get; }
 		DateTime Expiration { get; }
 
@@ -35,30 +40,14 @@ namespace Peach.Pro.Core.License
 		string EulaText { get; }
 		IEnumerable<EulaType> Eulas { get; }
 
-		IEnumerable<IFeature> Features { get; }
-
-		/// <summary>
-		/// Get a feature by name.
-		/// <list type="bullet">
-		/// <item>Peach-Android</item>
-		/// <item>Peach-Engine</item>
-		/// <item>Peach-ExportPit</item>
-		/// <item>PeachPit-Custom</item>
-		/// <item>PeachPit-$CATEGORY-$PIT</item>
-		/// </list>
-		/// </summary>
-		/// <returns>The feature.</returns>
-		/// <param name="name">Feature name.</param>
-		IFeature GetFeature(string name);
+		IEnumerable<string> AvailablePits { get; }
+		PitFeature CanUsePit(string path);
+		IJobLicense NewJob(string pit, string config, string job);
 	}
 
-	public interface IFeature : IDisposable
+	public interface IJobLicense : IDisposable
 	{
-		string Name { get; }
-		byte[] Key { get; }
-
-		bool Acquire();
-		// Call Dispose() to release the license
+		bool CanExecuteTestCase();
 	}
 
 	public static class LicenseExtensions
@@ -75,7 +64,12 @@ namespace Peach.Pro.Core.License
 
 		public static bool IsNearingExpiration(this ILicense license)
 		{
-			return license.IsValid && license.Expiration < DateTime.Now.AddDays(30);
+			return license.IsValid() && license.Expiration < DateTime.Now.AddDays(30);
+		}
+
+		public static bool IsValid(this ILicense license)
+		{
+			return license.Status == LicenseStatus.Valid;
 		}
 	}
 }

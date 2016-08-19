@@ -32,28 +32,26 @@ namespace Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
+		private LicenseStatusTitle(license: ILicense): string {
+			switch (license.status) {
+				case LicenseStatus.Missing:
+					return 'Missing License Detected';
+				case LicenseStatus.Expired:
+					return 'Expired License Detected';
+				case LicenseStatus.Invalid:
+					return 'Invalid License Detected';
+			}
+		}
+
 		private VerifyLicense(license: ILicense): ng.IPromise<ILicense> {
-			if (!license.isValid) {
-				let title: string;
-
-				if (license.isInvalid) {
-					title = 'Invalid License Detected';
-				} else if (license.isMissing) {
-					title = 'Missing License Detected';
-				} else if (license.isExpired) {
-					title = 'Expired License Detected';
-				} else {
-					title = 'License Error Detected';
-				}
-
+			if (license.status != LicenseStatus.Valid) {
 				return this.LicenseError({
-					Title: title,
+					Title: this.LicenseStatusTitle(license),
 					Body: license.errorText.split('\n')
 				}).then(() => {
 					return this.Verify();
 				});
 			}
-
 
 			if (license.eulaAccepted) {
 				const ret = this.$q.defer<ILicense>();

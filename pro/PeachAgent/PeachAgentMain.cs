@@ -45,7 +45,7 @@ namespace PeachAgent
 		protected string _port = "9001";
 
 		protected override int OnRun(List<string> args)
-		{ 
+		{
 			Console.Write("\n");
 			Console.ForegroundColor = ConsoleColor.DarkRed;
 			Console.Write("[[ ");
@@ -82,7 +82,7 @@ namespace PeachAgent
 				"port=",
 				"Port to listen for incoming connections on (defaults to 9001).",
 				v => _port = v
-				);
+			);
 
 			options.Add(
 				"debug",

@@ -29,10 +29,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return new LicenseModel
 			{
-				IsValid = _license.IsValid,
-				IsInvalid = _license.IsInvalid,
-				IsMissing = _license.IsMissing,
-				IsExpired = _license.IsExpired,
+				Status = _license.Status,
 				ErrorText = _license.ErrorText,
 				Expiration = _license.Expiration,
 				Eulas = _license.Eulas.ToArray(),

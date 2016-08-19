@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using NUnit.Framework;
 using Peach.Core.Test;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Test.WebApi.Controllers
@@ -33,7 +34,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 		[Test]
 		public void GetLibraries()
 		{
-			_license.Setup(x => x.IsValid).Returns(true);
+			_license.Setup(x => x.Status).Returns(LicenseStatus.Valid);
 			_license.Setup(x => x.EulaAccepted).Returns(true);
 
 			var expected = new Library[] 

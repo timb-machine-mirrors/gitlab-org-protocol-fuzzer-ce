@@ -143,7 +143,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			//   _Common
 			//     Models
 			//       Image
- 			//         IMG_Data.xml
+			//         IMG_Data.xml
 			//   Image
 			//     IMG.xml
 			//     IMG.xml.config
@@ -166,6 +166,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			File.WriteAllText(_originalPitPath + ".config", configExample);
 
 			var license = new Mock<ILicense>();
+			license.Setup(x => x.CanUsePit(It.IsAny<string>())).Returns(new PitFeature { IsValid = true });
 
 			_db = new PitDatabase(license.Object);
 			_db.ValidationEventHandler += OnValidationEvent;
@@ -349,7 +350,8 @@ namespace Peach.Pro.Test.Core.WebServices
 		{
 			var ent = _db.Entries.First();
 			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
-			var cfg = new PitConfig {
+			var cfg = new PitConfig
+			{
 				Agents = new List<MAgent>(),
 				Config = new List<Param> {
 					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
@@ -380,7 +382,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
 
-			var cfg = new PitConfig {
+			var cfg = new PitConfig
+			{
 				Config = new List<Param>(),
 				Agents = new List<MAgent> {
 					new MAgent {
@@ -519,7 +522,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		]
 	}
 ]";
-						
+
 			var ent = _db.Entries.First();
 			Assert.NotNull(ent);
 
@@ -540,7 +543,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			var defs = new Dictionary<string, string>
 			{
-				{"PitLibraryPath", _root.Path}, 
+				{"PitLibraryPath", _root.Path},
 				{"Strategy", "Random"}
 			};
 
@@ -609,7 +612,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 			File.Delete(path);
 
-			_db.Load(_root.Path); 
+			_db.Load(_root.Path);
 			Assert.AreEqual(1, _db.Entries.Count());
 
 			Assert.Null(_db.Entries.FirstOrDefault(e => e.PitConfig.Name == "My"));
@@ -895,7 +898,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.AreEqual("StartOnCall", newPit.Agents[0].Monitors[0].Map[1].Key);
 			Assert.AreEqual("Foo", newPit.Agents[0].Monitors[0].Map[1].Value);
 		}
-	
+
 		[Test]
 		public void TestDeletePitConfig()
 		{
@@ -913,7 +916,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.IsFalse(File.Exists(expName));
 			Assert.IsNull(_db.GetPitById(tuple.Item2.Id));
 		}
-	
+
 		[Test]
 		public void TestRenamePitConfig()
 		{

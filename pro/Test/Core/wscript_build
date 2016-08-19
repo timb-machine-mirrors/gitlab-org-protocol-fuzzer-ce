@@ -5,6 +5,10 @@ deps = [
 	'BouncyCastle.Crypto.dll',
 	'Castle.Core.dll',
 	'Dapper.dll',
+	'FlexNet.Library.dll',
+	'FlexNet.Operations.dll',
+	'FlxClientCommon.dll',
+	'FlxLicensingClient.dll',
 	'Ionic.Zip.dll',
 	'komodo_net.dll',
 	'Managed.Adb.dll',
@@ -30,6 +34,7 @@ deps = [
 	'System.Data.dll',
 	'System.Data.SQLite.dll',
 	'System.Runtime.Remoting.dll',
+	'System.Web.Services.dll',
 	'System.Xml.dll',
 ]
 

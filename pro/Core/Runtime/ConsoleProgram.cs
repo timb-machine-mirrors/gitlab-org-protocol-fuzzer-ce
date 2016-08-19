@@ -450,7 +450,7 @@ namespace Peach.Pro.Core.Runtime
 					ShowEula();
 
 				// Let Web-UI show errors when no command line args are specified
-				if (!_license.IsValid)
+				if (_license.Status != LicenseStatus.Valid)
 				{
 					Console.WriteLine(_license.ErrorText);
 					return -1;

@@ -1,69 +1,61 @@
 #!/usr/bin/env python
 
 deps = [
-	'System.Runtime.Remoting.dll',
-	'System.Runtime.Serialization.dll',
+	'Aspose.Words.dll',
+	'aardvark_net.dll',
+	'BouncyCastle.Crypto.dll',
+	'Dapper.dll',
+	'Facades/System.Runtime.dll',
+	'Facades/System.Threading.Tasks.dll',
+	'FlxClientCommon.dll',
+	'FlxLicensingClient.dll',
+	'Ionic.Zip.dll',
+	'IronPython.dll',
+	'komodo_net.dll',
+	'LibUsbDotNet.dll',
+	'Managed.Adb.dll',
+	'Microsoft.CSharp.dll',
+	'Microsoft.Diagnostics.Runtime.dll',
+	'Microsoft.Dynamic.dll',
+	'Microsoft.Scripting.dll',
+	'Microsoft.Scripting.Metadata.dll',
+	'Mono.Posix.dll',
+	'Newtonsoft.Json.dll',
+	'NLog.dll',
+	'Nustache.Core.dll',
+	'PacketDotNet.dll',
+	'Patterns.Logging.dll',
+	'Peach.Core.dll',
+	'Portable.Licensing.dll',
+	'Renci.SshNet.dll',
+	'SharpPcap.dll',
+	'SharpSnmpLib.Full.dll',
+	'SharpSnmpLib.Portable.dll',
+	'SocketHttpListener.dll',
 	'System.dll',
-	'System.Management.dll',
-	'System.Xml.dll',
+	'System.Configuration.dll',
 	'System.Core.dll',
 	'System.Data.dll',
 	'System.Data.DataSetExtensions.dll',
 	'System.Data.SQLite.dll',
 	'System.Drawing.dll',
+	'System.Management.dll',
 	'System.Numerics.dll',
+	'System.Runtime.Remoting.dll',
+	'System.Runtime.Serialization.dll',
+	'System.ServiceProcess.dll',
+	'System.Threading.Tasks.Dataflow.dll',
 	'System.Web.dll',
 	'System.Web.Services.dll',
-	'System.Configuration.dll',
-	'System.ServiceProcess.dll',
-
-	'Portable.Licensing.dll',
-	'SocketHttpListener.dll',
-
-	'NLog.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',
-	'Ionic.Zip.dll',
-
-	'IronPython.dll',
-
-	'Microsoft.Dynamic.dll',
-	'Microsoft.CSharp.dll',
-	'Microsoft.Scripting.dll',
-	'Microsoft.Scripting.Metadata.dll',
-	
-	'Renci.SshNet.dll',
-	'Newtonsoft.Json.dll',
-
-	'Peach.Core.dll',
-
-	'Managed.Adb.dll',
-	'BouncyCastle.Crypto.dll',
-	'aardvark_net.dll',
-	'komodo_net.dll',
-	'LibUsbDotNet.dll',
-	'Mono.Posix.dll',
-
-	'websocket-sharp.dll',
-	'Dapper.dll',
-	'Aspose.Words.dll',
-	'Nustache.Core.dll',
-
-
+	'System.Xml.dll',
+	'Titanium.Web.Proxy.dll',
 	'vtortola.WebSockets.dll',
 	'vtortola.WebSockets.Rfc6455.dll',
-	'System.Threading.Tasks.Dataflow.dll',
-	'Facades/System.Runtime.dll',
-	'Facades/System.Threading.Tasks.dll',
-
-	'SharpSnmpLib.Full.dll',
-	'SharpSnmpLib.Portable.dll',
-
-	'Microsoft.Diagnostics.Runtime.dll',
-	'Patterns.Logging.dll',
-
-	'Titanium.Web.Proxy.dll',
+	'websocket-sharp.dll',
 ]
+
+top = bld.path.parent.parent
+flexnet = 'flexnet_client-2016.03.0'
 
 if bld.env.TARGET in ['win']:
 	embed = 'Vix.dll'
@@ -81,6 +73,10 @@ asm = bld(
 	name = 'Peach.Pro.dll',
 	namespace = 'Peach.Pro.Core',
 	install_755 = {},
+	install_644 = {
+		top.find_or_declare('/'.join(['3rdParty', flexnet, bld.env.BASENAME])) :
+		top.ant_glob('/'.join(['3rdParty', flexnet, bld.env.BASENAME, '**']))
+	}
 )
 
 if 'win' in bld.env['supported_features']:
