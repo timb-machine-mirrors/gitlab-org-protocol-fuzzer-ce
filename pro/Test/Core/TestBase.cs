@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
@@ -32,6 +34,11 @@ namespace Peach.Pro.Test.Core
 			_tmpDir.Dispose();
 
 			DoTearDown();
+		}
+
+		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
+		{
+			return new ProPitParser().asParser(args, new StringReader(xml));
 		}
 	}
 
