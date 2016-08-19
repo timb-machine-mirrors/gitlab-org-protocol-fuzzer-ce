@@ -221,13 +221,15 @@ namespace Peach.Pro.Core
 					throw new PeachException("Error, Action of type 'web' must have a 'method' attribute.");
 
 				var webAction = (WebAction) action;
-				webAction.url = node.getAttrString("url");
+				webAction.Url = node.getAttrString("url");
 				webAction.method = node.getAttrString("method");
 
 				foreach (XmlNode child in node)
 				{
 					if (_webChildElementNames.Contains(child.Name))
 						webAction.parameters.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Part")
+						handleActionPart(child, webAction);
 					else if(child.Name == "Response")
 						handleActionResponse(child, webAction);
 				}
@@ -252,6 +254,38 @@ namespace Peach.Pro.Core
 			return action;
 		}
 
+		protected void handleActionPart(XmlNode node, WebAction action)
+		{
+			var name = node.getAttrString("name");
+			var param = new ActionWebPart(name)
+			{
+				action = action
+			};
+
+			foreach (XmlNode child in node)
+			{
+				switch (child.Name)
+				{
+					case "Header":
+						var header = ActionWebParameter.PitParser(this, child, action);
+						header.PartName = name;
+						param.Headers.Add(header);
+						break;
+					case "FormData":
+						var formData = ActionWebParameter.PitParser(this, child, action);
+						formData.PartName = name;
+						param.FormDatas.Add(formData);
+						break;
+					case "Body":
+						var body = ActionWebParameter.PitParser(this, child, action);
+						body.PartName = name;
+						param.Body = body;
+						break;
+				}
+			}
+
+			action.parameters.Add(param);
+		}
 		protected void handleActionResponse(XmlNode node, WebAction action)
 		{
 			action.result = new ActionWebResponse()
