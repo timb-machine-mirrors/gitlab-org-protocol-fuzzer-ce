@@ -265,7 +265,7 @@ namespace Peach.Core.Dom
 		/// run count so the name will be the same across multiple
 		/// runs of the action via a re-enterant state.
 		/// </summary>
-		public string modelName
+		public virtual string modelName
 		{
 			get
 			{
