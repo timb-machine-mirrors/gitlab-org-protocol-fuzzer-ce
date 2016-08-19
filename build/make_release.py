@@ -333,9 +333,6 @@ if __name__ == "__main__":
 		shutil.rmtree(tmpdir)
 
 	for x, y in pkgs:
-		if 'internal' in x:
-			path = os.path.join(reldir, buildtag)
-			shutil.copy(x, path)
 		try:
 			os.unlink(x)
 			os.unlink(x + '.sha1')
