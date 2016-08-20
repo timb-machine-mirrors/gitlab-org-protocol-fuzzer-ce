@@ -98,7 +98,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 				if (!File.Exists(file))
 					throw new PeachException("Error, provided WinDbgPath '{0}' does not exist.".Fmt(winDbgPath));
 
-				var type = FileInfoImpl.GetMachineType(file);
+				var type = FileArch.GetWindows(file);
 
 				if (Environment.Is64BitProcess && type != Platform.Architecture.x64)
 					throw new PeachException("Error, provided WinDbgPath '{0}' is not x64.".Fmt(winDbgPath));
@@ -150,7 +150,7 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 						continue;
 
 					//verify x64 vs x86
-					var type = FileInfoImpl.GetMachineType(file);
+					var type = FileArch.GetWindows(file);
 
 					if (Environment.Is64BitProcess && type != Platform.Architecture.x64)
 						continue;
