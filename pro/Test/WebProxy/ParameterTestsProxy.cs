@@ -13,7 +13,7 @@ using Peach.Pro.Core.Dom;
 namespace Peach.Pro.Test.WebProxy
 {
 	[TestFixture]
-	public class ParameterTests : BaseRunTester
+	public class ParameterTestsProxy : BaseRunTester
 	{
 		[Test]
 		public void TestSwaggerPath()
