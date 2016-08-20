@@ -104,7 +104,7 @@ namespace Peach.Core.Analysis
 
 		private ProcessStartInfo SetupWindows(string pwd,string executable,string arguments)
 		{
-			var arch = FileInfo.Instance.GetArch(executable);
+			var arch = FileArch.GetWindows(executable);
 
 			Logger.Debug("Target Architecture: {0}", arch);
 
@@ -144,7 +144,7 @@ namespace Peach.Core.Analysis
 
 		private ProcessStartInfo SetupLinux(string pwd, string executable, string arguments)
 		{
-			var arch = FileInfo.Instance.GetArch(executable);
+			var arch = FileArch.GetLinux(executable);
 
 			Logger.Debug("Target Architecture: {0}", arch);
 
