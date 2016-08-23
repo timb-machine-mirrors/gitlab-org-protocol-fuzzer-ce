@@ -156,7 +156,6 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		SimpleHttpListener _listener;
-		NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
 		[OneTimeSetUp]
 		public virtual void Init()
