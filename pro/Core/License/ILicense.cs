@@ -40,7 +40,6 @@ namespace Peach.Pro.Core.License
 		string EulaText { get; }
 		IEnumerable<EulaType> Eulas { get; }
 
-		IEnumerable<string> AvailablePits { get; }
 		PitFeature CanUsePit(string path);
 		IJobLicense NewJob(string pit, string config, string job);
 	}

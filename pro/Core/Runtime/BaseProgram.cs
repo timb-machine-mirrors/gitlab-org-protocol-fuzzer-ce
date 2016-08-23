@@ -42,38 +42,22 @@ namespace Peach.Pro.Core.Runtime
 
 		protected void PrepareLicensing(string pitLibraryPath)
 		{
-			ResourceRoot root = null;
-			if (pitLibraryPath != null)
-				root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
-
-			if (root == null)
+			var config = new LicenseConfig();
+			if (config.DetectConfig)
 			{
-				_logger.Trace("No license detected");
-				_license = new PortableLicense(null, null);
+				_logger.Trace("Using FlexeraLicense");
+				var root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
+				config.Manifest = PitResourceLoader.LoadManifest(root);
+				var license = new FlexeraLicense(config);
+				Console.Write("Activating license...");
+				license.Activate();
+				Console.WriteLine("  Done!");
+				_license = license;
 			}
 			else
 			{
-				var config = new LicenseConfig();
-				config.Manifest = PitResourceLoader.LoadManifest(root);
-				if (config.DetectConfig)
-				{
-					_logger.Trace("Using FlexeraLicense");
-					var license = new FlexeraLicense(config);
-					Console.Write("Activating license...");
-					license.Activate();
-					Console.WriteLine("  Done!");
-					_license = license;
-				}
-				else
-				{
-					var secrets = PitResourceLoader.LoadManifest(new ResourceRoot
-					{
-						Assembly = Assembly.GetExecutingAssembly(),
-						Prefix = "Peach.Pro.Core.Resources"
-					});
-					_logger.Trace("Using PortableLicense");
-					_license = new PortableLicense(config.Manifest, secrets);
-				}
+				_logger.Trace("Using PortableLicense");
+				_license = new PortableLicense();
 			}
 		}
 

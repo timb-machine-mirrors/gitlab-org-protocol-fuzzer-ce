@@ -203,7 +203,8 @@ namespace Peach.Pro.Test.Core.PitParserTests
 				Name = featureName,
 				Path = featureName,
 				IsValid = true,
-				Key = master.Features[featureName].Key			};
+				Key = master.Features[featureName].Key
+			};
 			using (var stream = PitResourceLoader.DecryptResource(root, feature, asset1))
 			using (var reader = new StreamReader(stream))
 			{
