@@ -13,13 +13,13 @@ namespace Peach.Pro.Core.Publishers
 	[Publisher("SslListener")]
 	[Parameter("Interface", typeof(IPAddress), "IP of interface to bind to")]
 	[Parameter("Port", typeof(ushort), "Local port to listen on")]
-    [Parameter("ServerCertPath", typeof(string), "Path to server certificate file")]
-    [Parameter("ServerCertPass", typeof(string), "Password for cert file","")]
-    [Parameter("ClientCertRequired", typeof(bool), "Require client to auth via certificate", "false")]
-    [Parameter("CheckCertRevocation", typeof(bool), "Check revocation of certificate", "false")] 
+	[Parameter("ServerCertPath", typeof(string), "Path to server certificate file")]
+	[Parameter("ServerCertPass", typeof(string), "Password for cert file", "")]
+	[Parameter("ClientCertRequired", typeof(bool), "Require client to auth via certificate", "false")]
+	[Parameter("CheckCertRevocation", typeof(bool), "Check revocation of certificate", "false")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data (default 3000)", "3000")]
 	[Parameter("AcceptTimeout", typeof(int), "How many milliseconds to wait for a connection (default 3000)", "3000")]
-	public class SslListenerPublisher : Peach.Core.Publishers.BufferedStreamPublisher 
+	public class SslListenerPublisher : Peach.Core.Publishers.BufferedStreamPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return logger; } }
@@ -43,7 +43,8 @@ namespace Peach.Pro.Core.Publishers
 		public SslListenerPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-
+			// On mono, sometimes OnOutput waits forever. Attempt to work around this.
+			_sendTimeout = 10000;
 			try
 			{
 				//Mono fix. If the password is empty and still provided it will explode trying to decrypt.
@@ -57,7 +58,6 @@ namespace Peach.Pro.Core.Publishers
 				throw new PeachException(string.Format("Error, unable to load certificate '{0}': ",
 					ServerCertPath), ex);
 			}
-
 		}
 
 		protected override void OnOpen()
@@ -75,7 +75,6 @@ namespace Peach.Pro.Core.Publishers
 				throw new PeachException("Error, unable to bind to interface " +
 					Interface + " on port " + Port + ": " + ex.Message, ex);
 			}
-
 		}
 
 		protected override void OnClose()
@@ -88,7 +87,6 @@ namespace Peach.Pro.Core.Publishers
 
 			base.OnClose();
 		}
-
 
 		protected override void OnAccept()
 		{
@@ -155,6 +153,5 @@ namespace Peach.Pro.Core.Publishers
 		{
 			_tcp.Client.Shutdown(SocketShutdown.Send);
 		}
-
 	}
 }

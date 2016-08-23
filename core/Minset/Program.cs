@@ -276,6 +276,7 @@ the .trace files in the 'traces' folder for later analysis.
 
 Syntax:
   PeachMinset [-k -v] -s samples -t traces command.exe args %s
+  PeachMinset [-k -v] -s samples -t traces -- command.exe --flags args %s
 
 Note:
   %s will be replaced by sample filename.
@@ -300,7 +301,8 @@ All-In-One
 Both tracing and computing can be performed in a single step.
 
 Syntax:
-  PeachMinset [-k -v] -s samples -t traces -m minset command.exe args %s
+  PeachMinset [-k -v] -s samples -t traces -m minset command.exe %s
+  PeachMinset [-k -v] -s samples -t traces -m minset -- command.exe --flags args %s
 
 Note:
   %s will be replaced by sample filename.
