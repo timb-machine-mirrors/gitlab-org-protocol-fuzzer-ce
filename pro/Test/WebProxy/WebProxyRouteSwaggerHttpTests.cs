@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
-using Encoding = System.Text.Encoding;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -156,7 +152,6 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		SimpleHttpListener _listener;
-		NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
 		[OneTimeSetUp]
 		public virtual void Init()
