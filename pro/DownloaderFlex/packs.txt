@@ -1,0 +1,56 @@
+= Adding PITs based on license
+
+ - Upload all pit zips into a pits folder
+ - release.json:
+	- "pits" points to pits folder
+	- "packs" is array of pack objects
+
+    "pits": [
+		{
+			"name" : "PNG",
+			"archive" : [ "PNG.zip" ]
+		},
+		{
+			"name" : "SNMP",
+			"archive": [
+				"SNMP_Server.zip",
+				"SNMP_Client.zip"
+			]
+		}
+	],
+    "trial": [
+		{
+			"name" : "PNG",
+			"archive" : [ "PNG.zip" ]
+		},
+		{
+			"name" : "SNMP",
+			"archive": [
+				"SNMP_Server.zip",
+				"SNMP_Client.zip"
+			]
+		}
+	],
+	"packs": [
+		{
+			"name": "Network Configuration",
+			"pits" : [
+				"SNMP_Server.zip",
+				"SNMP_Client.zip"
+			]
+		},
+		{
+			"name" : "IPv4 Pack"
+			"pits" : [
+				"IPv4.zip",
+				"TCP.zip",
+				"UDP.zip"
+			]
+		}
+	],
+	
+ - Based on packs or pits:
+	- Merge pits zips into downloads.
+	- Save merged zip as /tmp/guid
+	- Remove after download
+	
