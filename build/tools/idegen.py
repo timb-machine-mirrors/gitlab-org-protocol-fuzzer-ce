@@ -515,6 +515,12 @@ class vsnode_cs_target(msvs.vsnode_project):
 			r = source_file('Content', self, x)
 			lst[x.abspath()] = r
 
+			if x.name.endswith('.asax'):
+				cs = x.parent.find_resource(x.name + '.cs')
+				if cs: 
+					cs = lst.get(cs.abspath(), None)
+					cs.attrs['DependentUpon'] = x.name
+
 		# Process installed files
 		self.collect_install(lst, 'install_644')
 		self.collect_install(lst, 'install_755')
@@ -535,21 +541,21 @@ class vsnode_cs_target(msvs.vsnode_project):
 			lst[cfg.abspath()] = source_file('None', self, cfg)
 
 		# Check for Web.config
-		if getattr(tg, 'ide_aspnet', False):
-			cfg = tg.path.find_resource('Web.config')
-			if not cfg:
-				self.ctx.fatal('Could not find Web.config for ide_aspnet taskgen: %r' % tg)
-			r = source_file('Content', self, cfg)
-			r.attrs['SubType'] = 'Designer'
-			lst[cfg.abspath()] = r
+		# if getattr(tg, 'ide_aspnet', False):
+		# 	cfg = tg.path.find_resource('Web.config')
+		# 	if not cfg:
+		# 		self.ctx.fatal('Could not find Web.config for ide_aspnet taskgen: %r' % tg)
+		# 	r = source_file('Content', self, cfg)
+		# 	r.attrs['SubType'] = 'Designer'
+		# 	lst[cfg.abspath()] = r
 
-			config = self.ctx.get_config(tg.bld, tg.env)
+		# 	config = self.ctx.get_config(tg.bld, tg.env)
 
-			cfg_config = tg.path.find_resource('Web.%s.config' % config)
-			if cfg_config:
-				r = source_file('None', self, cfg_config)
-				r.attrs['DependentUpon'] = cfg.name
-				lst[cfg_config.abspath()] = r
+		# 	cfg_config = tg.path.find_resource('Web.%s.config' % config)
+		# 	if cfg_config:
+		# 		r = source_file('None', self, cfg_config)
+		# 		r.attrs['DependentUpon'] = cfg.name
+		# 		lst[cfg_config.abspath()] = r
 
 		settings = []
 
@@ -704,7 +710,10 @@ class vsnode_cs_target(msvs.vsnode_project):
 		p['DebugSymbols'] = getattr(tg, 'csdebug', tg.env.CSDEBUG) and True or False
 		p['DebugType'] = getattr(tg, 'csdebug', tg.env.CSDEBUG)
 		p['Optimize'] = '/optimize+' in tg.env.CSFLAGS
-		p['OutputPath'] = out
+		if getattr(tg, 'ide_aspnet', False):
+			p['OutputPath'] = 'bin'
+		else:
+			p['OutputPath'] = out
 		p['DefineConstants'] = self.combine_flags('/define:')
 		p['ErrorReport'] = 'prompt'
 		p['WarningLevel'] = self.combine_flags('/warn:')
