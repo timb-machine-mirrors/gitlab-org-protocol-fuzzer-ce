@@ -117,7 +117,7 @@ def install_aspnet(self):
 	for x in names:
 		y = self.bld.get_tgen_by_name(x)
 		y.post()
-		task = getattr(y, 'install_task', getattr(y, 'link_task', None))
+		task = getattr(y, 'cs_task', getattr(y, 'link_task', None))
 		self.install_files(inst_to_bin, task.outputs, chmod=Utils.O755)
 
 	content = getattr(self, 'ide_content', [])
