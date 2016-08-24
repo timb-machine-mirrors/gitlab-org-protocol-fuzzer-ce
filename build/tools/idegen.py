@@ -517,8 +517,9 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 			if x.name.endswith('.asax'):
 				cs = x.parent.find_resource(x.name + '.cs')
-				if cs: cs = lst.get(cs.abspath(), None)
-				cs.attrs['DependentUpon'] = x.name
+				if cs: 
+					cs = lst.get(cs.abspath(), None)
+					cs.attrs['DependentUpon'] = x.name
 
 		# Process installed files
 		self.collect_install(lst, 'install_644')
