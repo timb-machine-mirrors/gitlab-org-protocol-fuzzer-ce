@@ -105,6 +105,9 @@ def install_aspnet(self):
 	if getattr(self.bld, 'is_idegen', False):
 		return
 
+	if not getattr(self, 'install_task', False):
+		return
+
 	inst_to = getattr(self, 'install_path', '${BINDIR}')
 	inst_to_bin = inst_to + '/bin'
 
