@@ -87,7 +87,7 @@ def install_fake_lib(self):
 @after_method('apply_cs')
 def install_content(self):
 	names = self.to_list(getattr(self, 'content', []))
-     	get = self.bld.get_tgen_by_name
+   	get = self.bld.get_tgen_by_name
 	for x in names:
 		try:
 			y = get(x)
@@ -105,14 +105,21 @@ def install_aspnet(self):
 	if getattr(self.bld, 'is_idegen', False):
 		return
 
-	self.install_task.dest += '/bin'
+	inst_to = getattr(self, 'install_path', '${BINDIR}')
+	inst_to_bin = inst_to + '/bin'
+
+	self.install_task.dest = inst_to_bin
 
 	names = self.to_list(getattr(self, 'use', []))
 	for x in names:
 		y = self.bld.get_tgen_by_name(x)
 		y.post()
 		task = getattr(y, 'install_task', getattr(y, 'link_task', None))
-		self.install_files(self.install_task.dest, task.outputs, chmod=Utils.O755)
+		self.install_files(inst_to_bin, task.outputs, chmod=Utils.O755)
+
+	content = getattr(self, 'ide_content', [])
+	if content:
+		self.install_files(inst_to, content, cwd=self.path, relative_trick=True, chmod=Utils.O644)
 
 def install_content2(self):
 	if getattr(self, 'has_installed', False):

@@ -13,7 +13,7 @@ deps = [
 	'System.Web.Services.dll',
 ]
 
-content = bld.path.ant_glob('assets/**/* Images/**/* Web.config **/*.aspx **/*.asax')
+content = bld.path.ant_glob('assets/**/* Images/**/* Web.config **/*.aspx **/*.asax', excl='bin')
 
 bld(
 	name ='PeachDownloader.dll',
@@ -24,6 +24,5 @@ bld(
 	ide_aspnet = True,
 	use = deps,
 	install_path = '${BINDIR}/Downloader',
-	install_644 = content,
 	csdoc = False,
 )
