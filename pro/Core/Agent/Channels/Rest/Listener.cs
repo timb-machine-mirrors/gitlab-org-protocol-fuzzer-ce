@@ -3,7 +3,10 @@
 //
 
 using System;
+using System.Collections;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using NLog;
 using Peach.Core;
@@ -18,6 +21,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		private HttpListener _listener;
+		private Hashtable _registry;
 		private ManualResetEvent _event;
 
 		public RouteHandler Routes { get; private set; }
@@ -34,6 +38,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			{
 				_listener.Close();
 				_listener = null;
+				_registry = null;
 			}
 
 			if (_event != null)
@@ -62,6 +67,11 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_listener = listener;
 			_event = new ManualResetEvent(false);
 
+			var fi = _listener.GetType().GetField("registry", BindingFlags.NonPublic | BindingFlags.Instance);
+			Debug.Assert(fi != null);
+
+			_registry = (Hashtable)fi.GetValue(_listener);
+
 			Uri = new Uri(_listener.Prefixes.First().Replace("+", Environment.MachineName));
 			Routes = new RouteHandler();
 		}
@@ -72,9 +82,21 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 			var response = Routes.Dispatch(ctx.Request);
 
-			response.Complete(ctx);
+			try
+			{
+				response.Complete(ctx);
+			}
+			finally
+			{
+				// The context is added to the registry after the handler runs, and since the
+				// handler unregisters the context, we need to force remove it so we don't have
+				// unbounded memory growth. Unfortunatley we can't do this until the next subsequent request.
+				// See RegisterContext() in https://github.com/MediaBrowser/SocketHttpListener/blob/master/SocketHttpListener/Net/HttpListener.cs
+				lock (_registry)
+					_registry.Clear();
 
-			Logger.Trace("<<< {0} {1}", (int)response.StatusCode, response.StatusCode);
+				Logger.Trace("<<< {0} {1} ({2})", (int)response.StatusCode, response.StatusCode, _registry);
+			}
 		}
 
 		private static HttpListener MakeListener(string prefix)
