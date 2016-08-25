@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+deps = [
+	'FlexNet.Library.dll',
+	'FlexNet.Operations.dll',
+	'Ionic.Zip.dll',
+	'Newtonsoft.Json.dll',
+	'NLog.dll',
+	'System.dll',
+	'System.Configuration.dll',
+	'System.Core.dll',
+	'System.Web.dll',
+	'System.Web.Services.dll',
+]
+
+content = bld.path.ant_glob('assets/**/* Images/**/* Web.config **/*.aspx **/*.asax', excl='bin')
+
+bld(
+	name ='PeachDownloader.dll',
+	features = 'cs',
+	platform = 'AnyCPU',
+	source = bld.path.ant_glob('**/*.cs'),
+	ide_content = content,
+	ide_aspnet = True,
+	use = deps,
+	install_path = '${BINDIR}/Downloader',
+	csdoc = False,
+)

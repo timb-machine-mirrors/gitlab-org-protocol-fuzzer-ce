@@ -65,7 +65,6 @@ def do_install(self, inst_to, attr, chmod, **kw):
 
 def do_install2(self, inst_to, cwd, items, chmod):
 	extras = self.to_nodes(items, path=cwd)
-
 	if extras:
 		if not inst_to:
 			Logs.warn('\'%s\' has no install path but is supposed to install: %s' % (self.name, extras))
@@ -88,13 +87,42 @@ def install_fake_lib(self):
 @after_method('apply_cs')
 def install_content(self):
 	names = self.to_list(getattr(self, 'content', []))
-	get = self.bld.get_tgen_by_name
+   	get = self.bld.get_tgen_by_name
 	for x in names:
 		try:
 			y = get(x)
 			install_content2(y)
 		except Errors.WafError:
 			self.bld.fatal('cs task has no taskgen for content %r' % self)
+
+@feature('cs')
+@after_method('apply_cs')
+def install_aspnet(self):
+	# special installation structure for asp.net projects
+	if not getattr(self, 'ide_aspnet', False):
+		return
+
+	if getattr(self.bld, 'is_idegen', False):
+		return
+
+	if not getattr(self, 'install_task', False):
+		return
+
+	inst_to = getattr(self, 'install_path', '${BINDIR}')
+	inst_to_bin = inst_to + '/bin'
+
+	self.install_task.dest = inst_to_bin
+
+	names = self.to_list(getattr(self, 'use', []))
+	for x in names:
+		y = self.bld.get_tgen_by_name(x)
+		y.post()
+		task = getattr(y, 'cs_task', getattr(y, 'link_task', None))
+		self.install_files(inst_to_bin, task.outputs, chmod=Utils.O755)
+
+	content = getattr(self, 'ide_content', [])
+	if content:
+		self.install_files(inst_to, content, cwd=self.path, relative_trick=True, chmod=Utils.O644)
 
 def install_content2(self):
 	if getattr(self, 'has_installed', False):
@@ -116,7 +144,6 @@ def install_outputs(self):
 	self.install_files('${LIBDIR}', self.link_task.outputs, chmod=Utils.O755)
 
 	# install any pdb or .config files into ${LIBDIR}
-
 	for lib in self.link_task.outputs:
 		# only look for .config if we are mono - as they are the only ones that support this
 		config = self.env.CS_NAME == 'mono' and lib.parent.find_resource(lib.name + '.config')

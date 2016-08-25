@@ -345,8 +345,16 @@ namespace Peach.Pro.Core.Runtime
 			}
 
 			// Add the JobLogger as necessary
-			if (!test.loggers.OfType<JobLogger>().Any())
-				test.loggers.Insert(0, new JobLogger());
+			var jobLogger = test.loggers.OfType<JobLogger>().SingleOrDefault();
+			if (jobLogger == null)
+			{
+				jobLogger = new JobLogger();
+				test.loggers.Insert(0, jobLogger);
+			}
+
+			var configName = pitConfig != null ? pitConfig.Name : _config.pitFile;
+			var jobLicense = _license.NewJob(_config.pitFile, configName, _config.id.ToString());
+			jobLogger.Initialize(_config, jobLicense);
 
 			var job = new Job(_config);
 

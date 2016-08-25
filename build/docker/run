@@ -1,0 +1,4 @@
+#!/bin/sh
+
+docker run -it -v $PWD:/build peach-pro ./waf $*
+docker rm $(docker ps -a -q) &>/dev/null
