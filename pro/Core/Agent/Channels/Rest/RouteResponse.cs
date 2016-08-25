@@ -30,28 +30,35 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			var resp = ctx.Response;
 
-			resp.StatusCode = (int)StatusCode;
-
-			// On mono, reset the connection reuse counter
-			//ctx.ResetReuses();
-
-			if (Content == null)
+			try
 			{
-				resp.ContentLength64 = 0;
-				resp.OutputStream.Close();
-			}
-			else
-			{
-				// Leave the stream at the position it was given to us at
-				// so we can return data starting at an offset.
+				// Don't reuse this connection
+				resp.AddHeader("Connection", "close");
 
-				resp.ContentType = ContentType;
-				resp.ContentLength64 = Content.Length - Content.Position;
+				resp.StatusCode = (int)StatusCode;
 
-				using (var stream = resp.OutputStream)
+				if (Content == null)
 				{
-					Content.CopyTo(stream);
+					resp.ContentLength64 = 0;
+					resp.OutputStream.Close();
 				}
+				else
+				{
+					// Leave the stream at the position it was given to us at
+					// so we can return data starting at an offset.
+
+					resp.ContentType = ContentType;
+					resp.ContentLength64 = Content.Length - Content.Position;
+
+					using (var stream = resp.OutputStream)
+					{
+						Content.CopyTo(stream);
+					}
+				}
+			}
+			finally
+			{
+				resp.Close();
 			}
 		}
 
