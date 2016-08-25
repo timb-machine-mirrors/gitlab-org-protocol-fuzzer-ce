@@ -6,7 +6,8 @@ The _Header_ element models an HTTP header key-value pair. This element is only 
 [source,xml]
 ----
 <Action type="web" method="GET" url="http://www.google.com/users">
-    <Header name="ct" id="Content-Type" value="application/json"/>
+    <Header key="Content-Type" value="application/json"/>
+    
     <Body name="json">
         <DataModel ref="JsonBody" />
     </Body>
@@ -17,11 +18,14 @@ _Attributes:_
 
 _Required:_
 
-name:: Name of parameter.
-id:: Subsitution identifier
+key:: Subsitution identifier
 
 _Optional:_
 
+name:: 
+    Name of parameter.  
+    When not specified a sanitized version of _key_ will be used to generate a name.
+    The _name_ field is shown in the job metrics.
 xref:value[value]:: 
     Default value. When used a DataModel is automatically created and attached to this element.
     Cannot be used in conjunction with a DataModel child element.
@@ -59,7 +63,7 @@ Example setting the Content-Type header field.
     
         <Action type="web" method="POST" url="http://www.example.com/users">
             
-            <Header name="ct" id="Content-Type" value="application/json"/>
+            <Header key="Content-Type" value="application/json"/>
             
             <Body name="json">
                 <DataModel ref="NewUser" />
