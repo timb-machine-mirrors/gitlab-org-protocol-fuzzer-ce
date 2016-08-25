@@ -1,0 +1,4 @@
+#!/bin/sh
+
+docker build -t peach-downloader .
+docker rmi $(docker images -q -f dangling=true) 2>/dev/null
