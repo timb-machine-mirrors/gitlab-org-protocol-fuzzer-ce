@@ -144,6 +144,7 @@ def configure(conf):
 		'vnum',
 		'subst',
 		'msbuild',
+		'flexnetls',
 	])
 
 	cppflags = [
