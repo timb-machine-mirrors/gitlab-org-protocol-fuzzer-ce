@@ -106,6 +106,7 @@ def prepare(conf):
 		'subst',
 		'network',
 		'unix',
+		'flexnetls',
 	])
 
 def configure(conf):
