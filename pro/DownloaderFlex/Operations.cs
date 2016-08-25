@@ -11,11 +11,11 @@ namespace PeachDownloader
 {
 	public class Operations
 	{
-		static Logger _logger = LogManager.GetCurrentClassLogger();
+		static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		private string _username;
-		private string _password;
-		private EnvironmentType _env;
+		private readonly string _username;
+		private readonly string _password;
+		private readonly EnvironmentType _env;
 		private readonly NetworkCredential _creds;
 
 		private static readonly string BaseFeature = ConfigurationManager.AppSettings["OperationsBaseFeature"];
@@ -82,7 +82,7 @@ namespace PeachDownloader
 					foreach (var item in entitlement.simpleEntitlement.lineItems)
 					{
 						var product = fno.GetProduct(item.product.primaryKeys.name, item.product.primaryKeys.version);
-						if (!product.features.Any(x => x.featureIdentifier.primaryKeys.name == BaseFeature))
+						if (product.features.All(x => x.featureIdentifier.primaryKeys.name != BaseFeature))
 							continue;
 
 						var act = new Activation
