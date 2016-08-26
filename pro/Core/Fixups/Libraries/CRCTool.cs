@@ -40,6 +40,7 @@ namespace Peach.Pro.Core.Fixups.Libraries
 		private ulong crcxor = 0x0;
 		private int refin = 0;
 		private int refout = 0;
+		private ulong mask = ulong.MaxValue;
 
 		private ulong crcmask;
 		private ulong crchighbit;
@@ -48,7 +49,7 @@ namespace Peach.Pro.Core.Fixups.Libraries
 		private ulong[] crctab = new ulong[256];
 
 		// Enumeration used in the init function to specify which CRC algorithm to use
-		public enum CRCCode { CRC_CCITT, CRC16, CRC32, CRC16_Modbus, DNP3 };
+		public enum CRCCode { CRC_CCITT, CRC16, CRC32, CRC32_16, CRC16_Modbus, DNP3 };
 
 		public CRCTool()
 		{
@@ -69,6 +70,9 @@ namespace Peach.Pro.Core.Fixups.Libraries
 					break;
 				case CRCCode.CRC16_Modbus:
 					order = 16; direct = 1; polynom = 0x8005; crcinit = 0xFFFF; crcxor = 0x0; refin = 1; refout = 1;
+					break;
+				case CRCCode.CRC32_16:
+					order = 32; direct = 1; polynom = 0x4c11db7; crcinit = 0xFFFFFFFF; crcxor = 0xFFFFFFFF; refin = 1; refout = 1; mask = 0xffff;
 					break;
 				case CRCCode.CRC32:
 					order = 32; direct = 1; polynom = 0x4c11db7; crcinit = 0xFFFFFFFF; crcxor = 0xFFFFFFFF; refin = 1; refout = 1;
@@ -160,7 +164,7 @@ namespace Peach.Pro.Core.Fixups.Libraries
             }
             crc ^= crcxor;
             crc &= crcmask;
-            return (crc);
+            return (crc & mask);
         }
         /// <summary>
         /// 4 ways to calculate the crc checksum. If you have to do a lot of encoding
@@ -196,7 +200,7 @@ namespace Peach.Pro.Core.Fixups.Libraries
             }
             crc ^= crcxor;
             crc &= crcmask;
-            return (crc);
+            return (crc & mask);
         }
 
 		public ulong crctablefast(Stream stream)
@@ -234,7 +238,7 @@ namespace Peach.Pro.Core.Fixups.Libraries
 			}
 			crc ^= crcxor;
 			crc &= crcmask;
-			return (crc);
+			return (crc & mask);
 		}
 
 		public ulong crctable(byte[] p)

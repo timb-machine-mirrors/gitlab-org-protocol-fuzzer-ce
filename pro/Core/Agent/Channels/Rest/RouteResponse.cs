@@ -30,35 +30,25 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		{
 			var resp = ctx.Response;
 
-			try
+			resp.StatusCode = (int)StatusCode;
+
+			if (Content == null)
 			{
-				// Don't reuse this connection
-				resp.AddHeader("Connection", "close");
-
-				resp.StatusCode = (int)StatusCode;
-
-				if (Content == null)
-				{
-					resp.ContentLength64 = 0;
-					resp.OutputStream.Close();
-				}
-				else
-				{
-					// Leave the stream at the position it was given to us at
-					// so we can return data starting at an offset.
-
-					resp.ContentType = ContentType;
-					resp.ContentLength64 = Content.Length - Content.Position;
-
-					using (var stream = resp.OutputStream)
-					{
-						Content.CopyTo(stream);
-					}
-				}
+				resp.ContentLength64 = 0;
+				resp.OutputStream.Close();
 			}
-			finally
+			else
 			{
-				resp.Close();
+				// Leave the stream at the position it was given to us at
+				// so we can return data starting at an offset.
+
+				resp.ContentType = ContentType;
+				resp.ContentLength64 = Content.Length - Content.Position;
+
+				using (var stream = resp.OutputStream)
+				{
+					Content.CopyTo(stream);
+				}
 			}
 		}
 
