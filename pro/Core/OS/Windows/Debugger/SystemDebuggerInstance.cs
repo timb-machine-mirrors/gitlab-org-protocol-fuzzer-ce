@@ -43,10 +43,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			var procs = SysProcess.GetProcessesByName(processName);
 			if (procs.Length > 0)
 			{
+				var ret = procs[0].Id;
+
 				foreach (var p in procs)
 					p.Close();
 
-				return procs[0].Id;
+				return ret;
 			}
 
 			int pid;
