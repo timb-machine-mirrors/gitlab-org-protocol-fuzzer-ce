@@ -73,7 +73,7 @@ namespace PeachDownloader
 				var entitlements = fno.GetEntitlements(org);
 				foreach (var entitlement in entitlements)
 				{
-					var device = fno.GetDevice(entitlement);
+					var device = fno.GetLicenseServer(entitlement);
 					var deviceUrl = string.Format(
 						ConfigurationManager.AppSettings["OperationsLicenseServerUrl"],
 						device.deviceIdentifier.deviceId
