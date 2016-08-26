@@ -6,14 +6,14 @@ The _Body_ element models the web api/HTTP request body.  Typically it is paired
 [source,xml]
 ----
 <Action type="web" method="GET" url="http://www.google.com/users">
-    <Header name="ct" id="Content-Type" value="application/x-www-form-urlencoded"/>
+    <Header name="ct" key="Content-Type" value="application/x-www-form-urlencoded"/>
     <Body name="JsonBody">
         <DataModel ref="JsonBody" />
     </Body>
 </Action>
 ----
 
-_Attributes:_
+=== Attributes
 
 _Required:_
 
@@ -53,7 +53,7 @@ Example setting the Content-Type header field.
     
         <Action type="web" method="POST" url="http://www.example.com/users">
             
-            <Header name="ct" id="Content-Type" value="application/json"/>
+            <Header name="ct" key="Content-Type" value="application/json"/>
             
             <Body name="json">
                 <DataModel ref="NewUser" />
