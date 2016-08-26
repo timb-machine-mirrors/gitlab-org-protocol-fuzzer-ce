@@ -40,6 +40,8 @@ include::web_FormData.adoc[]
 
 include::web_Body.adoc[]
 
+include::web_Part.adoc[]
+
 include::web_Response.adoc[]
 
 // end

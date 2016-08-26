@@ -10,6 +10,7 @@ This action gives full control over:
  * Query string
  * Headers
  * Form data
+ * Multipart requests
  * Body
  ** Binary
  ** Json
@@ -40,7 +41,7 @@ xref:Analyzers_Xml[Xml]::
 TIP: SSL/TLS is supported, just use +https+ as the protocol in the URL.
 
 NOTE: Must be used with xref:Publishers_WebApi[WebApi] publisher.
- 
+
 === Syntax
 
 [source,xml]
@@ -48,10 +49,10 @@ NOTE: Must be used with xref:Publishers_WebApi[WebApi] publisher.
 <StateModel name="TheStateModel" initialState="InitialState">
 	<State name="InitialState">
 		<Action type="web" method="GET" url="http://localhost/product/{id}">
-            <Path name="Id" id="id" value="100" />
-            <Query name="First" id="first" value="Mike" />
-            <Query name="Last" id="last" value="Smith" />
-            <Header name="CT" id="Content-Type" value="application/json"/>
+            <Path key="id" value="100" />
+            <Query key="first" value="Mike" />
+            <Query key="last" value="Smith" />
+            <Header key="Content-Type" value="application/json"/>
             <Body name="Json">
                 <DataModel ref="JsonBody" />
             </Body>
@@ -92,11 +93,13 @@ xref:web_Query[Query]::
     Defines a querystring key/value pair.  The query portion of the URL will be built using these child elements.
 xref:web_Header[Header]:: Define an HTTP header.
 xref:web_FormData[FormData]::
-    Define a key/value pair of form data. These values are transmitted via the request body. It is not possible to combine FormData with a Body child.
+    Define a key/value pair of form data. These values are transmitted via the request body. It is not possible to combine FormData with a Body or Part child.
 xref:web_Body[Body]::
-    Define the request body. Only one Body child element is allowed.
+    Define the request body. Only one Body child element is allowed.  Body elements cannot be mixed with FormData or Part elements.  Only one type of body is allowed.
+xref:web_Part[Part]::
+    Define a part of a multipart request. Each part can contain xref:web_Header[Header], xref:web_FormData[FormData] and xref:web_Body[Body] child elements. Part elements cannot be used with FormData or Body elements.
 xref:web_Response[Response]::
-    Capture the response with an optional custom data model. Exposes status code, headers and body to scripting and _slurp_ actions.
+    Capture the response with an optional custom data model. Exposes status code, headers and body to scripting and _slurp_ actions.  If omitted, a default Response element is generated to capture the request response.
 
 === Examples
 
@@ -132,7 +135,7 @@ For the GET request, the Result element is used to capture any returned data.
 <StateModel name="Default" initialState="FirstState">
     <State name="FirstState">
         <Action type="web" method="GET" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="1"/>
+            <Path name="Id" key="id" value="1"/>
 
             <Response />
                 <DataModel ref="WebApiResult" />
@@ -140,8 +143,8 @@ For the GET request, the Result element is used to capture any returned data.
         </Action>
 
         <Action type="web" method="GET" url="http://www.example.com/invoices">
-            <Query name="StartDate" id="start_date" value="11-21-2011" />
-            <Query name="EndDate" id="end_date" value="11-21-2015" />
+            <Query name="StartDate" key="start_date" value="11-21-2011" />
+            <Query name="EndDate" key="end_date" value="11-21-2015" />
 
             <Response>
                 <DataModel ref="WebApiResult" />
@@ -149,7 +152,7 @@ For the GET request, the Result element is used to capture any returned data.
         </Action>
 
         <Action type="call" method="POST" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="100" />
+            <Path name="Id" key="id" value="100" />
             <Body name="PostData">
                 <DataModel ref="PostData" />
             </Body>
@@ -197,7 +200,7 @@ The following example provides three fragments using the GET and POST methods.
     <State name="FirstState">
 
         <Action type="web" method="POST" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="1"/>
+            <Path key="id" value="1"/>
 
             <Body name="PostData">
                 <DataModel ref="PostData" />
@@ -236,7 +239,7 @@ The following example provides three fragments using the GET and POST methods.
     <State name="FirstState">
 
         <Action type="web" method="POST" url="http://www.example.com/product/{id}/image">
-            <Path name="Id" id="id" value="1"/>
+            <Path key="id" value="1"/>
             <Body name="PostData">
                 <DataModel ref="PostData" />
                 <Data fileName="image.png" />
@@ -272,8 +275,8 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
     <State name="FirstState">
 	
         <Action type="web" method="GET" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="1"/>
-            <Header name="x-custom" id="X-CustomHeader" value="Hello World!" />
+            <Path key="id" value="1"/>
+            <Header name="x-custom" key="X-CustomHeader" value="Hello World!" />
             <Response/>
         </Action>
 		
@@ -399,3 +402,4 @@ def AwsAuthGen(context, action):
 ----
 
 ===================================
+

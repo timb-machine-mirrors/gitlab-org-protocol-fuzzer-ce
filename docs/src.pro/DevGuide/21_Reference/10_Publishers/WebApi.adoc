@@ -126,7 +126,7 @@ For the GET request, the Result element is used to capture any returned data.
 <StateModel name="Default" initialState="FirstState">
     <State name="FirstState">
         <Action type="web" method="GET" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="1"/>
+            <Path name="Id" key="id" value="1"/>
 
             <Response />
                 <DataModel ref="WebApiResult" />
@@ -134,8 +134,8 @@ For the GET request, the Result element is used to capture any returned data.
         </Action>
 
         <Action type="web" method="GET" url="http://www.example.com/invoices">
-            <Query name="StartDate" id="start_date" value="11-21-2011" />
-            <Query name="EndDate" id="end_date" value="11-21-2015" />
+            <Query name="StartDate" key="start_date" value="11-21-2011" />
+            <Query name="EndDate" key="end_date" value="11-21-2015" />
 
             <Response>
                 <DataModel ref="WebApiResult" />
@@ -143,7 +143,7 @@ For the GET request, the Result element is used to capture any returned data.
         </Action>
 
         <Action type="call" method="POST" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="100" />
+            <Path name="Id" key="id" value="100" />
             <Body name="PostData">
                 <DataModel ref="PostData" />
             </Body>
@@ -191,7 +191,7 @@ The following example provides three fragments using the GET and POST methods.
     <State name="FirstState">
 
         <Action type="web" method="POST" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="1"/>
+            <Path name="Id" key="id" value="1"/>
 
             <Body name="PostData">
                 <DataModel ref="PostData" />
@@ -230,7 +230,7 @@ The following example provides three fragments using the GET and POST methods.
     <State name="FirstState">
 
         <Action type="web" method="POST" url="http://www.example.com/product/{id}/image">
-            <Path name="Id" id="id" value="1"/>
+            <Path name="Id" key="id" value="1"/>
             <Body name="PostData">
                 <DataModel ref="PostData" />
                 <Data fileName="image.png" />
@@ -266,8 +266,8 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
     <State name="FirstState">
 	
         <Action type="web" method="GET" url="http://www.example.com/product/{id}">
-            <Path name="Id" id="id" value="1"/>
-            <Header name="x-custom" id="X-CustomHeader" value="Hello World!" />
+            <Path name="Id" key="id" value="1"/>
+            <Header name="x-custom" key="X-CustomHeader" value="Hello World!" />
             <Response/>
         </Action>
 		
