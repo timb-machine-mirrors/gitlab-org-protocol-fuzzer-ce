@@ -13,7 +13,7 @@ namespace PeachDownloader
 	{
 		static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		private readonly string _username;
+		public string Username { get; set; }
 		private readonly string _password;
 		private readonly EnvironmentType _env;
 		private readonly NetworkCredential _creds;
@@ -22,7 +22,7 @@ namespace PeachDownloader
 
 		public Operations(string user, string pass)
 		{
-			_username = user;
+			Username = user;
 			_password = pass;
 			_env = ConfigurationManager.AppSettings["OperationsEnvironment"] == "PROD" ? EnvironmentType.Production : EnvironmentType.UAT;
 			_creds = new NetworkCredential(
@@ -33,23 +33,24 @@ namespace PeachDownloader
 
 		public bool ValidateCredentials()
 		{
+			return AcquireToken() != null;
+		}
+
+		public string AcquireToken()
+		{
 			try
 			{
-				var creds = new NetworkCredential(_username, _password);
+				var creds = new NetworkCredential(Username, _password);
 				using (var service = Factory.Create<FlexnetAuthenticationService>(_env, creds))
 				{
-					var token = service.getSecureToken(new IdentityType { userId = _username });
-					if (token.token == null)
-						return false;
-
-					//_authToken = token.token;
-					return true;
+					var token = service.getSecureToken(new IdentityType { userId = Username });
+					return token.token;
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "ValidateCredentials failed for user: {0}", _username);
-				return false;
+				_logger.Error(ex, "AcquireToken failed for user: {0}", Username);
+				return null;
 			}
 		}
 
@@ -66,7 +67,7 @@ namespace PeachDownloader
 			try
 			{
 				var fno = new FlexNetOperations(_env, _creds);
-				var user = fno.GetUser(_username);
+				var user = fno.GetUser(Username);
 				var org = user.orgRolesList[0].organization;
 
 				var activations = new List<Activation>();
@@ -101,7 +102,7 @@ namespace PeachDownloader
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Exception in ActivationIds for username: {0}", _username);
+				_logger.Error(ex, "Exception in ActivationIds for username: {0}", Username);
 				return null;
 			}
 		}
