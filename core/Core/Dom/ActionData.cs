@@ -9,7 +9,7 @@ using System.ComponentModel;
 namespace Peach.Core.Dom
 {
 	[Serializable]
-	public class ActionData : INamed
+	public class ActionData : INamed, IActionDataXpath
 	{
 		#region Obsolete Functions
 
@@ -275,5 +275,14 @@ namespace Peach.Core.Dom
 					return string.Join(".", action.parent.Name, action.Name, Name, dataModel.Name);
 			}
 		}
+
+		public virtual IEnumerable<ActionData> XpathData
+		{
+			get
+			{
+				return Enumerable.Empty<ActionData>();
+			}
+		}
+
 	}
 }

@@ -54,6 +54,9 @@ namespace Peach.Core.Dom
 	public delegate void ActionStartingEventHandler(Action action);
 	public delegate void ActionFinishedEventHandler(Action action);
 
+	/// <summary>
+	/// Used by the xpath navigator to get all action data children.
+	/// </summary>
 	public interface IActionDataXpath
 	{
 		IEnumerable<ActionData> XpathData { get; }

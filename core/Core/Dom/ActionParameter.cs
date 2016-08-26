@@ -8,7 +8,7 @@ using System.Xml;
 namespace Peach.Core.Dom
 {
 	[Serializable]
-	public class ActionParameter : ActionData, IActionDataXpath
+	public class ActionParameter : ActionData
 	{
 		public ActionParameter(string name)
 		{
@@ -79,11 +79,6 @@ namespace Peach.Core.Dom
 				data.WritePit(pit);
 
 			pit.WriteEndElement();
-		}
-
-		public virtual IEnumerable<ActionData> XpathData
-		{
-			get { return Enumerable.Empty<ActionData>(); }
 		}
 	}
 }
