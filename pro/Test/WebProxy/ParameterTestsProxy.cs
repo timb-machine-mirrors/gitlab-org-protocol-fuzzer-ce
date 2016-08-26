@@ -3,7 +3,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
@@ -329,6 +331,27 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.Null(param.ShadowParameter);
 			Assert.AreEqual("Foo Bar", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual("Foo Bar", NoSwaggerValuesController.Value);
+		}
+
+		[Test]
+		public void TestMultiPartFormData()
+		{
+			var content = new MultipartFormDataContent();
+			var metadataContent = new ByteArrayContent(Encoding.ASCII.GetBytes("{\"foo\":\"bar\"}"));
+			metadataContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+			content.Add(metadataContent);
+			var imageContent = new ByteArrayContent(Encoding.ASCII.GetBytes("Hello World"));
+			imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+			content.Add(imageContent, "image", "中時東自想図.jpg");
+			var client = GetHttpClient();
+			var response = client.PostAsync(BaseUrl + "/unknown/api/values", content).Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.UnsupportedMediaType, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
 		}
 
 		[Test]
