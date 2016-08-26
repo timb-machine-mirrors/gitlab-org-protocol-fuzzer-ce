@@ -31,7 +31,7 @@ namespace Peach.Pro.Test.WebProxy
 		protected RunContext Context;
 		protected IWebStatus Server;
 		protected TempFile SwaggerFile;
-		protected int Port = 8888;
+		protected int Port;
 		protected WebApiRecorder Recorder;
 
 		/// <summary>
@@ -110,6 +110,8 @@ namespace Peach.Pro.Test.WebProxy
 
 			Recorder = new WebApiRecorder(Port, options);
 			Recorder.Start();
+
+			Port = Recorder.Port;
 		}
 
 		[TearDown]
