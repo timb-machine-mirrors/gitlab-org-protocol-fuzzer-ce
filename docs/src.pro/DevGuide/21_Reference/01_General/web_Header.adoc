@@ -3,6 +3,8 @@
 
 The _Header_ element models an HTTP header key-value pair. This element is only valid when used with a parent element of xref:Action_web[web].
 
+=== Syntax
+
 [source,xml]
 ----
 <Action type="web" method="GET" url="http://www.google.com/users">
@@ -14,7 +16,7 @@ The _Header_ element models an HTTP header key-value pair. This element is only 
 </Action>
 ----
 
-_Attributes:_
+=== Attributes
 
 _Required:_
 

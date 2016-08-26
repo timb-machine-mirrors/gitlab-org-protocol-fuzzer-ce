@@ -3,6 +3,8 @@
 
 The _Query_ element models an HTTP querystring parameter. This element is only valid when used with a parent element of xref:Action_web[web].
 
+=== Syntax
+
 [source,xml]
 ----
 <Action type="web" method="GET" url="http://www.google.com/users">
@@ -11,7 +13,7 @@ The _Query_ element models an HTTP querystring parameter. This element is only v
 </Action>
 ----
 
-_Attributes:_
+=== Attributes
 
 _Required:_
 

@@ -3,6 +3,8 @@
 
 The _FormData_ element models a key-value pair sent via the HTTP body. Normally this is paird with a content type of 'application/x-www-form-urlencoded'. This element is only valid when used with a parent element of xref:Action_web[web]. Multiple _FormData_ elements can be used, but cannot be mixed with _Body_ elements.
 
+=== Syntax
+
 [source,xml]
 ----
 <Action type="web" method="GET" url="http://www.google.com/users">
@@ -12,7 +14,7 @@ The _FormData_ element models a key-value pair sent via the HTTP body. Normally 
 </Action>
 ----
 
-_Attributes:_
+=== Attributes
 
 _Required:_
 
