@@ -106,7 +106,14 @@ namespace Peach.Core.Dom
 
 		public override void WritePit(XmlWriter pit)
 		{
-			pit.WriteStartElement(elementType);
+			var elem = elementType;
+
+			// If we reference another element and are not a root
+			// element then force our name to <Block>
+			if (referenceName != null && parent != null)
+				elem = "Block";
+
+			pit.WriteStartElement(elem);
 
 			if(referenceName != null)
 				pit.WriteAttributeString("ref", referenceName);
