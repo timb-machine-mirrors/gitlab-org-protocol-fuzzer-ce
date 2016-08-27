@@ -309,17 +309,8 @@ namespace PeachDownloader
 		[DefaultValue(1)]
 		public int Version { get; set; }
 
-		/// <summary>
-		/// Available Pits
-		/// </summary>
-		[JsonProperty("pit_archives")]
-		public JsonPit[] PitArchives { get; set; }
-
-		/// <summary>
-		/// Available Pit Packs
-		/// </summary>
-		[JsonProperty("packs")]
-		public PitPacks[] Packs { get; set; }
+		[JsonProperty("pit_features")]
+		public PitFeature[] PitFeatures { get; set; }
 
 		[JsonProperty("flexnetls")]
 		public string[] Flexnet { get; set; }
@@ -411,6 +402,10 @@ namespace PeachDownloader
 
 		public void BuildDownload(Activation activation, string outFile)
 		{
+			// TODO: use CityHash64 to create ShortName for PitFeature
+			var map = _release.PitFeatures.ToDictionary(x => x.Feature);
+			var pendingZips = new Dictionary<string, ZipFile>();
+
 			using (var outZip = new ZipFile(outFile))
 			{
 				var licenseFile = string.Format(
@@ -419,9 +414,35 @@ namespace PeachDownloader
 					activation.ActivationId
 				);
 
-				outZip.AddEntry("Peach.exe.license.config", Encoding.UTF8.GetBytes(licenseFile));
+				outZip.AddEntry("Peach.exe.license.config", licenseFile, Encoding.UTF8);
+
+				foreach (var pit in activation.Pits)
+				{
+					PitFeature feature;
+					if (map.TryGetValue(pit, out feature))
+					{
+						var path = System.IO.Path.Combine(_release.BasePath, feature.Zip);
+
+						ZipFile zip;
+						if (!pendingZips.TryGetValue(path, out zip))
+							pendingZips.Add(path, zip);
+						
+						foreach (var entry in zip)
+						{
+							if (!feature.Exclude.Contains(entry.FileName) && 
+							    !outZip.ContainsEntry(entry.FileName))
+							{
+								outZip.AddEntry(entry.FileName, x => zip[x].OpenReader(), (x, y) => y.Dispose());
+							}
+						}
+					}
+				}
 
 				outZip.Save(outFile);
+				foreach (var zip in pendingZips.Values)
+				{
+					zip.Dispose();
+				}
 			}
 		}
 	}
@@ -464,27 +485,16 @@ namespace PeachDownloader
 		}
 	}
 
-	public class PitPacks
+	public class PitFeature
 	{
-		public string name { get; set; }
+		[JsonProperty("zip")]
+		public string Zip { get; set; }
 
-		/// <summary>
-		/// Name of pit listed in PitArchives
-		/// </summary>
-		public string[] pits { get; set; }
-	}
+		[JsonProperty("feature")]
+		public string Feature { get; set; }
 
-	public class JsonPit
-	{
-		/// <summary>
-		/// name of pit
-		/// </summary>
-		public string name { get; set; }
-
-		/// <summary>
-		/// Zips to include in this pit
-		/// </summary>
-		public string[] archives { get; set; }
+		[JsonProperty("exclude")]
+		public string[] Exclude { get; set; } 
 	}
 
 	public class Build
