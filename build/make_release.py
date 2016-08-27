@@ -286,7 +286,7 @@ if __name__ == "__main__":
 		print ''
 
 		manifest = dict(
-			files = [ x for x in names if r['filter'](x)],
+			files = [ x for x in names if r['filter'](x) ],
 			product = r['product'],
 			build = buildtag,
 			nightly = c.nightly,

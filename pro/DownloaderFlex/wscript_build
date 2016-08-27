@@ -4,16 +4,22 @@ deps = [
 	'FlexNet.Library.dll',
 	'FlexNet.Operations.dll',
 	'Ionic.Zip.dll',
+	'Microsoft.Web.Infrastructure.dll',
 	'Newtonsoft.Json.dll',
 	'NLog.dll',
 	'System.dll',
 	'System.Configuration.dll',
 	'System.Core.dll',
 	'System.Web.dll',
+	'System.Web.Helpers.dll',
+	'System.Web.Razor.dll',
 	'System.Web.Services.dll',
+	'System.Web.WebPages.dll',
+	'System.Web.WebPages.Deployment.dll',
+	'System.Web.WebPages.Razor.dll',
 ]
 
-content = bld.path.ant_glob('assets/**/* Images/**/* Web.config **/*.aspx **/*.asax', excl='bin')
+content = bld.path.ant_glob('assets/**/* Images/**/* Web.config **/*.aspx **/*.asax **/*.cshtml', excl='bin')
 
 bld(
 	name ='PeachDownloader.dll',

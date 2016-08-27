@@ -9,6 +9,14 @@ using NLog;
 
 namespace PeachDownloader
 {
+	public class Activation
+	{
+		public string OrgName;
+		public string ActivationId;
+		public string Product;
+		public string LicenseServerUrl;
+	}
+
 	public class Operations
 	{
 		static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -54,15 +62,7 @@ namespace PeachDownloader
 			}
 		}
 
-		public class Activation
-		{
-			public string OrgName;
-			public string ActivationId;
-			public string Product;
-			public string LicenseServerUrl;
-		}
-
-		public List<Activation> ActivationIds()
+		public List<Activation> GetActivations()
 		{
 			try
 			{
