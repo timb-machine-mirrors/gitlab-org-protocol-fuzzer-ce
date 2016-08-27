@@ -1,6 +1,8 @@
 ﻿@using PeachDownloader;
-@{ Layout="_Layout.cshtml"; }
 @{
+	Layout = "_Layout.cshtml";
+	Page.Title = "Peach Customer Portal";
+
 	if (!AppSession.Current.IsAuthenticated)
 	{
 		Response.Redirect("Default.cshtml", true);
@@ -87,6 +89,8 @@
 		</div>
 	</div>
 </section>
+
+@RenderPage("_Footer.cshtml")
 
 @if (AppSession.Current.IsEulaAccepted && Request["p"] != null)
 {

@@ -1,6 +1,8 @@
 ﻿@using PeachDownloader;
-@{ Layout="_Layout.cshtml"; }
 @{
+	Layout = "_Layout.cshtml";
+	Page.Title = "Peach Customer Portal";
+
 	if (!AppSession.Current.IsAuthenticated)
 	{
 		Response.Redirect("Default.cshtml", true);
@@ -9,17 +11,6 @@
 }
 
 @RenderPage("_NavBar.cshtml")
-<nav id="left-panel">
-	<div id="left-panel-content">
-		<ul>
-			<li class="active">
-				<a href="#"><span class="icon-info-sign"></span>Information</a>
-			</li>
-		</ul>
-	</div>
-	<div class="icon-caret-down"></div>
-	<div class="icon-caret-up"></div>
-</nav>
 <section class="container">
 	<section class="row-fluid">
 		<div class="well widget-pie-charts">
@@ -63,31 +54,35 @@
 
 		<br/>
 
-		<table>
-			<tr>
-				<th>Organization</th>
-				<th>Activation ID</th>
-				<th>Product</th>
-			</tr>
-			@foreach (var act in activations)
-			{
-				var args = HttpUtility.ParseQueryString(string.Empty);
-				args.Add("p", Request["p"]);
-				args.Add("b", Request["b"]);
-				args.Add("f", Request["f"]);
-				args.Add("a", act.ActivationId);
-				var url = string.Format("Eula.cshtml?{0}", args);
-
+		<center>
+			<table>
 				<tr>
-					<td>@act.OrgName</td>
-					<td><a href="@url">@act.ActivationId</a></td>
-					<td>@act.Product</td>
+					<th>Organization</th>
+					<th>Activation ID</th>
+					<th>Product</th>
 				</tr>
-			}
-		</table>
+				@foreach (var act in activations)
+				{
+					var args = HttpUtility.ParseQueryString(string.Empty);
+					args.Add("p", Request["p"]);
+					args.Add("b", Request["b"]);
+					args.Add("f", Request["f"]);
+					args.Add("a", act.ActivationId);
+					var url = string.Format("Eula.cshtml?{0}", args);
+
+					<tr>
+						<td>@act.OrgName</td>
+						<td><a href="@url">@act.ActivationId</a></td>
+						<td>@act.Product</td>
+					</tr>
+				}
+			</table>
+		</center>
 	}
 }
 			</div>
 		</div>
 	</section>
 </section>
+
+@RenderPage("_Footer.cshtml")

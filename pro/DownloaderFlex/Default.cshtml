@@ -1,6 +1,8 @@
 ﻿@using PeachDownloader;
-@{ Layout="_Layout.cshtml"; }
 @{
+	Layout = "_Layout.cshtml";
+	Page.Title = "Peach Customer Portal";
+	Page.BodyClass = "signin-page";
 
 	Response.Cache.SetCacheability(HttpCacheability.NoCache);
 
@@ -31,10 +33,10 @@
 	}
 }
 
-<div class="row">
-<form id="formFlexera" method="post" class="form-horizontal">
-	<fieldset>
-		<img src="Images/peach_fuzzer.png" alt="Peach Fuzzer Professional" width="80%">
+<section id="signin-container" style="margin-top: 19.5px; width: 370px">
+	<div class="header text-center" style="color: #CCC">
+		<img src="Images/peach_fuzzer-white.png" alt="Peach Fuzzer Professional">
+		<hr />
 		<p>
 			Welcome to the Peach Fuzzer download site!
 		</p>
@@ -50,25 +52,18 @@
 				If login issues persist please contact <a href="mailto:support@peachfuzzer.com">support@peachfuzzer.com</a> for assistance.
 			</p>
 		}
-		<div class="form-group">
-			<label for="Username" class="col-sm-2 control-label">Username</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="Username" name="Username" placeholder="Username" required autofocus />
+	</div>
+	<form id="formFlexera" method="post">
+		<fieldset>
+			<div class="fields">
+				<input type="text" name="Username" placeholder="Username" id="Username" tabindex="1" required autofocus>
+				<input type="password" name="Password" placeholder="Password" id="Password" tabindex="2" required>
 			</div>
-		</div>
-		<div class="form-group">
-			<label for="Password" class="col-sm-2 control-label">Password</label>
-			<div class="col-sm-10">
-				<input type="Password" class="form-control" id="Password" name="Password" placeholder="Password" required />
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-offset-2 col-sm-10">
-				<button type="submit" class="btn btn-primary">Sign in</button>
-			</div>
-		</div>
-	</fieldset>
+			<button type="submit" class="btn btn-primary btn-block" tabindex="4">Sign In</button>
+		</fieldset>
 
-	@AntiForgery.GetHtml()
-</form>
-</div>
+		@AntiForgery.GetHtml()
+	</form>
+</section>
+
+@RenderPage("_Footer.cshtml")
