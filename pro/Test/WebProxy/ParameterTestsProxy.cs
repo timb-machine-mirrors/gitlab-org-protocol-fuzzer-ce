@@ -352,6 +352,35 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.AreEqual("POST", op.Method);
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
+
+			var elems = op.DataModel.PreOrderTraverse().Select(e => e.fullName).ToList();
+			var expected = new[]
+			{
+				"Request",
+				"Request.Path",
+				"Request.Path.unknown",
+				"Request.Path.api", 
+				"Request.Path.values",
+				"Request.Headers",
+				"Request.Headers.content-type",
+				"Request.Headers.host",
+				"Request.Headers.content-length",
+				"Request.Headers.expect",
+				"Request.Headers.connection",
+				"Request.Part",
+				"Request.Part.Headers",
+				"Request.Part.Headers.content-type",
+				"Request.Part.Headers.content-disposition",
+				"Request.Part.jsonBody",
+				"Request.Part.jsonBody.foo",
+				"Request.image",
+				"Request.image.Headers",
+				"Request.image.Headers.content-type",
+				"Request.image.Headers.content-disposition",
+				"Request.image.unknownBody",
+			};
+
+			CollectionAssert.AreEqual(expected, elems);
 		}
 
 		[Test]
