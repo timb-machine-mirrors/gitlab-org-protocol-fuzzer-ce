@@ -84,7 +84,7 @@ Web actions are used to perform WebApi calls.
 +
 This action provides full control over the HTTP request.
 The 'method' attribute contains the HTTP method (GET, POST, etc.).
-The 'url' attribute contians the URL with optional parameter substitution tokens.
+The 'url' attribute contains the URL with optional parameter substitution tokens.
 These tokens are replaced with the parameters provided by the 'Path' elements.
 +
 * This example places a call that expects to receive a single parameter: +http://localhost/product/{id}+
@@ -289,7 +289,7 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
 
 The following example shows how to add custom authentication via a python script.
 In this example we will configure a pit for fuzzing an Amazon AWS S3 service endpoint.
-This is only and example and should not actually be used to fuzz AWS.
+This is only an example and should not actually be used to fuzz AWS.
 
 [source,python]
 ----

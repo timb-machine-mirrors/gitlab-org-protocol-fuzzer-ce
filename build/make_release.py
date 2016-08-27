@@ -1,8 +1,38 @@
 #!/usr/bin/env python
 
-import os, sys, argparse, fnmatch, zipfile, shutil, json, datetime
+import os
+import sys
+import argparse
+import fnmatch
+import zipfile
+import shutil
+import json
+import datetime
 
-buildtag = None
+'''
+This script expects the following directory structure:
+output
+  doc/doc.zip
+  pits/${pit}.zip
+  ${platform}_release/pkg/peach-pro-${buildtag}-${platform}_release.zip
+  ${platform}_release/pkg/flexnetls-${platform}.zip
+
+The result should be:    <--- archive to smb://nas/builds/peach-pro
+output
+  release
+  ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+    release.json
+    peach-pro-${buildtag}-${platform}_release.zip
+    flexnetls-${platform}.zip
+    pits
+      ${pit}.zip
+    datasheets
+      html
+        ${pit}.html
+      pdf
+        ${pit}.pdf
+'''
+
 outdir   = 'output'
 reldir   = os.path.join(outdir, 'release')
 pitfile  = os.path.join(outdir, 'pits.zip')
@@ -18,32 +48,13 @@ releases = [
 		'dirname' : '%(buildtag)s',
 		'all'     : 'peach-pro-%(buildtag)s.zip',
 		'product' : 'Peach Studio',
-		'filter'  : lambda s: s.startswith('peach-pro'),
+		'filter'  : lambda s: filter_release(s)
 	},
 ]
 
-'''
-This script expects the following directory structure:
-output
-  doc/doc.zip
-  pits/${pit}.zip
-  ${platform}_release/pkg/peach-pro-${buildtag}-${platform}_release.zip
-
-The result should be:    <--- archive to smb://nas/builds/peach-pro
-output
-  release
-  ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
-    release.json
-    peach-pro-${buildtag}-${platform}_release.zip
-    peach-pro-${buildtag}-${platform}_release.zip.sha1
-    pits
-      ${pit}.zip
-    datasheets
-      html
-        ${pit}.html
-      pdf
-        ${pit}.pdf
-'''
+def filter_release(item):
+	return (item.startswith('peach-pro') and 'release' in item) \
+		or item.startswith('flexnetls')
 
 def to_list(sth):
 	if isinstance(sth, str):
@@ -72,20 +83,8 @@ def glob(root, include = [], exclude = []):
 
 	return ret
 
-def sha1sum(filename):
-	try:
-		from hashlib import sha1 as sha
-	except ImportError:
-		from sha import sha
-
-	with open(filename, 'r') as f:
-		digest = sha(f.read()).hexdigest()
-
-	with open(filename + '.sha1', 'w') as f:
-		f.write('SHA1(%s)= %s\n' % (os.path.basename(filename), digest))
-
 def extract_pkg():
-		# Copy for output/$CFG_release/pkg/*.zip to release folder
+		# Copy output/$CFG_release/pkg/*.zip to release folder
 
 		print ''
 		print 'Extract packages'
@@ -107,8 +106,9 @@ def extract_pkg():
 				for item in os.listdir(path):
 						if not item.endswith('.zip'):
 								continue
-						print ' - %s' % item
-						shutil.copy(os.path.join(path, item), reldir)
+						src = os.path.join(path, item)
+						print '  - %s' % item
+						shutil.copy(src, reldir)
 						pkgs.append((
 							os.path.join(reldir, item),
 							os.path.join(path, 'peach.xsd')
@@ -117,7 +117,7 @@ def extract_pkg():
 		return pkgs
 
 def extract_doc():
-	# Lookfor output/doc.zip
+	# Look for output/doc.zip
 	# Extract to release/tmp/doc and make list of all files
 
 	print ''
@@ -203,8 +203,6 @@ def update_pkg(pkg, xsd, docs):
 
 		z.write(xsd, 'peach.xsd')
 
-	sha1sum(pkg)
-
 def make_pits(dest, library, docs):
 	# Make pits zip and include docs in it
 
@@ -242,8 +240,6 @@ def make_pits(dest, library, docs):
 			zi = z.getinfo(dst)
 			zi.external_attr = mode << 16L
 
-	sha1sum(dest)
-
 def filter_docs(files, filters):
 	ret = []
 	for f in files:
@@ -252,9 +248,12 @@ def filter_docs(files, filters):
 				ret.append((k,f))
 	return ret
 
+def filter_updates(pkg):
+	return 'internal' not in pkg and 'flexnetls' not in pkg
+
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description = 'make release zips')
-	p.add_argument('--buildtag', default = '0.0.0.0', help = 'buildtag')
+	p.add_argument('--buildtag', default = '0.0.0', help = 'buildtag')
 	p.add_argument('--nightly', default = True, help = 'is nightly build')
 
 	c = p.parse_args()
@@ -271,9 +270,8 @@ if __name__ == "__main__":
 	(pit_files, packs, pit_archives) = extract_pits()
 
 	toAdd = filter_docs(docs, peach_docs)
-
 	for pkg, xsd in pkgs:
-		if 'internal' not in pkg:
+		if filter_updates(pkg):
 			update_pkg(pkg, xsd, toAdd)
 
 	d = datetime.datetime.now()
@@ -288,7 +286,7 @@ if __name__ == "__main__":
 		print ''
 
 		manifest = dict(
-			files = [ x for x in names if 'release' in x and r['filter'](x)],
+			files = [ x for x in names if r['filter'](x)],
 			product = r['product'],
 			build = buildtag,
 			nightly = c.nightly,
@@ -312,7 +310,6 @@ if __name__ == "__main__":
 			src = os.path.join(reldir, f)
 			dst = os.path.join(path, f)
 			shutil.copy(src, dst)
-			shutil.copy(src + '.sha1', dst + '.sha1')
 
 		for f in pit_files:
 			src = os.path.join(tmpdir, 'pits', f)
@@ -335,7 +332,6 @@ if __name__ == "__main__":
 	for x, y in pkgs:
 		try:
 			os.unlink(x)
-			os.unlink(x + '.sha1')
 		except:
 			pass
 

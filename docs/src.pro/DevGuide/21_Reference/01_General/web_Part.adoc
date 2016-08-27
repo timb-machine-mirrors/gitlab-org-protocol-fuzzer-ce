@@ -2,7 +2,7 @@
 == Web Part
 
 The _Part_ element allows modeling of HTTP multipart requests. 
-Each part of a multipart request can include it's own set of HTTP headers and a body composed of xref:web_FormData[FormData] elements or a single xref:web_Body[Body] element.
+Each section of a multipart request can include it's own set of HTTP headers and a body composed of xref:web_FormData[FormData] elements or a single xref:web_Body[Body] element.
 This element is only valid when used with a parent element of xref:Action_web[web].
 
 NOTE: A 'Content-Type' header does not need to be provided when modeling a multipart HTTP request. Peach will automatically set the correct content-type header when a child of 'Part' is used.
@@ -41,7 +41,7 @@ name:: Name of parameter.
 _Optional:_
 
 xref:value[value]:: 
-    Default value. When used a DataModel is automatically created and attached to this element.
+    Default value. When used, a DataModel is automatically created and attached to this element.
     Cannot be used in conjunction with a DataModel child element.
 xref:valueType[valueType]:: Format of value attribute. 
 xref:mutable[mutable]:: 

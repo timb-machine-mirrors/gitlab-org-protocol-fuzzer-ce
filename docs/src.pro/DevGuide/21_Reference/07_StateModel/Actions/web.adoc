@@ -263,7 +263,7 @@ The following example provides three fragments using the GET and POST methods.
 ===================================
 
 The following example shows how to set a custom header via the Pit XML.
-The custom header is named "X-CustomeHeader" with a value of "Hello World".
+The custom header is named "X-CustomeHeader" with a value of "Hello World!".
 
 [source,xml]
 ----
@@ -298,7 +298,7 @@ The custom header is named "X-CustomeHeader" with a value of "Hello World".
 
 The following example shows how to add custom authentication via a python script.
 In this example we will configure a pit for fuzzing an Amazon AWS S3 service endpoint.
-This is only and example and should not actually be used to fuzz AWS.
+This is only an example and should not actually be used to fuzz AWS.
 
 [source,python]
 ----
