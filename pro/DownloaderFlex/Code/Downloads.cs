@@ -79,6 +79,28 @@ namespace PeachDownloader
 			}
 		}
 
+		static void BasicDownload(JsonRelease release, string filename)
+		{
+			var Request = HttpContext.Current.Request;
+			var Response = HttpContext.Current.Response;
+			var logger = LogManager.GetCurrentClassLogger();
+
+			var file = release.FlexnetFiles.SingleOrDefault(x => x.Name == filename);
+			if (file == null)
+			{
+				logger.Error("Error 10004: invalid file");
+				Response.Write("Error: 10004");
+				return;
+			}
+
+			Response.Clear();
+			Response.ContentType = "application/octet-stream";
+			Response.AppendHeader("Content-Length", file.Size.ToString());
+			Response.AppendHeader("Content-Disposition", string.Format("attachment; filename=\"{0}\"", file.Name));
+			Response.TransmitFile(file.Path);
+			Response.Flush();
+		}
+
 		public static void Download()
 		{
 			var Request = HttpContext.Current.Request;
@@ -89,6 +111,64 @@ namespace PeachDownloader
 			{
 				logger.Error("Error 10001: Authenticated == false");
 				Response.Write("Error: 10001");
+				return;
+			}
+
+			var product = Request["p"];
+			var build = Request["b"];
+			var filename = Request["f"];
+
+			if (string.IsNullOrEmpty(product) || string.IsNullOrEmpty(build) || string.IsNullOrEmpty(filename))
+			{
+				logger.Error("Error 10002.2: missing one of product, build or file");
+				Response.Write("Error: 10002.2");
+				return;
+			}
+
+			var downloads = AppSession.Current.Downloads;
+			if (downloads == null)
+			{
+				logger.Error("Error 10006: downloads == null");
+				Response.Write("Error: 10006");
+				return;
+			}
+
+			// Validate product
+			SortedReleases releases;
+			if (!downloads.TryGetValue(product, out releases))
+			{
+				logger.Error("Error 10003.1: invalid product");
+				Response.Write("Error: 10003.1");
+				return;
+			}
+
+			// Validate build
+			JsonRelease release;
+			if (!releases.TryGetValue(Build.Parse(build), out release))
+			{
+				logger.Error("Error 10003.2: invalid build");
+				Response.Write("Error: 10003.2");
+				return;
+			}
+
+			// Handle different versions of releases
+			if (release.Version < 3)
+			{
+				logger.Error("Error 10005: Unsupported release version");
+				Response.Write("Error: 10005");
+				return;
+			}
+
+			if (release.Version != 3)
+			{
+				logger.Error("Error 10008: Unknown version: {0}", release.Version);
+				Response.Write("Error: 10008");
+				return;
+			}
+
+			if (Request["x"] != null)
+			{
+				BasicDownload(release, filename);
 				return;
 			}
 
@@ -113,65 +193,12 @@ namespace PeachDownloader
 
 			AppSession.Current.IsEulaAccepted = false;
 
-			var downloads = AppSession.Current.Downloads;
-			if (downloads == null)
-			{
-				logger.Error("Error 10006: downloads == null");
-				Response.Write("Error: 10006");
-				return;
-			}
-
-			var product = Request["p"];
-			var build = Request["b"];
-			var filename = Request["f"];
-
-			if (string.IsNullOrEmpty(product) || string.IsNullOrEmpty(build) || string.IsNullOrEmpty(filename))
-			{
-				logger.Error("Error 10002.2: missing one of product, build or file");
-				Response.Write("Error: 10002.2");
-				return;
-			}
-
-			// Validate product
-			SortedReleases releases;
-			if (!downloads.TryGetValue(product, out releases))
-			{
-				logger.Error("Error 10003.1: invalid product");
-				Response.Write("Error: 10003.1");
-				return;
-			}
-
-			// Validate build
-			JsonRelease release;
-			if (!releases.TryGetValue(Build.Parse(build), out release))
-			{
-				logger.Error("Error 10003.2: invalid build");
-				Response.Write("Error: 10003.2");
-				return;
-			}
-
 			// Validate file
 			var file = release.Files.SingleOrDefault(x => x.Name == filename);
 			if (file == null)
 			{
 				logger.Error("Error 10004: invalid file");
 				Response.Write("Error: 10004");
-				Response.End();
-				return;
-			}
-
-			// Handle different versions of releases
-			if (release.Version < 3)
-			{
-				logger.Error("Error 10005: Unsupported release version");
-				Response.Write("Error: 10005");
-				return;
-			}
-
-			if (release.Version != 3)
-			{
-				logger.Error("Error 10008: Unknown version: {0}", release.Version);
-				Response.Write("Error: 10008");
 				return;
 			}
 
@@ -294,6 +321,9 @@ namespace PeachDownloader
 		[JsonProperty("packs")]
 		public PitPacks[] Packs { get; set; }
 
+		[JsonProperty("flexnetls")]
+		public string[] Flexnet { get; set; }
+
 		public string BasePath { get; set; }
 
 		public static JsonRelease Load(string dir)
@@ -318,9 +348,20 @@ namespace PeachDownloader
 			{
 				if (Dist == null)
 					return new DownloadFile[0];
-				return Dist.Select(x => new DownloadFile(this, x));
+				return Dist.Select(x => new DownloadFile(this, x)).OrderBy(x => x.Name);
 			}
 		}
+
+		public IEnumerable<FlexnetFile> FlexnetFiles
+		{
+			get
+			{
+				if (Dist == null)
+					return new FlexnetFile[0];
+				return Flexnet.Select(x => new FlexnetFile(this, x)).OrderBy(x => x.Name);
+			}
+		}
+
 	}
 
 	public class DownloadFile
@@ -353,7 +394,7 @@ namespace PeachDownloader
 
 		public long SizeInMB
 		{
-			get { return Size / 1048576; }
+			get { return Size / 1024 / 1024; }
 		}
 
 		public string Url
@@ -381,6 +422,44 @@ namespace PeachDownloader
 				outZip.AddEntry("Peach.exe.license.config", Encoding.UTF8.GetBytes(licenseFile));
 
 				outZip.Save(outFile);
+			}
+		}
+	}
+
+	public class FlexnetFile
+	{
+		JsonRelease _release;
+
+		internal FlexnetFile(JsonRelease release, string file)
+		{
+			_release = release;
+			Name = file;
+			Path = System.IO.Path.Combine(release.BasePath, file);
+		}
+
+		public string Name { get; private set; }
+		public string Path { get; private set; }
+
+		public long Size
+		{
+			get { return new FileInfo(Path).Length; }
+		}
+
+		public long SizeInMB
+		{
+			get { return Size / 1024 / 1024; }
+		}
+
+		public string Url
+		{
+			get
+			{
+				var args = HttpUtility.ParseQueryString(string.Empty);
+				args.Add("p", _release.Product);
+				args.Add("b", _release.Build);
+				args.Add("f", Name);
+				args.Add("x", "1");
+				return string.Format("Download.cshtml?{0}", args);
 			}
 		}
 	}

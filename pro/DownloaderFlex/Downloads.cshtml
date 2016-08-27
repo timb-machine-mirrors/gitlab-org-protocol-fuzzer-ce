@@ -64,6 +64,19 @@
 											</td>
 										</tr>
 									}
+									@foreach (var file in release.FlexnetFiles)
+									{
+										<tr>
+											<td>@file.Name</td>
+											<td></td>
+											<td>@file.SizeInMB MB</td>
+											<td>
+												<a href="@file.Url" alt="Download">
+													<span class="icon-download"></span>
+												</a>
+											</td>
+										</tr>
+									}
 									</tbody>
 								</table>
 							</div>
@@ -84,5 +97,17 @@
 	args.Add("a", Request["a"]);
 	var url = string.Format("Download.cshtml?{0}", args);
 
-	<iframe style="display:none;" width="1" height="1" src="@url" />
-}		
+	<iframe style="display:none" width="1" height="1" src="@url" />
+}
+
+@if (Request["x"] != null)
+{
+	var args = HttpUtility.ParseQueryString(string.Empty);
+	args.Add("p", Request["p"]);
+	args.Add("b", Request["b"]);
+	args.Add("f", Request["f"]);
+	args.Add("x", Request["x"]);
+	var url = string.Format("Download.cshtml?{0}", args);
+
+	<iframe style="display:none" width="1" height="1" src="@url" />
+}
