@@ -37,7 +37,7 @@ using uint8 = System.Byte;
 using uint32 = System.UInt32;
 using uint64 = System.UInt64;
 
-namespace Peach.Pro.Core.License
+namespace Google
 {
 	using uint128 = UInt128;
 

@@ -9,6 +9,7 @@ deps = [
 	'Facades/System.Threading.Tasks.dll',
 	'FlxClientCommon.dll',
 	'FlxLicensingClient.dll',
+	'Google.CityHash.dll',
 	'Ionic.Zip.dll',
 	'IronPython.dll',
 	'komodo_net.dll',
