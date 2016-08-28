@@ -5,12 +5,13 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using Google;
 using Ionic.Zip;
 using Newtonsoft.Json;
-using NLog;
 
 namespace PeachDownloader
 {
@@ -83,13 +84,12 @@ namespace PeachDownloader
 		{
 			var Request = HttpContext.Current.Request;
 			var Response = HttpContext.Current.Response;
-			var logger = LogManager.GetCurrentClassLogger();
 
 			var file = release.FlexnetFiles.SingleOrDefault(x => x.Name == filename);
 			if (file == null)
 			{
-				logger.Error("Error 10004: invalid file");
-				Response.Write("Error: 10004");
+				Response.StatusCode = (int)HttpStatusCode.NotFound;
+				Response.Write("Error: 10010");
 				return;
 			}
 
@@ -105,11 +105,10 @@ namespace PeachDownloader
 		{
 			var Request = HttpContext.Current.Request;
 			var Response = HttpContext.Current.Response;
-			var logger = LogManager.GetCurrentClassLogger();
 
 			if (!AppSession.Current.IsAuthenticated)
 			{
-				logger.Error("Error 10001: Authenticated == false");
+				Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 				Response.Write("Error: 10001");
 				return;
 			}
@@ -120,16 +119,16 @@ namespace PeachDownloader
 
 			if (string.IsNullOrEmpty(product) || string.IsNullOrEmpty(build) || string.IsNullOrEmpty(filename))
 			{
-				logger.Error("Error 10002.2: missing one of product, build or file");
-				Response.Write("Error: 10002.2");
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				Response.Write("Error: 10002");
 				return;
 			}
 
 			var downloads = AppSession.Current.Downloads;
 			if (downloads == null)
 			{
-				logger.Error("Error 10006: downloads == null");
-				Response.Write("Error: 10006");
+				Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+				Response.Write("Error: 10003");
 				return;
 			}
 
@@ -137,8 +136,8 @@ namespace PeachDownloader
 			SortedReleases releases;
 			if (!downloads.TryGetValue(product, out releases))
 			{
-				logger.Error("Error 10003.1: invalid product");
-				Response.Write("Error: 10003.1");
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				Response.Write("Error: 10004");
 				return;
 			}
 
@@ -146,23 +145,23 @@ namespace PeachDownloader
 			JsonRelease release;
 			if (!releases.TryGetValue(Build.Parse(build), out release))
 			{
-				logger.Error("Error 10003.2: invalid build");
-				Response.Write("Error: 10003.2");
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				Response.Write("Error: 10005");
 				return;
 			}
 
 			// Handle different versions of releases
 			if (release.Version < 3)
 			{
-				logger.Error("Error 10005: Unsupported release version");
-				Response.Write("Error: 10005");
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				Response.Write("Error: 10006");
 				return;
 			}
 
 			if (release.Version != 3)
 			{
-				logger.Error("Error 10008: Unknown version: {0}", release.Version);
-				Response.Write("Error: 10008");
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				Response.Write("Error: 10007");
 				return;
 			}
 
@@ -174,8 +173,8 @@ namespace PeachDownloader
 
 			if (!AppSession.Current.IsEulaAccepted)
 			{
-				logger.Error("Error 10002: AcceptLicense == false");
-				Response.Write("Error: 10002");
+				Response.StatusCode = (int)HttpStatusCode.Forbidden;
+				Response.Write("Error: 10008");
 				return;
 			}
 
@@ -183,8 +182,8 @@ namespace PeachDownloader
 
 			if (string.IsNullOrEmpty(activationId))
 			{
-				logger.Error("Error 10002.1: ActivationId is null or empty");
-				Response.Write("Error: 10002.1");
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				Response.Write("Error: 10009");
 				return;
 			}
 
@@ -197,8 +196,8 @@ namespace PeachDownloader
 			var file = release.Files.SingleOrDefault(x => x.Name == filename);
 			if (file == null)
 			{
-				logger.Error("Error 10004: invalid file");
-				Response.Write("Error: 10004");
+				Response.StatusCode = (int)HttpStatusCode.NotFound;
+				Response.Write("Error: 10010");
 				return;
 			}
 
@@ -220,8 +219,9 @@ namespace PeachDownloader
 				}
 				catch (Exception ex)
 				{
-					logger.Error("Error 10006: {0}", ex.ToString());
-					Response.Write("Error: 10006");
+					Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+					Response.Write("Error: 10011\r\n");
+					Response.Write(ex.ToString());
 					return;
 				}
 
@@ -236,8 +236,9 @@ namespace PeachDownloader
 				}
 				catch (Exception ex)
 				{
-					logger.Error("Error 10007: {0}", ex.ToString());
-					Response.Write("Error: 10007");
+					Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+					Response.Write("Error: 10012\r\n");
+					Response.Write(ex.ToString());
 				}
 			}
 			finally
@@ -358,6 +359,7 @@ namespace PeachDownloader
 	public class DownloadFile
 	{
 		JsonRelease _release;
+		const string PitPrefix = "PeachPit-";
 
 		const string LicenseConfigTemplate = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -400,10 +402,14 @@ namespace PeachDownloader
 			}
 		}
 
+		string FeatureName(string name)
+		{
+			return PitPrefix + CityHash.CityHash64(name).ToString("X16");
+		}
+
 		public void BuildDownload(Activation activation, string outFile)
 		{
-			// TODO: use CityHash64 to create ShortName for PitFeature
-			var map = _release.PitFeatures.ToDictionary(x => x.Feature);
+			var map = _release.PitFeatures.ToDictionary(x => FeatureName(x.Feature));
 			var pendingZips = new Dictionary<string, ZipFile>();
 
 			using (var outZip = new ZipFile(outFile))
@@ -415,6 +421,7 @@ namespace PeachDownloader
 				);
 
 				outZip.AddEntry("Peach.exe.license.config", licenseFile, Encoding.UTF8);
+				outZip.AddFile(System.IO.Path.Combine(_release.BasePath, "pits", "Peach.Pro.Pits.dll"), "pits");
 
 				foreach (var pit in activation.Pits)
 				{
@@ -425,14 +432,18 @@ namespace PeachDownloader
 
 						ZipFile zip;
 						if (!pendingZips.TryGetValue(path, out zip))
+						{
+							zip = new ZipFile(path);
 							pendingZips.Add(path, zip);
+						}
 						
 						foreach (var entry in zip)
 						{
+							var relpath = System.IO.Path.Combine("pits", entry.FileName);
 							if (!feature.Exclude.Contains(entry.FileName) && 
-							    !outZip.ContainsEntry(entry.FileName))
+							    !outZip.ContainsEntry(relpath))
 							{
-								outZip.AddEntry(entry.FileName, x => zip[x].OpenReader(), (x, y) => y.Dispose());
+								outZip.AddEntry(relpath, x => zip[entry.FileName].OpenReader(), (x, y) => y.Dispose());
 							}
 						}
 					}

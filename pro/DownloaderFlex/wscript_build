@@ -3,6 +3,7 @@
 deps = [
 	'FlexNet.Library.dll',
 	'FlexNet.Operations.dll',
+	'Google.CityHash.dll',
 	'Ionic.Zip.dll',
 	'Microsoft.Web.Infrastructure.dll',
 	'Newtonsoft.Json.dll',
