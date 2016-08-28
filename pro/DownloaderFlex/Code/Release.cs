@@ -95,7 +95,6 @@ namespace PeachDownloader
 	public class DownloadFile
 	{
 		Release _release;
-		const string PitPrefix = "PeachPit-";
 
 		const string LicenseConfigTemplate = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
@@ -140,7 +139,7 @@ namespace PeachDownloader
 
 		string FeatureName(string name)
 		{
-			return PitPrefix + CityHash.CityHash64(name).ToString("X16");
+			return Operations.PitPrefix + CityHash.CityHash64(name).ToString("X16");
 		}
 
 		public void BuildDownload(Activation activation, string outFile)

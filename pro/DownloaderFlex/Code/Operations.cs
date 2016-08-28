@@ -22,7 +22,9 @@ namespace PeachDownloader
 	{
 		static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+		public const string PitPrefix = "PeachPit-";
 		public string Username { get; set; }
+
 		readonly string _password;
 		readonly EnvironmentType _env;
 		readonly NetworkCredential _creds;
@@ -115,7 +117,7 @@ namespace PeachDownloader
 							var name = feature.featureIdentifier.primaryKeys.name;
 							if (name == BaseFeature)
 								candidates.Add(item);
-							else if (name.StartsWith("PeachPit-"))
+							else if (name.StartsWith(PitPrefix))
 								pits.Add(name);
 						}
 					}
