@@ -16,9 +16,12 @@ RUN echo "deb http://download.mono-project.com/repo/debian wheezy main" > /etc/a
 	&& apt-get install -y \
 		build-essential \
 		clang \
+		doxygen \
 		g++-multilib \
+		libxml2-utils \
 		mono-complete \
 		npm \
+		openjdk-7-jdk \
 		python \
 		ruby2.2 \
 		xsltproc \
