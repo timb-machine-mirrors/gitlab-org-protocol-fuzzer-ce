@@ -53,8 +53,7 @@ releases = [
 ]
 
 def filter_release(item):
-	return (item.startswith('peach-pro') and 'release' in item) \
-		or item.startswith('flexnetls')
+	return item.startswith('peach-pro') and 'release' in item
 
 def to_list(sth):
 	if isinstance(sth, str):
@@ -84,37 +83,37 @@ def glob(root, include = [], exclude = []):
 	return ret
 
 def extract_pkg():
-		# Copy output/$CFG_release/pkg/*.zip to release folder
+	# Copy output/$CFG_release/pkg/*.zip to release folder
 
-		print ''
-		print 'Extract packages'
-		print ''
+	print ''
+	print 'Extract packages'
+	print ''
 
-		pkgs = []
+	pkgs = []
 
-		for cfg in os.listdir(outdir):
-				if not cfg.endswith('release'):
-						print 'IGNORING   %s' % cfg
-						continue
+	for cfg in os.listdir(outdir):
+			if not cfg.endswith('release'):
+					print 'IGNORING   %s' % cfg
+					continue
 
-				path = os.path.join(outdir, cfg, 'pkg')
-				if not os.path.exists(path):
-						continue
+			path = os.path.join(outdir, cfg, 'pkg')
+			if not os.path.exists(path):
+					continue
 
-				print 'PROCESSING %s' % cfg
+			print 'PROCESSING %s' % cfg
 
-				for item in os.listdir(path):
-						if not item.endswith('.zip'):
-								continue
-						src = os.path.join(path, item)
-						print '  - %s' % item
-						shutil.copy(src, reldir)
-						pkgs.append((
-							os.path.join(reldir, item),
-							os.path.join(path, 'peach.xsd')
-						))
+			for item in os.listdir(path):
+					if not item.endswith('.zip'):
+							continue
+					src = os.path.join(path, item)
+					print '  - %s' % item
+					shutil.copy(src, reldir)
+					pkgs.append((
+						os.path.join(reldir, item),
+						os.path.join(path, 'peach.xsd')
+					))
 
-		return pkgs
+	return pkgs
 
 def extract_doc():
 	# Look for output/doc.zip
@@ -162,6 +161,8 @@ def extract_pits():
 				packs = z.read(i)
 			if os.path.basename(i.filename) == 'shipping_pits.json':
 				archives = z.read(i)
+			if os.path.basename(i.filename) == 'manifest.json':
+				archives = z.read(i)
 			if i.filename.endswith('.zip'):
 				print ' - %s' % i.filename
 				z.extract(i, pitdir)
@@ -175,8 +176,9 @@ def extract_pits():
 
 	packs = json.loads(packs)
 	archives = json.loads(archives)
+	manifest = json.loads(manifest)
 
-	return (files, packs, archives)
+	return (files, packs, archives, manifest)
 
 def update_pkg(pkg, xsd, docs):
 	# Add all files in docs to pkg zip
@@ -248,13 +250,22 @@ def filter_docs(files, filters):
 				ret.append((k,f))
 	return ret
 
+def convert_manifest(manifest):
+	ret = []
+	for k, v in manifest['Features']:
+		ret.append(dict(
+			feature = k,
+			zip = v['Zip'],
+			exclude = v['Assets'],
+		))
+	return ret
+
 def filter_updates(pkg):
 	return 'internal' not in pkg and 'flexnetls' not in pkg
 
 if __name__ == "__main__":
 	p = argparse.ArgumentParser(description = 'make release zips')
 	p.add_argument('--buildtag', default = '0.0.0', help = 'buildtag')
-	p.add_argument('--nightly', default = True, help = 'is nightly build')
 
 	c = p.parse_args()
 	buildtag = c.buildtag
@@ -267,7 +278,7 @@ if __name__ == "__main__":
 
 	pkgs = extract_pkg()
 	docs = extract_doc()
-	(pit_files, packs, pit_archives) = extract_pits()
+	(pit_files, packs, pit_archives, manifest) = extract_pits()
 
 	toAdd = filter_docs(docs, peach_docs)
 	for pkg, xsd in pkgs:
@@ -286,14 +297,15 @@ if __name__ == "__main__":
 		print ''
 
 		manifest = dict(
-			files = [ x for x in names if r['filter'](x)],
+			dist = [ x for x in names if r['filter'](x) ],
 			product = r['product'],
 			build = buildtag,
-			nightly = c.nightly,
 			version = 3,
 			date = '%s/%s/%s' % (d.day, d.month, d.year),
 			pit_archives = pit_archives,
 			packs = packs,
+			pit_features = convert_manifest(manifest),
+			flexnetls = [ x for x in names if 'flexnetls' in x ],
 		)
 
 		if not manifest['files']:

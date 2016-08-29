@@ -1,0 +1,117 @@
+﻿@using PeachDownloader;
+@{
+	Layout = "_Layout.cshtml";
+	Page.Title = "Peach Customer Portal";
+
+	if (!AppSession.Current.IsAuthenticated)
+	{
+		Response.Redirect("Default.cshtml", true);
+		return;
+	}
+
+	var downloads = new Downloads();
+}
+
+@RenderPage("_NavBar.cshtml")
+
+<nav id="left-panel">
+	<div id="left-panel-content">
+		<ul>
+			@{
+				var active = Request.QueryString["v"];
+				foreach (var version in downloads.GetReleases().Reverse())
+				{
+					if (active == null) { active = version; }
+					<li class="@(version == active ? "active" : "")">
+						<a href="Downloads.cshtml?v=@version">
+							<span class="icon-circle-blank"></span>@version
+						</a>
+					</li>
+				}
+			}
+		</ul>
+	</div>
+	<div class="icon-caret-down"></div>
+	<div class="icon-caret-up"></div>
+</nav>
+<section class="container">
+	<div class="row-fluid">
+		<div class="span6">
+		@{
+			foreach (var release in downloads.GetReleases(active))
+			{
+				<div class="row-fluid">
+					<div class="span12">
+						<h3 class="box-header">
+							 @release.Build (@release.Date)
+						</h3>
+							<div class="box" style="padding-bottom: 10px">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Download</th>
+										</tr>
+									</thead>
+									<tbody>
+									@foreach (var file in release.Files)
+									{
+										<tr>
+											<td>@file.Name</td>
+											<td></td>
+											<td>@file.SizeInMB MB</td>
+											<td>
+												<a href="@file.Url" alt="Download">
+													<span class="icon-download"></span>
+												</a>
+											</td>
+										</tr>
+									}
+									@foreach (var file in release.FlexnetFiles)
+									{
+										<tr>
+											<td>@file.Name</td>
+											<td></td>
+											<td>@file.SizeInMB MB</td>
+											<td>
+												<a href="@file.Url" alt="Download">
+													<span class="icon-download"></span>
+												</a>
+											</td>
+										</tr>
+									}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				}
+			}
+		</div>
+	</div>
+</section>
+
+@RenderPage("_Footer.cshtml")
+
+@if (AppSession.Current.IsEulaAccepted && Request["p"] != null)
+{
+	var args = HttpUtility.ParseQueryString(string.Empty);
+	args.Add("p", Request["p"]);
+	args.Add("b", Request["b"]);
+	args.Add("f", Request["f"]);
+	args.Add("a", Request["a"]);
+	var url = string.Format("Download.cshtml?{0}", args);
+
+	<iframe style="display:none" width="1" height="1" src="@url" />
+}
+
+@if (Request["x"] != null)
+{
+	var args = HttpUtility.ParseQueryString(string.Empty);
+	args.Add("p", Request["p"]);
+	args.Add("b", Request["b"]);
+	args.Add("f", Request["f"]);
+	args.Add("x", Request["x"]);
+	var url = string.Format("Download.cshtml?{0}", args);
+
+	<iframe style="display:none" width="1" height="1" src="@url" />
+}

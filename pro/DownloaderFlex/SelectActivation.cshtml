@@ -1,0 +1,88 @@
+﻿@using PeachDownloader;
+@{
+	Layout = "_Layout.cshtml";
+	Page.Title = "Peach Customer Portal";
+
+	if (!AppSession.Current.IsAuthenticated)
+	{
+		Response.Redirect("Default.cshtml", true);
+		return;
+	}
+}
+
+@RenderPage("_NavBar.cshtml")
+<section class="container">
+	<section class="row-fluid">
+		<div class="well widget-pie-charts">
+			<div class="box no-border non-collapsible">
+@{
+	var operations = AppSession.Current.Operations;
+	var activations = operations.GetActivations();
+	AppSession.Current.Activations = activations;
+
+	// Auto select single activation id
+	if (activations != null && activations.Count == 1)
+	{
+	    var act = activations[0];
+
+		var args = HttpUtility.ParseQueryString(string.Empty);
+		args.Add("p", Request["p"]);
+		args.Add("b", Request["b"]);
+		args.Add("f", Request["f"]);
+		args.Add("a", act.ActivationId);
+		var url = string.Format("Eula.cshtml?{0}", args);
+
+		Response.Redirect(url, true);
+	}
+		
+	if (activations == null || activations.Count == 0)
+	{
+		<h3>
+			Error, no activations found for your account/organization.
+			Please contact sales@peachfuzzer.com for assistance.
+		</h3>
+	}
+	else
+	{
+		<h4>Select one of the following activations</h4>
+
+		<p>
+			Your download will be pre-configured to use the selected activation ID.
+			The activation ID and license server URL can be changed after download by 
+			modifying the <i>Peach.exe.license.config</i> file.
+		</p>
+
+		<br/>
+
+		<center>
+			<table>
+				<tr>
+					<th>Organization</th>
+					<th>Activation ID</th>
+					<th>Product</th>
+				</tr>
+				@foreach (var act in activations)
+				{
+					var args = HttpUtility.ParseQueryString(string.Empty);
+					args.Add("p", Request["p"]);
+					args.Add("b", Request["b"]);
+					args.Add("f", Request["f"]);
+					args.Add("a", act.ActivationId);
+					var url = string.Format("Eula.cshtml?{0}", args);
+
+					<tr>
+						<td>@act.OrgName</td>
+						<td><a href="@url">@act.ActivationId</a></td>
+						<td>@act.Product</td>
+					</tr>
+				}
+			</table>
+		</center>
+	}
+}
+			</div>
+		</div>
+	</section>
+</section>
+
+@RenderPage("_Footer.cshtml")
