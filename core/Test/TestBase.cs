@@ -98,7 +98,7 @@ namespace Peach.Core.Test
 
 		public static void EnableDebug()
 		{
-			var config = LogManager.Configuration;
+			var config = LogManager.Configuration ?? new LoggingConfiguration();
 			var target = new ColoredConsoleTarget 
 			{ 
 				Layout = "${time} ${logger} ${message} ${exception:format=tostring}" 
@@ -113,7 +113,7 @@ namespace Peach.Core.Test
 
 		public static void EnableTrace()
 		{
-			var config = LogManager.Configuration;
+			var config = LogManager.Configuration ?? new LoggingConfiguration();
 			var target = new ConsoleTarget { Layout = "${time} ${logger} ${message} ${exception:format=tostring}" };
 			var rule = new LoggingRule("*", LogLevel.Trace, target);
 
