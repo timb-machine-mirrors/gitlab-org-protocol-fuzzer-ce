@@ -6,6 +6,68 @@ host_plat = [ 'linux' ]
 
 archs = [ 'x86', 'x86_64' ]
 
+'''
+Compile:
+g++
+-DBIGARRAY_MULTIPLIER=1
+-Wall
+-Werror
+-Wno-unknown-pragmas
+-D__PIN__=1
+-DPIN_CRT=1
+-fno-stack-protector
+-fno-exceptions
+-funwind-tables
+-fasynchronous-unwind-tables
+-fno-rtti
+-DTARGET_{IA32,IA32E}
+-DHOST_{IA32,IA32E}
+-fPIC
+-DTARGET_LINUX
+-fabi-version=2
+-I../../../source/include/pin
+-I../../../source/include/pin/gen
+-isystem /home/peach/pin/pin-3.0-76991-gcc-linux/extras/stlport/include
+-isystem /home/peach/pin/pin-3.0-76991-gcc-linux/extras/libstdc++/include
+-isystem /home/peach/pin/pin-3.0-76991-gcc-linux/extras/crt/include
+-isystem /home/peach/pin/pin-3.0-76991-gcc-linux/extras/crt/include/arch-{x86,x86_64}
+-isystem /home/peach/pin/pin-3.0-76991-gcc-linux/extras/crt/include/kernel/uapi
+-isystem /home/peach/pin/pin-3.0-76991-gcc-linux/extras/crt/include/kernel/uapi/asm-x86
+-I../../../extras/components/include
+-I../../../extras/xed-{ia32,intel64}/include
+-I../../../source/tools/InstLib
+-O3
+-fomit-frame-pointer
+-fno-strict-aliasing
+-m{32,64}
+-c
+-o obj-intel64/MyPinTool.o MyPinTool.cpp
+
+Link:
+g++
+-shared
+-Wl,--hash-style=sysv
+../../../{ia32,intel64}/runtime/pincrt/crtbeginS.o
+-Wl,-Bsymbolic
+-Wl,--version-script=../../../source/include/pin/pintool.ver
+-fabi-version=2
+-m{32,64}
+-o obj-ia32/MyPinTool.so    obj-ia32/MyPinTool.o
+-L../../../{ia32,intel64}/runtime/pincrt
+-L../../../{ia32,intel64}/lib
+-L../../../{ia32,intel64}/lib-ext
+-L../../../extras/xed-{ia32,intel64}/lib
+-lpin
+-lxed
+../../../{ia32,intel64}/runtime/pincrt/crtendS.o
+-lpin3dwarf
+-ldl-dynamic
+-nostdlib
+-lstlport-dynamic
+-lm-dynamic
+-lc-dynamic
+'''
+
 tools = [
 	'gcc',
 	'gxx',

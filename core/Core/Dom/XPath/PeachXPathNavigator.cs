@@ -259,11 +259,11 @@ namespace Peach.Core.Dom.XPath
 				if (actionData == null)
 					return null;
 
-				var param = actionData as ActionParameter;
-				if (param != null)
-					return new ActionParamEntry(_action, param, 0);
+				if (string.IsNullOrEmpty(actionData.Name))
+					return new ModelEntry(actionData.dataModel);
 
-				return new ModelEntry(actionData.dataModel);
+				return new ActionParamEntry(_action, actionData, 0);
+
 			}
 
 			public override Entry GetNext()
@@ -369,11 +369,13 @@ namespace Peach.Core.Dom.XPath
 		class ActionParamEntry : Entry
 		{
 			private readonly IActionDataXpath _parent;
-			private readonly ActionParameter _actionParam;
+			private readonly ActionData _actionParam;
 
-			public ActionParamEntry(IActionDataXpath parent, ActionParameter actionParam, int index)
+			public ActionParamEntry(IActionDataXpath parent, ActionData actionParam, int index)
 				: base(actionParam, index)
 			{
+				Debug.Assert(actionParam.Name != null);
+
 				_parent = parent;
 				_actionParam = actionParam;
 
@@ -434,9 +436,8 @@ namespace Peach.Core.Dom.XPath
 				if (actionData == null)
 					return null;
 
-				var param = actionData as ActionParameter;
-				if (param != null)
-					return new ActionParamEntry(parent, param, index);
+				if (!string.IsNullOrEmpty(actionData.Name))
+					return new ActionParamEntry(parent, actionData, index);
 
 				Debug.Assert(actionData.dataModel != null);
 				return new ModelEntry(actionData.dataModel);

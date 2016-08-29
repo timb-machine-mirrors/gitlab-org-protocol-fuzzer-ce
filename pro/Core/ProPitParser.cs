@@ -207,8 +207,6 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		private string[] _webChildElementNames = {"Path", "Query", "FormData", "Header", "Body"};
-
 		protected override Action handleAction(XmlNode node, State parent)
 		{
 			var action = base.handleAction(node, parent);
@@ -222,16 +220,25 @@ namespace Peach.Pro.Core
 
 				var webAction = (WebAction) action;
 				webAction.Url = node.getAttrString("url");
-				webAction.method = node.getAttrString("method");
+				webAction.Method = node.getAttrString("method");
 
 				foreach (XmlNode child in node)
 				{
-					if (_webChildElementNames.Contains(child.Name))
-						webAction.parameters.Add(ActionWebParameter.PitParser(this, child, webAction));
-					else if (child.Name == "Part")
+					if (child.Name == "Part")
 						handleActionPart(child, webAction);
-					else if(child.Name == "Response")
+					else if (child.Name == "Response")
 						handleActionResponse(child, webAction);
+					else if (child.Name == "Path")
+						webAction.Paths.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Query")
+						webAction.Queries.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Header")
+						webAction.Headers.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "FormData")
+						webAction.FormDatas.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Body")
+						webAction.Body = ActionWebParameter.PitParser(this, child, webAction);
+
 				}
 			}
 
@@ -284,20 +291,20 @@ namespace Peach.Pro.Core
 				}
 			}
 
-			action.parameters.Add(param);
+			action.Parts.Add(param);
 		}
 		protected void handleActionResponse(XmlNode node, WebAction action)
 		{
-			action.result = new ActionWebResponse()
+			action.Response = new ActionWebResponse()
 			{
 				action = action
 			};
 
 			// Data model is not required.
 			if (node.ChildNodes.Count > 0)
-				handleActionData(node, action.result, "<Response> child of ", false);
+				handleActionData(node, action.Response, "<Response> child of ", false);
 			else
-				action.result.dataModel = new DataModel("NULL");
+				action.Response.dataModel = new DataModel("NULL");
 		}
 
 

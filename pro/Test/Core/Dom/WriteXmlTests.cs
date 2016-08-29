@@ -1,11 +1,12 @@
 ﻿using System.IO;
+using System.Text;
 using System.Xml;
 using NUnit.Framework;
-using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.Test;
 using Peach.Pro.Core.Analyzers;
 using Peach.Pro.Core.Dom;
+using UTF8Encoding = Peach.Core.UTF8Encoding;
 
 namespace Peach.Pro.Test.Core.Dom
 {
@@ -225,6 +226,63 @@ namespace Peach.Pro.Test.Core.Dom
 				Assert.Less(-1, pitOut.IndexOf("Relation type=\"size\" of=\"Data\" expressionGet=\"1\" expressionSet=\"1\""));
 				Assert.Less(-1, pitOut.IndexOf("Relation type=\"offset\" of=\"Data2\" relative=\"true\" relativeTo=\"Data\""));
 				Assert.Less(-1, pitOut.IndexOf("Relation type=\"count\" of=\"Array\" expressionGet=\"1\" expressionSet=\"1\""));
+			}
+		}
+
+		[Test]
+		public void WriteDataModelRef()
+		{
+			const string pit = @"
+<Peach>
+	<DataModel name='Template'>
+		<String name='Value' />
+	</DataModel>
+
+	<DataModel name='DM'>
+		<Block name='Inner' ref='Template' />
+	</DataModel>
+
+	<StateModel name='TheStateModel' initialState='initial'>
+		<State name='initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheStateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var dom = ParsePit(pit);
+
+			var settings = new XmlWriterSettings
+			{
+				Encoding = Encoding.UTF8,
+				Indent = true,
+				IndentChars = " ",
+				OmitXmlDeclaration = true
+			};
+
+			var sb = new StringBuilder();
+			using (var sout = new StringWriter(sb))
+			{
+				using (var xml = XmlWriter.Create(sout, settings))
+				{
+					xml.WriteStartDocument();
+
+					dom.WritePit(xml);
+
+					xml.WriteEndDocument();
+				}
+
+				var pitOut = sb.ToString();
+
+				Assert.NotNull(pitOut);
+
+				StringAssert.Contains("<Block ref=\"Template\" name=\"Inner\">", pitOut);
 			}
 		}
 	}

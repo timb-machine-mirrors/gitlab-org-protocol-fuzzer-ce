@@ -46,6 +46,8 @@ deps = [
 	'System.Runtime.Serialization.dll',
 	'System.ServiceProcess.dll',
 	'System.Threading.Tasks.Dataflow.dll',
+	'System.Net.Http.dll',
+	'System.Net.Http.Formatting.dll',
 	'System.Web.dll',
 	'System.Web.Services.dll',
 	'System.Xml.dll',
