@@ -1,33 +1,31 @@
 ﻿@using PeachDownloader;
 @{
-	Layout = "_Layout.cshtml";
-	Page.Title = "Peach Customer Portal";
+		Layout = "_Layout.cshtml";
+		Page.Title = "Peach Customer Portal";
 
-	if (!AppSession.Current.IsAuthenticated)
-	{
-		Response.Redirect("Default.cshtml", true);
-		return;
-	}
+		if (!AppSession.Current.IsAuthenticated)
+		{
+			Response.Redirect("Default.cshtml", true);
+			return;
+		}
 
-	var downloads = new Downloads();
+		var downloads = new Downloads();
 }
-
 @RenderPage("_NavBar.cshtml")
-
 <nav id="left-panel">
 	<div id="left-panel-content">
 		<ul>
 			@{
-				var active = Request.QueryString["v"];
-				foreach (var version in downloads.GetReleases().Reverse())
-				{
-					if (active == null) { active = version; }
-					<li class="@(version == active ? "active" : "")">
-						<a href="Downloads.cshtml?v=@version">
-							<span class="icon-circle-blank"></span>@version
-						</a>
-					</li>
-				}
+					var active = Request.QueryString["v"];
+					foreach (var version in downloads.GetReleases().Reverse())
+					{
+						if (active == null) { active = version; }
+						<li class="@(version == active ? "active" : "")">
+							<a href="Downloads.cshtml?v=@version">
+								<span class="icon-circle-blank"></span>@version
+							</a>
+						</li>
+					}
 			}
 		</ul>
 	</div>
@@ -37,20 +35,20 @@
 <section class="container">
 	<div class="row-fluid">
 		<div class="span6">
-		@{
-			foreach (var release in downloads.GetReleases(active))
-			{
-				<div class="row-fluid">
-					<div class="span12">
-						<h3 class="box-header">
-							 @release.Build (@release.Date)
-						</h3>
+			@{
+				foreach (var release in downloads.GetReleases(active))
+				{
+					<div class="row-fluid">
+						<div class="span12">
+							<h3 class="box-header">
+								@release.Build (@release.Date)
+							</h3>
 							<div class="box" style="padding-bottom: 10px">
 								<table class="table table-hover">
 									<thead>
-										<tr>
-											<th>Download</th>
-										</tr>
+									<tr>
+										<th>Download</th>
+									</tr>
 									</thead>
 									<tbody>
 									@foreach (var file in release.Files)
@@ -88,10 +86,10 @@
 			}
 		</div>
 	</div>
+	<div class="row">
+		@RenderPage("_Footer.cshtml")
+	</div>
 </section>
-
-@RenderPage("_Footer.cshtml")
-
 @if (AppSession.Current.IsEulaAccepted && Request["p"] != null)
 {
 	var args = HttpUtility.ParseQueryString(string.Empty);
@@ -101,9 +99,8 @@
 	args.Add("a", Request["a"]);
 	var url = string.Format("Download.cshtml?{0}", args);
 
-	<iframe style="display:none" width="1" height="1" src="@url" />
+		<iframe style="display:none" width="1" height="1" src="@url" />
 }
-
 @if (Request["x"] != null)
 {
 	var args = HttpUtility.ParseQueryString(string.Empty);
@@ -113,5 +110,5 @@
 	args.Add("x", Request["x"]);
 	var url = string.Format("Download.cshtml?{0}", args);
 
-	<iframe style="display:none" width="1" height="1" src="@url" />
+		<iframe style="display:none" width="1" height="1" src="@url" />
 }
