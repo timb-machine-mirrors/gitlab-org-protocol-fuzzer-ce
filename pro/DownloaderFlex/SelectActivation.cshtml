@@ -12,7 +12,7 @@
 
 @RenderPage("_NavBar.cshtml")
 <section class="container">
-	<section class="row-fluid">
+	<div class="row-fluid">
 		<div class="well widget-pie-charts">
 			<div class="box no-border non-collapsible">
 				@{
@@ -82,7 +82,8 @@
 				}
 			</div>
 		</div>
-	</section>
+	</div>
+	<div class="row">
+		@RenderPage("_Footer.cshtml")
+	</div>
 </section>
-
-@RenderPage("_Footer.cshtml")

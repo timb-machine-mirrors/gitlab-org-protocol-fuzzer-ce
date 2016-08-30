@@ -2,6 +2,7 @@
 @{
 		Layout = "_Layout.cshtml";
 		Page.Title = "Terms and Conditions";
+		Page.BodyStyle = "padding-left: 0";
 
 		if (!AppSession.Current.IsAuthenticated)
 		{
@@ -21,7 +22,7 @@
 			Response.Redirect(string.Format("Downloads.cshtml?{0}", args), true);
 		}
 }
-<div class="fluid-container">
+<div class="container-fluid">
 	<form id="formEula" method="post">
 		<p class="text-center">
 			<strong>PEACH FUZZER FLEX EULA</strong>

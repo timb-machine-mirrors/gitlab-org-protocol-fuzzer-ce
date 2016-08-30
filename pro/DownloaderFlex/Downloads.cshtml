@@ -36,58 +36,60 @@
 	<div class="row-fluid">
 		<div class="span6">
 			@{
-			foreach (var release in downloads.GetReleases(active))
-			{
-							<div class="row-fluid">
-								<div class="span12">
-									<h3 class="box-header">
-										@release.Build (@release.Date)
-									</h3>
-									<div class="box" style="padding-bottom: 10px">
-										<table class="table table-hover">
-											<thead>
-												<tr>
-													<th>Download</th>
-												</tr>
-											</thead>
-											<tbody>
-												@foreach (var file in release.Files)
-												{
-														<tr>
-															<td>@file.Name</td>
-															<td></td>
-															<td>@file.SizeInMB MB</td>
-															<td>
-																<a href="@file.Url" alt="Download">
-																	<span class="icon-download"></span>
-																</a>
-															</td>
-														</tr>
-}
-												@foreach (var file in release.FlexnetFiles)
-												{
-														<tr>
-															<td>@file.Name</td>
-															<td></td>
-															<td>@file.SizeInMB MB</td>
-															<td>
-																<a href="@file.Url" alt="Download">
-																	<span class="icon-download"></span>
-																</a>
-															</td>
-														</tr>
-}
-											</tbody>
-										</table>
-									</div>
-								</div>
+				foreach (var release in downloads.GetReleases(active))
+				{
+					<div class="row-fluid">
+						<div class="span12">
+							<h3 class="box-header">
+								@release.Build (@release.Date)
+							</h3>
+							<div class="box" style="padding-bottom: 10px">
+								<table class="table table-hover">
+									<thead>
+									<tr>
+										<th>Download</th>
+									</tr>
+									</thead>
+									<tbody>
+									@foreach (var file in release.Files)
+									{
+										<tr>
+											<td>@file.Name</td>
+											<td></td>
+											<td>@file.SizeInMB MB</td>
+											<td>
+												<a href="@file.Url" alt="Download">
+													<span class="icon-download"></span>
+												</a>
+											</td>
+										</tr>
+									}
+									@foreach (var file in release.FlexnetFiles)
+									{
+										<tr>
+											<td>@file.Name</td>
+											<td></td>
+											<td>@file.SizeInMB MB</td>
+											<td>
+												<a href="@file.Url" alt="Download">
+													<span class="icon-download"></span>
+												</a>
+											</td>
+										</tr>
+									}
+									</tbody>
+								</table>
 							</div>
-					}
+						</div>
+					</div>
+				}
 			}
 		</div>
 	</div>
+	<div class="row">
+		@RenderPage("_Footer.cshtml")
+	</div>
 </section>
-@RenderPage("_Footer.cshtml")
 @if (AppSession.Current.IsEulaAccepted && Request["p"] != null)
 {
 	var args = HttpUtility.ParseQueryString(string.Empty);
