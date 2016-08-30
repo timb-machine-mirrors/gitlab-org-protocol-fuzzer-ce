@@ -1,0 +1,25 @@
+{
+  "name": "rest_target",
+  "description": "Flask Rest Target",
+  "originalPit": "Net/WebProxy.xml",
+  "config": [],
+  "agents": [
+    {
+      "name": "Local",
+      "agentUrl": "",
+      "monitors": [
+        {
+          "monitorClass": "Syslog",
+          "name": "Syslog",
+          "map": [
+            {
+              "key": "FaultRegex",
+              "value": "(.*syntax error)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "weights": []
+}

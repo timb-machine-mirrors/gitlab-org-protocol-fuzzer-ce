@@ -1,0 +1,6 @@
+httplib2
+flask
+flash-restful
+requests
+pytest
+pytest-peach

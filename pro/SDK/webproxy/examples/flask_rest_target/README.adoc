@@ -1,0 +1,155 @@
+= Rest Target Documentation
+
+The rest target is a working example of a REST API backed by a SQLite database.
+The example target contains one or more SQL injection vulnerabilities that can be 
+identified by fuzzing the API.
+
+This example includes a configuration (.peach file) that has the correct monitors configured.
+
+== Usage
+
+=== Starting Peach Fuzzer Web Proxy
+
+Start the proxy using a custom configuration:
+
+----
+peach rest_target.peach
+----
+
+Use our pytest integration to generate traffic:
+
+----
+pytest --peach=auto test_target.py
+----
+
+== Design
+
+=== Logging
+
+The Rest Target logs to the console and also syslog to host 127.0.0.1.
+
+.Example of SQL statement compile error:
+----
+<11>2016-04-27 18:28:57,431 [ERROR] Error creating user: near "PO": syntax error
+----
+
+=== API Specification
+
+==== GET /api/users
+
+Returns list of all users.
+
+----
+GET /api/users
+----
+
+Response:
+
+[source,java]
+----
+[
+    {
+        "first": "Joe", 
+        "last": "Smith", 
+        "password": "Password!", 
+        "user": "admin", 
+        "user_id": 1
+    }
+]
+----
+
+==== DELETE /api/users?user=USER
+
+Delete a user by user name.
+
+----
+DELETE /api/users?user=admin
+----
+
+Status Code
+----
+204
+----
+
+==== POST /api/users
+
+Create a new user.
+
+----
+POST /api/users
+----
+
+Post Body:
+
+[source,java]
+----
+{
+	"first": "Joe", 
+	"last": "Smith", 
+	"password": "Password!", 
+	"user": "admin", 
+}
+----
+
+Result:
+
+[source,java]
+----
+{
+	"user_id": 2, 
+}
+----
+
+==== GET /api/users/USERID
+
+Get user by user id.
+
+----
+GET /api/users/USERID
+----
+
+Response:
+
+----
+{
+	"first": "Joe", 
+	"last": "Smith", 
+	"password": "Password!", 
+	"user": "admin", 
+	"user_id": 1
+}
+----
+
+==== PUT /api/users/USERID
+
+Update user.
+
+----
+PUT /api/users/2
+----
+
+Put body:
+
+[source,java]
+----
+{
+	"first": "Joe", 
+	"last": "Smith", 
+	"password": "Password!", 
+	"user": "admin", 
+}
+----
+
+==== DELETE /api/users/USERID
+
+Delete specified user.
+
+----
+DELETE /api/users/2
+----
+
+Status Code:
+----
+204
+----
+
