@@ -249,6 +249,18 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override int OnRun(List<string> args)
 		{
+			if (!string.IsNullOrEmpty(_pitLibraryPath) && !string.IsNullOrEmpty(_defPitLibraryPath))
+			{
+				if (_pitLibraryPath != _defPitLibraryPath)
+					throw new PeachException("--pits and -DPitLibraryPath should both specify the same path.");
+			}
+
+			if (string.IsNullOrEmpty(_pitLibraryPath))
+				_pitLibraryPath = _defPitLibraryPath;
+
+			_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
+			_definedValues[PitLibraryPath] = _pitLibraryPath;
+
 			PrepareLicensing(_pitLibraryPath);
 
 			_config.commandLine = args.ToArray();
@@ -438,15 +450,6 @@ namespace Peach.Pro.Core.Runtime
 		/// <param name="extra">Extra command line options</param>
 		protected virtual int OnRunJob(bool test, List<string> extra)
 		{
-			if (!string.IsNullOrEmpty(_pitLibraryPath) && !string.IsNullOrEmpty(_defPitLibraryPath))
-			{
-				if (_pitLibraryPath != _defPitLibraryPath)
-					throw new PeachException("--pits and -DPitLibraryPath should both specify the same path.");
-			}
-
-			if (string.IsNullOrEmpty(_pitLibraryPath))
-				_pitLibraryPath = _defPitLibraryPath;
-
 			if (extra.Count > 0)
 			{
 				// Pit was specified on the command line, do normal behavior
@@ -472,10 +475,6 @@ namespace Peach.Pro.Core.Runtime
 				PitConfig pitConfig = null;
 				if (Path.GetExtension(pitPath) == ".peach")
 				{
-					// Ensure pit library exists
-					_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
-					_definedValues[PitLibraryPath] = _pitLibraryPath;
-
 					pitConfig = PitDatabase.LoadPitConfig(pitPath);
 					pitPath = Path.Combine(_pitLibraryPath, pitConfig.OriginalPit);
 				}
@@ -509,7 +508,6 @@ namespace Peach.Pro.Core.Runtime
 			}
 			else if (!_noweb && CreateWeb != null)
 			{
-				_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 				RunWeb(_pitLibraryPath, !_nobrowser, new InternalJobMonitor(_license));
 			}
 

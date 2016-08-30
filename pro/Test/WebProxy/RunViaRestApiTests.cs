@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Moq;
@@ -9,9 +10,11 @@ using Peach.Pro.Core;
 using Peach.Pro.Core.License;
 using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Runtime;
+using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Test.Core.Storage;
 using Peach.Pro.Test.WebProxy.TestTarget;
 using Monitor = System.Threading.Monitor;
 
@@ -26,13 +29,14 @@ namespace Peach.Pro.Test.WebProxy
 		string _oldLogRoot;
 		InternalJobMonitor _monitor;
 		string _proxyUri;
+		Job _job;
 
 		private const string Pit = @"
 <Peach>
 	<Test name='Default' maxOutputSize='65000'>
 		<WebProxy>
 			<Route
-				url='*' mutate='false'
+				url='*' mutate='true'
 				baseUrl='{0}'
 			/> 
 		</WebProxy>
@@ -85,6 +89,43 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.True(_monitor.ProxyEvent(new SessionTearDownProxyEvent()), "Session TearDown Event Failed!");
 
 			StopJob();
+
+			Assert.NotNull(_job);
+
+			using (var db = new NodeDatabase())
+			{
+				_job = db.GetJob(_job.Guid);
+			}
+
+			using (var db = new JobDatabase(_job.DatabasePath))
+			{
+				DatabaseTests.AssertResult(db.LoadTableKind<StateMetric>(NameKind.Machine), new[]
+				{
+					// Machine metrics include the run count siffux
+					new StateMetric("Test1_1", 9) { Kind = NameKind.Machine },
+					new StateMetric("Test2_1", 9) { Kind = NameKind.Machine },
+				});
+
+				DatabaseTests.AssertResult(db.LoadTableKind<StateMetric>(NameKind.Human), new[]
+				{
+					new StateMetric("Test1", 9) { Kind = NameKind.Human },
+					new StateMetric("Test2", 9) { Kind = NameKind.Human },
+				});
+
+				var actions = db.LoadTable<IterationMetric>().Select(m => m.Action).Distinct().ToList();
+
+				var exp = new[]
+				{
+					"GET_/{unknown}/{api}/{values}/{6}",
+					"GET_/{unknown}/{api}/{values}/{5}",
+					"PUT_/{unknown}/{api}/{values}/{5}",
+					"PUT_/{unknown}/{api}/{values}/{6}",
+				};
+
+				CollectionAssert.AreEquivalent(exp, actions);
+			}
+
+			CleanupJob();
 		}
 
 		[SetUp]
@@ -190,7 +231,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.IsNull(_proxyUri, "Proxy uri should null");
 
-			_monitor.Start(_tmpDir.Path, Path.Combine(_tmpDir.Path, "Rest.peach"), new JobRequest());
+			_job = _monitor.Start(_tmpDir.Path, Path.Combine(_tmpDir.Path, "Rest.peach"), new JobRequest());
 		}
 
 		private void StopJob()
@@ -204,9 +245,12 @@ namespace Peach.Pro.Test.WebProxy
 			if (_monitor != null)
 			{
 				_monitor.Dispose();
-				_tmpDir = null;
+				_monitor = null;
 			}
+		}
 
+		private void CleanupJob()
+		{
 			Configuration.UseAsyncLogging = _oldAsync;
 			Configuration.LogRoot = _oldLogRoot;
 

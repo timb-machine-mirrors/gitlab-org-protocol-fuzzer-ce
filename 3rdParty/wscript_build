@@ -24,6 +24,7 @@ subdirs = [
 	'BouncyCastle/crypto',
 	'BouncyCastle/crypto/test',
 	'FlexNet.Operations-2016.R2',
+	'Google.CityHash',
 	'libusbdotnet',
 	'Managed.AndroidDebugBridge',
 	'pin',

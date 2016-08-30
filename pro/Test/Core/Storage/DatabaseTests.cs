@@ -15,7 +15,7 @@ namespace Peach.Pro.Test.Core.Storage
 {
 	[TestFixture]
 	[Quick]
-	class DatabaseTests
+	public class DatabaseTests
 	{
 		public static void AssertResult<T>(IEnumerable<T> actual, IEnumerable<T> expected)
 		{

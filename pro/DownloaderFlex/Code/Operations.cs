@@ -9,16 +9,27 @@ using NLog;
 
 namespace PeachDownloader
 {
+	public class Activation
+	{
+		public string OrgName;
+		public string ActivationId;
+		public string Product;
+		public string LicenseServerUrl;
+		public string[] Pits;
+	}
+
 	public class Operations
 	{
 		static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+		public const string PitPrefix = "PeachPit-";
 		public string Username { get; set; }
-		private readonly string _password;
-		private readonly EnvironmentType _env;
-		private readonly NetworkCredential _creds;
 
-		private static readonly string BaseFeature = ConfigurationManager.AppSettings["OperationsBaseFeature"];
+		readonly string _password;
+		readonly EnvironmentType _env;
+		readonly NetworkCredential _creds;
+
+		static readonly string BaseFeature = ConfigurationManager.AppSettings["OperationsBaseFeature"];
 
 		public Operations(string user, string pass)
 		{
@@ -54,16 +65,31 @@ namespace PeachDownloader
 			}
 		}
 
-		public class Activation
+		public List<Activation> GetActivations()
 		{
-			public string OrgName;
-			public string ActivationId;
-			public string Product;
-			public string LicenseServerUrl;
-		}
-
-		public List<Activation> ActivationIds()
-		{
+			// for testing multiple activations...
+			//var fno = new FlexNetOperations(_env, _creds);
+			//var user = fno.GetUser(Username);
+			//Console.WriteLine("User: {0}", user.displayName);;
+			//return new List<Activation>
+			//{
+			//	new Activation
+			//	{
+			//		Pits = new string[0],
+			//		ActivationId = "3f83-c70e-e8c6-44db-8230-74c1-cca7-3dc7",
+			//		OrgName = "Acme",
+			//		LicenseServerUrl = "",
+			//		Product = "Product",
+			//	},
+			//	new Activation
+			//	{
+			//		Pits = new string[0],
+			//		ActivationId = "3f83-c70e-e8c6-44db-8230-74c1-cca7-3dc7",
+			//		OrgName = "Acme",
+			//		LicenseServerUrl = "",
+			//		Product = "Product",
+			//	},
+			//};
 			try
 			{
 				var fno = new FlexNetOperations(_env, _creds);
@@ -80,29 +106,40 @@ namespace PeachDownloader
 						device.deviceIdentifier.deviceId
 					);
 
+					var candidates = new List<entitlementLineItemDataType>();
+					var pits = new HashSet<string>();
+
 					foreach (var item in entitlement.simpleEntitlement.lineItems)
 					{
 						var product = fno.GetProduct(item.product.primaryKeys.name, item.product.primaryKeys.version);
-						if (product.features.All(x => x.featureIdentifier.primaryKeys.name != BaseFeature))
-							continue;
-
-						var act = new Activation
+						foreach (var feature in product.features)
 						{
-							ActivationId = item.activationId.id,
-							OrgName = entitlement.simpleEntitlement.soldTo,
-							Product = item.product.primaryKeys.name,
-							LicenseServerUrl = deviceUrl
-						};
-
-						activations.Add(act);
+							var name = feature.featureIdentifier.primaryKeys.name;
+							if (name == BaseFeature)
+								candidates.Add(item);
+							else if (name.StartsWith(PitPrefix))
+								pits.Add(name);
+						}
 					}
+
+					var pitsArray = pits.ToArray();
+					activations.AddRange(candidates.Select(
+						x => new Activation
+						{
+							OrgName = org.primaryKeys.name,
+							LicenseServerUrl = deviceUrl,
+							ActivationId = x.activationId.id,
+							Product = x.product.primaryKeys.name,
+							Pits = pitsArray,
+						}
+					));
 				}
 
 				return activations;
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Exception in ActivationIds for username: {0}", Username);
+				_logger.Error(ex, "Exception in GetActivations for username: {0}", Username);
 				return null;
 			}
 		}
