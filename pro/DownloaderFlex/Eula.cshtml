@@ -1,43 +1,44 @@
 ﻿@using PeachDownloader;
 @{
-	Layout = "_Layout.cshtml";
-	Page.Title = "Terms and Conditions";
+		Layout = "_Layout.cshtml";
+		Page.Title = "Terms and Conditions";
+		Page.BodyStyle = "padding-left: 0";
 
-	if (!AppSession.Current.IsAuthenticated)
-	{
-		Response.Redirect("Default.cshtml", true);
-		return;
-	}
+		if (!AppSession.Current.IsAuthenticated)
+		{
+			Response.Redirect("Default.cshtml", true);
+			return;
+		}
 
-	if (IsPost)
-	{
-		AppSession.Current.IsEulaAccepted = true;
+		if (IsPost)
+		{
+			AppSession.Current.IsEulaAccepted = true;
 
-		var args = HttpUtility.ParseQueryString(string.Empty);
-		args.Add("p", Request["p"]);
-		args.Add("b", Request["b"]);
-		args.Add("f", Request["f"]);
-		args.Add("a", Request["a"]);
-		Response.Redirect(string.Format("Downloads.cshtml?{0}", args), true);
-    }
+			var args = HttpUtility.ParseQueryString(string.Empty);
+			args.Add("p", Request["p"]);
+			args.Add("b", Request["b"]);
+			args.Add("f", Request["f"]);
+			args.Add("a", Request["a"]);
+			Response.Redirect(string.Format("Downloads.cshtml?{0}", args), true);
+		}
 }
-<div class="container">
+<div class="container-fluid">
 	<form id="formEula" method="post">
 		<p class="text-center">
 			<strong>PEACH FUZZER FLEX EULA</strong>
 		</p>
 		<div class="well">
-			BY DOWNLOADING, ACCESSING OR USING THE SOFTWARE, DEFINITION FILES OR FEATURES, YOU AUTOMATICALLY ACKNOWLEDGE, 
-			ACCEPT AND AGREE TO ALL THE TERMS OF THE PEACH FUZZER FLEX END-USER LICENSE AGREEMENT LOCATED AT 
+			BY DOWNLOADING, ACCESSING OR USING THE SOFTWARE, DEFINITION FILES OR FEATURES, YOU AUTOMATICALLY ACKNOWLEDGE,
+			ACCEPT AND AGREE TO ALL THE TERMS OF THE PEACH FUZZER FLEX END-USER LICENSE AGREEMENT LOCATED AT
 			<a href="http://www.peachfuzzer.com/eula/flex/">http://www.peachfuzzer.com/eula/flex/</a>.
-			IF YOU DO NOT AGREE TO THESE TERMS AND CONDITIONS, YOU MAY NOT DOWNLOAD, 
+			IF YOU DO NOT AGREE TO THESE TERMS AND CONDITIONS, YOU MAY NOT DOWNLOAD,
 			ACCESS OR OTHERWISE USE THE SOFTWARE AND ACCOMPANYING FEATURES.
 		</div>
 		<div class="text-center">
 			<p>CONTACT INFORMATION</p>
 			<p>
-				If you have any questions about this EULA, 
-				or if you want to contact Peach Fuzzer, LLC for any reason, 
+				If you have any questions about this EULA,
+				or if you want to contact Peach Fuzzer, LLC for any reason,
 				please direct all correspondence to: <a href="mailto:peach@peachfuzzer.com">peach@peachfuzzer.com</a>
 			</p>
 
