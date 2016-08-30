@@ -62,10 +62,15 @@ namespace Peach.Pro.Test.WebProxy
 			return Ops.FirstOrDefault();
 		}
 
+		protected virtual RunConfiguration GetRunConfiguration()
+		{
+			return new RunConfiguration { singleIteration = true };
+		}
+
 		public void RunEngine(string xml, HookRequestEvent hookRequestEventPre = null, HookRequestEvent hookRequestEventPost = null)
 		{
 			var dom = new ProPitParser().asParser(null, new StringReader(xml));
-			var cfg = new RunConfiguration { singleIteration = true };
+			var cfg = GetRunConfiguration();
 			var e = new Engine(null);
 
 			Ops.Clear();
@@ -93,6 +98,9 @@ namespace Peach.Pro.Test.WebProxy
 
 				ctx.StateModelStarting += (c, sm) =>
 				{
+					if (!Monitor.IsEntered(e))
+						return;
+
 					Port = pub.Port;
 
 					Monitor.Pulse(e);
