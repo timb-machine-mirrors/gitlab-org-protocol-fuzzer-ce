@@ -195,51 +195,21 @@ namespace PeachDownloader
 				return;
 			}
 
-			var tmpFile = Path.Combine(
-				ConfigurationManager.AppSettings["TempFolder"],
-				Guid.NewGuid().ToString()
-			);
-
 			Debug.Assert(File.Exists(file.Path));
-			Debug.Assert(!File.Exists(tmpFile));
-
-			File.Copy(file.Path, tmpFile);
-
 			try
 			{
-				try
-				{
-					file.BuildDownload(activation, tmpFile);
-				}
-				catch (Exception ex)
-				{
-					Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-					Response.Write("Error: 10011\r\n");
-					Response.Write(ex.ToString());
-					return;
-				}
-
-				try
-				{
-					Response.Clear();
-					Response.ContentType = "application/octet-stream";
-					Response.AppendHeader("Content-Length", new FileInfo(tmpFile).Length.ToString());
-					Response.AppendHeader("Content-Disposition", string.Format("attachment; filename=\"{0}\"", file.Name));
-					Response.TransmitFile(tmpFile);
-					Response.Flush();
-				}
-				catch (Exception ex)
-				{
-					Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-					Response.Write("Error: 10012\r\n");
-					Response.Write(ex.ToString());
-				}
+				Response.Clear();
+				Response.ContentType = "application/octet-stream";
+				Response.AppendHeader("Content-Disposition", string.Format("attachment; filename=\"{0}\"", file.Name));
+				Response.BufferOutput = false;
+				file.BuildDownload(activation, file.Path, Response.OutputStream);
+				Response.Flush();
 			}
-			finally
+			catch (Exception ex)
 			{
-				// Remove generated file.
-				if (File.Exists(tmpFile))
-					File.Delete(tmpFile);
+				Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+				Response.Write("Error: 10012\r\n");
+				Response.Write(ex.ToString());
 			}
 		}
 	}

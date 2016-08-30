@@ -142,12 +142,12 @@ namespace PeachDownloader
 			return Operations.PitPrefix + CityHash.CityHash64(name).ToString("X16");
 		}
 
-		public void BuildDownload(Activation activation, string outFile)
+		public void BuildDownload(Activation activation, string inFile, Stream outStream)
 		{
 			var map = _release.PitFeatures.ToDictionary(x => FeatureName(x.Feature));
 			var pendingZips = new Dictionary<string, ZipFile>();
 
-			using (var outZip = new ZipFile(outFile))
+			using (var outZip = new ZipFile(inFile))
 			{
 				var licenseFile = string.Format(
 					LicenseConfigTemplate,
@@ -178,13 +178,17 @@ namespace PeachDownloader
 							if (!feature.Exclude.Contains(entry.FileName) &&
 								!outZip.ContainsEntry(relpath))
 							{
-								outZip.AddEntry(relpath, x => zip[entry.FileName].OpenReader(), (x, y) => y.Dispose());
+								outZip.AddEntry(
+									relpath, 
+									x => zip[entry.FileName].OpenReader(), 
+									(x, y) => y.Dispose()
+								);
 							}
 						}
 					}
 				}
 
-				outZip.Save(outFile);
+				outZip.Save(outStream);
 				foreach (var zip in pendingZips.Values)
 				{
 					zip.Dispose();
