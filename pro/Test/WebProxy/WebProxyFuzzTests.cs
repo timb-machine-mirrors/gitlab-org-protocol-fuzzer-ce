@@ -12,7 +12,7 @@ namespace Peach.Pro.Test.WebProxy
 	{
 		protected override RunConfiguration GetRunConfiguration()
 		{
-			return new RunConfiguration { rangeStart = 1, rangeStop = 20 };
+			return new RunConfiguration { range = true, rangeStart = 1, rangeStop = 19 };
 		}
 
 		public override void SetUp()
