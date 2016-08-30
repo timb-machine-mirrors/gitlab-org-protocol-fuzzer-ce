@@ -113,8 +113,6 @@ namespace Peach.Pro.Core
 
 		public Stream Load(string path)
 		{
-			path = path.Replace("##PitLibraryPath##", _pitLibraryPath);
-
 			Stream stream = null;
 
 			// try to load from assembly
@@ -123,11 +121,7 @@ namespace Peach.Pro.Core
 			    _pitFeature.Key != null && 
 			    path.StartsWith(_pitLibraryPath))
 			{
-				stream = PitResourceLoader.DecryptResource(
-					_root,
-					_pitFeature,
-					path.Substring(_pitLibraryPath.Length + 1) // skip 1st '.'
-				);
+				stream = PitResourceLoader.DecryptResource(_root, _pitFeature, GetRelativePath(path));
 			}
 
 			// if fail, try to load from disk
@@ -140,6 +134,14 @@ namespace Peach.Pro.Core
 			}
 
 			return stream;
+		}
+	
+		private string GetRelativePath(string path)
+		{
+			var len = _pitLibraryPath.Length;
+			while (path[len] == Path.DirectorySeparatorChar)
+				len++;
+			return path.Substring(len);
 		}
 	}
 
