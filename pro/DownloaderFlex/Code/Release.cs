@@ -155,7 +155,7 @@ namespace PeachDownloader
 					activation.ActivationId
 				);
 
-				outZip.AddEntry("Peach.exe.license.config", licenseFile, Encoding.UTF8);
+				outZip.AddEntry("Peach.license.config", licenseFile, Encoding.UTF8);
 				outZip.AddFile(System.IO.Path.Combine(_release.BasePath, "pits", "Peach.Pro.Pits.dll"), "pits");
 
 				foreach (var pit in activation.Pits)

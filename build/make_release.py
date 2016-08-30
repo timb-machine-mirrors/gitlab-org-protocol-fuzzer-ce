@@ -148,6 +148,7 @@ def extract_pits():
 	files = []
 	packs = None
 	archives = None
+	manifest = None
 
 	pitdir = os.path.join(tmpdir, 'pits')
 
@@ -155,14 +156,15 @@ def extract_pits():
 
 	with zipfile.ZipFile(pitfile, 'r') as z:
 		for i in z.infolist():
-			if i.filename.startswith('gump/'):
-				continue
 			if os.path.basename(i.filename) == 'shipping_packs.json':
 				packs = z.read(i)
 			if os.path.basename(i.filename) == 'shipping_pits.json':
 				archives = z.read(i)
 			if os.path.basename(i.filename) == 'manifest.json':
-				archives = z.read(i)
+				manifest = z.read(i)
+			if os.path.basename(i.filename) == 'Peach.Pro.Pits.dll':
+				z.extract(i, pitdir)
+				files.append(i.filename)
 			if i.filename.endswith('.zip'):
 				print ' - %s' % i.filename
 				z.extract(i, pitdir)
@@ -252,7 +254,7 @@ def filter_docs(files, filters):
 
 def convert_manifest(manifest):
 	ret = []
-	for k, v in manifest['Features']:
+	for k, v in manifest['Features'].items():
 		ret.append(dict(
 			feature = k,
 			zip = v['Zip'],
@@ -308,7 +310,7 @@ if __name__ == "__main__":
 			flexnetls = [ x for x in names if 'flexnetls' in x ],
 		)
 
-		if not manifest['files']:
+		if not manifest['dist']:
 			print 'No files found, skipping!'
 			continue
 
@@ -318,7 +320,12 @@ if __name__ == "__main__":
 
 		rel = os.path.join(path, 'release.json')
 
-		for f in manifest['files']:
+		for f in manifest['dist']:
+			src = os.path.join(reldir, f)
+			dst = os.path.join(path, f)
+			shutil.copy(src, dst)
+
+		for f in manifest['flexnetls']:
 			src = os.path.join(reldir, f)
 			dst = os.path.join(path, f)
 			shutil.copy(src, dst)
