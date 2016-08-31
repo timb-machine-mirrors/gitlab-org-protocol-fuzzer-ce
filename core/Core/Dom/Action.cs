@@ -244,7 +244,7 @@ namespace Peach.Core.Dom
 		/// This should be performed in StateModel to every State/Action at
 		/// start of the iteration.
 		/// </remarks>
-		public void UpdateToOriginalDataModel()
+		public virtual void UpdateToOriginalDataModel()
 		{
 			foreach (var item in allData)
 			{
