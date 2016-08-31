@@ -18,6 +18,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 		public static string Value = null;
 		public static int Id = -1;
 		public static string X_Peachy = null;
+		public static string[] ArrayValue = null;
 
 		public static void Clear()
 		{
@@ -25,14 +26,16 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 			Value = null;
 			Id = -1;
 			X_Peachy = null;
+			ArrayValue = null;
 		}
 
 		// GET api/values 
 		[Route("")]
-		public IEnumerable<string> Get([FromUri]string filter = null)
-		{
+		public IEnumerable<string> Get([FromUri]string filter = null, [FromUri]string[] a= null)
+		{ 
 			Clear();
 			Filter = filter;
+			ArrayValue = a;
 
 			if (Request.Headers.Contains("X-Peachy"))
 				X_Peachy = Request.Headers.GetValues("X-Peachy").First();
@@ -59,6 +62,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 		{
 			Clear();
 			Value = data.value;
+			ArrayValue = data.a;
 
 			if (Request.Headers.Contains("X-Peachy"))
 				X_Peachy = Request.Headers.GetValues("X-Peachy").First();
