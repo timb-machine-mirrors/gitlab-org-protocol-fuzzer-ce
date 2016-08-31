@@ -316,6 +316,38 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
+		public void TestQueryArray()
+		{
+			var client = GetHttpClient();
+			var response = client.GetAsync(BaseUrl + "/unknown/api/values?a=b,b&a=c&a=d").Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			var p = op.Parameters.Where(i => i.In == WebApiParameterIn.Query).ToArray();
+
+			Assert.AreEqual(3, p.Length);
+
+			var param = p[0];
+
+			Assert.AreEqual(WebApiParameterIn.Query, param.In);
+			Assert.Null(param.ShadowParameter);
+
+			Assert.AreEqual("b,b", (string)p[0].DataElement.DefaultValue);
+			Assert.AreEqual("c", (string)p[1].DataElement.DefaultValue);
+			Assert.AreEqual("d", (string)p[2].DataElement.DefaultValue);
+
+			Assert.AreEqual("b,b", NoSwaggerValuesController.ArrayValue[0]);
+			Assert.AreEqual("c", NoSwaggerValuesController.ArrayValue[1]);
+			Assert.AreEqual("d", NoSwaggerValuesController.ArrayValue[2]);
+		}
+
+		[Test]
 		public void TestHeader()
 		{
 			var client = GetHttpClient();
@@ -373,6 +405,45 @@ namespace Peach.Pro.Test.WebProxy
 			var dom = OperationsToDom();
 			Assert.NotNull(dom);
 			Assert.NotNull(SerializeOperations(dom));
+		}
+
+		[Test]
+		public void TestFormDataArray()
+		{
+			var content = new FormUrlEncodedContent(new[] 
+			{
+				new KeyValuePair<string, string>("a", "b,b"),
+				new KeyValuePair<string, string>("a", "c"),
+				new KeyValuePair<string, string>("a", "d")
+			});
+
+			var client = GetHttpClient();
+			var response = client.PostAsync(BaseUrl + "/unknown/api/values", content).Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			var p = op.Parameters.Where(i => i.In == WebApiParameterIn.FormData).ToArray();
+
+			Assert.AreEqual(3, p.Length);
+
+			var param = p[0];
+
+			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
+			Assert.Null(param.ShadowParameter);
+
+			Assert.AreEqual("b,b", (string)p[0].DataElement.DefaultValue);
+			Assert.AreEqual("c", (string)p[1].DataElement.DefaultValue);
+			Assert.AreEqual("d", (string)p[2].DataElement.DefaultValue);
+
+			Assert.AreEqual("b,b", NoSwaggerValuesController.ArrayValue[0]);
+			Assert.AreEqual("c", NoSwaggerValuesController.ArrayValue[1]);
+			Assert.AreEqual("d", NoSwaggerValuesController.ArrayValue[2]);
 		}
 
 		[Test]
