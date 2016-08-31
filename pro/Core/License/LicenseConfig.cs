@@ -8,7 +8,6 @@ namespace Peach.Pro.Core.License
 	public interface ILicenseConfig
 	{
 		string ActivationId { get; set; }
-		byte[] IdentityData { get; }
 		string LicenseUrl { get; set; }
 		string LicensePath { get; set; }
 		PitManifest Manifest { get; set; }
@@ -65,7 +64,7 @@ namespace Peach.Pro.Core.License
 
 		public byte[] IdentityData
 		{
-			get { return IdentityClient_Production.IdentityData; }
+			get { return IdentityClient.IdentityData; }
 		}
 
 		public bool DetectConfig
