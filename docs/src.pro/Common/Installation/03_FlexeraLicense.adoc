@@ -1,0 +1,40 @@
+[[License_FuzzFlex]]
+=== Peach Fuzzer Flex
+
+Peach Fuzzer Flex allows users to run Peach on a Pay-Per-Use (PPU) basis.
+Each test case that Peach executes is considered one 'use' of the Peach license.
+
+Peach Fuzzer, LLC,
+will create an initial user that can be used for accessing the Peach Fuzzer download site.
+
+==== Downloading Peach Fuzzer Flex
+
+. When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
+. Navigate to https://dl.peachfuzzer.com with your preferred web browser.
+. Click +Users with an Operations Portal username/password+.
+. At the login prompt, 
+enter the same username/password as specified in your welcome email and click +Sign In+.
+. On the +Downloads+ page, select the Peach release version and operating system to install.
+.. Choose a release version from the items on the left side.
+.. Click the download icon on the right side after deciding which OS and architecture is needed.
+. If your organization has multiple entitlements,
+you may need to select an Activation ID that matches your purchase.
+Contact sales for more information if you are unsure which Activation ID to select.
+This selection will be skipped if there is only one entitlement for your organization.
+. After a few moments, an End User License Agreement acceptance page appears. 
+Click +I ACCEPT+ to continue.
+. The download will begin. 
+Depending on your network connection, 
+this could take a few minutes.
+
+==== Managing Peach Fuzzer Flex Licenses
+
+The Licensing Portal provides the following features:
+
+* View entitlements
+* View a usage report
+* Manage users
+* Manage devices (installations of a particular license)
+* Manage local or cloud license servers
+
+// end
