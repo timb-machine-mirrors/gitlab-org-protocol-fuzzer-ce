@@ -17,7 +17,7 @@ You will need the following prerequisites in order to use pytest-peach:
 To install pytest-repeat:
 
 ----
-$ pip install pytest-peach
+$ pip install pytest-repeat
 ----
 
 *From Source*

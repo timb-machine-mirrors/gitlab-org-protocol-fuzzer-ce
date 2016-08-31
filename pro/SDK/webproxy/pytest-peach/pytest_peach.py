@@ -85,7 +85,7 @@ def pytest_unconfigure(config):
         print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         sys.exit(-1)
 
-#@pytest.hookimpl(tryfirst=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_runtest_setup(item):
     print(">>pytest_runtest_setup")
     jobid = item.config.option.peach
@@ -102,7 +102,7 @@ def pytest_runtest_setup(item):
         print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         sys.exit(-1)
 
-#@pytest.hookimpl(tryfirst=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_runtest_call(item):
     print(">>pytest_runtest_call")
     jobid = item.config.option.peach
@@ -111,7 +111,7 @@ def pytest_runtest_call(item):
         return
     
     try:
-        session.put("%s/p/proxy/%s/testCall" % (api, jobid), data=json.dumps({"name":getTestName(item)}))
+        session.put("%s/p/proxy/%s/testCase" % (api, jobid), json={"name":getTestName(item)})
     except requests.exceptions.RequestException as e:
         print("pytest-peach: Error communicating with Peach Fuzzer.")
         print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
@@ -119,7 +119,7 @@ def pytest_runtest_call(item):
         print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         sys.exit(-1)
 
-#@pytest.hookimpl(tryfirst=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_runtest_teardown(item, nextitem):
     print(">>pytest_runtest_teardown")
     jobid = item.config.option.peach
