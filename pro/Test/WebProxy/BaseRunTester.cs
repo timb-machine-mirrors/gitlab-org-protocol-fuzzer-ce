@@ -67,13 +67,16 @@ namespace Peach.Pro.Test.WebProxy
 			return new RunConfiguration { singleIteration = true };
 		}
 
-		public void RunEngine(string xml, HookRequestEvent hookRequestEventPre = null, HookRequestEvent hookRequestEventPost = null)
+		public void RunEngine(string xml, HookRequestEvent hookRequestEventPre = null, HookRequestEvent hookRequestEventPost = null, Action<Engine> hook = null)
 		{
 			var dom = new ProPitParser().asParser(null, new StringReader(xml));
 			var cfg = GetRunConfiguration();
 			var e = new Engine(null);
 
 			Ops.Clear();
+
+			if (hook != null)
+				hook(e);
 
 			e.TestStarting += ctx =>
 			{

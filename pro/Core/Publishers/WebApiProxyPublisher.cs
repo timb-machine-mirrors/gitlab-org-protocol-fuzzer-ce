@@ -45,9 +45,6 @@ namespace Peach.Pro.Core.Publishers
 		public class ResponseArgs : BaseArgs
 		{
 			public bool Fault { get; set; }
-
-			public string Request { get; set;}
-			public byte[] Response { get; set;}
 		}
 
 		private readonly ProxyServer _proxy = new ProxyServer();
@@ -95,6 +92,8 @@ namespace Peach.Pro.Core.Publishers
 
 			// Update ephemeral port
 			Port = _proxy.ProxyEndPoints[0].Port;
+
+			Logger.Debug("Proxy listening at {0}:{1}", _proxy.ProxyEndPoints[0].IpAddress, _proxy.ProxyEndPoints[0].Port);
 		}
 
 		protected override void OnStop()
@@ -214,6 +213,15 @@ namespace Peach.Pro.Core.Publishers
 				Route = route,
 			};
 
+			try
+			{
+				await e.GetResponseBody();
+			}
+			catch (Exception ex)
+			{
+				e.WebSession.Response.Exception = ex;
+			}
+
 			// Not sure if this is what we want to do long term, but currently
 			// we are testing for a fault in the proxy worker thread so we only
 			// grab the response body when a fault occurs.
@@ -222,8 +230,6 @@ namespace Peach.Pro.Core.Publishers
 			if (route.FaultOnStatusCodes != null  && route.FaultOnStatusCodes.Contains(statusCode))
 			{
 				msg.Fault = true;
-				msg.Request = e.WebSession.Request.ContentLength > 0 ? await e.GetRequestBodyAsString() : string.Empty;
-				msg.Response = await e.GetResponseBody();
 			}
 
 			// Even if there is no fault, we need to signal the response was
@@ -244,6 +250,9 @@ namespace Peach.Pro.Core.Publishers
 		{
 			// OnDisposing is called if request is completed and we
 			// have not signalled completion the the engine thread
+
+			if (e.WebSession.Response.Exception == null)
+				e.WebSession.Response.Exception = new ObjectDisposedException("WebSession has been disposed.");
 
 			var msg = new ResponseArgs
 			{
