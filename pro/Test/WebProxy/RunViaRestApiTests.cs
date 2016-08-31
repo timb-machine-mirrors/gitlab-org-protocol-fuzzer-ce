@@ -132,6 +132,10 @@ namespace Peach.Pro.Test.WebProxy
 		public void SetUp()
 		{
 			Assert.True(_monitor.ProxyEvent(new TestSetUpProxyEvent()), "SetUp Event Failed!");
+
+			var client = GetHttpClient();
+			var response1 = client.GetAsync("http://testhost/unknown/api/values/5").Result;
+			Assert.NotNull(response1);
 		}
 
 		[TearDown]

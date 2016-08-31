@@ -196,6 +196,14 @@ namespace Peach.Pro.Core.Publishers
 				return;
 			}
 
+			if (!msg.Handled)
+			{
+				// If WebPRoxyModel didn't handle the request, we don't need
+				// to handle the response.
+				e.State = null;
+				return;
+			}
+
 			e.DisposingEvent += OnDisposing;
 
 			if (req.RequestBody != null)
@@ -204,6 +212,11 @@ namespace Peach.Pro.Core.Publishers
 
 		private async Task OnResponse(object sender, SessionEventArgs e)
 		{
+			// If State is null then we decided to ignore the request.
+			// This happens with requests that happen during unit test setup/teardown
+			if (e.State == null)
+				return;
+
 			var route = ((SessionState)e.State).Route;
 			var statusCode = int.Parse(e.WebSession.Response.ResponseStatusCode);
 
