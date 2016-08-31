@@ -20,9 +20,14 @@ the target application,
 and any directories that might have files used in fuzzing,
 as out of scope for real time monitoring.
 
+Peach Fuzzer, LLC offers {product} under two separate licensing schemes:
+
+. xref:License_Subscription[{product} Subscription]
+. xref:License_FuzzFlex[Peach Fuzzer Flex]
+
 include::01_Hardware.adoc[]
-include::02_License.adoc[]
-include::03_Download.adoc[]
+include::02_PortableLicense.adoc[]
+include::03_FlexeraLicense.adoc[]
 include::04_Windows.adoc[]
 include::05_Linux.adoc[]
 include::06_OSX.adoc[]

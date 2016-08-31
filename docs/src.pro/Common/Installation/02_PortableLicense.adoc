@@ -1,4 +1,17 @@
-=== Downloading the Peach Fuzzer Distribution Files
+[[License_Subscription]]
+=== {product} Subscription
+
+Under the {product} Subscription licensing scheme, 
+{product} is licensed on a per-concurrent instance basis for a one year duration.
+
+Peach Fuzzer, LLC,
+delivers subscription licenses via email after each purchase,
+typically within 24 hours during the business week.
+The filename of the Peach Fuzzer license,
++Peach.license+,
+is the same for all operating system platforms.
+
+==== Downloading {product} Subscription
 
 The first step of the installation is to download the Peach Fuzzer distribution files from the Peach download site.
 Once the bits are local,
@@ -10,7 +23,7 @@ NOTE: You need a copy of your Peach Fuzzer license on your system to perform the
 +
 image::{images}/Common/Installation/Site_Home.png[scalewidth="60%"]
 
-.. Click Browse. The Upload dialog display, allowing you to select the Peach license file.
+.. Click Browse. The Upload dialog display, allowing you to select the +Peach.license+ file.
 +
 image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
 
