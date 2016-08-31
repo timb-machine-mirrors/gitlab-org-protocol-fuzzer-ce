@@ -256,7 +256,7 @@ namespace Peach.Core.Dom
 				item.parent = this;
 		}
 
-		public bool HasFieldIds
+		public virtual bool HasFieldIds
 		{
 			get
 			{

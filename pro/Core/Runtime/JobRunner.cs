@@ -113,6 +113,8 @@ namespace Peach.Pro.Core.Runtime
 					hooker(_engine);
 				if (test.stateModel is WebProxyStateModel)
 					PrepareProxyFuzzer();
+				else
+					CompleteProxyEvents();
 				_engine.startFuzzing(dom, _config);
 			}
 			catch (ApplicationException ex) // PeachException or SoftException

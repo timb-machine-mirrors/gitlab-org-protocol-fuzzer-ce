@@ -1,7 +1,9 @@
 ﻿
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +21,7 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebApi;
+using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -377,7 +380,9 @@ namespace Peach.Pro.Core.Runtime
 				return;
 			}
 
-			using (var svc = CreateWeb(_license, "", new ConsoleJobMonitor(job)))
+			var jobMonitor = new ConsoleJobMonitor(job);
+
+			using (var svc = CreateWeb(_license, "", jobMonitor))
 			{
 				svc.Start(_webPort);
 
@@ -387,6 +392,13 @@ namespace Peach.Pro.Core.Runtime
 				Console.WriteLine("Web site running at: {0}", svc.Uri);
 
 				var e = new Engine(GetUIWatcher());
+				e.TestStarting += ctx =>
+				{
+					if (ctx.test.stateModel is WebProxyStateModel)
+						ctx.StateModelStarting += jobMonitor.ProxyStateModelStarting;
+					else
+						jobMonitor.CompleteProxyEvents();
+				};
 				e.startFuzzing(dom, _config);
 			}
 		}
@@ -852,6 +864,7 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 
 		public void Dispose()
 		{
+			CompleteProxyEvents();
 		}
 
 		public int Pid { get { return _pid; } }
@@ -901,9 +914,87 @@ AGREE TO BE BOUND BY THE TERMS ABOVE.
 			throw new NotImplementedException();
 		}
 
-		public bool ProxyEvent(IProxyEvent args)
+		readonly object _proxySync = new object();
+		BlockingCollection<IProxyEvent> _proxyEvents = new BlockingCollection<IProxyEvent>();
+
+		public bool ProxyEvent(IProxyEvent item)
 		{
-			throw new NotImplementedException();
+			lock (_proxySync)
+			{
+				if (_proxyEvents == null)
+					return false;
+
+				Monitor.Enter(item);
+
+				try
+				{
+					_proxyEvents.Add(item);
+				}
+				catch (InvalidOperationException)
+				{
+					// BlockingQueue was closed so mark the event as failed
+					Monitor.Exit(item);
+					return false;
+				}
+			}
+
+			try
+			{
+				Monitor.Wait(item);
+				return item.Handled;
+			}
+			finally
+			{
+				Monitor.Exit(item);
+			}
+		}
+
+		public void ProxyStateModelStarting(RunContext context, StateModel sm)
+		{
+			// Once the state model starts, promote all pending proxy
+			// commands over to the publisher and update where we
+			// queue future events.
+
+			context.StateModelStarting -= ProxyStateModelStarting;
+
+			var pub = (WebApiProxyPublisher)context.test.publishers[0];
+
+			lock (_proxySync)
+			{
+				Debug.Assert(_proxyEvents != null);
+				Debug.Assert(!_proxyEvents.IsAddingCompleted);
+
+				_proxyEvents.CompleteAdding();
+
+				foreach (var item in _proxyEvents)
+				{
+					pub.Requests.Add(item);
+				}
+
+				_proxyEvents.Dispose();
+				_proxyEvents = pub.Requests;
+			}
+		}
+
+		public void CompleteProxyEvents()
+		{
+			lock (_proxySync)
+			{
+				if (_proxyEvents == null || _proxyEvents.IsAddingCompleted)
+					return;
+
+				_proxyEvents.CompleteAdding();
+
+				foreach (var item in _proxyEvents)
+				{
+					item.Handled = false;
+
+					lock (item)
+						Monitor.Pulse(item);
+				}
+
+				_proxyEvents = null;
+			}
 		}
 
 		public EventHandler InternalEvent

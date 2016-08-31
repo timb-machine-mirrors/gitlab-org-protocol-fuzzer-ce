@@ -1,12 +1,14 @@
 from __future__ import print_function
 
+import os
+
+#os.environ["HTTP_PROXY"] = 'http://127.0.0.1:8001'
+
 import warnings
 from unittest import TestCase
-
 import pytest
-import requests
+import requests, json, sys
 from requests import put, get, delete, post
-import json
 
 session = requests.Session()
 session.trust_env = False
@@ -32,13 +34,25 @@ def pytest_addoption(parser):
         default='http://127.0.0.1:8888',
         type=str,
         help='Set Peach Fuzzer API URL. Defaults to http://127.0.0.1:8888.')
-
+    
 def getJobId(config):
     jobid = config.option.peach
     api = config.option.peach_api
     
     if jobid == 'auto':
-        r =     session.get("%s/p/jobs?dryrun=false&running=true" % api).json()
+        try:
+            r = session.get("%s/p/jobs?dryrun=false&running=true" % api)
+            if r.status_code != 200:
+                print("pytest-peach: Error communicating with Peach Fuzzer. Status code was %s" % r.status_code)
+                sys.exit(-1)
+        except requests.exceptions.RequestException as e:
+            print("pytest-peach: Error communicating with Peach Fuzzer.")
+            print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+            print(e)
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+            sys.exit(-1)
+        
+        r = r.json()
         jobid = r[0]['id']
         config.option.peach = jobid
         
@@ -62,34 +76,65 @@ def pytest_unconfigure(config):
     if not jobid:
         return
     
-    session.put("%s/p/proxy/%s/sessionTearDown" % (api, jobid))
+    try:
+        session.put("%s/p/proxy/%s/sessionTearDown" % (api, jobid))
+    except requests.exceptions.RequestException as e:
+        print("pytest-peach: Error communicating with Peach Fuzzer.")
+        print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+        print(e)
+        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        sys.exit(-1)
 
-@pytest.hookimpl(hookwrapper=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_runtest_setup(item):
+    print(">>pytest_runtest_setup")
     jobid = item.config.option.peach
     api = item.config.option.peach_api
     if not jobid:
         return
     
-    session.put("%s/p/proxy/%s/testSetUp" % (api, jobid))
+    try:
+        session.put("%s/p/proxy/%s/testSetUp" % (api, jobid))
+    except requests.exceptions.RequestException as e:
+        print("pytest-peach: Error communicating with Peach Fuzzer.")
+        print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+        print(e)
+        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        sys.exit(-1)
 
-@pytest.hookimpl(hookwrapper=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_runtest_call(item):
+    print(">>pytest_runtest_call")
     jobid = item.config.option.peach
     api = item.config.option.peach_api
     if not jobid:
         return
     
-    session.put("%s/p/proxy/%s/testCall" % (api, jobid), data=json.dumps({"name":getTestName(item)}))
+    try:
+        session.put("%s/p/proxy/%s/testCase" % (api, jobid), json={"name":getTestName(item)})
+    except requests.exceptions.RequestException as e:
+        print("pytest-peach: Error communicating with Peach Fuzzer.")
+        print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+        print(e)
+        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        sys.exit(-1)
 
-@pytest.hookimpl(hookwrapper=True)
+@pytest.hookimpl(tryfirst=True)
 def pytest_runtest_teardown(item, nextitem):
+    print(">>pytest_runtest_teardown")
     jobid = item.config.option.peach
     api = item.config.option.peach_api
     if not jobid:
         return
     
-    session.put("%s/p/proxy/%s/testTearDown" % (api, jobid))
+    try:
+        session.put("%s/p/proxy/%s/testTearDown" % (api, jobid))
+    except requests.exceptions.RequestException as e:
+        print("pytest-peach: Error communicating with Peach Fuzzer.")
+        print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+        print(e)
+        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        sys.exit(-1)
 
 class UnexpectedError(Exception):
     pass
