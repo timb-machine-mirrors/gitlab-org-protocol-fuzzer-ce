@@ -23,7 +23,7 @@ NOTE: You need a copy of your Peach Fuzzer license on your system to perform the
 +
 image::{images}/Common/Installation/Site_Home.png[scalewidth="60%"]
 
-.. Click Browse. The Upload dialog display, allowing you to select the +Peach.license+ file.
+.. Click the Choose File button. The upload dialog display allows you to select the +Peach.license+ file.
 +
 image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
 
@@ -31,7 +31,7 @@ image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
 .. Select the license (`Peach.license`)
 .. Click `Open` to return to the download home page.
 
-. Upon return to the Peach Fuzzer download home page, click `Upload License`.
+. Upon returning to the Peach Fuzzer download home page, click `Sign In with License`.
 The page listing the available images displays:
 +
 image::{images}/Common/Installation/Image_Choices.png[scalewidth="70%"]
