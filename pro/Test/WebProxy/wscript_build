@@ -44,6 +44,9 @@ deps = [
 	'System.Xml.dll',
 
 	'Titanium.Web.Proxy.dll',
+
+	'vtortola.WebSockets.dll',
+	'vtortola.WebSockets.Rfc6455.dll',
 ]
 
 bld(
