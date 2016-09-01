@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Peach.Core;
 
 namespace Peach.Pro.Core.License
@@ -9,6 +8,7 @@ namespace Peach.Pro.Core.License
 		Academic,
 		Developer,
 		Enterprise,
+		Flex,
 		Professional,
 		Trial,
 	}
@@ -38,7 +38,7 @@ namespace Peach.Pro.Core.License
 
 		bool EulaAccepted { get; set; }
 		string EulaText { get; }
-		IEnumerable<EulaType> Eulas { get; }
+		EulaType Eula { get; }
 
 		PitFeature CanUsePit(string path);
 		IJobLicense NewJob(string pit, string config, string job);

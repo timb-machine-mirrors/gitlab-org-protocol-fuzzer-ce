@@ -32,7 +32,7 @@ namespace Peach.Pro.WebApi2.Controllers
 				Status = _license.Status,
 				ErrorText = _license.ErrorText,
 				Expiration = _license.Expiration,
-				Eulas = _license.Eulas.ToArray(),
+				Eula = _license.Eula,
 				EulaAccepted = _license.EulaAccepted,
 				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 			};
