@@ -6,7 +6,7 @@ namespace Peach {
 		errorText: string;
 		expiration: string;
 		eulaAccepted: boolean;
-		eulas: string[];
+		eula: string;
 		version: string;
 	}
 

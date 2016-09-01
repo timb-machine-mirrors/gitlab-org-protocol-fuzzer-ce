@@ -59,16 +59,7 @@ namespace Peach {
 				return ret.promise;
 			}
 
-			let promise: ng.IPromise<ILicense> = null;
-			for (var type of license.eulas) {
-				if (!promise) {
-					promise = this.DisplayEula(type);
-				} else {
-					promise = promise.then(() => {
-						return this.DisplayEula(type);
-					});
-				}
-			}
+			let promise = this.DisplayEula(license.eula);
 			return promise.then(() => {
 				return this.AcceptEula()
 			})
