@@ -489,6 +489,7 @@ namespace Org.BouncyCastle.Crypto.Tls
                 if (!mRecordStream.ReadRecord())
                 {
                     this.FailWithError(AlertLevel.warning, AlertDescription.close_notify, "Stream is closed", null);
+                    throw new EndOfStreamException();
                 }
             }
             catch (TlsFatalAlert e)

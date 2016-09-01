@@ -134,7 +134,7 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.True(_monitor.ProxyEvent(new TestSetUpProxyEvent()), "SetUp Event Failed!");
 
 			var client = GetHttpClient();
-			var response1 = client.GetAsync("http://testhost/unknown/api/values/5").Result;
+			var response1 = client.GetAsync("http://testhost/unknown/api/values/99").Result;
 			Assert.NotNull(response1);
 		}
 
@@ -142,6 +142,10 @@ namespace Peach.Pro.Test.WebProxy
 		public void TearDown()
 		{
 			Assert.True(_monitor.ProxyEvent(new TestTearDownProxyEvent()), "TearDown Event Failed!");
+
+			var client = GetHttpClient();
+			var response1 = client.GetAsync("http://testhost/unknown/api/values/88").Result;
+			Assert.NotNull(response1);
 		}
 
 		[Test]

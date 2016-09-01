@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NLog;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Tls;
 using Peach.Core;
 using Peach.Pro.Core.WebApi;
 using Titanium.Web.Proxy;
@@ -22,6 +25,8 @@ namespace Peach.Pro.Core.Publishers
 	[Publisher("WebApiProxy", Scope = PluginScope.Internal)]
 	[Parameter("Port", typeof(int), "Port to listen on", "8001")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default infinite)", "-1")]
+	[Parameter("ClientCert", typeof(string), "Path to client certificate in PEM format", "")]
+	[Parameter("ClientKey", typeof(string), "Path to client private key in PEM format", "")]
 	public class WebApiProxyPublisher : Publisher
 	{
 		public class BaseArgs : IProxyEvent
@@ -54,23 +59,59 @@ namespace Peach.Pro.Core.Publishers
 		private static readonly NLog.Logger ClassLogger = LogManager.GetCurrentClassLogger();
 		protected override NLog.Logger Logger { get { return ClassLogger; } }
 
+		private Certificate _clientCert;
+		private AsymmetricKeyParameter _clientKey;
+
 		public WebProxyStateModel Model { get; set; }
 
 		public BlockingCollection<IProxyEvent> Requests { get { return _requests; } }
 
 		public int Port { get; set; }
 		public int Timeout { get; set; }
+		public string ClientCert { get; set; }
+		public string ClientKey { get; set; }
 
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
+			// listen to client request & server response events
+			_proxy.BeforeRequest += OnRequest;
+			_proxy.BeforeResponse += OnResponse;
+
+			_proxy.SelectClientCertificate += (sender, eventArgs) =>
+			{
+				eventArgs.ClientCert = _clientCert;
+				eventArgs.ClientPrivateKey = _clientKey;
+			};
 		}
 
 		protected override void OnStart()
 		{
-			// listen to client request & server response events
-			_proxy.BeforeRequest += OnRequest;
-			_proxy.BeforeResponse += OnResponse;
+			if (!string.IsNullOrEmpty(ClientCert))
+			{
+				try
+				{
+					using (var rdr = new StreamReader(ClientCert))
+						_clientCert = ProxyServer.LoadPemCert(rdr);
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Error reading client certificate '{0}'. {1}".Fmt(ClientCert, ex.Message), ex);
+				}
+			}
+
+			if (!string.IsNullOrEmpty(ClientKey))
+			{
+				try
+				{
+					using (var rdr = new StreamReader(ClientKey))
+						_clientKey = ProxyServer.LoadPemKey(rdr);
+				}
+				catch (Exception ex)
+				{
+					throw new PeachException("Error reading client private key '{0}'. {1}".Fmt(ClientKey, ex.Message), ex);
+				}
+			}
 
 			var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, Port);
 
@@ -160,7 +201,7 @@ namespace Peach.Pro.Core.Publishers
 			if (route == null)
 				return;
 
-			if(req.ContentLength >= 0)
+			if(req.ContentLength >= 0 || req.IsChunked)
 				await e.GetRequestBody();
 
 			e.State = new SessionState {Route = route};
