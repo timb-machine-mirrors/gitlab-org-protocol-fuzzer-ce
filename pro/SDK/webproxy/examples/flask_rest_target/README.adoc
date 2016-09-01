@@ -20,13 +20,13 @@ Use our pytest integration to generate traffic:
 
 .Linux
 ----
-export HTTP_PROXY=http://127.0.0.1:8002
+export HTTP_PROXY=http://127.0.0.1:8001
 pytest --peach=auto test_target.py
 ----
 
 .Windows
 ----
-set HTTP_PROXY=http://127.0.0.1:8002
+set HTTP_PROXY=http://127.0.0.1:8001
 pytest --peach=auto test_target.py
 ----
 
