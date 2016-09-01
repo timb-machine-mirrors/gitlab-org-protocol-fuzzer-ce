@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using NUnit.Framework;
-using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
 using Peach.Core.Test;
 using Peach.Pro.Core.Dom;
+using Titanium.Web.Proxy;
+using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -351,6 +354,54 @@ namespace Peach.Pro.Test.WebProxy
 			var op = GetOp();
 
 			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.FormData);
+
+			Assert.AreEqual(WebApiParameterIn.FormData, param.In);
+			Assert.Null(param.ShadowParameter);
+			Assert.AreEqual("Foo Bar", (string)param.DataElement.DefaultValue);
+			Assert.AreEqual("Foo Bar", NoSwaggerValuesController.Value);
+		}
+
+		[Test]
+		public void TestChunkedEncodingFormData()
+		{
+			var uri = new Uri(BaseUrl);
+			var json = @"value=Foo+Bar";
+
+			var msg = string.Format(@"POST {2}/unknown/api/values HTTP/1.1
+Host: {0}:{1}
+Transfer-Encoding: chunked
+Content-Type: application/x-www-form-urlencoded
+
+{3:X}
+{4}
+0
+
+
+", uri.Host, uri.Port, BaseUrl, json.Length, json).Replace("\r", "").Replace("\n", "\r\n");
+
+			var msgBuff = Encoding.ASCII.GetBytes(msg);
+			var responseLine = string.Empty;
+
+			using (var client = new TcpClient())
+			{
+				client.Connect("127.0.0.1", Port);
+				client.GetStream().Write(msgBuff, 0, msgBuff.Length);
+				client.GetStream().Flush();
+
+				using (var reader = new StreamReader(client.GetStream()))
+					responseLine = reader.ReadLine();
+			}
+
+			var op = GetOp();
+
+			StringAssert.StartsWith("HTTP/1.1 201", responseLine);
 			Assert.NotNull(op);
 			Assert.AreEqual("POST", op.Method);
 			Assert.NotNull(op.Path);
