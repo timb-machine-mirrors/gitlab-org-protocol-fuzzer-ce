@@ -23,9 +23,9 @@ namespace Peach.Pro.Core.WebServices.Models
 		public bool EulaAccepted { get; set; }
 
 		/// <summary>
-		/// Gets or sets the EULAs.
+		/// Gets or sets the EULA.
 		/// </summary>
-		public EulaType[] Eulas { get; set; }
+		public EulaType Eula { get; set; }
 
 		public string Version { get; set; }
 	}
