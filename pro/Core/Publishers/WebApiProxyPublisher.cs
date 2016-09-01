@@ -201,7 +201,7 @@ namespace Peach.Pro.Core.Publishers
 			if (route == null)
 				return;
 
-			if(req.ContentLength >= 0)
+			if(req.ContentLength >= 0 || req.IsChunked)
 				await e.GetRequestBody();
 
 			e.State = new SessionState {Route = route};
