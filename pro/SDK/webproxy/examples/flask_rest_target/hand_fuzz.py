@@ -32,6 +32,7 @@ def getJobId():
 
 	
 def setup():
+	print ">>setup"
 	try:
 		r = session.put("%s/p/proxy/%s/testSetUp" % (api, jobid))
 		if r.status_code != 200:
@@ -47,13 +48,17 @@ def setup():
 	try:
 		delete('http://127.0.0.1:5000/api/users/2')
 	except:
+		print "E1"
 		pass
 	try:
 		delete('http://127.0.0.1:5000/api/users?user=dd')
 	except:
+		print "E2"
 		pass
+	print "<<setup"
 	
 def teardown():
+	print ">>teardown"
 	try:
 		r = session.put("%s/p/proxy/%s/testTearDown" % (api, jobid))
 		if r.status_code != 200:
@@ -69,12 +74,15 @@ def teardown():
 	try:
 		delete('http://127.0.0.1:5000/api/users/2')
 	except:
+		print "E1"
 		pass
 	try:
 		delete('http://127.0.0.1:5000/api/users?user=dd')
 	except:
+		print "E2"
 		pass
-
+	print "<<teardown"
+	
 def testcase(name):
 	try:
 		r = session.put("%s/p/proxy/%s/testCase" % (api, jobid), json={"name":name})
@@ -124,18 +132,20 @@ except requests.exceptions.RequestException as e:
     sys.exit(-1)
 
 
-for i in range(1):
-	print(".")
+for i in range(2):
+	print ".",
 	setup()
 	testcase('test_user_create')
 	
-	try:
-		test_user_create()
-	except:
-		pass
+	#try:
+	test_user_create()
+	print "P"
+	#except:
+	#	print "E"
 	
 	teardown()
 
+'''
 for i in range(1):
 	print(".")
 	setup()
@@ -147,6 +157,7 @@ for i in range(1):
 		pass
 	
 	teardown()
+'''
 
 try:
 	r = session.put("%s/p/proxy/%s/sessionTearDown" % (api, jobid))
