@@ -9,7 +9,9 @@ session.trust_env = False
 jobid = 'auto'
 api = 'http://127.0.0.1:8888'
 
-def getJobId(config):
+def getJobId():
+    global jobid
+    
     if jobid == 'auto':
         try:
             r = session.get("%s/p/jobs?dryrun=false&running=true" % api)
@@ -25,7 +27,6 @@ def getJobId(config):
         
         r = r.json()
         jobid = r[0]['id']
-        config.option.peach = jobid
         
     return jobid
 
@@ -107,7 +108,10 @@ def test_user_update():
 ##############################
 # Session Start
 
+getJobId()
+
 try:
+	print("api: %s jobid: %s" % (api, jobid))
 	r = session.put("%s/p/proxy/%s/sessionSetUp" % (api, jobid))
 	if r.status_code != 200:
 		print('Error sending sessionSetUp: ', r.status_code)
@@ -121,6 +125,7 @@ except requests.exceptions.RequestException as e:
 
 
 for i in range(1):
+	print(".")
 	setup()
 	testcase('test_user_create')
 	
@@ -132,6 +137,7 @@ for i in range(1):
 	teardown()
 
 for i in range(1):
+	print(".")
 	setup()
 	testcase('test_user_update')
 	
