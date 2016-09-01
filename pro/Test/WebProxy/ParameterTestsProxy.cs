@@ -285,6 +285,29 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
+		public void TestDeleteQuery()
+		{
+			var client = GetHttpClient();
+			var response = client.DeleteAsync(BaseUrl + "/unknown/api/values?filter=foo").Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("DELETE", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			var param = op.Parameters.First(i => i.In == WebApiParameterIn.Query);
+
+			Assert.IsTrue(NoSwaggerValuesController.MethodDelete);
+			Assert.AreEqual(WebApiParameterIn.Query, param.In);
+			Assert.Null(param.ShadowParameter);
+			Assert.AreEqual("foo", (string)param.DataElement.DefaultValue);
+			Assert.AreEqual("foo", NoSwaggerValuesController.Filter);
+		}
+
+		[Test]
 		public void TestQueryArray()
 		{
 			var client = GetHttpClient();

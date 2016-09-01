@@ -19,6 +19,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 		public static int Id = -1;
 		public static string X_Peachy = null;
 		public static string[] ArrayValue = null;
+		public static bool MethodDelete = false;
 
 		public static void Clear()
 		{
@@ -27,12 +28,13 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 			Id = -1;
 			X_Peachy = null;
 			ArrayValue = null;
+			MethodDelete = false;
 		}
 
 		// GET api/values 
 		[Route("")]
-		public IEnumerable<string> Get([FromUri]string filter = null, [FromUri]string[] a= null)
-		{ 
+		public IEnumerable<string> Get([FromUri]string filter = null, [FromUri]string[] a = null)
+		{
 			Clear();
 			Filter = filter;
 			ArrayValue = a;
@@ -41,6 +43,21 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 				X_Peachy = Request.Headers.GetValues("X-Peachy").First();
 
 			return new string[] { "value1", "value2" };
+		}
+
+		// DELETE api/values 
+		[Route("")]
+		public StatusCodeResult Delete([FromUri]string filter = null, [FromUri]string[] a = null)
+		{
+			Clear();
+			Filter = filter;
+			ArrayValue = a;
+			MethodDelete = true;
+
+			if (Request.Headers.Contains("X-Peachy"))
+				X_Peachy = Request.Headers.GetValues("X-Peachy").First();
+
+			return new StatusCodeResult(HttpStatusCode.OK, this);
 		}
 
 		// GET api/values/5 
