@@ -315,7 +315,12 @@ namespace Peach.Pro.Core.Loggers
 				{
 					Debug.Assert(_license != null);
 					if (!_license.CanExecuteTestCase())
-						throw new PeachException("License does not allow anymore test case executions");
+					{
+						throw new PeachException(
+							"Total number of FuzzFlex test cases reached. " +
+							"Contact sales@peachfuzzer.com for more test cases."
+						);
+					}
 				}
 				_counter++;
 			}
