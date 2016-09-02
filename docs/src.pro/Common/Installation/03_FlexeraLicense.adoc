@@ -1,8 +1,8 @@
 [[License_FuzzFlex]]
 === Peach FuzzFlex
 
-Peach FuzzFlex allows users to run Peach on a Pay-Per-Use (PPU) basis.
-Each test case that Peach executes is considered one 'use' of the Peach license.
+Peach FuzzFlex is a flexible licensing model which allows users to purchase test cases in batches of 100k. 
+Each test case that Peach executes is considered one 'use' of the Peach license against the total number of test cases purchased.
 
 Peach Fuzzer, LLC,
 will create an initial user profile that can be used to access the Peach Fuzzer download site.
@@ -24,7 +24,7 @@ image::{images}/Common/Installation/Portal_Downloads.png[]
 
 . If your organization has multiple entitlements,
 you may need to select an Activation ID that matches your purchase.
-Contact sales for more information if you are unsure which Activation ID to select.
+Contact licensing@peachfuzzer.com for more information if you are unsure which Activation ID to select.
 This selection will be skipped if there is only one entitlement for your organization.
 . After a few moments, an End User License Agreement acceptance page appears.
 Click +I ACCEPT+ to continue.
