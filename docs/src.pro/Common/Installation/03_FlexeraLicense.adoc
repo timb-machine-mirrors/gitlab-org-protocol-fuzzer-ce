@@ -1,5 +1,5 @@
 [[License_FuzzFlex]]
-=== Peach FuzzeFlex
+=== Peach FuzzFlex
 
 Peach FuzzFlex allows users to run Peach on a Pay-Per-Use (PPU) basis.
 Each test case that Peach executes is considered one 'use' of the Peach license.
@@ -11,29 +11,42 @@ will create an initial user profile that can be used to access the Peach Fuzzer 
 
 . When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
 . Navigate to https://dl.peachfuzzer.com with your preferred web browser.
-. At the login prompt under the FuzzFlex Sign In section, 
+. At the login prompt under the FuzzFlex Sign In section,
 enter the same username/password as specified in your welcome email and click +Sign In+.
++
+image::{images}/Common/Installation/Portal_Home_Flex.png[]
+
 . On the +Downloads+ page, select the Peach release version and operating system to install.
 .. Choose a release version from the items on the left side.
 .. Click the download icon on the right side after deciding which OS and architecture is needed.
++
+image::{images}/Common/Installation/Portal_Downloads.png[]
+
 . If your organization has multiple entitlements,
 you may need to select an Activation ID that matches your purchase.
 Contact sales for more information if you are unsure which Activation ID to select.
 This selection will be skipped if there is only one entitlement for your organization.
-. After a few moments, an End User License Agreement acceptance page appears. 
+. After a few moments, an End User License Agreement acceptance page appears.
 Click +I ACCEPT+ to continue.
-. The download will begin. 
-Depending on your network connection, 
++
+image::{images}/Common/Installation/Portal_EULA_Flex.png[]
+
+. The download will begin.
+Depending on your network connection,
 this could take a few minutes.
 
 ==== Managing Peach Fuzzer Flex Licenses
 
+From the https://dl.peachfuzzer.com[Peach Downloader] website,
+a link to the Licensing Portal is available after logging in with your username/password.
 The Licensing Portal provides the following features:
 
 * View entitlements
++
+image::{images}/Common/Installation/FNO_Home.png[]
+
 * View a usage report
-* Manage users
-* Manage devices (installations of a particular license)
-* Manage local or cloud license servers
++
+image::{images}/Common/Installation/FNO_Usage_Gauge.png[]
 
 // end

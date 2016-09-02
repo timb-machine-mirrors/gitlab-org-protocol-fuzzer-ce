@@ -1,7 +1,7 @@
 [[License_Subscription]]
 === {product} Subscription
 
-Under the {product} Subscription licensing scheme, 
+Under the {product} Subscription licensing scheme,
 {product} is licensed on a per-concurrent instance basis for a one year duration.
 
 Peach Fuzzer, LLC,
@@ -21,9 +21,9 @@ NOTE: You need a copy of your Peach Fuzzer license on your system to perform the
 
 . Using a web browser, navigate to https://dl.peachfuzzer.com
 +
-image::{images}/Common/Installation/Site_Home.png[scalewidth="60%"]
+image::{images}/Common/Installation/Portal_Home_ProEnt.png[]
 
-.. Click the Choose File button. The upload dialog display allows you to select the +Peach.license+ file.
+.. Click the +Choose File+ button. The upload dialog display allows you to select the +Peach.license+ file.
 +
 image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
 
