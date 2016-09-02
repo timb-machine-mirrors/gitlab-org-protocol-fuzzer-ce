@@ -113,6 +113,7 @@ namespace Peach.Pro.Core
 
 		public Stream Load(string path)
 		{
+			path = Path.GetFullPath(path.Replace("##PitLibraryPath##", _pitLibraryPath));
 			Stream stream = null;
 
 			// try to load from assembly
@@ -127,7 +128,7 @@ namespace Peach.Pro.Core
 			// if fail, try to load from disk
 			if (stream == null)
 			{
-				var uri = new Uri(Path.GetFullPath(path.Replace("##PitLibraryPath##", _pitLibraryPath)));
+				var uri = new Uri(path);
 				if (uri.Scheme != Uri.UriSchemeFile)
 					throw new PeachException("Invalid uri scheme for <Include>: {0}".Fmt(path));
 				stream = File.OpenRead(uri.AbsolutePath);
