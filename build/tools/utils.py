@@ -87,7 +87,7 @@ def install_fake_lib(self):
 @after_method('apply_cs')
 def install_content(self):
 	names = self.to_list(getattr(self, 'content', []))
-   	get = self.bld.get_tgen_by_name
+	get = self.bld.get_tgen_by_name
 	for x in names:
 		try:
 			y = get(x)
