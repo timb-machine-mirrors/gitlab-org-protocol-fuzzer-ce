@@ -124,7 +124,7 @@ namespace Peach.Core.Agent.Channels
 
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private readonly List<IMonitor> _monitors = new List<IMonitor>();
+		internal readonly List<IMonitor> Monitors = new List<IMonitor>();
 
 		public AgentLocal(string name, string uri, string password)
 			: base(name, uri, password)
@@ -152,24 +152,24 @@ namespace Peach.Core.Agent.Channels
 		{
 			Logger.Debug("StartMonitor: {0} {1}", monitorName, cls);
 
-			_monitors.Add(ActivateMonitor(monitorName, cls, args));
+			Monitors.Add(ActivateMonitor(monitorName, cls, args));
 		}
 
 		public override void StopAllMonitors()
 		{
 			Logger.Trace("StopAllMonitors");
 
-			foreach (var mon in _monitors.Reverse<IMonitor>())
+			foreach (var mon in Monitors.Reverse<IMonitor>())
 			{
 				Guard(mon, "StopMonitor", m => m.StopMonitor());
 			}
 
-			_monitors.Clear();
+			Monitors.Clear();
 		}
 
 		public override void SessionStarting()
 		{
-			foreach (var mon in _monitors)
+			foreach (var mon in Monitors)
 			{
 				Logger.Debug("SessionStarting");
 				mon.SessionStarting();
@@ -178,7 +178,7 @@ namespace Peach.Core.Agent.Channels
 
 		public override void SessionFinished()
 		{
-			foreach (var mon in _monitors.Reverse<IMonitor>())
+			foreach (var mon in Monitors.Reverse<IMonitor>())
 			{
 				Guard(mon, "SessionFinished", m => m.SessionFinished());
 			}
@@ -188,7 +188,7 @@ namespace Peach.Core.Agent.Channels
 		{
 			Logger.Trace("IterationStarting: {0} {1}", args.IsReproduction, args.LastWasFault);
 
-			foreach (var mon in _monitors)
+			foreach (var mon in Monitors)
 			{
 				mon.IterationStarting(args);
 			}
@@ -198,7 +198,7 @@ namespace Peach.Core.Agent.Channels
 		{
 			Logger.Trace("IterationFinished");
 
-			foreach (var mon in _monitors.Reverse<IMonitor>())
+			foreach (var mon in Monitors.Reverse<IMonitor>())
 			{
 				Guard(mon, "IterationFinished", m => m.IterationFinished());
 			}
@@ -210,7 +210,7 @@ namespace Peach.Core.Agent.Channels
 
 			var detectedFault = false;
 
-			foreach (var mon in _monitors)
+			foreach (var mon in Monitors)
 			{
 				Guard(mon, "DetectedFault", m => detectedFault |= m.DetectedFault());
 			}
@@ -224,7 +224,7 @@ namespace Peach.Core.Agent.Channels
 
 			var ret = new List<MonitorData>();
 
-			foreach (var mon in _monitors)
+			foreach (var mon in Monitors)
 			{
 				Guard(mon, "GetMonitorData", m =>
 				{
@@ -247,7 +247,7 @@ namespace Peach.Core.Agent.Channels
 		{
 			Logger.Trace("Message: {0}", msg);
 
-			foreach (var monitor in _monitors)
+			foreach (var monitor in Monitors)
 				monitor.Message(msg);
 		}
 

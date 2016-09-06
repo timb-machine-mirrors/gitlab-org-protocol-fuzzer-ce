@@ -8,6 +8,8 @@ using SysProcess = System.Diagnostics.Process;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading;
+using Peach.Core.Agent;
+using Peach.Core.Agent.Channels;
 using Peach.Core.IO;
 
 namespace Peach.Core.Test
@@ -183,6 +185,12 @@ namespace Peach.Core.Test
 			}
 
 			return null;
+		}
+
+		public static T GetMonitor<T>(this RunContext ctx)
+		{
+			return ctx.agentManager.Agents.OfType<AgentLocal>().SelectMany(a => a.Monitors).OfType<T>().FirstOrDefault();
+
 		}
 	}
 }
