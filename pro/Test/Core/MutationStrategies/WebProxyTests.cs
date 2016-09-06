@@ -31,7 +31,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 				test = new Peach.Core.Dom.Test()
 			};
 
-			var strategy = new WebProxyStrategy(null);
+			var strategy = new WebProxyStrategy(new Dictionary<string, Variant>());
 
 			strategy.Initialize(ctx, null);
 
@@ -59,7 +59,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.NotNull(obj.Routes[1]);
 			Assert.AreEqual("/foo/bar", obj.Routes[1].Url);
 			Assert.AreEqual(false, obj.Routes[1].Mutate);
-			Assert.AreEqual("/tmp/swagger/json", obj.Routes[1].Swagger);
+			Assert.AreEqual("/tmp/swagger/json", obj.Routes[1].SwaggerAttr);
 			Assert.AreEqual("google.com", obj.Routes[1].BaseUrl);
 			Assert.AreEqual(2, obj.Routes[1].FaultOnStatusCodes.Count);
 			Assert.AreEqual(500, obj.Routes[1].FaultOnStatusCodes[0]);
