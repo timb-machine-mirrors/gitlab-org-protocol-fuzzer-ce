@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,6 +25,8 @@ namespace Peach.Pro.Test.WebProxy
 
 		public delegate void HookRequestEvent(SessionEventArgs e, RunContext context, WebApiOperation op);
 
+		protected TempDirectory TempDir;
+		protected string LogRoot;
 		protected RunContext Context;
 		protected IWebStatus Server;
 		protected TempFile SwaggerFile;
@@ -181,6 +184,23 @@ namespace Peach.Pro.Test.WebProxy
 			Server = TestTargetServer.StartServer();
 
 			SwaggerFile = new TempFile(GetValuesJson());
+
+			TempDir = new TempDirectory();
+			LogRoot = Configuration.LogRoot;
+
+			Configuration.LogRoot = TempDir.Path;
+
+			var logLevel = 0;
+
+			var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
+			if (peachDebug == "1")
+				logLevel = 1;
+
+			var peachTrace = Environment.GetEnvironmentVariable("PEACH_TRACE");
+			if (peachTrace == "1")
+				logLevel = 2;
+
+			Utilities.ConfigureLogging(logLevel);
 		}
 
 		[OneTimeTearDown]
@@ -196,6 +216,18 @@ namespace Peach.Pro.Test.WebProxy
 			{
 				SwaggerFile.Dispose();
 				SwaggerFile = null;
+			}
+
+			if (LogRoot != null)
+			{
+				Configuration.LogRoot = LogRoot;
+				LogRoot = null;
+			}
+
+			if (TempDir != null)
+			{
+				TempDir.Dispose();
+				TempDir = null;
 			}
 		}
 	}
