@@ -9,7 +9,7 @@ using Peach.Core.Dom;
 namespace Peach.Pro.Core.Mutators
 {
 	[Mutator("StringSqlInjection")]
-	[Description("Perform common string mutations")]
+	[Description("Perform sql injection string mutations")]
 	public partial class StringSqlInjection : Mutator
 	{
 		public StringSqlInjection(DataElement obj)
@@ -29,8 +29,16 @@ namespace Peach.Pro.Core.Mutators
 		{
 			get
 			{
-				// Fake increase the weight
-				return values.Length*3;
+				return values.Length;
+			}
+		}
+
+		public override int weight
+		{
+			get
+			{
+				// Increase the weight
+				return count * 300;
 			}
 		}
 
