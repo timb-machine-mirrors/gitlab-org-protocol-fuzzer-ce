@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using NUnit.Framework;
 using Peach.Core;
@@ -9,6 +10,7 @@ using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebApi;
+using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Test.Core.MutationStrategies
 {
@@ -88,11 +90,13 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 			var settings = new XmlWriterSettings
 			{
+				OmitXmlDeclaration = true,
 				Encoding = System.Text.Encoding.UTF8,
 				Indent = true
 			};
 
-			using (var sout = new MemoryStream())
+			var sb = new StringBuilder();
+			using (var sout = new StringWriter(sb))
 			{
 				using (var xmlWriter = XmlWriter.Create(sout, settings))
 				{
@@ -103,10 +107,9 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 					xmlWriter.WriteEndDocument();
 				}
 
-				var pitOut = Encoding.UTF8.GetString(sout.ToArray(), 3, (int)sout.Length-3);
-				//File.WriteAllText(@"c:\temp\pitout.xml", pitOut);
+				var pitOut = sb.ToString().Replace("\r\n", "\n");
 
-				Assert.AreEqual("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Test name=\"Default\" maxOutputSize=\"1073741824\">\r\n  <WebProxy>\r\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"True\" baseUrl=\"\" faultOnStateCodes=\"\" />\r\n    <Route url=\"/foo/bar\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"google.com\" faultOnStateCodes=\"500,501\" />\r\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"\" faultOnStateCodes=\"500,501\" />\r\n  </WebProxy>\r\n</Test>", pitOut);
+				Assert.AreEqual("<Test name=\"Default\" maxOutputSize=\"1073741824\">\n  <WebProxy>\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"True\" baseUrl=\"\" faultOnStateCodes=\"\" />\n    <Route url=\"/foo/bar\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"google.com\" faultOnStateCodes=\"500,501\" />\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"\" faultOnStateCodes=\"500,501\" />\n  </WebProxy>\n</Test>", pitOut);
 			}
 		}
 
