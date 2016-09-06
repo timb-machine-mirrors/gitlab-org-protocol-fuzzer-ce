@@ -575,23 +575,12 @@ namespace Peach.Pro.Core.Loggers
 			// The combined fault will use Assets and not collectedData
 			var ret = new MergedFault { collectedData = null };
 
-			Fault coreFault = null;
-			var dataFaults = new List<Fault>();
-
-			// First find the core fault.
-			foreach (var fault in faults)
-			{
-				if (fault.type == FaultType.Fault)
-				{
-					coreFault = fault;
-					Logger.Debug("Found core fault [" + coreFault.title + "]");
-				}
-				else
-					dataFaults.Add(fault);
-			}
+			var coreFault = faults.FirstOrDefault(f => f.type == FaultType.Fault);
 
 			if (coreFault == null)
 				throw new PeachException("Error, we should always have a fault with type = Fault!");
+
+			Logger.Debug("Found core fault [" + coreFault.title + "]");
 
 			// Gather up data from the state model
 			foreach (var item in stateModel.dataActions)

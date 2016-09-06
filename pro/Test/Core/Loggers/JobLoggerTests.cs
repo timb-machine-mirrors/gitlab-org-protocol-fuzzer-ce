@@ -635,6 +635,90 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
+		public void TestTwoCoreFaults()
+		{
+			const string pit = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Value' value='Hello' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='act1' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='Agent1'>
+		<Monitor name='mon1' class='你好RandoFaulter'>
+			<Param name='Fault' value='1' />
+		</Monitor>
+		<Monitor name='mon2' class='你好RandoFaulter'>
+			<Param name='Fault' value='1' />
+		</Monitor>
+	</Agent>
+
+	<Test name='Default' faultWaitTime='0'>
+		<Publisher class='Null'/>
+		<StateModel ref='SM'/>
+		<Logger class='File' />
+		<Agent ref='Agent1' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(pit);
+			dom.tests[0].publishers[0] = new TestPub();
+
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 1,
+				pitFile = "TestTwoCoreFaults"
+			};
+
+			var e = new Engine(null);
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (!ctx.controlIteration)
+					ctx.InjectFault();
+			};
+
+			e.Fault += (ctx, it, sm, faults) =>
+			{
+				foreach (var f in faults)
+				{
+					f.title = f.monitorName + ": " + f.title;
+				}
+			};
+
+			e.startFuzzing(dom, config);
+
+			Job job;
+
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(config.id);
+			}
+
+			Assert.AreEqual(1, job.FaultCount);
+
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				var faults = db.LoadTable<FaultSummary>().ToList();
+
+				Assert.AreEqual(job.FaultCount, faults.Count);
+
+				var f = db.GetFaultById(faults[0].Id, NameKind.Machine);
+
+				Assert.AreEqual("mon1: 你好 from RandoFaulter", f.Title);
+			}
+		}
+
+		[Test]
 		public void TestFaultFile()
 		{
 			const string xml = @"
