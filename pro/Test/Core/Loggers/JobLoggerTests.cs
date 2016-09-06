@@ -1075,8 +1075,12 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			var e = new Engine(null);
 
-			e.Fault += e_Fault;
-			e.ReproFault += e_ReproFault;
+			e.TestStarting += ctx =>
+			{
+				e.Fault += e_Fault;
+				e.ReproFault += e_ReproFault;
+			};
+
 			e.IterationStarting += (ctx, it, tot) =>
 			{
 				if (it == 2)
