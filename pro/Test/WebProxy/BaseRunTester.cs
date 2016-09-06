@@ -164,7 +164,7 @@ namespace Peach.Pro.Test.WebProxy
 			<Param name='Port' value='0' />
 		</Publisher>
 	</Test>
-</Peach>".Fmt(SwaggerFile, Server.Uri);//"http://127.0.0.1:8003");// Server.Uri);
+</Peach>".Fmt(SwaggerFile, Server.Uri);
 
 			RunEngine(xml);
 		}

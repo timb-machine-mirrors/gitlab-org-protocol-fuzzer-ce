@@ -57,7 +57,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget
 
 			try
 			{
-				ret.Start(8002);
+				ret.Start(8002, true);
 				return ret;
 			}
 			catch (Exception)
