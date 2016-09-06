@@ -103,6 +103,24 @@ The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
 such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
+[TIP]
+=====
+If you receive and error regarding libMonoPosixHelper the +/etc/mono/config+ file may need to be editted.  To edit
+locate a line that looks like the following (the path may be different):
+
+----
+<dllmap dll="MonoPosixHelper" target="/usr/lib/libMonoPosixHelper.so" os="!windows" />
+----
+
+Once found use the Linux _find_ command to locate the shared library:
+
+----
+find /usr -name "*libMonoPosixHelper.so"
+----
+
+And finally, update the +/etc/mono/config+ entry to the correct path.  This should resolve the issue.
+
+=====
 
 [NOTE]
 ============
