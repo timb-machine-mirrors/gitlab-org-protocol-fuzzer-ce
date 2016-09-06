@@ -27,6 +27,9 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait for data/connection (default infinite)", "-1")]
 	[Parameter("ClientCert", typeof(string), "Path to client certificate in PEM format", "")]
 	[Parameter("ClientKey", typeof(string), "Path to client private key in PEM format", "")]
+	[Parameter("CaCert", typeof(string), "Path to CA certificate in PEM format", "")]
+	[Parameter("CaKey", typeof(string), "Path to private key of the CA certificate in PEM format", "")]
+	[Parameter("ServerKey", typeof(string), "Path to the private key to use for server certificates in PEM format", "")]
 	public class WebApiProxyPublisher : Publisher
 	{
 		public class BaseArgs : IProxyEvent
@@ -70,6 +73,9 @@ namespace Peach.Pro.Core.Publishers
 		public int Timeout { get; set; }
 		public string ClientCert { get; set; }
 		public string ClientKey { get; set; }
+		public string CaCert { get; set; }
+		public string CaKey { get; set; }
+		public string ServerKey { get; set; }
 
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -112,6 +118,15 @@ namespace Peach.Pro.Core.Publishers
 					throw new PeachException("Error reading client private key '{0}'. {1}".Fmt(ClientKey, ex.Message), ex);
 				}
 			}
+
+			if (!string.IsNullOrEmpty(CaCert))
+				_proxy.CaCert = File.ReadAllText(CaCert);
+
+			if (!string.IsNullOrEmpty(CaKey))
+				_proxy.CaKey = File.ReadAllText(CaKey);
+
+			if (!string.IsNullOrEmpty(ServerKey))
+				_proxy.ServerKey = File.ReadAllText(ServerKey);
 
 			var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, Port);
 
