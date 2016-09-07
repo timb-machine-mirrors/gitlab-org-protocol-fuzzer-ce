@@ -21,6 +21,8 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		public bool IgnoreFirstChanceGuardPage { get; set; }
 		public bool IgnoreSecondChanceGuardPage { get; set; }
 
+		public bool IgnoreFirstChanceReadAv { get; set; }
+
 		private readonly object _mutex = new object();
 
 		private bool _detectedFault;
@@ -270,7 +272,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 				if (ev.Code == 0xC0000005)
 				{
 					// A/V on EIP
-					if (ev.Info[0] == 0)
+					if (ev.Info[0] == 0 && !IgnoreFirstChanceReadAv)
 						break;
 
 					// write a/v not near null

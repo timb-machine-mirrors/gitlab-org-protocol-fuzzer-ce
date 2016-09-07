@@ -23,6 +23,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 	[Parameter("SymbolsPath", typeof(string), "Optional Symbol path.  Default is Microsoft public symbols server.", "SRV*http://msdl.microsoft.com/download/symbols")]
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
 	[Parameter("StartOnCall", typeof(string), "Indicate the debugger should wait to start or attach to process until notified by state machine.", "")]
+	[Parameter("IgnoreFirstChanceReadAv", typeof(bool), "Ignore first chance read access violation exceptions.  These are sometimes false posistives or anti-debugging faults.", "false")]
 	[Parameter("IgnoreFirstChanceGuardPage", typeof(bool), "Ignore first chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
 	[Parameter("IgnoreSecondChanceGuardPage", typeof(bool), "Ignore second chance guard page faults.  These are sometimes false posistives or anti-debugging faults.", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Don't use process CPU usage to terminate early.", "false")]
@@ -45,6 +46,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		public string SymbolsPath { get; set; }
 		public string WinDbgPath { get; set; }
 		public string StartOnCall { get; set; }
+		public bool IgnoreFirstChanceReadAv { get; set; }
 		public bool IgnoreFirstChanceGuardPage { get; set; }
 		public bool IgnoreSecondChanceGuardPage { get; set; }
 		public bool NoCpuKill { get; set; }
@@ -236,6 +238,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		{
 			return new T
 			{
+				IgnoreFirstChanceReadAv = IgnoreFirstChanceReadAv,
 				IgnoreFirstChanceGuardPage = IgnoreFirstChanceGuardPage,
 				IgnoreSecondChanceGuardPage = IgnoreSecondChanceGuardPage,
 				WinDbgPath = WinDbgPath,

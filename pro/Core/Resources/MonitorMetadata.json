@@ -740,6 +740,7 @@
           "WaitForExitTimeout",
           "",
           "SymbolsPath",
+          "IgnoreFirstChanceReadAv",
           "IgnoreFirstChanceGuardPage",
           "IgnoreSecondChanceGuardPage",
           "ServiceStartTimeout",

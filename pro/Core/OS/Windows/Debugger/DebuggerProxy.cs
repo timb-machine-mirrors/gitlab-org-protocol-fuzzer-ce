@@ -25,6 +25,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			set { _dbg.SymbolsPath = value; }
 		}
 
+		public bool IgnoreFirstChanceReadAv
+		{
+			get { return _dbg.IgnoreFirstChanceReadAv; }
+			set { _dbg.IgnoreFirstChanceReadAv = value; }
+		}
+
 		public bool IgnoreFirstChanceGuardPage
 		{
 			get { return _dbg.IgnoreFirstChanceGuardPage; }
@@ -113,6 +119,12 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 			{
 				get { return instance.SymbolsPath; }
 				set { instance.SymbolsPath = value; }
+			}
+
+			public bool IgnoreFirstChanceReadAv
+			{
+				get { return instance.IgnoreFirstChanceReadAv; }
+				set { instance.IgnoreFirstChanceReadAv = value; }
 			}
 
 			public bool IgnoreFirstChanceGuardPage

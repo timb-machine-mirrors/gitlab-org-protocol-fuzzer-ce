@@ -303,5 +303,62 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 				dbg.Dispose();
 			}
 		}
+
+		[Test]
+		public void TestWinDbgIgnoreReadAv()
+		{
+			var dbg = new DebugEngineInstance
+			{
+				IgnoreFirstChanceReadAv = true,
+				WinDbgPath = WindowsKernelDebugger.FindWinDbg(null),
+				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
+			};
+
+			try
+			{
+				var exe = Utilities.GetAppResourcePath("CrashingProgram.exe");
+				dbg.StartProcess(exe + " 1 2 3 4 5");
+
+				Assert.True(dbg.IsRunning, "Debugger should be running");
+
+				var exited = dbg.WaitForExit(10000);
+
+				Assert.Null(dbg.Fault, "Should not have detected fault");
+				Assert.True(exited, "Debugger should have exited");
+			}
+			finally
+			{
+				dbg.Dispose();
+			}
+		}
+
+		[Test]
+		public void TestSystemDebuggerIgnoreReadAv()
+		{
+			var dbg = new SystemDebuggerInstance
+			{
+				IgnoreFirstChanceReadAv = true,
+				WinDbgPath = WindowsKernelDebugger.FindWinDbg(null),
+				SymbolsPath = DebugEngineInstance.DefaultSymbolPath
+			};
+
+			try
+			{
+				var exe = Utilities.GetAppResourcePath("CrashingProgram.exe");
+				dbg.StartProcess(exe + " 1 2 3 4 5");
+
+				Assert.True(dbg.IsRunning, "Debugger should be running");
+
+				var exited = dbg.WaitForExit(10000);
+
+				Assert.Null(dbg.Fault, "Should not have detected fault");
+				Assert.True(exited, "Debugger should have exited");
+			}
+			finally
+			{
+				dbg.Dispose();
+			}
+		}
+
 	}
 }

@@ -8,6 +8,7 @@ namespace Peach.Pro.Core.OS.Windows.Debugger
 		string WinDbgPath { get; set; }
 		string SymbolsPath { get; set; }
 
+		bool IgnoreFirstChanceReadAv { get; set; }
 		bool IgnoreFirstChanceGuardPage { get; set; }
 		bool IgnoreSecondChanceGuardPage { get; set; }
 
