@@ -15,7 +15,7 @@ bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 # Be.HexBox is not nugetable yet
 bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 
-flexnet = 'flexnet_client-2016.03.0'
+flexnet = 'flexnet_client-2016.08'
 
 bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
 bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])

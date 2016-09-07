@@ -58,7 +58,7 @@ deps = [
 ]
 
 top = bld.path.parent.parent
-flexnet = 'flexnet_client-2016.03.0'
+flexnet = 'flexnet_client-2016.08'
 
 if bld.env.TARGET in ['win']:
 	embed = 'Vix.dll'
