@@ -47,6 +47,8 @@ namespace Peach.Pro.Core.Runtime
 			{
 				_logger.Trace("Using FlexeraLicense");
 				var root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
+				if (root == null)
+					throw new ApplicationException("Peach.Pro.Pits.dll could not be found.");
 				config.Manifest = PitResourceLoader.LoadManifest(root);
 				var license = new FlexeraLicense(config);
 				Console.Write("Activating license...");
