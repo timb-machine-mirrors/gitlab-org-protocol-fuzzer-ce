@@ -419,7 +419,23 @@ namespace Peach.Core.Analyzers
 						break;
 
 					case "Import":
-						dom.Python.ImportModule(child.getAttrString("import"));
+						var module = child.getAttrString("import");
+						try
+						{
+							dom.Python.ImportModule(module);
+						}
+						catch (ArgumentException ex)
+						{
+							// If the user tries to import a python extension via their pit,
+							// IronPython will try to generate the C# class bindings and
+							// subsequently fail because the class name already exists.
+							// Provide a more useful error message in this case.
+
+							if (ex.Message != "Duplicate type name within an assembly.")
+								throw;
+
+							throw new PeachException("Failed to import python module '{0}' because it was already loaded from the plugins folder.  Remove <Import import=\"{0}\" /> from your pit and try again.".Fmt(module), ex);
+						}
 						break;
 
 					case "PythonPath":

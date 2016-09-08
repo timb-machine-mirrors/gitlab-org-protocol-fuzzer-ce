@@ -2,9 +2,6 @@
 <Peach xmlns="http://peachfuzzer.com/2012/Peach" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://peachfuzzer.com/2012/Peach ../peach.xsd">
 
-	<!-- Import our Python module -->
-	<Import import="fixup" />
-
 	<DataModel name="TheDataModel">
 		<String name="Value" value="Hello World">
 			<!-- Use our fixup like normal -->
@@ -22,9 +19,9 @@
 		</State>
 	</StateModel>
 
-	<Test name="Default">
+	<Test name="Default" maxOutputSize="1024">
 		<StateModel ref="State"/>
-		<Publisher class="Console" />
+		<Publisher class="ConsoleHex" />
 	</Test>
 
 </Peach>

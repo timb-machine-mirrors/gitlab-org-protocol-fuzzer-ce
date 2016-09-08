@@ -12,15 +12,6 @@ from Peach.Core import Variant, Fixup
 from Peach.Core.Dom import Block, String, DataElement
 from Peach.Pro.Core.Fixups import BasePythonFixup
 
-
-
-# Add the special assembly that our Python extensions will 
-# appear in. This is the list of assemblies that Peach checks
-# for extension types.
-for a in System.AppDomain.CurrentDomain.GetAssemblies():
-	if a.FullName.startswith("Snippets.scripting"):
-		Peach.Core.ClassLoader.AssemblyCache[a.FullName] = a
-
 # Create wrappers for class attributes we will use
 FixupAttr = clrtype.attribute(Peach.Core.FixupAttribute)
 DescriptionAttr = clrtype.attribute(System.ComponentModel.DescriptionAttribute)
@@ -48,6 +39,7 @@ class PythonFixup(BasePythonFixup):
 	]
 
 	@clrtype.accepts(DataElement, System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
+	@clrtype.returns()
 	def __init__(self, parent, args):
 		print '>>> FIXUP INIT Param1=%s' % (str(args['Param1']))
 		pass
