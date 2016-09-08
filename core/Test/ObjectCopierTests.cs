@@ -442,7 +442,7 @@ namespace Peach.Core.Test
 			// 2) Generic type resolution (i.e. OwnedCollection<T>)
 			// maybe more...
 			var fails = (
-				from kv in ClassLoader.AssemblyCache
+				from kv in ClassLoader.AssemblyCache.Keys
 				where kv.GetName().FullName.StartsWith("Peach")
 				from type in kv.GetTypes()
 				where type.IsSerializable

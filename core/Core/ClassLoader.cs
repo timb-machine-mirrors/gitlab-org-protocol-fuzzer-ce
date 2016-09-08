@@ -42,7 +42,7 @@ namespace Peach.Core
 	{
 		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 		static readonly object _mutex = new object();
-		internal static readonly HashSet<Assembly> AssemblyCache = new HashSet<Assembly>();
+		internal static readonly Dictionary<Assembly, List<Type>> AssemblyCache = new Dictionary<Assembly, List<Type>>();
 		static readonly Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
 		static readonly Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
 
@@ -60,10 +60,13 @@ namespace Peach.Core
 			foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
 			{
 				var attr = asm.GetCustomAttribute<PluginAssemblyAttribute>();
-				if (attr != null)
+				if (attr != null || asm.FullName.StartsWith("Snippets.scripting"))
 				{
+					if (AssemblyCache.ContainsKey(asm))
+						continue;
+
 					logger.Trace("Loading plugins from: {0}", asm.FullName);
-					AssemblyCache.Add(asm);
+					AssemblyCache.Add(asm, GetTypes(asm));
 				}
 			}
 		}
@@ -80,8 +83,7 @@ namespace Peach.Core
 				try
 				{
 					var asm = Load(file);
-					asm.GetTypes(); // make sure we can load exported types.
-					AssemblyCache.Add(asm);
+					AssemblyCache.Add(asm, GetTypes(asm));
 				}
 				catch (Exception ex)
 				{
@@ -103,6 +105,33 @@ namespace Peach.Core
 				{
 					logger.Warn("ClassLoader skipping \"{0}\", {1}", py, ex.Message);
 				}
+			}
+		}
+
+		private static List<Type> GetTypes(Assembly asm)
+		{
+			return TryGetTypes(asm)
+				.Where(t => t != null && t.IsClass && (t.IsPublic || t.IsNestedPublic))
+				.ToList();
+		}
+
+		private static IEnumerable<Type> TryGetTypes(Assembly asm)
+		{
+			try
+			{
+				return asm.GetTypes();
+			}
+			catch (ReflectionTypeLoadException ex)
+			{
+				// This happens when there are multiple .py plugins
+				// and one of the files fails to load.  We want to
+				// log which types could not be loaded and return the
+				// types that were able to be loaded.
+
+				foreach (var item in ex.LoaderExceptions)
+					logger.Debug("{0}", item.Message);
+
+				return ex.Types;
 			}
 		}
 
@@ -207,13 +236,10 @@ namespace Peach.Core
 				if (!AllByAttributeCache.TryGetValue(typeof(A), out types))
 				{
 					var typesList = new List<Type>();
-					foreach (var asm in AssemblyCache)
+					foreach (var kv in AssemblyCache)
 					{
-						foreach (var type in asm.GetTypes())
+						foreach (var type in kv.Value)
 						{
-							if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
-								continue;
-
 							if (type.GetCustomAttributes<A>().Any())
 								typesList.Add(type);
 						}
@@ -283,40 +309,6 @@ namespace Peach.Core
 					a.Name == name ||
 					t.GetAttributes<AliasAttribute>().Any(x => x.Name == name))
 				.FirstOrDefault().Value;
-		}
-
-		/// <summary>
-		/// Find and create and instance of class by parent type and 
-		/// name.
-		/// </summary>
-		/// <typeparam name="T">Return Type.</typeparam>
-		/// <param name="name">Name of type.</param>
-		/// <returns>Returns a new instance of found type, or null.</returns>
-		public static T FindAndCreateByTypeAndName<T>(string name)
-			where T : class
-		{
-			lock (_mutex)
-			{
-				foreach (var asm in AssemblyCache)
-				{
-					//if (asm.IsDynamic)
-					//	continue;
-
-					var type = asm.GetType(name);
-					if (type == null)
-						continue;
-
-					if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
-						continue;
-
-					if (!type.IsSubclassOf(type))
-						continue;
-
-					return Activator.CreateInstance(type) as T;
-				}
-			}
-
-			return null;
 		}
 
 		static object[] GetCustomAttributes(Type type)
