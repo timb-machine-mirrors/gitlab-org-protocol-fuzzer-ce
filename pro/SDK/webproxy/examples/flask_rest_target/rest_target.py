@@ -218,6 +218,10 @@ if __name__ == '__main__':
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(logFormatter)
     logger.addHandler(consoleHandler)
+    
+    fileHandler = logging.FileHandler('rest_target.log')
+    fileHandler.setFormatter(logFormatter)
+    logger.addHandler(fileHandler)
 
     logger.info("rest_target.py initializing.")
     CreateDb()
