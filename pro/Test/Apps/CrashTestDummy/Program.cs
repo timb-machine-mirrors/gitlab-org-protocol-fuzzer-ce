@@ -60,6 +60,16 @@ namespace Peach.CrashTestDummy
 
 		protected override int OnRun(List<string> args)
 		{
+			IDisposable canary = null;
+			Guid guid;
+			if (args.Count > 0 && Guid.TryParse(args[0], out guid))
+			{
+				Console.WriteLine("Grabbing canary...");
+				canary = Pal.GetCanary(guid);
+				if (canary != null)
+					Console.WriteLine("Grabbed canary");
+			}
+
 			Console.WriteLine("Opening mutex...");
 			using (var mutex = Pal.SingleInstance("CrashTestDummy"))
 			{
@@ -75,6 +85,13 @@ namespace Peach.CrashTestDummy
 				}
 			}
 			Console.WriteLine("Mutex released");
+
+			if (canary != null)
+			{
+				canary.Dispose();
+				Console.WriteLine("Canary released");
+			}
+
 			return 0;
 		}
 

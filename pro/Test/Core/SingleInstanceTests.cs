@@ -29,6 +29,17 @@ namespace Peach.Pro.Test.Core
 			var proc = new SysProcess
 			{
 				StartInfo = new ProcessStartInfo(path, args)
+				{
+					RedirectStandardOutput = true,
+					CreateNoWindow = true,
+					UseShellExecute = false
+				}
+			};
+
+			proc.OutputDataReceived += (e, d) =>
+			{
+				if (!string.IsNullOrEmpty(d.Data))
+					Console.WriteLine(d.Data);
 			};
 
 			using (var mutex = Pal.SingleInstance("CrashTestDummy"))
@@ -36,11 +47,95 @@ namespace Peach.Pro.Test.Core
 				mutex.Lock();
 
 				proc.Start();
+				proc.BeginOutputReadLine();
 
 				Assert.IsFalse(proc.WaitForExit(5000));
 			}
 
+			Assert.IsTrue(proc.WaitForExit(2000));
+		}
+
+		[Test]
+		public void TestCanarySameProc()
+		{
+			var guid = Guid.NewGuid();
+
+			// No one is holding canary, should get it
+			using (var c1 = Pal.GetCanary(guid))
+			{
+				Assert.NotNull(c1, "1st get on canary should be non-null");
+
+				for (var i = 0; i < 100; ++i)
+				{
+					// Someone is holding canary, should not get it
+					using (var c2 = Pal.GetCanary(guid))
+					{
+						Assert.Null(c2, "2nd get on canary should be null");
+					}
+				}
+			}
+
+			// No one is holding canary, should get it
+			using (var c3 = Pal.GetCanary(guid))
+			{
+				Assert.NotNull(c3, "3rd get on canary should be non-null");
+			}
+		}
+
+		[Test]
+		public void TestCanaryMultiProc()
+		{
+			var guid = Guid.NewGuid();
+			var argsList = new List<string>();
+			var path = Path.Combine(Utilities.ExecutionDirectory, "CrashTestDummy.exe");
+			if (Platform.GetOS() != Platform.OS.Windows)
+			{
+				argsList.Add(path);
+				path = "mono";
+			}
+
+			argsList.Add(guid.ToString());
+
+			var args = string.Join(" ", argsList);
+			var proc = new SysProcess
+			{
+				StartInfo = new ProcessStartInfo(path, args)
+				{
+					RedirectStandardOutput = true,
+					CreateNoWindow = true,
+					UseShellExecute = false
+				}
+			};
+
+			proc.OutputDataReceived += (e, d) =>
+			{
+				if (!string.IsNullOrEmpty(d.Data))
+					Console.WriteLine(d.Data);
+			};
+
+			using (var mutex = Pal.SingleInstance("CrashTestDummy"))
+			{
+				mutex.Lock();
+
+				proc.Start();
+				proc.BeginOutputReadLine();
+
+				Assert.IsFalse(proc.WaitForExit(5000));
+
+				using (var c = Pal.GetCanary(guid))
+				{
+					Assert.Null(c, "Canary should be held by other process");
+				}
+
+				proc.Kill();
+			}
+
 			Assert.IsTrue(proc.WaitForExit(1000));
+
+			using (var c = Pal.GetCanary(guid))
+			{
+				Assert.NotNull(c, "Canary should no longer be held");
+			}
 		}
 	}
 }

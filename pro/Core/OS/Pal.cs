@@ -21,6 +21,14 @@ namespace Peach.Pro.Core.OS
 			int writeBufferSize);
 
 		ISingleInstance SingleInstance(string name);
+
+		/// <summary>
+		/// Returns non-null if guid is not referenced by any process.
+		/// Returns null if guid is referenced by any process.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		IDisposable GetCanary(Guid id);
 	}
 
 	public static class Pal
@@ -77,6 +85,11 @@ namespace Peach.Pro.Core.OS
 		public static ISingleInstance SingleInstance(string name)
 		{
 			return Instance.SingleInstance(name);
+		}
+
+		public static IDisposable GetCanary(Guid id)
+		{
+			return Instance.GetCanary(id);
 		}
 	}
 }

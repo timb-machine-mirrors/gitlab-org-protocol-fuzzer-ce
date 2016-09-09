@@ -1,3 +1,4 @@
+using System;
 using System.IO.Ports;
 using Peach.Pro.Core.OS.Unix;
 
@@ -37,6 +38,11 @@ namespace Peach.Pro.Core.OS.OSX
 		public ISingleInstance SingleInstance(string name)
 		{
 			return new SingleInstanceImpl(name);
+		}
+
+		public IDisposable GetCanary(Guid id)
+		{
+			return CanaryImpl.Get(id);
 		}
 	}
 }

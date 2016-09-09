@@ -1,4 +1,6 @@
+using System;
 using System.IO.Ports;
+using System.Threading;
 
 namespace Peach.Pro.Core.OS.Windows
 {
@@ -36,6 +38,20 @@ namespace Peach.Pro.Core.OS.Windows
 		public ISingleInstance SingleInstance(string name)
 		{
 			return new SingleInstanceImpl(name);
+		}
+
+		public IDisposable GetCanary(Guid id)
+		{
+			var name = "Global\\" + id;
+			bool createdNew;
+
+			var mutex = new Mutex(true, name, out createdNew);
+
+			if (createdNew)
+				return mutex;
+
+			mutex.Dispose();
+			return null;
 		}
 	}
 }
