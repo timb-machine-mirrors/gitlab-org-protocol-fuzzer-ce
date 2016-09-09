@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
+using Peach.Pro.Core.OS;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
@@ -13,13 +14,13 @@ namespace Peach.Pro.Test.Core.Publishers
 	[Peach]
 	class RemotePublisherTests
 	{
-		SingleInstance _si;
+		ISingleInstance _si;
 		TempDirectory _tmpDir;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_si = SingleInstance.CreateInstance(GetType().FullName);
+			_si = Pal.SingleInstance(GetType().FullName);
 			_si.Lock();
 			_tmpDir = new TempDirectory();
 

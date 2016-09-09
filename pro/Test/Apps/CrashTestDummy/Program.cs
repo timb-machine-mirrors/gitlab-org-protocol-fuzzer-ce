@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using Peach.Core.Runtime;
+using Peach.Pro.Core.OS;
 using Peach.Pro.Core.Runtime;
 
 namespace Peach.CrashTestDummy
@@ -60,7 +61,7 @@ namespace Peach.CrashTestDummy
 		protected override int OnRun(List<string> args)
 		{
 			Console.WriteLine("Opening mutex...");
-			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
+			using (var mutex = Pal.SingleInstance("CrashTestDummy"))
 			{
 				for (int i = 0; i < 20; i++)
 				{

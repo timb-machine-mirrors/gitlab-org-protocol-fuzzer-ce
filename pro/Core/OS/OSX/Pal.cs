@@ -33,5 +33,10 @@ namespace Peach.Pro.Core.OS.OSX
 				readBufferSize,
 				writeBufferSize);
 		}
+
+		public ISingleInstance SingleInstance(string name)
+		{
+			return new SingleInstanceImpl(name);
+		}
 	}
 }

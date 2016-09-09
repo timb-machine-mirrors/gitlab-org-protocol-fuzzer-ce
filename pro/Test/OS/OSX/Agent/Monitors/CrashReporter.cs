@@ -6,6 +6,7 @@ using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.OS.OSX.Agent.Monitors;
 using Peach.Core.Test;
+using Peach.Pro.Core.OS;
 
 namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 {
@@ -15,13 +16,13 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 	[Platform("MacOSX")]
 	public class CrashReporterTest
 	{
-		SingleInstance _si;
+		ISingleInstance _si;
 
 		[SetUp]
 		public void SetUp()
 		{
 			// Ensure only 1 instance of the platform tests runs at a time
-			_si = SingleInstance.CreateInstance(Assembly.GetExecutingAssembly().FullName);
+			_si = Pal.SingleInstance(Assembly.GetExecutingAssembly().FullName);
 			_si.Lock();
 		}
 

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Pro.Core.OS;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
@@ -17,7 +18,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 	[Platform("Linux")]
 	class LinuxCoreFileTests
 	{
-		SingleInstance _si;
+		ISingleInstance _si;
 		TempDirectory _tmp;
 
 		[SetUp]
@@ -26,7 +27,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			_tmp = new TempDirectory();
 
 			// Ensure only 1 instance of the test runs at a time
-			_si = SingleInstance.CreateInstance(Assembly.GetExecutingAssembly().FullName);
+			_si = Pal.SingleInstance(Assembly.GetExecutingAssembly().FullName);
 			_si.Lock();
 		}
 
@@ -290,7 +291,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 				{ "LogFolder", _tmp.Path }
 			});
 
-			using (var si = SingleInstance.CreateInstance("LinuxCoreFile"))
+			using (var si = Pal.SingleInstance("LinuxCoreFile"))
 			{
 				Assert.True(si.TryLock(), "SingleInstance should have locked");
 

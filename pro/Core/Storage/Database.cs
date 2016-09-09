@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Dapper;
 using Peach.Core;
+using Peach.Pro.Core.OS;
 using FileInfo = System.IO.FileInfo;
 
 namespace Peach.Pro.Core.Storage
@@ -195,7 +196,7 @@ namespace Peach.Pro.Core.Storage
 
 		public void Migrate()
 		{
-			using (var si = SingleInstance.CreateInstance(Path))
+			using (var si = Pal.SingleInstance(Path))
 			{
 				si.Lock();
 

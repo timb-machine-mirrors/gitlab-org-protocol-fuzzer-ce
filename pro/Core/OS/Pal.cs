@@ -19,6 +19,8 @@ namespace Peach.Pro.Core.OS
 			int writeTimeout,
 			int readBufferSize,
 			int writeBufferSize);
+
+		ISingleInstance SingleInstance(string name);
 	}
 
 	public static class Pal
@@ -70,6 +72,11 @@ namespace Peach.Pro.Core.OS
 				writeTimeout,
 				readBufferSize,
 				writeBufferSize);
+		}
+
+		public static ISingleInstance SingleInstance(string name)
+		{
+			return Instance.SingleInstance(name);
 		}
 	}
 }

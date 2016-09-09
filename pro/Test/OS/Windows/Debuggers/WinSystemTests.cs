@@ -8,6 +8,7 @@ using Peach.Core.Test;
 using Peach.Pro.Core.OS.Windows;
 using Peach.Pro.Core.OS.Windows.Debugger;
 using Peach.Pro.OS.Windows.Agent.Monitors;
+using Pal = Peach.Pro.Core.OS.Pal;
 
 namespace Peach.Pro.Test.OS.Windows.Debuggers
 {
@@ -101,7 +102,7 @@ namespace Peach.Pro.Test.OS.Windows.Debuggers
 
 			try
 			{
-				using (var si = SingleInstance.CreateInstance("Peach.Core.Test.OS.Windows.WinSystemTests"))
+				using (var si = Pal.SingleInstance("Peach.Core.Test.OS.Windows.WinSystemTests"))
 				{
 					si.Lock();
 

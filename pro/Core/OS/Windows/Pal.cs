@@ -32,5 +32,10 @@ namespace Peach.Pro.Core.OS.Windows
 				readBufferSize, 
 				writeBufferSize);
 		}
+
+		public ISingleInstance SingleInstance(string name)
+		{
+			return new SingleInstanceImpl(name);
+		}
 	}
 }

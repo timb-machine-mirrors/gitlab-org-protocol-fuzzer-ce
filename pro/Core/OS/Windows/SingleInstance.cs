@@ -1,56 +1,54 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Threading;
-using Peach.Core;
 
-namespace Peach.Pro.OS.Windows
+namespace Peach.Pro.Core.OS.Windows
 {
-	[PlatformImpl(Platform.OS.Windows)]
-	public class SingleInstanceImpl : SingleInstance
+	internal class SingleInstanceImpl : ISingleInstance
 	{
-		object obj;
-		Mutex mutex;
-		bool locked;
+		private static readonly Regex SanitizerRegex = new Regex(@"[\\/]");
+
+		private readonly Mutex _mutex;
+		private bool _locked;
+		private bool _disposed;
 
 		public SingleInstanceImpl(string name)
 		{
-			locked = false;
-			obj = new object();
-			var safeName = name.Replace("\\", "_").Replace("/", "_");
-			mutex = new Mutex(false, "Global\\" + safeName);
+			_mutex = new Mutex(false, "Global\\" + SanitizerRegex.Replace(name, "_"));
 		}
 
-		public override void Dispose()
+		public void Dispose()
 		{
-			lock (obj)
+			lock (_mutex)
 			{
-				if (mutex != null)
-				{
-					if (locked)
-					{
-						mutex.ReleaseMutex();
-						locked = false;
-					}
+				if (_disposed)
+					return;
 
-					mutex.Dispose();
-					mutex = null;
+				if (_locked)
+				{
+					_mutex.ReleaseMutex();
+					_locked = false;
 				}
+
+				_mutex.Dispose();
+				_disposed = true;
 			}
 		}
 
-		public override bool TryLock()
+		public bool TryLock()
 		{
-			lock (obj)
+			lock (_mutex)
 			{
-				if (mutex == null)
+				if (_disposed)
 					throw new ObjectDisposedException("SingleInstanceImpl");
 
-				if (locked)
+				if (_locked)
 					return true;
 
 				try
 				{
-					locked = mutex.WaitOne(0);
-					return locked;
+					_locked = _mutex.WaitOne(0);
+					return _locked;
 				}
 				catch (AbandonedMutexException)
 				{
@@ -59,20 +57,20 @@ namespace Peach.Pro.OS.Windows
 			}
 		}
 
-		public override void Lock()
+		public void Lock()
 		{
-			lock (obj)
+			lock (_mutex)
 			{
-				if (mutex == null)
+				if (_disposed)
 					throw new ObjectDisposedException("SingleInstanceImpl");
 
-				if (locked)
+				if (_locked)
 					return;
 
 				try
 				{
-					mutex.WaitOne();
-					locked = true;
+					_mutex.WaitOne();
+					_locked = true;
 				}
 				catch (AbandonedMutexException)
 				{

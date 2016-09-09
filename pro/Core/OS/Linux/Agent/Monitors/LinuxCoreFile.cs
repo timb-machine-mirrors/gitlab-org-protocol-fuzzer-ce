@@ -11,6 +11,7 @@ using Mono.Unix.Native;
 using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
+using Peach.Pro.Core.OS;
 using Monitor = Peach.Core.Agent.Monitor2;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
@@ -47,7 +48,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 				throw new PeachException(string.Format("The specified log folder is too long, it must be less than 60 characters: '{0}'", LogFolder));
 
 			// 1) Ensure only one monitor exists...
-			var si = SingleInstance.CreateInstance("LinuxCoreFile");
+			var si = Pal.SingleInstance("LinuxCoreFile");
 			if (!si.TryLock())
 				throw new PeachException("Only a single running instance of the core file monitor is allowed on a host at any time.");
 			_cleanup.Push(si);

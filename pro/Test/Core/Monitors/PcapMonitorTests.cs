@@ -10,6 +10,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Test;
+using Peach.Pro.Core.OS;
 using SharpPcap;
 using SharpPcap.LibPcap;
 
@@ -142,7 +143,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			MonitorData[] faults;
 
-			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.DataCollection"))
+			using (var si = Pal.SingleInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.DataCollection"))
 			{
 				si.Lock();
 
@@ -279,7 +280,7 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			MonitorData[] faults;
 
-			using (var si = SingleInstance.CreateInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.MultipleMonitorsTest"))
+			using (var si = Pal.SingleInstance("Peach.Pro.Test.Core.Monitors.PcapMonitorTests.MultipleMonitorsTest"))
 			{
 				si.Lock();
 

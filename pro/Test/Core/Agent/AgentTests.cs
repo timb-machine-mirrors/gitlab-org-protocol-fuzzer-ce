@@ -11,6 +11,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
 using Peach.Core.Test;
+using Peach.Pro.Core.OS;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
 using SysProcess = System.Diagnostics.Process;
@@ -22,14 +23,14 @@ namespace Peach.Pro.Test.Core.Agent
 	[Peach]
 	public class AgentTests
 	{
-		SingleInstance _si;
+		ISingleInstance _si;
 		SysProcess _process;
 		TempDirectory _tmpDir;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_si = SingleInstance.CreateInstance(GetType().FullName);
+			_si = Pal.SingleInstance(GetType().FullName);
 			_si.Lock();
 			_tmpDir = new TempDirectory();
 

@@ -33,5 +33,10 @@ namespace Peach.Pro.Core.OS.Linux
 				readBufferSize,
 				writeBufferSize);
 		}
+
+		public ISingleInstance SingleInstance(string name)
+		{
+			return new SingleInstanceImpl(name);
+		}
 	}
 }

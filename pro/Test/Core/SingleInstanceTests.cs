@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Peach.Pro.Core.OS;
 using SysProcess = System.Diagnostics.Process;
 
 namespace Peach.Pro.Test.Core
@@ -30,7 +31,7 @@ namespace Peach.Pro.Test.Core
 				StartInfo = new ProcessStartInfo(path, args)
 			};
 
-			using (var mutex = SingleInstance.CreateInstance("CrashTestDummy"))
+			using (var mutex = Pal.SingleInstance("CrashTestDummy"))
 			{
 				mutex.Lock();
 
