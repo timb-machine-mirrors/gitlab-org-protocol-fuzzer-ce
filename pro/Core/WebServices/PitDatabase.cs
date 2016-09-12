@@ -15,6 +15,7 @@ using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Newtonsoft.Json;
 using Peach.Pro.Core.License;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -51,6 +52,10 @@ namespace Peach.Pro.Core.WebServices
 				public string Ref { get; set; }
 			}
 
+			public class WebProxyElement : ChildElement
+			{
+			}
+
 			public TestElement()
 			{
 				Children = new List<ChildElement>();
@@ -61,6 +66,7 @@ namespace Peach.Pro.Core.WebServices
 
 			[XmlElement("Agent", typeof(AgentReferenceElement))]
 			[XmlElement("StateModel", typeof(StateModelReferenceElement))]
+			[XmlElement("WebProxy", typeof(WebProxyElement))]
 			public List<ChildElement> Children { get; set; }
 
 			public IEnumerable<AgentReferenceElement> AgentRefs
@@ -71,6 +77,15 @@ namespace Peach.Pro.Core.WebServices
 			public IEnumerable<StateModelReferenceElement> StateModelRefs
 			{
 				get { return Children.OfType<StateModelReferenceElement>(); }
+			}
+
+			[XmlIgnore]
+			public bool IsWebProxy
+			{
+				get
+				{
+					return Children.OfType<WebProxyElement>().Any();
+				}
 			}
 		}
 
@@ -732,6 +747,7 @@ namespace Peach.Pro.Core.WebServices
 			detail.PitConfig.Config = data.Config; // TODO: defines.ApplyWeb(config);
 			detail.PitConfig.Agents = data.Agents.FromWeb();
 			detail.PitConfig.Weights = data.Weights;
+			detail.PitConfig.WebProxy = data.WebProxy;
 
 			SavePitConfig(detail.Path, detail.PitConfig);
 
@@ -786,17 +802,21 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Pit Config/Agents/Metadata
 
-		void ExtractCalls(PitResource pitResource, 
+		bool ExtractCalls(PitResource pitResource,
 		                  string xmlPath, 
 		                  Stream input, 
 		                  string stateModel, 
-		                  string ns, 
+		                  string ns,
 		                  HashSet<string> calls)
 		{
 			var contents = Parse(xmlPath, input);
 
 			if (string.IsNullOrEmpty(stateModel))
 			{
+
+				if (contents.Children.OfType<PeachElement.TestElement>().Any(x => x.IsWebProxy))
+					return true;
+
 				stateModel = contents.Children.OfType<PeachElement.TestElement>()
 									 .SelectMany(x => x.StateModelRefs)
 									 .Select(x => x.Ref)
@@ -813,7 +833,7 @@ namespace Peach.Pro.Core.WebServices
 					                .Select(x => x.Method);
 					foreach (var method in methods)
 						calls.Add(method);
-					return;
+					return false;
 				}
 			}
 
@@ -824,6 +844,24 @@ namespace Peach.Pro.Core.WebServices
 					ExtractCalls(pitResource, inc.Source, stream, stateModel, inc.Ns, calls);
 				}
 			}
+
+			return false;
+		}
+
+		private static WebProxy DefaultWebProxy()
+		{
+			return new WebProxy
+			{
+				Routes = new List<WebRoute>
+				{
+					new WebRoute
+					{
+						Url = "*",
+						Mutate = true,
+						FaultOnStatusCodes = WebProxyRoute.DefaultFaultStatusCodes.ToList()
+					}
+				}
+			};
 		}
 
 		private Pit MakePit(PitDetail detail)
@@ -835,9 +873,10 @@ namespace Peach.Pro.Core.WebServices
 
 			var calls = new HashSet<string>();
 			var pitResource = new PitResource(_license, _pitLibraryPath, pitXml);
+			bool isWebProxy;
 			using (var stream = File.OpenRead(pitXml))
 			{
-				ExtractCalls(pitResource, pitXml, stream, null, null, calls);
+				isWebProxy = ExtractCalls(pitResource, pitXml, stream, null, null, calls);
 			}
 
 			var pit = new Pit {
@@ -853,6 +892,7 @@ namespace Peach.Pro.Core.WebServices
 				Config = detail.PitConfig.Config,
 				Agents = detail.PitConfig.Agents,
 				Weights = detail.PitConfig.Weights,
+				WebProxy = isWebProxy ? (detail.PitConfig.WebProxy ?? DefaultWebProxy()) : null,
 				Metadata = new PitMetadata {
 					Defines = defs.ToWeb(detail.PitConfig.Config),
 					Monitors = MonitorMetadata.Generate(calls.ToList()),
