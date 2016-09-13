@@ -46,6 +46,21 @@ namespace Peach {
 		public WizardTracks = Peach.WizardTracks;
 		public Version: string;
 
+		private configStepsDefault = [
+			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
+			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
+			{ id: C.States.PitAdvancedTest, name: 'Test' }
+		];
+
+		private configStepsWebProxy = [
+			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
+			{ id: C.States.PitAdvancedWebProxy, name: 'Web Proxy' },
+			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
+			{ id: C.States.PitAdvancedTest, name: 'Test' }
+		];
+
 		private get LicenseExpiration(): moment.Moment {
 			if (_.isUndefined(this.license)) {
 				return moment().add({ days: 60 });
@@ -69,12 +84,9 @@ namespace Peach {
 			return this.$state.params['pit'];
 		}
 
-		public ConfigSteps = [
-			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
-			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
-			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
-			{ id: C.States.PitAdvancedTest, name: 'Test' }
-		];
+		public get ConfigSteps() {
+			return this.pitService.IsWebProxy ? this.configStepsWebProxy : this.configStepsDefault;
+		}
 
 		public OnItemClick(event: ng.IAngularEvent, enabled) {
 			if (!enabled) {

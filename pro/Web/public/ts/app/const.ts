@@ -21,6 +21,7 @@ namespace Peach.C {
 		export const FaultFiles = 'peachFaultFiles';
 		export const Jobs = 'peachJobs';
 		export const Monitor = 'peachMonitor';
+		export const Route = 'peachRoute';
 		export const Parameter = 'peachParameter';
 		export const ParameterInput = 'peachParameterInput';
 		export const ParameterCombo = 'peachParameterCombo';
@@ -52,6 +53,7 @@ namespace Peach.C {
 		export const FaultFiles = 'FaultFilesController';
 		export const Jobs = 'JobsDirectiveController';
 		export const Monitor = 'MonitorController';
+		export const Route = 'RouteController';
 		export const Parameter = 'ParameterController';
 		export const ParameterInput = 'ParameterInputController';
 		export const Test = 'TestController';
@@ -156,6 +158,7 @@ namespace Peach.C {
 				export const Variables = 'html/pit/advanced/variables.html';
 				export const Monitoring = 'html/pit/advanced/monitoring.html';
 				export const Tuning = 'html/pit/advanced/tuning.html';
+				export const WebProxy = 'html/pit/advanced/webproxy.html';
 				export const Test = 'html/pit/advanced/test.html';
 			}
 		}
@@ -179,6 +182,7 @@ namespace Peach.C {
 			export const FaultFiles = 'html/directives/fault/files.html';
 			export const Jobs = 'html/directives/jobs.html';
 			export const Monitor = 'html/directives/monitor.html';
+			export const Route = 'html/directives/route.html';
 			export const Parameter = 'html/directives/parameter.html';
 			export const Question = 'html/directives/question.html';
 			export const Test = 'html/directives/test.html';
@@ -210,6 +214,7 @@ namespace Peach.C {
 		export const PitAdvancedVariables = 'pit.advanced.variables';
 		export const PitAdvancedMonitoring = 'pit.advanced.monitoring';
 		export const PitAdvancedTuning = 'pit.advanced.tuning';
+		export const PitAdvancedWebProxy = 'pit.advanced.webproxy';
 		export const PitAdvancedTest = 'pit.advanced.test';
 	}
 }

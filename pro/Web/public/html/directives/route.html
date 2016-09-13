@@ -1,0 +1,164 @@
+﻿<ng-form name="form">
+	<uib-accordion-group is-open="isOpen">
+		<uib-accordion-heading>
+			<span>
+				<i class="fa"
+					 ng-class="{'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen}">
+				</i>
+				&nbsp;
+				{{vm.Header}}
+				<span class="btn-group btn-group-xs pull-right">
+					<button class="btn btn-xs btn-info"
+									ng-click="vm.OnMoveUp($event)"
+									ng-disabled="!vm.CanMoveUp"
+									uib-tooltip="Move Route Up"
+									tooltip-append-to-body="true">
+						<i class="fa fa-chevron-up">
+						</i>
+					</button>
+					<button class="btn btn-xs btn-info"
+									ng-click="vm.OnMoveDown($event)"
+									ng-disabled="!vm.CanMoveDown"
+									uib-tooltip="Move Route Down"
+									tooltip-append-to-body="true">
+						<i class="fa fa-chevron-down">
+						</i>
+					</button>
+					<button class="btn btn-xs btn-danger"
+									ng-click="vm.OnRemove($event)"
+									uib-tooltip="Remove Route"
+									tooltip-append-to-body="true">
+						<i class="fa fa-remove">
+						</i>
+					</button>
+				</span>
+			</span>
+		</uib-accordion-heading>
+		<div class="form-group"
+				 ng-class="{'has-error': form.url.$invalid}">
+			<label class="col-sm-4 control-label">
+				Pattern
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="input-group-addon"
+								uib-tooltip="Url"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
+						<i class="fa fa-question-circle"></i>
+					</span>
+					<input name="url"
+								 autocomplete="off"
+								 ng-required="true"
+								 ng-model="route.url"
+								 type="text"
+								 class="form-control"/>
+				</div>
+				<span class="help-block"
+							ng-messages="form.url.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+		<div class="form-group"
+				 ng-class="{'has-error': form.swagger.$invalid}">
+			<label class="col-sm-4 control-label">
+				Swagger
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="input-group-addon"
+								uib-tooltip="Swagger"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
+						<i class="fa fa-question-circle"></i>
+					</span>
+					<input name="swagger"
+								 autocomplete="off"
+								 ng-model="route.swagger"
+								 type="text"
+								 class="form-control"/>
+				</div>
+				<span class="help-block"
+							ng-messages="form.swagger.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+		<div class="form-group"
+				 ng-class="{'has-error': form.script.$invalid}">
+			<label class="col-sm-4 control-label">
+				Script
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="input-group-addon"
+								uib-tooltip="Script"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
+						<i class="fa fa-question-circle"></i>
+					</span>
+					<input name="script"
+								 autocomplete="off"
+								 ng-model="route.script"
+								 type="text"
+								 class="form-control"/>
+				</div>
+				<span class="help-block"
+							ng-messages="form.script.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+		<div class="form-group"
+				 ng-class="{'has-error': form.baseUrl.$invalid}">
+			<label class="col-sm-4 control-label">
+				Target Endpoint
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="input-group-addon"
+								uib-tooltip="Target endpoint"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
+						<i class="fa fa-question-circle"></i>
+					</span>
+					<input name="baseUrl"
+								 autocomplete="off"
+								 ng-model="route.baseUrl"
+								 type="text"
+								 class="form-control"/>
+				</div>
+				<span class="help-block"
+							ng-messages="form.baseUrl.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+		<div class="form-group"
+				 ng-class="{'has-error': form.faults.$invalid}">
+			<label class="col-sm-4 control-label">
+				Fault On Status Codes
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="input-group-addon"
+								uib-tooltip="Faults status codes"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
+						<i class="fa fa-question-circle"></i>
+					</span>
+					<input name="faults"
+								 autocomplete="off"
+								 ng-model="route.faultOnStatusCodesText"
+								 type="text"
+								 class="form-control"/>
+				</div>
+				<span class="help-block"
+							ng-messages="form.faults.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+	</uib-accordion-group>
+</ng-form>
