@@ -1,27 +1,26 @@
 from setuptools import setup
 
 setup(
-    name = 'pytest-peach',
-    version = '1.0.0',
+    name = 'peachproxy',
+    version = '4.1.0',
     #use_scm_version=True,
-    description = 'pytest plugin for fuzzing with Peach Fuzzer Web Proxy',
+    description = 'Peach Web Proxy API module',
     long_description = open('README.adoc').read(),
     author = 'Peach Fuzzer, LLC',
     author_email = 'contact@peachfuzzer.com',
     url = 'http://peachfuzzer.com',
     
-    py_modules = ['pytest_peach'],
+    py_modules = ['peachproxy'],
     entry_points = {'pytest11': ['peach = pytest_peach']},
     setup_requires = ['setuptools_scm'],
-    install_requires = ['pytest>=2.8.7', 'requests>=2.11', 'peachproxy>=4.1'],
+    install_requires = ['requests>=2.11'],
     
     license = 'MIT',
     
-    keywords = 'py.test pytest fuzzing peach',
+    keywords = 'peach fuzzing security test rest',
     
     classifiers = [
         'Development Status :: 4 - Beta',
-        'Framework :: Pytest',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX',
