@@ -19,5 +19,7 @@ namespace Peach.Pro.Core.WebServices.Models
 		public List<Agent> Agents { get; set; }
 
 		public List<PitWeight> Weights { get; set; }
+
+		public WebProxy WebProxy { get; set; }
 	}
 }

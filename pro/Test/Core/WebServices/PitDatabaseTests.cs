@@ -135,6 +135,17 @@ namespace Peach.Pro.Test.Core.WebServices
 </Peach>
 ";
 
+		const string proxyExample =
+@"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<Test name='Default'>
+		<WebProxy />
+		<Strategy class='WebProxy' />
+		<Publisher class='WebApiProxy'/>
+	</Test>
+</Peach>
+";
+
 		[SetUp]
 		public void SetUp()
 		{
@@ -954,6 +965,224 @@ namespace Peach.Pro.Test.Core.WebServices
 			var saved = PitDatabase.LoadPitConfig(finish.Item2.Path);
 			Assert.AreEqual("SomeMiscVariable", saved.Config[0].Key);
 			Assert.AreEqual("Foo Bar Baz", saved.Config[0].Value);
+		}
+
+		[Test]
+		public void TestWebProxy()
+		{
+			File.WriteAllText(Path.Combine(_root.Path, "Image", "WebProxy.xml"), proxyExample);
+
+			_db.Load(_root.Path);
+
+			var ent = _db.Entries.ToList();
+			Assert.AreEqual(2, ent.Count);
+
+			var img = ent.First(e => e.PitConfig.Name == "IMG");
+
+			var pit1 = _db.GetPitByUrl(img.PitUrl);
+			Assert.NotNull(pit1);
+			Assert.Null(pit1.WebProxy);
+
+			var web = ent.First(e => e.PitConfig.Name == "WebProxy");
+
+			var pit2 = _db.GetPitByUrl(web.PitUrl);
+			Assert.IsEmpty(pit2.Config);
+			Assert.IsEmpty(pit2.Agents);
+			Assert.IsEmpty(pit2.Weights);
+			Assert.NotNull(pit2.WebProxy);
+			Assert.NotNull(pit2.WebProxy.Routes);
+			Assert.AreEqual(1, pit2.WebProxy.Routes.Count);
+			Assert.AreEqual("*", pit2.WebProxy.Routes[0].Url);
+			Assert.AreEqual(true, pit2.WebProxy.Routes[0].Mutate);
+		}
+
+		[Test]
+		public void TestSetWebProxy()
+		{
+			File.WriteAllText(Path.Combine(_root.Path, "Image", "WebProxy.xml"), proxyExample);
+
+			_db.Load(_root.Path);
+
+			var ent = _db.Entries.First(e => e.PitConfig.Name == "WebProxy");
+			var tuple = _db.NewConfig(ent.PitUrl, "MyWebSvc", "Desc");
+			var cfg = new PitConfig
+			{
+				Agents = new List<MAgent>(),
+				Config = new List<Param> {
+					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
+				},
+				WebProxy = new WebProxy
+				{
+					Routes = new List<WebRoute>
+					{
+						new WebRoute
+						{
+							Url = "/p",
+							Mutate = true,
+							Swagger = "myswagger.json",
+							FaultOnStatusCodes = new List<int> { 300, 301, 302, 500, 501 },
+							BaseUrl = "http://127.0.0.1",
+							Script = "mypython.py",
+							Headers = new List<WebHeader>
+							{
+								new WebHeader
+								{
+									Name = "Content-Type",
+									Mutate = false
+								},
+								new WebHeader
+								{
+									Name = "X-Peach-*",
+									Mutate = true
+								},
+							}
+						},
+						new WebRoute
+						{
+							Url = "*",
+							Mutate = false
+						}
+					}
+				}
+			};
+
+			var pit = _db.UpdatePitByUrl(tuple.Item1.PitUrl, cfg);
+			Assert.NotNull(pit);
+			Assert.NotNull(pit.WebProxy);
+			Assert.NotNull(pit.WebProxy.Routes);
+			Assert.AreEqual(2, pit.WebProxy.Routes.Count);
+			Assert.AreEqual("/p", pit.WebProxy.Routes[0].Url);
+
+			var savedPit = PitDatabase.LoadPitConfig(tuple.Item2.Path);
+			Assert.NotNull(savedPit);
+			Assert.NotNull(savedPit.WebProxy);
+			Assert.NotNull(savedPit.WebProxy.Routes);
+			Assert.AreEqual(2, savedPit.WebProxy.Routes.Count);
+			Assert.AreEqual("/p", savedPit.WebProxy.Routes[0].Url);
+		}
+
+		[Test]
+		public void TestSaveWebProxy()
+		{
+			// If a WebProxy is posted, ignore if our pit doesn't use WebPoxy
+
+			var ent = _db.Entries.First(e => e.PitConfig.Name == "IMG");
+			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
+			var cfg = new PitConfig
+			{
+				Agents = new List<MAgent>(),
+				Config = new List<Param> {
+					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
+				},
+				WebProxy = new WebProxy
+				{
+					Routes = new List<WebRoute>
+					{
+						new WebRoute
+						{
+							Url = "/p",
+							Mutate = true,
+							Swagger = "myswagger.json",
+							FaultOnStatusCodes = new List<int> { 300, 301, 302, 500, 501 },
+							BaseUrl = "http://127.0.0.1",
+							Script = "mypython.py",
+							Headers = new List<WebHeader>
+							{
+								new WebHeader
+								{
+									Name = "Content-Type",
+									Mutate = false
+								},
+								new WebHeader
+								{
+									Name = "X-Peach-*",
+									Mutate = true
+								},
+							}
+						},
+						new WebRoute
+						{
+							Url = "*",
+							Mutate = false
+						}
+					}
+				}
+			};
+
+			var pit = _db.UpdatePitByUrl(tuple.Item1.PitUrl, cfg);
+			Assert.NotNull(pit);
+			Assert.Null(pit.WebProxy);
+
+			var savedPit = PitDatabase.LoadPitConfig(tuple.Item2.Path);
+			Assert.NotNull(savedPit);
+			Assert.NotNull(savedPit.WebProxy);
+		}
+
+		[Test]
+		public void TestLoadWebProxy()
+		{
+			// If a WebProxy is added to .peach, ignore if our pit doesn't use WebPoxy
+
+			var ent = _db.Entries.First(e => e.PitConfig.Name == "IMG");
+			var tuple = _db.NewConfig(ent.PitUrl, "IMG Copy", "Desc");
+
+			var cfg = new PitConfig
+			{
+				OriginalPit = tuple.Item2.PitConfig.OriginalPit,
+				Agents = new List<MAgent>(),
+				Config = new List<Param> {
+					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
+				},
+				WebProxy = new WebProxy
+				{
+					Routes = new List<WebRoute>
+					{
+						new WebRoute
+						{
+							Url = "/p",
+							Mutate = true,
+							Swagger = "myswagger.json",
+							FaultOnStatusCodes = new List<int> { 300, 301, 302, 500, 501 },
+							BaseUrl = "http://127.0.0.1",
+							Script = "mypython.py",
+							Headers = new List<WebHeader>
+							{
+								new WebHeader
+								{
+									Name = "Content-Type",
+									Mutate = false
+								},
+								new WebHeader
+								{
+									Name = "X-Peach-*",
+									Mutate = true
+								},
+							}
+						},
+						new WebRoute
+						{
+							Url = "*",
+							Mutate = false
+						}
+					}
+				}
+			};
+
+			// Save a config with a WebProxy section
+			PitDatabase.SavePitConfig(tuple.Item2.Path, cfg);
+
+			// Verify it saved
+			var savedPit = PitDatabase.LoadPitConfig(tuple.Item2.Path);
+			Assert.NotNull(savedPit);
+			Assert.NotNull(savedPit.WebProxy);
+
+			_db.Load(_root.Path);
+
+			var ent2 = _db.GetPitByUrl(tuple.Item2.PitUrl);
+
+			// When pit db loads the .peach, it shouldn't return the WebProxy part.
+			Assert.NotNull(ent2);
+			Assert.Null(ent2.WebProxy);
 		}
 	}
 }
