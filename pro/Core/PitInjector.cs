@@ -6,6 +6,7 @@ using DomObject = Peach.Core.Dom.Dom;
 using WebAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Pro.Core.WebServices.Models;
 using System.Text;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core
 {
@@ -50,6 +51,30 @@ namespace Peach.Pro.Core
 				{
 					test.agents.Add(domAgent);
 				}
+			}
+
+			if (cfg.WebProxy == null)
+				return;
+
+			var opts = new WebProxyOptions
+			{
+				Proxy = null,
+				Routes = new List<WebProxyRoute>(
+					cfg.WebProxy.Routes.Select(r => new WebProxyRoute()
+					{
+						BaseUrl = r.BaseUrl,
+						FaultOnStatusCodes = r.FaultOnStatusCodes,
+						Mutate = r.Mutate,
+						OnRequest = r.Script,
+						SwaggerAttr = r.Swagger,
+						Url = r.Url,
+					})
+				)
+			};
+
+			foreach (var sm in dom.tests.Select(t => t.stateModel).OfType<WebProxyStateModel>())
+			{
+				sm.Options = opts;
 			}
 		}
 

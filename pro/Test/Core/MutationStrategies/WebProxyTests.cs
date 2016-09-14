@@ -109,7 +109,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 
 				var pitOut = sb.ToString().Replace("\r\n", "\n");
 
-				Assert.AreEqual("<Test name=\"Default\" maxOutputSize=\"1073741824\">\n  <WebProxy>\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"True\" baseUrl=\"\" faultOnStateCodes=\"\" />\n    <Route url=\"/foo/bar\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"google.com\" faultOnStateCodes=\"500,501\" />\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"\" faultOnStateCodes=\"500,501\" />\n  </WebProxy>\n</Test>", pitOut);
+				Assert.AreEqual("<Test name=\"Default\" maxOutputSize=\"1073741824\">\n  <WebProxy>\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"True\" baseUrl=\"\" faultOnStateCodes=\"\" />\n    <Route url=\"/foo/bar\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"google.com\" faultOnStateCodes=\"500,501\" />\n  </WebProxy>\n</Test>", pitOut);
 			}
 		}
 
@@ -140,9 +140,8 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 				var sm = (WebProxyStateModel) dom.tests[0].stateModel;
 				var routes = sm.Options.Routes;
 
-				Assert.AreEqual(2, routes.Count);
+				Assert.AreEqual(1, routes.Count);
 				Assert.AreEqual("/p/jobs", routes[0].Url);
-				Assert.AreEqual("*", routes[1].Url);
 			}
 			finally
 			{
@@ -169,8 +168,9 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			var sm = (WebProxyStateModel)dom.tests[0].stateModel;
 			var routes = sm.Options.Routes;
 
-			Assert.AreEqual(1, routes.Count);
-			Assert.AreEqual("*", routes[0].Url);
+			Assert.AreEqual(0, routes.Count);
+
+			// Default route gets added when the proxy runs
 		}
 
 		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
