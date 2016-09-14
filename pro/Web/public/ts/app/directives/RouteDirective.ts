@@ -38,6 +38,11 @@ namespace Peach {
 			return this.$scope.route.url === '*' ? 'Default (*)' : this.$scope.route.url;
 		}
 
+		public MutateChoices = [
+			'Include',
+			'Exclude'
+		];
+
 		public get CanMoveUp(): boolean {
 			return this.$scope.index !== 0;
 		}
@@ -64,6 +69,15 @@ namespace Peach {
 			$event.preventDefault();
 			$event.stopPropagation();
 			this.$scope.routes.splice(this.$scope.index, 1);
+			this.$scope.form.$setDirty();
+		}
+
+		public OnAddHeader(): void {
+			this.$scope.route.headers.push({
+				name: "",
+				mutate: false,
+				mutateChoice: 'Include'
+			});
 			this.$scope.form.$setDirty();
 		}
 	}

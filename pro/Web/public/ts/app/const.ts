@@ -22,6 +22,7 @@ namespace Peach.C {
 		export const Jobs = 'peachJobs';
 		export const Monitor = 'peachMonitor';
 		export const Route = 'peachRoute';
+		export const Headers = 'peachHeaders';
 		export const Parameter = 'peachParameter';
 		export const ParameterInput = 'peachParameterInput';
 		export const ParameterCombo = 'peachParameterCombo';
@@ -54,6 +55,7 @@ namespace Peach.C {
 		export const Jobs = 'JobsDirectiveController';
 		export const Monitor = 'MonitorController';
 		export const Route = 'RouteController';
+		export const Headers = 'HeadersController';
 		export const Parameter = 'ParameterController';
 		export const ParameterInput = 'ParameterInputController';
 		export const Test = 'TestController';
@@ -183,6 +185,7 @@ namespace Peach.C {
 			export const Jobs = 'html/directives/jobs.html';
 			export const Monitor = 'html/directives/monitor.html';
 			export const Route = 'html/directives/route.html';
+			export const Headers = 'html/directives/headers.html';
 			export const Parameter = 'html/directives/parameter.html';
 			export const Question = 'html/directives/question.html';
 			export const Test = 'html/directives/test.html';

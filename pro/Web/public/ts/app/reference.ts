@@ -48,6 +48,7 @@
 /// <reference path="directives/FaultAssetsDirective.ts" />
 /// <reference path="directives/FaultFilesDirective.ts" />
 /// <reference path="directives/FaultsDirective.ts" />
+/// <reference path="directives/HeadersDirective.ts" />
 /// <reference path="directives/JobsDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
