@@ -858,7 +858,15 @@ namespace Peach.Pro.Core.WebServices
 					{
 						Url = "*",
 						Mutate = true,
-						FaultOnStatusCodes = WebProxyRoute.DefaultFaultStatusCodes.ToList()
+						FaultOnStatusCodes = WebProxyRoute.DefaultFaultStatusCodes.ToList(),
+						Headers = new List<WebHeader>
+						{
+							new WebHeader
+							{
+								Name = "*",
+								Mutate = true
+							}
+						}
 					}
 				}
 			};
