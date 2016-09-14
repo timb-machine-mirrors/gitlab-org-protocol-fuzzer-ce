@@ -71,5 +71,14 @@ namespace Peach {
 			this.$scope.routes.splice(this.$scope.index, 1);
 			this.$scope.form.$setDirty();
 		}
+
+		public OnAddHeader(): void {
+			this.$scope.route.headers.push({
+				name: "",
+				mutate: false,
+				mutateChoice: 'Include'
+			});
+			this.$scope.form.$setDirty();
+		}
 	}
 }

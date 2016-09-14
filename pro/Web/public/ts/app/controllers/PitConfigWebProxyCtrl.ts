@@ -19,6 +19,11 @@ namespace Peach {
 				for (let route of this.Routes) {
 					route.faultOnStatusCodesText = _.join(route.faultOnStatusCodes, ',');
 					route.mutateChoice = route.mutate ? 'Include' : 'Exclude';
+					if (route.headers) {
+						for (let header of route.headers) {
+							header.mutateChoice = header.mutate ? 'Include' : 'Exclude';
+						}
+					}
 				}
 				this.hasLoaded = true;
 			});
@@ -55,6 +60,11 @@ namespace Peach {
 					_.parseInt
 				);
 				route.mutate = route.mutateChoice === 'Include';
+				if (route.headers) {
+					for (let header of route.headers) {
+						header.mutate = header.mutateChoice === 'Include';
+					}
+				}
 			}
 			const promise = this.pitService.SaveWebProxy({ routes: this.Routes });
 			promise.then(() => {

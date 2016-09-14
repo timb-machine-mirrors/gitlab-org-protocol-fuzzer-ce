@@ -118,5 +118,8 @@ namespace Peach {
 	export interface IWebHeader {
 		name: string;
 		mutate: boolean;
+
+		// only used by front-end
+		mutateChoice: string;
 	}
 }
