@@ -46,7 +46,11 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 		{
 			const string xml = @"
 <WebProxy>
-	<Route url='*' />
+	<Route url='*'>
+		<ExcludeHeader>*</ExcludeHeader>
+		<IncludeHeader>X-*</IncludeHeader>
+		<ExcludeHeader>X-Super-Important</ExcludeHeader>
+	</Route>
 	<Route url='/foo/bar' mutate='false' swagger='/tmp/swagger/json' baseUrl='google.com' faultOnStatusCodes='500,501' />
 </WebProxy>
 ";
@@ -59,6 +63,14 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.NotNull(obj.Routes[0]);
 			Assert.AreEqual("*", obj.Routes[0].Url);
 			Assert.AreEqual(true, obj.Routes[0].Mutate);
+			Assert.AreEqual(3, obj.Routes[0].Headers.Count);
+			Assert.AreEqual("*", obj.Routes[0].Headers[0].Name);
+			Assert.AreEqual(false, obj.Routes[0].Headers[0].Mutate);
+			Assert.AreEqual("X-*", obj.Routes[0].Headers[1].Name);
+			Assert.AreEqual(true, obj.Routes[0].Headers[1].Mutate);
+			Assert.AreEqual("X-Super-Important", obj.Routes[0].Headers[2].Name);
+			Assert.AreEqual(false, obj.Routes[0].Headers[2].Mutate);
+
 			Assert.NotNull(obj.Routes[1]);
 			Assert.AreEqual("/foo/bar", obj.Routes[1].Url);
 			Assert.AreEqual(false, obj.Routes[1].Mutate);
@@ -72,18 +84,20 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 		[Test]
 		public void TestSerialize()
 		{
-			const string xml = @"
-<Peach>
-	<Test name='Default'>
-		<WebProxy>
-			<Route url='*' />
-			<Route url='/foo/bar' mutate='false' baseUrl='google.com' faultOnStatusCodes='500,501' />
-		</WebProxy>
-
-		<Publisher class='Null' />
-	</Test>
-</Peach>";
-
+			var xml =
+@"<Peach>
+  <Test name='Default' maxOutputSize='4096'>
+    <Publisher class='WebApi' />
+    <WebProxy>
+      <Route url='*'>
+        <ExcludeHeader>*</ExcludeHeader>
+        <IncludeHeader>X-*</IncludeHeader>
+        <ExcludeHeader>X-Super-Important</ExcludeHeader>
+      </Route>
+      <Route url='/foo/bar' mutate='false' baseUrl='google.com' faultOnStatusCodes='500,501,404,400' />
+    </WebProxy>
+  </Test>
+</Peach>".Replace("\r\n", "\n").Replace('\'', '"');
 
 			var dom = ParsePit(xml);
 
@@ -93,6 +107,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			{
 				OmitXmlDeclaration = true,
 				Encoding = System.Text.Encoding.UTF8,
+				IndentChars = "  ",
 				Indent = true
 			};
 
@@ -102,15 +117,15 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 				using (var xmlWriter = XmlWriter.Create(sout, settings))
 				{
 					xmlWriter.WriteStartDocument();
-
+					xmlWriter.WriteStartElement("Peach");
 					dom.tests[0].WritePit(xmlWriter);
-
+					xmlWriter.WriteEndElement();
 					xmlWriter.WriteEndDocument();
 				}
 
 				var pitOut = sb.ToString().Replace("\r\n", "\n");
 
-				Assert.AreEqual("<Test name=\"Default\" maxOutputSize=\"1073741824\">\n  <WebProxy>\n    <Route url=\"*\" swagger=\"\" onRequest=\"\" mutate=\"True\" baseUrl=\"\" faultOnStateCodes=\"\" />\n    <Route url=\"/foo/bar\" swagger=\"\" onRequest=\"\" mutate=\"False\" baseUrl=\"google.com\" faultOnStateCodes=\"500,501\" />\n  </WebProxy>\n</Test>", pitOut);
+				Assert.AreEqual(xml, pitOut);
 			}
 		}
 
