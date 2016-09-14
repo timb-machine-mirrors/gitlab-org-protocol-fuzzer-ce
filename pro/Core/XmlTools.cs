@@ -66,9 +66,9 @@ namespace Peach.Pro.Core
 
 					FixupAttributes(asType.Attributes);
 
-					if (asType.ContentModel != null)
+					var content = asType.ContentModel as XmlSchemaComplexContent;
+					if (content != null)
 					{
-						var content = (XmlSchemaComplexContent)asType.ContentModel;
 						var ext = (XmlSchemaComplexContentExtension)content.Content;
 
 						// If xs:complexType isMixed='true' we need to set
