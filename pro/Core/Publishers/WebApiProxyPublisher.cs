@@ -196,7 +196,7 @@ namespace Peach.Pro.Core.Publishers
 				if (!Regex.Match(url, urlRexex).Success)
 					continue;
 
-				return ObjectCopier.Clone(r);
+				return r;
 			}
 
 			return null;

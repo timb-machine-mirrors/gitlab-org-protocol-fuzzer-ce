@@ -66,6 +66,63 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
+		public void TestNonMutableHeaders()
+		{
+			var xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<Test name='Default' maxOutputSize='65000'>
+		<WebProxy>
+			<Route url='*' mutate='true' baseUrl='{0}'>
+				<ExcludeHeader>*</ExcludeHeader>
+				<IncludeHeader>X-*</IncludeHeader>
+				<ExcludeHeader>X-Peachy-Keen</ExcludeHeader>
+			</Route>
+		</WebProxy>
+		<Strategy class='WebProxy' />
+		<Publisher class='WebApiProxy'>
+			<Param name='Port' value='0' />
+		</Publisher>
+	</Test>
+</Peach>".Fmt(Server.Uri);
+
+			RunEngine(xml);
+
+			var content = new FormUrlEncodedContent(new[] 
+			{
+				new KeyValuePair<string, string>("value", "Foo Bar")
+			});
+
+			var client = GetHttpClient();
+			var headers = client.DefaultRequestHeaders;
+			headers.Add("X-Peachy", "Testing 1..2..3..");
+			headers.Add("X-Peachy-Keen", "Testing 1..2..3..");
+
+			var response = client.PutAsync(BaseUrl + "/unknown/api/values/5?filter=foo", content).Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.Null(op.ShadowOperation);
+			Assert.LessOrEqual(4, op.Parameters.Count);
+
+			foreach (var param in op.Parameters)
+			{
+				if (param.In != WebApiParameterIn.Header)
+				{
+					Assert.IsTrue(param.DataElement.isMutable);
+					continue;
+				}
+
+				if (param.Key == "X-Peachy-Keen")
+					Assert.IsFalse(param.DataElement.isMutable);
+				else if (param.Key.StartsWith("X-"))
+					Assert.True(param.DataElement.isMutable);
+				else
+					Assert.IsFalse(param.DataElement.isMutable);
+			}
+		}
+
+		[Test]
 		public void TestRouteMatch()
 		{
 			var xml = @"<?xml version='1.0' encoding='utf-8'?>
