@@ -1189,7 +1189,7 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Test]
 		public void TestWebProxyInjection()
 		{
-			var dom = DataModelCollector.ParsePit(proxyExample);
+			var dom = TestBase.ParsePit(proxyExample);
 
 			var cfg = new PitConfig
 			{
@@ -1233,11 +1233,11 @@ namespace Peach.Pro.Test.Core.WebServices
 			};
 
 			var sm = (WebProxyStateModel)dom.tests[0].stateModel;
-			Assert.AreEqual(0, sm.Options.Routes);
+			Assert.AreEqual(0, sm.Options.Routes.Count);
 
 			PitInjector.InjectAgents(cfg, Enumerable.Empty<KeyValuePair<string, string>>(), dom);
 
-			Assert.AreEqual(1, sm.Options.Routes);
+			Assert.AreEqual(2, sm.Options.Routes.Count);
 
 			var r = sm.Options.Routes[0];
 
