@@ -38,6 +38,11 @@ namespace Peach {
 			return this.$scope.route.url === '*' ? 'Default (*)' : this.$scope.route.url;
 		}
 
+		public MutateChoices = [
+			'Include',
+			'Exclude'
+		];
+
 		public get CanMoveUp(): boolean {
 			return this.$scope.index !== 0;
 		}

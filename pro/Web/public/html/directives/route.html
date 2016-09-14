@@ -26,8 +26,7 @@
 					</button>
 					<button class="btn btn-xs btn-danger"
 									ng-click="vm.OnRemove($event)"
-									uib-tooltip="Remove Route"
-									tooltip-append-to-body="true">
+									uib-tooltip="Remove Route">
 						<i class="fa fa-remove">
 						</i>
 					</button>
@@ -56,6 +55,34 @@
 				</div>
 				<span class="help-block"
 							ng-messages="form.url.$error"
+							ng-messages-include="html/messages.html">
+				</span>
+			</div>
+		</div>
+		<div class="form-group"
+				 ng-class="{'has-error': form.mutate.$invalid}">
+			<label class="col-sm-4 control-label">
+				Mutate
+			</label>
+			<div class="col-sm-6">
+				<div class="input-group">
+					<span class="input-group-addon"
+								uib-tooltip="Mutate"
+								tooltip-placement="above"
+								tooltip-append-to-body="true">
+						<i class="fa fa-question-circle"></i>
+					</span>
+					<ui-select name="mutate"
+										 ng-model="route.mutateChoice"
+										 style="position: relative">
+						<ui-select-match>{{$select.selected}}</ui-select-match>
+						<ui-select-choices repeat="item in vm.MutateChoices">
+							<div ng-bind-html="item"></div>
+						</ui-select-choices>
+					</ui-select>
+				</div>
+				<span class="help-block"
+							ng-messages="form.mutate.$error"
 							ng-messages-include="html/messages.html">
 				</span>
 			</div>

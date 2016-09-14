@@ -107,9 +107,12 @@ namespace Peach {
 		script: string;
 		mutate: boolean;
 		baseUrl: string;
-		faultOnStatusCodesText: string; // only used by front-end
 		faultOnStatusCodes: number[];
 		headers: IWebHeader[];
+
+		// only used by front-end
+		mutateChoice: string;
+		faultOnStatusCodesText: string;
 	}
 
 	export interface IWebHeader {

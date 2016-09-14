@@ -18,6 +18,7 @@ namespace Peach {
 				this.Routes = pit.webProxy.routes;
 				for (let route of this.Routes) {
 					route.faultOnStatusCodesText = _.join(route.faultOnStatusCodes, ',');
+					route.mutateChoice = route.mutate ? 'Include' : 'Exclude';
 				}
 				this.hasLoaded = true;
 			});
@@ -53,6 +54,7 @@ namespace Peach {
 					_.split(route.faultOnStatusCodesText, ','),
 					_.parseInt
 				);
+				route.mutate = route.mutateChoice === 'Include';
 			}
 			const promise = this.pitService.SaveWebProxy({ routes: this.Routes });
 			promise.then(() => {
@@ -68,9 +70,10 @@ namespace Peach {
 				script: "",
 				mutate: false,
 				baseUrl: "",
-				faultOnStatusCodesText: "500,501",
 				faultOnStatusCodes: [500, 501],
-				headers: []
+				headers: [],
+				faultOnStatusCodesText: "500,501",
+				mutateChoice: 'Include'
 			});
 			this.$scope.form.$setDirty();
 		}
