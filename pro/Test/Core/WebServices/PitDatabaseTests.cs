@@ -16,6 +16,7 @@ using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Core.Test;
 using Peach.Pro.Core.License;
 using Moq;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Test.Core.WebServices
 {
@@ -1184,5 +1185,66 @@ namespace Peach.Pro.Test.Core.WebServices
 			Assert.NotNull(ent2);
 			Assert.Null(ent2.WebProxy);
 		}
+
+		[Test]
+		public void TestWebProxyInjection()
+		{
+			var dom = DataModelCollector.ParsePit(proxyExample);
+
+			var cfg = new PitConfig
+			{
+				Agents = new List<MAgent>(),
+				Config = new List<Param> {
+					new Param { Key = "SomeMiscVariable", Value = "Foo Bar Baz" }
+				},
+				WebProxy = new WebProxy
+				{
+					Routes = new List<WebRoute>
+					{
+						new WebRoute
+						{
+							Url = "/p",
+							Mutate = true,
+							Swagger = "myswagger.json",
+							FaultOnStatusCodes = new List<int> { 300, 301, 302, 500, 501 },
+							BaseUrl = "http://127.0.0.1",
+							Script = "mypython.py",
+							Headers = new List<WebHeader>
+							{
+								new WebHeader
+								{
+									Name = "Content-Type",
+									Mutate = false
+								},
+								new WebHeader
+								{
+									Name = "X-Peach-*",
+									Mutate = true
+								},
+							}
+						},
+						new WebRoute
+						{
+							Url = "*",
+							Mutate = false
+						}
+					}
+				}
+			};
+
+			var sm = (WebProxyStateModel)dom.tests[0].stateModel;
+			Assert.AreEqual(0, sm.Options.Routes);
+
+			PitInjector.InjectAgents(cfg, Enumerable.Empty<KeyValuePair<string, string>>(), dom);
+
+			Assert.AreEqual(1, sm.Options.Routes);
+
+			var r = sm.Options.Routes[0];
+
+			Assert.AreEqual("/p", r.Url);
+			Assert.AreEqual(true, r.Mutate);
+			Assert.AreEqual("myswagger.json", r.SwaggerAttr);
+		}
+
 	}
 }
