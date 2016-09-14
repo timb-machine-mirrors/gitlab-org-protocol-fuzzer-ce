@@ -56,6 +56,10 @@ namespace Peach {
 			);
 		}
 
+		public get ShowWebProxy() : boolean {
+			return onlyIf(this.pitService.Pit, () => this.pitService.IsWebProxy);
+		}
+
 		public get CanStart(): boolean {
 			return onlyIf(this.pitService.Pit, () => this.pitService.IsConfigured);
 		}

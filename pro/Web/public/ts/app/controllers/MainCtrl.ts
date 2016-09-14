@@ -54,10 +54,9 @@ namespace Peach {
 		];
 
 		private configStepsWebProxy = [
-			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
 			{ id: C.States.PitAdvancedWebProxy, name: 'Web Proxy' },
+			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
 			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
-			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
 			{ id: C.States.PitAdvancedTest, name: 'Test' }
 		];
 
