@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -157,7 +158,9 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 	<Test name='Default'>
 		<WebProxy />
 		<Strategy class='WebProxy' />
-		<Publisher class='Null' />
+		<Publisher class='WebApiProxy'>
+			<Param name='Timeout' value='1' />
+		</Publisher>
 	</Test>
 </Peach>";
 
@@ -171,6 +174,15 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			Assert.AreEqual(0, routes.Count);
 
 			// Default route gets added when the proxy runs
+
+			var cfg = new RunConfiguration { singleIteration = true };
+			var e = new Engine(null);
+
+			var ex = Assert.Throws<PeachException>(() => e.startFuzzing(dom, cfg));
+
+			Assert.That(ex.InnerException, Is.InstanceOf<SoftException>());
+			Assert.That(ex.InnerException.InnerException, Is.InstanceOf<TimeoutException>());
+
 		}
 
 		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
