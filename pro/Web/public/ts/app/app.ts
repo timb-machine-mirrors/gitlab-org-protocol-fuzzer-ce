@@ -243,6 +243,17 @@ namespace Peach {
 					},
 					ncyBreadcrumb: { label: 'Tuning' }
 				})
+				.state(C.States.PitAdvancedWebProxy, {
+					url: '/webproxy',
+					views: {
+						'@': {
+							templateUrl: C.Templates.Pit.Advanced.WebProxy,
+							controller: ConfigureWebProxyController,
+							controllerAs: C.ViewModel
+						}
+					},
+					ncyBreadcrumb: { label: 'Web Proxy' }
+				})
 				.state(C.States.PitAdvancedTest, {
 					url: '/test',
 					views: {

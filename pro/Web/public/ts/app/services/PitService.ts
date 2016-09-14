@@ -28,6 +28,10 @@ namespace Peach {
 			return this.pit;
 		}
 
+		public get IsWebProxy() {
+			return !_.isUndefined(this.pit) && !_.isUndefined(this.pit.webProxy);
+		}
+
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
 			const promise = this.$http.get(C.Api.Libraries);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
@@ -98,7 +102,8 @@ namespace Peach {
 				description: this.pit.description,
 				config: config,
 				agents: agents,
-				weights: this.pit.weights
+				weights: this.pit.weights,
+				webProxy: this.pit.webProxy
 			};
 
 			const promise = this.$http.post(this.pit.pitUrl, dto);
@@ -121,6 +126,11 @@ namespace Peach {
 
 		public SaveWeights(weights: IPitWeight[]): ng.IPromise<IPit> {
 			this.pit.weights = weights;
+			return this.SavePit();
+		}
+
+		public SaveWebProxy(webProxy: IWebProxy): ng.IPromise<IPit> {
+			this.pit.webProxy = webProxy;
 			return this.SavePit();
 		}
 
