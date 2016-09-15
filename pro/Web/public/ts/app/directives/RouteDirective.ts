@@ -101,7 +101,7 @@ namespace Peach {
 			this.$scope.route.headers.push({
 				name: "",
 				mutate: false,
-				mutateChoice: 'Include'
+				mutateChoice: 'Exclude'
 			});
 			this.$scope.form.$setDirty();
 		}

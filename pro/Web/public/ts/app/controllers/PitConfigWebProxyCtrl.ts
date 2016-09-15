@@ -81,7 +81,13 @@ namespace Peach {
 				mutate: false,
 				baseUrl: "",
 				faultOnStatusCodes: [500, 501],
-				headers: [],
+				headers: [
+					{
+						name: "*",
+						mutate: true,
+						mutateChoice: 'Include'
+					}
+				],
 				faultOnStatusCodesText: "500,501",
 				mutateChoice: 'Include'
 			});
