@@ -18,20 +18,45 @@ namespace Peach {
 		route: IWebRoute;
 		index: number;
 		isOpen: boolean;
+		help: boolean;
+		storage: IRouteStorage;
+	}
+
+	interface IRouteStorage {
+		showHelp: boolean;
 	}
 
 	export class RouteController {
 		static $inject = [
 			C.Angular.$scope,
+			C.Angular.$localStorage,
 			C.Services.Pit
 		];
 
 		constructor(
 			private $scope: IRouteScope,
+			$localStorage,
 			private pitService: PitService
 		) {
 			$scope.vm = this;
 			$scope.isOpen = true;
+			$scope.storage = $localStorage['$default']({
+				showHelp: true
+			});
+		}
+
+		public OnHelp($event: ng.IAngularEvent): void {
+			$event.preventDefault();
+			$event.stopPropagation();
+			this.$scope.storage.showHelp = !this.$scope.storage.showHelp;
+		}
+
+		public get HelpClass() {
+			return { active: this.$scope.storage.showHelp };
+		}
+
+		public get HelpPrompt(): string {
+			return this.$scope.storage.showHelp ? 'Hide' : 'Help';
 		}
 
 		public get Header(): string {

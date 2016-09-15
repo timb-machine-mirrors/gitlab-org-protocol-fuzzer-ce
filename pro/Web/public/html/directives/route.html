@@ -31,6 +31,15 @@
 						</i>
 					</button>
 				</span>
+				<span class="pull-right" style="padding-right: 10px">
+					<button type="button"
+									class="btn btn-xs btn-default"
+									ng-class="vm.HelpClass"
+									ng-click="vm.OnHelp($event)">
+						<i class="fa fa-question-circle"></i>
+						{{vm.HelpPrompt}}
+					</button>
+				</span>
 			</span>
 		</uib-accordion-heading>
 		<div class="form-group"
@@ -39,24 +48,19 @@
 				Pattern
 			</label>
 			<div class="col-sm-7">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Url"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="url"
-								 autocomplete="off"
-								 ng-required="true"
-								 ng-model="route.url"
-								 type="text"
-								 class="form-control"/>
-				</div>
+				<input name="url"
+							 autocomplete="off"
+							 ng-required="true"
+							 ng-model="route.url"
+							 type="text"
+							 class="form-control" />
 				<span class="help-block"
 							ng-messages="form.url.$error"
 							ng-messages-include="html/messages.html">
 				</span>
+				<p class="text-muted small" ng-show="storage.showHelp">
+					Pattern
+				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -65,26 +69,21 @@
 				Mutate
 			</label>
 			<div class="col-sm-7">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Mutate"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<ui-select name="mutate"
-										 ng-model="route.mutateChoice"
-										 style="position: relative">
-						<ui-select-match>{{$select.selected}}</ui-select-match>
-						<ui-select-choices repeat="item in vm.MutateChoices">
-							<div ng-bind-html="item"></div>
-						</ui-select-choices>
-					</ui-select>
-				</div>
+				<ui-select name="mutate"
+									 ng-model="route.mutateChoice"
+									 style="position: relative">
+					<ui-select-match>{{$select.selected}}</ui-select-match>
+					<ui-select-choices repeat="item in vm.MutateChoices">
+						<div ng-bind-html="item"></div>
+					</ui-select-choices>
+				</ui-select>
 				<span class="help-block"
 							ng-messages="form.mutate.$error"
 							ng-messages-include="html/messages.html">
 				</span>
+				<p class="text-muted small" ng-show="storage.showHelp">
+					Mutate
+				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -93,23 +92,18 @@
 				Swagger
 			</label>
 			<div class="col-sm-7">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Swagger"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="swagger"
-								 autocomplete="off"
-								 ng-model="route.swagger"
-								 type="text"
-								 class="form-control"/>
-				</div>
+				<input name="swagger"
+							 autocomplete="off"
+							 ng-model="route.swagger"
+							 type="text"
+							 class="form-control" />
 				<span class="help-block"
 							ng-messages="form.swagger.$error"
 							ng-messages-include="html/messages.html">
 				</span>
+				<p class="text-muted small" ng-show="storage.showHelp">
+					Swagger
+				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -118,23 +112,18 @@
 				Script
 			</label>
 			<div class="col-sm-7">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Script"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="script"
-								 autocomplete="off"
-								 ng-model="route.script"
-								 type="text"
-								 class="form-control"/>
-				</div>
+				<input name="script"
+							 autocomplete="off"
+							 ng-model="route.script"
+							 type="text"
+							 class="form-control" />
 				<span class="help-block"
 							ng-messages="form.script.$error"
 							ng-messages-include="html/messages.html">
 				</span>
+				<p class="text-muted small" ng-show="storage.showHelp">
+					Script
+				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -143,23 +132,18 @@
 				Target Endpoint
 			</label>
 			<div class="col-sm-7">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Target endpoint"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="baseUrl"
-								 autocomplete="off"
-								 ng-model="route.baseUrl"
-								 type="text"
-								 class="form-control"/>
-				</div>
+				<input name="baseUrl"
+							 autocomplete="off"
+							 ng-model="route.baseUrl"
+							 type="text"
+							 class="form-control" />
 				<span class="help-block"
 							ng-messages="form.baseUrl.$error"
 							ng-messages-include="html/messages.html">
 				</span>
+				<p class="text-muted small" ng-show="storage.showHelp">
+					Target Endpoint
+				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -168,23 +152,18 @@
 				Fault On Status Codes
 			</label>
 			<div class="col-sm-7">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Faults status codes"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="faults"
-								 autocomplete="off"
-								 ng-model="route.faultOnStatusCodesText"
-								 type="text"
-								 class="form-control"/>
-				</div>
+				<input name="faults"
+							 autocomplete="off"
+							 ng-model="route.faultOnStatusCodesText"
+							 type="text"
+							 class="form-control" />
 				<span class="help-block"
 							ng-messages="form.faults.$error"
 							ng-messages-include="html/messages.html">
 				</span>
+				<p class="text-muted small" ng-show="storage.showHelp">
+					Fault On Status Codes
+				</p>
 			</div>
 		</div>
 		<div class="form-group"
