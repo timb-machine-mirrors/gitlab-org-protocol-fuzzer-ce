@@ -41,7 +41,7 @@ def __peach_getJobId(api):
         
         if __peach_jobid == 'auto':
                 try:
-                        r = session.get("%s/p/jobs?dryrun=false&running=true" % api)
+                        r = session.get("%s/p/jobs?running=true" % api)
                         if r.status_code != 200:
                                 print("Error communicating with Peach Fuzzer. Status code was %s" % r.status_code)
                                 sys.exit(-1)
