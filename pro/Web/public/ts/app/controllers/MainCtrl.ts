@@ -9,8 +9,7 @@ namespace Peach {
 			C.Angular.$uibModal,
 			C.Angular.$window,
 			C.Services.Eula,
-			C.Services.Pit,
-			C.Services.Wizard
+			C.Services.Pit
 		];
 
 		constructor(
@@ -19,8 +18,7 @@ namespace Peach {
 			private $modal: ng.ui.bootstrap.IModalService,
 			private $window: ng.IWindowService,
 			private eulaService: EulaService,
-			private pitService: PitService,
-			private wizardService: WizardService
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 			$scope.$root.$on(C.Angular.$stateChangeSuccess, () => {
@@ -43,7 +41,6 @@ namespace Peach {
 		private isMenuMin: boolean = false;
 		private license: ILicense;
 		public Metrics = C.MetricsList;
-		public WizardTracks = Peach.WizardTracks;
 		public Version: string;
 
 		private configStepsDefault = [
@@ -96,7 +93,6 @@ namespace Peach {
 
 		private subMenus = [
 			{ state: C.States.JobMetrics, collapsed: true },
-			{ state: C.States.PitWizard, collapsed: true },
 			{ state: C.States.PitAdvanced, collapsed: true },
 			{ state: 'help', collapsed: true }
 		];
@@ -123,10 +119,6 @@ namespace Peach {
 				count = this.$scope.job.faultCount;
 			}
 			return count || '';
-		}
-
-		public IsComplete(step: string): boolean {
-			return this.wizardService.GetTrack(step).isComplete;
 		}
 
 		public get IsMenuMinimized(): boolean {
@@ -177,17 +169,6 @@ namespace Peach {
 			return undefined;
 		}
 		
-		public WizardActive(track: ITrackStatic) {
-			if (track.id == C.Tracks.Intro) {
-				if (this.$state.is(track.start)) {
-					return 'active';
-				}
-			} else if (this.$state.includes(track.start)) {
-				return 'active';
-			}
-			return undefined;
-		}
-
 		public ShortcutClass(section: string) {
 			//if (this.$state.includes(section)) {
 			//	return 'active-shortcut';

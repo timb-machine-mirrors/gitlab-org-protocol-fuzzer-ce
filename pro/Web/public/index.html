@@ -177,34 +177,6 @@
 					</a>
 				</li>
 
-				<li ng-show="vm.ShowQuickStart()">
-					<a href="#"
-					   ng-click="vm.OnSubClick($event, 'pit.wizard')">
-						<i class="fa fa-rocket"></i>
-						<span class="menu-text">
-							Quick Start
-						</span>
-						<b class="arrow fa fa-angle-down"></b>
-					</a>
-
-					<ul class="submenu"
-					    uib-collapse="vm.IsCollapsed('pit.wizard')">
-						<li ng-class="vm.WizardActive(item)"
-						    ng-repeat="item in vm.WizardTracks">
-							<a ui-sref="{{item.start}}({pit: vm.PitId})">
-								<span class="menu-text">
-									{{item.name}}
-									<span ng-cloak
-												ng-show="vm.IsComplete(item.id)"
-												class="badge badge-transparent">
-										<i ng-class="{'fa fa-check-circle fa-lg green': vm.IsComplete(item.id)}"></i>
-									</span>
-								</span>
-							</a>
-						</li>
-					</ul>
-				</li>
-
 				<li ng-show="vm.ShowMenu('pit')">
 					<a href="#"
 					   ng-click="vm.OnSubClick($event, 'pit.advanced')">

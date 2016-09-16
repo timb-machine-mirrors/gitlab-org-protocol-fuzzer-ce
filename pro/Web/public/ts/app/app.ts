@@ -182,29 +182,6 @@ namespace Peach {
 						parent: C.States.MainLibrary
 					}
 				})
-				.state(C.States.PitWizard, {
-					url: '/quickstart',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Pit.Wizard.Intro,
-							controller: WizardController,
-							controllerAs: C.ViewModel
-						}
-					},
-					data: { track: C.Tracks.Intro },
-					ncyBreadcrumb: { label: 'Quick Start' }
-				})
-				.state(C.States.PitWizardTest, {
-					url: '/test',
-					views: {
-						'@': {
-							templateUrl: C.Templates.Pit.Wizard.Test,
-							controller: PitTestController,
-							controllerAs: C.ViewModel
-						}
-					},
-					ncyBreadcrumb: { label: 'Test' }
-				})
 				.state(C.States.PitAdvanced, {
 					abstract: true,
 					url: '/advanced',
@@ -281,44 +258,6 @@ namespace Peach {
 					params: { metric: metric.id },
 					ncyBreadcrumb: { label: metric.name }
 				});
-			});
-
-			_.forEach(WizardTracks, (track: ITrackStatic) => {
-				if (track.skip)
-					return;
-
-				const views = {
-					'@': {
-						templateUrl: C.Templates.Pit.Wizard.Track,
-						controller: WizardController,
-						controllerAs: C.ViewModel
-					}
-				};
-
-				views[`@pit.wizard.${track.id}`] = {
-					templateUrl: C.Templates.Pit.Wizard.TrackIntro.replace(':track', track.id.toLowerCase())
-				};
-
-				$stateProvider
-					.state([C.States.PitWizard, track.id].join('.'), {
-						url: `/${track.id}`,
-						views: views,
-						data: { track: track.id },
-						ncyBreadcrumb: { label: track.name }
-					})
-					.state([C.States.PitWizard, track.id, 'review'].join('.'), {
-						url: '/review',
-						templateUrl: C.Templates.Pit.Wizard.TrackDone.replace(':track', track.id.toLowerCase()),
-						ncyBreadcrumb: { label: 'Review' }
-					})
-					.state([C.States.PitWizard, track.id, 'steps'].join('.'), {
-						url: '/{id:int}',
-						templateUrl: C.Templates.Pit.Wizard.Question,
-						controller: WizardQuestionController,
-						controllerAs: C.ViewModel,
-						ncyBreadcrumb: { label: 'Questions & Answers' }
-					})
-				;
 			});
 		}
 	]);
