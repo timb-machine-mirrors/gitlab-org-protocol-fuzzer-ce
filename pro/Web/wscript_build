@@ -19,6 +19,7 @@ public = bld.path.ant_glob('public/**/*', excl = [
 	'public/js/app/*',
 	'public/js/test/*',
 	'public/**/*.ts',
+	'**/.DS_Store',
 ])
 
 bld(

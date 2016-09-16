@@ -31,7 +31,6 @@
 	</caption>
 	<thead>
 		<tr>
-			<th>Name</th>
 			<th>Key</th>
 			<th>Value</th>
 			<th class="center">Insert</th>
@@ -39,18 +38,6 @@
 	</thead>
 	<tbody>
 		<tr ng-repeat="def in Defines">
-			<td class="align-middle">
-				<span>
-					{{def.name}}
-				</span>
-				<span class="pull-right"
-				      style="margin-right: 10px"
-				      uib-tooltip="{{def.description}}"
-				      tooltip-placement="above"
-				      tooltip-append-to-body="true">
-					<i class="fa fa-question-circle"></i>
-				</span>
-			</td>
 			<td class="align-middle">
 				{{def.key}}
 			</td>

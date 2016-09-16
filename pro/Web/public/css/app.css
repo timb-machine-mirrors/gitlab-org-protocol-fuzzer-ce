@@ -380,4 +380,12 @@ noscript {
 	border-bottom: 1px solid #ddd;
 }
 
+.help-text {
+	margin-top: 5px;
+	font-size: 85%;
+	color: #777;
+}
 
+.help-block {
+	margin: 0;
+}

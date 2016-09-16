@@ -41,12 +41,8 @@ namespace Peach {
 			return !this.$scope.form.$dirty && this.isSaved;
 		}
 
-		public get ShowRequired(): boolean {
-			return this.$scope.form.$pristine && this.$scope.form.$invalid;
-		}
-
-		public get ShowValidation(): boolean {
-			return this.$scope.form.$dirty && this.$scope.form.$invalid;
+		public get ShowError(): boolean {
+			return this.$scope.form.$invalid;
 		}
 
 		public get CanSave(): boolean {

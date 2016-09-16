@@ -158,6 +158,10 @@ namespace Peach {
 			return this.$state.includes(name);
 		}
 
+		public ShowQuickStart(): boolean {
+			return this.ShowMenu('pit') && !this.pitService.IsWebProxy;
+		}
+
 		public MetricUrl(metric: C.IMetric): string {
 			const state = [C.States.JobMetrics, metric.id].join('.');
 			const params = { job: this.JobId };

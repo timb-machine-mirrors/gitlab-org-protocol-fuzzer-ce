@@ -3,7 +3,6 @@
 			novalidate
 			peach:unsaved
 			autocomplete="off">
-
 	<p>
 		The Monitoring data entry screen defines one or more Agents and one or more Monitors for the Pit.
 	</p>
@@ -20,19 +19,19 @@
 		No agents have been configured.
 	</div>
 
-	<div class="alert alert-danger"
-			 ng-show="vm.ShowError">
-		Save is disabled until validation issues are fixed.
-	</div>
-
-	<div class="alert alert-success"
-			 ng-show="vm.ShowSaved">
-		Saved successfully.
-	</div>
-
 	<div class="row"
 			 style="margin-bottom: 10px">
-		<div class="col-xs-12 text-right">
+		<div class="col-xs-6">
+			<span ng-show="vm.ShowSaved"
+						class="green">
+				Saved successfully.
+			</span>
+			<span ng-show="vm.ShowError"
+						class="red">
+				Save is disabled until validation issues are fixed.
+			</span>
+		</div>
+		<div class="col-xs-6 text-right">
 			<button class="btn btn-xs btn-danger"
 							ng-click="vm.Save()"
 							ng-disabled="!vm.CanSave">
@@ -62,5 +61,4 @@
 			</uib-accordion>
 		</div>
 	</div>
-
 </form>

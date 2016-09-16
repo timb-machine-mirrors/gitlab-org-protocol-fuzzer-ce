@@ -177,7 +177,7 @@
 					</a>
 				</li>
 
-				<li ng-show="vm.ShowMenu('pit')">
+				<li ng-show="vm.ShowQuickStart()">
 					<a href="#"
 					   ng-click="vm.OnSubClick($event, 'pit.wizard')">
 						<i class="fa fa-rocket"></i>
@@ -216,7 +216,7 @@
 					</a>
 
 					<ul class="submenu"
-					    uib-collapse="vm.IsCollapsed('pit.advanced')">
+					    uib-collapse="false">
 						<li ui-sref-active="active"
 						    ng-repeat="item in vm.ConfigSteps">
 							<a ui-sref="{{item.id}}({pit: vm.PitId})">

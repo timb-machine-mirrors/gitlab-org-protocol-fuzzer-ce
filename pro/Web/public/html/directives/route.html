@@ -8,7 +8,8 @@
 				&nbsp;
 				{{vm.Header}}
 				<span class="btn-group btn-group-xs pull-right">
-					<button class="btn btn-xs btn-info"
+					<button type="button"
+									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveUp($event)"
 									ng-disabled="!vm.CanMoveUp"
 									uib-tooltip="Move Route Up"
@@ -16,7 +17,8 @@
 						<i class="fa fa-chevron-up">
 						</i>
 					</button>
-					<button class="btn btn-xs btn-info"
+					<button type="button"
+									class="btn btn-xs btn-info"
 									ng-click="vm.OnMoveDown($event)"
 									ng-disabled="!vm.CanMoveDown"
 									uib-tooltip="Move Route Down"
@@ -24,20 +26,12 @@
 						<i class="fa fa-chevron-down">
 						</i>
 					</button>
-					<button class="btn btn-xs btn-danger"
+					<button type="button"
+									class="btn btn-xs btn-danger"
 									ng-click="vm.OnRemove($event)"
 									uib-tooltip="Remove Route">
 						<i class="fa fa-remove">
 						</i>
-					</button>
-				</span>
-				<span class="pull-right" style="padding-right: 10px">
-					<button type="button"
-									class="btn btn-xs btn-default"
-									ng-class="vm.HelpClass"
-									ng-click="vm.OnHelp($event)">
-						<i class="fa fa-question-circle"></i>
-						{{vm.HelpPrompt}}
 					</button>
 				</span>
 			</span>
@@ -50,17 +44,17 @@
 			<div class="col-sm-7">
 				<input name="url"
 							 autocomplete="off"
-							 ng-required="true"
-							 ng-model="route.url"
 							 type="text"
+							 ng-model="route.url"
+							 ng-required="true"
 							 class="form-control" />
+				<span class="help-text" ng-show="storage.showHelp">
+					Pattern
+				</span>
 				<span class="help-block"
 							ng-messages="form.url.$error"
 							ng-messages-include="html/messages.html">
 				</span>
-				<p class="text-muted small" ng-show="storage.showHelp">
-					Pattern
-				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -77,13 +71,13 @@
 						<div ng-bind-html="item"></div>
 					</ui-select-choices>
 				</ui-select>
+				<span class="help-text" ng-show="storage.showHelp">
+					Mutate
+				</span>
 				<span class="help-block"
 							ng-messages="form.mutate.$error"
 							ng-messages-include="html/messages.html">
 				</span>
-				<p class="text-muted small" ng-show="storage.showHelp">
-					Mutate
-				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -96,14 +90,15 @@
 							 autocomplete="off"
 							 ng-model="route.swagger"
 							 type="text"
-							 class="form-control" />
+							 class="form-control" 
+							 placeholder="Optional" />
+				<span class="help-text" ng-show="storage.showHelp">
+					Swagger
+				</span>
 				<span class="help-block"
 							ng-messages="form.swagger.$error"
 							ng-messages-include="html/messages.html">
 				</span>
-				<p class="text-muted small" ng-show="storage.showHelp">
-					Swagger
-				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -116,14 +111,15 @@
 							 autocomplete="off"
 							 ng-model="route.script"
 							 type="text"
-							 class="form-control" />
+							 class="form-control" 
+							 placeholder="Optional" />
+				<span class="help-text" ng-show="storage.showHelp">
+					Script
+				</span>
 				<span class="help-block"
 							ng-messages="form.script.$error"
 							ng-messages-include="html/messages.html">
 				</span>
-				<p class="text-muted small" ng-show="storage.showHelp">
-					Script
-				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -136,14 +132,15 @@
 							 autocomplete="off"
 							 ng-model="route.baseUrl"
 							 type="text"
-							 class="form-control" />
+							 class="form-control" 
+							 placeholder="Optional" />
+				<span class="help-text" ng-show="storage.showHelp">
+					Target Endpoint
+				</span>
 				<span class="help-block"
 							ng-messages="form.baseUrl.$error"
 							ng-messages-include="html/messages.html">
 				</span>
-				<p class="text-muted small" ng-show="storage.showHelp">
-					Target Endpoint
-				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -156,14 +153,15 @@
 							 autocomplete="off"
 							 ng-model="route.faultOnStatusCodesText"
 							 type="text"
-							 class="form-control" />
+							 class="form-control" 
+							 placeholder="Optional" />
+				<span class="help-text" ng-show="storage.showHelp">
+					Fault On Status Codes
+				</span>
 				<span class="help-block"
 							ng-messages="form.faults.$error"
 							ng-messages-include="html/messages.html">
 				</span>
-				<p class="text-muted small" ng-show="storage.showHelp">
-					Fault On Status Codes
-				</p>
 			</div>
 		</div>
 		<div class="form-group"
@@ -175,14 +173,11 @@
 				<peach:headers route="route"
 											 form="form">
 				</peach:headers>
-				<p class="text-muted small" ng-show="storage.showHelp">
+				<span class="help-text" ng-show="storage.showHelp">
 					Headers
-				</p>
+				</span>
 			</div>
-		</div>
-		<div class="clearfix"
-				 style="margin-bottom: 10px">
-			<div class="pull-right">
+			<div class="col-sm-2">
 				<button class="btn btn-xs btn-info"
 								ng-click="vm.OnAddHeader()">
 					<i class="fa fa-plus"></i>
