@@ -7,6 +7,7 @@ using System.Text;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Peach.Core;
+using Peach.Pro.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
@@ -329,9 +330,16 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return WithJobDatabase(id, (job, db) =>
 			{
+				if (job.Status != JobStatus.Stopped)
+					return NotFound();
+
 				var file = new FileInfo(job.ReportPath);
 				if (!file.Exists)
-					return NotFound();
+				{
+					var report = db.GetReport(job);
+					Reporting.SaveReportPdf(report);
+					file = new FileInfo(job.ReportPath);
+				}
 
 				return new FileResult(file);
 			});
@@ -537,7 +545,7 @@ namespace Peach.Pro.WebApi2.Controllers
 			job.NodesUrl = MakeUrl(id, "nodes");
 			job.FirstNodeUrl = MakeUrl(id, "nodes", "first");
 
-			if (File.Exists(job.ReportPath))
+			if (job.Status == JobStatus.Stopped)
 				job.ReportUrl = MakeUrl(id, "report");
 
 			//TargetUrl = "",
