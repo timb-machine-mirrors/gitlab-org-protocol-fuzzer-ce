@@ -125,8 +125,10 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			var asStr = faults[0].description;
 
-			StringAssert.StartsWith("SoftException Detected", asStr);
 			StringAssert.Contains("Erroring on a control iteration", asStr);
+
+			// No stacktraces!
+			StringAssert.DoesNotContain("Peach.Core.SoftException", asStr);
 		}
 
 		[Test]
