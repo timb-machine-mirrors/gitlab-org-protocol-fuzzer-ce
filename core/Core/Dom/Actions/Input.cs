@@ -57,9 +57,13 @@ namespace Peach.Core.Dom.Actions
 
 				logger.Debug("Final pos: {0} length: {1} crack consumed: {2} bytes", endPos, pub.Length, endPos - startPos);
 			}
-			catch (CrackingFailure ex)
+			catch (CrackingFailure cex)
 			{
 				endPos = pub.Length;
+
+				var ex = startPos == endPos
+					? new TimeoutException("Timed out waiting for input from the publisher.", cex)
+					: (Exception)cex;
 
 				throw new SoftException(ex);
 			}

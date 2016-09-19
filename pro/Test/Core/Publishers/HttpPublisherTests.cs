@@ -244,7 +244,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		public void TestReconnectFail()
 		{
 			var ex = Assert.Throws<PeachException>(() =>
-				HttpClient(true, "POST", 1000, "<Param name='Timeout' value='10'/>"));
+				HttpClient(true, "POST", 2000, "<Param name='Timeout' value='10'/>"));
 
 			StringAssert.StartsWith("Timed out connecting to http://", ex.Message);
 		}
