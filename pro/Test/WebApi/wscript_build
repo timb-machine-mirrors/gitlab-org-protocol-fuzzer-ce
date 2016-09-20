@@ -25,4 +25,5 @@ bld(
 	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.Pro.Test.WebApi.exe',
 	csdoc = False,
+	resource = bld.path.ant_glob('Resources/**/*'),
 )

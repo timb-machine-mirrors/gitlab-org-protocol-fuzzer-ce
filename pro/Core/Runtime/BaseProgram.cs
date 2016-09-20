@@ -20,8 +20,9 @@ namespace Peach.Pro.Core.Runtime
 		/// <summary>
 		/// Starts the web server.
 		/// </summary>
-		/// <param name="port">If not specified an unused port will be picked.</param>
-		void Start(int? port);
+		/// <param name="port">If not specified an unused port will be chosen.</param>
+		/// <param name="certPath"></param>
+		void Start(int? port, string certPath);
 
 		Uri Uri { get; }
 	}
@@ -359,7 +360,7 @@ namespace Peach.Pro.Core.Runtime
 			return Path.GetFullPath(pitLibraryPath);
 		}
 
-		protected int RunWeb(string pitLibraryPath, bool shouldStartBrowser, IJobMonitor jobMonitor)
+		protected int RunWeb(string pitLibraryPath, bool shouldStartBrowser, IJobMonitor jobMonitor, string certPath)
 		{
 			// Don't try and open the browser on linux hosts as this can cause lynx to start
 			if (Platform.GetOS() == Platform.OS.Linux)
@@ -376,13 +377,14 @@ namespace Peach.Pro.Core.Runtime
 
 				using (var svc = CreateWeb(_license, pitLibraryPath, jobMonitor))
 				{
-					svc.Start(_webPort);
+					svc.Start(_webPort, certPath);
 
 					if (!Debugger.IsAttached && shouldStartBrowser)
 					{
 						try
 						{
-							SysProcess.Start(svc.Uri.ToString());
+							var uri = new UriBuilder(svc.Uri) { Host = "localhost" }.Uri;
+							SysProcess.Start(uri.ToString());
 						}
 						catch
 						{

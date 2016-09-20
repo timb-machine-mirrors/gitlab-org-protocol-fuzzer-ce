@@ -8,6 +8,7 @@ namespace Peach.Pro.Core.Runtime
 	public class Service : BaseProgram
 	{
 		string _pitLibraryPath;
+		string _certPath;
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
@@ -20,6 +21,11 @@ namespace Peach.Pro.Core.Runtime
 				"webport=",
 				"Specifies port web interface runs on.",
 				(int v) => _webPort = v
+			);
+			options.Add(
+				"https=",
+				"Enable https, specify a path to a .pfx file",
+				v => _certPath = v
 			);
 		}
 
@@ -34,7 +40,7 @@ namespace Peach.Pro.Core.Runtime
 			var pits = FindPitLibrary(_pitLibraryPath);
 
 			if (CreateWeb != null)
-				RunWeb(pits, false, new ExternalJobMonitor());
+				RunWeb(pits, false, new ExternalJobMonitor(), _certPath);
 
 			return 0;
 		}

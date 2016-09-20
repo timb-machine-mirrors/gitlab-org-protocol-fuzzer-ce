@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using Moq;
 using NUnit.Framework;
@@ -36,14 +38,14 @@ namespace Peach.Pro.Test.WebApi
 
 					using (var web = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
 					{
-						web.Start(port, true);
+						web.Start(port, null, true);
 
 						var actualPort = web.Uri.Port;
 						Assert.Greater(actualPort, port);
 
 						using (var web2 = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
 						{
-							web2.Start(actualPort, true);
+							web2.Start(actualPort, null, true);
 							Assert.Greater(web2.Uri.Port, actualPort);
 						}
 					}
@@ -71,7 +73,7 @@ namespace Peach.Pro.Test.WebApi
 					using (var web = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
 					{
 						var ex = Assert.Throws<PeachException>(() =>
-							web.Start(port, false));
+							web.Start(port, null, false));
 
 						var expected = "Unable to start the web server at http://localhost:{0}/ because the port is currently in use.".Fmt(port);
 						Assert.AreEqual(expected, ex.Message);
@@ -129,6 +131,56 @@ namespace Peach.Pro.Test.WebApi
 			Assert.AreEqual(TimeSpan.FromSeconds(36), j.Runtime);
 			Assert.AreEqual(DateTimeKind.Utc, j.StartDate.Kind);
 			Assert.AreEqual(start.ToUniversalTime(), j.StartDate);
+		}
+
+		[Test]
+		public void Https()
+		{
+			using (var tmpDir = new TempDirectory())
+			{
+				var asm = Assembly.GetExecutingAssembly();
+				var certPath = Path.Combine(tmpDir.Path, "test.pfx");
+				using (var sout = new FileStream(certPath, FileMode.Create))
+				using (var sin = asm.GetManifestResourceStream("Peach.Pro.Test.WebApi.Resources.test.pfx"))
+				{
+					sin.CopyTo(sout);
+				}
+
+				// Disable server certification check to allow self-signed certificate
+				ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, errors) =>
+				{
+					return true;
+				};
+
+				using (var web = new WebServer(_license.Object, tmpDir.Path, new InternalJobMonitor(_license.Object)))
+				{
+					web.Start(null, certPath);
+
+					// test HTTPS (should succeed) 
+					using (var client = new HttpClient())
+					{
+						var builder = new UriBuilder(Uri.UriSchemeHttps, "127.0.0.1", web.Uri.Port);
+						client.BaseAddress = builder.Uri;
+						client.Timeout = TimeSpan.FromSeconds(5);
+
+						var response = client.GetAsync("p/license").Result;
+						Assert.IsTrue(response.IsSuccessStatusCode);
+					}
+
+					// test HTTP (should fail)
+					using (var client = new HttpClient())
+					{
+						var builder = new UriBuilder(Uri.UriSchemeHttp, "127.0.0.1", web.Uri.Port);
+						client.BaseAddress = builder.Uri;
+						client.Timeout = TimeSpan.FromSeconds(5);
+
+						Assert.Throws<AggregateException>(() =>
+						{
+							var result = client.GetAsync("p/license").Result;
+						});
+					}
+				}
+			}
 		}
 	}
 }

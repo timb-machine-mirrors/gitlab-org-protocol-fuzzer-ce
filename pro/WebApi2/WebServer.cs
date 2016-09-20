@@ -2,11 +2,9 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using Owin;
 using System.Web.Http;
 using Microsoft.Owin;
-using Microsoft.Owin.Hosting;
 using Microsoft.Owin.StaticFiles;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.Hosting.Tracing;
@@ -21,6 +19,7 @@ using Peach.Pro.Core.License;
 using Autofac;
 using Autofac.Integration.WebApi;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Owin.Builder;
 using Nowin;
 
@@ -61,12 +60,12 @@ namespace Peach.Pro.WebApi2
 			_startup = startup;
 		}
 
-		public void Start(int? port)
+		public void Start(int? port, string certPath)
 		{
 			if (port.HasValue)
-				Start(port.Value, false);
+				Start(port.Value, certPath, false);
 			else
-				Start(8888, true);
+				Start(8888, certPath, true);
 		}
 
 		class NullTraceOutputFactory : ITraceOutputFactory
@@ -77,7 +76,7 @@ namespace Peach.Pro.WebApi2
 			}
 		}
 
-		public void Start(int port, bool keepGoing)
+		public void Start(int port, string certPath, bool keepGoing)
 		{
 			while (_server == null)
 			{
@@ -86,15 +85,16 @@ namespace Peach.Pro.WebApi2
 					// Owin adds a TextWriterTraceListener during startup
 					// we need to replace it to avoid spewing to console
 
-					//var options = new StartOptions(url)
-					//{
-					//	ServerFactory = "Nowin",
-					//};
+					//var options = new StartOptions(url);
 					//options.Settings.Add(
 					//	typeof(ITraceOutputFactory).FullName,
 					//	typeof(NullTraceOutputFactory).AssemblyQualifiedName
 					//);
 					//_server = WebApp.Start(options, _startup.OnStartup);
+
+					X509Certificate2 cert = null;
+					if (certPath != null)
+						cert = new X509Certificate2(certPath);
 
 					var appBuilder = new AppBuilder();
 					OwinServerFactory.Initialize(appBuilder.Properties);
@@ -103,9 +103,15 @@ namespace Peach.Pro.WebApi2
 						.SetAddress(IPAddress.Any)
 						.SetPort(port)
 						.SetOwinApp(appBuilder.Build())
+						.SetCertificate(cert)
 						.Start();
 
-					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
+					Uri = new UriBuilder()
+					{
+						Scheme = cert == null ? "http" : "https",
+						Host = GetLocalIp(),
+						Port = port
+					}.Uri;
 				}
 				catch (Exception ex)
 				{
@@ -147,11 +153,7 @@ namespace Peach.Pro.WebApi2
 			}
 		}
 
-		public Uri Uri
-		{
-			get;
-			private set;
-		}
+		public Uri Uri { get; private set; }
 
 		public void Dispose()
 		{

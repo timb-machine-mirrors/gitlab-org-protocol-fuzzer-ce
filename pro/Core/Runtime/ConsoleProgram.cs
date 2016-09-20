@@ -64,6 +64,7 @@ namespace Peach.Pro.Core.Runtime
 		private bool _nobrowser;
 		private static volatile bool _shouldStop;
 		private bool _polite;
+		private string _certPath;
 
 		#region Public Properties
 
@@ -180,6 +181,11 @@ namespace Peach.Pro.Core.Runtime
 				"webport=",
 				"Specifies port web interface runs on.",
 				(int v) => _webPort = v
+			);
+			options.Add(
+				"https=",
+				"Enable https, specify a path to a .pfx file",
+				v => _certPath = v
 			);
 
 			// DEPRECATED - Not in syntax help
@@ -384,7 +390,7 @@ namespace Peach.Pro.Core.Runtime
 
 			using (var svc = CreateWeb(_license, "", jobMonitor))
 			{
-				svc.Start(_webPort);
+				svc.Start(_webPort, _certPath);
 
 				_webUri = svc.Uri;
 
@@ -520,7 +526,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 			else if (!_noweb && CreateWeb != null)
 			{
-				RunWeb(_pitLibraryPath, !_nobrowser, new InternalJobMonitor(_license));
+				RunWeb(_pitLibraryPath, !_nobrowser, new InternalJobMonitor(_license), _certPath);
 			}
 
 			return 0;
