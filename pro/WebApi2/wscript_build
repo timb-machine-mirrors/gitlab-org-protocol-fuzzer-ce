@@ -1,40 +1,32 @@
 #!/usr/bin/env python
 
 deps = [
-	'NLog.dll',
-
-	'System.dll',
-	'System.Core.dll',
-	'System.Net.Http.dll',
-	'System.Web.dll',
-	'Microsoft.CSharp.dll',
-
-	'Peach.Core.dll',
-	'Peach.Pro.dll',
-
-	'Swashbuckle.Core.dll',
-
-	'System.Net.Http.Formatting.dll',
-	'System.Web.Cors.dll',
-	'System.Web.Http.dll',
-	'System.Web.Http.Cors.dll',
-	'System.Web.Http.Owin.dll',
-
-	'Microsoft.Owin.StaticFiles.dll',
-	'Microsoft.Owin.FileSystems.dll',
-	'Microsoft.Owin.Host.HttpListener.dll',
-	'Microsoft.Owin.Hosting.dll',
-	'Microsoft.Owin.dll',
-	'Owin.dll',
-
-	'Newtonsoft.Json.dll',
-
-	'Ionic.Zip.dll',
-
 	'Autofac.dll',
 	'Autofac.Integration.Owin.dll',
 	'Autofac.Integration.WebApi.dll',
 	'Autofac.Integration.WebApi.Owin.dll',
+	'Ionic.Zip.dll',
+	'Microsoft.CSharp.dll',
+	'Microsoft.Owin.dll',
+	'Microsoft.Owin.Hosting.dll',
+	'Microsoft.Owin.FileSystems.dll',
+	'Microsoft.Owin.StaticFiles.dll',
+	'Newtonsoft.Json.dll',
+	'NLog.dll',
+	'Nowin.dll',
+	'Owin.dll',
+	'Peach.Core.dll',
+	'Peach.Pro.dll',
+	'Swashbuckle.Core.dll',
+	'System.dll',
+	'System.Core.dll',
+	'System.Net.Http.dll',
+	'System.Net.Http.Formatting.dll',
+	'System.Web.dll',
+	'System.Web.Cors.dll',
+	'System.Web.Http.dll',
+	'System.Web.Http.Cors.dll',
+	'System.Web.Http.Owin.dll',
 ]
 
 bld(

@@ -13,7 +13,6 @@ deps = [
 
 	'Microsoft.Owin.StaticFiles.dll',
 	'Microsoft.Owin.FileSystems.dll',
-	'Microsoft.Owin.Host.HttpListener.dll',
 	'Microsoft.Owin.Hosting.dll',
 	'Microsoft.Owin.dll',
 	'Microsoft.CSharp.dll',
@@ -22,6 +21,7 @@ deps = [
 
 	'Newtonsoft.Json.dll',
 	'NLog.dll',
+	'Nowin.dll',
 	'nunit.framework.dll',
 	'Owin.dll',
 	

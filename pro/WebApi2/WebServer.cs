@@ -21,6 +21,8 @@ using Peach.Pro.Core.License;
 using Autofac;
 using Autofac.Integration.WebApi;
 using System.Reflection;
+using Microsoft.Owin.Builder;
+using Nowin;
 
 namespace Peach.Pro.WebApi2
 {
@@ -45,13 +47,8 @@ namespace Peach.Pro.WebApi2
 
 	public class BaseWebServer : IWebStatus
 	{
-		// If we use "+" on mono, there is a 10 sec startup & shutdown delay
-		// as we try and resolve the ip for dns name "+"
-		private static readonly string AnyHost = Platform.IsRunningOnMono() ? "*" : "+";
-
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
 		// ReSharper disable InconsistentNaming
-		private const int ERROR_ACCESS_DENIED = 5;
 		private const int ERROR_SHARING_VIOLATION = 32;
 		private const int ERROR_ALREADY_EXISTS = 183;
 		// ReSharper restore InconsistentNaming
@@ -82,23 +79,31 @@ namespace Peach.Pro.WebApi2
 
 		public void Start(int port, bool keepGoing)
 		{
-			var added = false;
-
 			while (_server == null)
 			{
-				var url = "http://{0}:{1}/".Fmt(AnyHost, port);
-
 				try
 				{
 					// Owin adds a TextWriterTraceListener during startup
 					// we need to replace it to avoid spewing to console
 
-					var options = new StartOptions(url);
-					options.Settings.Add(
-						typeof(ITraceOutputFactory).FullName,
-						typeof(NullTraceOutputFactory).AssemblyQualifiedName
-					);
-					_server = WebApp.Start(options, _startup.OnStartup);
+					//var options = new StartOptions(url)
+					//{
+					//	ServerFactory = "Nowin",
+					//};
+					//options.Settings.Add(
+					//	typeof(ITraceOutputFactory).FullName,
+					//	typeof(NullTraceOutputFactory).AssemblyQualifiedName
+					//);
+					//_server = WebApp.Start(options, _startup.OnStartup);
+
+					var appBuilder = new AppBuilder();
+					OwinServerFactory.Initialize(appBuilder.Properties);
+					_startup.OnStartup(appBuilder);
+					_server = ServerBuilder.New()
+						.SetAddress(IPAddress.Any)
+						.SetPort(port)
+						.SetOwinApp(appBuilder.Build())
+						.Start();
 
 					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
 				}
@@ -109,32 +114,6 @@ namespace Peach.Pro.WebApi2
 					var lex = inner as HttpListenerException;
 					if (lex != null)
 					{
-						if (lex.ErrorCode == ERROR_ACCESS_DENIED)
-						{
-							var error = added;
-
-							if (!added)
-								error = !UacHelpers.AddUrl(url);
-
-							if (!error)
-							{
-								// UAC reservation added, don't increment port
-								added = true;
-								continue;
-							}
-
-							var sb = new StringBuilder();
-
-							sb.AppendFormat("Access was denied when starts the web server at url '{0}'.", url);
-							sb.AppendLine();
-							sb.AppendLine();
-							sb.AppendLine("Please create the url reservations by executing the following");
-							sb.AppendLine("from a command prompt with elevated privileges:");
-							sb.AppendFormat("{0} {1}", UacHelpers.Command, UacHelpers.GetArguments(url));
-
-							throw new PeachException(sb.ToString(), ex);
-						}
-
 						// Windows gives ERROR_SHARING_VIOLATION when port in use
 						// Windows gives ERROR_ALREADY_EXISTS when two http instances are running
 						// Mono raises "Prefix already in use" message
@@ -147,7 +126,6 @@ namespace Peach.Pro.WebApi2
 
 							// Try the next port
 							++port;
-							added = false;
 							continue;
 						}
 					}
@@ -161,7 +139,6 @@ namespace Peach.Pro.WebApi2
 
 						// Try the next port
 						++port;
-						added = false;
 						continue;
 					}
 
