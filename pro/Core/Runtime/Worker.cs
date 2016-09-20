@@ -127,7 +127,7 @@ namespace Peach.Pro.Core.Runtime
 				throw new SyntaxException("Missing <pit> argument.");
 
 			PrepareLicensing(_pitLibraryPath);
-			if (_license.Status != LicenseStatus.Invalid)
+			if (_license.Status != LicenseStatus.Valid)
 				return -1;
 
 			if (_init)
