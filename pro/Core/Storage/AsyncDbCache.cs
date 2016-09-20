@@ -394,16 +394,20 @@ namespace Peach.Pro.Core.Storage
 				Monitor.Wait(copy);
 			}
 
+			EnqueueBack(sw => null);
+			_task.Wait();
+
+			Job = _task.Result;
+
 			if (!Job.DryRun && Job.IterationCount > 0)
 			{
-				// use the `copy` here because it has been modified with the stopped status
 				try
 				{
 					using (var db = new JobDatabase(Job.DatabasePath))
 					{
-						Debug.Assert(copy.StopDate == now);
-						copy.Status = JobStatus.Stopped;
-						var report = db.GetReport(copy);
+						Debug.Assert(Job.StopDate == now);
+						Job.Status = JobStatus.Stopped;
+						var report = db.GetReport(Job);
 						Reporting.SaveReportPdf(report);
 					}
 				}
@@ -430,10 +434,6 @@ namespace Peach.Pro.Core.Storage
 				}
 			}
 
-			EnqueueBack(sw => null);
-			_task.Wait();
-
-			Job = _task.Result;
 			Job.Mode = JobMode.Fuzzing;
 		}
 

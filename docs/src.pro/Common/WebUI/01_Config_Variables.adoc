@@ -1,9 +1,9 @@
 [[Program_PeachWebAdvanceConfig]]
 === Configuration Menu
 
-As an alternative to using the Quick Start wizard, you can configure a Pit by using the Configuration menu. This menu consists of three parts: variables, monitoring, and test. In contrast to the Quick Start wizard that leads sequentially through the entire configuration, you can shuffle the order in which you configure variables or set up monitors.
-
-The Variable and Monitoring parts need to be completed to pass a test of the configuration; this is true whether you use the Configuration Menu or the Quick Start wizard.
+You can configure a Pit by using the Configuration menu.
+This menu consists of three parts: variables, monitoring, and test.
+The Variable and Monitoring parts need to be completed to pass a test of the configuration.
 
 To begin from the Home Page,
 
