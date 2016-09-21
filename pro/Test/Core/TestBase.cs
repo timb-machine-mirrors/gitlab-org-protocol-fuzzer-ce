@@ -13,7 +13,7 @@ using Peach.Pro.Core.Runtime;
 namespace Peach.Pro.Test.Core
 {
 	[SetUpFixture]
-	internal class TestBase : SetUpFixture
+	public class TestBase : SetUpFixture
 	{
 		TempDirectory _tmpDir;
 
@@ -44,7 +44,7 @@ namespace Peach.Pro.Test.Core
 
 	[TestFixture]
 	[Quick]
-	internal class CommonTests : TestFixture
+	public class CommonTests : TestFixture
 	{
 		public CommonTests()
 			: base(Assembly.GetExecutingAssembly())

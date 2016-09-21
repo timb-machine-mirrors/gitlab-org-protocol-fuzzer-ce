@@ -33,6 +33,7 @@ namespace Peach.Pro.Test.WebProxy
 		protected Task Engine;
 		protected int Port;
 		protected List<WebApiOperation> Ops = new List<WebApiOperation>();
+		protected List<string> Requests = new List<string>();
 
 		/// <summary>
 		/// Get an instance of HTTP Client
@@ -77,6 +78,7 @@ namespace Peach.Pro.Test.WebProxy
 			var e = new Engine(null);
 
 			Ops.Clear();
+			Requests.Clear();
 
 			if (hook != null)
 				hook(e);
@@ -166,7 +168,10 @@ namespace Peach.Pro.Test.WebProxy
 	</Test>
 </Peach>".Fmt(SwaggerFile, Server.Uri);
 
-			RunEngine(xml);
+			RunEngine(xml, hookRequestEventPost: (e, ctx, op) =>
+			{
+				Requests.Add(e.WebSession.Request.ToString());
+			});
 		}
 
 		[TearDown]

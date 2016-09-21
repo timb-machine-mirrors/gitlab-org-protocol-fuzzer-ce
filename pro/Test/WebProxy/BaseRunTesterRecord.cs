@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -72,11 +73,13 @@ namespace Peach.Pro.Test.WebProxy
 
 			var settings = new XmlWriterSettings
 			{
+				OmitXmlDeclaration = true,
 				Encoding = Encoding.UTF8,
 				Indent = true
 			};
 
-			using (var sout = new MemoryStream())
+			var sb = new StringBuilder();
+			using (var sout = new StringWriter(sb))
 			{
 				using (var xml = XmlWriter.Create(sout, settings))
 				{
@@ -85,7 +88,7 @@ namespace Peach.Pro.Test.WebProxy
 					xml.WriteEndDocument();
 				}
 
-				return Encoding.UTF8.GetString(sout.ToArray());
+				return sb.ToString();
 			}
 		}
 

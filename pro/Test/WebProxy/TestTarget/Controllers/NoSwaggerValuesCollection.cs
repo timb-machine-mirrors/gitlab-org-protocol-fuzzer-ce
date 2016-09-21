@@ -60,6 +60,18 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 			return new StatusCodeResult(HttpStatusCode.OK, this);
 		}
 
+		// GET api/values/values
+		[Route("values")]
+		public string GetValues()
+		{
+			Clear();
+
+			if (Request.Headers.Contains("X-Peachy"))
+				X_Peachy = Request.Headers.GetValues("X-Peachy").First();
+
+			return "value";
+		}
+
 		// GET api/values/5 
 		[Route("{id}")]
 		public string Get(int id)

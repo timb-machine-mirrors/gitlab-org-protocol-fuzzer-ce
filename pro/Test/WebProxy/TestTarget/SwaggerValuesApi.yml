@@ -54,6 +54,11 @@ paths:
           description: It's a value dude
           type: string
           required: true
+        - name: extra
+          in: formData
+          description: It's some extra junk
+          type: string
+          required: false
       tags:
         - Value
       responses:
