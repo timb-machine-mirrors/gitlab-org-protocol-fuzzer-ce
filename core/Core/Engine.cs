@@ -274,6 +274,11 @@ namespace Peach.Core
 						StartTest();
 
 						RunTest();
+
+						if (!_context.continueFuzzing)
+							logger.Debug("Stop command received, stopping engine.");
+						else
+							logger.Debug("All test cases executed, stopping engine.");
 					}
 					finally
 					{
@@ -286,11 +291,13 @@ namespace Peach.Core
 				{
 					if (ex.GetBaseException() is ThreadAbortException)
 					{
+						logger.Debug("Kill command received, stopping engine.");
 						logger.Trace("ResetAbort()");
 						Thread.ResetAbort();
 					}
 					else
 					{
+						logger.Debug("Stopping engine due to {0}.", ex.GetType().Name);
 						OnTestError(ex);
 						throw;
 					}

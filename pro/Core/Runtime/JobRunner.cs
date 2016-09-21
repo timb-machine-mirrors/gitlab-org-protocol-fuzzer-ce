@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using NLog;
 using Peach.Core;
@@ -144,7 +145,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				CompleteProxyEvents();
 
-				Logger.Debug("Flushing Logs");
+				Logger.Debug("Flushing Logs (Version: {0})", Assembly.GetEntryAssembly().GetName().Version);
 				LogManager.Flush();
 				_jobLogger.RestoreLogging(_config.id);
 			}
