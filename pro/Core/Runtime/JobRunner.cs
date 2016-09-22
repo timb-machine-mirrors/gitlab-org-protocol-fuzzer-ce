@@ -145,7 +145,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				CompleteProxyEvents();
 
-				Logger.Debug("Flushing Logs (Version: {0})", Assembly.GetEntryAssembly().GetName().Version);
+				Logger.Debug("Flushing Logs (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version);
 				LogManager.Flush();
 				_jobLogger.RestoreLogging(_config.id);
 			}
