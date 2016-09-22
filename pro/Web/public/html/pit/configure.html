@@ -2,14 +2,14 @@
 		 ng-show="vm.ShowNotConfigured">
 	<strong>Warning!</strong>
 	The currently selected Pit has required configuration variables that must be set.
-	<a ui-sref="pit.wizard">Pit Configuration Quick Start</a>
+	<a ui-sref="pit.advanced.variables">Configure Variables</a>
 </div>
 
 <div class="alert alert-warning"
 		ng-show="vm.ShowNoMonitors">
 	<strong>Warning!</strong>
 	The currently selected Pit should be configured for monitoring the environment.
-	<a ui-sref="pit.wizard">Pit Configuration Quick Start</a>
+	<a ui-sref="pit.advanced.monitoring">Configure Monitoring</a>
 </div>
 
 <div class="alert alert-success"
@@ -42,14 +42,6 @@
 			<p>
 				Set or change the test configuration using the following buttons:
 				<dl class="dl-horizontal">
-					<dt ng-show="!vm.ShowWebProxy">
-						Quick Start Wizard
-					</dt>
-					<dd ng-show="!vm.ShowWebProxy">
-						Leads a structured question &amp; answer session that covers typical configurations.
-						<br />
-						This choice is recommended for novice users and for simple configurations.
-					</dd>
 					<dt ng-show="vm.ShowWebProxy">
 						Configure Web Proxy
 					</dt>
@@ -78,14 +70,6 @@
 			</p>
 		</div>
 		<div class="center">
-			<a role="button"
-				class="btn btn-primary"
-				ng-show="!vm.ShowWebProxy"
-				ui-sref="pit.wizard">
-				<i class="fa fa-rocket"></i>
-				Quick Start Wizard
-			</a>
-
 			<a role="button"
 				class="btn btn-primary"
 				ng-show="vm.ShowWebProxy"

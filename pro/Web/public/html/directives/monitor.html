@@ -40,21 +40,16 @@
 				Name
 			</label>
 			<div class="col-sm-6">
-				<div class="input-group">
-					<span class="input-group-addon"
-								uib-tooltip="Friendly name for your monitor"
-								tooltip-placement="above"
-								tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="name"
-								 autocomplete="off"
-								 ng-model="monitor.name"
-								 type="text"
-								 class="form-control"
-								 peach:unique-channel="agents[{{agentIndex}}].monitor.name"
-								 peach:unique-default="Monitor{{monitorIndex}}" />
-				</div>
+				<input name="name"
+							 autocomplete="off"
+							 ng-model="monitor.name"
+							 type="text"
+							 class="form-control"
+							 peach:unique-channel="agents[{{agentIndex}}].monitor.name"
+							 peach:unique-default="Monitor{{monitorIndex}}" />
+				<span class="help-text">
+					Friendly name for your monitor
+				</span>
 				<span class="help-block"
 							ng-messages="form.name.$error"
 							ng-messages-include="html/messages.html">

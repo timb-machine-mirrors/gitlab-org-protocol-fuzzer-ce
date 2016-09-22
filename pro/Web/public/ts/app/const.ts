@@ -70,7 +70,6 @@ namespace Peach.C {
 		export const HttpError = 'HttpErrorService';
 		export const Job = 'JobService';
 		export const Test = 'TestService';
-		export const Wizard = 'WizardService';
 	}
 
 	export namespace Api {
@@ -147,15 +146,6 @@ namespace Peach.C {
 		}
 		export namespace Pit {
 			export const Configure = 'html/pit/configure.html';
-			export namespace Wizard {
-				export const Intro = 'html/pit/wizard/intro.html';
-				export const Track = 'html/pit/wizard/track.html';
-				export const TrackIntro = 'html/pit/wizard/:track/intro.html';
-				export const Question = 'html/pit/wizard/question.html';
-				export const TrackDone = 'html/pit/wizard/:track/done.html';
-				export const Test = 'html/pit/wizard/test.html';
-				export const QuestionType = 'html/pit/q/:type.html';
-			}
 			export namespace Advanced {
 				export const Variables = 'html/pit/advanced/variables.html';
 				export const Monitoring = 'html/pit/advanced/monitoring.html';
@@ -209,9 +199,6 @@ namespace Peach.C {
 		export const JobMetrics = 'job.metrics';
 
 		export const Pit = 'pit';
-
-		export const PitWizard = 'pit.wizard';
-		export const PitWizardTest = 'pit.wizard.test';
 
 		export const PitAdvanced = 'pit.advanced';
 		export const PitAdvancedVariables = 'pit.advanced.variables';

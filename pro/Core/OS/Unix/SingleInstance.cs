@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Mono.Unix;
 using Mono.Unix.Native;
@@ -15,6 +16,15 @@ namespace Peach.Pro.Core.OS.Unix
 
 		private int _fd;
 		private bool _locked;
+
+		[DllImport("libc", SetLastError = true)]
+		private static extern int flock(int fd, int op);
+
+		// ReSharper disable InconsistentNaming
+		private const int LOCK_EX = 0x0002;
+		private const int LOCK_NB = 0x0004;
+		private const int LOCK_UN = 0x0008;
+		// ReSharper restore InconsistentNaming
 
 		public SingleInstanceImpl(string name)
 		{
@@ -32,8 +42,7 @@ namespace Peach.Pro.Core.OS.Unix
 
 				if (_locked)
 				{
-					var flock = new Flock { l_type = LockType.F_UNLCK };
-					Syscall.fcntl(_fd, FcntlCommand.F_SETLK, ref flock);
+					flock(_fd, LOCK_UN);
 					_locked = false;
 				}
 
@@ -54,16 +63,13 @@ namespace Peach.Pro.Core.OS.Unix
 				if (_locked)
 					return true;
 
-				var flock = new Flock { l_type = LockType.F_WRLCK };
-
-				var ret = Syscall.fcntl(_fd, FcntlCommand.F_SETLK, ref flock);
+				var ret = flock(_fd, LOCK_EX | LOCK_NB);
 
 				if (ret == -1)
 				{
-					// If EACCES or EAGAIN means the lock is held
 					var errno = Stdlib.GetLastError();
 
-					if (errno != Errno.EACCES && errno != Errno.EAGAIN)
+					if (errno != Errno.EWOULDBLOCK)
 						UnixMarshal.ThrowExceptionForError(errno);
 
 					_locked = false;
@@ -89,9 +95,7 @@ namespace Peach.Pro.Core.OS.Unix
 
 				while (true)
 				{
-					var flock = new Flock { l_type = LockType.F_WRLCK };
-
-					var ret = Syscall.fcntl(_fd, FcntlCommand.F_SETLKW, ref flock);
+					var ret = flock(_fd, LOCK_EX);
 
 					Errno error;
 					if (UnixMarshal.ShouldRetrySyscall(ret, out error))

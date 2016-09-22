@@ -109,6 +109,7 @@ namespace Peach.Pro.Test.WebProxy.TestTarget.Controllers
 	public class Value
 	{
 		public string value { get; set; }
+		public string extra { get; set; }
 		public string[] a { get; set; }
 	}
 

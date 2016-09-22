@@ -66,6 +66,69 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
+		public void TestSwaggerOptionalQuery()
+		{
+			var client = GetHttpClient();
+			var response = client.GetAsync(BaseUrl + "/api/values").Result;
+			var op = GetOp();
+			var req = Requests[0];
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			StringAssert.StartsWith("GET /api/values HTTP/1.1", req);
+		}
+
+		[Test]
+		public void TestSwaggerOptionalHeaders()
+		{
+			var client = GetHttpClient();
+			var response = client.GetAsync(BaseUrl + "/api/values").Result;
+			var op = GetOp();
+			var req = Requests[0];
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			StringAssert.DoesNotContain("x-peachy:", req);
+		}
+
+		[Test]
+		public void TestSwaggerOptionalFormData()
+		{
+			var content = new FormUrlEncodedContent(new[] 
+			{
+				new KeyValuePair<string, string>("value", "foo")
+			});
+
+			var client = GetHttpClient();
+			var headers = client.DefaultRequestHeaders;
+			headers.Add("X-Peachy", "Testing 1..2..3..");
+
+			var response = client.PostAsync(BaseUrl + "/api/values", content).Result;
+			var op = GetOp();
+			var req = Requests[0];
+
+			Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("POST", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			StringAssert.StartsWith("POST /api/values HTTP/1.1", req);
+			StringAssert.DoesNotContain("extra=", req);
+		}
+
+		[Test]
 		public void TestSwaggerHeader()
 		{
 			var client = GetHttpClient();
@@ -87,6 +150,8 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.AreEqual(WebApiParameterIn.Header, param.In);
 			Assert.AreEqual("Testing 1..2..3..", (string)param.DataElement.DefaultValue);
 			Assert.AreEqual("Testing 1..2..3..", ValuesController.X_Peachy);
+
+			StringAssert.StartsWith("GET /api/values HTTP/1.1", Requests[0]);
 		}
 
 		[Test]
@@ -141,7 +206,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
 			Assert.IsTrue(param.DataElement is JsonObject);
-			Assert.AreEqual("{\"values\":[\"A\",\"B\",\"C\",\"D\"],\"extraValue\":{\"value\":\"Hello extra value\",\"a\":null}}",
+			Assert.AreEqual("{\"values\":[\"A\",\"B\",\"C\",\"D\"],\"extraValue\":{\"value\":\"Hello extra value\",\"extra\":null,\"a\":null}}",
 				(string)param.DataElement.DefaultValue);
 			Assert.AreEqual((string)param.DataElement.DefaultValue, (string)param.DataElement.InternalValue);
 			Assert.AreEqual((string)param.DataElement.DefaultValue, param.DataElement.Value.BitsToString());
@@ -178,7 +243,7 @@ namespace Peach.Pro.Test.WebProxy
 
 			Assert.AreEqual(WebApiParameterIn.Body, param.In);
 			Assert.IsTrue(param.DataElement is XmlElement);
-			Assert.AreEqual("<ComplexValue xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/Peach.Pro.Test.WebProxy.TestTarget.Controllers\"><extraValue><a xmlns:d3p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\" i:nil=\"true\" /><value>Hello extra value</value></extraValue><values xmlns:d2p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><d2p1:string>A</d2p1:string><d2p1:string>B</d2p1:string><d2p1:string>C</d2p1:string><d2p1:string>D</d2p1:string></values></ComplexValue>",
+			Assert.AreEqual("<ComplexValue xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://schemas.datacontract.org/2004/07/Peach.Pro.Test.WebProxy.TestTarget.Controllers\"><extraValue><a xmlns:d3p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\" i:nil=\"true\" /><extra i:nil=\"true\" /><value>Hello extra value</value></extraValue><values xmlns:d2p1=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><d2p1:string>A</d2p1:string><d2p1:string>B</d2p1:string><d2p1:string>C</d2p1:string><d2p1:string>D</d2p1:string></values></ComplexValue>",
 				(string)param.DataElement.DefaultValue);
 			Assert.AreEqual((string)param.DataElement.DefaultValue, param.DataElement.InternalValue.BitsToString());
 			Assert.AreEqual((string)param.DataElement.DefaultValue, param.DataElement.Value.BitsToString());

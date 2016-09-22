@@ -42,21 +42,16 @@
 				Name
 			</label>
 			<div class="col-sm-6">
-				<div class="input-group">
-					<span class="input-group-addon"
-					      uib-tooltip="Friendly name for your agent"
-					      tooltip-placement="above"
-					      tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="name"
-								 autocomplete="off"
-								 type="text"
-								 ng-model="agent.name"
-								 ng-required="true"
-								 class="form-control"
-								 peach:unique-channel="agent.name" />
-				</div>
+				<input name="name"
+							 autocomplete="off"
+							 type="text"
+							 ng-model="agent.name"
+							 ng-required="true"
+							 class="form-control"
+							 peach:unique-channel="agent.name" />
+				<span class="help-text">
+					Friendly name for your agent
+				</span>
 				<span class="help-block"
 							ng-messages="form.name.$error"
 							ng-messages-include="html/messages.html">
@@ -69,23 +64,18 @@
 				Location
 			</label>
 			<div class="col-sm-6">
-				<div class="input-group">
-					<span class="input-group-addon"
-					      uib-tooltip="URL for the agent. Leave blank for a local agent."
-					      tooltip-placement="above"
-					      tooltip-append-to-body="true">
-						<i class="fa fa-question-circle"></i>
-					</span>
-					<input name="location"
-								 autocomplete="off"
-								 type="text"
-								 placeholder="local://"
-								 ng-model="agent.agentUrl"
-								 class="form-control"
-								 peach:unique-channel="agent.agentUrl"
-								 peach:unique-default="local://"
-								 peach:unique-ignore="^local://" />
-				</div>
+				<input name="location"
+							 autocomplete="off"
+							 type="text"
+							 placeholder="local://"
+							 ng-model="agent.agentUrl"
+							 class="form-control"
+							 peach:unique-channel="agent.agentUrl"
+							 peach:unique-default="local://"
+							 peach:unique-ignore="^local://" />
+				<span class="help-text">
+					URL for the agent. Leave blank for a local agent.
+				</span>
 				<span class="help-block"
 							ng-messages="form.location.$error"
 							ng-messages-include="html/messages.html">

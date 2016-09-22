@@ -44,9 +44,9 @@ The dashboard allows you to monitor progress as your fuzzing job runs and from i
 ==== From a Configuration Test
 
 When your Pit configuration passes the validation test, the following screen displays
-with the green banner and the message "Testing Passed. Click Continue."
+with the green banner and the message "Testing Passed, click Continue."
 
-image::{images}/Common/WebUI/QS32_TestPass.png[scalewidth="75%"]
+image::{images}/Common/WebUI/AC_Test_Pass.png[scalewidth="75%"]
 
 From here, you can start a fuzzing session with two clicks of the mouse.
 

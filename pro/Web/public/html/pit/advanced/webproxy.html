@@ -1,9 +1,12 @@
 ﻿<form name="form"
+			class="form-horizontal"
+			novalidate
 			peach:unsaved
 			autocomplete="off">
 	<p>
 		Web Proxy configuration
 	</p>
+
 	<div class="row"
 			 style="margin-bottom: 10px">
 		<div class="col-xs-6">
@@ -11,19 +14,15 @@
 						class="green">
 				Saved successfully.
 			</span>
-			<span ng-show="vm.ShowRequired"
+			<span ng-show="vm.ShowError"
 						class="red">
-				There are required variables that must be configured.
-			</span>
-			<span ng-show="vm.ShowValidation"
-						class="red">
-				You have some validation issues to correct.
+				Save is disabled until validation issues are fixed.
 			</span>
 		</div>
 		<div class="col-xs-6 text-right">
 			<button class="btn btn-xs btn-danger"
-							ng-disabled="!vm.CanSave"
-							ng-click="vm.OnSave()">
+							ng-click="vm.OnSave()"
+							ng-disabled="!vm.CanSave">
 				<i class="fa fa-save"></i>
 				Save
 			</button>
@@ -34,20 +33,21 @@
 			</button>
 		</div>
 	</div>
+
 	<div class="alert alert-info"
 			 ng-show="vm.ShowLoading">
 		Loading configuration...
 	</div>
 
-	<div class="row"
-			 ng-hide="vm.ShowLoading">
-		<uib-accordion close-others="false"
-									 ng-repeat="route in vm.Routes track by $index"
-									 class="col-xs-12">
-			<peach:route routes="vm.Routes"
-									 route="route"
-									 index="$index">
-			</peach:route>
-		</uib-accordion>
+	<div class="row">
+		<div class="col-xs-12">
+			<uib-accordion close-others="false"
+										 ng-repeat="route in vm.Routes track by $index">
+				<peach:route routes="vm.Routes"
+										 route="route"
+										 index="$index">
+				</peach:route>
+			</uib-accordion>
+		</div>
 	</div>
 </form>

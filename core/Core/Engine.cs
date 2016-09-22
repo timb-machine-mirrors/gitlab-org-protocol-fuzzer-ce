@@ -274,6 +274,11 @@ namespace Peach.Core
 						StartTest();
 
 						RunTest();
+
+						if (!_context.continueFuzzing)
+							logger.Debug("Stop command received, stopping engine.");
+						else
+							logger.Debug("All test cases executed, stopping engine.");
 					}
 					finally
 					{
@@ -286,11 +291,13 @@ namespace Peach.Core
 				{
 					if (ex.GetBaseException() is ThreadAbortException)
 					{
+						logger.Debug("Kill command received, stopping engine.");
 						logger.Trace("ResetAbort()");
 						Thread.ResetAbort();
 					}
 					else
 					{
+						logger.Debug("Stopping engine due to {0}.", ex.GetType().Name);
 						OnTestError(ex);
 						throw;
 					}
@@ -590,14 +597,12 @@ namespace Peach.Core
 						else if (context.controlRecordingIteration)
 						{
 							logger.Debug("runTest: SoftException on control recording iteration, saving as fault");
-							var ex = se.InnerException ?? se;
-							OnControlFault("SoftException Detected:\n" + ex);
+							OnControlFault(se);
 						}
 						else if (context.controlIteration)
 						{
 							logger.Debug("runTest: SoftException on control iteration, saving as fault");
-							var ex = se.InnerException ?? se;
-							OnControlFault("SoftException Detected:\n" + ex);
+							OnControlFault(se);
 						}
 						else
 						{
@@ -1058,6 +1063,28 @@ namespace Peach.Core
 				sb.AppendFormat("{0,-11} | {1}.{2}", action.type, action.parent.Name, action.Name);
 				sb.AppendLine();
 			}
+		}
+
+		private void OnControlFault(SoftException se)
+		{
+			var ex = se.InnerException ?? se;
+
+			const string template = @"Peach detected an error while performing the protocol sequence without fuzzing the values (changing them) to verify the target is still responsive. This fault is saying the device under test did not respond correctly. This usually means the target was:
+
+1. Overwhelmed and could not respond correctly 
+2. In an invalid state and non responsive 
+3. Had just restarted and was unable to process the request 
+4. Service could not respond in time for some reason
+
+This can happen during testing when a series of test cases cause the target service to misbehave, but not crash.
+
+Extended error information:
+
+{0}";
+
+			var msg = string.Format(template, ex.Message);
+
+			OnControlFault(msg);
 		}
 
 		private void OnControlFault(string description, string majorHash = null, string minorHash = null)
