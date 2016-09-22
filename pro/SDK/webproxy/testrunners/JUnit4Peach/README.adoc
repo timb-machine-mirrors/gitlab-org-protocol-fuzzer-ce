@@ -1,0 +1,47 @@
+= JUnit 4 Peach Integration
+
+This project builds an extension to JUnit 4 to allow using unit tests to drive
+fuzzing with Peach Fuzzer Web Proxy.
+
+Integration requires creating a special Suite of unit tests.  See FuzzFlashRestTarget.java and
+TestFlaskRestTarget.java for an example.
+
+== Installation
+
+Build with Maven or Netbeans. Once build a jar is build in the 'target' folder.
+Dependencies are in 'target/lib'.
+
+== Usage
+
+Create a suite similar to "FuzzFlashRestTarget.java".  
+
+Example usage:
+
+All test classes to include are listed in the @PeachSuiteClasses attribute.
+
+[source=java]
+----
+@RunWith(com.peachfuzzer.web.frameworks.junit4.JUnit4PeachSuiteRunner.class)
+@PeachSuiteClasses(TestFlaskRestTarget.class)
+public class FuzzFlaskRestTarget {
+    @BeforeClass
+    public static void setProxy()
+    {
+        Options.setOption(Option.PROXY, new HttpHost("127.0.0.1", 8001));
+    }
+    
+    @AfterClass
+    public static void removeProxy()
+    {
+        Options.setOption(Option.PROXY, null);
+    }
+}
+----
+
+== Running
+
+Run via the command line:
+
+----
+java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
+----
