@@ -99,6 +99,6 @@ public class TestFlaskRestTarget {
             .body(user)
             .asString();
         
-        Assert.assertEquals(201, ret2.getStatus());
+        Assert.assertEquals(204, ret2.getStatus());
     }
 }

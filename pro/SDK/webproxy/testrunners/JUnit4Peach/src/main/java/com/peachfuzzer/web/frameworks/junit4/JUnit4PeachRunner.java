@@ -27,6 +27,8 @@ public class JUnit4PeachRunner extends BlockJUnit4ClassRunner {
     
     public JUnit4PeachRunner(Class<?> klass) throws org.junit.runners.model.InitializationError {
         super(klass);
+        
+        _proxy = new Proxy();
     }
 
     @Override
