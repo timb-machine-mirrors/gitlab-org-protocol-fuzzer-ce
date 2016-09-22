@@ -20,7 +20,7 @@ using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Moq;
 using Peach.Pro.Core.License;
 
-namespace Peach.Pro.Test.Core.Runtime
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
 	[Peach]

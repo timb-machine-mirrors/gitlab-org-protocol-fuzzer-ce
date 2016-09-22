@@ -76,8 +76,9 @@ namespace Peach.Pro.Test.Core.PitParserTests
 					encryptedRoot
 				);
 			},
-				Throws.TypeOf<PeachException>()
-					.With.Message.Contains("Your license does not include support for 'PeachPit-Net-DNP3_Slave'.")
+				Throws.TypeOf<PeachException>().With.Message.Contains(
+					"The 'PeachPit-Net-DNP3_Slave' pit is not supported with your current license."
+				)
 			);
 		}
 
