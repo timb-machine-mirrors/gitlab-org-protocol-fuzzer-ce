@@ -105,8 +105,17 @@ namespace Peach.Pro.Core
 				if (!_pitFeature.IsValid)
 				{
 					if (_pitFeature.IsCustom)
-						throw new PeachException("Your license does not include support for custom pits. Contact Peach Fuzzer sales for more information.");
-					throw new PeachException("Your license does not include support for '{0}'. Contact Peach Fuzzer sales for more information.".Fmt(_pitFeature.Name));
+					{
+						throw new PeachException(
+							"Your license does not include support for custom pits. " +
+							"Contact Peach Fuzzer sales for more information."
+						);
+					}
+
+					throw new PeachException(
+						"The '{0}' pit is not supported with your current license. ".Fmt(_pitFeature.Name) + 
+					    "Contact Peach Fuzzer sales for more information."
+					);
 				}
 			}
 		}

@@ -17,6 +17,7 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
+using MMonitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using Moq;
 using Peach.Pro.Core.License;
 
@@ -74,17 +75,48 @@ namespace Peach.Pro.Test.Core
 
 		const string PitXmlFail = "xxx" + PitXml;
 
-		static readonly PitConfig PitDefault = new PitConfig {
+		static readonly PitConfig PitDefault = new PitConfig
+		{
 			OriginalPit = "Test.xml",
 			Config = new List<Param>(),
 			Agents = new List<MAgent>(),
 			Weights = new List<PitWeight>(),
 		};
 
-		static readonly PitConfig PitFail = new PitConfig {
+		static readonly PitConfig PitFail = new PitConfig
+		{
 			OriginalPit = "TestFail.xml",
 			Config = new List<Param>(),
 			Agents = new List<MAgent>(),
+			Weights = new List<PitWeight>(),
+		};
+
+		static readonly PitConfig PitWithMonitors = new PitConfig 
+		{
+			OriginalPit = "Test.xml",
+			Config = new List<Param>(),
+			Agents = new List<MAgent>
+			{
+				new MAgent()
+				{
+					AgentUrl = "local://",
+					Monitors = new List<MMonitor>
+					{
+						new MMonitor()
+						{
+							MonitorClass = "你好RandoFaulter",
+							Map = new List<Param>
+							{
+								new Param
+								{
+									Key = "Fault",
+									Value = "-1"
+								}
+							}
+						}
+					}
+				}
+			},
 			Weights = new List<PitWeight>(),
 		};
 
@@ -132,7 +164,11 @@ namespace Peach.Pro.Test.Core
 			Exception _caught;
 			readonly AutoResetEvent _evtReady = new AutoResetEvent(false);
 
-			public SafeRunner(string pitLibraryPath, PitConfig pitConfig, JobRequest jobRequest, Action<Engine> hooker = null)
+			public SafeRunner(
+				string pitLibraryPath, 
+				PitConfig pitConfig, 
+				JobRequest jobRequest, 
+				Action<Engine> hooker = null)
 			{
 				var pitPath = Path.Combine(pitLibraryPath, "Test.peach");
 				PitDatabase.SavePitConfig(pitPath, pitConfig);
@@ -364,6 +400,34 @@ namespace Peach.Pro.Test.Core
 
 				Assert.NotNull(job);
 				Assert.AreEqual("Message Goes Here", job.Result);
+			}
+		}
+
+		[Test]
+		public void TestWithMonitors()
+		{
+			var jobRequest = new JobRequest
+			{
+				RangeStop = 1,
+			};
+			using (var runner = new SafeRunner(_tmpDir.Path, PitWithMonitors, jobRequest))
+			{
+				runner.WaitForFinish();
+				runner.VerifyDatabase(1);
+
+				using (var db = new NodeDatabase())
+				{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[] {
+						new TestEvent(1, runner.Id, TestStatus.Pass,
+							"Loading pit file", "Loading pit file '{0}'".Fmt(_pitXmlPath), null),
+						new TestEvent(2, runner.Id, TestStatus.Pass,
+							"Starting fuzzing engine", "Starting fuzzing engine", null),
+						new TestEvent(3, runner.Id, TestStatus.Pass,
+							"Running iteration", "Running the initial control record iteration", null),
+						new TestEvent(4, runner.Id, TestStatus.Pass,
+							"Flushing logs.", "Flushing logs.", null),
+					});
+				}
 			}
 		}
 	}

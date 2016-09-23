@@ -41,6 +41,8 @@ namespace Peach.Pro.Core.License
 		EulaType Eula { get; }
 
 		PitFeature CanUsePit(string path);
+		bool CanUseMonitor(string name);
+
 		IJobLicense NewJob(string pit, string config, string job);
 	}
 

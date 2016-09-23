@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Moq;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
@@ -10,6 +11,7 @@ using Peach.Core.IO;
 using Peach.Core.Publishers;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
@@ -62,6 +64,17 @@ namespace Peach.Pro.Test.Core.Loggers
 		</Mutators>
 	</Test>
 </Peach>";
+
+		void InitializeLicense(Peach.Core.Dom.Dom dom, RunConfiguration cfg)
+		{
+			var license = new Mock<ILicense>();
+			license.Setup(x => x.CanUseMonitor("你好RandoFaulter")).Returns(true);
+			var jobLicense = new Mock<IJobLicense>();
+
+			var test = dom.tests["Default"];
+			var jobLogger = test.loggers.OfType<JobLogger>().Single();
+			jobLogger.Initialize(cfg, license.Object, jobLicense.Object);
+		}
 
 		[Test]
 		public void TestRelativePaths()
@@ -679,6 +692,8 @@ namespace Peach.Pro.Test.Core.Loggers
 				pitFile = "TestTwoCoreFaults"
 			};
 
+			InitializeLicense(dom, config);
+
 			var e = new Engine(null);
 
 			e.IterationStarting += (ctx, it, tot) =>
@@ -765,6 +780,8 @@ namespace Peach.Pro.Test.Core.Loggers
 				rangeStop = 3,
 				pitFile = "LoggerTest"
 			};
+
+			InitializeLicense(dom, config);
 
 			var e = new Engine(null);
 
