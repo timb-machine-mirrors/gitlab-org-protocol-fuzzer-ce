@@ -1069,18 +1069,25 @@ namespace Peach.Core
 		{
 			var ex = se.InnerException ?? se;
 
-			const string template = @"Peach detected an error while performing the protocol sequence without fuzzing the values (changing them) to verify the target is still responsive. This fault is saying the device under test did not respond correctly. This usually means the target was:
+			const string template =
+@"Peach intermittently sends non-fuzzed values to ensure the test target 
+is still responding correctly. During one of these check points, Peach 
+detected an error.
 
-1. Overwhelmed and could not respond correctly 
-2. In an invalid state and non responsive 
-3. Had just restarted and was unable to process the request 
-4. Service could not respond in time for some reason
+This usually means the device/software under test:
 
-This can happen during testing when a series of test cases cause the target service to misbehave, but not crash.
+ 1. Crashed or exited during testing
+ 2. Overwhelmed and could not respond correctly 
+ 3. In an invalid state and non responsive 
+ 4. Had just restarted and was unable to process the request 
+
+This can happen during testing when a series of test cases cause the 
+target service to misbehave or even crash.
 
 Extended error information:
 
-{0}";
+{0}
+";
 
 			var msg = string.Format(template, ex.Message);
 
