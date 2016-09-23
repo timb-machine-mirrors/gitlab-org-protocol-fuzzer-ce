@@ -48,6 +48,7 @@ def prepare(conf):
 	env['MCS']  = 'mcs'
 
 	env['SYSROOT'] = find_directory([ 
+		'MacOSX10.12.sdk', 
 		'MacOSX10.11.sdk', 
 		'MacOSX10.10.sdk', 
 		'MacOSX10.9.sdk', 
