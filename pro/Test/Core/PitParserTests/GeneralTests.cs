@@ -1,5 +1,6 @@
 ﻿
 
+using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -399,15 +400,32 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			File.WriteAllText(Path.Combine(tempDir, "2.png"), "");
 			File.WriteAllText(Path.Combine(tempDir, "2a.png"), "");
 
+			var cwd = Environment.CurrentDirectory;
 
+			try
 			{
+				Environment.CurrentDirectory = tempDir;
+
 				string xml = "<Peach><Data name='data' fileName='*'/></Peach>";
 				PitParser parser = new PitParser();
 				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
-				var ds = dom.datas["data"];
-				Assert.Greater(ds.Count, 0);
+				var ds = dom.datas["data"].Select(d => d.Name).ToList();
+
+				CollectionAssert.AreEqual(new[]
+				{
+					"data/1.png",
+					"data/1.txt",
+					"data/2.png",
+					"data/2.txt",
+					"data/2a.png",
+					"data/2a.txt",
+				}, ds);
+			}
+			finally
+			{
+				Environment.CurrentDirectory = cwd;
 			}
 
 			Assert.Throws<PeachException>(delegate()
