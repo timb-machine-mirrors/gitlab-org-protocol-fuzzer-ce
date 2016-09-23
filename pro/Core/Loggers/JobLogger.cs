@@ -23,6 +23,7 @@ using Peach.Pro.Core.Dom.Actions;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
 using Peach.Pro.Core.License;
+using System.Reflection;
 
 namespace Peach.Pro.Core.Loggers
 {
@@ -95,7 +96,8 @@ namespace Peach.Pro.Core.Loggers
 		Exception _caught;
 		Target _tempTarget;
 		Message _lastMessage;
-		IJobLicense _license;
+		ILicense _license;
+		IJobLicense _jobLicense;
 		ulong _counter;
 
 		enum Category { Faults, Reproducing, NonReproducible }
@@ -118,9 +120,10 @@ namespace Peach.Pro.Core.Loggers
 			BasePath = Path.GetFullPath((string)path);
 		}
 
-		public void Initialize(RunConfiguration config, IJobLicense license)
+		public void Initialize(RunConfiguration config, ILicense license, IJobLicense jobLicense)
 		{
 			_license = license;
+			_jobLicense = jobLicense;
 			_tempTarget = new DatabaseTarget(config.id) { Layout = DebugLogLayout };
 			ConfigureLogging(null, _tempTarget);
 		}
@@ -149,8 +152,23 @@ namespace Peach.Pro.Core.Loggers
 					AddEvent(db,
 						context.config.id,
 						"Starting monitor",
-						"Starting monitor '{0}'".Fmt(cls),
-						CompleteTestEvents.Last);
+						"Starting monitor '{0}' named '{1}'".Fmt(cls, name),
+						CompleteTestEvents.Last
+					);
+
+					var url = new Uri(agent.Url);
+					if (url.Scheme == "local" || url.Scheme == "tcp")
+					{
+						var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
+						if (type.Assembly == Assembly.GetExecutingAssembly() &&
+						   !_license.CanUseMonitor(cls))
+						{
+							throw new PeachException(
+								"The {0} monitor is not supported with your current license. ".Fmt(cls) +
+								"Contact Peach Fuzzer sales for more information."
+							);
+						}
+					}
 				}
 			}
 		}
@@ -252,10 +270,10 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
-			if (_license != null)
+			if (_jobLicense != null)
 			{
-				_license.Dispose();
-				_license = null;
+				_jobLicense.Dispose();
+				_jobLicense = null;
 			}
 
 			Job job;
@@ -313,8 +331,8 @@ namespace Peach.Pro.Core.Loggers
 			{
 				if (_counter >= 100)
 				{
-					Debug.Assert(_license != null);
-					if (!_license.CanExecuteTestCase())
+					Debug.Assert(_jobLicense != null);
+					if (!_jobLicense.CanExecuteTestCase())
 					{
 						throw new PeachException(
 							"Total number of FuzzFlex test cases reached. " +

@@ -369,7 +369,7 @@ namespace Peach.Pro.Core.Runtime
 
 			var configName = pitConfig != null ? pitConfig.Name : _config.pitFile;
 			var jobLicense = _license.NewJob(_config.pitFile, configName, _config.id.ToString());
-			jobLogger.Initialize(_config, jobLicense);
+			jobLogger.Initialize(_config, _license, jobLicense);
 
 			var job = new Job(_config);
 

@@ -17,10 +17,11 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
+using MMonitor = Peach.Pro.Core.WebServices.Models.Monitor;
 using Moq;
 using Peach.Pro.Core.License;
 
-namespace Peach.Pro.Test.Core.Runtime
+namespace Peach.Pro.Test.Core
 {
 	[TestFixture]
 	[Peach]
@@ -74,17 +75,48 @@ namespace Peach.Pro.Test.Core.Runtime
 
 		const string PitXmlFail = "xxx" + PitXml;
 
-		static readonly PitConfig PitDefault = new PitConfig {
+		static readonly PitConfig PitDefault = new PitConfig
+		{
 			OriginalPit = "Test.xml",
 			Config = new List<Param>(),
 			Agents = new List<MAgent>(),
 			Weights = new List<PitWeight>(),
 		};
 
-		static readonly PitConfig PitFail = new PitConfig {
+		static readonly PitConfig PitFail = new PitConfig
+		{
 			OriginalPit = "TestFail.xml",
 			Config = new List<Param>(),
 			Agents = new List<MAgent>(),
+			Weights = new List<PitWeight>(),
+		};
+
+		static readonly PitConfig PitWithMonitors = new PitConfig 
+		{
+			OriginalPit = "Test.xml",
+			Config = new List<Param>(),
+			Agents = new List<MAgent>
+			{
+				new MAgent()
+				{
+					AgentUrl = "local://",
+					Monitors = new List<MMonitor>
+					{
+						new MMonitor()
+						{
+							MonitorClass = "你好RandoFaulter",
+							Map = new List<Param>
+							{
+								new Param
+								{
+									Key = "Fault",
+									Value = "-1"
+								}
+							}
+						}
+					}
+				}
+			},
 			Weights = new List<PitWeight>(),
 		};
 
@@ -132,12 +164,18 @@ namespace Peach.Pro.Test.Core.Runtime
 			Exception _caught;
 			readonly AutoResetEvent _evtReady = new AutoResetEvent(false);
 
-			public SafeRunner(string pitLibraryPath, PitConfig pitConfig, JobRequest jobRequest, Action<Engine> hooker = null)
+			public SafeRunner(
+				string pitLibraryPath, 
+				PitConfig pitConfig, 
+				JobRequest jobRequest, 
+				Action<Engine> hooker = null,
+				Mock<ILicense> license = null)
 			{
 				var pitPath = Path.Combine(pitLibraryPath, "Test.peach");
 				PitDatabase.SavePitConfig(pitPath, pitConfig);
 
-				var license = new Mock<ILicense>();
+				if (license == null)
+					license = new Mock<ILicense>();
 
 				_job = new Job(jobRequest, pitPath);
 				JobRunner = new JobRunner(license.Object, _job, pitLibraryPath, pitPath);
@@ -208,6 +246,11 @@ namespace Peach.Pro.Test.Core.Runtime
 					Assert.IsNotNull(job);
 
 					var logs = db.GetJobLogs(job.Guid).ToList();
+					Console.WriteLine("JobLog>");
+					foreach (var line in logs)
+					{
+						Console.WriteLine(line);
+					}
 					Assert.AreEqual(expectedLogs, logs.Count, "JobLog mismatch");
 				}
 			}
@@ -229,7 +272,7 @@ namespace Peach.Pro.Test.Core.Runtime
 			using (var runner = new SafeRunner(_tmpDir.Path, PitDefault, jobRequest))
 			{
 				runner.WaitForFinish();
-				runner.VerifyDatabase(1);
+				runner.VerifyDatabase(2);
 			}
 		}
 
@@ -244,7 +287,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				runner.JobRunner.Stop();
 				runner.WaitForFinish();
 				Console.WriteLine("VerifyDatabase");
-				runner.VerifyDatabase(0);
+				runner.VerifyDatabase(1);
 			}
 		}
 
@@ -261,7 +304,7 @@ namespace Peach.Pro.Test.Core.Runtime
 				runner.WaitUntil(JobStatus.Running);
 				runner.JobRunner.Stop();
 				runner.WaitForFinish();
-				runner.VerifyDatabase(0);
+				runner.VerifyDatabase(1);
 			}
 		}
 
@@ -364,6 +407,77 @@ namespace Peach.Pro.Test.Core.Runtime
 
 				Assert.NotNull(job);
 				Assert.AreEqual("Message Goes Here", job.Result);
+			}
+		}
+
+		[Test]
+		public void TestWithMonitorsNoLicense()
+		{
+			var jobRequest = new JobRequest
+			{
+				RangeStop = 1,
+			};
+			using (var runner = new SafeRunner(_tmpDir.Path, PitWithMonitors, jobRequest))
+			{
+				runner.WaitForFinish();
+				runner.VerifyDatabase(2);
+
+				using (var db = new NodeDatabase())
+				{
+					var licenseError =
+						"The 你好RandoFaulter monitor is not supported with your current license. " + 
+						"Contact Peach Fuzzer sales for more information.";
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[] {
+						new TestEvent(1, runner.Id, TestStatus.Pass,
+							"Loading pit file", "Loading pit file '{0}'".Fmt(_pitXmlPath), null),
+						new TestEvent(2, runner.Id, TestStatus.Fail,
+							"Starting fuzzing engine", "Starting fuzzing engine", licenseError),
+						new TestEvent(3, runner.Id, TestStatus.Pass,
+							"Connecting to agent", "Connecting to agent 'local://'", null),
+						new TestEvent(4, runner.Id, TestStatus.Fail,
+							"Starting monitor", "Starting monitor '你好RandoFaulter' named 'Monitor'", licenseError),
+						new TestEvent(5, runner.Id, TestStatus.Pass,
+							"Flushing logs.", "Flushing logs.", null),
+					});
+				}
+			}
+		}
+
+		[Test]
+		public void TestWithMonitors()
+		{
+			var license = new Mock<ILicense>();
+			license.Setup(x => x.CanUseMonitor("你好RandoFaulter")).Returns(true);
+
+			var jobRequest = new JobRequest
+			{
+				RangeStop = 1,
+			};
+
+			using (var runner = new SafeRunner(_tmpDir.Path, PitWithMonitors, jobRequest, license: license))
+			{
+				runner.WaitForFinish();
+				runner.VerifyDatabase(2);
+
+				using (var db = new NodeDatabase())
+				{
+					DatabaseTests.AssertResult(db.GetTestEventsByJob(runner.Id), new[] {
+						new TestEvent(1, runner.Id, TestStatus.Pass,
+							"Loading pit file", "Loading pit file '{0}'".Fmt(_pitXmlPath), null),
+						new TestEvent(2, runner.Id, TestStatus.Pass,
+							"Starting fuzzing engine", "Starting fuzzing engine", null),
+						new TestEvent(3, runner.Id, TestStatus.Pass,
+							"Connecting to agent", "Connecting to agent 'local://'", null),
+						new TestEvent(4, runner.Id, TestStatus.Pass,
+							"Starting monitor", "Starting monitor '你好RandoFaulter' named 'Monitor'", null),
+						new TestEvent(5, runner.Id, TestStatus.Pass,
+							"Starting fuzzing session", "Notifying agent 'local://' that the fuzzing session is starting", null),
+						new TestEvent(6, runner.Id, TestStatus.Pass,
+							"Running iteration", "Running the initial control record iteration", null),
+						new TestEvent(7, runner.Id, TestStatus.Pass,
+							"Flushing logs.", "Flushing logs.", null),
+					});
+				}
 			}
 		}
 	}
