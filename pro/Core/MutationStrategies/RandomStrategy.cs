@@ -134,6 +134,8 @@ namespace Peach.Pro.Core.MutationStrategies
 			}
 
 			RecordDataSets();
+
+			logger.Debug("Initialized with seed {0}", Seed);
 		}
 
 		public override void Finalize(RunContext context, Engine engine)
