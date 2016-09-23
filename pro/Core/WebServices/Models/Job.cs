@@ -178,6 +178,11 @@ namespace Peach.Pro.Core.WebServices.Models
 		public string JobId { get; set; }
 
 		public string Message { get; set; }
+
+		public override string ToString()
+		{
+			return Message;
+		}
 	}
 
 	[Serializable]
