@@ -39,6 +39,7 @@ def configure(conf):
 	env = conf.env
 
 	env.append_value('supported_features', [
+		'doc',
 		'emit',
 		'subst',
 	])

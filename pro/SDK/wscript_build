@@ -3,8 +3,8 @@
 peach = bld.path.find_node('../Peach')
 
 bld(
-	name='peach-sdk',
-	features = 'peach',
+	name = 'peach-sdk',
+	features = 'doc',
 	install_path = '${BINDIR}/sdk',
 	install_755 = {
 		bld.path : bld.path.ant_glob('**/*', excl='wscript_build'),
