@@ -20,6 +20,7 @@ import peachproxy
 jobid = 'auto'
 api = 'http://127.0.0.1:8888'
 proxy = 'http://127.0.0.1:8001'
+target = 'http://127.0.0.1:5000'
 
 # Set proxy for requires library
 os.environ["HTTP_PROXY"] = proxy
@@ -33,12 +34,12 @@ def test_setup():
 	'''
 	
 	try:
-		delete('http://127.0.0.1:5000/api/users/2')
+		delete(target+'/api/users/2')
 	except:
 		print "E1"
 		pass
 	try:
-		delete('http://127.0.0.1:5000/api/users?user=dd')
+		delete(target+'/api/users?user=dd')
 	except:
 		print "E2"
 		pass
@@ -49,12 +50,12 @@ def test_teardown():
 	'''
 	
 	try:
-		delete('http://127.0.0.1:5000/api/users/2')
+		delete(target+'/api/users/2')
 	except:
 		print "E1"
 		pass
 	try:
-		delete('http://127.0.0.1:5000/api/users?user=dd')
+		delete(target+'/api/users?user=dd')
 	except:
 		print "E2"
 		pass
@@ -62,17 +63,17 @@ def test_teardown():
 	pass
 
 def test_user_create():
-	r = post('http://127.0.0.1:5000/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
+	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
 	user = r.json()
-	get('http://127.0.0.1:5000/api/users/%d' % user['user_id'])
-	delete('http://127.0.0.1:5000/api/users/%d' % user['user_id'])
+	get(target+'/api/users/%d' % user['user_id'])
+	delete(target+'/api/users/%d' % user['user_id'])
 
 def test_user_update():
-	r = post('http://127.0.0.1:5000/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
+	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
 	user = r.json()
-	get('http://127.0.0.1:5000/api/users/%d' % user['user_id'])
-	put('http://127.0.0.1:5000/api/users/%d' % user['user_id'], data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
-	delete('http://127.0.0.1:5000/api/users/%d' % user['user_id'])
+	get(target+'/api/users/%d' % user['user_id'])
+	put(target+'/api/users/%d' % user['user_id'], data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
+	delete(target+'/api/users/%d' % user['user_id'])
 
 ##############################
 ## Traffic Generation
