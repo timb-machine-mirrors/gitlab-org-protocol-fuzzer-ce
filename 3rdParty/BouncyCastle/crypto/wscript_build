@@ -10,6 +10,7 @@ deps = [
 bld(
 	features = 'cs',
 	use = deps,
+	platform = 'AnyCPU',
 	source = bld.path.ant_glob('src/**/*.cs bzip2/**/*.cs'),
 	name = 'BouncyCastle.Crypto.dll',
 	namespace = 'Org.BouncyCastle',
