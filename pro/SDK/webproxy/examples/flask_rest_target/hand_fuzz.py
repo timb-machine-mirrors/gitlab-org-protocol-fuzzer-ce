@@ -18,9 +18,20 @@ import peachproxy
 ## Configuration options
 
 jobid = 'auto'
-api = 'http://127.0.0.1:8888'
-proxy = 'http://127.0.0.1:8001'
+api = 'http://10.0.1.77:8888'
+proxy = 'http://10.0.1.77:8001'
+
+# HTTP target
 target = 'http://127.0.0.1:5000'
+req_args = {}
+
+# HTTPS target
+#target = 'https://127.0.0.1:5000'
+#req_args = { 'verify' : False }
+
+# HTTPS target with client cert
+#target = 'https://127.0.0.1:5000'
+#req_args = { 'cert' : ('clientcert.crt', 'clientcert.key'), 'verify' : False }
 
 # Set proxy for requires library
 os.environ["HTTP_PROXY"] = proxy
@@ -34,12 +45,12 @@ def test_setup():
 	'''
 	
 	try:
-		delete(target+'/api/users/2')
+		delete(target+'/api/users/2', **req_args)
 	except:
 		print "E1"
 		pass
 	try:
-		delete(target+'/api/users?user=dd')
+		delete(target+'/api/users?user=dd', **req_args)
 	except:
 		print "E2"
 		pass
@@ -50,12 +61,12 @@ def test_teardown():
 	'''
 	
 	try:
-		delete(target+'/api/users/2')
+		delete(target+'/api/users/2', **req_args)
 	except:
 		print "E1"
 		pass
 	try:
-		delete(target+'/api/users?user=dd')
+		delete(target+'/api/users?user=dd', **req_args)
 	except:
 		print "E2"
 		pass
@@ -63,17 +74,17 @@ def test_teardown():
 	pass
 
 def test_user_create():
-	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
+	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}, **req_args))
 	user = r.json()
-	get(target+'/api/users/%d' % user['user_id'])
-	delete(target+'/api/users/%d' % user['user_id'])
+	get(target+'/api/users/%d' % user['user_id'], **req_args)
+	delete(target+'/api/users/%d' % user['user_id'], **req_args)
 
 def test_user_update():
-	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
+	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}, **req_args))
 	user = r.json()
-	get(target+'/api/users/%d' % user['user_id'])
-	put(target+'/api/users/%d' % user['user_id'], data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}))
-	delete(target+'/api/users/%d' % user['user_id'])
+	get(target+'/api/users/%d' % user['user_id'], **req_args)
+	put(target+'/api/users/%d' % user['user_id'], data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}, **req_args))
+	delete(target+'/api/users/%d' % user['user_id'], **req_args)
 
 ##############################
 ## Traffic Generation
