@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -77,6 +78,19 @@ namespace Peach.Pro.Core.Publishers
 		public string CaKey { get; set; }
 		public string ServerKey { get; set; }
 
+		class ProxyTraceListener : TraceListener
+		{
+			public override void Write(string message)
+			{
+				// Don't write the header
+			}
+
+			public override void WriteLine(string message)
+			{
+				ClassLogger.Debug(message);
+			}
+		}
+
 		public WebApiProxyPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
@@ -89,6 +103,11 @@ namespace Peach.Pro.Core.Publishers
 				eventArgs.ClientCert = _clientCert;
 				eventArgs.ClientPrivateKey = _clientKey;
 			};
+
+			_proxy.Logger.TraceSource.Listeners.Clear();
+			_proxy.Logger.TraceSource.Listeners.Add(new ProxyTraceListener());
+			_proxy.Logger.TraceSource.Switch.Level = SourceLevels.All;
+
 		}
 
 		protected override void OnStart()
