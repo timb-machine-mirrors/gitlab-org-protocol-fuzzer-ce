@@ -71,7 +71,14 @@ def do_install2(self, inst_to, cwd, items, chmod):
 		else:
 			self.install_files(inst_to, extras, env=self.env, cwd=cwd, relative_trick=True, chmod=chmod)
 
-@feature('win', 'win_x86', 'win_x64', 'linux', 'linux_x86', 'linux_x86_64', 'osx', 'debug', 'release', 'com', 'pin', 'network', 'peach', 'unix', 'flexnetls')
+@feature(
+	'win', 'win_x86', 'win_x64', 
+	'unix',
+	'linux', 'linux_x86', 'linux_x86_64', 
+	'osx', 
+	'doc',
+	'debug', 'release', 
+	'com', 'pin', 'network', 'peach', 'flexnetls')
 def dummy_platform(self):
 	# prevent warnings about features with unbound methods
 	pass

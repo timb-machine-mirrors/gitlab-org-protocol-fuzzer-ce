@@ -20,9 +20,10 @@ output
 The result should be:    <--- archive to smb://nas/builds/peach-pro
 output
   release
-  ${buildtag}          <--- publish to ssh://dl.peachfuzzer.com
+  ${buildtag}            <--- publish to ssh://dl.peachfuzzer.com
     release.json
     peach-pro-${buildtag}-${platform}_release.zip
+    peach-pro-${buildtag}-sdk.zip
     flexnetls-${platform}.zip
     pits
       ${pit}.zip
@@ -39,48 +40,20 @@ pitfile  = os.path.join(outdir, 'pits.zip')
 docfile  = os.path.join(outdir, 'doc.zip')
 tmpdir   = os.path.join(outdir, 'tmp')
 
-peach_docs = {
-	''      : [ 'sdk/*', 'docs/*' ],
-}
+peach_docs = [ 'docs/*' ]
+sdk_filter = [ 'sdk/*' ]
 
 releases = [
 	{
 		'dirname' : '%(buildtag)s',
 		'all'     : 'peach-pro-%(buildtag)s.zip',
 		'product' : 'Peach Studio',
-		'filter'  : lambda s: filter_release(s)
+		'sdk'     : 'peach-pro-%(buildtag)s-sdk.zip',
 	},
 ]
 
 def filter_release(item):
 	return item.startswith('peach-pro') and 'release' in item
-
-def to_list(sth):
-	if isinstance(sth, str):
-		return sth.split()
-	else:
-		return sth
-
-def matches(name, filters):
-	for i in filters:
-		if fnmatch.fnmatch(name, i):
-			return i
-
-	return None
-
-def glob(root, include = [], exclude = []):
-	incs = to_list(include)
-	rejs = to_list(exclude)
-
-	ret = []
-
-	for (path, dirs, files) in os.walk(root):
-		for f in files:
-			x = os.path.normpath(os.path.join(os.path.relpath(path, root), f))
-			if matches(x, incs) and not matches(x, rejs):
-				ret.append(x)
-
-	return ret
 
 def extract_pkg():
 	# Copy output/$CFG_release/pkg/*.zip to release folder
@@ -104,7 +77,7 @@ def extract_pkg():
 
 			for item in os.listdir(path):
 					if not item.endswith('.zip'):
-							continue
+						continue
 					src = os.path.join(path, item)
 					print '  - %s' % item
 					shutil.copy(src, reldir)
@@ -131,9 +104,9 @@ def extract_doc():
 
 	with zipfile.ZipFile(docfile, 'r') as z:
 		for i in z.infolist():
-			print ' - %s' % i.filename
+			# print ' - %s' % i.filename
 			z.extract(i, docdir)
-			files.append(os.path.join(i.filename))
+			files.append((docdir, i.filename))
 
 	return files
 
@@ -182,74 +155,40 @@ def extract_pits():
 
 	return (files, packs, archives, manifest)
 
-def update_pkg(pkg, xsd, docs):
+def add_files(z, files):
+	for b, f in files:
+		src = os.path.join(b, f)
+		mode = os.stat(src).st_mode
+		print ' + %s (%s)' % (f, oct(mode))
+		z.write(src, f)
+		zi = z.getinfo(f)
+		zi.external_attr = mode << 16L
+
+def update_pkg(pkg, docs, xsd):
 	# Add all files in docs to pkg zip
 
 	print ''
 	print 'Adding docs to %s' % pkg
 	print ''
 
-	docdir = os.path.join(tmpdir, 'doc')
-
 	with zipfile.ZipFile(pkg, 'a', compression=zipfile.ZIP_DEFLATED) as z:
-		for b,i in docs:
-			src = os.path.join(docdir, i)
-			dst = b + i
-
-			mode = os.stat(src).st_mode
-
-			#print ' + %s (%s)' % (dst, oct(mode))
-
-			z.write(src, dst)
-
-			zi = z.getinfo(dst)
-			zi.external_attr = mode << 16L
-
+		add_files(z, docs)
 		z.write(xsd, 'peach.xsd')
 
-def make_pits(dest, library, docs):
-	# Make pits zip and include docs in it
-
+def make_sdk(pkg, files):
 	print ''
-	print 'Creating %s' % dest
+	print 'Creating %s' % pkg
 	print ''
 
-	docdir = os.path.dirname(docfile)
-
-	with zipfile.ZipFile(dest, 'w', compression=zipfile.ZIP_DEFLATED) as z:
-		for i in library:
-			for f in glob(i['root'], i['incl'], i['excl']):
-				src = os.path.join(i['root'], f)
-				mode = os.stat(src).st_mode
-
-				# zip files need '/' as path delimeter
-				f = f.replace('\\', '/')
-
-				print ' + %s (%s)' % (f, oct(mode))
-
-				z.write(src, f)
-
-				zi = z.getinfo(f)
-				zi.external_attr = mode << 16L
-
-		for b,f in docs:
-			src = os.path.join(docdir, f)
-			dst = b+f
-			mode = os.stat(src).st_mode
-
-			print ' + %s (%s)' % (dst, oct(mode))
-
-			z.write(src, dst)
-
-			zi = z.getinfo(dst)
-			zi.external_attr = mode << 16L
+	with zipfile.ZipFile(pkg, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+		add_files(z, files)
 
 def filter_docs(files, filters):
 	ret = []
-	for f in files:
-		for k,v in filters.iteritems():
-			if matches(f, v):
-				ret.append((k,f))
+	for b, f in files:
+		for v in filters:
+			if fnmatch.fnmatch(f, v):
+				ret.append((b, f))
 	return ret
 
 def convert_manifest(manifest):
@@ -265,12 +204,10 @@ def convert_manifest(manifest):
 def filter_updates(pkg):
 	return 'internal' not in pkg and 'flexnetls' not in pkg
 
-if __name__ == "__main__":
+def main():
 	p = argparse.ArgumentParser(description = 'make release zips')
 	p.add_argument('--buildtag', default = '0.0.0', help = 'buildtag')
-
-	c = p.parse_args()
-	buildtag = c.buildtag
+	args = p.parse_args()
 
 	if os.path.isdir(reldir):
 		shutil.rmtree(reldir)
@@ -282,32 +219,33 @@ if __name__ == "__main__":
 	docs = extract_doc()
 	(pit_files, packs, pit_archives, manifest) = extract_pits()
 
-	toAdd = filter_docs(docs, peach_docs)
 	for pkg, xsd in pkgs:
-		if filter_updates(pkg):
-			update_pkg(pkg, xsd, toAdd)
+		if 'release.zip' in pkg:
+			update_pkg(pkg, filter_docs(docs, peach_docs), xsd)
 
-	d = datetime.datetime.now()
+	now = datetime.datetime.now()
 
 	names = [ os.path.basename(x) for x, y in pkgs ]
 
 	for r in releases:
-		dirname = r['dirname'] % c.__dict__
+		dirname = r['dirname'] % vars(args)
+		sdk = r['sdk'] % vars(args)
 
 		print ''
 		print 'Generating release folder %s' % dirname
 		print ''
 
 		manifest = dict(
-			dist = [ x for x in names if r['filter'](x) ],
+			dist = [ x for x in names if filter_release(x) ],
+			files = [ sdk ],
+			flexnetls = [ x for x in names if 'flexnetls' in x ],
 			product = r['product'],
-			build = buildtag,
+			build = args.buildtag,
 			version = 3,
-			date = '%s/%s/%s' % (d.day, d.month, d.year),
+			date = '%s/%s/%s' % (now.day, now.month, now.year),
 			pit_archives = pit_archives,
 			packs = packs,
 			pit_features = convert_manifest(manifest),
-			flexnetls = [ x for x in names if 'flexnetls' in x ],
 		)
 
 		if not manifest['dist']:
@@ -317,6 +255,9 @@ if __name__ == "__main__":
 		path = os.path.join(reldir, dirname)
 		os.mkdir(path)
 		os.mkdir(os.path.join(path, 'pits'))
+
+		sdk_path = os.path.join(path, sdk)
+		make_sdk(sdk_path, filter_docs(docs, sdk_filter))
 
 		rel = os.path.join(path, 'release.json')
 
@@ -333,7 +274,7 @@ if __name__ == "__main__":
 		for f in pit_files:
 			src = os.path.join(tmpdir, 'pits', f)
 			# Eat the 'docs/' prefix
-			if (f.startswith('docs/')):
+			if f.startswith('docs/'):
 				f = f[5:]
 			dst = os.path.join(path, 'pits', f)
 			d = os.path.dirname(dst)
@@ -354,5 +295,5 @@ if __name__ == "__main__":
 		except:
 			pass
 
-	sys.exit(0)
-
+if __name__ == "__main__":
+	main()
