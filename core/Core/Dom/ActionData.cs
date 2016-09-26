@@ -129,10 +129,10 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public ulong MaxOutputSize
+		public virtual ulong MaxOutputSize
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		/// <summary>
@@ -148,7 +148,8 @@ namespace Peach.Core.Dom
 			if (originalDataModel == null)
 			{
 				// Store off the max output size
-				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+				if (MaxOutputSize == 0)
+					MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
 
 				// Apply data samples
 				var option = allData.FirstOrDefault();
@@ -193,7 +194,8 @@ namespace Peach.Core.Dom
 				System.Diagnostics.Debug.Assert(originalDataModel == null);
 
 				// Store off the max output size
-				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+				if (MaxOutputSize == 0)
+					MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
 
 				// Cache the model before any cracking has ever occured
 				// since we can't crack into an model that has previously

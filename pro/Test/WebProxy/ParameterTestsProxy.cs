@@ -563,34 +563,49 @@ Content-Type: application/x-www-form-urlencoded
 			Assert.NotNull(op.Path);
 			Assert.Null(op.ShadowOperation);
 
-			var elems = op.DataModel.PreOrderTraverse().Select(e => e.fullName).ToList();
+			var elems = op.Action.outputData.SelectMany(d => d.dataModel.PreOrderTraverse().Select(e => e.FullFieldId)).ToList();
+
 			var expected = new[]
 			{
-				"Request",
-				"Request.Path",
-				"Request.Path.unknown",
-				"Request.Path.api", 
-				"Request.Path.values",
-				"Request.Headers",
-				"Request.Headers.content-type",
-				"Request.Headers.host",
-				"Request.Headers.content-length",
-				"Request.Headers.expect",
-				"Request.Headers.connection",
-				"Request.Part",
-				"Request.Part.Headers",
-				"Request.Part.Headers.content-type",
-				"Request.Part.Headers.content-disposition",
-				"Request.Part.jsonBody",
-				"Request.Part.jsonBody.foo",
-				"Request.image",
-				"Request.image.Headers",
-				"Request.image.Headers.content-type",
-				"Request.image.Headers.content-disposition",
-				"Request.image.unknownBody",
+				"Path", "Path.unknown",
+				"Path", "Path.api", 
+				"Path", "Path.values",
+				"Headers", "Headers.content-type",
+				"Headers", "Headers.host",
+				"Headers", "Headers.content-length",
+				"Headers", "Headers.expect",
+				"Headers", "Headers.connection",
+				"Part.Headers", "Part.Headers.content-type",
+				"Part.Headers", "Part.Headers.content-disposition",
+				"Part", "Part.jsonBody", "Part.jsonBody.foo",
+				"image.Headers", "image.Headers.content-type",
+				"image.Headers", "image.Headers.content-disposition",
+				"image", "image.unknownBody",
 			};
 
 			CollectionAssert.AreEqual(expected, elems);
+
+			foreach (var item in op.Action.outputData)
+			{
+				switch (item.dataModel.FieldId)
+				{
+					case "Path":
+						Assert.AreEqual(2083, item.MaxOutputSize);
+						break;
+					case "Headers":
+					case "Part.Headers":
+					case "image.Headers":
+						Assert.AreEqual(16 * 1024, item.MaxOutputSize);
+						break;
+					case "Part":
+					case "image":
+						Assert.AreEqual(0, item.MaxOutputSize);
+						break;
+					default:
+						Assert.Fail("Uknown dataModel name");
+						break;
+				}
+			}
 		}
 
 		[Test]

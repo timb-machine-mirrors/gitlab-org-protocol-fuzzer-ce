@@ -170,61 +170,43 @@ namespace Peach.Pro.Core.MutationStrategies
 
 		#region Dumb Proxy Fuzzing (No Test Events)
 
-		public void Mutate(ActionData data)
+		public void Mutate(Action action)
 		{
 			SeedRandom();
 
-			var scope = RecordDataModel(data);
+			var scope = RecordDataModels(action);
 			var fieldsToMutate = GetMutationCount();
-			var mutations = Random.WeightedSample(scope, fieldsToMutate);
-
-			foreach (var mutation in mutations)
-			{
-				ApplyMutation(data, mutation);
-			}
+			mutations = Random.WeightedSample(scope, fieldsToMutate);
+			MutateDataModel(action);
 		}
 
-		private MutationScope RecordDataModel(ActionData data)
+		private MutationScope RecordDataModels(Action action)
 		{
 			var scope = new MutationScope("All");
 
-			foreach (var elem in data.dataModel.PreOrderTraverse())
+			foreach (var data in action.outputData)
 			{
-				if (elem.Weight == ElementWeight.Off)
-					continue;
-
-				var rec = new MutableItem(scope.Name, elem.fullName, elem.Weight);
-				var e = elem;
-
-				rec.Mutators.AddRange(dataMutators
-					.Where(m => SupportedDataElement(m, e))
-					.Select(m => GetMutatorInstance(m, e))
-					.Where(m => m.SelectionWeight > 0));
-
-				if (rec.Mutators.Count > 0)
+				foreach (var elem in data.dataModel.PreOrderTraverse())
 				{
-					scope.Add(rec);
+					if (elem.Weight == ElementWeight.Off)
+						continue;
+
+					var rec = new MutableItem(data.instanceName, elem.fullName, elem.Weight);
+					var e = elem;
+
+					rec.Mutators.AddRange(dataMutators
+						.Where(m => SupportedDataElement(m, e))
+						.Select(m => GetMutatorInstance(m, e))
+						.Where(m => m.SelectionWeight > 0));
+
+					if (rec.Mutators.Count > 0)
+					{
+						scope.Add(rec);
+					}
 				}
 			}
 
 			return scope;
-		}
-
-		private void ApplyMutation(ActionData data, MutableItem mutation)
-		{
-			var elem = data.dataModel.find(mutation.ElementName);
-			if (elem != null && elem.mutationFlags == MutateOverride.None)
-			{
-				var mutator = Random.WeightedChoice(mutation.Mutators);
-				Context.OnDataMutating(data, elem, mutator);
-				Logger.Debug("Action_Starting: Fuzzing: {0}", mutation.ElementName);
-				Logger.Debug("Action_Starting: Mutator: {0}", mutator.Name);
-				mutator.randomMutation(elem);
-			}
-			else
-			{
-				Logger.Debug("Action_Starting: Skipping Fuzzing: {0}", mutation.ElementName);
-			}
 		}
 
 		#endregion
