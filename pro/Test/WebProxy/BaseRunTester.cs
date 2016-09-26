@@ -8,9 +8,12 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
+using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
@@ -76,6 +79,16 @@ namespace Peach.Pro.Test.WebProxy
 			var dom = new ProPitParser().asParser(null, new StringReader(xml));
 			var cfg = GetRunConfiguration();
 			var e = new Engine(null);
+
+			var jobLogger = dom.tests[0].loggers.OfType<JobLogger>().FirstOrDefault();
+			if (jobLogger != null)
+			{
+				var license = new Mock<ILicense>();
+				license.Setup(x => x.CanUseMonitor("Syslog")).Returns(true);
+				var jobLicense = new Mock<IJobLicense>();
+				jobLogger.Initialize(cfg, license.Object, jobLicense.Object);
+				
+			}
 
 			Ops.Clear();
 			Requests.Clear();
