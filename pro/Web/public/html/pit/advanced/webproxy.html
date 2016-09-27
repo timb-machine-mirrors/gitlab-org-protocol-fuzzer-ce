@@ -4,7 +4,20 @@
 			peach:unsaved
 			autocomplete="off">
 	<p>
-		Web Proxy configuration
+		One or more routes can be configured for use with the Peach Fuzzing Web Proxy feature.
+		Each route contains several configuration parameters.
+		Route entries are matched in order.
+		It’s recommended that a final route entry be included with a Route pattern of 
+		<code>*</code> as a catch all.
+	</p>
+	<p>
+		Adding multiple routes allows different configurations based on matching a portion of the Path.
+		For example, 
+		if two different APIs are accessed during testing 
+		<code>/storage/*</code> and 
+		<code>/users/*</code>, 
+		each can have a different route entry allowing for different fault status codes or 
+		Swagger API specifications.
 	</p>
 
 	<div class="row"
