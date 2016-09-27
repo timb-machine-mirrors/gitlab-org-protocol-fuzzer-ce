@@ -65,6 +65,7 @@ followed by the Mono package and Peach.
 NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
 The mono project has `yum` packages for RHEL and CentOS distributions.
 
+NOTE: The following Mono installation steps are taken from the link:http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives[Mono Project].
 
 The following steps provide the needed details:
 
@@ -105,7 +106,7 @@ such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 [TIP]
 =====
-If you receive and error regarding libMonoPosixHelper the +/etc/mono/config+ file may need to be editted.  To edit
+If you receive and error regarding libMonoPosixHelper the +/etc/mono/config+ file may need to be edited.  To edit
 locate a line that looks like the following (the path may be different):
 
 ----
