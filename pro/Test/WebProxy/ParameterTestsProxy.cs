@@ -659,6 +659,46 @@ Content-Type: application/x-www-form-urlencoded
 			Assert.AreEqual("Foo Bar", NoSwaggerValuesController.Value);
 		}
 
+		[Test]
+		public void TestDotsInNames()
+		{
+			var content = new FormUrlEncodedContent(new[] 
+			{
+				new KeyValuePair<string, string>("val.lue", "Foo Bar")
+			});
+
+			var client = GetHttpClient();
+			var headers = client.DefaultRequestHeaders;
+			headers.Add("X.Peachy", "Testing 1..2..3..");
+
+			var response = client.PutAsync(BaseUrl + "/unknown/api.foo/values/5?filter=foo&foo.a=b", content).Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("PUT", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.Null(op.ShadowOperation);
+
+
+			Assert.LessOrEqual(6, op.Parameters.Count);
+
+			Assert.AreEqual("unknown", op.Parameters[0].Key);
+			Assert.AreEqual("unknown", op.Parameters[0].DataElement.Name);
+			Assert.AreEqual("api.foo", op.Parameters[1].Key);
+			Assert.AreEqual("api_foo", op.Parameters[1].DataElement.Name);
+			Assert.AreEqual("values", op.Parameters[2].Key);
+			Assert.AreEqual("values", op.Parameters[2].DataElement.Name);
+			Assert.AreEqual("5", op.Parameters[3].Key);
+			Assert.AreEqual("n5", op.Parameters[3].DataElement.Name);
+			Assert.AreEqual("filter", op.Parameters[4].Key);
+			Assert.AreEqual("filter", op.Parameters[4].DataElement.Name);
+			Assert.AreEqual("foo.a", op.Parameters[5].Key);
+			Assert.AreEqual("foo_a", op.Parameters[5].DataElement.Name);
+			Assert.AreEqual("X.Peachy", op.Parameters[6].Key);
+			Assert.AreEqual("x_peachy", op.Parameters[6].DataElement.Name);
+		}
+
 		/*
 		[Test]
 		public void TestChangingParameters()
