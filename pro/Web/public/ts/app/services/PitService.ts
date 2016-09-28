@@ -236,7 +236,7 @@ namespace Peach {
 			return view;
 		}
 
-		private CreateFlatDefinesView(src: IParameter[]): IParameter[] {
+		public CreateFlatDefinesView(src: IParameter[]): IParameter[] {
 			const skip = [
 				ParameterType.Group,
 				ParameterType.Monitor,
