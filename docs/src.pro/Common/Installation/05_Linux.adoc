@@ -27,6 +27,11 @@ recommends using Ubuntu Linux version 14.04 LTS,
 and Mono .NET runtime version 4 from the mono project.
 The mono project has `apt` packages for Ubuntu.
 
+Peach will not run with version 4.4 of the Mono runtime as there are known
+handle leaks which can cause Peach to run out of memory during long fuzzing runs.
+If you have Mono 4.4 installed,
+you can either upgrade to 4.6+ or downgrade to 4.2.
+
 Some Linux kernel versions have known issues with the Mono runtime.
 When using Ubuntu 14.04 LTS,
 avoid using kernel versions 3.13.0-48 through 3.13.0-54 inclusive.
@@ -62,10 +67,22 @@ Installing Peach on a RHEL CentOS platform requires additional steps.
 Begin by installing Extra Packages for Enterprise Linux (EPEL),
 followed by the Mono package and Peach.
 
-NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
+[NOTE]
+====
+Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
 The mono project has `yum` packages for RHEL and CentOS distributions.
 
-NOTE: The following Mono installation steps are taken from the link:http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives[Mono Project].
+Peach will not run with version 4.4 of the Mono runtime as there are known
+handle leaks which can cause Peach to run out of memory during long fuzzing runs.
+If you have Mono 4.4 installed,
+you can either upgrade to 4.6+ or downgrade to 4.2.
+====
+
+[NOTE]
+====
+The following Mono installation steps are taken from the
+link:http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives[Mono Project].
+====
 
 The following steps provide the needed details:
 
@@ -106,8 +123,8 @@ such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 [TIP]
 =====
-If you receive and error regarding libMonoPosixHelper the +/etc/mono/config+ file may need to be edited.  To edit
-locate a line that looks like the following (the path may be different):
+If you receive and error regarding libMonoPosixHelper the +/etc/mono/config+ file may need to be edited.
+To edit locate a line that looks like the following (the path may be different):
 
 ----
 <dllmap dll="MonoPosixHelper" target="/usr/lib/libMonoPosixHelper.so" os="!windows" />
@@ -119,17 +136,15 @@ Once found use the Linux _find_ command to locate the shared library:
 find /usr -name "*libMonoPosixHelper.so"
 ----
 
-And finally, update the +/etc/mono/config+ entry to the correct path.  This should resolve the issue.
-
+And finally, update the +/etc/mono/config+ entry to the correct path.
 =====
 
 [NOTE]
-============
-For more information, see the following web locations:
-
-* http://www.mono-project.com/docs/getting-started/install/linux/#centos-fedora-and-derivatives +
+====
+For more information, see the following resources:
+* http://www.mono-project.com/docs/getting-started/install/linux#centos-fedora-and-derivatives
 * https://fedoraproject.org/wiki/EPEL#How_can_I_use_these_extra_packages.3F
-============
+====
 
 ==== SUSE Enterprise Linux (SLES)
 
@@ -138,8 +153,16 @@ use the 1-click SUSE mono-complete installation file.
 If you want to attach a debugger to a target process,
 install GDB when the Mono installation completes.
 
-NOTE: Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
+[NOTE]
+====
+Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
 The mono project has packages for SLES distributions.
+
+Peach will not run with version 4.4 of the Mono runtime as there are known
+handle leaks which can cause Peach to run out of memory during long fuzzing runs.
+If you have Mono 4.4 installed,
+you can either upgrade to 4.6+ or downgrade to 4.2.
+====
 
 . Install Mono using One-Click install file
 +
@@ -174,5 +197,13 @@ The checklist follows:
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
 such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
+
+[NOTE]
+====
+Peach will not run with version 4.4 of the Mono runtime as there are known
+handle leaks which can cause Peach to run out of memory during long fuzzing runs.
+If you have Mono 4.4 installed,
+you can either upgrade to 4.6+ or downgrade to 4.2.
+====
 
 // end

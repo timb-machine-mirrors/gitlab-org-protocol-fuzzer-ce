@@ -7,10 +7,18 @@ install CrashWrangler and Xcode.
 Note that installing CrashWrangler is optional;
 it is only needed when running the target locally.
 
-. Install the http://www.go-mono.com/mono-downloads/download.html[Mono package].
-+
+[NOTE]
+====
 Peach Fuzzer, LLC,
 recommends using Mono .NET runtime version 4 from the mono project.
+
+Peach will not run with version 4.4 of the Mono runtime as there are known
+handle leaks which can cause Peach to run out of memory during long fuzzing runs.
+If you have Mono 4.4 installed,
+you can either upgrade to 4.6+ or downgrade to 4.2.
+====
+
+. Install the http://www.go-mono.com/mono-downloads/download.html[Mono package].
 
 . Unzip the Peach distribution to an appropriate folder.
 The file is a zip file with the extension `.zip`.
