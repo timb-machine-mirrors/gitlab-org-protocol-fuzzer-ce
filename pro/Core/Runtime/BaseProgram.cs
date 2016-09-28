@@ -143,6 +143,7 @@ namespace Peach.Pro.Core.Runtime
 				return true;
 
 			var minVer = new Version(4, 0, 0);
+			var badVer = new Version(4, 4);
 
 			var mi = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
 			if (mi == null)
@@ -159,7 +160,9 @@ namespace Peach.Pro.Core.Runtime
 				else
 				{
 					var ver = ParseMonoVersion(str);
-					if (ver == null || ver < minVer)
+					if (ver == null || 
+						ver < minVer || 
+						(ver.Major == badVer.Major && ver.Minor == badVer.Minor))
 					{
 						Console.WriteLine("The installed mono version {0} is not supported.", str);
 					}
@@ -170,7 +173,10 @@ namespace Peach.Pro.Core.Runtime
 				}
 			}
 
-			Console.WriteLine("Ensure mono version {0} or newer is installed and try again.", minVer);
+			Console.WriteLine("Ensure mono version {0} or newer and not {1} is installed and try again.", 
+				minVer, 
+				badVer
+			);
 			return false;
 		}
 
