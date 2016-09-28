@@ -39,8 +39,8 @@ namespace Peach.Pro.WebApi2
 						return pitdb;
 					}
 				))
-			{
-			}
+		{
+		}
 	}
 
 	public class BaseWebServer : IWebStatus
@@ -216,7 +216,7 @@ namespace Peach.Pro.WebApi2
 		readonly Func<IComponentContext, IPitDatabase> _pitDatabaseFactory;
 
 		public WebStartup(
-			ILicense license, 
+			ILicense license,
 			IWebContext context,
 			IJobMonitor jobMonitor,
 			Func<IComponentContext, IPitDatabase> pitDatabaseFactory)
@@ -284,15 +284,25 @@ namespace Peach.Pro.WebApi2
 			AddStaticContent(app, "", "public");
 
 			AddStaticContent(app, "/docs/user", "docs/webhelp");
-			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp");
+			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp", "public/html/no_sdk");
 		}
 
-		private static void AddStaticContent(IAppBuilder app, string requestPath, string fileSystem)
+		private static void AddStaticContent(
+			IAppBuilder app,
+			string requestPath,
+			string fileSystem,
+			string alternate = null)
 		{
 			var fullPath = Path.Combine(Utilities.ExecutionDirectory, fileSystem);
-
 			if (!Directory.Exists(fullPath))
-				return;
+			{
+				if (alternate == null)
+					return;
+
+				fullPath = Path.Combine(Utilities.ExecutionDirectory, alternate);
+				if (!Directory.Exists(fullPath))
+					return;
+			}
 
 			var opts = new FileServerOptions
 			{
