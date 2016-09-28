@@ -31,5 +31,6 @@ include::03_FlexeraLicense.adoc[]
 include::04_Windows.adoc[]
 include::05_Linux.adoc[]
 include::06_OSX.adoc[]
+include::07_SecurePeach.adoc[]
 
 // end
