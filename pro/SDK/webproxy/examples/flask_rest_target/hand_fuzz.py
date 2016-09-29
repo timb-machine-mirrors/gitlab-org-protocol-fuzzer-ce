@@ -9,6 +9,7 @@ and the python requests library to make HTTP calls.
 import os, json
 from requests import put, get, delete, post
 import requests, json, sys
+import sqlite3, logging, logging.handlers
 
 '''The peachproxy module provides helper methods for calling
 the Peach Web Proxy APIs.  These api's are used to integrate
@@ -20,15 +21,15 @@ import peachproxy
 jobid = 'auto'
 api = 'http://127.0.0.1:8888'
 proxy = 'http://127.0.0.1:8001'
+cabundle = 'rootCA.pem'
 
 # HTTP target
 target = 'http://127.0.0.1:5000'
 req_args = {}
 
 # HTTPS target
-target = 'https://127.0.0.1:5000'
+#target = 'https://127.0.0.1:5000'
 #req_args = { 'verify' : False }
-cabundle = 'rootCA.pem'
 
 # HTTPS target with client cert
 #target = 'https://127.0.0.1:5000'
@@ -146,5 +147,6 @@ while True:
 '''Notify Peach our job is completed.  This will stop the webproxy
 and generate a testing report.'''
 peachproxy.session_teardown(api)
+
 
 # end
