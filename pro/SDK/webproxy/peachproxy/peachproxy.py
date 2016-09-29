@@ -15,6 +15,17 @@ from requests import put, get, delete, post
 
 logger = logging.getLogger(__name__)
 
+logger.setLevel(logging.DEBUG)
+
+logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] %(message)s")
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
+
+fileHandler = logging.FileHandler('peachproxy.log')
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
 ## This code will block the use of proxies.
 
 session = requests.Session()
@@ -43,7 +54,7 @@ def __peach_getJobId(api):
                 try:
                         r = session.get("%s/p/jobs?running=true" % api)
                         if r.status_code != 200:
-                                print("Error communicating with Peach Fuzzer. Status code was %s" % r.status_code)
+                                logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
                                 sys.exit(-1)
                 except requests.exceptions.RequestException as e:
                         print("Error communicating with Peach Fuzzer.")
@@ -76,7 +87,7 @@ def session_setup(api='http://127.0.0.1:8888', jobid='auto'):
                 logger.info("api: %s jobid: %s" % (api, jobid))
                 r = session.put("%s/p/proxy/%s/sessionSetUp" % (api, jobid))
                 if r.status_code != 200:
-                        logger.error('Error sending sessionSetUp: ', r.status_code)
+                        logger.error('Error sending sessionSetUp: %s', r.status_code)
                         sys.exit(-1)
         except requests.exceptions.RequestException as e:
                 logger.error("Error communicating with Peach Fuzzer.")
@@ -101,7 +112,7 @@ def session_teardown(api='http://127.0.0.1:8888'):
         try:
                 r = session.put("%s/p/proxy/%s/sessionTearDown" % (api, jobid))
                 if r.status_code != 200:
-                        logger.error('Error sending sessionTearDown: ', r.status_code)
+                        logger.error('Error sending sessionTearDown: %s', r.status_code)
                         sys.exit(-1)
         except requests.exceptions.RequestException as e:
                 logger.error("Error communicating with Peach Fuzzer.")
@@ -128,7 +139,7 @@ def setup(api='http://127.0.0.1:8888'):
         try:
                 r = session.put("%s/p/proxy/%s/testSetUp" % (api, jobid))
                 if r.status_code != 200:
-                        logger.error('Error sending testSetUp: ', r.status_code)
+                        logger.error('Error sending testSetUp: %s', r.status_code)
                         sys.exit(-1)
         except requests.exceptions.RequestException as e:
             logger.error("Error communicating with Peach Fuzzer.")
@@ -154,7 +165,7 @@ def teardown(api='http://127.0.0.1:8888'):
         try:
                 r = session.put("%s/p/proxy/%s/testTearDown" % (api, jobid))
                 if r.status_code != 200:
-                        logger.error('Error sending testSetUp: ', r.status_code)
+                        logger.error('Error sending testSetUp: %s', r.status_code)
                         sys.exit(-1)
         except requests.exceptions.RequestException as e:
             logger.error("Error communicating with Peach Fuzzer.")
@@ -181,7 +192,7 @@ def testcase(name, api='http://127.0.0.1:8888'):
         try:
                 r = session.put("%s/p/proxy/%s/testCase" % (api, jobid), json={"name":name})
                 if r.status_code != 200:
-                        logger.error('Error sending testCase: ', r.status_code)
+                        logger.error('Error sending testCase: %s', r.status_code)
                         sys.exit(-1)
         except requests.exceptions.RequestException as e:
             logger.error("Error communicating with Peach Fuzzer.")
