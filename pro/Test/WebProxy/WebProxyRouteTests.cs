@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using NUnit.Framework;
@@ -180,15 +181,29 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
-		public void TestOnRequest()
+		public void TestScript()
 		{
-			var xml = @"<?xml version='1.0' encoding='utf-8'?>
+			using (var d = new TempDirectory())
+			{
+				const string script = @"
+from peach import webproxy
+
+def on_request(context, request, body):
+	request.Method = 'FOOBAR'
+
+webproxy.register_event(webproxy.EVENT_ACTION, on_request)
+";
+
+				var module = Path.Combine(d.Path, "mymodule.py");
+				File.WriteAllText(module, script);
+
+				var xml = @"<?xml version='1.0' encoding='utf-8'?>
 <Peach>
 	<Test name='Default' maxOutputSize='65000'>
 		<WebProxy>
 			<Route
 				url='*/unknown?api/*' mutate='true'
-				onRequest=""setattr(request, 'Method', 'FOOBAR')""
+				script='{1}'
 				baseUrl='{0}'
 			/> 
 			<Route
@@ -201,20 +216,21 @@ namespace Peach.Pro.Test.WebProxy
 			<Param name='Port' value='0' />
 		</Publisher>
 	</Test>
-</Peach>".Fmt(Server.Uri);
+</Peach>".Fmt(Server.Uri, module);
 
-			string method = null;
+				string method = null;
 
-			RunEngine(xml, null, (e, context, op) =>
-			{
-				method = e.WebSession.Request.Method;
-			});
+				RunEngine(xml, null, (e, context, op) =>
+				{
+					method = e.WebSession.Request.Method;
+				});
 
-			var client = GetHttpClient();
-			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+				var client = GetHttpClient();
+				var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
 
-			Assert.AreEqual(HttpStatusCode.MethodNotAllowed, response.StatusCode);
-			Assert.AreEqual("FOOBAR", method);
+				Assert.AreEqual(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+				Assert.AreEqual("FOOBAR", method);
+			}
 		}
 
 		[Test]
@@ -262,5 +278,6 @@ namespace Peach.Pro.Test.WebProxy
 			Assert.False(r.Mutate);
 			Assert.AreEqual("500,501", r.FaultOnStatusCodesAttr);
 		}
+
 	}
 }

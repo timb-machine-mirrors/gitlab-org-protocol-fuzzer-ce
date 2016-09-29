@@ -37,7 +37,6 @@ namespace Peach.Pro.Core.Runtime
 		protected int _verbosity;
 		protected int? _webPort;
 		protected ILicense _license;
-		protected string _pluginsPath;
 		protected Func<List<string>, int> _cmd;
 
 		protected void PrepareLicensing(string pitLibraryPath)
@@ -67,11 +66,7 @@ namespace Peach.Pro.Core.Runtime
 
 		public void LoadAssemblies()
 		{
-			var path =
-				_pluginsPath ??
-				Utilities.GetUserConfig().AppSettings.Settings.Get("Plugins") ??
-				Utilities.GetAppResourcePath("Plugins");
-			ClassLoader.Initialize(Path.GetFullPath(path));
+			ClassLoader.Initialize(Configuration.PluginsPath);
 		}
 
 		/// <summary>
@@ -276,7 +271,7 @@ namespace Peach.Pro.Core.Runtime
 			options.Add(
 				"plugins=",
 				"Specify the plugins path",
-				v => _pluginsPath = v
+				v => Configuration.PluginsPath = Path.GetFullPath(v)
 			);
 		}
 
