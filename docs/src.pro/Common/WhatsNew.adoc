@@ -13,7 +13,8 @@ Descriptions of the new/updated Pits follow:
 
 === Peach Download Site
 
-XXX
+A new download site has been deployed that supports both our existing licensing system and also our new
+FuzzFlex licensing system.  The new download site improves the download speed and responsiveness of the site.
 
 === Peach Professional/Enterprise
 
@@ -21,30 +22,57 @@ Descriptions of new features and improvements for Professional and Enterprise fo
 
 ==== Web Proxy
 
-XXXXX
+XXXX
 
-==== WebApi Publisher
+NOTE: The Web Proxy feature is being licensed as a separate feature.
+Please contact sales@peachfuzzer.com for a trial license.
 
-XXXXX
+==== JUnit 4 Integration for Web Proxy
+
+JUnit 4 integration extension for use with Peach.
+This enables using existing JUnit 4 test automation in conjunction with the Peach Web Proxy feature.
+It's available 
+
+==== Python pytest Integration for Web Proxy
+
+XXXX
+
+==== Peach Proxy Python Module
+
+This module wraps the new Peach Web Proxy API.  It's main use is to allow
+developers to create traffic generators for the Peach Web Proxy feature. It's
+available in the SDK under 'webproxy/peachproxy'.
 
 ==== Web Action
 
-XXXX
+A new action 'web' has been added in this release allowing for much easier modeling
+of web api requests.  This action can only be used with the new WebApi publishers.
+See the developer guide for more information.
+
+==== WebApi Publisher
+
+A new publisher has been added that supports the new 'web' action type.
+See the developer guide for more information.
 
 ==== Updated Swagger Analyzer
 
-XXXXX
+The Swagger analyzer has been updated to generate web actions.
+See the developer guide for more information.
 
 ==== Updated Postman Analyzer
 
-XXXX
+The Postman analyzer has been updated to generate web actions.
+See the developer guide for more information.
 
 ==== Updated GDB Monitor
 
-XXXX
+The GDB monitor has been updated with new options to ignore first chance read A/V exceptions.
+This facilitates easier usage with targets that host the JVM.
+See the developer guide for more information.
 
 ==== Scripts Folder
 
-XXXXX
+A new top level folder +Scripts+ has been added that contains global python modules.
+A new peach.webproxy module has been added to enable scripting extensions for the web proxy feature.
 
 // end
