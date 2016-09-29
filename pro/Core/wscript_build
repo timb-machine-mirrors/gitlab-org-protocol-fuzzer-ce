@@ -78,7 +78,8 @@ asm = bld(
 	install_755 = {},
 	install_644 = {
 		top.find_or_declare('/'.join(['3rdParty', flexnet, bld.env.BASENAME])) :
-		top.ant_glob('/'.join(['3rdParty', flexnet, bld.env.BASENAME, '**']))
+		top.ant_glob('/'.join(['3rdParty', flexnet, bld.env.BASENAME, '**'])),
+		bld.path : bld.path.ant_glob('Scripts/**/*')
 	}
 )
 

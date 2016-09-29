@@ -65,7 +65,7 @@ namespace Peach.Pro.Core
 						BaseUrl = r.BaseUrl,
 						FaultOnStatusCodes = r.FaultOnStatusCodes,
 						Mutate = r.Mutate,
-						OnRequest = r.Script,
+						Script = r.Script,
 						SwaggerAttr = r.Swagger,
 						Url = r.Url,
 					})

@@ -571,6 +571,18 @@ namespace Peach.Pro.Core
 						Value = Configuration.LogRoot,
 					},
 					new SystemDefine {
+						Key = "Peach.Plugins",
+						Name = "Plugins Directory",
+						Description = "Full path to the plugins directory",
+						Value = Configuration.PluginsPath,
+					},
+					new SystemDefine {
+						Key = "Peach.Scripts",
+						Name = "Scripts Directory",
+						Description = "Full path to the scripts directory",
+						Value = Configuration.PluginsPath,
+					},
+					new SystemDefine {
 						Key = "PitLibraryPath",
 						Name = "Pit Library Path",
 						Description = "Path to root of Pit Library",
