@@ -6,6 +6,19 @@ identified by fuzzing the API.
 
 This example includes a configuration (.peach file) that has the correct monitors configured.
 
+== Important Files
+
+rest_target.py:: Start target API service using 'http'
+rest_ssl_target.py:: Start target API service using 'https' with yourserver.crt and yourserver.key
+hand_fuzz.py:: Example of a traffic generator written by hand. Has support for http and https versions
+of rest target.  Must edit file to switch between them.
+test_target.py:: Automated tests using pytest.  Suitable for testing with pytest-peach plugin.
+
+*Sample Peach Configs*
+
+rest_target.peach:: For fuzzing http version of rest target
+rest_ssl_target.peach:: For fuzzing https version of rest target
+
 == Usage
 
 === Starting Peach Fuzzer Web Proxy
@@ -18,15 +31,7 @@ peach rest_target.peach
 
 Use our pytest integration to generate traffic:
 
-.Linux
 ----
-export HTTP_PROXY=http://127.0.0.1:8001
-pytest --peach=auto test_target.py
-----
-
-.Windows
-----
-set HTTP_PROXY=http://127.0.0.1:8001
 pytest --peach=auto test_target.py
 ----
 

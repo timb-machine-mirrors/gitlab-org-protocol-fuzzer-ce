@@ -18,16 +18,17 @@ import peachproxy
 ## Configuration options
 
 jobid = 'auto'
-api = 'http://10.0.1.77:8888'
-proxy = 'http://10.0.1.77:8001'
+api = 'http://127.0.0.1:8888'
+proxy = 'http://127.0.0.1:8001'
 
 # HTTP target
 target = 'http://127.0.0.1:5000'
 req_args = {}
 
 # HTTPS target
-#target = 'https://127.0.0.1:5000'
+target = 'https://127.0.0.1:5000'
 #req_args = { 'verify' : False }
+cabundle = 'rootCA.pem'
 
 # HTTPS target with client cert
 #target = 'https://127.0.0.1:5000'
@@ -36,6 +37,7 @@ req_args = {}
 # Set proxy for requires library
 os.environ["HTTP_PROXY"] = proxy
 os.environ["HTTPS_PROXY"] = proxy
+os.environ["REQUESTS_CA_BUNDLE"] = cabundle
 
 ## Test cases
 
