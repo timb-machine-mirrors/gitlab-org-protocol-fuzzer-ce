@@ -16,7 +16,7 @@ import logging
 
 ## Configuration
 
-# Directory containing Peach install
+# Full path and peach executable
 peach_exe = '/opt/peach/peach'
 peach_exe = 'c:/peach-pro/output/win_x64_debug/bin/peach.exe'
 
@@ -50,11 +50,14 @@ syslog_level = logging.INFO
 ###############################################################
 
 import os
-from requests import get, post
+from requests import get, post, delete
 import requests, json, sys
 import subprocess, signal, psutil
 import logging, logging.handlers
 from time import sleep
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 logger = logging.getLogger(__name__)
 
@@ -81,13 +84,20 @@ logger.info("  exit_code_error: %d", exit_code_error)
 
 peach_process = None
 test_process = None
+peach_jobid = None
+
+try:
+    from subprocess import DEVNULL
+except ImportError:
+    import os
+    DEVNULL = open(os.devnull, 'wb')
 
 try:
     logger.info("Starting peach")
-#        [peach_exe, "--webport=%d" % peach_port, "--pits=c:\pits\output\pits\Assets"],
     peach_process = subprocess.Popen(
-        [peach_exe, "--webport=%d" % peach_port],
-        stderr=subprocess.STDOUT)
+        "%s --webport=%s --nobrowser" % (peach_exe, peach_port),
+#        "%s --webport=%s --nobrowser --pits=c:\pits\output\pits\Assets" % (peach_exe, peach_port),
+        stdin=subprocess.PIPE, stdout=DEVNULL, stderr=subprocess.STDOUT)
     
     if not peach_process:
         logger.critical("Unable to start peach")
@@ -100,9 +110,12 @@ try:
     
 except Exception as ex:
     logger.critical("Error starting peach: %s", ex)
-    eexit(exit_code_error)
+    exit(exit_code_error)
 
-def kill_proc_tree(pid, including_parent=True):    
+def kill_proc_tree(pid, including_parent=True):
+    '''Try and kill the pid's process tree
+    '''
+    
     parent = psutil.Process(pid)
     children = parent.children(recursive=True)
     for child in children:
@@ -112,9 +125,62 @@ def kill_proc_tree(pid, including_parent=True):
         parent.kill()
         parent.wait(5)
 
+def stop_job(jobid):
+    '''Stop a running job
+    '''
+    
+    if not jobid:
+        logger.error("start_job error, jobid invalid")
+        return False
+    
+    try:
+        logger.info("Stopping job %s" % jobid)
+    
+        r = get("http://127.0.0.1:%d/p/jobs/%s/stop" % (peach_port, jobid))
+        if r.status_code != 200:
+            logger.error("job stop, status code: %s", r.status_code)
+            return False
+    
+        sleep(2)
+    
+        r = get("http://127.0.0.1:%d/p/jobs/%s/stop" % (peach_port, jobid))
+        if r.status_code != 200:
+            logger.error("job stop, status code: %s", r.status_code)
+            return False
+        
+        for i in range(30):
+            sleep(1)
+            
+            try:
+                r = get("http://127.0.0.1:%d/p/jobs/%s" % (peach_port, jobid))
+                if r.status_code != 200:
+                    logger.error("job get, status code: %s", r.status_code)
+                    return False
+            except Exception as ex:
+                logger.error(ex)
+                return False
+            
+            r = r.json()
+            if not (r['status'] == 'running'):
+                logger.info("Job %s stopped"% jobid)
+                return True
+    
+        logger.info("Unable to stop job %s" % jobid)
+        return False
+    
+    except Exception as ex:
+        logger.error(ex)
+        return False
+
+
 def eexit(code):
+    '''Close all processes and exit with 'code'
+    '''
+    
     logger.info("eexit(%d)", code)
     if peach_process:
+        if peach_jobid:
+            stop_job(peach_jobid)
         try:
             kill_proc_tree(peach_process.pid)
             kill_proc_tree(peach_process.pid)
@@ -205,11 +271,13 @@ if not peach_jobid:
 
 # Launch test automation
 
+eexit(0)
+
 logger.info("Launching test automation")
 try:
     test_process = subprocess.Popen(
         automation_cmd,
-        stderr=subprocess.STDOUT)
+        stdin=subprocess.PIPE, stdout=DEVNULL, stderr=subprocess.STDOUT)
     
     if not peach_process:
         logger.critical("Unable to start test automation")
@@ -241,7 +309,7 @@ while True:
     
     r = r.json()
     if r['status'] == 'running':
-        logger.info("still running...")
+        logger.debug("still running...")
         continue
     
     peach_fault_count = r['faultCount']
@@ -253,9 +321,77 @@ test_process.wait()
 
 # Wait for fuzzing to complete
 
-if peach_fault_count > 0:
-    eexit(exit_code_failure)
+if peach_fault_count == 0:
+    eexit(exit_code_ok)    
+
+# Dump faults to console
+
+faults = []
+
+try:
+    r = get("http://127.0.0.1:%d/p/jobs/%s/faults" % (peach_port, peach_jobid))
+    if r.status_code != 200:
+        logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
+        eexit(exit_code_error)
     
-eexit(exit_code_ok)
+    jsonFaults = r.json()
+    
+    for f in jsonFaults:
+        furl = f['faultUrl']
+        
+        r = get("http://127.0.0.1:%d%s" % (peach_port, furl))
+        if r.status_code != 200:
+            logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
+            eexit(exit_code_error)
+        
+        r = r.json()
+        fields = u""
+        
+        for field in r['mutations']:
+            fields = fields +u'%s.%s.%s\t%s\n' % (
+                field['state'],
+                field['action'],
+                field['element'],
+                field['mutator'],
+            )
+        
+        values = {
+            "test_case":r['iteration'],
+            "reproducible":r['reproducible'],
+            "title":r['title'],
+            "when":r['timeStamp'],
+            "source":r['source'],
+            "risk":r['exploitability'],
+            "major":r['majorHash'],
+            "minor":r['minorHash'],
+            "fields":fields,
+            "description":r['description'],
+        }
+        
+        print(u'''
+
+====] %(title)s
+
+   Test Case: %(test_case)s
+Reproducible: %(reproducible)s
+        When: %(when)s
+      Source: %(source)s
+        Risk: %(risk)s
+Major Bucket: %(major)s
+Minor Bucket: %(minor)s
+ Test Fields: %(fields)s
+ Description:
+
+%(description)s
+
+======================================================
+
+''' % values)
+    
+except requests.exceptions.RequestException as e:
+    logger.critical("Error communicating with Peach: %s", e)
+    eexit(exit_code_error)
+
+eexit(exit_code_failure)
 
 # end

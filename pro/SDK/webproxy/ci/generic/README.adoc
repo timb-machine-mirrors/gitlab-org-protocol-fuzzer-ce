@@ -1,8 +1,8 @@
-Peach CI Generic Integration Runner
+= Peach CI Generic Integration Runner
 Copyright (c) 2016 Peach Fuzzer, LLC
 
-This script provides generic integration with CI systems by
-running a command that returns non-zero when testing did not pass.
+This script provides generic integration with CI systems by running a
+command that returns non-zero when testing did not pass.
 The vast majority of CI systems support this method of integration.
 
 If a specific integration is offered for your CI system that is
@@ -10,3 +10,80 @@ preferred over this generic integration.
 
 To use, update the configuration at top of python file and
 configure your CI system to run.
+
+== Script Operation
+
+This script performs the following steps when run:
+
+. Start Peach
+. Start new fuzzing job using supplied configuration
+. Launch automation command
+. Wait for fuzzing job to complete
+. Check for faults in fuzzing job
+. Stop Peach
+. Stop automation
+. Return ok or failure via exit code
+
+Requirements:
+
+. Peach eula must be accepted
+. Automation command must call sessionTearDown Peach Web API to stop fuzzing job
+
+== Usage
+
+=== Configuration Parameters
+
+peach_exe::
+	Full path to Peach executable.
+	The Peach executable is 'peach' on Linux and OS X and 'peach.exe' on Windows.
+	Example: +/opt/peach/peach+
+
+automation_cmd::
+	Test automation launch script and arguments.
+	This script is run in the background and generates the web api traffic that is fuzzed by Peach Web.
+	If the script does not automatically exit at the end of fuzzing it will be terminated by the
+	this script.
+	Example: +python /opt/peach/sdk/webproxy/examples/flask_rest_target/hand_fuzz.py+
+
+pit_config::
+	Peach Web configuration to start.
+	The configuration name can be found by clicking on a configuration in the Library page.
+	This will load the configuration screen, at the top in red is the name.
+	Example: +WebProxy-Flask-Demo+
+
+peach_port::
+	Port for Peaches web interface to start on.
+	This equates to the +webport+ command line argument.
+	This is not the web proxy port.
+	Example: 8888
+
+exit_code_ok::
+	Exit code set by script when testing passed.
+	Example: 0
+
+exit_code_failure::
+	Exit code set by script when testing failed.
+	This indicates a security issue was found.
+	Example: 1
+
+exit_code_error::
+	Exit code when error occured and testing did not complete.
+	Example: 100
+
+syslog_enabled::
+	Enable or disable sending logs to a syslog server.
+	Example: False
+	
+syslog_host::
+	Host name or IP of syslog server that will receive logs.
+	Example: logserver.foobar.com
+
+syslog_port::
+	Port syslog server listens on. Default syslog port is 514.
+	Exmaple: 514
+	
+syslog_level::
+	Logging level. +logging.INFO+ is the recommended log level.
+	Acceptable values are: logging.INFO (normal), logging.ERROR (only errors), logging.DEBUG (verbose)
+	Example: logging.ERROR
+
