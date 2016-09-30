@@ -75,7 +75,13 @@ XXX
 
 ==== pytest
 
-XXX
+Pytest integration is provided as a pytest plugin called "pytest-peach".
+It's available in the SDK as "sdk\webproxy\testrunners\pytest-peach".
+The plugin builds and installs via the command "python setup.py install".
+The plugin is also available via pip "pip install pytest-peach".
+
+For full information about installation and usage see the 'README.adoc' file available
+in the distribution folder.
 
 ==== Other
 
