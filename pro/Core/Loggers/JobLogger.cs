@@ -936,7 +936,9 @@ namespace Peach.Pro.Core.Loggers
 
 		public void Stop()
 		{
-			_cache.Stop();
+			// Will be null if stop gets called prior to TestStarting event
+			if (_cache != null)
+				_cache.Stop();
 		}
 
 		public void RestoreLogging(Guid id)

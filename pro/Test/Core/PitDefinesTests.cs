@@ -210,13 +210,13 @@ namespace Peach.Pro.Test.Core
 			{
 				var defs = PitDefines.ParseFile(f.Path, "Peach/Pits");
 
-				Assert.AreEqual(5, defs.SystemDefines.Count);
+				Assert.AreEqual(7, defs.SystemDefines.Count);
 				Assert.AreEqual(1, defs.Platforms.Count);
 				Assert.AreEqual(2, defs.Platforms[0].Defines.Count);
 
 				var dst = defs.Evaluate();
 
-				Assert.AreEqual(6, dst.Count);
+				Assert.AreEqual(8, dst.Count);
 
 				// PitLibraryPath is injected as a system define
 				// and takes prededence over any .config define
@@ -227,8 +227,10 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual("Peach.Pwd", dst[2].Key);
 				Assert.AreEqual("Peach.Cwd", dst[3].Key);
 				Assert.AreEqual("Peach.LogRoot", dst[4].Key);
-				Assert.AreEqual("PitLibraryPath", dst[5].Key);
-				Assert.AreEqual("Peach/Pits", dst[5].Value);
+				Assert.AreEqual("Peach.Plugins", dst[5].Key);
+				Assert.AreEqual("Peach.Scripts", dst[6].Key);
+				Assert.AreEqual("PitLibraryPath", dst[7].Key);
+				Assert.AreEqual("Peach/Pits", dst[7].Value);
 			}
 		}
 
@@ -255,13 +257,13 @@ namespace Peach.Pro.Test.Core
 			{
 				var defs = PitDefines.ParseFile(f.Path, overrides);
 
-				Assert.AreEqual(7, defs.SystemDefines.Count);
+				Assert.AreEqual(9, defs.SystemDefines.Count);
 				Assert.AreEqual(1, defs.Platforms.Count);
 				Assert.AreEqual(3, defs.Platforms[0].Defines.Count);
 
 				var dst = defs.Evaluate();
 
-				Assert.AreEqual(7, dst.Count);
+				Assert.AreEqual(9, dst.Count);
 
 				// overrides get injected as system defines and
 				// take precedence over any .config define
@@ -272,10 +274,12 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual("Peach.Pwd", dst[2].Key);
 				Assert.AreEqual("Peach.Cwd", dst[3].Key);
 				Assert.AreEqual("Peach.LogRoot", dst[4].Key);
-				Assert.AreEqual("SamplePath1", dst[5].Key);
-				Assert.AreEqual("foo", dst[5].Value);
-				Assert.AreEqual("PitLibraryPath", dst[6].Key);
-				Assert.AreEqual("bar", dst[6].Value);
+				Assert.AreEqual("Peach.Plugins", dst[5].Key);
+				Assert.AreEqual("Peach.Scripts", dst[6].Key);
+				Assert.AreEqual("SamplePath1", dst[7].Key);
+				Assert.AreEqual("foo", dst[7].Value);
+				Assert.AreEqual("PitLibraryPath", dst[8].Key);
+				Assert.AreEqual("bar", dst[8].Value);
 			}
 		}
 
@@ -305,14 +309,14 @@ namespace Peach.Pro.Test.Core
 			{
 				var defs = PitDefines.ParseFile(f.Path, overrides);
 
-				Assert.AreEqual(7, defs.SystemDefines.Count);
+				Assert.AreEqual(9, defs.SystemDefines.Count);
 				Assert.AreEqual(2, defs.Platforms.Count);
 				Assert.AreEqual(3, defs.Platforms[0].Defines.Count);
 				Assert.AreEqual(1, defs.Platforms[1].Defines.Count);
 
 				var dst = defs.Evaluate();
 
-				Assert.AreEqual(8, dst.Count);
+				Assert.AreEqual(10, dst.Count);
 
 				Assert.AreEqual("SamplePath", dst[0].Key);
 				Assert.AreEqual("bar", dst[0].Value);
@@ -322,9 +326,11 @@ namespace Peach.Pro.Test.Core
 				Assert.AreEqual("Peach.Pwd", dst[3].Key);
 				Assert.AreEqual("Peach.Cwd", dst[4].Key);
 				Assert.AreEqual("Peach.LogRoot", dst[5].Key);
-				Assert.AreEqual("PitLibraryPath", dst[6].Key);
-				Assert.AreEqual("Arg", dst[7].Key);
-				Assert.AreEqual("bar", dst[7].Value);
+				Assert.AreEqual("Peach.Plugins", dst[6].Key);
+				Assert.AreEqual("Peach.Scripts", dst[7].Key);
+				Assert.AreEqual("PitLibraryPath", dst[8].Key);
+				Assert.AreEqual("Arg", dst[9].Key);
+				Assert.AreEqual("bar", dst[9].Value);
 			}
 		}
 
