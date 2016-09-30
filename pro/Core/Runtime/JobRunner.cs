@@ -234,6 +234,7 @@ namespace Peach.Pro.Core.Runtime
 		{
 			_shouldStop = true;
 			_pausedEvt.Set();
+			_jobLogger.Stop();
 		}
 
 		public void Abort()
