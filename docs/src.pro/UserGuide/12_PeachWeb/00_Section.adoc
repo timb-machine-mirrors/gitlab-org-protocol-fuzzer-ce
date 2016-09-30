@@ -1,0 +1,92 @@
+== Peach Web
+
+Peach Web enables Peach to perform fuzz testing of various web services and web APIs.
+Any web service or API system that utilizes HTTP as the transport layer with JSON, XML or formdata is supported.
+Examples include REST, SOAP and JSON-API.
+
+Testing is performed by sending valid traffic through Peaches web proxy to the test target.
+As requests pass through the web proxy they are modified to create test cases.
+Transport layer security (SSL/TLS) is supported along with client cert authentication.
+Web socket traffic is also supported, but is not tested at this time (pass through only).
+
+Peach Web has been designed to integrate into the development process to provide immediate feedback on API security.
+This is an optional, but recommended method for usage.
+
+=== Usage
+
+This section provides some example usage patterns for Peach Web.
+
+==== Development/Engineering Team
+
+For teams building web services and web APIs, integration into the CI system or automated test system provides
+a lot of advantages over traditional web testing processes.
+Peach Web can also re-use automated tests to provide high test coverage with little effort.
+
+Immediate feedback during CI build and test process::
+	Peach Web becomes a step in your CI system.
+	Builds that don't pass security testing can fail.
+	Cost savings by fixing issues immediately.
+	
+Integration with existing automated tests::
+	Because Peach Web operates as a web proxy, traffic must be sent through it to generate test cases.
+	An one method to accomplish this is using existing automated tests based on Selenium, JUnit, pytest or other
+	test frameworks.
+	Peach provides integrations into these common automated testing platforms.
+	This provides instant test coverage across your APIs with little upfront work.
+	As new test cases are added they can automatically be used with Peach, lowering your cost
+	of ownership.
+	
+
+==== Redteam or Penetration Tester
+
+Use by individual testers such as redteam members or penetration testers can be achieved in several ways:
+
+. Attack proxies can forward input into Peach for testing.
+For example Burp Repeater can be used to forward requests through Peach multiple times.
+. A custom traffic generator script can be written in a language known by the tester such as Python.
+These scripts are easy and quick to author, in fact existing sample code can be used in many cases.
+. Selenium Firefox plugin can be used to record a web session.
+Selenium then exports to formats like JUnit that have Peach integrations.
+
+=== CI Integration
+
+Peach Web currently provides generic CI integration via command line usage.
+Our next release will include specific plugins or integrations with leading CI systems.
+
+The generic CI integration script is available in SDK\webproxy\ci\generic.
+Integration is done via return codes:
+
+Return code 0:: Testing passed, no issues found
+Return code 1:: Testing failed, at least one issue found
+Return code 100:: Testing did not complete due to an error
+
+For more information about using the generic CI integration script, please see the readme file included
+in the distribution folder and also the comments at the top of the python script.
+
+=== Automated Test Integration
+
+Peach has support for several automated test frameworks with more under development.
+If your automation framework is not currently supported please let support@peachfuzzer.com know
+so it can be added to our list and an interim solution found.
+
+==== JUnit 4
+
+XXX
+
+==== pytest
+
+XXX
+
+==== Other
+
+XXX
+
+=== Fault Detection
+
+XXXX
+
+=== Configuration
+
+XXXX
+
+// end
