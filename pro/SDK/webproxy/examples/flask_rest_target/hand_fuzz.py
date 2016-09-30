@@ -23,6 +23,8 @@ api = 'http://127.0.0.1:8888'
 proxy = 'http://127.0.0.1:8001'
 cabundle = 'rootCA.pem'
 
+test_repeat = 100
+
 # HTTP target
 target = 'http://127.0.0.1:5000'
 req_args = {}
@@ -95,12 +97,12 @@ def test_user_update():
 '''Notify Peach we are starting a fuzzing session'''
 peachproxy.session_setup(api, jobid)
 
-#for cnt in xrange(100000):
+#for cnt in xrange(suite_repeat):
 while True:
 	
 	print "\n\n----] test_user_create [----------------------------\n"
 	
-	for i in range(100):
+	for i in range(test_repeat):
 		print ".",
 		
 		'''Notify Peach we are doing test setup.  This will
@@ -128,7 +130,7 @@ while True:
 	
 	print "\n\n----] test_user_update [----------------------------\n"
 	
-	for i in range(100):
+	for i in range(test_repeat):
 		print ".",
 		peachproxy.setup(api)
 		test_setup()
