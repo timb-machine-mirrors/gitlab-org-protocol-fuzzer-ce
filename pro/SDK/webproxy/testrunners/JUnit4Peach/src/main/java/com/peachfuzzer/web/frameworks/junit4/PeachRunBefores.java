@@ -5,7 +5,8 @@
  */
 package com.peachfuzzer.web.frameworks.junit4;
 
-import com.peachfuzzer.api.Proxy;
+import com.peachfuzzer.api.PeachState;
+import com.peachfuzzer.api.PeachApiException;
 import java.util.List;
 
 import org.junit.runners.model.FrameworkMethod;
@@ -15,19 +16,29 @@ public class PeachRunBefores extends Statement {
     private final Statement next;
     private final Object target;
     private final List<FrameworkMethod> befores;
-    private final Proxy proxy;
+    private final PeachContext context;
 
-    public PeachRunBefores(Proxy proxy, Statement next, List<FrameworkMethod> befores, Object target) {
+    public PeachRunBefores(PeachContext context, Statement next, List<FrameworkMethod> befores, Object target) {
         this.next = next;
         this.befores = befores;
         this.target = target;
-        this.proxy = proxy;
+        this.context = context;
     }
 
     @Override
     public void evaluate() throws Throwable {
         
-        proxy.testSetUp();
+        try
+        {
+            context.proxy.testSetUp();
+        }
+        catch(PeachApiException ex)
+        {
+            context.state = PeachState.ERROR;
+            context.ex = ex;
+            
+            throw ex;
+        }
         
         for (FrameworkMethod before : befores) {
             before.invokeExplosively(target);

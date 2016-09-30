@@ -1,14 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.peachfuzzer.web.frameworks.junit4;
 
-import com.peachfuzzer.api.Proxy;
+import com.peachfuzzer.api.PeachState;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.internal.runners.statements.Fail;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
@@ -16,23 +12,23 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-/**
- *
- * @author mike
- */
 public class JUnit4PeachRunner extends BlockJUnit4ClassRunner {
 
-    Proxy _proxy = null;
+    PeachContext _context = null;
     Description _currentDescription = null;
     
-    public JUnit4PeachRunner(Class<?> klass) throws org.junit.runners.model.InitializationError {
+    public JUnit4PeachRunner(PeachContext context, Class<?> klass) throws org.junit.runners.model.InitializationError {
         super(klass);
         
-        _proxy = new Proxy();
+        _context = context;
     }
 
     @Override
     protected void runChild(final FrameworkMethod method, RunNotifier notifier) {
+        
+        if(_context.debug)
+            System.out.println(">> runChild: " + method.getName());
+        
         Description description = describeChild(method);
         if (isIgnored(method)) {
             notifier.fireTestIgnored(description);
@@ -47,36 +43,42 @@ public class JUnit4PeachRunner extends BlockJUnit4ClassRunner {
                 statement = new Fail(ex);
             }
             
-            for(int cnt = 0; cnt < 50; cnt++)
+            for(int cnt = 0; cnt < 200 && _context.state.equals(PeachState.CONTINUE); cnt++)
             {
                 runLeaf(statement, description, notifier);
             }
         }
+        
+        if(_context.debug)
+            System.out.println("<< runChild");
+    }
+    
+    @Override
+    protected List<FrameworkMethod> computeTestMethods() {
+        List<FrameworkMethod> methods = getTestClass().getAnnotatedMethods(Test.class);
+        
+        return methods;
     }
 
     @Override
     protected Statement methodInvoker(FrameworkMethod method, Object test) {
-        return new PeachInvokeMethod(_proxy, _currentDescription.getClassName(), method, test);
+        if(_context.debug)
+            System.out.println(">> methodInvoker");
+        
+        return new PeachInvokeMethod(_context, method.getName(), method, test);
     }
     
     @Override
     protected Statement withBefores(FrameworkMethod method, Object target,
         Statement statement) {
+        
+        if(_context.debug)
+            System.out.println(">> withBefores");
+        
         List<FrameworkMethod> befores = getTestClass().getAnnotatedMethods(
             Before.class);
         
-        return befores.isEmpty() ? statement : new PeachRunBefores(_proxy, statement,
+        return befores.isEmpty() ? statement : new PeachRunBefores(_context, statement,
             befores, target);
     }
-
-    @Override
-    protected Statement withAfters(FrameworkMethod method, Object target,
-        Statement statement) {
-        List<FrameworkMethod> afters = getTestClass().getAnnotatedMethods(
-            After.class);
-        
-        return afters.isEmpty() ? statement : new PeachRunAfters(_proxy, statement, afters,
-            target);
-    }
-
 }

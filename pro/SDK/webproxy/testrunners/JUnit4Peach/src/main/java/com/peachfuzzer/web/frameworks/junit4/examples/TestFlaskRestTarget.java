@@ -4,6 +4,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import junit.framework.Assert;
+import org.apache.http.HttpHost;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;

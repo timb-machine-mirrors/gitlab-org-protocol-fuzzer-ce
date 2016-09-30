@@ -5,8 +5,8 @@
  */
 package com.peachfuzzer.web.frameworks.junit4;
 
+import com.peachfuzzer.api.PeachState;
 import com.peachfuzzer.api.PeachApiException;
-import com.peachfuzzer.api.Proxy;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -19,7 +19,6 @@ import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
-import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
@@ -35,6 +34,9 @@ import org.junit.runners.model.RunnerBuilder;
  * @since 4.0
  */
 public class JUnit4PeachSuiteRunner extends ParentRunner<Runner> {
+    
+    protected final static PeachContext _context = new PeachContext();
+    
     /**
      * Returns an empty suite.
      */
@@ -75,7 +77,7 @@ public class JUnit4PeachSuiteRunner extends ParentRunner<Runner> {
         List<Runner> runners = new ArrayList<Runner>();
         
         for (Class<?> each : children) {
-            Runner childRunner = new JUnit4PeachRunner(each);
+            Runner childRunner = new JUnit4PeachRunner(_context, each);
             if (childRunner != null) {
                 runners.add(childRunner);
             }
@@ -154,16 +156,19 @@ public class JUnit4PeachSuiteRunner extends ParentRunner<Runner> {
 
     @Override
     protected void runChild(Runner runner, final RunNotifier notifier) {
-        //System.out.println(">> runChild");
+        if(_context.debug)
+            System.out.println(">> PeachSuiteRunner.runChild");
         
         try
         {
-            Proxy proxy = new Proxy();
-            proxy.sessionSetup();
+            _context.proxy.sessionSetup();
 
-            runner.run(notifier);
+            while(_context.state.equals(PeachState.CONTINUE))
+            {
+                runner.run(notifier);
+            }
 
-            proxy.sessionTearDown();
+            _context.proxy.sessionTearDown();
         }
         catch(PeachApiException ex)
         {

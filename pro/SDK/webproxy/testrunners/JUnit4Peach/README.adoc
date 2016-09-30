@@ -27,12 +27,16 @@ public class FuzzFlaskRestTarget {
     @BeforeClass
     public static void setProxy()
     {
+        // Route all web traffic through Peach Web Proxy
+        // this is specific to the library used by your test
+        // cases.
         Options.setOption(Option.PROXY, new HttpHost("127.0.0.1", 8001));
     }
     
     @AfterClass
     public static void removeProxy()
     {
+        // Stop traffic from routing through Peach Web Proxy
         Options.setOption(Option.PROXY, null);
     }
 }
@@ -40,8 +44,20 @@ public class FuzzFlaskRestTarget {
 
 == Running
 
+When running Peach set a time duration or test case range.
+For JUnit 4 runner, Peach controls when the runner should stop.
+
 Run via the command line:
 
+.Windows
 ----
+set PEACH_API_HOST=127.0.0.1:8888
 java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
 ----
+
+.Linux
+----
+export PEACH_API_HOST=127.0.0.1:8888
+java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
+----
+

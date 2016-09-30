@@ -1,4 +1,9 @@
 
+/*
+ * Example of a junit4 setup that runs unit tests through
+ * Peach Fuzzer.
+ */
+
 package com.peachfuzzer.web.frameworks.junit4.examples;
 
 import com.mashape.unirest.http.options.Option;
