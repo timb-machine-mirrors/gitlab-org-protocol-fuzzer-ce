@@ -146,6 +146,38 @@ class Request(object):
 		self._peach_req.Method = value
 
 	@property
+	def host(self):
+		return self._peach_req.Host
+
+	@host.setter
+	def host(self, value):
+		self._peach_req.Host = value
+
+	@property
+	def contentLength(self):
+		return self._peach_req.ContentLength
+
+	@contentLength.setter
+	def contentLength(self, value):
+		self._peach_req.ContentLength = value
+
+	@property
+	def contentEncoding(self):
+		return self._peach_req.ContentEncoding
+
+	@contentEncoding.setter
+	def contentEncoding(self, value):
+		self._peach_req.ContentEncoding = value
+
+	@property
+	def contentType(self):
+		return self._peach_req.ContentType
+
+	@contentType.setter
+	def contentType(self, value):
+		self._peach_req.ContentType = value
+
+	@property
 	def headers(self):
 		return HeaderDict(self._peach_req)
 

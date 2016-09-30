@@ -369,5 +369,76 @@ def to_p(req):
 				Assert.That(items[1].Value, Is.EqualTo("quux"));
 			}
 		}
+
+		[Test]
+		public void TestAwsAuth()
+		{
+			const string script = @"
+from peach import webproxy
+
+import base64
+import hmac
+
+from hashlib import sha1
+from email.Utils import formatdate
+
+AWS_ACCESS_KEY_ID = '44CF9590006BF252F707'
+AWS_SECRET_KEY = 'OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV'
+
+def aws_auth(ctx, req, body):
+    XAmzDate = formatdate()
+
+    h = hmac.new(AWS_SECRET_KEY, '%s\n\n%s\n\nx-amz-date:%s\n/?policy' % (req.method, req.contentType, XAmzDate), sha1)
+    authToken = base64.encodestring(h.digest()).strip()
+
+    req.headers['x-amz-date'] = XAmzDate
+    req.headers['Authorization'] = 'AWS %s:%s' % (AWS_ACCESS_KEY_ID, authToken)
+
+webproxy.register_event(webproxy.EVENT_ACTION, aws_auth)
+
+";
+
+			using (var d = new TempDirectory())
+			{
+				var module = Path.Combine(d.Path, "aws.py");
+
+				File.WriteAllText(module, script);
+
+				var xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<Test name='Default' maxOutputSize='65000'>
+		<WebProxy>
+			<Route
+				url='*/unknown?api/*' mutate='true'
+				script='{1}'
+				baseUrl='{0}'
+			/> 
+			<Route
+				url='*' mutate='false'
+				baseUrl='{0}'
+			/> 
+		</WebProxy>
+		<Strategy class='WebProxy' />
+		<Publisher class='WebApiProxy'>
+			<Param name='Port' value='0' />
+		</Publisher>
+	</Test>
+</Peach>".Fmt(Server.Uri, module);
+
+				string req = null;
+
+				RunEngine(xml, null, (e, context, op) =>
+				{
+					req = e.WebSession.Request.ToString();
+				});
+
+				var client = GetHttpClient();
+				var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
+
+				Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+				StringAssert.Contains("x-amz-date: ", req);
+				StringAssert.Contains("Authorization: ", req);
+			}
+		}
 	}
 }
