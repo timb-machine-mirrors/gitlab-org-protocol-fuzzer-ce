@@ -81,7 +81,8 @@ namespace Peach {
 			return this.isControlable && (
 				this.Job.status === JobStatus.Starting ||
 				this.Job.status === JobStatus.Running ||
-				this.Job.status === JobStatus.Paused
+				this.Job.status === JobStatus.Paused ||
+				this.Job.status === JobStatus.Stopping
 			);
 		}
 

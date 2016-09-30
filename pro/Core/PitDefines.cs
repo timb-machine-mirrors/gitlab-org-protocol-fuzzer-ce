@@ -580,7 +580,7 @@ namespace Peach.Pro.Core
 						Key = "Peach.Scripts",
 						Name = "Scripts Directory",
 						Description = "Full path to the scripts directory",
-						Value = Configuration.PluginsPath,
+						Value = Configuration.ScriptsPath,
 					},
 					new SystemDefine {
 						Key = "PitLibraryPath",

@@ -469,6 +469,22 @@ namespace Peach.Pro.Core.Storage
 			}
 		}
 
+		public void Stop()
+		{
+			var copy = CopyJob();
+			lock (copy)
+			{
+				EnqueueFront(sw =>
+				{
+					_status = JobStatus.Stopping;
+					sw.Stop();
+					DoUpdateRunningJob(sw, copy);
+					return copy;
+				});
+				Monitor.Wait(copy);
+			}
+		}
+
 		private Job CopyJob()
 		{
 			return ObjectCopier.Clone(Job);

@@ -934,6 +934,11 @@ namespace Peach.Pro.Core.Loggers
 			_cache.Continue();
 		}
 
+		public void Stop()
+		{
+			_cache.Stop();
+		}
+
 		public void RestoreLogging(Guid id)
 		{
 			Logger.Trace("RestoreLogging>");
