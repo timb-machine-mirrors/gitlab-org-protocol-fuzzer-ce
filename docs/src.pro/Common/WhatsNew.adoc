@@ -64,9 +64,9 @@ See the developer guide for more information.
 The Postman analyzer has been updated to generate web actions.
 See the developer guide for more information.
 
-==== Updated GDB Monitor
+==== Updated WindowsDebugger Monitor
 
-The GDB monitor has been updated with new options to ignore first chance read A/V exceptions.
+The WindowsDebugger monitor has been updated with new options to ignore first chance read A/V exceptions.
 This facilitates easier usage with targets that host the JVM.
 See the developer guide for more information.
 

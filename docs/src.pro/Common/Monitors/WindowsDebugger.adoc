@@ -50,6 +50,10 @@ are sometimes false positives or anti-debugging faults, defaults to false.
 IgnoreSecondChanceGuardPage:: Ignores faults from the second chance guard page. These faults
 are sometimes false positives or anti-debugging faults, defaults to false.
 
+IgnoreFirstChanceReadAv:: Ignores faults from the first chance read access violations. These faults
+are sometimes false positives, defaults to false.  Whem monitoring a Java process,
+it is recommended to set this parameter to true.
+
 NoCpuKill:: Allows or disallows the CPU to idle. If true, the CPU can idle without terminating
 the target. If false, Peach polls and then terminates the target if it is caught idling. The
 default value is false.
