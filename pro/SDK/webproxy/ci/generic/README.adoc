@@ -31,6 +31,15 @@ Requirements:
 
 == Usage
 
+To use this script follow this process:
+
+. Create a script to launch traffic generation or automated tests.
+All traffic must route through Peach Web and use the Peach Web Proxy APIs
+. Create a Peach Web configuration via the Peach UI
+. Configure +peach_ci_runner.py+ parameters
+. Test by running +peach_ci_runner.py+ by hand
+. Configure CI to run +peach_ci_runner.py+
+
 === Configuration Parameters
 
 peach_exe::
