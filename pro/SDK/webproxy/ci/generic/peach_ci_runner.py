@@ -20,6 +20,9 @@ import logging
 peach_exe = '/opt/peach/peach'
 peach_exe = 'c:/peach-pro/output/win_x64_debug/bin/peach.exe'
 
+# Test automation launch script
+automation_cmd = 'python C:/peach-pro/pro/SDK/webproxy/examples/flask_rest_target/hand_fuzz.py'
+
 # Configuration to start
 pit_config = 'WebProxy-Flask-Demo'
 
@@ -56,7 +59,7 @@ from time import sleep
 logger = logging.getLogger(__name__)
 
 logger.setLevel(syslog_level)
-logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] %(message)s")
+logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] Peach CI: %(message)s")
 
 if syslog_enabled:
     syslogHandler = logging.handlers.SysLogHandler(address=(syslog_host, syslog_port))
@@ -69,6 +72,7 @@ logger.addHandler(consoleHandler)
 
 logger.info("Peach CI Generic Starting")
 logger.info("  peach_exe: %s", peach_exe)
+logger.info("  automation_cmd: %s", automation_cmd)
 logger.info("  pit_config: %s", pit_config)
 logger.info("  peach_port: %d", peach_port)
 logger.info("  exit_code_ok: %d", exit_code_ok)
@@ -76,10 +80,11 @@ logger.info("  exit_code_failure: %d", exit_code_failure)
 logger.info("  exit_code_error: %d", exit_code_error)
 
 peach_process = None
+test_process = None
 
 try:
-#        [peach_exe, "--webport=%d" % peach_port, "--pits=c:\pits\output\pits\Assets"],
     logger.info("Starting peach")
+#        [peach_exe, "--webport=%d" % peach_port, "--pits=c:\pits\output\pits\Assets"],
     peach_process = subprocess.Popen(
         [peach_exe, "--webport=%d" % peach_port],
         stderr=subprocess.STDOUT)
@@ -118,6 +123,17 @@ def eexit(code):
                 peach_process.terminate()
                 peach_process.kill()
                 peach_process.wait()
+        except:
+            pass
+    if test_process:
+        try:
+            kill_proc_tree(test_process.pid)
+            kill_proc_tree(test_process.pid)
+            while not test_process.poll():
+                os.killpg(os.getpgid(test_process.pid), signal.SIGTERM)
+                test_process.terminate()
+                test_process.kill()
+                test_process.wait()
         except:
             pass
     
@@ -186,7 +202,28 @@ except requests.exceptions.RequestException as e:
 if not peach_jobid:
     logger.critical("Unable to start job")
     eexit(exit_code_error)
+
+# Launch test automation
+
+logger.info("Launching test automation")
+try:
+    test_process = subprocess.Popen(
+        automation_cmd,
+        stderr=subprocess.STDOUT)
     
+    if not peach_process:
+        logger.critical("Unable to start test automation")
+        eexit(exit_code_error)
+    
+    sleep(1)
+    if peach_process.poll():
+        logger.critical("Unable to start test automation")
+        eexit(exit_code_error)
+    
+except Exception as ex:
+    logger.critical("Error starting test automation: %s", ex)
+    eexit(exit_code_error)
+
 # Wait for fuzzing to end
 
 logger.info("Waiting for job to complete")
@@ -211,6 +248,8 @@ while True:
     break
 
 logger.info("Fuzzing completed, found %d faults", peach_fault_count)
+
+test_process.wait()
 
 # Wait for fuzzing to complete
 
