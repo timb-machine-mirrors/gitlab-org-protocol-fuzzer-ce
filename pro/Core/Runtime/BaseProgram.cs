@@ -40,19 +40,21 @@ namespace Peach.Pro.Core.Runtime
 		protected Func<List<string>, int> _cmd;
 
 		protected void PrepareLicensing(string pitLibraryPath)
-		{
+		{	
 			var config = new LicenseConfig();
 			if (config.DetectConfig)
 			{
 				_logger.Trace("Using FlexeraLicense");
+				config.Validate();
+
 				var root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
 				if (root == null)
 					throw new ApplicationException("Peach.Pro.Pits.dll could not be found.");
 				config.Manifest = PitResourceLoader.LoadManifest(root);
 				var license = new FlexeraLicense(config);
-				Console.Write("Activating license...");
+				Console.WriteLine("Activating license, this may take a few moments.");
 				license.Activate();
-				Console.WriteLine("  Done!");
+				Console.WriteLine("License has been activaed.");
 				_license = license;
 			}
 			else
