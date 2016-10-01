@@ -15,6 +15,13 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 api = Api(app)
 
+@app.route("/")
+def Home():
+    with open('rest_target.html', 'r') as myfile:
+        data=myfile.read()
+    
+    return data, 200, {'Content-Type':'text/html'}
+
 class ApiRoot(Resource):
     def get(self):
         return [
