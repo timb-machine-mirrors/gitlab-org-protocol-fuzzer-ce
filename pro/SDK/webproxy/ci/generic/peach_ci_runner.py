@@ -12,6 +12,7 @@ If a specific integration is offered for your CI system that is
 preferred over this generic integration.
 '''
 
+from __future__ import print_function
 import logging
 
 ## Configuration
@@ -50,7 +51,14 @@ syslog_level = logging.INFO
 ###############################################################
 
 import os
-from requests import get, post, delete
+
+try:
+    from requests import get, post, delete
+except:
+    print("Detected missing dependency 'requests' python module.")
+    print("Install: pip install requests")
+    exit(exit_code_error)
+
 import requests, json, sys
 import subprocess, signal, psutil
 import logging, logging.handlers

@@ -9,6 +9,7 @@ import com.mashape.unirest.http.options.Option;
 import com.mashape.unirest.http.options.Options;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.http.HttpHost;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,7 +20,10 @@ import org.json.JSONObject;
  */
 public class Proxy {
     
-    private String _api = "http://127.0.0.1:8888";
+    private final static Boolean _debug = false;
+    
+    private String _api = null;
+    private String _api_host = null;
     private String _jobid = "auto";
     private Object _unirestProxy = null;
     
@@ -30,37 +34,52 @@ public class Proxy {
      */
     public Proxy()
     {
+        _api_host = System.getenv("PEACH_API_HOST");
+        if(_api_host == null)
+            _api_host = "127.0.0.1:8888";
+        
+        _jobid = System.getenv("PEACH_WEB_JOBID");
+        if(_jobid == null)
+            _jobid = "auto";
+        
+        _api = "http://" + _api_host;
     }
     
     /**
      * Create Proxy instance with default jobid of "auto".
-     * @param api Base URL for Peach API. Example: "http://127.0.0.1:8888"
+     * @param api_host SPecify host and port "HOST:PORT". Example: "127.0.0.1:8888"
      */
-    public Proxy(String api)
+    public Proxy(String api_host)
     {
-        _api = api;
+        this();
+        
+        _api_host = api_host;
+        _api = "http://" + _api_host;
     }
     
     /**
      * Create Proxy instance
      * 
-     * @param api Base URL for Peach API. Example: "http://127.0.0.1:8888"
+     * @param api_host SPecify host and port "HOST:PORT". Example: "127.0.0.1:8888"
      * @param jobid Specify jobid GUID or "auto" to discover.
      */
-    public Proxy(String api, String jobid)
+    public Proxy(String api_host, String jobid)
     {
-        _api = api;
+        this(api_host);
+        
         _jobid = jobid;
     }
     
     protected void stashUnirestProxy()
     {
         _unirestProxy = Options.getOption(Option.PROXY);
+        Unirest.setProxy(new HttpHost("127.0.0.1", 8888));
     }
     
     protected void revertUnirestProxy()
     {
         Options.setOption(Option.PROXY, _unirestProxy);
+        Unirest.setProxy((HttpHost)_unirestProxy);
     }
     
     protected void getJobId() throws PeachApiException
@@ -120,6 +139,9 @@ public class Proxy {
         getJobId();
         stashUnirestProxy();
         
+        if(_debug)
+            System.out.println(">>sessionSetup");
+        
         try
         {
             HttpResponse<String> ret = null;
@@ -163,7 +185,10 @@ public class Proxy {
     {
         getJobId();
         stashUnirestProxy();
-
+        
+        if(_debug)
+            System.out.println(">>sessionTearDown");
+        
         try
         {
             HttpResponse<String> ret = null;
@@ -208,6 +233,9 @@ public class Proxy {
     {
         getJobId();
         stashUnirestProxy();
+        
+        if(_debug)
+            System.out.println(">>testSetUp");
         
         try
         {
@@ -254,13 +282,16 @@ public class Proxy {
         getJobId();
         stashUnirestProxy();
         
+        if(_debug)
+            System.out.println(">>testTearDown");
+        
         try
         {
-            HttpResponse<String> ret = null;
+            HttpResponse<JsonNode> ret = null;
             try {
                 ret = Unirest
                         .put(String.format("%s/p/proxy/%s/testTearDown", _api, _jobid))
-                        .asString();
+                        .asJson();
             } catch (UnirestException ex) {
                 Logger.getLogger(Proxy.class.getName()).log(Level.SEVERE, "Error contacting Peach API", ex);
                 throw new PeachApiException(
@@ -279,6 +310,15 @@ public class Proxy {
 
                 throw new PeachApiException(errorMsg, null);
             }
+            
+            /*
+            PeachState state = ret.getBody().getObject().getEnum(PeachState.class, "state");
+            
+            if(_debug)
+                System.out.println(String.format(">>testTearDown(%s)", state));
+        
+            reutrn state;
+            */
         }
         finally
         {
@@ -299,6 +339,9 @@ public class Proxy {
         getJobId();
         stashUnirestProxy();
 
+        if(_debug)
+            System.out.println(String.format(">>testCase(%s)", name));
+        
         try
         {
             HttpResponse<String> ret = null;
