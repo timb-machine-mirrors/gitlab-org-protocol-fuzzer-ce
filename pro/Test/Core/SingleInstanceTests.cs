@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Peach.Pro.Core.OS;
 using SysProcess = System.Diagnostics.Process;
 
@@ -53,6 +55,47 @@ namespace Peach.Pro.Test.Core
 			}
 
 			Assert.IsTrue(proc.WaitForExit(2000));
+		}
+
+		[Test]
+		public void TestSameProc()
+		{
+			ISingleInstance m1 = null;
+			try
+			{
+				m1 = Pal.SingleInstance("TestSameProc");
+				Assert.True(m1.TryLock(), "First lock should pass");
+
+				Task.Factory.StartNew(() =>
+				{
+					using (var m2 = Pal.SingleInstance("TestSameProc"))
+					{
+						Assert.False(m2.TryLock(), "Shouldn't grab lock when its held");
+					}
+				}).Wait();
+
+				var tsk = Task.Factory.StartNew(() =>
+				{
+					using (var m2 = Pal.SingleInstance("TestSameProc"))
+					{
+						Assert.False(m2.TryLock(), "Still shouldn't grab lock when its held");
+
+						m2.Lock();
+					}
+				});
+
+				Assert.False(tsk.Wait(2000), "Task should be waiting on mutex");
+
+				m1.Dispose();
+				m1 = null;
+
+				Assert.True(tsk.Wait(10000), "Task should be done");
+			}
+			finally
+			{
+				if (m1 != null)
+					m1.Dispose();
+			}
 		}
 
 		[Test]

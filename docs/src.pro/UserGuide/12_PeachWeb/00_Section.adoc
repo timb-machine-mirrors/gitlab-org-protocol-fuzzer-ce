@@ -93,6 +93,90 @@ XXXX
 
 === Configuration
 
-XXXX
+One or more routes can be configured for use with the Peach Fuzzing Web Proxy feature.
+Each route contains several configuration parameters.
+Route entries are matched in order.
+It's recommended that a final route entry be included with a Route pattern of +*+ as a catch all.
+
+Adding multiple routes allows different configurations based on matching a portion of the Path.
+For example, if two different APIs are accessed during testing `/storage/*` and `/users/*`,
+each can have a different route entry allowing for different fault status codes
+or Swagger API specifications.
+
+_Required:_
+
+Path Pattern:: This pattern will match a specific route to a request.
+Define a pattern that matches the HTTP request path (excluding the sheme, host, and query)
+using single character wildcard (+?+) and multiple character wildcard (+*+). +
+Examples: `/storage/*` or `*/v?/*`
+
+_Optional:_
+
+Test:: Should the route be included or excluded from testing.
+This setting affects all requests that match the route.
+
+Swagger:: Optionally provide the URL to a Swagger API JSON. +
+For example, +http://127.0.0.1:8888/swagger/docs/v1+ or +file:///opt/service/swagger.js+
+
+Script:: Optional path to a python script.  See xref:webproxy_Scripts[Scripts] for a full explanation and examples.
+
+Rewrite Base URL:: Optionally provide a new replacement base URL.
+Only the scheme, host, and port are replaced.
+
+Failure Status Codes:: Optionally provide a comma separated list of HTTP status codes that
+will result in a test failing. When a test fails it is logged as a fault in the tool. +
+Example: +500,501+
+Header Testing:: This parameter controls what HTTP headers are included/excluded from testing. +
++
+Mutate;; Include or exclude the header from mutation.
+Pattern;; Pattern to match against HTTP headers.
++
+Headers support pattern matching using the single character wildcard (+?+) or multiple character wildcard (+*+). +
+
+
+[[webproxy_Scripts]]
+=== Scripts
+
+The _Script_ configuration option allows custom code to be run after fuzzing but prior to sending outgoing HTTP requests.
+This is typically used to implement custom authentication required by the target web service.
+When the script is imported, it registers a function with the peach.webproxy python module.
+The function will then be called with every outgoing request after all fuzzing has taken place.
+This allows arbitrary changes to be made on a per request basis.
+Headers can be added/removed and the body can be altered if needed.
+
+
+.Sample AWS Authentication Script
+========================
+This example demonstrates how to set the +Authorization+ header in every outgoing request.
+
+----
+from peach import webproxy <1>
+
+import base64
+import hmac
+
+from hashlib import sha1
+from email.Utils import formatdate
+
+AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
+AWS_SECRET_KEY = 'AWS_SECRET_KEY'
+
+def aws_auth(ctx, req, body): <2>
+    XAmzDate = formatdate()
+
+    hdrs = '%s\n\n%s\n\nx-amz-date:%s\n/?policy' % (req.method, req.contentType, XAmzDate)
+    h = hmac.new(AWS_SECRET_KEY, hdrs, sha1)
+    authToken = base64.encodestring(h.digest()).strip()
+
+    req.headers['x-amz-date'] = XAmzDate
+    req.headers['Authorization'] = 'AWS %s:%s' % (AWS_ACCESS_KEY_ID, authToken) <3>
+
+webproxy.register_event(webproxy.EVENT_ACTION, aws_auth) <4>
+----
+<1> Import peach.webproxy module to register for events
+<2> Function has three arguments: Context, Request, Body
+<3> Set the header value
+<4> Register function with Peach Web
+========================
 
 // end

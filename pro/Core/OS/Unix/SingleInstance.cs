@@ -42,14 +42,14 @@ namespace Peach.Pro.Core.OS.Unix
 
 				if (_locked)
 				{
+					Syscall.unlink(_name);
+
 					flock(_fd, LOCK_UN);
 					_locked = false;
 				}
 
 				Syscall.close(_fd);
 				_fd = -1;
-
-				Syscall.unlink(_name);
 			}
 		}
 
