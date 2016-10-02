@@ -17,17 +17,27 @@ import logging
 
 ## Configuration
 
+# Test duration
+# Argument format is DD.HH:MM:SS.
+test_duration = '0:02'
+
 # Full path and peach executable
+# Command line or None to disable launching Peach
+peach_exe = None
 peach_exe = '/opt/peach/peach'
 peach_exe = 'c:/peach-pro/output/win_x64_debug/bin/peach.exe'
 
 # Test automation launch script
+# Command line or None to disable
 automation_cmd = 'python C:/peach-pro/pro/SDK/webproxy/examples/flask_rest_target/hand_fuzz.py'
 
 # Configuration to start
 pit_config = 'WebProxy-Flask-Demo'
 
-# Port to start Peach on
+# Peach API hostname/ip
+peach_host = '127.0.0.1'
+
+# Peach API Port
 peach_port = 8888
 
 # Exit code when testing passed
@@ -82,14 +92,17 @@ consoleHandler.setFormatter(logFormatter)
 logger.addHandler(consoleHandler)
 
 logger.info("Peach CI Generic Starting")
-logger.info("  peach_exe: %s", peach_exe)
 logger.info("  automation_cmd: %s", automation_cmd)
-logger.info("  pit_config: %s", pit_config)
-logger.info("  peach_port: %d", peach_port)
 logger.info("  exit_code_ok: %d", exit_code_ok)
 logger.info("  exit_code_failure: %d", exit_code_failure)
 logger.info("  exit_code_error: %d", exit_code_error)
+logger.info("  peach_exe: %s", peach_exe)
+logger.info("  peach_host: %s", peach_host)
+logger.info("  peach_port: %d", peach_port)
+logger.info("  pit_config: %s", pit_config)
+logger.info("  test_duration: %s", test_duration)
 
+peach_api = "http://%s:%d" % (peach_host, peach_port)
 peach_process = None
 test_process = None
 peach_jobid = None
@@ -100,25 +113,26 @@ except ImportError:
     import os
     DEVNULL = open(os.devnull, 'wb')
 
-try:
-    logger.info("Starting peach")
-    peach_process = subprocess.Popen(
-        "%s --webport=%s --nobrowser" % (peach_exe, peach_port),
-#        "%s --webport=%s --nobrowser --pits=c:\pits\output\pits\Assets" % (peach_exe, peach_port),
-        stdin=subprocess.PIPE, stdout=DEVNULL, stderr=subprocess.STDOUT)
-    
-    if not peach_process:
-        logger.critical("Unable to start peach")
+if peach_exe:
+    try:
+        logger.info("Starting peach")
+        peach_process = subprocess.Popen(
+            "%s --webport=%s --nobrowser" % (peach_exe, peach_port),
+ #           "%s --webport=%s --nobrowser --pits=c:\pits\output\pits\Assets" % (peach_exe, peach_port),
+            stdin=subprocess.PIPE, stdout=DEVNULL, stderr=subprocess.STDOUT)
+        
+        if not peach_process:
+            logger.critical("Unable to start peach")
+            exit(exit_code_error)
+        
+        sleep(1)
+        if peach_process.poll():
+            logger.critical("Unable to start peach")
+            exit(exit_code_error)
+        
+    except Exception as ex:
+        logger.critical("Error starting peach: %s", ex)
         exit(exit_code_error)
-    
-    sleep(1)
-    if peach_process.poll():
-        logger.critical("Unable to start peach")
-        exit(exit_code_error)
-    
-except Exception as ex:
-    logger.critical("Error starting peach: %s", ex)
-    exit(exit_code_error)
 
 def kill_proc_tree(pid, including_parent=True):
     '''Try and kill the pid's process tree
@@ -144,14 +158,14 @@ def stop_job(jobid):
     try:
         logger.info("Stopping job %s" % jobid)
     
-        r = get("http://127.0.0.1:%d/p/jobs/%s/stop" % (peach_port, jobid))
+        r = get("%s/p/jobs/%s/stop" % (peach_api, jobid))
         if r.status_code != 200:
             logger.error("job stop, status code: %s", r.status_code)
             return False
     
         sleep(2)
     
-        r = get("http://127.0.0.1:%d/p/jobs/%s/stop" % (peach_port, jobid))
+        r = get("%s/p/jobs/%s/stop" % (peach_api, jobid))
         if r.status_code != 200:
             logger.error("job stop, status code: %s", r.status_code)
             return False
@@ -160,7 +174,7 @@ def stop_job(jobid):
             sleep(1)
             
             try:
-                r = get("http://127.0.0.1:%d/p/jobs/%s" % (peach_port, jobid))
+                r = get("%s/p/jobs/%s" % (peach_api, jobid))
                 if r.status_code != 200:
                     logger.error("job get, status code: %s", r.status_code)
                     return False
@@ -186,9 +200,9 @@ def eexit(code):
     '''
     
     logger.info("eexit(%d)", code)
+
+    stop_job(peach_jobid)
     if peach_process:
-        if peach_jobid:
-            stop_job(peach_jobid)
         try:
             kill_proc_tree(peach_process.pid)
             kill_proc_tree(peach_process.pid)
@@ -220,7 +234,7 @@ pit_config_url = None
 for cnt in range(10):
     sleep(1)
     try:
-        r = get("http://127.0.0.1:%d/p/libraries" % peach_port)
+        r = get("%s/p/libraries" % peach_api)
         if r.status_code != 200:
             logger.info("Library api not ready, status code: %s", r.status_code)
             continue
@@ -261,7 +275,7 @@ logger.info("Starting job")
 peach_jobid = None
 
 try:
-    r = post("http://127.0.0.1:%d/p/jobs" % peach_port, json = { "pitUrl": pit_config_url })
+    r = post("%s/p/jobs" % peach_api, json = { "pitUrl": pit_config_url, "duration":test_duration })
     if r.status_code != 200:
         logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
         eexit(exit_code_error)
@@ -277,28 +291,52 @@ if not peach_jobid:
     logger.critical("Unable to start job")
     eexit(exit_code_error)
 
+# Wait for job to start
+
+logger.info("Waiting for job to start")
+
+for i in range(12):
+    try:
+        r = get("%s/p/jobs/%s" % (peach_api, peach_jobid))
+        if r.status_code != 200:
+            logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
+            continue
+    except requests.exceptions.RequestException as e:
+        logger.critical("Error communicating with Peach: %s", e)
+        eexit(exit_code_error)
+    
+    r = r.json()
+    if r['status'] == 'running':
+        break
+    
+    if not (r['status'] == 'starting'):
+        logger.critical("Error starting job, status reported as: ", r['status'])
+        eexit(exit_code_error)
+    
+    sleep(10)
+
 # Launch test automation
 
-eexit(0)
-
-logger.info("Launching test automation")
-try:
-    test_process = subprocess.Popen(
-        automation_cmd,
-        stdin=subprocess.PIPE, stdout=DEVNULL, stderr=subprocess.STDOUT)
+if automation_cmd:
     
-    if not peach_process:
-        logger.critical("Unable to start test automation")
+    logger.info("Launching test automation")
+    try:
+        test_process = subprocess.Popen(
+            automation_cmd,
+            stdin=subprocess.PIPE, stdout=DEVNULL, stderr=subprocess.STDOUT)
+        
+        if not test_process:
+            logger.critical("Unable to start test automation")
+            eexit(exit_code_error)
+        
+        sleep(1)
+        if test_process.poll():
+            logger.critical("Unable to start test automation")
+            eexit(exit_code_error)
+        
+    except Exception as ex:
+        logger.critical("Error starting test automation: %s", ex)
         eexit(exit_code_error)
-    
-    sleep(1)
-    if peach_process.poll():
-        logger.critical("Unable to start test automation")
-        eexit(exit_code_error)
-    
-except Exception as ex:
-    logger.critical("Error starting test automation: %s", ex)
-    eexit(exit_code_error)
 
 # Wait for fuzzing to end
 
@@ -307,7 +345,7 @@ logger.info("Waiting for job to complete")
 while True:
     sleep(60)
     try:
-        r = get("http://127.0.0.1:%d/p/jobs/%s" % (peach_port, peach_jobid))
+        r = get("%s/p/jobs/%s" % (peach_api, peach_jobid))
         if r.status_code != 200:
             logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
             continue
@@ -325,7 +363,8 @@ while True:
 
 logger.info("Fuzzing completed, found %d faults", peach_fault_count)
 
-test_process.wait()
+if test_process:
+    test_process.wait()
 
 # Wait for fuzzing to complete
 
@@ -337,7 +376,7 @@ if peach_fault_count == 0:
 faults = []
 
 try:
-    r = get("http://127.0.0.1:%d/p/jobs/%s/faults" % (peach_port, peach_jobid))
+    r = get("%s/p/jobs/%s/faults" % (peach_api, peach_jobid))
     if r.status_code != 200:
         logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
         eexit(exit_code_error)
@@ -347,7 +386,7 @@ try:
     for f in jsonFaults:
         furl = f['faultUrl']
         
-        r = get("http://127.0.0.1:%d%s" % (peach_port, furl))
+        r = get("%s%s" % (peach_api, furl))
         if r.status_code != 200:
             logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
             eexit(exit_code_error)
