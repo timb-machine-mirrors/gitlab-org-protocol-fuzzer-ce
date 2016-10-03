@@ -7,7 +7,39 @@ Each test case that Peach executes is considered one 'use' of the Peach license 
 Peach Fuzzer, LLC,
 will create an initial user profile that can be used to access the Peach Fuzzer download site.
 
-==== Downloading Peach FuzzFlex
+Peach FuzzFlex can be deployed in one of two ways:
+
+xref:License_FuzzFlex_CLS[Cloud License Server (Online Synchronization)]::
+This scenario is sufficient for most customers.
+A persistent connection to the Internet is required for this option.
+It is much easier to use this deployment option since a Cloud License Server
+will be automatically provisioned and managed for you.
+
+xref:License_FuzzFlex_LLS[Local License Server (Offline Synchronization)]::
+Users who wish to use Peach FuzzFlex without having access to the Internet can deploy a
+Local License Server onsite to provide offline activation and synchronization of licensing 
+information.
++
+The Local License Server is supported on the following platforms.
++
+[options="header"]
+|========
+| Operating System    | CPU Architecture  | Version
+.4+^.^| Linux   .4+^.^| x86/x86-64        | CentOS 6.0
+                                          | CentOS 7.0
+                                          | Red Hat Enterprise Linux 6.0
+                                          | Red Hat Enterprise Linux 7.0
+.2+^.^| Windows .2+^.^| x86/x86-64        | Windows 8 (including 8.1) and 10
+                                          | Windows Server 2012 R2
+|========
+
+
+[[License_FuzzFlex_CLS]]
+==== Cloud License Server
+
+TODO
+
+===== Downloading Peach FuzzFlex
 
 . When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
 . Navigate to https://dl.peachfuzzer.com with your preferred web browser.
@@ -34,6 +66,51 @@ image::{images}/Common/Installation/Portal_EULA_Flex.png[]
 . The download will begin.
 Depending on your network connection,
 this could take a few minutes.
+
+===== Using Peach FuzzFlex
+
+TODO
+
+[[License_FuzzFlex_LLS]]
+==== Local License Server (Offline Synchronization) 
+
+TODO
+
+===== Preparing a Local License Server
+
+TODO
+
+===== Downloading Peach FuzzFlex
+
+. When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
+. Navigate to https://dl.peachfuzzer.com with your preferred web browser.
+. At the login prompt under the FuzzFlex Sign In section,
+enter the same username/password as specified in your welcome email and click +Sign In+.
++
+image::{images}/Common/Installation/Portal_Home_Flex.png[]
+
+. On the +Downloads+ page, select the Peach release version and operating system to install.
+.. Choose a release version from the items on the left side.
+.. Click the download icon on the right side after deciding which OS and architecture is needed.
++
+image::{images}/Common/Installation/Portal_Downloads.png[]
+
+. If your organization has multiple entitlements,
+you may need to select an Activation ID that matches your purchase.
+Contact licensing@peachfuzzer.com for more information if you are unsure which Activation ID to select.
+This selection will be skipped if there is only one entitlement for your organization.
+. After a few moments, an End User License Agreement acceptance page appears.
+Click +I ACCEPT+ to continue.
++
+image::{images}/Common/Installation/Portal_EULA_Flex.png[]
+
+. The download will begin.
+Depending on your network connection,
+this could take a few minutes.
+
+===== Using Peach FuzzFlex
+
+TODO
 
 ==== Managing Peach Fuzzer Flex Licenses
 
