@@ -28,13 +28,25 @@ CI integration::
 	If security testing fails during those 2 hours, the build would be marked as such, similar to failing
 	automated tests.
 
-Automated Test Integration::
-	XXX
-	
+Traffic Generator::
++
+A traffic generator is needed that produces requests that are fuzzed.
+The xref:webproxy_TrafficGen[Traffic Generator] section provides more information about what is needed.
+There are two common methods:
++
+Automated Test Integration;;
++
+Use existing test automation with one of Peaches framework integrations such as JUnit or pytest.
+The use of existing test automation provides a fast way to get Peach Web running.
++
+Custom Traffic Generator;;
++
+A custom traffic generator can also be used.
+These are custom written scripts in any language (python, java, nodejs, etc.).
+
 Issue Tracker Integration::
-	XXX
-
-
+	Peach can automatically log found faults into popular issue trackers such as JIRA or Bugzilla.
+	The scripts and documentation are provided in _SDK/tools/peach2bugzilla_ and _SDK/tools/peach2jira_.
 
 ==== Redteam or Penetration Tester
 
