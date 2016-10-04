@@ -33,6 +33,7 @@ deps = [
 	'System.Core.dll',
 	'System.Data.dll',
 	'System.Data.SQLite.dll',
+	'System.Net.Http.dll',
 	'System.Runtime.Remoting.dll',
 	'System.Web.Services.dll',
 	'System.Xml.dll',
