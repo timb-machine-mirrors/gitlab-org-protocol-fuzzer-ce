@@ -1,0 +1,25 @@
+
+[[webproxy_Auth]]
+=== Authenticated Services
+
+Most service authentication mechanisms work automatically with Peach Web with only two main exceptions.
+Mechanisms that work include:
+
+ * Cookie based auth
+ * Username/password over TLS
+ * API Token
+
+The two authentication types that require some special configuration are:
+
+ * TLS User Certificates
+ * Hashed/computed keys.  For example, AWS authentication includes the hash of headers and body.
+
+==== TLS User Certificates
+
+TLS user certificates are well supported by Peach Web and only require small configuration changes to get working.
+
+XXX TODO
+
+==== Hashed/computed keys
+
+XXX

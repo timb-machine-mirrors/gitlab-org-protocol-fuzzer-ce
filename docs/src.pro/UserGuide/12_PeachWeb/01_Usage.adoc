@@ -1,0 +1,37 @@
+
+[[webproxy_Usage]]
+=== Usage
+
+This section provides some example usage patterns for Peach Web.
+
+==== Development/Engineering Team
+
+For teams building web services and web APIs, integration into the CI system or automated test system provides
+a lot of advantages over traditional web testing processes.
+Peach Web can also re-use automated tests to provide high test coverage with little effort.
+
+Immediate feedback during CI build and test process::
+	Peach Web becomes a step in your CI system.
+	Builds that don't pass security testing can fail.
+	Cost savings by fixing issues immediately.
+	
+Integration with existing automated tests::
+	Because Peach Web operates as a web proxy, traffic must be sent through it to generate test cases.
+	An one method to accomplish this is using existing automated tests based on Selenium, JUnit, pytest or other
+	test frameworks.
+	Peach provides integrations into these common automated testing platforms.
+	This provides instant test coverage across your APIs with little upfront work.
+	As new test cases are added they can automatically be used with Peach, lowering your cost
+	of ownership.
+	
+
+==== Redteam or Penetration Tester
+
+Use by individual testers such as redteam members or penetration testers can be achieved in several ways:
+
+. Attack proxies can forward input into Peach for testing.
+For example Burp Repeater can be used to forward requests through Peach multiple times.
+. A custom traffic generator script can be written in a language known by the tester such as Python.
+These scripts are easy and quick to author, in fact existing sample code can be used in many cases.
+. Selenium Firefox plugin can be used to record a web session.
+Selenium then exports to formats like JUnit that have Peach integrations.

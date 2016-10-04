@@ -25,7 +25,7 @@ test_duration = '0:02'
 # Command line or None to disable launching Peach
 peach_exe = None
 peach_exe = '/opt/peach/peach'
-peach_exe = 'c:/peach-pro/output/win_x64_debug/bin/peach.exe'
+peach_exe = 'c:/peach/peach.exe'
 
 # Test automation launch script
 # Command line or None to disable
