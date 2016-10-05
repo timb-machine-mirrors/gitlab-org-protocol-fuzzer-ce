@@ -12,7 +12,7 @@ process, or service.
 
 The _WindowsDebugger_ performs automation, fault detection, and data collection.
 
-* Automation manages when the fuzzing target (process, service, etc) starts and restarts:
+* Automation manages when the fuzzing target (process, service, etc) starts and restarts. This can occur
 at the start of a fuzzing session, at the start of each iteration, after detecting a fault,
 or upon receiving a call from the state model.
 * Fault detection watches and reports crashes and faults--when the target exits prematurely,
