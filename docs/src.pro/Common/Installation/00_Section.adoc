@@ -26,11 +26,17 @@ Peach Fuzzer, LLC offers {product} withunder two separate licensing schemes:
 . xref:License_FuzzFlex[Peach Fuzzer Flex]
 
 include::01_Hardware.adoc[]
+
 include::02_PortableLicense.adoc[]
+
 include::03_FlexeraLicense.adoc[]
+
 include::04_Windows.adoc[]
+
 include::05_Linux.adoc[]
+
 include::06_OSX.adoc[]
+
 include::07_SecurePeach.adoc[]
 
 // end

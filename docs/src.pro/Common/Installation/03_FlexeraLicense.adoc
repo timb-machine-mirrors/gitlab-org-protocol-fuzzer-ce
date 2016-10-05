@@ -4,21 +4,25 @@
 Peach FuzzFlex is a flexible licensing model which allows users to purchase test cases in batches of 100k. 
 Each test case that Peach executes is considered one 'use' of the Peach license against the total number of test cases purchased.
 
-Peach Fuzzer, LLC,
-will create an initial user profile that can be used to access the Peach Fuzzer download site.
+During the delivery, Peach will create a user profile that can be used to access the Peach Fuzzer download site.
+The user can also be used to access the Licensing Operations Portal via the download site.
+The download site is available at link:https://dl.peachfuzzer.com[https://dl.peachfuzzer.com].
 
 Peach FuzzFlex can be deployed in one of two ways:
 
 xref:License_FuzzFlex_CLS[Cloud License Server (Online Synchronization)]::
-This scenario is sufficient for most customers.
-A persistent connection to the Internet is required for this option.
-It is much easier to use this deployment option since a Cloud License Server
-will be automatically provisioned and managed for you.
-
+    This scenario is sufficient for most customers.
+    A persistent connection to the Internet is required for this option.
+    It is much easier to use this deployment option since a Cloud License Server
+    will be automatically provisioned and managed for you.
+                                          
 xref:License_FuzzFlex_LLS[Local License Server (Offline Synchronization)]::
 Users who wish to use Peach FuzzFlex without having access to the Internet can deploy a
 Local License Server onsite to provide offline activation and synchronization of licensing 
 information.
++
+Deploying a local license server requires changes to your account.
+Please contact sales@peachfuzzer.com for more information about the process.
 
 [[License_FuzzFlex_CLS]]
 ==== Cloud License Server
@@ -62,13 +66,18 @@ Users who wish to use Peach FuzzFlex without having access to the Internet can d
 Local License Server onsite to provide offline activation and synchronization of licensing 
 information.
 
+Deploying a local license server requires changes to your account.
+Please contact sales@peachfuzzer.com for more information about the process.
+
 ===== Hardware Requirements
 
 The following are the minimum hardware requirements for license server:
 
-Disk:: 100 MB
-RAM:: 4 GB
-CPU:: 1 GHz
+|====
+| Disk | 100 MB
+| RAM  | 4 GB
+| CPU  | 1 GHz
+|====
 
 ===== Supported Platforms
 
