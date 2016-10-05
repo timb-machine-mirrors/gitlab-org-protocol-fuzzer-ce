@@ -74,7 +74,11 @@
 							 peach:unique-default="local://"
 							 peach:unique-ignore="^local://" />
 				<span class="help-text">
-					URL for the agent. Leave blank for a local agent.
+					URL for the agent. 
+					Leave blank for a local agent.
+					For remote agents use the <code>tcp</code> scheme.
+					The default agent port is <code>9001</code>.
+					Example: <code>tcp://192.168.48.2:9001</code>
 				</span>
 				<span class="help-block"
 							ng-messages="form.location.$error"

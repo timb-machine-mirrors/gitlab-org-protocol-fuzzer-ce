@@ -1,5 +1,5 @@
 [[Brand_new_items]]
-== What's new in Peach Platform v4.1 (2016 Q3)
+== What's new in Peach Platform v{VER_MAJOR}.{VER_MINOR} (2016 Q3)
 
 This is our third release of 2016.
 This release focuses on adding Web API testing capabilities.
@@ -38,14 +38,14 @@ See the User Guide for more information.
 ==== Python pytest Integration for Web Proxy
 
 pytest integration plugin for use with Peach.
-This enabled using existing pytest automation in conjunction with the Peach Web feature.
+This enables using existing pytest automation in conjunction with the Peach Web feature.
 See the User Guide for more information.
 
 ==== Peach Proxy Python Module
 
 This module wraps the new Peach Web Proxy API.  It's main use is to allow
 developers to create traffic generators for the Peach Web Proxy feature. It's
-available in the SDK under 'webproxy/peachproxy'.
+available in the SDK under 'webproxy/peachproxy'. See the developer guide for more information.
 
 ==== Web Action
 

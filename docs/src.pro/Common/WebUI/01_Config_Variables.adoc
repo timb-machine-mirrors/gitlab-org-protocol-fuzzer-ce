@@ -2,8 +2,8 @@
 === Configuration Menu
 
 You can configure a Pit by using the Configuration menu.
-This menu consists of three parts: variables, monitoring, and test.
-The Variable and Monitoring parts need to be completed to pass a test of the configuration.
+This menu consists of four parts: variables, monitoring, tuning, and test.
+Only the Variable and Monitoring parts need to be completed to pass a test of the configuration.
 
 To begin from the Home Page,
 
