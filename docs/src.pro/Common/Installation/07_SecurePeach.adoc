@@ -1,8 +1,8 @@
 [[InstallSecureInstall]]
 === Secure Peach Install
 
-By default Peach exposes a web interface that is accessible with no encryption (SSL/TLS) and no authentication.
-Peach will natively support this in the future, but currently their is a work around by configuring nginx or
+By default, Peach exposes a web interface that is accessible with no encryption (SSL/TLS) and no authentication.
+Peach will natively support this in the future, but currently there is a work around by configuring nginx or
 other web server (apache, thttp, etc.) as a reverse proxy.
 This will place the configured web server in front of Peach wrapping requests in TLS and
 optionally providing authentication.
@@ -27,7 +27,7 @@ sudo sh -c "openssl passwd -apr1 >> /etc/nginx/.htpasswd"
 ----
 
 [start=6]
-. Add a firewall rule to block external access to Peaches port 8888.  Make sure this rule is enabled on bootup.
+. Add a firewall rule to block external access to Peach's port 8888.  Make sure this rule is enabled on bootup.
 . Link /etc/nginx/sites-available/peach to /etc/nginx/sites-enabled/peach
 . Restart NGINX and verify configuration is working
 
