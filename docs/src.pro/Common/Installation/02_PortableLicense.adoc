@@ -34,7 +34,7 @@ image::{images}/Common/Installation/LicenseUpload.png[scalewidth="60%"]
 . Upon returning to the Peach Fuzzer download home page, click `Sign In with License`.
 The page listing the available images displays:
 +
-image::{images}/Common/Installation/Image_Choices.png[scalewidth="70%"]
+image::{images}/Common/Installation/Portal_Downloads.png[scalewidth="70%"]
 
 . On the downloads page, select the Peach release version and operating system to install.
 
