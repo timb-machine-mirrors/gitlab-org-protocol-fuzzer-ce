@@ -5,7 +5,7 @@ Peach FuzzFlex is a flexible licensing model which allows users to purchase test
 Each test case that Peach executes is considered one 'use' of the Peach license against the total number of test cases purchased.
 
 During the delivery, Peach will create a user profile that can be used to access the Peach Fuzzer download site.
-The user can also be used to access the Licensing Operations Portal via the download site.
+The user can also be used to access the Licensing Operations Portal, used to check usage statistics, via the download site.
 The download site is available at link:https://dl.peachfuzzer.com[https://dl.peachfuzzer.com].
 
 Peach FuzzFlex can be deployed in one of two ways:
@@ -22,7 +22,7 @@ Local License Server onsite to provide offline activation and synchronization of
 information.
 +
 Deploying a local license server requires changes to your account.
-Please contact sales@peachfuzzer.com for more information about the process.
+Please contact licensing@peachfuzzer.com for more information about the process.
 
 [[License_FuzzFlex_CLS]]
 ==== Cloud License Server
@@ -70,7 +70,7 @@ Local License Server onsite to provide offline activation and synchronization of
 information.
 
 Deploying a local license server requires changes to your account.
-Please contact sales@peachfuzzer.com for more information about the process.
+Please contact licensing@peachfuzzer.com for more information about the process.
 
 ===== Hardware Requirements
 
@@ -156,7 +156,7 @@ flexnetlsadmin.bat -server http://127.0.0.1:7070/api/1.0/instances/~ -activate -
 NOTE: Substitute the +AID+ in the above command with the Activation ID found on the 'Licensing' page.
 
 . After initially activating the Local License Server,
-you'll need to return the the 'Licensing' page and use the +Link Features+ button
+you'll need to return to the 'Licensing' page and use the +Link Features+ button
 to ensure that all line items for an entitlement are linked to the Local License Server.
 
 . Finally, after your features have been linked with the Local License Server,
