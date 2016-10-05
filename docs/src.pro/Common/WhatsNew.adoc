@@ -1,5 +1,5 @@
 [[Brand_new_items]]
-== What's new in Peach Platform v4.1 (2016 Q3)
+== What's new in Peach Platform v{VER_MAJOR}.{VER_MINOR} (2016 Q3)
 
 This is our third release of 2016.
 This release focuses on adding Web API testing capabilities.
