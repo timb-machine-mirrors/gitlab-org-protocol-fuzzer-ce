@@ -16,21 +16,24 @@ This is an optional, but recommended method for usage.
 include::01_Usage.adoc[]
 
 <<<
-include::02_TrafficGenerator.adoc[]
+include::02_CI.adoc[]
 
 <<<
-include::03_Configuration.adoc[]
+include::03_TrafficGenerator.adoc[]
 
 <<<
-include::04_Scripts.adoc[]
+include::04_IssueTracker.adoc[]
 
 <<<
-include::05_Authentication.adoc[]
+include::05_Configuration.adoc[]
 
 <<<
-include::06_CI.adoc[]
+include::06_Authentication.adoc[]
 
 <<<
-include::07_Examples.adoc[]
+include::07_Scripts.adoc[]
+
+<<<
+include::08_Examples.adoc[]
 
 // end

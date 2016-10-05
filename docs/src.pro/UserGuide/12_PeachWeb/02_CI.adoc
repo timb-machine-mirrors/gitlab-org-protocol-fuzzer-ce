@@ -1,11 +1,12 @@
 
+[[webproxy_CI]]
 === CI Integration
 
 Peach Web currently provides generic CI integration via command line usage.
-Our next release will include specific plugins or integrations with leading CI systems.
+Future releases will include plugins for leading CI systems.
 
 Generic integration with CI systems is provided by running a command that
-returns non-zero when testing did not pass.
+returns non-zero when testing does not pass.
 The vast majority of CI systems support this method of integration.
 
 The generic CI integration script is available in SDK\webproxy\ci\generic.
