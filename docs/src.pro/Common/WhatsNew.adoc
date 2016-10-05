@@ -2,23 +2,20 @@
 == What's new in Peach Platform v{VER_MAJOR}.{VER_MINOR} (2016 Q3)
 
 This is our third release of 2016.
-This release focuses on adding Web API testing capabilities.
-The new Pits are available for licensing singularly or as part of a Pit Pack.
-If you are interested in using a new Pit that has been added to an existing Pit Pack already licensed,
+This release focuses on adding Web API testing capabilities. If you are interested in using a new feature that has been added to an existing license,
 re-download Peach Fuzzer by visiting https://dl.peachfuzzer.com.
 
 === Peach FuzzFlex Licensing Model
 
-Peach FuzzFlex is a flexible licensing model which allows users to purchase test cases in batches of 100k.
+Peach Fuzzer’s FuzzFlex solution allows organizations to scale Peach Fuzzer to meet their needs and budget. FuzzFlex users experience the full power of the platform: unlimited concurrencies, access to a library of over 100 off-the-shelf Peach Pits, developer access to support custom protocols. FuzzFlex users purchase test cases in batches of 100k.
 Each test case that Peach executes is considered one 'use' of the Peach license against the
 total number of test cases purchased.
 
-Please contact licensing@peachfuzzer.com for more information about this new licensing model.
+Please contact sales@peachfuzzer.com for more information about this new licensing model.
 
 === Peach Download Site
 
-A new download site has been deployed that supports both our existing licensing system and also our new
-FuzzFlex licensing system.
+A new download site has been deployed that supports both our existing licensing system for Professional and Enterprise users as well as our new FuzzFlex licensing system.
 The new download site improves the download speed and responsiveness of the site.
 
 === Peach Professional/Enterprise
