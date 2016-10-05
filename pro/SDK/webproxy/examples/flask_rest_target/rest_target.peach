@@ -1,6 +1,6 @@
 {
   "name": "rest_target",
-  "description": "Flask Rest Target",
+  "description": "",
   "originalPit": "Net/WebProxy.xml",
   "config": [
     {
@@ -8,24 +8,28 @@
       "value": "8001"
     },
     {
-      "key": "SwaggerUrl",
+      "key": "ClientCert",
       "value": ""
     },
     {
-      "key": "BaseUrl",
-      "value": "http://127.0.0.1:5000"
+      "key": "ClientKey",
+      "value": ""
     },
     {
-      "key": "FaultOnStatusCode",
-      "value": "500,501"
+      "key": "CaCert",
+      "value": ""
     },
     {
-      "key": "OnRequest",
+      "key": "CaKey",
+      "value": ""
+    },
+    {
+      "key": "ServerKey",
       "value": ""
     },
     {
       "key": "Timeout",
-      "value": "9999999"
+      "value": "999000"
     }
   ],
   "agents": [
@@ -39,12 +43,30 @@
           "map": [
             {
               "key": "FaultRegex",
-              "value": "(.*syntax error)"
+              "value": "(.*syntax error.*)"
             }
           ]
         }
       ]
     }
   ],
-  "weights": []
+  "weights": [],
+  "webProxy": {
+    "routes": [
+      {
+        "url": "*",
+        "mutate": true,
+        "faultOnStatusCodes": [
+          500,
+          501
+        ],
+        "headers": [
+          {
+            "name": "*",
+            "mutate": true
+          }
+        ]
+      }
+    ]
+  }
 }
