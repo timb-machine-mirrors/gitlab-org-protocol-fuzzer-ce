@@ -19,20 +19,6 @@ xref:License_FuzzFlex_LLS[Local License Server (Offline Synchronization)]::
 Users who wish to use Peach FuzzFlex without having access to the Internet can deploy a
 Local License Server onsite to provide offline activation and synchronization of licensing 
 information.
-+
-The Local License Server is supported on the following platforms.
-+
-[options="header"]
-|========
-| Operating System    | CPU Architecture  | Version
-.4+^.^| Linux   .4+^.^| x86/x86-64        | CentOS 6.0
-                                          | CentOS 7.0
-                                          | Red Hat Enterprise Linux 6.0
-                                          | Red Hat Enterprise Linux 7.0
-.2+^.^| Windows .2+^.^| x86/x86-64        | Windows 8 (including 8.1) and 10
-                                          | Windows Server 2012 R2
-|========
-
 
 [[License_FuzzFlex_CLS]]
 ==== Cloud License Server
@@ -67,18 +53,149 @@ image::{images}/Common/Installation/Portal_EULA_Flex.png[]
 Depending on your network connection,
 this could take a few minutes.
 
-===== Using Peach FuzzFlex
-
-TODO
-
 [[License_FuzzFlex_LLS]]
 ==== Local License Server (Offline Synchronization) 
 
-TODO
+The Local License Server provides functionality for serving and monitoring a counted pool of licenses 
+for Peach FuzzFlex.
+Users who wish to use Peach FuzzFlex without having access to the Internet can deploy a
+Local License Server onsite to provide offline activation and synchronization of licensing 
+information.
 
-===== Preparing a Local License Server
+===== Hardware Requirements
 
-TODO
+The following are the minimum hardware requirements for license server:
+Disk:: 100 MB
+RAM:: 4 GB
+CPU:: 1 GHz
+
+===== Supported Platforms
+
+The Local License Server is supported on the following platforms.
+
+[options="header"]
+|========
+| Operating System    | CPU Architecture  | Version
+.4+^.^| Linux   .4+^.^| x86/x86-64        | CentOS 6.0
+                                          | CentOS 7.0
+                                          | Red Hat Enterprise Linux 6.0
+                                          | Red Hat Enterprise Linux 7.0
+.2+^.^| Windows .2+^.^| x86/x86-64        | Windows 8 (including 8.1) and 10
+                                          | Windows Server 2012 R2
+|========
+
+===== Java Prerequisites
+
+The following are the Java prerequisites for the machine on which the Local License Server is installed:
+
+* Oracle JRE 1.8 or OpenJDK 1.8
+* A 64-bit JRE for a 64-bit license server or a 32-bit JRE for a 32-bit license server 
+(not adhering to this requirement can cause the license server to fail to start)
+* The JAVA_HOME (or JRE_HOME) environment variable on your system set to the path for your default JDK (or JRE) installation
+
+NOTE: The license server requires only the JRE component.
+If JRE is your default Java installation, 
+set the JRE_HOME environment variable;
+if JDK is your default installation,
+set JAVA_HOME.
+
+===== Downloading the Software Package
+
+The Local License Server is provided as a .zip file that you download from 
+the https://dl.peachfuzzer.com[Peach Downloader]. 
+The software package supports both the 32-bit and 64-bit architectures.
+Choose the appropriate package based on your system requirements:
+
+* +flexnetls-linux_x86.zip+
+* +flexnetls-linux_x86_64.zip+
+* +flexnetls-win_x86.zip+
+* +flexnetls-win_x64.zip+
+
+===== Preparing a Local License Server for Windows
+
+. Extract the installation archive to +C:\flexnetls+.
+
+. Run the following commands as an Administrator to install and start the server:
++
+----
+cd C:\flexnetls
+flexnetls.bat -install
+flexnetls.bat -start
+----
+
+. Once your local license server is installed and running,
+follow the instructions provided on the 'Licensing' page on the 
+https://dl.peachfuzzer.com[Peach Downloader] site.
++
+An Activation ID will be required to continue. 
+The 'Licensing' page should provide this information.
+If you need help with finding the Activation ID,
+please contact licensing@peachfuzzer.com.
++
+As an example,
+the 'Licensing' page will ask you to run a command similar to:
++
+----
+cd C:\flexnetls
+flexnetlsadmin.bat -server http://127.0.0.1:7070/api/1.0/instances/~ -activate -id AID
+----
++
+NOTE: Substitute the +AID+ in the above command with the Activation ID found on the 'Licensing' page.
+
+. After initially activating the Local License Server,
+you'll need to return the the 'Licensing' page and use the +Link Features+ button
+to ensure that all line items for an entitlement are linked to the Local License Server.
+
+. Finally, after your features have been linked with the Local License Server,
+perform another activation as before to ensure that your entitlement is synchronized
+with the Flex Net Operations back-end.
+
+NOTE: For more information and additional deployment options,
+see the 'FlexNet Embedded 2016 R2 License Server Administration Guide' found
+in the installation folder as a file named +FNE_LicenseServerAdminGuide_2016R2.pdf+.
+
+===== Preparing a Local License Server for Linux
+
+. Extract the installation archive to +/opt/flexnetls+.
+
+. Run the following commands as root to install and start the server:
++
+----
+cd /opt/flexnetls
+sudo ./flexnetls.sh -install
+sudo ./flexnetls.sh -start
+----
+
+. Once your local license server is installed and running,
+follow the instructions provided on the 'Licensing' page on the 
+https://dl.peachfuzzer.com[Peach Downloader] site.
++
+An Activation ID will be required to continue. 
+The 'Licensing' page should provide this information.
+If you need help with finding the Activation ID,
+please contact licensing@peachfuzzer.com.
++
+As an example,
+the 'Licensing' page will ask you to run a command similar to:
++
+----
+cd /opt/flexnetls
+./flexnetlsadmin.sh -server http://127.0.0.1:7070/api/1.0/instances/~ -activate -id AID
+----
++
+NOTE: Substitute the +AID+ in the above command with the Activation ID found on the 'Licensing' page.
+
+. After initially activating the Local License Server,
+you'll need to return the the 'Licensing' page and use the +Link Features+ button
+to ensure that all line items for an entitlement are linked to the Local License Server.
+
+. Finally, after your features have been linked with the Local License Server,
+perform another activation as before to ensure that your entitlement is synchronized
+with the Flex Net Operations back-end.
+
+NOTE: For more information and additional deployment options,
+see the 'FlexNet Embedded 2016 R2 License Server Administration Guide' found
+in the installation folder as a file named +FNE_LicenseServerAdminGuide_2016R2.pdf+.
 
 ===== Downloading Peach FuzzFlex
 
