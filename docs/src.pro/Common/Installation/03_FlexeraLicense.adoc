@@ -231,7 +231,7 @@ cd /opt/flexnetls
 NOTE: Substitute the +AID+ in the above command with the Activation ID found on the 'Licensing' page.
 
 . After initially activating the Local License Server,
-you'll need to return the the 'Licensing' page and use the +Link Features+ button
+you'll need to return to the 'Licensing' page and use the +Link Features+ button
 to ensure that all line items for an entitlement are linked to the Local License Server.
 
 . Finally, after your features have been linked with the Local License Server,
@@ -244,7 +244,6 @@ in the installation folder as a file named +FNE_LicenseServerAdminGuide_2016R2.p
 
 ===== Downloading Peach FuzzFlex
 
-. When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
 . Navigate to https://dl.peachfuzzer.com with your preferred web browser.
 . At the login prompt under the FuzzFlex Sign In section,
 enter the new username/password that was recently reset and click +Sign In+.
