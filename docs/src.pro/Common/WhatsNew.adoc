@@ -7,14 +7,19 @@ The new Pits are available for licensing singularly or as part of a Pit Pack.
 If you are interested in using a new Pit that has been added to an existing Pit Pack already licensed,
 re-download Peach Fuzzer by visiting https://dl.peachfuzzer.com.
 
-=== Fuzzing Definitions (Pits)
+=== Peach FuzzFlex Licensing Model
 
-Descriptions of the new/updated Pits follow:
+Peach FuzzFlex is a flexible licensing model which allows users to purchase test cases in batches of 100k.
+Each test case that Peach executes is considered one 'use' of the Peach license against the
+total number of test cases purchased.
+
+Please contact licensing@peachfuzzer.com for more information about this new licensing model.
 
 === Peach Download Site
 
 A new download site has been deployed that supports both our existing licensing system and also our new
-FuzzFlex licensing system.  The new download site improves the download speed and responsiveness of the site.
+FuzzFlex licensing system.
+The new download site improves the download speed and responsiveness of the site.
 
 === Peach Professional/Enterprise
 
