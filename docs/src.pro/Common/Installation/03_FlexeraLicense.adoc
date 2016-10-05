@@ -27,7 +27,10 @@ Please contact sales@peachfuzzer.com for more information about the process.
 [[License_FuzzFlex_CLS]]
 ==== Cloud License Server
 
-TODO
+A Cloud License Server provides functionality for serving and monitoring a counted pool of licenses 
+for Peach FuzzFlex.
+A persistent connection to the Internet is required so that usage data can be uploaded to
+the Cloud License Server while a Peach FuzzFlex job is running.
 
 ===== Downloading Peach FuzzFlex
 
@@ -237,7 +240,40 @@ this could take a few minutes.
 
 ===== Using Peach FuzzFlex
 
-TODO
+Once your organization has a Local License Server installed and running 
+(this may require the assistance of an IT administrator)
+the Peach license configuration must be updated.
+You can use the same license configuration for any machine intended to run
+Peach FuzzFlex across your entire organization.
+
+Follow these steps to update your local configuration. 
+To update the local configuration you will need the Local License Server URL.
+In general, the URL should be of the form: +http://HOST:PORT/request+.
+An example of a Local License Server URL is +http://192.168.1.2:7070/request+.
+
+NOTE: For more information on determining the Local License Server URL,
+see the 'FlexNet Embedded 2016 R2 License Server Administration Guide' found
+in the installation folder as a file named +FNE_LicenseServerAdminGuide_2016R2.pdf+.
+
+1. Edit the file +Peach.license.config+ located in your Peach install folder.
+2. Replace +LOCAL_LICENSE_SERVER_URL+ with the Local License Server URL.
+3. Restart Peach.
+
+Example of an updated file is:
+
+----
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <appSettings>
+    <add key="licenseUrl" value="http://192.168.1.2:7070/request" />
+    <add key="activationId" value="0000-0000-0000-0000-0000-0000-0000-0000" />
+  </appSettings>
+</configuration> 
+----
+
+NOTE: The +activationId+ setting in the +Peach.license.config+ file should already be
+set for you by the download process. 
+You only need to focus on modifying the +licenseUrl+ setting.
 
 ==== Managing Peach Fuzzer Flex Licenses
 

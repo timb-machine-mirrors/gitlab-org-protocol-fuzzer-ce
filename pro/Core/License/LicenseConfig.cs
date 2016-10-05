@@ -43,12 +43,13 @@ namespace Peach.Pro.Core.License
 			{
 				var msg = @"
 Your product license requires a local license server to operate.
-You can find more information about setting up a local license server in the 
-Peach User Guide under XXXX. Once your organization has a local license server
+You can find more information about setting up a local license server in the
+Peach User Guide under section 4.3.2: Local License Server (Offline Synchronization).
+Once your organization has a local license server
 installed and running (this may require the assistance of an IT administrator)
 the Peach license configuration must be updated.
 
-The following these steps to update your local configuration. 
+Follow these steps to update your local configuration. 
 To update the local configuration you will need the local license server URL.
 An example of a local license server URL is ""http://192.168.1.2:7070/request"".
 
