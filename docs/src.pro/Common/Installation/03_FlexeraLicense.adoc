@@ -65,6 +65,7 @@ information.
 ===== Hardware Requirements
 
 The following are the minimum hardware requirements for license server:
+
 Disk:: 100 MB
 RAM:: 4 GB
 CPU:: 1 GHz
