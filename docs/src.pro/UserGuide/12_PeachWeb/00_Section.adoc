@@ -4,8 +4,8 @@ Peach Web enables Peach to perform fuzz testing of various web services and web 
 Any web service or API system that utilizes HTTP as the transport layer with JSON, XML or formdata is supported.
 Examples include REST, SOAP and JSON-API.
 
-Testing is performed by sending valid traffic through Peaches web proxy to the test target.
-As requests pass through the web proxy they are modified to create test cases.
+Testing is performed by sending valid traffic through Peach's web proxy to the test target.
+As requests pass through the web proxy, they are modified to create test cases.
 Transport layer security (SSL/TLS) is supported along with client cert authentication.
 Web socket traffic is also supported, but is not tested at this time (pass through only).
 
