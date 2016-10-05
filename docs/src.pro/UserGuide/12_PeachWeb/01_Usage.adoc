@@ -8,22 +8,45 @@ This section provides some example usage patterns for Peach Web.
 
 For teams building web services and web APIs, integration into the CI system or automated test system provides
 a lot of advantages over traditional web testing processes.
-Peach Web can also re-use automated tests to provide high test coverage with little effort.
 
-Immediate feedback during CI build and test process::
-	Peach Web becomes a step in your CI system.
-	Builds that don't pass security testing can fail.
-	Cost savings by fixing issues immediately.
-	
-Integration with existing automated tests::
-	Because Peach Web operates as a web proxy, traffic must be sent through it to generate test cases.
-	An one method to accomplish this is using existing automated tests based on Selenium, JUnit, pytest or other
-	test frameworks.
-	Peach provides integrations into these common automated testing platforms.
-	This provides instant test coverage across your APIs with little upfront work.
-	As new test cases are added they can automatically be used with Peach, lowering your cost
-	of ownership.
-	
+ * Immediate feedback.
+When security testing occurs with every build, security issues are found and fixed much faster.
+ 
+ * Lowered cost of fixing security issues.
+The cost to fix a security issue starts increasing as time between when it was authored and discovered grows.
+By providing immediate feedback the time between write and fix is shortened.
+
+ * Lowered Cost of Ownership.
+Re purposing existing automated tests removes the need to maintain configurations for each API.
+Re-using existing tests also quickly provides high test coverage with little effort.
+
+A typical deployment includes the following components:
+
+CI integration::
+	CI system's pipeline is configured to include Peach Web testing with specific types of builds.
+	For example, nightly builds might be configured to run Peach Web testing for 2 hours each night.
+	If security testing fails during those 2 hours, the build would be marked as such, similar to failing
+	automated tests.
+
+Traffic Generator::
++
+A traffic generator is needed that produces requests that are fuzzed.
+The xref:webproxy_TrafficGen[Traffic Generator] section provides more information about what is needed.
+There are two common methods:
++
+Automated Test Integration;;
++
+Use existing test automation with one of Peaches framework integrations such as JUnit or pytest.
+The use of existing test automation provides a fast way to get Peach Web running.
++
+Custom Traffic Generator;;
++
+A custom traffic generator can also be used.
+These are custom written scripts in any language (python, java, nodejs, etc.).
+
+Issue Tracker Integration::
+	Peach can automatically log found faults into popular issue trackers such as JIRA or Bugzilla.
+	The scripts and documentation are provided in _SDK/tools/peach2bugzilla_ and _SDK/tools/peach2jira_.
 
 ==== Redteam or Penetration Tester
 

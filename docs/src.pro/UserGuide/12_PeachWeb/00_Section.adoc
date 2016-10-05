@@ -30,4 +30,7 @@ include::05_Authentication.adoc[]
 <<<
 include::06_CI.adoc[]
 
+<<<
+include::07_Examples.adoc[]
+
 // end
