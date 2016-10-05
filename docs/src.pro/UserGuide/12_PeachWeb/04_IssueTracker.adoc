@@ -18,8 +18,8 @@ when the testing has completed.
 This is the recommended solution when integrating into a CI system.
     
 Monitor::
-    Luanched by a monitor in your Peach configuration.
-    The Peach Web configuraiton has a local agent with a _Run Command_ monitor configured
+    Launched by a monitor in your Peach configuration.
+    The Peach Web configuration has a local agent with a _Run Command_ monitor configured
     to run at the end of the fuzzing session and launch the issue tracker integration script.
     
 External Entity/By Hand::
