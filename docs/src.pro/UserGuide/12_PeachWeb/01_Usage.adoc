@@ -17,7 +17,7 @@ The cost to fix a security issue starts increasing as time between when it was a
 By providing immediate feedback the time between write and fix is shortened.
 
  * Lowered Cost of Ownership.
-Re purposing existing automated tests removes the need to maintain configurations for each API.
+Re-purposing existing automated tests removes the need to maintain configurations for each API.
 Re-using existing tests also quickly provides high test coverage with little effort.
 
 A typical deployment includes the following components:
@@ -41,7 +41,7 @@ There are two common methods:
 +
 Automated Test Integration;;
 +
-Use existing test automation with one of Peaches framework integrations such as JUnit or pytest.
+Use existing test automation with one of Peach's framework integrations such as JUnit or pytest.
 The use of existing test automation provides a fast way to get Peach Web running.
 +
 Custom Traffic Generator;;
@@ -63,6 +63,6 @@ Use by individual testers such as redteam members or penetration testers can be 
  * Attack proxies can forward input into Peach for testing.
 For example Burp Repeater can be used to forward requests through Peach multiple times.
  * A custom traffic generator script can be written in a language known by the tester such as Python.
-These scripts are easy and quick to author, in fact existing sample code can be used in many cases.
+These scripts are easy and quick to author- existing sample code can be used in many cases.
  * Selenium Firefox plugin can be used to record a web session.
 Selenium then exports to formats like JUnit that have Peach integrations.
