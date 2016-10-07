@@ -327,6 +327,9 @@ namespace Peach.Pro.Core.Loggers
 			uint currentIteration,
 			uint? totalIterations)
 		{
+			// prevent last iteration failures from showing up in this one
+			_lastMessage = null; 
+
 			if (!context.controlIteration && !context.controlRecordingIteration)
 			{
 				if (_counter >= 100)
