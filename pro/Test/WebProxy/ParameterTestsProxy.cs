@@ -66,6 +66,31 @@ namespace Peach.Pro.Test.WebProxy
 		}
 
 		[Test]
+		public void TestSwaggerNullQuery()
+		{
+			var client = GetHttpClient();
+			var response = client.GetAsync(BaseUrl + "/api/values?%2ffoo&%2fbar").Result;
+			var op = GetOp();
+
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.NotNull(op);
+			Assert.AreEqual("GET", op.Method);
+			Assert.NotNull(op.Path);
+			Assert.NotNull(op.ShadowOperation);
+			Assert.LessOrEqual(1, op.Parameters.Count);
+
+			var param = op.Parameters.Where(i => i.In == WebApiParameterIn.Query).ToList();
+
+			Assert.AreEqual(2, param.Count);
+			Assert.AreEqual(null, param[0].Key);
+			Assert.AreEqual("/foo", (string)param[0].DataElement.DefaultValue);
+			Assert.AreEqual(null, param[1].Key);
+			Assert.AreEqual("/bar", (string)param[1].DataElement.DefaultValue);
+
+			StringAssert.Contains("GET /api/values?%2ffoo&%2fbar", Requests[0]);
+		}
+
+		[Test]
 		public void TestSwaggerOptionalQuery()
 		{
 			var client = GetHttpClient();
