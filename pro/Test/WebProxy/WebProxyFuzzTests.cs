@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using Castle.Core.Internal;
 using NUnit.Framework;
 using Org.BouncyCastle.Asn1.Cmp;
+using Org.BouncyCastle.Utilities.Collections;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Monitors;
@@ -179,7 +181,7 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 				baseUrl='{0}'
 			/> 
 			<Route
-				url='*' mutate='false'
+				url='*' mutate='true'
 				baseUrl='{0}'
 			/> 
 		</WebProxy>
@@ -206,43 +208,45 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 				var headers = client.DefaultRequestHeaders;
 				headers.Add("X-Peachy", "Testing 1..2..3..");
 
-				var response = client.PutAsync(BaseUrl + "/unknown/api/values/5?filter=foo", content).Result;
+				var response = client.PutAsync(BaseUrl + "/api/values/5?filter=foo", content).Result;
 				Assert.NotNull(response);
-				
+
+				var paramList = new List<WebApiParameter>();
+
 				if (i == 0)
 				{
 					Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
 					var op = GetOp();
+					paramList = op.Parameters;
 					Assert.NotNull(op);
 					Assert.AreEqual("PUT", op.Method);
 					Assert.NotNull(op.Path);
-					Assert.AreEqual("/{unknown}/{api}/{values}/{5}", op.Path.Path);
-					Assert.LessOrEqual(2, op.Parameters.Count);
-
+					Assert.AreEqual("/{api}/{values}/{5}", op.Path.Path);
+					Assert.AreEqual("PUTapivalues5", op.Name);
+					
 					var param = op.Parameters.First(j => j.In == WebApiParameterIn.Path);
 					Assert.AreEqual(WebApiParameterIn.Path, param.In);
-					Assert.AreEqual("unknown", (string)param.DataElement.DefaultValue);
-					Assert.AreEqual(-1, ValuesController.Id);
+					Assert.AreEqual("api", (string)param.DataElement.DefaultValue);
+					Assert.AreEqual(5, ValuesController.Id);
 				}
-				else
+				else if (i == 1)
 				{
 					try
 					{
 						Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 					}
-					catch (AssertionException ex)
+					catch (Exception)
 					{
-						//Testing that an exception does not actually get thrown.
-						StringAssert.DoesNotContain(ex.ToString(), ex.Message);
+						//Fuzzing so weird requests happen, if not caught, tests halt. 
+						continue; 
 					}
 					var op = GetOp();
 					Assert.NotNull(op);
-					Assert.AreNotEqual("/{unknown}/{api}/{values}/{5}/", op.Path.Path);
-
-					var param = op.Parameters.First(j => j.In == WebApiParameterIn.Path);
-					Assert.AreNotEqual("api", (string)param.DataElement.DefaultValue);
-					Assert.AreNotEqual(5, ValuesController.Id);
+					Assert.AreNotEqual("/{api}/{values}/{5}/", op.Path.Path);
+					
+					// if the two lists are identical means no fuzzing 
+					Assert.AreNotSame(paramList, op.Parameters);
 				}
 			}
 		}
