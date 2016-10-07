@@ -1,6 +1,8 @@
 ﻿using System.Linq;
+using System.Web;
 using NUnit.Framework;
 using Peach.Pro.Core.WebApi;
+using Titanium.Web.Proxy;
 
 namespace Peach.Pro.Test.WebProxy
 {
@@ -27,6 +29,17 @@ namespace Peach.Pro.Test.WebProxy
 
 			match = path.PathRegex().Match("/unknown/api/values/5?foo=bar");
 			Assert.IsFalse(match.Success);
+		}
+
+		[Test]
+		public void TestQueryStringParse()
+		{
+			var uri = new Uri("http://host.com/foo?/bar&/baz");
+			var query = uri.Query;
+			var res = HttpUtility.ParseQueryString(query);
+			Assert.AreEqual(1, res.Keys.Count);
+			Assert.AreEqual(null, res.Keys[0]);
+			Assert.AreEqual(new[] {"/bar", "/baz"}, res.GetValues(0));
 		}
 	}
 }
