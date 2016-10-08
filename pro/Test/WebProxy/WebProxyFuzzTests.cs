@@ -230,7 +230,7 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 					Assert.AreEqual("api", (string)param.DataElement.DefaultValue);
 					Assert.AreEqual(5, ValuesController.Id);
 				}
-				else if (i == 1)
+				else
 				{
 					try
 					{
