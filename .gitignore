@@ -94,3 +94,6 @@ TestResult.xml
 
 # Emacs backup files
 *~
+
+# Downloader site
+/pro/Downloader/Web.local.config
