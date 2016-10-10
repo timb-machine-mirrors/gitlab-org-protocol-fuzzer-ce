@@ -50,6 +50,9 @@ class Header(object):
 	def __init__(self, name, value, item = None):
 		self._item = item or HttpHeader(name, value)
 
+	def __repr__(self):
+		return "{'name' : '%s', 'value' : '%s'}" % (self._item.Name, self._item.Value)
+
 	def __str__(self):
 		return "{'name' : '%s', 'value' : '%s'}" % (self._item.Name, self._item.Value)
 
@@ -73,6 +76,9 @@ class HeaderDict(dict):
 	def __init__(self, peach_req, *args, **kwargs):
 		super(HeaderDict, self).__init__(self, *args, **kwargs)
 		self._peach_req = peach_req
+
+	def __repr__(self):
+		return '{%s}' % ', '.join(['\'%s\' : [%s]' % (k, ', '.join(v)) for k,v in self.iteritems()])
 
 	def __str__(self):
 		return '{%s}' % ', '.join(['\'%s\' : [%s]' % (k, ', '.join(v)) for k,v in self.iteritems()])
@@ -120,14 +126,71 @@ class HeaderDict(dict):
 		for x in self._peach_req.NonUniqueRequestHeaders.Keys:
 			yield x
 
+	def __contains__(self, key):
+		return self._peach_req.RequestHeaders.ContainsKey(key) or self._peach_req.NonUniqueRequestHeaders.ContainsKey(key)
+
+	def keys(self):
+		return [ x for x in self.iterkeys() ]
+
+	def values(self):
+		return [ x for x in self.itervalues() ]
+
+	def items(self):
+		return [ x for x in self.iteritems() ]
+
+	def has_key(self, key):
+		if self._peach_req.RequestHeaders.ContainsKey(key):
+			return True
+		if self._peach_req.NonUniqueRequestHeaders.ContainsKey(key):
+			return True
+
+		return False
+
+	def get(self, key, failobj=None):
+		if self._peach_req.RequestHeaders.ContainsKey(key):
+			val = self._peach_req.RequestHeaders[key];
+			return [ Header(None, None, val) ]
+		if self._peach_req.NonUniqueRequestHeaders.ContainsKey(key):
+			vals = self._peach_req.NonUniqueRequestHeaders[key];
+			return [ Header(None, None, val) for val in vals ]
+
+		return failobj
+
+	def clear(self):
+		raise NotImplementedError
+
+	def setdefault(self, key, failobj=None):
+		raise NotImplementedError
+
+	def iterkeys(self):
+		for kv in self._peach_req.RequestHeaders:
+			yield kv.Key
+		for kv in self._peach_req.NonUniqueRequestHeaders:
+			yield kv.Key
+
+	def itervalues(self):
+		for kv in self._peach_req.RequestHeaders:
+			yield [ Header(None, None, kv.Value) ]
+		for kv in self._peach_req.NonUniqueRequestHeaders:
+			yield [ Header(None, None, v) for v in kv.Value ]
+
 	def iteritems(self):
 		for kv in self._peach_req.RequestHeaders:
 			yield (kv.Key, [ Header(None, None, kv.Value) ])
 		for kv in self._peach_req.NonUniqueRequestHeaders:
 			yield (kv.Key, [ Header(None, None, v) for v in kv.Value ])
 
-	def __contains__(self, key):
-		return self._peach_req.RequestHeaders.ContainsKey(key) or self._peach_req.NonUniqueRequestHeaders.ContainsKey(key)
+	def pop(self, key, failobj=None):
+		raise NotImplementedError
+
+	def popitem(self):
+		raise NotImplementedError
+
+	def copy(self):
+		raise NotImplementedError
+
+	def update(self):
+		raise NotImplementedError
 
 class Request(object):
 	def __init__(self, peach_req):
