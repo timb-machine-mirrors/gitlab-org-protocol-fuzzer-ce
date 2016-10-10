@@ -18,7 +18,7 @@ def configure(conf):
 	match = version_re(out)
 	if match:
 		kw = match.groupdict()
-		if int(kw['major']) != 1 or int(kw['minor']) < 6:
+		if int(kw['major']) < 1 and (int(kw['major']) != 1 or int(kw['minor']) < 6):
 			raise Errors.WafError('Wrong version for tsc. Expecting 1.6+, got: %(major)s.%(minor)s.%(patch)s' % kw) 
 	else:
 		raise Errors.WafError('Could not determine version for tsc.')
