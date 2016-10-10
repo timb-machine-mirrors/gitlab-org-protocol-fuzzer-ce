@@ -246,7 +246,7 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 					Assert.AreNotEqual("/{api}/{values}/{5}/", op.Path.Path);
 					
 					// if the two lists are identical means no fuzzing 
-					Assert.AreNotSame(paramList, op.Parameters);
+					Assert.AreNotEqual(paramList, op.Parameters);
 				}
 			}
 		}
