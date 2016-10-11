@@ -5,10 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using Castle.Core.Internal;
 using NUnit.Framework;
-using Org.BouncyCastle.Asn1.Cmp;
-using Org.BouncyCastle.Utilities.Collections;
 using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Monitors;
@@ -16,7 +13,6 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
-using Titanium.Web.Proxy;
 using Encoding = Peach.Core.Encoding;
 using FaultSummary = Peach.Pro.Core.WebServices.Models.FaultSummary;
 using Monitor = System.Threading.Monitor;
@@ -232,15 +228,7 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 				}
 				else
 				{
-					try
-					{
-						Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-					}
-					catch (Exception)
-					{
-						//Fuzzing so weird requests happen, if not caught, tests halt. 
-						continue; 
-					}
+					//Note: we cannot assert on the response status code because we are fuzzing
 					var op = GetOp();
 					Assert.NotNull(op);
 					Assert.AreNotEqual("/{api}/{values}/{5}/", op.Path.Path);
