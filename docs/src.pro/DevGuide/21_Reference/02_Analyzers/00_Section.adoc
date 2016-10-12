@@ -48,6 +48,10 @@ include::Swagger.adoc[]
 
 <<<
 
+include::Vcr.adoc[]
+
+<<<
+
 include::Xml.adoc[]
 
 <<
