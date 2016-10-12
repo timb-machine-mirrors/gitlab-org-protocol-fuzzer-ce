@@ -12,7 +12,6 @@ import os, warnings, logging
 import requests, json, sys
 from requests import put, get, delete, post
 
-
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.DEBUG)
@@ -22,9 +21,9 @@ consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
 logger.addHandler(consoleHandler)
 
-fileHandler = logging.FileHandler('peachproxy.log')
-fileHandler.setFormatter(logFormatter)
-logger.addHandler(fileHandler)
+#fileHandler = logging.FileHandler('peachproxy.log')
+#fileHandler.setFormatter(logFormatter)
+#logger.addHandler(fileHandler)
 
 ## This code will block the use of proxies.
 
@@ -57,13 +56,18 @@ def __peach_getJobId(api):
                                 logger.error("Error communicating with Peach Fuzzer. Status code was %s", r.status_code)
                                 sys.exit(-1)
                 except requests.exceptions.RequestException as e:
-                        print("Error communicating with Peach Fuzzer.")
-                        print("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-                        print(e)
-                        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                        logger.error("Error communicating with Peach Fuzzer.")
+                        logger.error("vvvv ERROR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+                        logger.error(e)
+                        logger.error("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
                         sys.exit(-1)
                 
                 r = r.json()
+                
+                if len(r) == 0:
+                        logger.error("No running jobs found, exitting")
+                        sys.exit(-1)
+                
                 __peach_jobid = r[0]['id']
                 
         return __peach_jobid
