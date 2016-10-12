@@ -139,7 +139,9 @@ namespace Peach.Pro.Core.Analyzers
 
 					logger.Debug("Resolved entry '{0}' to data model '{1}'.", fileName, other.Name);
 
-					return (DataElementContainer)other.Clone("Content");
+					var ret = (DataModel)other.Clone("Content");
+					ret.dom = dom;
+					return ret;
 
 				}
 			}
