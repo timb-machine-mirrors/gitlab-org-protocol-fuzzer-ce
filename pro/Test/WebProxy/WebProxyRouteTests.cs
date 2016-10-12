@@ -333,7 +333,10 @@ def to_p(req):
 				Assert.AreEqual("/path/to/item", p.Eval("mymodule.to_p(req).uri.path", scope));
 				Assert.AreEqual("?query&string&goes=here", p.Eval("mymodule.to_p(req).uri.query", scope));
 
+				Console.WriteLine(p.Eval("mymodule.to_p(req).headers", scope));
 				Console.WriteLine(p.Eval("str(mymodule.to_p(req).headers)", scope));
+				Console.WriteLine(p.Eval("str(mymodule.to_p(req).headers.keys())", scope));
+				Console.WriteLine(p.Eval("str(mymodule.to_p(req).headers.values())", scope));
 				Console.WriteLine(p.Eval("str([x for x in mymodule.to_p(req).headers])", scope));
 				Console.WriteLine(p.Eval("str([str(item) for _,sublist in mymodule.to_p(req).headers.iteritems() for item in sublist])", scope));
 

@@ -68,16 +68,6 @@ module.exports = (grunt) ->
 				e2e
 			]
 
-		tsd:
-			app: 
-				options:
-					command: 'reinstall'
-					config: 'tsd-app.json'
-			test:
-				options:
-					command: 'reinstall'
-					config: 'tsd-test.json'
-
 		ts:
 			options:
 				module: 'commonjs'
@@ -235,7 +225,6 @@ module.exports = (grunt) ->
 	grunt.registerTask 'init', [
 		'clean'
 		'bowercopy'
-		'tsd'
 		'ts:app'
 	]
 
