@@ -195,6 +195,9 @@ def __on_request(route, context, req, body):
 
 	r = Request(req)
 
+	if body:
+		body = bytes(body)
+
 	for func in funcs:
 		func(context, r, body)
 
