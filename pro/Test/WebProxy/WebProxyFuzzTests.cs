@@ -228,7 +228,7 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 				}
 				else
 				{
-					//Note: we cannot assert on the response status code because we are fuzzing
+					// Cannot assert on the response status code because we are fuzzing
 					var op = GetOp();
 					Assert.NotNull(op);
 					Assert.AreNotEqual("/{api}/{values}/{5}/", op.Path.Path);
