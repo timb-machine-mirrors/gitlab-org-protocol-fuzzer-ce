@@ -10,8 +10,9 @@ using Peach.Core;
 using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Monitors;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices.Models;
-using Titanium.Web.Proxy;
+using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
 using Encoding = Peach.Core.Encoding;
 using FaultSummary = Peach.Pro.Core.WebServices.Models.FaultSummary;
 using Monitor = System.Threading.Monitor;
@@ -155,6 +156,86 @@ QN2CJgB1sNtKNTOAbKHcGxgk6hQPaM5SYzEh8R888ei/vxj12O6Qow==
 
 				var response = client.PutAsync(BaseUrl + "/unknown/api/values/5?filter=foo", content).Result;
 				Assert.NotNull(response);
+			}
+		}
+
+		[Test]
+		public void TestMutations()
+		{
+			SetUpFixture.EnableDebug();
+
+			File.WriteAllText(Path.Combine(TempDir.Path, "CaCert.pem"), CaCert);
+			File.WriteAllText(Path.Combine(TempDir.Path, "Cakey.pem"), CaKey);
+			File.WriteAllText(Path.Combine(TempDir.Path, "ServerKey.pem"), ServerKey);
+
+			var xml = @"<?xml version='1.0' encoding='utf-8'?>
+<Peach>
+	<Test name='Default' maxOutputSize='65000'>
+		<WebProxy>
+			<Route
+				url='*/unknown?api/*' mutate='true'
+				baseUrl='{0}'
+			/> 
+			<Route
+				url='*' mutate='true'
+				baseUrl='{0}'
+			/> 
+		</WebProxy>
+		<Strategy class='WebProxy' />
+		<Publisher class='WebApiProxy'>
+			<Param name='Port' value='0' />
+			<Param name='CaCert' value='{1}/CaCert.pem' />
+			<Param name='CaKey' value='{1}/CaKey.pem' />
+			<Param name='ServerKey' value='{1}/ServerKey.pem' />
+		</Publisher>
+	</Test>
+</Peach>".Fmt(Server.Uri, TempDir.Path);
+			RunEngine(xml);
+
+			for (var i = 0; i < 20; i++)
+			{
+
+				var content = new FormUrlEncodedContent(new[]
+				{
+					new KeyValuePair<string, string>("value", "Foo Bar") 
+				});
+
+				var client = GetHttpClient();
+				var headers = client.DefaultRequestHeaders;
+				headers.Add("X-Peachy", "Testing 1..2..3..");
+
+				var response = client.PutAsync(BaseUrl + "/api/values/5?filter=foo", content).Result;
+				Assert.NotNull(response);
+
+				var paramList = new List<WebApiParameter>();
+
+				if (i == 0)
+				{
+					Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+					var op = GetOp();
+					paramList = op.Parameters;
+					Assert.NotNull(op);
+					Assert.AreEqual("PUT", op.Method);
+					Assert.NotNull(op.Path);
+					Assert.AreEqual("/{api}/{values}/{5}", op.Path.Path);
+					Assert.AreEqual("PUTapivalues5", op.Name);
+					
+					var param = op.Parameters.First(j => j.In == WebApiParameterIn.Path);
+					Assert.AreEqual(WebApiParameterIn.Path, param.In);
+					Assert.AreEqual("api", (string)param.DataElement.DefaultValue);
+					Assert.AreEqual(5, ValuesController.Id);
+				}
+				else
+				{
+					// Cannot assert on the response status code because we are fuzzing
+					var op = GetOp();
+					Assert.NotNull(op);
+					Assert.AreNotEqual("/{api}/{values}/{5}/", op.Path.Path);
+					
+					// if the two lists are identical means no fuzzing 
+					Assert.AreNotEqual(paramList, op.Parameters);
+				}
 			}
 		}
 
