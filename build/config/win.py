@@ -16,6 +16,7 @@ tools = [
 	'tools.externals',
 	'tools.tsc',
 	'tools.version',
+	'tools.yarn',
 ]
 
 optional_tools = [
