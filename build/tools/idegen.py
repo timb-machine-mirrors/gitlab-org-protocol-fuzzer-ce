@@ -250,7 +250,6 @@ class source_file(object):
 		self.name = rel_path
 
 		if proj_path != rel_path:
-			print 'link: %s' % proj_path
 			self.attrs['Link'] = proj_path
 
 class embed_resource(object):
@@ -293,7 +292,11 @@ class vsnode_target(msvs.vsnode_target):
 		return 'None'
 
 	def get_waf(self):
-		return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+		return 'cd /d "%s" & "%s" %s' % (
+			self.ctx.ctx.srcnode.abspath(), 
+			sys.executable, 
+			getattr(self.ctx, 'waf_command', 'waf')
+		)
 
 	def get_waf_mono(self):
 		return '%s %s' % (sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
@@ -778,9 +781,7 @@ class Variant(object):
 class idegen(msvs.msvs_generator):
 	'''generates a visual studio 2010 solution'''
 
-	is_idegen = True
 	copy_cmd = 'copy'
-	cmd = 'msvs2010'
 	enable_cproj = True
 
 	def __init__(self, ctx):
@@ -874,6 +875,9 @@ class idegen(msvs.msvs_generator):
 
 		return ('CustomCommands', os.linesep.join(args))
 
+	def get_solution_node(self):
+		return self.ctx.srcnode.make_node(self.sln)
+
 	def add_variant(self):
 		if self.all_projects:
 			# Generate the sln config|plat for this variant
@@ -886,6 +890,7 @@ class idegen(msvs.msvs_generator):
 			return Variant(prop.variant, prop, self.all_projects)
 
 	def write_files(self, sln, variants):
+		self.sln = sln
 		self.variants = variants
 		self.all_projects = self.flatten_projects(variants)
 
@@ -898,7 +903,7 @@ class idegen(msvs.msvs_generator):
 		self.make_sln_configs(variants)
 
 		# and finally write the solution file
-		node = self.ctx.srcnode.make_node(sln)
+		node = self.get_solution_node()
 		node.parent.mkdir()
 		Logs.warn('Creating %r' % node)
 		template1 = msvs.compile_template(msvs.SOLUTION_TEMPLATE)
@@ -1079,10 +1084,10 @@ class idegen(msvs.msvs_generator):
 					prop.configuration_bld = config
 
 				prop.configuration = config
-				prop.variant = variant.key
+				prop.variant = variant.name
 				prop.is_active = True
 
-				main.proj_configs[variant.key] = prop
+				main.proj_configs[variant.name] = prop
 
 				if not any([ x for x in main.build_properties if x.platform == prop.platform and x.configuration == config ]):
 					main.build_properties.append(prop)
@@ -1105,8 +1110,13 @@ class idegen(msvs.msvs_generator):
 			return None
 
 class multi_idegen(BuildContext):
+	cmd = 'msvs2010'
 	depth = 0
 	sln_variants = {}
+	is_idegen = True
+
+	def init(self, generator):
+		pass
 
 	def execute(self):
 		multi_idegen.depth += 1
@@ -1116,6 +1126,22 @@ class multi_idegen(BuildContext):
 			self.load_envs()
 		self.recurse([self.run_dir])
 
+		self.process_solutions()
+
+		multi_idegen.depth -= 1
+		if multi_idegen.depth == 0:
+			for sln, variants in multi_idegen.sln_variants.iteritems():
+				variants = OrderedDict(sorted(variants.iteritems(), key=lambda x: x[1].key))
+				generator = self.create_generator()
+				generator.write_files(sln, variants)
+
+	def create_generator(self):
+		generator = idegen(self)
+		generator.init()
+		self.init(generator)
+		return generator
+
+	def process_solutions(self):
 		solutions = self.collect_solutions()
 		for sln, tgs in solutions.iteritems():
 			generator = self.create_generator()
@@ -1140,19 +1166,6 @@ class multi_idegen(BuildContext):
 				variant = generator.add_variant()
 				sln_variants = multi_idegen.sln_variants.setdefault(sln, {})
 				sln_variants[variant.name] = variant
-
-		multi_idegen.depth -= 1
-		if multi_idegen.depth == 0:
-			for sln, variants in multi_idegen.sln_variants.iteritems():
-				variants = OrderedDict(sorted(variants.iteritems(), key=lambda x: x[1].key))
-				generator = self.create_generator()
-				generator.write_files(sln, variants)
-
-	def create_generator(self):
-		generator = idegen(self)
-		generator.init()
-		self.init(generator)
-		return generator
 
 	def collect_solutions(self):
 		ret = {}
@@ -1179,7 +1192,7 @@ class multi_idegen(BuildContext):
 class idegen2012(multi_idegen):
 	'''generates a visual studio 2012 solution'''
 	cmd = 'msvs2012'
-	fun = 'build'
+	fun = multi_idegen.fun
 
 	def init(self, generator):
 		generator.numver = '12.00'
@@ -1190,7 +1203,7 @@ class idegen2012(multi_idegen):
 class idegen_xamarin6(multi_idegen):
 	'''generates a solution for Xamarin Studio/MonoDevelop 6'''
 	cmd = 'xamarin6'
-	fun = 'build'
+	fun = multi_idegen.fun
 
 	def init(self, generator):
 		generator.numver = '12.00'
