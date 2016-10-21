@@ -88,7 +88,7 @@ def dummy_platform(self):
 def install_fake_lib(self):
 	name = self.link_task.__class__.__name__
 	if name is not 'fake_csshlib':
-		install_outputs(self)
+		install_outputs(self, self)
 
 @feature('cs')
 @after_method('apply_cs')
@@ -141,21 +141,25 @@ def install_content2(self):
 	if content:
 		self.install_files('${BINDIR}', content, cwd=self.path, relative_trick=True)
 
-def install_outputs(self):
-	if getattr(self, 'has_installed', False):
+def install_outputs(self, ref):
+	# install 3rdParty libs into ${LIBDIR}
+	inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
+
+	has_installed = getattr(ref, 'has_installed', [])
+	if inst_to in has_installed:
 		return
 
-	self.has_installed = True
+	has_installed.append(inst_to)
+	ref.has_installed = has_installed
 
-	# install 3rdParty libs into ${LIBDIR}
-	self.install_files('${LIBDIR}', self.link_task.outputs, chmod=Utils.O755)
+	self.install_files(inst_to, ref.link_task.outputs, chmod=Utils.O755)
 
 	# install any pdb or .config files into ${LIBDIR}
-	for lib in self.link_task.outputs:
+	for lib in ref.link_task.outputs:
 		# only look for .config if we are mono - as they are the only ones that support this
 		config = self.env.CS_NAME == 'mono' and lib.parent.find_resource(lib.name + '.config')
 		if config:
-			self.install_files('${LIBDIR}', config, chmod=Utils.O644)
+			self.install_files(inst_to, config, chmod=Utils.O644)
 
 		name = lib.name
 		ext='.pdb'
@@ -167,7 +171,7 @@ def install_outputs(self):
 
 		pdb = lib.parent.find_resource(name)
 		if pdb:
-			self.install_files('${LIBDIR}', pdb, chmod=Utils.O755)
+			self.install_files(inst_to, pdb, chmod=Utils.O755)
 
 @feature('cs', 'msbuild')
 @before_method('apply_cs', 'apply_mbuild')
@@ -283,7 +287,7 @@ def apply_target_framework(self):
 			y = get(x)
 			if 'fake_lib' in getattr(y, 'features', ''):
 				y.post()
-				install_outputs(y)
+				install_outputs(self, y)
 			filtered.append(x)
 		except Errors.WafError:
 			self.env.append_value('ASSEMBLIES', x)
