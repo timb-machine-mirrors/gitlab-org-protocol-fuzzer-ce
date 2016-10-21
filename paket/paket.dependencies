@@ -1,0 +1,6 @@
+framework: net451
+source https://www.nuget.org/api/v2
+
+nuget Microsoft.AspNetCore.Mvc
+nuget Microsoft.AspNetCore.Server.Kestrel
+nuget Microsoft.Extensions.Configuration.Json

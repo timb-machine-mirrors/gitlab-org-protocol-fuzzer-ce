@@ -97,3 +97,7 @@ TestResult.xml
 
 # Downloader site
 /pro/Downloader/Web.local.config
+
+# paket
+paket/.paket/paket.exe
+paket/packages
