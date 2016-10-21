@@ -292,7 +292,11 @@ class vsnode_target(msvs.vsnode_target):
 		return 'None'
 
 	def get_waf(self):
-		return 'cd /d "%s" & "%s" %s' % (self.ctx.srcnode.abspath(), sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
+		return 'cd /d "%s" & "%s" %s' % (
+			self.ctx.ctx.srcnode.abspath(), 
+			sys.executable, 
+			getattr(self.ctx, 'waf_command', 'waf')
+		)
 
 	def get_waf_mono(self):
 		return '%s %s' % (sys.executable, getattr(self.ctx, 'waf_command', 'waf'))
@@ -767,23 +771,52 @@ class vsnode_cs_target2012(vsnode_cs_target):
 def copyattr(obj, src, dst):
 	setattr(obj, dst, getattr(obj, src, []))
 
+class Variant(object):
+	def __init__(self, name, prop, projects):
+		self.name = name
+		self.prop = prop
+		self.projects = projects
+		self.key = '%s|%s' % (prop.configuration, prop.platform_sln)
+
 class idegen(msvs.msvs_generator):
 	'''generates a visual studio 2010 solution'''
 
-	all_projs = {} # Variant -> all_projects
-	sln_configs = {} # Variant -> build_property
-	is_idegen = True
-	depth = 0
 	copy_cmd = 'copy'
-	cmd = 'msvs2010'
 	enable_cproj = True
 
+	def __init__(self, ctx):
+		self.ctx = ctx
+
 	def init(self):
-		msvs.msvs_generator.init(self)
+		if not getattr(self, 'configurations', None):
+			self.configurations = ['Release'] # LocalRelease, RemoteDebug, etc
+		if not getattr(self, 'platforms', None):
+			self.platforms = ['Win32']
+		if not getattr(self, 'all_projects', None):
+			self.all_projects = []
+		if not getattr(self, 'project_extension', None):
+			self.project_extension = '.vcxproj'
+		if not getattr(self, 'projects_dir', None):
+			self.projects_dir = self.ctx.srcnode.make_node('.depproj')
+			self.projects_dir.mkdir()
+
+		# bind the classes to the object, so that subclass can provide custom generators
+		if not getattr(self, 'vsnode_vsdir', None):
+			self.vsnode_vsdir = msvs.vsnode_vsdir
+		if not getattr(self, 'vsnode_target', None):
+			self.vsnode_target = msvs.vsnode_target
+		if not getattr(self, 'vsnode_build_all', None):
+			self.vsnode_build_all = msvs.vsnode_build_all
+		if not getattr(self, 'vsnode_install_all', None):
+			self.vsnode_install_all = msvs.vsnode_install_all
+		if not getattr(self, 'vsnode_project_view', None):
+			self.vsnode_project_view = msvs.vsnode_project_view
+
+		self.numver = '11.00'
+		self.vsver  = '2010'
 
 		#self.projects_dir = None
 		#self.csproj_in_tree = False
-		self.solution_name = self.env.APPNAME + '.sln'
 
 		# Make monodevelop csproj
 		if Utils.unversioned_sys_platform() != 'win32':
@@ -799,6 +832,17 @@ class idegen(msvs.msvs_generator):
 		self.vsnode_target = vsnode_target
 		self.vsnode_cs_target = vsnode_cs_target
 		self.vsnode_web_target = vsnode_web_target
+
+	def collect_projects(self, projects):
+		self.all_projects = projects
+		self.add_aliases()
+		self.collect_dirs()
+		default_project = getattr(self, 'default_project', None)
+		def sortfun(x):
+			if x.name == default_project:
+				return ''
+			return getattr(x, 'path', None) and x.path.win32path() or x.name
+		self.all_projects.sort(key=sortfun)
 
 	def get_config(self, bld, env):
 		return '%s_%s' % (env.TARGET, env.VARIANT)
@@ -831,43 +875,41 @@ class idegen(msvs.msvs_generator):
 
 		return ('CustomCommands', os.linesep.join(args))
 
-	def execute(self):
-		idegen.depth += 1
-		msvs.msvs_generator.execute(self)
+	def get_solution_node(self):
+		return self.ctx.srcnode.make_node(self.sln)
 
-	def write_files(self):
+	def add_variant(self):
 		if self.all_projects:
 			# Generate the sln config|plat for this variant
 			prop = msvs.build_property()
-			prop.platform_tgt = self.env.CSPLATFORM
-			prop.platform = self.get_platform(self.env)
+			prop.platform_tgt = self.ctx.env.CSPLATFORM
+			prop.platform = self.get_platform(self.ctx.env)
 			prop.platform_sln = prop.platform_tgt.replace('AnyCPU', 'Any CPU')
-			prop.configuration = self.get_config(self, self.env)
-			prop.variant = self.variant
+			prop.configuration = self.get_config(self.ctx, self.ctx.env)
+			prop.variant = self.ctx.variant
+			return Variant(prop.variant, prop, self.all_projects)
 
-			idegen.sln_configs[prop.variant] = prop
-			idegen.all_projs[self.variant] = self.all_projects
+	def write_files(self, sln, variants):
+		self.sln = sln
+		self.variants = variants
+		self.all_projects = self.flatten_projects(variants)
 
-		idegen.depth -= 1
-		if idegen.depth == 0:
-			self.all_projects = self.flatten_projects()
+		if Logs.verbose == 0:
+			sys.stderr.write('\n')
 
-			if Logs.verbose == 0:
-				sys.stderr.write('\n')
+		for p in self.all_projects:
+			p.write()
 
-			for p in self.all_projects:
-				p.write()
+		self.make_sln_configs(variants)
 
-			self.make_sln_configs()
-
-			# and finally write the solution file
-			node = self.get_solution_node()
-			node.parent.mkdir()
-			Logs.warn('Creating %r' % node)
-			template1 = msvs.compile_template(msvs.SOLUTION_TEMPLATE)
-			sln_str = template1(self)
-			sln_str = msvs.rm_blank_lines(sln_str)
-			node.stealth_write(sln_str)
+		# and finally write the solution file
+		node = self.get_solution_node()
+		node.parent.mkdir()
+		Logs.warn('Creating %r' % node)
+		template1 = msvs.compile_template(msvs.SOLUTION_TEMPLATE)
+		sln_str = template1(self)
+		sln_str = msvs.rm_blank_lines(sln_str)
+		node.stealth_write(sln_str)
 
 	def collect_dirs(self):
 		"""
@@ -891,7 +933,7 @@ class idegen(msvs.msvs_generator):
 			self.all_projects.append(n)
 
 			# recurse up to the project directory
-			if x.height() > self.srcnode.height() + 1:
+			if x.height() > self.ctx.srcnode.height() + 1:
 				make_parents(n)
 
 		for p in self.all_projects[:]: # iterate over a copy of all projects
@@ -907,33 +949,28 @@ class idegen(msvs.msvs_generator):
 			else:
 				p.iter_path = path.make_node(ide_path)
 
-			if p.iter_path.height() > self.srcnode.height():
+			if p.iter_path.height() > self.ctx.srcnode.height():
 				make_parents(p)
 
 	def project_configurations(self):
-		ret = []
-		for k,v in idegen.sln_configs.iteritems():
-			ret.append((v.configuration, v.platform_sln))
-		return ret
+		return map(lambda x: (x.prop.configuration, x.prop.platform_sln), self.variants.itervalues())
 
-	def make_sln_configs(self):
-		sln_cfg = idegen.sln_configs
-
+	def make_sln_configs(self, variants):
 		for p in self.all_projects:
 			if not hasattr(p, 'tg'):
 				continue
 
-			if len(sln_cfg) == len(p.build_properties):
+			if len(variants) == len(p.build_properties):
 				continue
 
 			props = []
 
-			for k, v in sln_cfg.iteritems():
-				other = p.proj_configs.get(k, None)
+			for key, variant in variants.iteritems():
+				other = p.proj_configs.get(key, None)
 
 				prop = msvs.build_property()
-				prop.configuration = v.configuration
-				prop.platform_sln = v.platform_sln
+				prop.configuration = variant.prop.configuration
+				prop.platform_sln = variant.prop.platform_sln
 
 				if other:
 					prop.configuration_bld = other.configuration_bld
@@ -976,18 +1013,15 @@ class idegen(msvs.msvs_generator):
 			v.append(rhs[key])
 			setattr(prop, attr, v)
 
-	def flatten_projects(self):
+	def flatten_projects(self, variants):
 		ret = OrderedDict()
-
-		# Sort the solution configs
-		idegen.sln_configs = OrderedDict(sorted(idegen.sln_configs.iteritems(), key=lambda x: '%s|%s' % (x[1].configuration, x[1].platform_sln)))
 
 		# TODO: Might need to implement conditional project refereces
 		# as well as assembly references based on the selected
 		# configuration/platform
 
-		for variant,_ in idegen.sln_configs.iteritems():
-			for p in idegen.all_projs[variant]:
+		for variant in variants.itervalues():
+			for p in variant.projects:
 				p.ctx = self
 				ret.setdefault(p.uuid, p)
 
@@ -1050,10 +1084,10 @@ class idegen(msvs.msvs_generator):
 					prop.configuration_bld = config
 
 				prop.configuration = config
-				prop.variant = variant
+				prop.variant = variant.name
 				prop.is_active = True
 
-				main.proj_configs[variant] = prop
+				main.proj_configs[variant.name] = prop
 
 				if not any([ x for x in main.build_properties if x.platform == prop.platform and x.configuration == config ]):
 					main.build_properties.append(prop)
@@ -1075,10 +1109,67 @@ class idegen(msvs.msvs_generator):
 		else:
 			return None
 
-	def collect_targets(self):
-		"""
-		Process the list of task generators
-		"""
+class multi_idegen(BuildContext):
+	cmd = 'msvs2010'
+	depth = 0
+	sln_variants = {}
+	is_idegen = True
+
+	def init(self, generator):
+		pass
+
+	def execute(self):
+		multi_idegen.depth += 1
+
+		self.restore()
+		if not self.all_envs:
+			self.load_envs()
+		self.recurse([self.run_dir])
+
+		self.process_solutions()
+
+		multi_idegen.depth -= 1
+		if multi_idegen.depth == 0:
+			for sln, variants in multi_idegen.sln_variants.iteritems():
+				variants = OrderedDict(sorted(variants.iteritems(), key=lambda x: x[1].key))
+				generator = self.create_generator()
+				generator.write_files(sln, variants)
+
+	def create_generator(self):
+		generator = idegen(self)
+		generator.init()
+		self.init(generator)
+		return generator
+
+	def process_solutions(self):
+		solutions = self.collect_solutions()
+		for sln, tgs in solutions.iteritems():
+			generator = self.create_generator()
+
+			projects = []
+
+			for tg in tgs:
+				p = generator.make_project(tg)
+				if not p:
+					continue
+
+				p.collect_source()
+				p.collect_properties()
+				projects.append(p)
+
+				if Logs.verbose == 0:
+					sys.stderr.write('.')
+					sys.stderr.flush()
+
+			if projects:
+				generator.collect_projects(projects)
+				variant = generator.add_variant()
+				sln_variants = multi_idegen.sln_variants.setdefault(sln, {})
+				sln_variants[variant.name] = variant
+
+	def collect_solutions(self):
+		ret = {}
+
 		for g in self.groups:
 			for tg in g:
 				if not isinstance(tg, TaskGen.task_gen):
@@ -1092,42 +1183,34 @@ class idegen(msvs.msvs_generator):
 
 				tg.post()
 
-				p = self.make_project(tg)
-				if not p:
-					continue
+				solutions = getattr(tg, 'solutions', [self.env.APPNAME + '.sln'])
+				for sln in solutions:
+					ret.setdefault(sln, []).append(tg)
 
-				p.collect_source() # delegate this processing
-				p.collect_properties()
-				self.all_projects.append(p)
+		return ret
 
-				if Logs.verbose == 0:
-					sys.stderr.write('.')
-					sys.stderr.flush()
-
-class idegen2012(idegen):
+class idegen2012(multi_idegen):
 	'''generates a visual studio 2012 solution'''
 	cmd = 'msvs2012'
-	fun = idegen.fun
+	fun = multi_idegen.fun
 
-	def init(self):
-		idegen.init(self)
-		self.numver = '12.00'
-		self.vsver  = '2012'
-		self.platform_toolset = 'v110'
-		self.vsnode_cs_target = vsnode_cs_target2012
+	def init(self, generator):
+		generator.numver = '12.00'
+		generator.vsver  = '2012'
+		generator.platform_toolset = 'v110'
+		generator.vsnode_cs_target = vsnode_cs_target2012
 
-class idegen_xamarin6(idegen):
+class idegen_xamarin6(multi_idegen):
 	'''generates a solution for Xamarin Studio/MonoDevelop 6'''
 	cmd = 'xamarin6'
-	fun = idegen.fun
+	fun = multi_idegen.fun
 
-	def init(self):
-		idegen.init(self)
-		self.numver = '12.00'
-		self.vsver  = '2012'
-		self.platform_toolset = 'v110'
-		self.vsnode_cs_target = vsnode_cs_target2012
-		self.enable_cproj = False
+	def init(self, generator):
+		generator.numver = '12.00'
+		generator.vsver  = '2012'
+		generator.platform_toolset = 'v110'
+		generator.vsnode_cs_target = vsnode_cs_target2012
+		generator.enable_cproj = False
 
 def options(ctx):
 	"""
