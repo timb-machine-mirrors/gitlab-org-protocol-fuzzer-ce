@@ -1,3 +1,4 @@
+import os
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, taskgen_method
 from waflib import Utils, Logs, Task, Context, Errors
@@ -8,8 +9,20 @@ def configure(conf):
 		conf.find_program('mono')
 		dotnet = ['MONO']
 
-	conf.cmd_and_log(dotnet + ['.paket/paket.bootstrapper.exe'], cwd='paket')
-	conf.cmd_and_log(dotnet + ['.paket/paket.exe', 'restore'], cwd='paket')
+	bootstrapper = os.path.abspath(os.path.join(
+		'paket',
+		'.paket', 
+		'paket.bootstrapper.exe'
+	))
+
+	paket = os.path.abspath(os.path.join(
+		'paket',
+		'.paket', 
+		'paket.exe'
+	))
+
+	conf.cmd_and_log(dotnet + [bootstrapper], cwd='paket')
+	conf.cmd_and_log(dotnet + [paket, 'restore'], cwd='paket')
 
 	conf.env.append_value('supported_features', 'paket')
 
