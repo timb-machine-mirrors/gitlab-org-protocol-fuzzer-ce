@@ -80,6 +80,7 @@ tools = [
 	'tools.version',
 	'tools.xcompile',
 	'tools.yarn',
+	'tools.paket',
 ]
 
 optional_tools = [
@@ -161,6 +162,7 @@ def prepare(conf):
 		'cxxshlib',
 		'cxxprogram',
 		'fake_lib',
+		'nuget_lib',
 		'cs',
 		'debug',
 		'release',

@@ -17,6 +17,7 @@ tools = [
 	'tools.tsc',
 	'tools.version',
 	'tools.yarn',
+	'tools.paket',
 ]
 
 optional_tools = [
@@ -140,6 +141,7 @@ def configure(conf):
 		'cxxshlib',
 		'cxxprogram',
 		'fake_lib',
+		'nuget_lib',
 		'cs',
 		'debug',
 		'release',

@@ -276,6 +276,12 @@ def apply_target_framework(self):
 	tsk = self.create_task('emit', None, [ target ])
 	self.source = self.to_nodes(self.source) + tsk.outputs
 
+@feature('cs')
+@before_method('use_cs')
+def install_packages(self):
+	if getattr(self.bld, 'is_idegen', False):
+		return
+
 	# For any use entries that can't be resolved to a task generator
 	# assume they are system reference assemblies and add them to the
 	# ASSEMBLIES variable so they get full path linkage automatically added
@@ -285,7 +291,8 @@ def apply_target_framework(self):
 	for x in names:
 		try:
 			y = get(x)
-			if 'fake_lib' in getattr(y, 'features', ''):
+			features = getattr(y, 'features')
+			if 'fake_lib' in features or 'nuget_lib' in features:
 				y.post()
 				install_outputs(self, y)
 			filtered.append(x)

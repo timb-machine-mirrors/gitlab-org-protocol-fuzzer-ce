@@ -2,16 +2,52 @@ from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, taskgen_method
 from waflib import Utils, Logs, Task, Context, Errors
 
+def configure(conf):
+	dotnet = []
+	if Utils.unversioned_sys_platform() != 'win32':
+		conf.find_program('mono')
+		dotnet = ['MONO']
+
+	conf.cmd_and_log(dotnet + ['.paket/paket.bootstrapper.exe'], cwd='paket')
+	conf.cmd_and_log(dotnet + ['.paket/paket.exe', 'restore'], cwd='paket')
+
+	conf.env.append_value('supported_features', 'paket')
+
 class Package(object):
-	def __init__(self, path, name):
+	def __init__(self, bld, name):
 		self.name = name
 		self.deps = []
 		self.byfx = {}
 
-		pattern = 'packages/%s/lib/*/*.dll' % name
-		nodes = path.ant_glob(pattern, ignorecase=True)
+		byfx_libs = self.collect_byfx(bld, 'packages/%s/lib/*/*.dll' % name)
+		byfx_refs = self.collect_byfx(bld, 'packages/%s/ref/*/*.dll' % name)
+
+		self.create_tgs(bld, byfx_libs, False)
+		self.create_tgs(bld, byfx_refs, True)
+
+	def collect_byfx(self, bld, pattern):
+		nodes = bld.path.ant_glob(pattern, ignorecase=True)
+		byfx = {}
 		for node in nodes:
-			self.byfx.setdefault(node.parent.name, []).append(node)
+			fx = node.parent.name
+			byfx.setdefault(fx, []).append(node)
+		return byfx
+
+	def create_tgs(self, bld, byfx, is_ref):
+		for fx, nodes in byfx.iteritems():
+			if fx in self.byfx:
+				continue
+
+			tgs = []
+			for node in nodes:
+				tg = bld(
+					name='%s:%s:%s' % (self.name, fx, node.name),
+					features='nuget_lib',
+					node=node,
+					is_ref=is_ref
+				)
+				tgs.append(tg)
+			self.byfx[fx] = tgs
 
 	def __repr__(self):
 		return '%s: %s' % (self.name, self.byfx)
@@ -31,7 +67,7 @@ def read_paket(self, lockfile):
 			suffix = line.lstrip(' ')
 			depth = (len(line) - len(suffix)) / 2
 			if depth == 2:
-				parent = Package(self.path, suffix.split()[0])
+				parent = Package(self, suffix.split()[0])
 				pkgs[parent.name] = parent
 			elif depth == 3:
 				pkg = suffix.split()[0]
@@ -39,57 +75,61 @@ def read_paket(self, lockfile):
 
 	self.env.PAKET_PACKAGES = pkgs
 
-	# import pprint
-	# pprint.pprint(pkgs)
-
-@feature('cs')
-@after_method('apply_cs')
-def apply_use_packages(self):
+@feature('cs', 'paket')
+@before_method('install_packages')
+def use_nuget(self):
 	pkgs = getattr(self, 'use_packages', None)
 	if not pkgs:
 		return
 
-	nodes = set()
-	refs = set()
+	default_settings = dict(
+		excludes = [],
+		frameworks = []
+	)
+	settings = getattr(self, 'paket_settings', default_settings)
 
-	for pkg, item in pkgs.iteritems():
-		use_packages_recurse(self, pkg, Utils.to_list(item[0]), item[1], nodes, refs)
+	use = self.to_list(getattr(self, 'use', []))
 
-	for ref in refs:
-		self.env.append_value('CSFLAGS', '/reference:%s' % ref)
+	tgs = set()
 
-	self.cs_task.dep_nodes.extend(nodes)
-	for node in nodes:
-		self.env.append_value('CSFLAGS', '/reference:%s' % node.abspath())
+	for pkg in pkgs:
+		use_packages_recurse(self, pkg, settings, tgs)
 
-	# inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
-	# self.install_files(inst_to, nodes, chmod=Utils.O755)
+	for tg in sorted(tgs):
+		# print 'use: %s' % tg.name
+		use.append(tg.name)
 
-def use_packages_recurse(self, pkg, fxs, excludes, into, refs):
-	if pkg in excludes:
+def use_packages_recurse(self, pkg, settings, into):
+	if pkg in settings['excludes']:
 		return
 
 	dep = self.env.PAKET_PACKAGES.get(pkg)
 	if not dep:
 		self.bld.fatal('%r depends on unknown package %r' % (self.name, pkg))
 
-	if not dep.byfx:
-		refs.add(dep.name)
-	else:
-		nodes = get_pkg_nodes(dep, fxs)
-		if not nodes:
-			self.bld.fatal('%r depends on unknown framework for package %r, available frameworks: %r' % (
-				self.name, pkg, dep.byfx.keys()
-			))
+	tgs = get_pkg_for_fx(dep, settings['frameworks'])
+	if tgs is None:
+		self.bld.fatal('%r depends on unknown framework for package %r, available frameworks: %r' % (
+			self.name, pkg, dep.byfx.keys()
+		))
 
-		into.update(nodes)
+	for tg in tgs:
+		if not tg.is_ref:
+			into.add(tg)
 
 	for child in dep.deps:
-		use_packages_recurse(self, child, fxs, excludes, into, refs)
+		use_packages_recurse(self, child, settings, into)
 
-def get_pkg_nodes(dep, fxs):
+def get_pkg_for_fx(dep, fxs):
 	for fx in fxs:
-		nodes = dep.byfx.get(fx)
-		if nodes:
-			return nodes
+		tgs = dep.byfx.get(fx)
+		if tgs:
+			return tgs
 	return None
+
+@feature('nuget_lib')
+def process_nuget_lib(self):
+	# self.node.sig = Utils.h_file(self.node.abspath())
+
+	self.link_task = self.create_task('fake_csshlib', [], [self.node])
+	self.target = self.node.name

@@ -436,6 +436,12 @@ class vsnode_cs_target(msvs.vsnode_project):
 				self.references[r.key] = r
 				continue
 
+			if 'nuget_lib' in y.features:
+				asm_name = os.path.splitext(x.split(':')[2])[0]
+				r = reference(self.base, asm_name, y.link_task.outputs[0])
+				self.references[r.key] = r
+				continue
+
 			base = self.base == tg.path and y.path or self.base
 			name = os.path.splitext(y.name)[0]
 			other = base.make_node(name + '.csproj')

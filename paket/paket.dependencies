@@ -2,9 +2,11 @@ framework: net451
 source https://www.nuget.org/api/v2
 
 nuget Microsoft.AspNetCore.Diagnostics
+nuget Microsoft.AspNetCore.Hosting
 nuget Microsoft.AspNetCore.Mvc
-nuget Microsoft.AspNetCore.Server.Kestrel
+nuget Microsoft.AspNetCore.Owin
 nuget Microsoft.AspNetCore.StaticFiles
 nuget Microsoft.Extensions.Configuration.Json
 nuget Microsoft.Extensions.Logging.Console
 nuget Microsoft.Extensions.Logging.Debug
+nuget Nowin
