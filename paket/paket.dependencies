@@ -1,5 +1,6 @@
 framework: net451
 source https://www.nuget.org/api/v2
+cache //nas/builds/paket
 
 nuget Microsoft.AspNetCore.Diagnostics
 nuget Microsoft.AspNetCore.Hosting
