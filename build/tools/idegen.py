@@ -437,7 +437,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 				continue
 
 			if 'nuget_lib' in y.features:
-				asm_name = os.path.splitext(x.split(':')[2])[0]
+				asm_name = os.path.splitext(x.split(':')[3])[0]
 				r = reference(self.base, asm_name, y.link_task.outputs[0])
 				self.references[r.key] = r
 				continue
@@ -1104,7 +1104,8 @@ class idegen(msvs.msvs_generator):
 		pass
 
 	def make_project(self, tg):
-		if 'fake_lib' in getattr(tg, 'features', ''):
+		features = getattr(tg, 'features', '')
+		if 'fake_lib' in features or 'nuget_lib' in features:
 			return None
 		elif hasattr(tg, 'link_task') and self.enable_cproj:
 			return self.vsnode_target(self, tg)

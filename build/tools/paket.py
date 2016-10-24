@@ -27,13 +27,19 @@ def configure(conf):
 	conf.env.append_value('supported_features', 'paket')
 
 class Package(object):
-	def __init__(self, bld, name):
+	def __init__(self, bld, group, name):
+		self.group = group
 		self.name = name
 		self.deps = []
 		self.byfx = {}
 
-		byfx_libs = self.collect_byfx(bld, 'packages/%s/lib/*/*.dll' % name)
-		byfx_refs = self.collect_byfx(bld, 'packages/%s/ref/*/*.dll' % name)
+		if group == '':
+			pattern = 'packages/%(name)s/%(dir)s/**/*.dll'
+		else:
+			pattern = 'packages/%(group)s/%(name)s/%(dir)s/**/*.dll'
+
+		byfx_libs = self.collect_byfx(bld, pattern % (dict(group=group, name=name, dir='lib')))
+		byfx_refs = self.collect_byfx(bld, pattern % (dict(group=group, name=name, dir='ref')))
 
 		self.create_tgs(bld, byfx_libs, False)
 		self.create_tgs(bld, byfx_refs, True)
@@ -54,7 +60,7 @@ class Package(object):
 			tgs = []
 			for node in nodes:
 				tg = bld(
-					name='%s:%s:%s' % (self.name, fx, node.name),
+					name='%s:%s:%s:%s' % (self.group, self.name, fx, node.name),
 					features='nuget_lib',
 					node=node,
 					is_ref=is_ref
@@ -63,7 +69,7 @@ class Package(object):
 			self.byfx[fx] = tgs
 
 	def __repr__(self):
-		return '%s: %s' % (self.name, self.byfx)
+		return '%s/%s: %s' % (self.group, self.name, self.byfx)
 
 @conf
 def read_paket(self, lockfile):
@@ -71,22 +77,29 @@ def read_paket(self, lockfile):
 		return
 
 	pkgs = {}
+	group = ''
+	groups = { group : pkgs }
 	parent = None
 
 	src = self.path.find_resource(lockfile)
 	if src:
 		contents = src.read()
 		for line in contents.splitlines():
+			if line.startswith('GROUP'):
+				group = line[6:]
+				pkgs = {}
+				groups[group] = pkgs
+				parent = None
 			suffix = line.lstrip(' ')
 			depth = (len(line) - len(suffix)) / 2
 			if depth == 2:
-				parent = Package(self, suffix.split()[0])
+				parent = Package(self, group, suffix.split()[0])
 				pkgs[parent.name] = parent
 			elif depth == 3:
 				pkg = suffix.split()[0]
 				parent.deps.append(pkg)
 
-	self.env.PAKET_PACKAGES = pkgs
+	self.env.PAKET_PACKAGES = groups
 
 @feature('cs', 'paket')
 @before_method('install_packages')
@@ -95,11 +108,15 @@ def use_nuget(self):
 	if not pkgs:
 		return
 
-	default_settings = dict(
+	settings = dict(
 		excludes = [],
-		frameworks = []
+		frameworks = [],
+		group = ''
 	)
-	settings = getattr(self, 'paket_settings', default_settings)
+
+	new_settings = getattr(self, 'paket_settings')
+	if new_settings:
+		settings.update(new_settings)
 
 	use = self.to_list(getattr(self, 'use', []))
 
@@ -116,8 +133,12 @@ def use_packages_recurse(self, pkg, settings, into):
 	if pkg in settings['excludes']:
 		return
 
-	dep = self.env.PAKET_PACKAGES.get(pkg)
-	if not dep:
+	group = self.env.PAKET_PACKAGES.get(settings['group'])
+	if group is None:
+		self.bld.fatal('%r uses unknown paket group %r' % (self.name, settings['group']))
+
+	dep = group.get(pkg)
+	if dep is None:
 		self.bld.fatal('%r depends on unknown package %r' % (self.name, pkg))
 
 	tgs = get_pkg_for_fx(dep, settings['frameworks'])
