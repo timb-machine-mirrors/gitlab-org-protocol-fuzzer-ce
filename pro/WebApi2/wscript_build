@@ -1,48 +1,36 @@
 #!/usr/bin/env python
 
 deps = [
-	'NLog.dll',
+	'Peach.Core.dll',
+	'Peach.Pro.dll',
 
 	'System.dll',
 	'System.Core.dll',
 	'System.Net.Http.dll',
 	'System.Web.dll',
-	'Microsoft.CSharp.dll',
+]
 
-	'Peach.Core.dll',
-	'Peach.Pro.dll',
-
-	'Swashbuckle.Core.dll',
-
-	'System.Net.Http.Formatting.dll',
-	'System.Web.Cors.dll',
-	'System.Web.Http.dll',
-	'System.Web.Http.Cors.dll',
-	'System.Web.Http.Owin.dll',
-
-	'Microsoft.Owin.StaticFiles.dll',
-	'Microsoft.Owin.FileSystems.dll',
-	'Microsoft.Owin.Host.HttpListener.dll',
-	'Microsoft.Owin.Hosting.dll',
-	'Microsoft.Owin.dll',
-	'Owin.dll',
-
-	'Newtonsoft.Json.dll',
-
-	'Ionic.Zip.dll',
-
-	'Autofac.dll',
-	'Autofac.Integration.Owin.dll',
-	'Autofac.Integration.WebApi.dll',
-	'Autofac.Integration.WebApi.Owin.dll',
+pkgs = [
+	'Autofac.WebApi2.Owin',
+	'DotNetZip',
+	'Microsoft.AspNet.WebApi.Client',
+	'Microsoft.Owin.Host.HttpListener',
+	'Microsoft.Owin.Hosting',
+	'Microsoft.Owin.StaticFiles',
+	'NLog',
+	'Swashbuckle.Core.Net45',
 ]
 
 bld(
-	features = 'cs',
+	name = 'Peach.Pro.WebApi2.dll',
+	features = 'cs paket',
 	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = ['net45', 'net40', 'net20'],
+	),
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = bld.path.ant_glob('Resources/**/* Views/**/*'),
-	name = 'Peach.Pro.WebApi2.dll',
 	csflags = [
 		# The following are remapped in Peach's app.config:
 		# System.Web.Http v5.2.2 -> v5.2.3

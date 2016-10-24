@@ -14,14 +14,17 @@ bld(
 
 bld(
 	name = 'ExtendExamples.dll',
-	features = 'cs',
+	features = 'cs paket',
 	source = bld.path.ant_glob('extend/examples/*.cs'),
 	use = [
-		'NLog.dll',
+		'Peach.Core.dll',
 		'System.dll',
 		'System.Core.dll',
 		'System.Xml.dll',
-		'Peach.Core.dll',
 	],
+	use_packages = ['NLog'],
+	paket_settings = dict(
+		frameworks = ['net45'],
+	),
 	install_path = None, # Compile only, don't install in ${BINDIR}
 )

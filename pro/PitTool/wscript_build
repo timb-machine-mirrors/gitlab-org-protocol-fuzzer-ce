@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 deps = [
-	'Newtonsoft.Json.dll',
-	'NLog.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.PitTester.dll',

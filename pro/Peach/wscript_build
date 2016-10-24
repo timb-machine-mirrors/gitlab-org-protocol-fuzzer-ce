@@ -4,12 +4,9 @@ import os
 from waflib import Task
 
 deps = [
-	'NLog.dll',
-	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.WebApi2.dll',
-	'SharpPcap.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
@@ -29,10 +26,10 @@ python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.5', 'content')
 makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 
 app = bld(
+	name = 'Peach.exe',
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.exe',
 	# mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = {
