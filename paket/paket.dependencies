@@ -3,6 +3,7 @@ cache //nas/builds/paket
 # main group
 framework: net451
 source https://www.nuget.org/api/v2
+
 nuget Aspose.Words 15.3.0
 nuget Autofac.WebApi2.Owin 3.3.0
 nuget Dapper 1.42
@@ -34,6 +35,9 @@ group peach-web
 	framework: net451
 	source https://www.nuget.org/api/v2
 
+	nuget FluentMigrator
+	nuget FluentMigrator.Runner
+	nuget linq2db.PostgreSQL
 	nuget Microsoft.AspNetCore.Diagnostics
 	nuget Microsoft.AspNetCore.Hosting
 	nuget Microsoft.AspNetCore.Mvc

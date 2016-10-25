@@ -79,6 +79,15 @@ GROUP peach-web
 FRAMEWORK: NET451
 NUGET
   remote: https://www.nuget.org/api/v2
+    FluentMigrator (1.6.2)
+    FluentMigrator.Runner (1.6.2)
+      FluentMigrator (>= 1.6.2)
+    linq2db (1.0.7.4)
+    linq2db.PostgreSQL (1.0.7.3)
+      linq2db
+      linq2db.t4models
+      Npgsql
+    linq2db.t4models (1.0.7.3)
     Microsoft.AspNetCore.Antiforgery (1.0.1)
       Microsoft.AspNetCore.DataProtection (>= 1.0)
       Microsoft.AspNetCore.Http.Abstractions (>= 1.0)
@@ -361,6 +370,7 @@ NUGET
       System.Runtime.Extensions (>= 4.1)
       System.Text.Encoding (>= 4.0.11)
     Newtonsoft.Json (9.0.1)
+    Npgsql (3.1.8)
     NUnit (3.5)
     Patterns.Logging (1.0.0.3)
     SocketHttpListener (1.0.0.40)
