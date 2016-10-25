@@ -248,8 +248,6 @@ NUGET
       Microsoft.Extensions.WebEncoders (>= 1.0)
       Newtonsoft.Json (>= 9.0.1)
       System.Buffers (>= 4.0)
-    Microsoft.AspNetCore.Owin (1.0)
-      Microsoft.AspNetCore.Http (>= 1.0)
     Microsoft.AspNetCore.Razor (1.0)
     Microsoft.AspNetCore.Razor.Runtime (1.0)
       Microsoft.AspNetCore.Html.Abstractions (>= 1.0)

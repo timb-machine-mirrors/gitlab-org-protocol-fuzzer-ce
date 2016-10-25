@@ -41,7 +41,6 @@ group peach-web
 	nuget Microsoft.AspNetCore.Diagnostics
 	nuget Microsoft.AspNetCore.Hosting
 	nuget Microsoft.AspNetCore.Mvc
-	nuget Microsoft.AspNetCore.Owin
 	nuget Microsoft.AspNetCore.Routing
 	nuget Microsoft.AspNetCore.StaticFiles
 	nuget Microsoft.Extensions.Configuration.CommandLine
