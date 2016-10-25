@@ -21,7 +21,6 @@ tools = [
 ]
 
 optional_tools = [
-	'tools.mdoc',
 	'tools.msbuild',
 	'tools.msi',
 	'tools.test',

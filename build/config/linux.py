@@ -85,7 +85,6 @@ tools = [
 
 optional_tools = [
 	'tools.asan',
-	'tools.mdoc',
 	'tools.mkbundle',
 	'tools.test',
 	'tools.zip',
