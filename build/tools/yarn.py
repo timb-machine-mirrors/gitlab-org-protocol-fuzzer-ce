@@ -34,7 +34,7 @@ def process_yarn(self):
 	build_task = self.create_task('yarn_build', src3, tgt3)
 	build_task.cwd = __waf__.abspath()
 
-	self.install_files(self.install_path, tgt3)
+	self.install_files(self.install_path, tgt3, cwd=__waf__, relative_trick=True)
 
 	install_task.run_after.add(copy_task)
 	build_task.run_after.add(install_task)
