@@ -50,3 +50,7 @@ group peach-web
 	nuget Microsoft.Extensions.Logging.Debug
 	nuget NUnit
 	nuget SocketHttpListener
+	nuget Swashbuckle beta
+	nuget Swashbuckle.Swagger beta
+	nuget Swashbuckle.SwaggerGen beta
+	nuget Swashbuckle.SwaggerUi beta
