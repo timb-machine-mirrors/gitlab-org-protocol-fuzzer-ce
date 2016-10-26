@@ -11,6 +11,7 @@ using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.WebApi;
+using Assert = NUnit.Framework.Assert;
 using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Test.Core.MutationStrategies

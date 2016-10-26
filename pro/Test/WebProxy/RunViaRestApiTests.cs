@@ -16,6 +16,7 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.Core.Storage;
 using Peach.Pro.Test.WebProxy.TestTarget;
+using Assert = NUnit.Framework.Assert;
 using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Test.WebProxy

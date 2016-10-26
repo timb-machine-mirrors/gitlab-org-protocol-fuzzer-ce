@@ -13,6 +13,7 @@ using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
 using Peach.Core.Test;
 using Peach.Pro.Core.Dom;
 using Titanium.Web.Proxy;
+using Assert = NUnit.Framework.Assert;
 using Encoding = Peach.Core.Encoding;
 
 namespace Peach.Pro.Test.WebProxy

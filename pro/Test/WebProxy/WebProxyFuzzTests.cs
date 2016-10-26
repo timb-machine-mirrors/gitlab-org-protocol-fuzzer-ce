@@ -13,6 +13,7 @@ using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices.Models;
 using Peach.Pro.Test.WebProxy.TestTarget.Controllers;
+using Assert = NUnit.Framework.Assert;
 using Encoding = Peach.Core.Encoding;
 using FaultSummary = Peach.Pro.Core.WebServices.Models.FaultSummary;
 using Monitor = System.Threading.Monitor;

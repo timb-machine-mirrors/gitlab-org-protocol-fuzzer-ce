@@ -3,6 +3,7 @@ using System.Web;
 using NUnit.Framework;
 using Peach.Pro.Core.WebApi;
 using Titanium.Web.Proxy;
+using Assert = NUnit.Framework.Assert;
 
 namespace Peach.Pro.Test.WebProxy
 {

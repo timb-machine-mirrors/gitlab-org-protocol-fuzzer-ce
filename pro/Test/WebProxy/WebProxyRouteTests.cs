@@ -13,6 +13,7 @@ using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebApi.Proxy;
 using Titanium.Web.Proxy.Http;
 using Titanium.Web.Proxy.Models;
+using Assert = NUnit.Framework.Assert;
 
 namespace Peach.Pro.Test.WebProxy
 {

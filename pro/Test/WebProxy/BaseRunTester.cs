@@ -19,6 +19,7 @@ using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
 using Peach.Pro.Test.WebProxy.TestTarget;
 using Titanium.Web.Proxy.EventArguments;
+using Assert = NUnit.Framework.Assert;
 
 namespace Peach.Pro.Test.WebProxy
 {

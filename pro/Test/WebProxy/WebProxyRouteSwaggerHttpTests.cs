@@ -9,6 +9,7 @@ using Peach.Core.Test;
 using Peach.Pro.Core;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
+using Assert = NUnit.Framework.Assert;
 
 namespace Peach.Pro.Test.WebProxy
 {

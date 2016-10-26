@@ -11,6 +11,7 @@ using Peach.Core.Test;
 using Peach.Pro.Core.MutationStrategies;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.WebApi;
+using Assert = NUnit.Framework.Assert;
 
 namespace Peach.Pro.Test.WebProxy
 {
