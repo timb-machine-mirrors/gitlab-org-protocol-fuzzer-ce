@@ -43,11 +43,13 @@ group peach-web
 	nuget Microsoft.AspNetCore.Mvc
 	nuget Microsoft.AspNetCore.Routing
 	nuget Microsoft.AspNetCore.StaticFiles
+	nuget Microsoft.AspNetCore.TestHost
 	nuget Microsoft.Extensions.Configuration.CommandLine
 	nuget Microsoft.Extensions.Configuration.Json
 	nuget Microsoft.Extensions.FileProviders.Embedded
 	nuget Microsoft.Extensions.Logging.Console
 	nuget Microsoft.Extensions.Logging.Debug
+	nuget Moq
 	nuget NUnit
 	nuget SocketHttpListener
 	nuget Swashbuckle beta

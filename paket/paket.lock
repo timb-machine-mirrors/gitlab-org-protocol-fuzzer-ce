@@ -79,6 +79,7 @@ GROUP peach-web
 FRAMEWORK: NET451
 NUGET
   remote: https://www.nuget.org/api/v2
+    Castle.Core (3.3.3)
     FluentMigrator (1.6.2)
     FluentMigrator.Runner (1.6.2)
       FluentMigrator (>= 1.6.2)
@@ -266,6 +267,8 @@ NUGET
       Microsoft.Extensions.FileProviders.Abstractions (>= 1.0)
       Microsoft.Extensions.Logging.Abstractions (>= 1.0)
       Microsoft.Extensions.WebEncoders (>= 1.0)
+    Microsoft.AspNetCore.TestHost (1.0)
+      Microsoft.AspNetCore.Hosting (>= 1.0)
     Microsoft.AspNetCore.WebUtilities (1.0)
       Microsoft.Extensions.Primitives (>= 1.0)
       System.Buffers (>= 4.0)
@@ -367,6 +370,8 @@ NUGET
       System.Resources.ResourceManager (>= 4.0.1)
       System.Runtime.Extensions (>= 4.1)
       System.Text.Encoding (>= 4.0.11)
+    Moq (4.5.23)
+      Castle.Core (>= 3.3.3)
     Newtonsoft.Json (9.0.1)
     Npgsql (3.1.8)
     NUnit (3.5)
