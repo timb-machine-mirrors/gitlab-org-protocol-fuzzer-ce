@@ -274,11 +274,11 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private readonly Uri _baseUrl;
 		private readonly List<PublisherProxy> _publishers;
 		private readonly CookieContainer _cookies;
 		private readonly LogSink _sink;
 
+		private Uri _baseUrl;
 		private ConnectRequest _connectReq;
 		private ConnectResponse _connectResp;
 		private Uri _agentUri;
@@ -287,25 +287,32 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		public Client(string name, string uri, string password)
 			: base(name, uri, password)
 		{
-			_baseUrl = new Uri(uri);
-
-			if (_baseUrl.IsDefaultPort)
-			{
-				_baseUrl = new Uri("{0}://{1}:{2}".Fmt(
-					_baseUrl.Scheme,
-					_baseUrl.Host,
-					Server.DefaultPort));
-			}
-
-			_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
-
 			_publishers = new List<PublisherProxy>();
 			_cookies = new CookieContainer();
-			_sink = new LogSink(name, _baseUrl);
+			_sink = new LogSink(Name);
 		}
 
 		public override void AgentConnect()
 		{
+			try
+			{
+				_baseUrl = new Uri(Url);
+
+				if (_baseUrl.IsDefaultPort)
+				{
+					_baseUrl = new Uri("{0}://{1}:{2}".Fmt(
+						_baseUrl.Scheme,
+						_baseUrl.Host,
+						Server.DefaultPort));
+				}
+
+				_baseUrl = new Uri("http://{0}:{1}".Fmt(_baseUrl.Host, _baseUrl.Port));
+			}
+			catch (SystemException ex)
+			{
+				throw new PeachException(ex.Message, ex);
+			}
+
 			// Initialize our monitors to be empty and populate
 			// them with calls to StartMonitor()
 			_connectReq = new ConnectRequest
@@ -497,7 +504,7 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		private void ReconnectAgent(IterationStartingArgs args)
 		{
-			_sink.Start();
+			_sink.Start(_baseUrl);
 
 			if (args != null)
 				Logger.Debug("Restarting all monitors on remote agent {0}", _baseUrl);

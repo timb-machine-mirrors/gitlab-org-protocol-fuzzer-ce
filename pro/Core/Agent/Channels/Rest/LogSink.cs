@@ -53,7 +53,6 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 	class LogSink : IDisposable
 	{
 		private readonly string _name;
-		private readonly Uri _baseUri;
 		private readonly NLog.Logger _logger;
 		private readonly NLog.Logger _chain;
 		private AutoResetEvent _evtReady;
@@ -64,16 +63,15 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 		private WebSocket _ws;
 		private bool _isClosed;
 
-		public LogSink(string name, Uri baseUri)
+		public LogSink(string name)
 		{
 			_name = name;
-			_baseUri = baseUri;
 			_logger = LogManager.GetCurrentClassLogger();
 			_chain = LogManager.GetLogger("Agent." + name);
 			_pending = new SortedDictionary<long, LogEventInfo>();
 		}
 
-		public void Start()
+		public void Start(Uri baseUri)
 		{
 			_logger.Trace("Start>");
 
@@ -84,8 +82,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 			_evtClosed = new AutoResetEvent(false);
 
 			var url = "ws://{0}:{1}{2}?level={3}".Fmt(
-				_baseUri.Host,
-				_baseUri.Port,
+				baseUri.Host,
+				baseUri.Port,
 				Server.LogPath,
 				Configuration.LogLevel);
 
@@ -110,8 +108,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				// when it tries to connect too soon.
 
 				var urlGet = "http://{0}:{1}{2}".Fmt(
-					_baseUri.Host,
-					_baseUri.Port,
+					baseUri.Host,
+					baseUri.Port,
 					Server.LogPath);
 
 				_logger.Trace("Attempting to GET '{0}'", urlGet);
