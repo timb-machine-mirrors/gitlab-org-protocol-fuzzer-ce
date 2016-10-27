@@ -793,7 +793,7 @@ class idegen(msvs.msvs_generator):
 	def __init__(self, ctx):
 		self.ctx = ctx
 
-	def init(self):
+	def init(self, sln):
 		if not getattr(self, 'configurations', None):
 			self.configurations = ['Release'] # LocalRelease, RemoteDebug, etc
 		if not getattr(self, 'platforms', None):
@@ -803,7 +803,7 @@ class idegen(msvs.msvs_generator):
 		if not getattr(self, 'project_extension', None):
 			self.project_extension = '.vcxproj'
 		if not getattr(self, 'projects_dir', None):
-			self.projects_dir = self.ctx.srcnode.make_node('.depproj')
+			self.projects_dir = self.ctx.srcnode.make_node('.depproj').make_node(os.path.splitext(sln)[0])
 			self.projects_dir.mkdir()
 
 		# bind the classes to the object, so that subclass can provide custom generators
@@ -1139,19 +1139,19 @@ class multi_idegen(BuildContext):
 		if multi_idegen.depth == 0:
 			for sln, variants in multi_idegen.sln_variants.iteritems():
 				variants = OrderedDict(sorted(variants.iteritems(), key=lambda x: x[1].key))
-				generator = self.create_generator()
+				generator = self.create_generator(sln)
 				generator.write_files(sln, variants)
 
-	def create_generator(self):
+	def create_generator(self, sln):
 		generator = idegen(self)
-		generator.init()
+		generator.init(sln)
 		self.init(generator)
 		return generator
 
 	def process_solutions(self):
 		solutions = self.collect_solutions()
 		for sln, tgs in solutions.iteritems():
-			generator = self.create_generator()
+			generator = self.create_generator(sln)
 
 			projects = []
 
