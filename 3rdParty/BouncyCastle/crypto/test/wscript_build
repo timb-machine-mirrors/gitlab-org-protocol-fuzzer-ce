@@ -12,6 +12,7 @@ pkgs = [
 
 bld(
 	name = 'BouncyCastle.Crypto.Tests.dll',
+	solutions = ['Peach.sln', 'PeachWeb.sln'],
 	features = 'cs paket',
 	use = deps,
 	use_packages = pkgs,

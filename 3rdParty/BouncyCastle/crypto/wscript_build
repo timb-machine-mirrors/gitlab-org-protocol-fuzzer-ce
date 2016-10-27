@@ -8,11 +8,12 @@ deps = [
 ]
 
 bld(
+	name = 'BouncyCastle.Crypto.dll',
+	solutions = ['Peach.sln', 'PeachWeb.sln'],
 	features = 'cs',
 	use = deps,
 	platform = 'AnyCPU',
 	source = bld.path.ant_glob('src/**/*.cs bzip2/**/*.cs'),
-	name = 'BouncyCastle.Crypto.dll',
 	namespace = 'Org.BouncyCastle',
 	csflags = [
 		'/nowarn:0168', # Variable declared but never used
