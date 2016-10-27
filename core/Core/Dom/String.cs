@@ -108,6 +108,8 @@ namespace Peach.Core.Dom
 		protected char _padCharacter = '\0';
 		protected Encoding encoding = Encoding.UTF8;
 
+		public Encoding Encoding { get { return encoding; } }
+
 		public String()
 			: base()
 		{
