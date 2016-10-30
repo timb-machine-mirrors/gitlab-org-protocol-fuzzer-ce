@@ -27,46 +27,45 @@ def configure(conf):
 	conf.env.append_value('supported_features', 'paket')
 
 class Package(object):
-	def __init__(self, bld, group, name):
+	def __init__(self, bld, group, name, node):
 		self.group = group
 		self.name = name
 		self.deps = []
 		self.byfx = {}
 
-		if group == '':
-			pattern = 'packages/%(name)s/%(dir)s/**/*.dll'
-		else:
-			pattern = 'packages/%(group)s/%(name)s/%(dir)s/**/*.dll'
+		self.create_tgs(bld, node.find_dir('lib'), False)
+		self.create_tgs(bld, node.find_dir('ref'), True)
 
-		byfx_libs = self.collect_byfx(bld, pattern % (dict(group=group, name=name, dir='lib')))
-		byfx_refs = self.collect_byfx(bld, pattern % (dict(group=group, name=name, dir='ref')))
+	def create_tgs(self, bld, node, is_ref):
+		if node is None:
+			return
 
-		self.create_tgs(bld, byfx_libs, False)
-		self.create_tgs(bld, byfx_refs, True)
+		root = node.abspath()
+		for fx in os.listdir(root):
+			fx_path = os.path.join(root, fx)
+			if os.path.isdir(fx_path):
+				if fx in self.byfx:
+					continue
+				fx_node = node.make_node(fx)
+				for file in os.listdir(fx_path):
+					ext = os.path.splitext(file)[1]
+					if ext == '.dll':
+						self.make_nuget_lib(bld, fx, fx_node.make_node(file), is_ref)
+			elif not is_ref:
+				ext = os.path.splitext(fx)[1]
+				if ext == '.dll':
+					self.make_nuget_lib(bld, 'lib', node.make_node(fx), is_ref)
 
-	def collect_byfx(self, bld, pattern):
-		nodes = bld.path.ant_glob(pattern, ignorecase=True)
-		byfx = {}
-		for node in nodes:
-			fx = node.parent.name
-			byfx.setdefault(fx, []).append(node)
-		return byfx
-
-	def create_tgs(self, bld, byfx, is_ref):
-		for fx, nodes in byfx.iteritems():
-			if fx in self.byfx:
-				continue
-
-			tgs = []
-			for node in nodes:
-				tg = bld(
-					name='%s:%s:%s:%s' % (self.group, self.name, fx, node.name),
-					features='nuget_lib',
-					node=node,
-					is_ref=is_ref
-				)
-				tgs.append(tg)
-			self.byfx[fx] = tgs
+	def make_nuget_lib(self, bld, fx, node, is_ref):
+		# print 'make: %s, %s, %s' % (fx, node, is_ref)
+		tg = bld(
+			name='%s:%s:%s:%s' % (self.group, self.name, fx, node.name),
+			features='nuget_lib',
+			node=node,
+			is_ref=is_ref
+		)
+		lst = self.byfx.setdefault(fx, [])
+		lst.append(tg)
 
 	def __repr__(self):
 		return '%s/%s: %s' % (self.group, self.name, self.byfx)
@@ -80,6 +79,8 @@ def read_paket(self, lockfile):
 	group = ''
 	groups = { group : pkgs }
 	parent = None
+	root = self.path.find_dir('packages')
+	node = root
 
 	src = self.path.find_resource(lockfile)
 	if src:
@@ -90,11 +91,15 @@ def read_paket(self, lockfile):
 				pkgs = {}
 				groups[group] = pkgs
 				parent = None
+				node = root.find_dir(group)
 			suffix = line.lstrip(' ')
 			depth = (len(line) - len(suffix)) / 2
 			if depth == 2:
-				parent = Package(self, group, suffix.split()[0])
-				pkgs[parent.name] = parent
+				name = suffix.split()[0]
+				parent = pkgs.get(name)
+				if parent is None:
+					parent = Package(self, group, name, node.find_dir(name))
+					pkgs[name] = parent
 			elif depth == 3:
 				pkg = suffix.split()[0]
 				parent.deps.append(pkg)
