@@ -1,4 +1,4 @@
-cache //nas/builds/paket
+# cache //nas/builds/paket
 
 # main group
 framework: net451
@@ -38,6 +38,8 @@ group peach-web
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
 	nuget linq2db.PostgreSQL
+	nuget LiquidState
+	nuget Microsoft.AspNet.WebApi.Client
 	nuget Microsoft.AspNetCore.Diagnostics
 	nuget Microsoft.AspNetCore.Hosting
 	nuget Microsoft.AspNetCore.Mvc
