@@ -55,6 +55,13 @@ deps = [
 	'vtortola.WebSockets.dll',
 	'vtortola.WebSockets.Rfc6455.dll',
 	'websocket-sharp.dll',
+	'NHapi.Base.dll',
+	'NHapi.Model.V21.dll',
+	'NHapi.Model.V22.dll',
+	'NHapi.Model.V23.dll',
+	'NHapi.Model.V231.dll',
+	'NHapi.Model.V24.dll',
+	'NHapi.Model.V25.dll',
 ]
 
 top = bld.path.parent.parent

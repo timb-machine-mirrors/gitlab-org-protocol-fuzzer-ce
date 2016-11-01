@@ -59,3 +59,6 @@ bld(
 		nunit_tools : nunit_tools.ant_glob('**/*'),
 	}
 )
+
+for f in bld.path.ant_glob('nHapi_version_24/*.dll'):
+	bld.read_csshlib(f.name, paths=[f.parent.name])

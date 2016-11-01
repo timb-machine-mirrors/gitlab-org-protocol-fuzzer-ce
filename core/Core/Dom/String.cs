@@ -108,6 +108,8 @@ namespace Peach.Core.Dom
 		protected char _padCharacter = '\0';
 		protected Encoding encoding = Encoding.UTF8;
 
+		public Encoding Encoding { get { return encoding; } }
+
 		public String()
 			: base()
 		{
@@ -286,7 +288,7 @@ namespace Peach.Core.Dom
 			if(padCharacter != '\0')
 				pit.WriteAttributeString("padCharacter", padCharacter.ToString());
 
-			if(stringType != StringType.ascii)
+			if(stringType != StringType.utf8)
 				pit.WriteAttributeString("type", stringType.ToString().ToLower());
 
 			if(nullTerminated)
