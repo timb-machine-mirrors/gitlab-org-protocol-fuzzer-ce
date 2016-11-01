@@ -510,6 +510,10 @@ namespace Peach.Core.Cracker
 				{
 					elem.analyzer.asDataElement(elem, positions);
 				}
+				catch (SoftException ex)
+				{
+					throw new CrackingFailure(ex.Message, elem, data, ex);
+				}
 				catch (Exception ex)
 				{
 					throw new CrackingFailure("The analyzer encountered an error. {0}".Fmt(ex.Message),
