@@ -21,6 +21,7 @@ deps = [
 	'Microsoft.Scripting.dll',
 	'Microsoft.Scripting.Metadata.dll',
 	'Mono.Posix.dll',
+	'mustache-sharp.dll',
 	'Newtonsoft.Json.dll',
 	'NLog.dll',
 	'Nustache.Core.dll',
