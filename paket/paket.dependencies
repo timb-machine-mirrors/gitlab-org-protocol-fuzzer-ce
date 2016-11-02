@@ -35,6 +35,7 @@ group peach-web
 	framework: net451
 	source https://www.nuget.org/api/v2
 
+	nuget Autofac.Extensions.DependencyInjection
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
 	nuget linq2db.PostgreSQL
