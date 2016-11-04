@@ -52,6 +52,7 @@ group peach-web
 	nuget Microsoft.Extensions.FileProviders.Embedded
 	nuget Microsoft.Extensions.Logging.Console
 	nuget Microsoft.Extensions.Logging.Debug
+	nuget Minimatch
 	nuget Moq
 	nuget NSwag.Core
 	nuget NUnit
