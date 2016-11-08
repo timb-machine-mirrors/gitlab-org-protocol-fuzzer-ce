@@ -79,7 +79,6 @@ tools = [
 	'tools.tsc',
 	'tools.version',
 	'tools.xcompile',
-	'tools.yarn',
 	'tools.paket',
 ]
 

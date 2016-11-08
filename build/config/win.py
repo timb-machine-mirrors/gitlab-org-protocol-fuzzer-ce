@@ -16,7 +16,6 @@ tools = [
 	'tools.externals',
 	'tools.tsc',
 	'tools.version',
-	'tools.yarn',
 	'tools.paket',
 ]
 
