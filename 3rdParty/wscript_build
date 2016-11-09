@@ -27,6 +27,7 @@ subdirs = [
 	'Google.CityHash',
 	'libusbdotnet',
 	'Managed.AndroidDebugBridge',
+#	'NJsonSchema-master/src',
 	'pin',
 	'Portable.Licensing',
 	'Renci.SshNet',

@@ -24,6 +24,7 @@ deps = [
 	'mustache-sharp.dll',
 	'Newtonsoft.Json.dll',
 	'NLog.dll',
+#	'NJsonSchema.dll',
 	'Nustache.Core.dll',
 	'PacketDotNet.dll',
 	'Patterns.Logging.dll',

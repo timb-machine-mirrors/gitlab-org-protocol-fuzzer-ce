@@ -6,10 +6,13 @@ Uses both the Peach Proxy API to notify when a test starts
 and the python requests library to make HTTP calls.
 '''
 
-import os, json
+import os, json, copy
 from requests import put, get, delete, post
 import requests, json, sys
 import sqlite3, logging, logging.handlers
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 '''The peachproxy module provides helper methods for calling
 the Peach Web Proxy APIs.  These api's are used to integrate
@@ -30,8 +33,8 @@ target = 'http://127.0.0.1:5000'
 req_args = {}
 
 # HTTPS target
-#target = 'https://127.0.0.1:5000'
-#req_args = { 'verify' : False }
+target = 'https://127.0.0.1:5000'
+req_args = { 'verify' : False }
 
 # HTTPS target with client cert
 #target = 'https://127.0.0.1:5000'
@@ -79,16 +82,25 @@ def test_teardown():
 	pass
 
 def test_user_create():
-	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}, **req_args))
+	
+	#post_args = copy.copy(req_args)
+	#post_args['data'] = 
+	r = post(target+'/api/users',
+		 data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}),
+		 **req_args)
 	user = r.json()
 	get(target+'/api/users/%d' % user['user_id'], **req_args)
 	delete(target+'/api/users/%d' % user['user_id'], **req_args)
 
 def test_user_update():
-	r = post(target+'/api/users', data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}, **req_args))
+	r = post(target+'/api/users',
+		 data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}),
+		 **req_args)
 	user = r.json()
 	get(target+'/api/users/%d' % user['user_id'], **req_args)
-	put(target+'/api/users/%d' % user['user_id'], data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}, **req_args))
+	put(target+'/api/users/%d' % user['user_id'],
+	    data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}),
+	    **req_args)
 	delete(target+'/api/users/%d' % user['user_id'], **req_args)
 
 ##############################
@@ -119,6 +131,8 @@ while True:
 		try:
 			test_user_create()
 			print "P"
+		#except Exception as ex:
+			#print ex
 		except:
 			print "E"
 		
