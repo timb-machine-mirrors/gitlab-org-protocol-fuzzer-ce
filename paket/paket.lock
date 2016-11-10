@@ -88,6 +88,7 @@ NUGET
     FluentMigrator (1.6.2)
     FluentMigrator.Runner (1.6.2)
       FluentMigrator (>= 1.6.2)
+    Handlebars.Net (1.8)
     linq2db (1.0.7.4)
     linq2db.PostgreSQL (1.0.7.3)
       linq2db

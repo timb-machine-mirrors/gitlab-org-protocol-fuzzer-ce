@@ -38,6 +38,7 @@ group peach-web
 	nuget Autofac.Extensions.DependencyInjection
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
+	nuget Handlebars.Net
 	nuget linq2db.PostgreSQL
 	nuget LiquidState
 	nuget Microsoft.AspNet.WebApi.Client
