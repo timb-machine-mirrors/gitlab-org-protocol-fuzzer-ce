@@ -57,14 +57,15 @@ class ApiUsers(Resource):
             conn.close()
         
         # Trigger sensitive information disclosure checks
-        if random.randint(0,1) == 1:
+        #if random.randint(0,1) == 1:
+        if True:
             flip = random.randint(0,2)
             if flip == 0:
-                return "Powered by: ASPX.NET", 200, {'Content-Type':'text/html'}
+                return "Blah blah blah. Powered by: ASPX.NET Other other other", 200, {'Content-Type':'text/html'}
             elif flip == 1:
-                return "Version: 1.1.1", 200, {'Content-Type':'text/html'}
+                return "Blah blah blah. Version: 1.1.1 Other other other", 200, {'Content-Type':'text/html'}
             
-            return "Stack trace: xxxxxx", 200, {'Content-Type':'text/html'}
+            return "Blah blah blah Stack trace: xxxxxx Ohter other other", 200, {'Content-Type':'text/html'}
         
         return users
         
