@@ -89,6 +89,7 @@ def test_user_create():
 		 data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}),
 		 **req_args)
 	user = r.json()
+	get(target+'/api/users', **req_args)
 	get(target+'/api/users/%d' % user['user_id'], **req_args)
 	delete(target+'/api/users/%d' % user['user_id'], **req_args)
 
@@ -102,6 +103,7 @@ def test_user_update():
 	    data=json.dumps({"user":"dd", "first":"mike", "last":"smith", "password":"hello"}),
 	    **req_args)
 	delete(target+'/api/users/%d' % user['user_id'], **req_args)
+	get(target+'/api/users', **req_args)
 
 ##############################
 ## Traffic Generation

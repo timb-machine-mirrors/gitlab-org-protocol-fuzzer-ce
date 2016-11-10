@@ -8,7 +8,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, abort, reqparse
 from werkzeug.exceptions import HTTPException
-import sqlite3, logging, logging.handlers
+import sqlite3, logging, logging.handlers, random
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,17 @@ class ApiUsers(Resource):
             abort(500)
         finally:
             conn.close()
+        
+        # Trigger sensitive information disclosure checks
+        if random.randint(0,1) == 1:
+            flip = random.randint(0,2)
+            if flip == 0:
+                return "Powered by: ASPX.NET", 200, {'Content-Type':'text/html'}
+            elif flip == 1:
+                return "Version: 1.1.1", 200, {'Content-Type':'text/html'}
             
+            return "Stack trace: xxxxxx", 200, {'Content-Type':'text/html'}
+        
         return users
         
     def post(self):
