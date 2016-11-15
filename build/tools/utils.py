@@ -295,6 +295,11 @@ def install_packages(self):
 			if 'fake_lib' in features or 'nuget_lib' in features:
 				y.post()
 				install_outputs(self, y)
+			if 'cs' in features:
+				y.post()
+				task = getattr(y, 'cs_task', None)
+				inst_to = getattr(self, 'install_path', None) or '${BINDIR}'
+				self.install_files(inst_to, task.outputs, chmod=Utils.O755)
 			filtered.append(x)
 		except Errors.WafError:
 			self.env.append_value('ASSEMBLIES', x)
