@@ -16,3 +16,9 @@ bld(
 	install_755 = tools,
 	install_644 = files,
 )
+
+subdirs = [
+	'AsmVersion',
+]
+
+bld.recurse(subdirs)

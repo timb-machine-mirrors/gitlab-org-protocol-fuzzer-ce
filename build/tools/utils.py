@@ -310,6 +310,98 @@ def install_packages(self):
 			self.env.append_value('ASSEMBLIES', x)
 	self.use = filtered
 
+def collect_assemblies(self, name, seen, into):
+	# Prevent infinite looping
+	if name in seen:
+		return
+	seen.append(name)
+
+	try:
+		y = self.bld.get_tgen_by_name(name)
+	except Errors.WafError:
+		return
+
+	features = getattr(y, 'features')
+	if 'fake_lib' in features or 'nuget_lib' in features:
+		y.post()
+		into.extend(map(lambda x: x.abspath(), y.link_task.outputs))
+	if 'cs' in features:
+		y.post()
+		# Recursivley collect dependencies
+		for x in self.to_list(getattr(y, 'use', [])):
+			collect_assemblies(self, x, seen, into)
+
+@feature('cs')
+@after_method('install_packages')
+def generate_binding_redirects(self):
+	if not getattr(self, 'GenerateBindingRedirects', False):
+		return
+
+	import xml.etree.ElementTree as ET
+	from xml.dom.minidom import parseString
+
+	asms = []
+	collect_assemblies(self, self.name, [], asms)
+
+	ns = {'asm': 'urn:schemas-microsoft-com:asm.v1'}
+
+	cmd = []
+	if self.env.CS_NAME == 'mono':
+		cmd = [ 'mono' ]
+
+	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + sorted(asms))
+	infos = Utils.subprocess.check_output(cmd) or ''
+
+	cfg = self.path.find_resource('app.config')
+	if not cfg.is_src():
+		return
+
+	xml = ET.parse(cfg.abspath())
+	node = xml.find('runtime/asm:assemblyBinding', ns)
+	if node is None:
+		return
+
+	old = cfg.read(encoding='utf-8')
+
+	node.clear()
+	for info in infos.splitlines():
+		parts = info.split(', ')
+
+		name = parts[0]
+		version = parts[1].split('=')[1]
+		culture = parts[2].split('=')[1]
+		token = parts[3].split('=')[1]
+
+		if token == 'null':
+			continue
+
+		dependentAssembly = ET.SubElement(node, 'dependentAssembly')
+		ET.SubElement(dependentAssembly, 'assemblyIdentity', dict(
+			name=name,
+			publicKeyToken=token,
+			culture=culture
+		))
+		ET.SubElement(dependentAssembly, 'bindingRedirect', dict(
+			oldVersion='0.0.0.0-%s' % version,
+			newVersion=version
+		))
+
+	raw = ET.tostring(xml.getroot(), 'utf-8')
+	dom = parseString(raw)
+	pretty = dom.toprettyxml(indent="\t", encoding='utf-8')
+	nice = []
+	for line in pretty.splitlines():
+		if line.rstrip():
+			nice.append(line)
+
+	new = '\n'.join(nice)
+	new = new.replace('<configuration xmlns:ns0="urn:schemas-microsoft-com:asm.v1">', '<configuration>')
+	new = new.replace('<ns0:assemblyBinding>', '<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">')
+	new = new.replace('</ns0:assemblyBinding>', '</assemblyBinding>')
+
+	if old != new:
+		cfg.write(new, encoding='utf-8')
+
 @conf
 def clone_env(self, variant):
 	env = self.all_envs.get(variant, None)
