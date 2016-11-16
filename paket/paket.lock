@@ -95,8 +95,7 @@ NUGET
       linq2db.t4models
       Npgsql
     linq2db.t4models (1.0.7.3)
-    LiquidState (8.0.2)
-      System.Collections.Immutable (>= 1.0)
+    LiquidState (8.2)
     Microsoft.AspNet.WebApi.Client (5.2.3)
       Newtonsoft.Json (>= 6.0.4)
     Microsoft.AspNetCore.Antiforgery (1.0.1)
