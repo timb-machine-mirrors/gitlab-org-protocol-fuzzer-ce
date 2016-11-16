@@ -1,4 +1,4 @@
-cache //nas/builds/paket
+cache \\nas\builds\paket
 
 # main group
 framework: net451
