@@ -141,18 +141,23 @@ def install_content2(self):
 	if content:
 		self.install_files('${BINDIR}', content, cwd=self.path, relative_trick=True)
 
-def install_outputs(self, ref):
-	# install 3rdParty libs into ${LIBDIR}
-	inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
-
+def install_once(self, ref, ref_task, inst_to):
 	has_installed = getattr(ref, 'has_installed', [])
 	if inst_to in has_installed:
-		return
+		return True
 
 	has_installed.append(inst_to)
 	ref.has_installed = has_installed
 
-	self.install_files(inst_to, ref.link_task.outputs, chmod=Utils.O755)
+	self.install_files(inst_to, ref_task.outputs, chmod=Utils.O755)
+	return False
+
+def install_outputs(self, ref):
+	# install 3rdParty libs into ${LIBDIR}
+	inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
+
+	if install_once(self, ref, ref.link_task, inst_to):
+		return
 
 	# install any pdb or .config files into ${LIBDIR}
 	for lib in ref.link_task.outputs:
@@ -295,6 +300,11 @@ def install_packages(self):
 			if 'fake_lib' in features or 'nuget_lib' in features:
 				y.post()
 				install_outputs(self, y)
+			if 'cs' in features:
+				y.post()
+				inst_to = getattr(self, 'install_path', None) or '${BINDIR}'
+				if inst_to != y.install_task.dest:
+					install_once(self, y, y.cs_task, inst_to)
 			filtered.append(x)
 		except Errors.WafError:
 			self.env.append_value('ASSEMBLIES', x)
