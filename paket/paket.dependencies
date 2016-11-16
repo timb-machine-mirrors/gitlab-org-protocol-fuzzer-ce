@@ -35,6 +35,7 @@ group peach-web
 	framework: net451
 	source https://www.nuget.org/api/v2
 
+	nuget Autofac
 	nuget Autofac.Extensions.DependencyInjection
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
@@ -62,3 +63,4 @@ group peach-web
 	nuget Swashbuckle.Swagger beta
 	nuget Swashbuckle.SwaggerGen beta
 	nuget Swashbuckle.SwaggerUi beta
+	nuget System.Runtime.CompilerServices.Unsafe
