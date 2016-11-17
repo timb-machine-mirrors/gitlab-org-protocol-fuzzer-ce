@@ -349,7 +349,10 @@ def generate_binding_redirects(self):
 	if self.env.CS_NAME == 'mono':
 		cmd = [ 'mono' ]
 
-	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + sorted(asms))
+	asms.sort(key=lambda x: os.path.basename(x), cmp=lambda x, y: cmp(x.lower(), y.lower()))
+	# import pprint
+	# pprint.pprint(map(lambda x: os.path.basename(x), asms))
+	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + asms)
 	infos = Utils.subprocess.check_output(cmd) or ''
 
 	cfg = self.path.find_resource('app.config')
@@ -394,13 +397,13 @@ def generate_binding_redirects(self):
 		if line.rstrip():
 			nice.append(line)
 
-	new = '\n'.join(nice)
+	new = '\r\n'.join(nice)
 	new = new.replace('<configuration xmlns:ns0="urn:schemas-microsoft-com:asm.v1">', '<configuration>')
 	new = new.replace('<ns0:assemblyBinding>', '<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">')
 	new = new.replace('</ns0:assemblyBinding>', '</assemblyBinding>')
 
 	if old != new:
-		cfg.write(new, encoding='utf-8')
+		cfg.write(new, flags='wb', encoding='utf-8')
 
 @conf
 def clone_env(self, variant):
