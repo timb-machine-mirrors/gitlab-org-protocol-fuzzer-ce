@@ -58,6 +58,11 @@ group peach-web
 	nuget Moq
 	nuget NSwag.Core
 	nuget NUnit
+	nuget Serilog.Enrichers.Thread
+	nuget Serilog.Extensions.Logging
+	nuget Serilog.Settings.Configuration
+	nuget Serilog.Sinks.ColoredConsole
+	nuget Serilog.Sinks.Literate
 	nuget SocketHttpListener
 	nuget Swashbuckle beta
 	nuget Swashbuckle.Swagger beta
