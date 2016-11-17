@@ -364,7 +364,7 @@ def generate_binding_redirects(self):
 	if node is None:
 		return
 
-	old = cfg.read(encoding='utf-8')
+	old = cfg.read(flags='rb', encoding='utf-8')
 
 	node.clear()
 	for info in infos.splitlines():
