@@ -37,6 +37,7 @@ group peach-web
 
 	nuget Autofac
 	nuget Autofac.Extensions.DependencyInjection
+	nuget DotNetZip
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
 	nuget Handlebars.Net

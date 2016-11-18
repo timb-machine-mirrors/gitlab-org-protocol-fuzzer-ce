@@ -85,6 +85,7 @@ NUGET
       Microsoft.Extensions.DependencyInjection.Abstractions (>= 1.0)
       NETStandard.Library (>= 1.6)
     Castle.Core (3.3.3)
+    DotNetZip (1.10.1)
     FluentMigrator (1.6.2)
     FluentMigrator.Runner (1.6.2)
       FluentMigrator (>= 1.6.2)
