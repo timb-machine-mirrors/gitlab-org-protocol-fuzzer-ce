@@ -7,7 +7,7 @@ def configure(conf):
 	dotnet = []
 	if Utils.unversioned_sys_platform() != 'win32':
 		conf.find_program('mono')
-		dotnet = ['MONO']
+		dotnet = conf.env['MONO']
 
 	bootstrapper = os.path.abspath(os.path.join(
 		'paket',
