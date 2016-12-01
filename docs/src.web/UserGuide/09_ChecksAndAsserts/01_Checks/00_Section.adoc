@@ -1,0 +1,9 @@
+== Checks
+
+Checks are broken up into global, passive, active and mutational....
+
+// TODO table of checks
+
+>>>
+include::SensitiveInformation.adoc[]
+

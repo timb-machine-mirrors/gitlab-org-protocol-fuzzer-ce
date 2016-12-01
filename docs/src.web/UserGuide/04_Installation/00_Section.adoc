@@ -1,0 +1,42 @@
+[[Installation]]
+== Installation
+
+Installing {product} on any of the supported platforms is a straightforward and easy process.
+The following sections list the steps needed to install Peach on different operating systems,
+beginning with using the license to download the product files.
+The items from Peach are contained in a single downloadable zip file that includes Peach,
+a copy of the license,
+Peach Pits,
+and/or Pit Packs.
+
+[TIP]
+When fuzzing, many security products (such as anti-virus programs) can interfere or slowdown fuzzing.
+For network fuzzing,
+make sure none of the network or host-based network intrusion detection systems (IDS) are running.
+For file fuzzing,
+disable anti-virus software;
+or mark Peach,
+the target application,
+and any directories that might have files used in fuzzing,
+as out of scope for real time monitoring.
+
+Peach Fuzzer, LLC offers {product} under two separate licensing schemes:
+
+. xref:License_Subscription[{product} Subscription]
+. xref:License_FuzzFlex[Peach Fuzzer Flex]
+
+include::01_Hardware.adoc[]
+
+include::02_PortableLicense.adoc[]
+
+include::03_00_FlexeraLicense.adoc[]
+
+include::04_Windows.adoc[]
+
+include::05_Linux.adoc[]
+
+include::06_OSX.adoc[]
+
+include::07_SecurePeach.adoc[]
+
+// end

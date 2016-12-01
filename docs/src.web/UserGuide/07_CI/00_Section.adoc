@@ -1,0 +1,136 @@
+[[webproxy_CI]]
+=== CI Integration
+
+Peach Web currently provides generic CI integration via command line usage.
+Future releases will include plugins for leading CI systems.
+
+Generic integration with CI systems is provided by running a command that
+returns non-zero when testing does not pass.
+The vast majority of CI systems support this method of integration.
+
+The generic CI integration script is available in SDK\webproxy\ci\generic.
+
+To use, update the configuration at top of python file and
+configure your CI system to run.
+
+==== Script Operation
+
+This script performs the following steps when run:
+
+. (Optional) Start Peach
+. Start new fuzzing job using supplied configuration
+. (Optional) Launch automation command
+. Wait for fuzzing job to complete
+. Display any faults found during testing to console
+. (Optional) Stop Peach
+. (optional) Stop automation
+. Return ok or failure via exit code
+
+Requirements:
+
+. Peach eula must be accepted
+. Automation command must call sessionTearDown Peach Web API to stop fuzzing job
+
+==== Usage
+
+To use this script follow this process:
+
+. Optionally create a script to launch traffic generation or automated tests.
+All traffic must route through Peach Web and use the Peach Web Proxy APIs
+. Create a Peach Web configuration via the Peach UI
+. Configure +peach_ci_runner.py+ parameters
+. Test by running +peach_ci_runner.py+ by hand
+. Configure CI to run +peach_ci_runner.py+
+
+NOTE: If this CI runner does not launch the traffic generator/automated tests
+then they must be started by some other mechanism.
+
+==== Configuration Parameters
+
+test_duration::
++
+Duration of testing.
+Argument format is DD.HH:MM:SS.
++
+|=====
+| 12     | Duration of 12 days
+| 0:20   | Duration of 20 min
+| 5:00   | Duration of 5 hours
+| 1.5:00 | Duration of 1 day, 5 hrs
+|=====
+
+peach_exe::
++
+Full path to Peach executable.
+When set the CI runner will start and stop Peach.
+The Peach executable is 'peach' on Linux and OS X and 'peach.exe' on Windows.
++
+To disable launching of Peach set the value to +None+.
++
+Example: +/opt/peach/peach+
+
+automation_cmd::
++
+Test automation launch script and arguments.
+This script is run in the background and generates the web api traffic that is fuzzed by Peach Web.
+If the script does not automatically exit at the end of fuzzing it will be terminated by the
+this script.
++
+To disable launch of automation set the value to +None+.
++
+Example: +python /opt/peach/sdk/webproxy/examples/flask_rest_target/hand_fuzz.py+
+
+pit_config::
+	Peach Web configuration to start.
+	The configuration name can be found by clicking on a configuration in the Library page.
+	This will load the configuration screen, at the top in red is the name.
+	Example: +WebProxy-Flask-Demo+
+
+peach_host::
+	Peach host name or IP address.
+	Example: 127.0.0.1
+	
+peach_port::
+	Peach API port (same as UI port).
+	When this script is configured to launch Peach, it will force use of this port number.
+	This is not the web proxy port.
+	Example: 8888
+
+exit_code_ok::
+	Exit code set by script when testing passed.
+	Example: 0
+
+exit_code_failure::
+	Exit code set by script when testing failed.
+	This indicates a security issue was found.
+	Example: 1
+
+exit_code_error::
+	Exit code when error occured and testing did not complete.
+	Example: 100
+
+syslog_enabled::
+	Enable or disable sending logs to a syslog server.
+	Example: False
+	
+syslog_host::
+	Host name or IP of syslog server that will receive logs.
+	Example: logserver.foobar.com
+
+syslog_port::
+	Port syslog server listens on. Default syslog port is 514.
+	Exmaple: 514
+	
+syslog_level::
++
+Logging level. +logging.INFO+ is the recommended log level.
+Acceptable values are:
++
+|====
+|logging.INFO  | normal
+|logging.ERROR | only errors
+|logging.DEBUG | verbose
+|====
++
+Example: logging.INFO
+
