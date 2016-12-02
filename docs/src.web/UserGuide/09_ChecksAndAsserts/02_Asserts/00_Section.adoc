@@ -7,3 +7,6 @@ Asserts are ....
 >>>
 include::SensitiveInformation.adoc[]
 
+>>>
+include::StatusCode.adoc[]
+
