@@ -10,3 +10,6 @@ include::HtmlInjection.adoc[]
 >>>
 include::SensitiveInformation.adoc[]
 
+>>>
+include::SqlInjection.adoc[]
+
