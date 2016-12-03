@@ -37,11 +37,11 @@ group peach-web
 
 	nuget Autofac
 	nuget Autofac.Extensions.DependencyInjection
+	nuget Dapper
 	nuget DotNetZip
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
 	nuget Handlebars.Net
-	nuget linq2db.PostgreSQL
 	nuget LiquidState
 	nuget Microsoft.AspNet.WebApi.Client
 	nuget Microsoft.AspNetCore.Diagnostics
@@ -57,6 +57,7 @@ group peach-web
 	nuget Microsoft.Extensions.Logging.Debug
 	nuget Minimatch
 	nuget Moq
+	nuget Npgsql
 	nuget NSwag.Core
 	nuget NUnit
 	nuget Serilog.Enrichers.Thread
@@ -64,6 +65,7 @@ group peach-web
 	nuget Serilog.Settings.Configuration
 	nuget Serilog.Sinks.ColoredConsole
 	nuget Serilog.Sinks.Literate
+	nuget Slapper.AutoMapper
 	nuget SocketHttpListener
 	nuget Swashbuckle beta
 	nuget Swashbuckle.Swagger beta
