@@ -37,6 +37,7 @@ group peach-web
 
 	nuget Autofac
 	nuget Autofac.Extensions.DependencyInjection
+nuget CommonMark.NET
 	nuget Dapper
 	nuget DotNetZip
 	nuget FluentMigrator
