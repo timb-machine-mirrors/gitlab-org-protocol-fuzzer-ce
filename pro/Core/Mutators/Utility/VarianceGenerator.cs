@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Random = Peach.Core.Random;
 
-namespace Peach.Pro.Core
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Generates a normal distribution of numbers

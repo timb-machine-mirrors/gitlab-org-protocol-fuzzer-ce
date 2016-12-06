@@ -5,6 +5,7 @@ using System.Linq;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Pro.Core.Mutators.Utility;
 using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
 

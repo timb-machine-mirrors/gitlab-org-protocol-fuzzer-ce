@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Random = Peach.Core.Random;
 
-namespace Peach.Pro.Core
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// Computes the edge cases of numbers inside a given space.

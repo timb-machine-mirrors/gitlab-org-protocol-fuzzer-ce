@@ -8,6 +8,7 @@ using Peach.Core;
 using Peach.Pro.Core;
 using Random = Peach.Core.Random;
 using Peach.Core.Test;
+using Peach.Pro.Core.Mutators.Utility;
 
 namespace Peach.Pro.Test.Core
 {

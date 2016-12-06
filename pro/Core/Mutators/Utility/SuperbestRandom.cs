@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Random = Peach.Core.Random;
 
-namespace Peach.Pro.Core
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	/// <summary>
 	/// https://bitbucket.org/Superbest/superbest-random
