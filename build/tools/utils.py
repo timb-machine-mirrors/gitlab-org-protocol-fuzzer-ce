@@ -276,7 +276,7 @@ def apply_target_framework(self):
 
 	# Add TargetFrameworkAttribute to the assembly
 	self.env.EMIT_SOURCE = Utils.subst_vars(target_framework_template, self.env)
-	name = '.NETFramework,Version=%s.AssemblyAttributes.cs' % self.env.TARGET_FRAMEWORK
+	name = '.NETFramework,Version=%s.AssemblyAttributes.%s.cs' % (self.env.TARGET_FRAMEWORK, self.idx)
 	target = self.path.find_or_declare(name)
 	tsk = self.create_task('emit', None, [ target ])
 	self.source = self.to_nodes(self.source) + tsk.outputs
