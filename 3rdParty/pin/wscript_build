@@ -13,3 +13,15 @@ if pin_ver:
 		install_path = '${BINDIR}/pin',
 		install_755 = path.ant_glob('pin pin.exe LICENSE README */runtime/** */bin/**')
 	)
+
+	# Use pre-built pin tools until multiple simultaneous versions 
+	# of MSVC are supported by waf
+	# Or, wait until the Microsoft.Net.Compilers nuget package gets this fix:
+	# https://github.com/dotnet/roslyn/issues/12360
+	if bld.env.DEST_OS is 'win32':
+		root = bld.path.find_node(bld.env.BASENAME)
+		bld(
+			name='pin-tools',
+			install_path = '${BINDIR}',
+			install_644 = { root : root.ant_glob('*.dll') }
+		)
