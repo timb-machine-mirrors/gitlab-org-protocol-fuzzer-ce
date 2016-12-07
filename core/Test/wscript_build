@@ -2,11 +2,6 @@
 
 deps = [
 	'IronPython.dll',
-	'IronPython.Modules.dll',
-	'Microsoft.Scripting.dll',
-	'Microsoft.Scripting.Metadata.dll',
-	'NLog.dll',
-	'nunit.framework.dll',
 	'Peach.Core.dll',
 	'System.dll',
 	'System.Core.dll',
@@ -14,9 +9,18 @@ deps = [
 	'System.Xml.dll',
 ]
 
+pkgs = [
+	'NLog',
+	'NUnit',
+]
+
 bld(
-	features = 'cs test',
-	use = deps,
-	source = bld.path.ant_glob('**/*.cs'),
 	name = 'Peach.Core.Test.dll',
+	features = 'cs test paket',
+	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = ['net45', 'Net45'],
+	),
+	source = bld.path.ant_glob('**/*.cs'),
 )

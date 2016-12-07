@@ -1,0 +1,75 @@
+cache \\nas\builds\paket
+
+# main group
+framework: net451
+source https://www.nuget.org/api/v2
+
+nuget Aspose.Words 15.3.0
+nuget Autofac.WebApi2.Owin 3.3.0
+nuget Dapper 1.42
+nuget DotNetZip 1.9.8
+nuget Lextm.SharpSnmpLib 9.0.1
+nuget Microsoft.AspNet.WebPages 3.2.3
+nuget Microsoft.Diagnostics.Runtime 0.8.27-beta
+nuget Microsoft.Owin.Host.HttpListener 3.0.1
+nuget Microsoft.Owin.StaticFiles 3.0.1
+nuget Microsoft.Owin.Testing 3.0.1
+nuget Mono.Posix-4.5 4.5.0
+nuget Moq 4.5.9
+nuget NLog 4.3.2
+nuget Newtonsoft.Json 6.0.8
+nuget NUnit 3.2.1
+nuget NUnit.ConsoleRunner 3.2.1
+nuget Nustache 1.16.0.1
+nuget PacketDotNet 0.13.0
+nuget SharpPcap 4.2.0
+nuget SocketHttpListener 1.0.0.30
+nuget Swashbuckle.Core.Net45 5.2.1
+nuget TreeViewAdv 1.7.0.0
+nuget vtortola.WebSocketListener 2.2.0.1
+nuget WebSocketSharp 1.0.3-rc9
+
+
+# careful, the packages directory for a group is always lower-case
+group peach-web
+	framework: net451
+	source https://www.nuget.org/api/v2
+
+	nuget Autofac
+	nuget Autofac.Extensions.DependencyInjection
+nuget CommonMark.NET
+	nuget Dapper
+	nuget DotNetZip
+	nuget FluentMigrator
+	nuget FluentMigrator.Runner
+	nuget Handlebars.Net
+	nuget LiquidState
+	nuget Microsoft.AspNet.WebApi.Client
+	nuget Microsoft.AspNetCore.Diagnostics
+	nuget Microsoft.AspNetCore.Hosting
+	nuget Microsoft.AspNetCore.Mvc
+	nuget Microsoft.AspNetCore.Routing
+	nuget Microsoft.AspNetCore.StaticFiles
+	nuget Microsoft.AspNetCore.TestHost
+	nuget Microsoft.Extensions.Configuration.CommandLine
+	nuget Microsoft.Extensions.Configuration.Json
+	nuget Microsoft.Extensions.FileProviders.Embedded
+	nuget Microsoft.Extensions.Logging.Console
+	nuget Microsoft.Extensions.Logging.Debug
+	nuget Minimatch
+	nuget Moq
+	nuget Npgsql
+	nuget NSwag.Core
+	nuget NUnit
+	nuget Serilog.Enrichers.Thread
+	nuget Serilog.Extensions.Logging
+	nuget Serilog.Settings.Configuration
+	nuget Serilog.Sinks.ColoredConsole
+	nuget Serilog.Sinks.Literate
+	nuget Slapper.AutoMapper
+	nuget SocketHttpListener
+	nuget Swashbuckle beta
+	nuget Swashbuckle.Swagger beta
+	nuget Swashbuckle.SwaggerGen beta
+	nuget Swashbuckle.SwaggerUi beta
+	nuget System.Runtime.CompilerServices.Unsafe

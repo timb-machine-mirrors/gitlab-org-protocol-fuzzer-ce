@@ -421,7 +421,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 				y = get(x)
 			except Errors.WafError:
 				if asm_name.startswith('Facades/'):
-					asm_name = asm_name[8:]
+					continue
 				r = reference(self.base, asm_name, None)
 				self.references[r.key] = r
 				continue
@@ -432,6 +432,12 @@ class vsnode_cs_target(msvs.vsnode_project):
 				self.bld.fatal('cs task has no link task for use %r' % self)
 
 			if 'fake_lib' in y.features:
+				r = reference(self.base, asm_name, y.link_task.outputs[0])
+				self.references[r.key] = r
+				continue
+
+			if 'nuget_lib' in y.features:
+				asm_name = os.path.splitext(x.split(':')[3])[0]
 				r = reference(self.base, asm_name, y.link_task.outputs[0])
 				self.references[r.key] = r
 				continue
@@ -787,7 +793,7 @@ class idegen(msvs.msvs_generator):
 	def __init__(self, ctx):
 		self.ctx = ctx
 
-	def init(self):
+	def init(self, sln):
 		if not getattr(self, 'configurations', None):
 			self.configurations = ['Release'] # LocalRelease, RemoteDebug, etc
 		if not getattr(self, 'platforms', None):
@@ -797,7 +803,7 @@ class idegen(msvs.msvs_generator):
 		if not getattr(self, 'project_extension', None):
 			self.project_extension = '.vcxproj'
 		if not getattr(self, 'projects_dir', None):
-			self.projects_dir = self.ctx.srcnode.make_node('.depproj')
+			self.projects_dir = self.ctx.srcnode.make_node('.depproj').make_node(os.path.splitext(sln)[0])
 			self.projects_dir.mkdir()
 
 		# bind the classes to the object, so that subclass can provide custom generators
@@ -1098,7 +1104,8 @@ class idegen(msvs.msvs_generator):
 		pass
 
 	def make_project(self, tg):
-		if 'fake_lib' in getattr(tg, 'features', ''):
+		features = getattr(tg, 'features', '')
+		if 'fake_lib' in features or 'nuget_lib' in features:
 			return None
 		elif hasattr(tg, 'link_task') and self.enable_cproj:
 			return self.vsnode_target(self, tg)
@@ -1132,19 +1139,19 @@ class multi_idegen(BuildContext):
 		if multi_idegen.depth == 0:
 			for sln, variants in multi_idegen.sln_variants.iteritems():
 				variants = OrderedDict(sorted(variants.iteritems(), key=lambda x: x[1].key))
-				generator = self.create_generator()
+				generator = self.create_generator(sln)
 				generator.write_files(sln, variants)
 
-	def create_generator(self):
+	def create_generator(self, sln):
 		generator = idegen(self)
-		generator.init()
+		generator.init(sln)
 		self.init(generator)
 		return generator
 
 	def process_solutions(self):
 		solutions = self.collect_solutions()
 		for sln, tgs in solutions.iteritems():
-			generator = self.create_generator()
+			generator = self.create_generator(sln)
 
 			projects = []
 

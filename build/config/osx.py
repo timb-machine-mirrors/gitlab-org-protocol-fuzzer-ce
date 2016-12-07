@@ -16,11 +16,11 @@ tools = [
 	'tools.externals',
 	'tools.tsc',
 	'tools.version',
+	'tools.paket',
 ]
 
 optional_tools = [
 	'tools.asan',
-	'tools.mdoc',
 	'tools.mkbundle',
 	'tools.test',
 	'tools.zip',
@@ -139,6 +139,7 @@ def configure(conf):
 		'cxxshlib',
 		'cxxprogram',
 		'fake_lib',
+		'nuget_lib',
 		'cs',
 		'debug',
 		'release',

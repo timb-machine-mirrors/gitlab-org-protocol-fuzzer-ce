@@ -12,9 +12,9 @@ deps = [
 ]
 
 bld(
+	name='PeachXmlGenerator.exe',
 	features = 'cs',
 	use = deps,
 	bintype = 'winexe',
 	source = bld.path.ant_glob('**/*.cs **/*.resx'),
-	name='PeachXmlGenerator.exe',
 )

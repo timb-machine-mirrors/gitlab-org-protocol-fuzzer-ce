@@ -1,30 +1,8 @@
 #!/usr/bin/env python
 
 deps = [
-	'Autofac.dll',
-	'Autofac.Integration.Owin.dll',
-	'Autofac.Integration.WebApi.dll',
-	'Autofac.Integration.WebApi.Owin.dll',
-
-	'Castle.Core.dll',
 	'BouncyCastle.Crypto.dll',
 
-	'Ionic.Zip.dll',
-
-	'Microsoft.Owin.StaticFiles.dll',
-	'Microsoft.Owin.FileSystems.dll',
-	'Microsoft.Owin.Host.HttpListener.dll',
-	'Microsoft.Owin.Hosting.dll',
-	'Microsoft.Owin.dll',
-	'Microsoft.CSharp.dll',
-	'Microsoft.Owin.Testing.dll',
-	'Moq.dll',
-
-	'Newtonsoft.Json.dll',
-	'NLog.dll',
-	'nunit.framework.dll',
-	'Owin.dll',
-	
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.dll',
@@ -34,27 +12,35 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Net.Http.dll',
-	'System.Net.Http.Formatting.dll',
 	'System.Net.Http.WebRequest.dll',
 	'System.Web.dll',
-	'System.Web.Cors.dll',
-	'System.Web.Http.dll',
-	'System.Web.Http.Cors.dll',
-	'System.Web.Http.Owin.dll',
 	'System.Xml.dll',
 
 	'Titanium.Web.Proxy.dll',
+]
 
-	'vtortola.WebSockets.dll',
-	'vtortola.WebSockets.Rfc6455.dll',
+pkgs = [
+	'Autofac.WebApi2.Owin',
+	'Microsoft.AspNet.WebApi.Client',
+	'Microsoft.Owin.Host.HttpListener',
+	'Microsoft.Owin.StaticFiles',
+	'Microsoft.Owin.Testing',
+	'Moq',
+	'NLog',
+	'NUnit',
+	'vtortola.WebSocketListener',
 ]
 
 bld(
-	features = 'cs test',
+	name = 'Peach.Pro.Test.WebProxy.exe',
+	features = 'cs test paket',
 	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = ['net45', 'net40', 'portable-net45+win8+wpa81'],
+	),
 	source = bld.path.ant_glob('**/*.cs'),
 	resource = bld.path.ant_glob('**/*.json **/*.yml'),
-	name = 'Peach.Pro.Test.WebProxy.exe',
 	csdoc = False,
 	csflags = [
 		# The following are remapped in Peach's app.config:

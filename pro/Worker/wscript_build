@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 deps = [
-	'NLog.dll',
-	'SharpPcap.dll',
-	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'System.dll',
@@ -12,9 +9,9 @@ deps = [
 ]
 
 app = bld(
+	name = 'PeachWorker.exe',
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'PeachWorker.exe',
 	ver_product = 'Peach Fuzzing Worker',
 )

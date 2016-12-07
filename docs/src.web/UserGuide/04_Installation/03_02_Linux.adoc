@@ -1,0 +1,249 @@
+===== Preparing a Local License Server for Linux
+
+. When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
+. Navigate to https://dl.peachfuzzer.com with your preferred web browser.
+. At the login prompt under the FuzzFlex Sign In section,
+enter the new username/password that was recently reset and click +Sign In+.
++
+image::{images}/Common/Installation/Portal_Home_Flex.png[]
+
+. On the +Downloads+ page, select the +flexnetls+ package that matches your system.
+.. Choose the latest release version from the items on the left side.
+.. Click the download icon on the right side of the +flexnetls-linux_x86.zip+ or +flexnetls-linux_x86_64.zip+ package.
++
+image::{images}/Common/Installation/Portal_Flex_Downloads.png[]
+
+. After a few moments, an End User License Agreement acceptance page appears.
+Click +I ACCEPT+ to continue.
++
+image::{images}/Common/Installation/Portal_EULA_Flex.png[]
+
+. The download will begin.
+Depending on your network connection,
+this could take a few minutes.
+
+. Extract the installation archive to +/opt/flexnetls+.
+
+. Run the following commands as root to install and start the server:
++
+----
+cd /opt/flexnetls
+sudo ./flexnetls.sh -install
+sudo ./flexnetls.sh -start
+----
+
+====== Online Activation
+
+. Once your local license server is installed and running,
+follow the instructions provided on the 'Licensing' page on the
+https://dl.peachfuzzer.com[Peach Downloader] site.
++
+An Activation ID will be required to continue.
+The 'Licensing' page should provide this information.
+If you need help with finding the Activation ID,
+please contact licensing@peachfuzzer.com.
++
+As an example,
+the 'Licensing' page will ask you to run a command similar to:
++
+----
+cd /opt/flexnetls
+./flexnetlsadmin.sh \
+    -server http://127.0.0.1:7070/api/1.0/instances/~ \
+    -activate \
+    -id AID
+----
++
+NOTE: Substitute the +AID+ in the above command with the Activation ID found on the 'Licensing' page.
+
+. After initially activating the Local License Server,
+you'll need to return to the 'Licensing' page and use the +Link Features+ button
+to ensure that all line items for an entitlement are linked to the Local License Server.
+
+. Finally, after your features have been linked with the Local License Server,
+perform another activation as before to ensure that your entitlement is synchronized
+with the Flex Net Operations back-end.
+
+NOTE: For more information and additional deployment options,
+see the 'FlexNet Embedded 2016 R2 License Server Administration Guide' found
+in the installation folder as a file named +FNE_LicenseServerAdminGuide_2016R2.pdf+.
+
+====== Offline Activation
+
+. Once your local license server is installed and running,
+follow the instructions provided on the 'Licensing' page on the
+https://dl.peachfuzzer.com[Peach Downloader] site.
++
+An Activation ID will be required to continue.
+The 'Licensing' page should provide this information.
+If you need help with finding the Activation ID,
+please contact licensing@peachfuzzer.com.
++
+As an example,
+the 'Licensing' page will ask you to run a command similar to:
++
+----
+cd /opt/flexnetls
+./flexnetlsadmin.sh \
+    -server http://127.0.0.1:7070/api/1.0/instances/~ \
+    -activate \
+    -id AID \
+    -o request.bin
+----
++
+NOTE: Substitute the +AID+ in the above command with the Activation ID found on the 'Licensing' page.
+
+. Submit the +request.bin+ file to the FNO backend.
+.. Login to the https://dl.peachfuzzer.com[Peach Downloader] site.
+.. Click the +Flexera Portal+ link in the navigation bar along the top of the page.
+.. Click the +Upload Capability Request+ link in the menu on the left side of the page.
+.. Select the +request.bin+ file and click the +Send+ button.
+.. A +.bin+ response file will be downloaded by your browser.
+
+. Once you have received the capability-response binary file from the back office, 
+run the following command to process the response generated to install the licenses on the license server:
++
+----
+cd /opt/flexnetls
+./flexnetlsadmin.sh \
+    -server http://127.0.0.1:7070/api/1.0/instances/~ \
+    -activate \
+    -load response.bin
+----
++
+NOTE: Substitute the +response.bin+ with the name of the file downloaded by the previous step.
+
+. After initially activating the Local License Server,
+you'll need to return to the 'Licensing' page and use the +Link Features+ button
+to ensure that all line items for an entitlement are linked to the Local License Server.
+
+. Finally, after your features have been linked with the Local License Server,
+perform an initial offline synchronization to ensure that your entitlement is synchronized
+with the Flex Net Operations back-end.
+
+NOTE: For more information and additional deployment options,
+see the 'FlexNet Embedded 2016 R2 License Server Administration Guide' found
+in the installation folder as a file named +FNE_LicenseServerAdminGuide_2016R2.pdf+.
+
+====== Offline Synchronization
+
+The traditional process of synchronizing license data from the local license server to the 
+back office relies on the license server having direct internet access to transmit data to 
+the back office. 
+For security reasons,
+such as data privacy,
+local license servers might have limited or no external network connections,
+making it difficult to synchronize data about concurrent-license distribution and metered usage 
+on the server to the back office.
+The offline synchronization feature supports the ability to download this data from the
+license server on to another device that has an external network connection and then
+transmitting the data to the back office.
+
+To perform the offline synchronization process, follow these steps:
+
+Step 1: Download Records::
++
+--
+The first step is to download the transaction records to be synchronized from the 
+license server using the +serverofflinesynctool.sh+ tool:
+
+----
+cd /opt/flexnetls
+./serverofflinesynctool.sh \
+    -url http://licenseServerHostName:port/api/1.0/sync_message/offline \
+    -generate path
+----
+
+where:
+
+* +licenseServerHostName:port+ is the server name and port for the license server URL from 
+  where the records are being downloaded (default port is 7070)
+* +path+ is the path on the local machine where the records will be temporarily stored
+
+This command can be run on a system with an external network connection or 
+on the hosting license server. 
+If you run the command on the hosting license server, 
+the files containing the data to be synchronized need to be copied to a machine with 
+external network connectivity.
+Once the download completes,
+a message stating the number of transaction records downloaded is displayed:
+
+----
+OfflineSync utility started.
+Sync completed for 3 device records.
+----
+
+If there are no new records to download, the message displays the following:
+
+----
+OfflineSync utility started.
+No new data is available.
+----
+--
+
+Step 2: Synchronize to the Back Office::
++
+--
+Next, 
+use the +backofficeofflinesynctool.sh+ tool to synchronize the records to the back office:
+
+----
+cd /opt/flexnetls
+./backofficeofflinesynctool.sh \
+    -url https://flex1253.compliance.flexnetoperations.com/deviceservices \
+    -out filename path
+----
+
+where:
+
+* +filename+ is the name of the file to which the synchronization acknowledgment will be written to 
+  (for example, +sync_ack.bin+)
+* +path+ is the path on the local machine where the transaction records to be synchronized were 
+  stored by the serverofflinesync tool
+
+A synchronization acknowledgment message is returned:
+
+----
+Successfully sent sync data and received a sync acknowledgment.
+----
+
+The synchronization acknowledgment received from the back office is written to the output file
+(default is +syncack.bin+ in the current directory).
+
+----
+MessageType=”Server sync acknowledgment”
+MessageTIme=”Jan 13, 2015 10:53:46 AM”
+LastSyncTime=”Jan 13, 2015 10:52:45 AM”
+SourceIDType=String
+SournceID=BACK_OFFICE
+SourceIds=BACK_OFFICE
+TargetID=A088B436F208
+TargetIDType=Ethernet
+----
+--
+
+Step 3: Update the Synchronization Time::
++
+--
+The synchronization acknowledgment needs to be processed on the license server to update the 
+last time of synchronization so that it knows that the data has been synchronized to the back office. 
+When executing the tool,
+use the same path value used to download and synchronize the data to the back office so that 
+the tool can remove the old synchronized data file after it processes the response:
+
+----
+cd /opt/flexnetls
+./serverofflinesynctool.sh \
+    -url http://licenseServerHostName:port/api/1.0/sync_ack/offline \
+    -process filename path
+----
+
+The server responds with the following message:
+
+----
+OfflineSync utility started.
+Purging file 20140613T105312.fnesync
+----
+--
+
+// end

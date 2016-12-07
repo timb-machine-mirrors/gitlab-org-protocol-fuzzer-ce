@@ -8,6 +8,7 @@ using System.Text;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
+using Peach.Pro.Core.Mutators.Utility;
 
 namespace Peach.Pro.Core.Mutators
 {

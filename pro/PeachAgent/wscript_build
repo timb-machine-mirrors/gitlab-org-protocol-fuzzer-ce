@@ -1,21 +1,18 @@
 #!/usr/bin/env python
 
 deps = [
-	'NLog.dll',
-	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
-	'SharpPcap.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
 ]
 
 app = bld(
+	name = 'PeachAgent.exe',
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'PeachAgent.exe',
 	ver_product = 'Peach Agent',
 )
 
