@@ -26,6 +26,9 @@ def configure(conf):
 	try:
 		conf.check_cc(fragment=template, msg='Verifying cc compilation', errmsg='Failed, ensure gcc/gcc-multilib is installed', okmsg='Success')
 		conf.check_cxx(fragment=template, msg='Verifying cxx compilation', errmsg='Failed, ensure g++/g++-multilib is installed', okmsg='Success')
+	except Exception as e:
+		e.msg = 'Cross compilation failed'
+		raise e
 	finally:
 		conf.start_msg = old_start
 		conf.end_msg = old_end
