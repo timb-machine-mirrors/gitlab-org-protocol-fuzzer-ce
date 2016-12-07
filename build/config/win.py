@@ -33,31 +33,7 @@ def prepare(conf):
 	env['MSVC_VERSIONS'] = ['msvc 14.0', 'msvc 12.0', 'msvc 11.0', 'msvc 10.0', 'wsdk 7.1' ]
 	env['MSVC_TARGETS']  = 'x64' in env.SUBARCH and [ 'x64', 'x86_amd64' ] or [ 'x86' ]
 
-	env['PIN_VER'] = 'pin-2.14-71313-msvc12-windows'
-
-	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
-
 	env['EXTERNALS_x86'] = {
-		'pin' : {
-			'MSVC_VER'  : [ '18.00.40629' ], 
-			'INCLUDES'  : [
-				j(pin, 'source', 'include', 'pin'),
-				j(pin, 'source', 'include', 'pin', 'gen'),
-				j(pin, 'extras', 'components', 'include'),
-				j(pin, 'extras', 'xed-ia32', 'include'),
-			],
-			'HEADERS'   : [],
-			'STLIBPATH' : [
-				j(pin, 'ia32', 'lib'),
-				j(pin, 'ia32', 'lib-ext'),
-				j(pin, 'extras', 'xed-ia32', 'lib'),
-			],
-			'STLIB'     : [ 'pin', 'ntdll-32', 'pinvm', 'libxed' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32', 'HOST_IA32', 'USING_XED', '_HAS_EXCEPTIONS=0' ],
-			'CFLAGS'    : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'CXXFLAGS'  : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
-		},
 		'com' : {
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
@@ -69,26 +45,6 @@ def prepare(conf):
 	}
 
 	env['EXTERNALS_x64'] = {
-		'pin' : {
-			'MSVC_VER'  : [ '18.00.40629' ], 
-			'INCLUDES'  : [
-				j(pin, 'source', 'include', 'pin'),
-				j(pin, 'source', 'include', 'pin', 'gen'),
-				j(pin, 'extras', 'components', 'include'),
-				j(pin, 'extras', 'xed-intel64', 'include'),
-			],
-			'HEADERS'   : [],
-			'STLIBPATH'   : [
-				j(pin, 'intel64', 'lib'),
-				j(pin, 'intel64', 'lib-ext'),
-				j(pin, 'extras', 'xed-intel64', 'lib'),
-			],
-			'STLIB'     : [ 'pin', 'ntdll-64', 'pinvm', 'libxed' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32E', 'HOST_IA32E', 'USING_XED', '_HAS_EXCEPTIONS=0' ],
-			'CFLAGS'    : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'CXXFLAGS'  : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
-		},
 		'com' : {
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
