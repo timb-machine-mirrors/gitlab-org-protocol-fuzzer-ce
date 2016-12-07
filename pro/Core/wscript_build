@@ -15,6 +15,7 @@ deps = [
 	'Microsoft.CSharp.dll',
 	'Microsoft.Dynamic.dll',
 	'Microsoft.Scripting.dll',
+	'Microsoft.Scripting.Metadata.dll',
 	'Peach.Core.dll',
 	'Portable.Licensing.dll',
 	'Renci.SshNet.dll',
