@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+bld(
+	name = 'Peach.Pro.Mutators.dll',
+	features = 'cs paket',
+	solutions = ['PeachWeb.sln'],
+	use = [
+		'Peach.Web.Compat.dll',
+		'System.dll',
+		'System.Core.dll',
+	],
+	use_packages = [
+		'DotNetZip',
+	],
+	paket_settings = dict(
+		group = 'peach-web',
+		frameworks = [ 'net20' ]
+	),
+	source = bld.path.ant_glob('Utility/*.cs String*.cs'),
+	resource = [
+		'../Resources/NamedSequences.txt',
+		'../Resources/xmltests.zip',
+	],
+	namespace = 'Peach.Pro.Core',
+	platform = 'AnyCPU',
+	install_path = '${PREFIX}/Web',
+)
