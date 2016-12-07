@@ -20,7 +20,8 @@ def configure(conf):
 	# Write out a custom Gemfile that points to asciidoctor-pdf
 	# This is to 1) include coderay and 2) keep the .lock file
 	# out of the source directory
-	gem = conf.bldnode.make_node('asciidoctor-pdf.gemspec')
+	plat = Utils.unversioned_sys_platform()
+	gem = conf.bldnode.make_node('asciidoctor-pdf.%s.gemspec' % plat)
 
 	# Need to use relative path with unix style directory seperators
 	rel = os.path.relpath(root, gem.parent.abspath()).replace('\\', '/')
