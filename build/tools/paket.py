@@ -1,7 +1,7 @@
 import os
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, taskgen_method
-from waflib import Utils, Logs, Task, Context, Errors
+from waflib import Utils, Logs, Task, Context, Errors, Options
 
 def configure(conf):
 	dotnet = []
@@ -21,10 +21,14 @@ def configure(conf):
 		'paket.exe'
 	))
 
-	conf.cmd_and_log(dotnet + [bootstrapper], cwd='paket')
-	conf.cmd_and_log(dotnet + [paket, 'restore'], cwd='paket')
+	if not Options.options.nopaket:
+		conf.cmd_and_log(dotnet + [bootstrapper], cwd='paket')
+		conf.cmd_and_log(dotnet + [paket, 'restore'], cwd='paket')
 
 	conf.env.append_value('supported_features', 'paket')
+
+def options(ctx):
+	ctx.add_option('--nopaket', action='store_true', default=False, help='Don\'t restore paket packages')
 
 class Package(object):
 	def __init__(self, bld, group, name, node):

@@ -38,6 +38,7 @@ def store_version(option, opt, value, parser):
 	setattr(parser.values, 'ver_branch', str(branch))
 
 def options(opt):
+	opt.load('tools.paket')
 	opt.load('tools.idegen')
 	opt.load('tools.test')
 
