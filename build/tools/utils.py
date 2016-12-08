@@ -10,6 +10,7 @@ ccroot.lib_patterns['resource'] = ['%s']
 def install_files(self, dest, files, **kw):
 	inst_task = self.bld.install_files(dest, files, **kw)
 	save_inst_task(self, inst_task)
+	return inst_task
 
 @taskgen_method
 def install_as(self, dest, srcfile, **kw):
@@ -142,14 +143,15 @@ def install_content2(self):
 		self.install_files('${BINDIR}', content, cwd=self.path, relative_trick=True)
 
 def install_once(self, ref, ref_task, inst_to):
-	has_installed = getattr(ref, 'has_installed', [])
-	if inst_to in has_installed:
+	has_installed = getattr(ref, 'has_installed', {})
+	past_task = has_installed.get(inst_to)
+	if past_task:
+		save_inst_task(self, past_task)
 		return True
 
-	has_installed.append(inst_to)
+	inst_task = self.install_files(inst_to, ref_task.outputs, chmod=Utils.O755)
+	has_installed[inst_to] = inst_task
 	ref.has_installed = has_installed
-
-	self.install_files(inst_to, ref_task.outputs, chmod=Utils.O755)
 	return False
 
 def install_outputs(self, ref):
@@ -350,8 +352,6 @@ def generate_binding_redirects(self):
 		cmd = [ 'mono' ]
 
 	asms.sort(key=lambda x: os.path.basename(x), cmp=lambda x, y: cmp(x.lower(), y.lower()))
-	# import pprint
-	# pprint.pprint(map(lambda x: os.path.basename(x), asms))
 	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + asms)
 	infos = Utils.subprocess.check_output(cmd) or ''
 
