@@ -3,6 +3,7 @@
 tools = [
 	'nunit.py',
 	'trampoline.py',
+	'web_unit_tests.py',
 ]
 
 files = [
