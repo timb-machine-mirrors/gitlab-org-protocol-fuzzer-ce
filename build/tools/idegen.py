@@ -371,7 +371,17 @@ class vsnode_cs_target(msvs.vsnode_project):
 				name = os.path.splitext(tg.gen)[0]
 			else:
 				name = tg.name
-		node = self.base.make_node(name + '.csproj') # the project file as a Node
+
+
+		# If taskgen is in multiple solutions, prepend sln name to csproj file
+		self.ctx = ctx
+		if len(getattr(tg, 'solutions', [])) > 1:
+			csproj = self.ctx.sln_name + '-' + name + '.csproj'
+		else:
+			csproj = name + '.csproj'
+		node = self.base.make_node(csproj) # the project file as a Node
+
+
 		msvs.vsnode_project.__init__(self, ctx, node)
 		self.name = name
 		self.tg = tg # task generators
@@ -444,7 +454,11 @@ class vsnode_cs_target(msvs.vsnode_project):
 
 			base = self.base == tg.path and y.path or self.base
 			name = os.path.splitext(y.name)[0]
-			other = base.make_node(name + '.csproj')
+			if len(getattr(y, 'solutions', [])) > 1:
+				csproj = self.ctx.sln_name + '-' + name + '.csproj'
+			else:
+				csproj = name + '.csproj'
+			other = base.make_node(csproj)
 			
 			dep = msvs.build_property()
 			dep.path = other.path_from(self.base)
@@ -818,6 +832,7 @@ class idegen(msvs.msvs_generator):
 		if not getattr(self, 'vsnode_project_view', None):
 			self.vsnode_project_view = msvs.vsnode_project_view
 
+		self.sln_name = os.path.splitext(sln)[0]
 		self.numver = '11.00'
 		self.vsver  = '2010'
 
