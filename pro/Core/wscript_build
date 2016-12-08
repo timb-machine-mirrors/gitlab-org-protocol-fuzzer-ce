@@ -92,6 +92,12 @@ asm = bld(
 	namespace = 'Peach.Pro.Core',
 	install_755 = {},
 	install_644 = {
+		# IronPython.Modules.dll is a dependency of IronPython.dll however
+		# we can't link directly to it.  The module directly implements the
+		# bzip2 decompressor from Ionic.Zip which will collide with peach's
+		# usage of Ionic.Zip.dll
+		top.find_or_declare('3rdParty/IronPython.2.7.5/lib/Net45') :
+		top.ant_glob('3rdParty/IronPython.2.7.5/lib/Net45/IronPython.Modules.dll'),
 		top.find_or_declare('/'.join(['3rdParty', flexnet, bld.env.BASENAME])) :
 		top.ant_glob('/'.join(['3rdParty', flexnet, bld.env.BASENAME, '**'])),
 		bld.path : bld.path.ant_glob('Scripts/**/*')
