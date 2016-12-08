@@ -109,3 +109,29 @@ if 'win' in bld.env['supported_features']:
 if 'linux' in bld.env['supported_features']:
 	root = bld.path.find_or_declare('OS/Linux')
 	asm.install_755[root] = root.ant_glob('gdb/**/*')
+
+bld(
+	name = 'Peach.Pro.Mutators.dll',
+	features = 'cs paket',
+	solutions = ['PeachWeb.sln'],
+	use = [
+		'Peach.Web.Compat.dll',
+		'System.dll',
+		'System.Core.dll',
+	],
+	use_packages = [
+		'DotNetZip',
+	],
+	paket_settings = dict(
+		group = 'peach-web',
+		frameworks = [ 'net20' ]
+	),
+	source = bld.path.ant_glob('Mutators/Utility/*.cs Mutators/String*.cs'),
+	resource = [
+		'Resources/NamedSequences.txt',
+		'Resources/xmltests.zip',
+	],
+	namespace = 'Peach.Pro.Core',
+	platform = 'AnyCPU',
+	install_path = '${PREFIX}/Web',
+)

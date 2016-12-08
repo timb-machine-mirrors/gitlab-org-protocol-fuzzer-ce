@@ -3,7 +3,6 @@
 subdirs = [
 	'ComContainer',
 	'Core',
-	'Core/Mutators',
 	'Downloader',
 	'FlexNet/Library',
 	'FlexNet/Tool',
