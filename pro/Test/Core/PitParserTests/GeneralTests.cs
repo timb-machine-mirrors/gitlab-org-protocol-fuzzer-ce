@@ -1,31 +1,6 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
 
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
-
+using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -425,15 +400,32 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			File.WriteAllText(Path.Combine(tempDir, "2.png"), "");
 			File.WriteAllText(Path.Combine(tempDir, "2a.png"), "");
 
+			var cwd = Environment.CurrentDirectory;
 
+			try
 			{
+				Environment.CurrentDirectory = tempDir;
+
 				string xml = "<Peach><Data name='data' fileName='*'/></Peach>";
 				PitParser parser = new PitParser();
 				Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 				Assert.AreEqual(1, dom.datas.Count);
 				Assert.True(dom.datas.ContainsKey("data"));
-				var ds = dom.datas["data"];
-				Assert.Greater(ds.Count, 0);
+				var ds = dom.datas["data"].Select(d => d.Name).ToList();
+
+				CollectionAssert.AreEqual(new[]
+				{
+					"data/1.png",
+					"data/1.txt",
+					"data/2.png",
+					"data/2.txt",
+					"data/2a.png",
+					"data/2a.txt",
+				}, ds);
+			}
+			finally
+			{
+				Environment.CurrentDirectory = cwd;
 			}
 
 			Assert.Throws<PeachException>(delegate()
@@ -791,6 +783,23 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			StringAssert.Contains("The 'bad_attr' attribute is not declared.", lines[1]);
 			StringAssert.Contains("The required attribute 'initialState' is missing.", lines[2]);
 			StringAssert.Contains("The required attribute 'name' is missing.", lines[3]);
+		}
+
+
+		[Test]
+		public void TestValidName()
+		{
+			// Ensure all fieldId values are valid element names so they are xpath selectable
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='1bad' />
+	</DataModel>
+</Peach>
+";
+
+			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
+			StringAssert.StartsWith("Error, Pit file failed to validate", ex.Message);
 		}
 	}
 }

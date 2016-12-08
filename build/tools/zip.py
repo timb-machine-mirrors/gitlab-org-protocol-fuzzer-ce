@@ -30,9 +30,12 @@ def use_zip_rec(self, name, **kw):
 
 @taskgen_method
 def get_zip_src(self, tsk):
-	dest = tsk.dest.replace('${PKGDIR}', '${BINDIR}')
+	zip_root = getattr(self, 'zip_root', '${BINDIR}')
+	zip_rewrites = getattr(self, 'zip_rewrites', {})
+
+	dest = tsk.dest.replace('${PKGDIR}', zip_root)
 	destpath = Utils.subst_vars(dest, tsk.env).replace('/', os.sep)
-	bindir = Utils.subst_vars('${BINDIR}', tsk.env)
+	bindir = Utils.subst_vars(zip_root, tsk.env)
 	destpath = os.path.relpath(destpath, bindir)
 
 	for src in tsk.source:
@@ -42,12 +45,18 @@ def get_zip_src(self, tsk):
 			destfile = destpath
 		elif tsk.relative_trick:
 			destfile = os.path.join(destpath, src.path_from(tsk.path))
+			for k, v in zip_rewrites.items():
+				if k in destfile:
+					destfile = destfile.replace(k, v)
 		else:
 			destfile = os.path.join(destpath, src.name)
-
+			for k, v in zip_rewrites.items():
+				if k in destfile:
+					destfile = destfile.replace(k, v)
+		
 		external_attr = tsk.chmod << 16L
 
-		self.zip_inputs.append((src, destfile, external_attr))
+		self.zip_inputs.add((src, destfile, external_attr))
 
 @feature('zip')
 @before_method('apply_zip_srcs')
@@ -65,7 +74,7 @@ def apply_zip_use(self):
 
 @feature('zip')
 def apply_zip_srcs(self):
-	self.zip_inputs = []
+	self.zip_inputs = set()
 
 	for y in self.zip_use:
 		tsk = getattr(y, 'install_task', None)
@@ -76,8 +85,8 @@ def apply_zip_srcs(self):
 
 	zip_extras = getattr(self, 'zip_extras', [])
 	for y in zip_extras:
-		self.zip_inputs.append(y)
-
+		self.zip_inputs.add(y)
+	
 	if self.zip_inputs:
 		self.zip_inputs = sorted(self.zip_inputs, key=lambda x: x[1])
 		srcs = [ x[0] for x in self.zip_inputs ]

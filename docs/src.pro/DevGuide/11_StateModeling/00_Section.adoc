@@ -109,10 +109,6 @@ This example is configured for Windows and requires an installed copy of Windows
 			<Param name="FileName" value="fuzzed.png" />
 		</Publisher>
 
-		<!-- Configure a logger to store collected information -->
-		<Logger class="Filesystem">
-			<Param name="Path" value="logs" />
-		</Logger>
 	</Test>
 
 </Peach>

@@ -157,7 +157,7 @@ namespace Peach.Core.Dom
 		/// This will start the initial State.
 		/// </remarks>
 		/// <param name="context"></param>
-		public void Run(RunContext context)
+		public virtual void Run(RunContext context)
 		{
 			var currentState = initialState;
 
@@ -256,7 +256,7 @@ namespace Peach.Core.Dom
 				item.parent = this;
 		}
 
-		public bool HasFieldIds
+		public virtual bool HasFieldIds
 		{
 			get
 			{
@@ -285,7 +285,7 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse()
+		public IEnumerable<KeyValuePair<string, DataElement>> TuningTraverse(bool forDisplay = false)
 		{
 			var useFieldIds = HasFieldIds;
 			foreach (var state in states)
@@ -299,12 +299,12 @@ namespace Peach.Core.Dom
 
 					foreach (var actionData in action.outputData)
 					{
-						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds, false))
+						foreach (var element in actionData.dataModel.TuningTraverse(useFieldIds, forDisplay))
 						{
 							var key = element.Key;
 							if (!string.IsNullOrEmpty(element.Key) && !string.IsNullOrEmpty(prefix))
 								key = string.Join(".", prefix, element.Key);
-							yield return new KeyValuePair<string, DataElement>(key, element.Value);
+							yield return new KeyValuePair<string, DataElement>(key ?? "", element.Value);
 						}
 					}
 				}
@@ -324,7 +324,22 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public void WritePit(XmlWriter pit)
+		/// <summary>
+		/// Create a StateModelRef for this State Model
+		/// </summary>
+		/// <remarks>
+		/// This allows different state model types to create
+		/// specific StateModelRef instances for themselves.
+		/// 
+		/// Example is WebProxyModel.
+		/// </remarks>
+		/// <returns></returns>
+		public virtual IStateModelRef CreateStateModelRef()
+		{
+			return new StateModelRef {refName = Name};
+		}
+
+		public virtual void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("StateModel");
 

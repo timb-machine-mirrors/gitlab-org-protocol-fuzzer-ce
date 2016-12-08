@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Dapper;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Test;
@@ -11,7 +15,7 @@ namespace Peach.Pro.Test.Core.Storage
 {
 	[TestFixture]
 	[Quick]
-	class DatabaseTests
+	public class DatabaseTests
 	{
 		public static void AssertResult<T>(IEnumerable<T> actual, IEnumerable<T> expected)
 		{
@@ -38,8 +42,8 @@ namespace Peach.Pro.Test.Core.Storage
 			}
 		}
 
-		class TestTable 
-		{			
+		class TestTable
+		{
 			[Key]
 			public long Id { get; set; }
 
@@ -48,16 +52,20 @@ namespace Peach.Pro.Test.Core.Storage
 
 		class TestDatabase : Database
 		{
-			public TestDatabase(string path)
-				: base(path, false)
+			const string InsertData = "INSERT INTO TestTable (Id, Value) VALUES (@Id, @Value)";
+
+			const string SelectData = "SELECT * FROM TestTable LIMIT 10";
+
+			public TestDatabase(string path, bool useWal)
+				: base(path, useWal)
 			{
 			}
 
 			protected override IEnumerable<Type> Schema
-			{ 
+			{
 				get { return new[] { typeof(TestTable) }; }
 			}
-			
+
 			protected override IEnumerable<string> Scripts { get { return null; } }
 
 			protected override IList<MigrationHandler> Migrations
@@ -65,7 +73,17 @@ namespace Peach.Pro.Test.Core.Storage
 				get { return TestMigrations; }
 			}
 
-			public List<MigrationHandler> TestMigrations = new List<MigrationHandler>();
+			public readonly List<MigrationHandler> TestMigrations = new List<MigrationHandler>();
+
+			public void Insert(TestTable data)
+			{
+				Connection.Execute(InsertData, data);
+			}
+
+			public IEnumerable<TestTable> Select()
+			{
+				return Connection.Query<TestTable>(SelectData);
+			}
 		}
 
 		TempDirectory _tmp;
@@ -82,20 +100,31 @@ namespace Peach.Pro.Test.Core.Storage
 			_tmp.Dispose();
 		}
 
+		class ConsoleTracer : TraceListener
+		{
+			public override void Write(string message)
+			{
+				Console.Write(message);
+			}
+
+			public override void WriteLine(string message)
+			{
+				Console.WriteLine(message);
+			}
+		}
 
 		[Test]
 		public void Migration()
 		{
 			var path = Path.Combine(_tmp.Path, "test.db");
-			var builder = new SqliteConnectionBuilder 
+			var builder = new SQLiteConnectionStringBuilder
 			{
 				DataSource = path,
 				ForeignKeys = true,
-				UseWAL = false,
 			};
 
 			// Create Version 0
-			using (var cnn = builder.Create())
+			using (var cnn = new SQLiteConnection(builder.ConnectionString))
 			{
 				cnn.Open();
 			}
@@ -103,7 +132,7 @@ namespace Peach.Pro.Test.Core.Storage
 			var history = new List<string>();
 
 			// Update to current (version 2)
-			using (var db = new TestDatabase(path))
+			using (var db = new TestDatabase(path, false))
 			{
 				Assert.AreEqual(0, db.CurrentVersion);
 
@@ -126,7 +155,7 @@ namespace Peach.Pro.Test.Core.Storage
 			// Add version 3 & 4
 			history.Clear();
 
-			using (var db = new TestDatabase(path))
+			using (var db = new TestDatabase(path, false))
 			{
 				Assert.AreEqual(2, db.CurrentVersion);
 
@@ -147,6 +176,60 @@ namespace Peach.Pro.Test.Core.Storage
 			};
 
 			Assert.That(history.ToArray(), Is.EqualTo(expected));
+		}
+
+		[Test]
+		public void TestWalConcurrentWriters()
+		{
+			Console.WriteLine("TestWalConcurrentWriters");
+
+			Trace.Listeners.Add(new ConsoleTracer());
+
+			var path = Path.Combine(_tmp.Path, "test.db");
+			using (new TestDatabase(path, true)) { }
+
+			var writeTasks = new Task[10];
+			for (var i = 0; i < writeTasks.Length; i++)
+			{
+				var index = i;
+				writeTasks[i] = Task.Factory.StartNew(() => DoWrites(index), TaskCreationOptions.LongRunning);
+			}
+
+			var readTasks = new Task[10];
+			for (var i = 0; i < readTasks.Length; i++)
+			{
+				readTasks[i] = Task.Factory.StartNew(DoReads, TaskCreationOptions.LongRunning);
+			}
+
+			Task.WaitAll(writeTasks.Concat(readTasks).ToArray());
+		}
+
+		private void DoReads()
+		{
+			const int reads = 1000;
+			var path = Path.Combine(_tmp.Path, "test.db");
+			for (var i = 0; i < reads; i++)
+			{
+				using (var db = new TestDatabase(path, true))
+				{
+					db.Select();
+				}
+			}
+		}
+
+		private void DoWrites(int index)
+		{
+			const int writes = 1000;
+			var start = writes * index;
+			var end = start + writes;
+			var path = Path.Combine(_tmp.Path, "test.db");
+			for (var i = start; i < end; i++)
+			{
+				using (var db = new TestDatabase(path, true))
+				{
+					db.Insert(new TestTable { Id = i, Value = "value" });
+				}
+			}
 		}
 	}
 }

@@ -11,16 +11,9 @@ from Peach.Core.Agent import IterationStartingArgs, MonitorData
 from Peach.Core.Agent.MonitorData import Info
 from Peach.Pro.Core.Agent.Monitors import BasePythonMonitor
 
-# Add the special assembly that our Python extensions will 
-# appear in. This is the list of assemblies that Peach checks
-# for extension types.
-for a in System.AppDomain.CurrentDomain.GetAssemblies():
-	if a.FullName.startswith("Snippets.scripting"):
-		Peach.Core.ClassLoader.AssemblyCache[a.FullName] = a
-
 # Create wrappers for class attributes we will use
 MonitorAttr = clrtype.attribute(Peach.Core.Agent.MonitorAttribute)
-DescriptionAttr = clrtype.attribute(Peach.Core.DescriptionAttribute)
+DescriptionAttr = clrtype.attribute(System.ComponentModel.DescriptionAttribute)
 ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
 class PythonMonitor(BasePythonMonitor):
@@ -37,11 +30,13 @@ class PythonMonitor(BasePythonMonitor):
 	]
 
 	@clrtype.accepts(clr.GetClrType(str))
+	@clrtype.returns()
 	def __init__(self, name):
 		print ">>>> MONITOR INIT %s" % name
 		pass
 
 	@clrtype.accepts(System.Collections.Generic.Dictionary[clr.GetClrType(str), clr.GetClrType(str)])
+	@clrtype.returns()
 	def StartMonitor(self, args):
 		print ">>>> START MONITOR '%s/%s' FROM PYTHON" % (self.Name, self.Class)
 		for kv in args:
@@ -49,19 +44,26 @@ class PythonMonitor(BasePythonMonitor):
 		self.count = 0
 		pass
 
+	@clrtype.accepts()
+	@clrtype.returns()
 	def StopMonitor(self):
 		print ">>>> STOP MONITOR FROM PYTHON"
 		pass
 
+	@clrtype.accepts()
+	@clrtype.returns()
 	def SessionStarting (self):
 		print ">>>> SESSION STARTING FROM PYTHON"
 		pass
 
+	@clrtype.accepts()
+	@clrtype.returns()
 	def SessionFinished(self):
 		print ">>>> SESSION FINISHED FROM PYTHON"
 		pass
 
 	@clrtype.accepts(IterationStartingArgs)
+	@clrtype.returns()
 	def IterationStarting(self, args):
 		print ">>>> ITERATION STARTING FROM PYTHON"
 		self.isReproduction = args.IsReproduction
@@ -69,16 +71,20 @@ class PythonMonitor(BasePythonMonitor):
 		self.count += 1
 		pass
 
+	@clrtype.accepts()
+	@clrtype.returns()
 	def IterationFinished(self):
 		print ">>>> ITERATION FINISHED FROM PYTHON"
 		pass
 
+	@clrtype.accepts()
 	@clrtype.returns(clr.GetClrType(bool))
 	def DetectedFault(self):
 		fault = (self.count % 2) == 0 or self.isReproduction
 		print ">>>> DETECTED FAULT: %s" % fault
 		return fault
 
+	@clrtype.accepts()
 	@clrtype.returns(MonitorData)
 	def GetMonitorData(self):
 		print ">>> GET MONITOR DATA"
@@ -92,6 +98,8 @@ class PythonMonitor(BasePythonMonitor):
 		data.Fault.MustStop = False
 		return data
 
+	@clrtype.accepts(clr.GetClrType(str))
+	@clrtype.returns()
 	def Message(self, name):
 		print ">>>> MESSAGE '%s' FROM PYTHON" % name
 		pass

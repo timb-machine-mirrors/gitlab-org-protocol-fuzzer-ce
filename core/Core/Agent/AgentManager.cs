@@ -41,7 +41,7 @@ namespace Peach.Core.Agent
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		private readonly NamedCollection<AgentClient> _agents = new NamedCollection<AgentClient>();
+		internal readonly NamedCollection<AgentClient> Agents = new NamedCollection<AgentClient>();
 
 		public RunContext Context { get; private set; }
 
@@ -56,7 +56,7 @@ namespace Peach.Core.Agent
 
 			AgentClient agent;
 
-			if (!_agents.TryGetValue(agentDef.Name, out agent))
+			if (!Agents.TryGetValue(agentDef.Name, out agent))
 			{
 				var uri = new Uri(agentDef.location);
 				var type = ClassLoader.FindPluginByName<AgentAttribute>(uri.Scheme);
@@ -65,7 +65,7 @@ namespace Peach.Core.Agent
 
 				agent = (AgentClient)Activator.CreateInstance(type, agentDef.Name, agentDef.location, agentDef.password);
 
-				_agents.Add(agent);
+				Agents.Add(agent);
 			}
 
 			try
@@ -79,7 +79,7 @@ namespace Peach.Core.Agent
 				// Remove from our collection so exception
 				// cleanup code doesn't cause a new exception
 				// to be raised.
-				_agents.Remove(agent);
+				Agents.Remove(agent);
 				throw;
 			}
 
@@ -111,7 +111,7 @@ namespace Peach.Core.Agent
 		public IPublisher CreatePublisher(string agentName, string name, string cls, Dictionary<string, string> args)
 		{
 			AgentClient agent;
-			if (!_agents.TryGetValue(agentName, out agent))
+			if (!Agents.TryGetValue(agentName, out agent))
 				throw new KeyNotFoundException("Could not find agent named '" + agentName + "'.");
 
 			Logger.Trace("CreatePublisher: {0} {1} {2}", agentName, name, cls);
@@ -121,14 +121,14 @@ namespace Peach.Core.Agent
 
 		public void Dispose()
 		{
-			foreach (var agent in _agents.Reverse())
+			foreach (var agent in Agents.Reverse())
 			{
 				Logger.Trace("SessionFinished: {0}", agent.Name);
 				Context.OnSessionFinished(agent);
 				Guard(agent, "SessionFinished", a => a.SessionFinished());
 			}
 
-			foreach (var agent in _agents.Reverse())
+			foreach (var agent in Agents.Reverse())
 			{
 				Logger.Trace("StopAllMonitors: {0}", agent.Name);
 				Context.OnStopAllMonitors(agent);
@@ -154,7 +154,7 @@ namespace Peach.Core.Agent
 				LastWasFault = lastWasFault
 			};
 
-			foreach (var agent in _agents)
+			foreach (var agent in Agents)
 			{
 				Logger.Trace("IterationStarting: {0} {1} {2}", agent.Name, args.IsReproduction, args.LastWasFault);
 				Context.OnIterationStarting(agent);
@@ -165,7 +165,7 @@ namespace Peach.Core.Agent
 		public void IterationFinished()
 		{
 
-			foreach (var agent in _agents.Reverse())
+			foreach (var agent in Agents.Reverse())
 			{
 				Logger.Trace("IterationFinished: {0}", agent.Name);
 				Context.OnIterationFinished(agent);
@@ -175,7 +175,7 @@ namespace Peach.Core.Agent
 
 		public void Message(string msg)
 		{
-			foreach (var agent in _agents)
+			foreach (var agent in Agents)
 			{
 				Logger.Debug("Message: {0} {1}", agent.Name, msg);
 				Context.OnMessage(agent, msg);
@@ -187,7 +187,7 @@ namespace Peach.Core.Agent
 		{
 			var ret = false;
 
-			foreach (var agent in _agents)
+			foreach (var agent in Agents)
 			{
 				Logger.Debug("DetectedFault: checking for fault in agent {0}", agent.Name);
 				Context.OnDetectedFault(agent);
@@ -201,7 +201,7 @@ namespace Peach.Core.Agent
 
 		private void GetMonitorData()
 		{
-			foreach (var agent in _agents)
+			foreach (var agent in Agents)
 			{
 				Logger.Trace("GetMonitorData {0}", agent.Name);
 				Context.OnGetMonitorData(agent);

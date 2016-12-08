@@ -71,7 +71,7 @@ namespace Peach.Pro.Core.WebServices
 			public string OS { get; set; }
 			public Type Type { get; set; }
 			public bool Visited { get; set; }
-			public bool Internal { get; set; }
+			public PluginScope Scope { get; set; }
 		}
 
 		private class ParamInfo : INamed
@@ -125,17 +125,30 @@ namespace Peach.Pro.Core.WebServices
 				{
 					missing.Sort(MonitorSorter);
 
+					var missingNames = string.Join("', '",
+						missing
+							.Where(m => m.Scope != PluginScope.Internal)
+							.Select(m => m.Key)
+					);
+
 					// If GetGroupings() failed we already raised ErrorEventHandler
 					if (ret == null)
 						ret = new List<ParamDetail>();
-					else if (ErrorEventHandler != null && missing.Any(m => !m.Internal && m.Name != "Null"))
-							ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Missing metadata entries for the following monitors: '{0}'.".Fmt(string.Join("', '", missing.Where(m => !m.Internal).Select(m => m.Key))))));
+					else if (ErrorEventHandler != null && !string.IsNullOrEmpty(missingNames))
+					{
+						var ex = new ApplicationException(
+							"Missing metadata entries for the following monitors: '{0}'.".Fmt(missingNames)
+						);
+						var args = new ErrorEventArgs(ex);
+
+						ErrorEventHandler(this, args);
+					}
 
 					var grp = new ParamDetail
 					{
-							Name = "Other",
-							Type = ParameterType.Group,
-							Items = new List<ParamDetail>()
+						Name = "Other",
+						Type = ParameterType.Group,
+						Items = new List<ParamDetail>()
 					};
 
 					foreach (var monitor in missing)
@@ -177,7 +190,18 @@ namespace Peach.Pro.Core.WebServices
 
 				try
 				{
-					return s.Deserialize<GroupInfo>(rdr) ?? new GroupInfo { Groups = new List<NamedItem>(), Parameters = new Dictionary<string, List<NamedItem>>() };
+					var result = s.Deserialize<GroupInfo>(rdr);
+					if (result != null)
+						return result;
+					else
+						return new GroupInfo { Groups = new List<NamedItem>(), Parameters = new Dictionary<string, List<NamedItem>>() };
+				}
+				catch (JsonReaderException ex)
+				{
+					if (ErrorEventHandler != null)
+						ErrorEventHandler(this, new ErrorEventArgs(new ApplicationException("Unable to parse monitor metadata resource. See line {0}, position {1}".Fmt(ex.LineNumber, ex.LinePosition), ex)));
+
+					return null;
 				}
 				catch (Exception ex)
 				{
@@ -250,19 +274,39 @@ namespace Peach.Pro.Core.WebServices
 
 		private NamedCollection<MonitorInfo> GetMonitorInfo()
 		{
-			return new NamedCollection<MonitorInfo>(
-				GetAllMonitors()
-					.Where(FilterInternal)
-					.Select(kv => new MonitorInfo
+			var ret = new NamedCollection<MonitorInfo>();
+
+			foreach (var kv in GetAllMonitors().Where(FilterInternal))
+			{
+				try
+				{
+					ret.Add(new MonitorInfo
 					{
 						Key = kv.Key.Name,
 						Name = KeyToName(kv.Key.Name),
 						Description = GetDescription(kv),
 						OS = GetOS(kv.Key),
 						Type = kv.Value,
-						Internal = kv.Key.Internal,
+						Scope = kv.Key.Scope,
 						Visited = false
-					}));
+					});
+				}
+				catch (ArgumentException ex)
+				{
+					if (ErrorEventHandler != null)
+					{
+						var key = kv.Key.Name;
+						var dupes = GetAllMonitors()
+							.Where(i => i.Key.Name == key)
+							.Select(i => "{0} @ {1}".Fmt(i.Value.FullName, i.Value.Assembly.Location));
+						var error = "Duplicate entries detected for monitor '{0}' on types '{1}'".Fmt(kv.Key.Name, string.Join("', '", dupes));
+
+						ErrorEventHandler(this, new ErrorEventArgs(new ArgumentException(error, ex)));
+					}
+				}
+			}
+
+			return ret;
 		}
 
 		private NamedCollection<ParamInfo> GetParamInfo(Type type, string name)
@@ -281,7 +325,7 @@ namespace Peach.Pro.Core.WebServices
 		private static bool FilterInternal(KeyValuePair<MonitorAttribute, Type> kv)
 		{
 #if !DEBUG
-			return !kv.Key.Internal;
+			return kv.Key.Scope != PluginScope.Internal;
 #else
 			return true;
 #endif

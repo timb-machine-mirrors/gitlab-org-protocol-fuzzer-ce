@@ -2,29 +2,19 @@
 
 namespace Peach {
 	export interface ILicense {
-		isValid: boolean;
-		isInvalid: boolean;
-		isMissing: boolean;
-		isExpired: boolean;
+		status: string;
 		errorText: string;
 		expiration: string;
-		version: string;
 		eulaAccepted: boolean;
+		eula: string;
+		version: string;
 	}
 
-	export var LicenseVersion = {
-		Enterprise: '',
-		Distributed: '',
-		ProfessionalWithConsulting: '',
-		Professional: '',
-		TrialAllPits: '',
-		Trial: '',
-		Academic: '',
-		TestSuites: '',
-		Studio: '',
-		Developer: '',
-		Unknown: ''
+	export var LicenseStatus = {
+		Missing   : '',
+		Expired   : '',
+		Invalid   : '',
+		Valid     : ''
 	};
-	MakeLowerEnum(LicenseVersion);
+	MakeLowerEnum(LicenseStatus);
 }
- 

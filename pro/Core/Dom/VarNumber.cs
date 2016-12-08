@@ -80,23 +80,11 @@ namespace Peach.Pro.Core.Dom
 			}
 		}
 
-		public override bool hasLength
-		{
-			get
-			{
-				return false;
-			}
-		}
+		public override bool hasLength { get { return false; } }
 
-		public override bool isDeterministic
-		{
-			get
-			{
-				return true;
-			}
-		}
+		public override bool isDeterministic { get { return true; } }
 
-		public static new DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
+		public new static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
 		{
 			if (node.Name != "VarNumber")
 				return null;

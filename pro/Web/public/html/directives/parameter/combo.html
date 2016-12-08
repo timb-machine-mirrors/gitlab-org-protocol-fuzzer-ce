@@ -1,22 +1,14 @@
-﻿<div class="input-group">
-	<span class="input-group-addon"
-				uib-tooltip="{{param.description}}"
-				tooltip-placement="above"
-				tooltip-append-to-body="true">
-		<i class="fa fa-question-circle"></i>
-	</span>
-	<ui-select tagging="NewChoice"
-						 tagging-label="(new)"
-						 ng-model="param.value"
-						 ng-required="vm.IsRequired"
-						 name="param">
-		<ui-select-match placeholder="{{param.defaultValue}}">
-			{{$select.selected.key}}
-		</ui-select-match>
-		<ui-select-choices repeat="choice.key as choice in vm.Choices | filter: $select.search"
-											 group-by="'group'">
-			<div ng-bind-html="choice.text | highlight: $select.search"></div>
-			<small ng-if="choice.description">{{choice.description}}</small>
-		</ui-select-choices>
-	</ui-select>
-</div>
+﻿<ui-select tagging="NewChoice"
+					 tagging-label="(new)"
+					 ng-model="param.value"
+					 ng-required="vm.IsRequired"
+					 name="param">
+	<ui-select-match placeholder="{{param.defaultValue}}">
+		{{$select.selected.key}}
+	</ui-select-match>
+	<ui-select-choices repeat="choice.key as choice in vm.Choices | filter: $select.search"
+										 group-by="'group'">
+		<div ng-bind-html="choice.text | highlight: $select.search"></div>
+		<small ng-if="choice.description">{{choice.description}}</small>
+	</ui-select-choices>
+</ui-select>

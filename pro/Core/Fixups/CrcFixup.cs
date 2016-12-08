@@ -30,10 +30,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Fixups.Libraries;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
@@ -44,7 +44,7 @@ namespace Peach.Pro.Core.Fixups
 	[Fixup("Crc32Fixup")]
 	[Fixup("checksums.Crc32Fixup")]
 	[Parameter("ref", typeof(DataElement), "Reference to data element")]
-	[Parameter("type", typeof(CRCTool.CRCCode), "Type of CRC to run [CRC32, CRC16, CRC16_Modbus, CRC_CCITT, DNP3]", "CRC32")]
+	[Parameter("type", typeof(CRCTool.CRCCode), "Type of CRC to run [CRC32, CRC32_16, CRC16, CRC16_Modbus, CRC_CCITT, DNP3]", "CRC32")]
 	[Serializable]
 	public class CrcFixup : Fixup
 	{

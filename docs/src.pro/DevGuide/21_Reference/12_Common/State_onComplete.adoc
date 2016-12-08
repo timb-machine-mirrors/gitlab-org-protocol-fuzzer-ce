@@ -89,12 +89,7 @@ This example prints a message when the _onComplete_ statement is run.
 
     <Publisher class="File">
       <Param name="FileName" value="fuzzed.txt" />
-    </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logtest" />
-    </Logger>
-  </Test>
+    </Publisher>  </Test>
 
 </Peach>
 ----
@@ -103,9 +98,6 @@ This is the resulting output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 27537.
 
@@ -167,12 +159,7 @@ This example uses the iteration state bag to simulate a for loop.
   <Test name="Default">
     <StateModel ref="State"/>
 
-    <Publisher class="Console"/>
-
-    <Logger class="File">
-      <Param name="Path" value="logtest" />
-    </Logger>
-  </Test>
+    <Publisher class="Console"/>  </Test>
 
 </Peach>
 ----
@@ -181,9 +168,6 @@ This is the resulting output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 28742.
 

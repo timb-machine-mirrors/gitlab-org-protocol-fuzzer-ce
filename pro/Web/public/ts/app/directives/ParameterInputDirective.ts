@@ -154,15 +154,19 @@ namespace Peach {
 		}
 
 		private Defines(): IOption[] {
-			return _.map(this.pitService.Pit.config, param => {
-				const key = `##${param.key}##`;
-				return <IOption> {
-					key: key,
-					text: key,
-					description: param.description,
-					group: "Defines"
-				};
-			});
+			const available = this.pitService.CreateFlatDefinesView(this.pitService.Pit.definesView);
+			return _.chain(available)
+				.map(param => {
+					const key = `##${param.key}##`;
+					return <IOption>{
+						key: key,
+						text: key,
+						description: param.description,
+						group: "Defines"
+					};
+				})
+				.orderBy(x => x.key)
+				.value();
 		}
 
 		private NewChoice(item: string): IOption {

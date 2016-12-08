@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using Peach.Core.Runtime;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core.Runtime
 {
-	public class Service : Program
+	public class Service : BaseProgram
 	{
 		string _pitLibraryPath;
 
@@ -22,13 +23,20 @@ namespace Peach.Pro.Core.Runtime
 			);
 		}
 
-		protected override void OnRun(List<string> args)
+		protected override int OnRun(List<string> args)
 		{
+			PrepareLicensing(_pitLibraryPath);
+
+			if (_license.Status != LicenseStatus.Valid)
+				return -1;
+
 			// Ensure pit library exists
 			var pits = FindPitLibrary(_pitLibraryPath);
 
 			if (CreateWeb != null)
 				RunWeb(pits, false, new ExternalJobMonitor());
+
+			return 0;
 		}
 	}
 }

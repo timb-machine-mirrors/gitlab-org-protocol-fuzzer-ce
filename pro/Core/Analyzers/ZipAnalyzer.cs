@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using Ionic.Zip;
@@ -8,7 +9,6 @@ using Peach.Core.Cracker;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Stream = Peach.Pro.Core.Dom.Stream;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Analyzers
 {
@@ -139,7 +139,9 @@ namespace Peach.Pro.Core.Analyzers
 
 					logger.Debug("Resolved entry '{0}' to data model '{1}'.", fileName, other.Name);
 
-					return (DataElementContainer)other.Clone("Content");
+					var ret = (DataModel)other.Clone("Content");
+					ret.dom = dom;
+					return ret;
 
 				}
 			}

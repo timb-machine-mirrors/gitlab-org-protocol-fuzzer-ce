@@ -26,16 +26,13 @@ A PIT is NOT valid unless...
 
 === What to do if the Pit Doesn't Parse
 
-One of the first things to do is to trace progress through the Pit. The +-t+
-command-line argument turns on tracing.
+Peach provides a tool to perform validation and lint checking that can assist in tracking down basic syntax issues in your pit file.  See xref:PitTool_Compile[PitTool] for additional information.
 
 ----
-Peach.exe -t pit_file.xml
+pittool compile pit_file.xml
 ----
 
-If a stack trace prints, record the stack trace where the improper error handling occurred.
-
-=== The pit doesn't run properly.
+=== The pit doesn't run properly
 
 During the testing and building phase, run the first iteration only. The +-1+
 command-line argument runs the record iteration on the Pit. No fuzzing occurs.

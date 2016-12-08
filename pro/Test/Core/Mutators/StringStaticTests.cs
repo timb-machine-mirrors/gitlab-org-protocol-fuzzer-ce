@@ -14,7 +14,10 @@ namespace Peach.Pro.Test.Core.Mutators
 		{
 			var runner = new MutatorRunner("StringStatic");
 
-			var str = new Peach.Core.Dom.String("String");
+			var str = new Peach.Core.Dom.String("String")
+			{
+				stringType = Peach.Core.Dom.StringType.ascii
+			};
 
 			Assert.True(runner.IsSupported(str));
 		}
@@ -24,7 +27,10 @@ namespace Peach.Pro.Test.Core.Mutators
 		{
 			var runner = new MutatorRunner("StringStatic");
 
-			var str = new Peach.Core.Dom.String("String");
+			var str = new Peach.Core.Dom.String("String")
+			{
+				stringType = Peach.Core.Dom.StringType.ascii
+			};
 
 			var m = runner.Sequential(str);
 
@@ -62,7 +68,10 @@ namespace Peach.Pro.Test.Core.Mutators
 		{
 			var runner = new MutatorRunner("StringStatic");
 
-			var str = new Peach.Core.Dom.String("String");
+			var str = new Peach.Core.Dom.String("String")
+			{
+				stringType = Peach.Core.Dom.StringType.ascii
+			};
 
 			var m = runner.Random(5000, str);
 			Assert.AreEqual(5000, m.Count());

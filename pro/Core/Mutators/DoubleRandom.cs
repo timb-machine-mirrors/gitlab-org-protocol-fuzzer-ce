@@ -1,11 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using Peach.Core;
 using Peach.Core.Dom;
 using Double = Peach.Core.Dom.Double;
 using String = Peach.Core.Dom.String;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {

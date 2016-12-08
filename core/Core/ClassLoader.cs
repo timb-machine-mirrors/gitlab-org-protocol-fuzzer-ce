@@ -40,177 +40,98 @@ namespace Peach.Core
 	/// </summary>
 	public static class ClassLoader
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
-		public static Dictionary<string, Assembly> AssemblyCache = new Dictionary<string, Assembly>();
-		static Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
-		static Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
-		static string[] searchPath = GetSearchPath();
-		static readonly string pluginsPath = GetPluginsPath();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly object _mutex = new object();
+		internal static readonly Dictionary<Assembly, List<Type>> AssemblyCache = new Dictionary<Assembly, List<Type>>();
+		static readonly Dictionary<Type, object[]> AttributeCache = new Dictionary<Type, object[]>();
+		static readonly Dictionary<Type, IEnumerable<Type>> AllByAttributeCache = new Dictionary<Type, IEnumerable<Type>>();
 
-		#region Exclude List
-
-		static readonly string[] excludeList =
+		public static void Initialize(params string[] pluginsPaths)
 		{
-			"aardvark.dll", 
-			"aardvark_net.dll", 
-			"Aga.Controls.dll", 
-			"Alchemy.dll",
-			"Be.Windows.Forms.HexBox.dll", 
-			"BouncyCastle.Crypto.dll", 
-			"ComTest.dll", 
-			"EasyHook.dll", 
-			"ExtendExamples.dll",
-			"Godel.Tests.dll", 
-			"Ionic.Zip.dll", 
-			"IronPython.dll", 
-			"IronPython.Modules.dll", 
-			"IronRuby.dll", 
-			"IronRuby.Libraries.dll", 
-			"IronRuby.Libraries.Yaml.dll", 
-			"Irony.dll", 
-			"Irony.Interpreter.dll",
-			"log4net.dll", 
-			"Managed.Adb.dll", 
-			"Microsoft.Dynamic.dll", 
-			"Microsoft.Scripting.dll", 
-			"Microsoft.Scripting.Metadata.dll", 
-			"MongoDB.Bson.dll", 
-			"MongoDB.Driver.dll", 
-			"Mono.Posix.dll", 
-			"MySql.Data.dll", 
-			"Nancy.dll", 
-			"Nancy.Hosting.Self.dll", 
-			"Nancy.Metadata.Module.dll",
-			"Nancy.Serialization.JsonNet.dll", 
-			"Nancy.Testing.dll",
-			"Newtonsoft.Json.dll", 
-			"NLog.dll", 
-			"nunit.core.dll", 
-			"nunit.framework.dll", 
-			"PacketDotNet.dll", 
-			//"Peach.Core.Test.dll", 
-			"PeachFarm.Admin.dll", 
-			"PeachFarm.Common.dll", 
-			"PeachFarm.Controller.dll", 
-			"PeachFarm.Node.dll", 
-			"PeachFarm.Reporting.dll", 
-			"PeachFarm.Reporting.Reports.dll", 
-			"PeachFarm.Test.dll", 
-			"PeachFarmMonitor.dll", 
-			"PeachHooker.File.dll", 
-			"PeachHooker.Network.dll", 
-			//"Peach.Pro.Test.dll", 
-			//"Peach.Pro.Test.OS.Linux.dll", 
-			//"Peach.Pro.Test.OS.OSX.dll", 
-			//"Peach.Pro.Test.OS.Windows.dll", 
-			"Portable.Licensing.dll", 
-			"RabbitMQ.Client.dll", 
-			"Renci.SshNet.dll", 
-			"SharpPcap.dll", 
-			"SuperSocket.Common.dll", 
-			"SuperSocket.SocketBase.dll", 
-			"SuperSocket.SocketEngine.dll", 
-			"SuperWebSocket.dll", 
-			"Syslog.Server.dll", 
-			"System.Data.SQLite.dll", 
-			"Telerik.Reporting.dll", 
-			"Telerik.Web.UI.dll", 
-			"VixAllProducts.dll", 
-			"vixAllProducts.dll", 
-			"CrashableServer.exe", 
-			"CrashingFileConsumer.exe", 
-			"CrashingProgram.exe", 
-			"CrashTest.exe",
-			"Peach.Core.ComContainer.exe", 
-			"Peach.Core.WindowsDebugInstance.exe", 
-			"Peach.exe", 
-			"PeachAssemblyFuzzer.exe", 
-			"PeachFarm.Reporting.Service.exe", 
-			"PeachHooker.exe", 
-			"PeachLinuxCrashHandler.exe", 
-			"PeachMinset.exe", 
-			"PeachNetworkFuzzer.exe", 
-			"PeachSampleNinja.exe", 
-			"PeachValidator.exe", 
-			"PeachXmlGenerator.exe", 
-			"pf_admin.exe", 
-			"pf_controller.exe", 
-			"pf_node.exe", 
-			"PitTester.exe",
-			"pitc.exe",
-			"komodo.dll",
-		};
+			var scripting = new PythonScripting();
+			scripting.AddSearchPath(Path.Combine(Utilities.ExecutionDirectory, "Lib"));
 
-		#endregion
-
-		static string[] GetSearchPath()
-		{
-			var ret = new List<string> {
-				Environment.CurrentDirectory,
-				Utilities.ExecutionDirectory,
-			};
-
-			return ret.Distinct().ToArray();
-		}
-
-		static string GetPluginsPath()
-		{
-			var config = Utilities.GetUserConfig();
-			var path =
-				config.AppSettings.Settings.Get("Plugins") ??
-				Utilities.GetAppResourcePath("Plugins");
-			return Path.GetFullPath(path);
-		}
-
-		static ClassLoader()
-		{
-			foreach (var path in searchPath)
+			foreach (var path in pluginsPaths)
 			{
-				foreach (var file in Directory.GetFiles(path))
+				if (Directory.Exists(path))
+					LoadPlugins(path, scripting);
+			}
+
+			foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				var attr = asm.GetCustomAttribute<PluginAssemblyAttribute>();
+				if (attr != null || asm.FullName.StartsWith("Snippets.scripting"))
 				{
-					if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
+					if (AssemblyCache.ContainsKey(asm))
 						continue;
 
-					if (excludeList.Contains(Path.GetFileName(file)))
-						continue;
+					logger.Trace("Loading plugins from: {0}", asm.FullName);
+					AssemblyCache.Add(asm, GetTypes(asm));
+				}
+			}
+		}
 
-					if (AssemblyCache.ContainsKey(file))
-						continue;
+		private static void LoadPlugins(string pluginsPath, PythonScripting scripting)
+		{
+			foreach (var file in Directory.GetFiles(pluginsPath))
+			{
+				if (!file.EndsWith(".exe") && !file.EndsWith(".dll"))
+					continue;
 
-					try
-					{
-						var asm = Load(file);
-						asm.GetTypes(); // make sure we can load exported types.
-						AssemblyCache.Add(file, asm);
-					}
-					catch (Exception ex)
-					{
-						logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
-					}
+				logger.Trace("Loading plugins from: {0}", file);
+
+				try
+				{
+					var asm = Load(file);
+					AssemblyCache.Add(asm, GetTypes(asm));
+				}
+				catch (Exception ex)
+				{
+					logger.Trace("ClassLoader skipping \"{0}\", {1}", file, ex.Message);
 				}
 			}
 
-			if (!Directory.Exists(pluginsPath))
-				return;
-
 			var pys = Directory.GetFiles(pluginsPath, "*.py");
-			if (pys.Length == 0)
-				return;
-
-			var s = new PythonScripting();
-
-			s.AddSearchPath(pluginsPath);
+			if (pys.Any())
+				scripting.AddSearchPath(pluginsPath);
 
 			foreach (var py in pys)
 			{
 				try
 				{
-					s.ImportModule(Path.GetFileNameWithoutExtension(py));
+					scripting.ImportModule(Path.GetFileNameWithoutExtension(py));
 				}
 				catch (Exception ex)
 				{
 					logger.Warn("ClassLoader skipping \"{0}\", {1}", py, ex.Message);
 				}
+			}
+		}
+
+		private static List<Type> GetTypes(Assembly asm)
+		{
+			return TryGetTypes(asm)
+				.Where(t => t != null && t.IsClass && (t.IsPublic || t.IsNestedPublic))
+				.ToList();
+		}
+
+		private static IEnumerable<Type> TryGetTypes(Assembly asm)
+		{
+			try
+			{
+				return asm.GetTypes();
+			}
+			catch (ReflectionTypeLoadException ex)
+			{
+				// This happens when there are multiple .py plugins
+				// and one of the files fails to load.  We want to
+				// log which types could not be loaded and return the
+				// types that were able to be loaded.
+
+				foreach (var item in ex.LoaderExceptions)
+					logger.Debug("{0}", item.Message);
+
+				return ex.Types;
 			}
 		}
 
@@ -243,110 +164,6 @@ namespace Peach.Core
 			 */
 
 			return Assembly.LoadFrom(fullPath);
-		}
-
-		static bool TryLoad(string fullPath, bool embedded = false)
-		{
-			if (!AssemblyCache.ContainsKey(fullPath))
-			{
-				Assembly asm;
-				if (embedded)
-				{
-					try
-					{
-						asm = Assembly.LoadFrom(fullPath);
-					}
-					catch
-					{
-						return false;
-					}
-				}
-				else
-				{
-					if (!File.Exists(fullPath))
-						return false;
-
-					asm = Load(fullPath);
-				}
-
-				asm.GetExportedTypes(); // make sure we can load exported types.
-				AssemblyCache.Add(fullPath, asm);
-			}
-
-			return true;
-		}
-
-		static object[] GetCustomAttributes(Type type)
-		{
-			lock (AttributeCache)
-			{
-				object[] attrs;
-
-				if (AttributeCache.TryGetValue(type, out attrs))
-					return attrs;
-
-				try
-				{
-					attrs = type.GetCustomAttributes(true);
-				}
-				catch (TypeLoadException)
-				{
-					attrs = new object[0];
-				}
-
-				AttributeCache.Add(type, attrs);
-
-				return attrs;
-			}
-		}
-
-		public static string[] SearchPaths
-		{
-			get { return searchPath; }
-		}
-
-		public static string FindFile(string fileName)
-		{
-			if (Path.IsPathRooted(fileName))
-			{
-				if (File.Exists(fileName))
-					return fileName;
-			}
-			else
-			{
-				foreach (var path in searchPath)
-				{
-					var fullPath = Path.Combine(path, fileName);
-
-					if (File.Exists(fullPath))
-						return fullPath;
-				}
-			}
-
-			throw new FileNotFoundException();
-		}
-
-		public static void LoadAssembly(string fileName)
-		{
-			if (Path.IsPathRooted(fileName))
-			{
-				if (TryLoad(fileName))
-					return;
-			}
-			else
-			{
-				// for mkbundle, attempt to load without path
-				if (TryLoad(fileName, true))
-					return;
-
-				foreach (var path in searchPath)
-				{
-					if (TryLoad(Path.Combine(path, fileName)))
-						return;
-				}
-			}
-
-			throw new FileNotFoundException();
 		}
 
 		/// <summary>
@@ -414,18 +231,15 @@ namespace Peach.Core
 			where A : Attribute
 		{
 			IEnumerable<Type> types;
-			lock (AllByAttributeCache)
+			lock (_mutex)
 			{
 				if (!AllByAttributeCache.TryGetValue(typeof(A), out types))
 				{
 					var typesList = new List<Type>();
-					foreach (var asm in AssemblyCache.Values)
+					foreach (var kv in AssemblyCache)
 					{
-						foreach (var type in asm.GetTypes())
+						foreach (var type in kv.Value)
 						{
-							if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
-								continue;
-
 							if (type.GetCustomAttributes<A>().Any())
 								typesList.Add(type);
 						}
@@ -497,35 +311,28 @@ namespace Peach.Core
 				.FirstOrDefault().Value;
 		}
 
-		/// <summary>
-		/// Find and create and instance of class by parent type and 
-		/// name.
-		/// </summary>
-		/// <typeparam name="T">Return Type.</typeparam>
-		/// <param name="name">Name of type.</param>
-		/// <returns>Returns a new instance of found type, or null.</returns>
-		public static T FindAndCreateByTypeAndName<T>(string name)
-			where T : class
+		static object[] GetCustomAttributes(Type type)
 		{
-			foreach (var asm in AssemblyCache.Values)
+			lock (_mutex)
 			{
-				//if (asm.IsDynamic)
-				//	continue;
+				object[] attrs;
 
-				var type = asm.GetType(name);
-				if (type == null)
-					continue;
+				if (AttributeCache.TryGetValue(type, out attrs))
+					return attrs;
 
-				if (!type.IsClass || (!type.IsPublic && !type.IsNestedPublic))
-					continue;
+				try
+				{
+					attrs = type.GetCustomAttributes(true);
+				}
+				catch (TypeLoadException)
+				{
+					attrs = new object[0];
+				}
 
-				if (!type.IsSubclassOf(type))
-					continue;
+				AttributeCache.Add(type, attrs);
 
-				return Activator.CreateInstance(type) as T;
+				return attrs;
 			}
-
-			return null;
 		}
 	}
 }

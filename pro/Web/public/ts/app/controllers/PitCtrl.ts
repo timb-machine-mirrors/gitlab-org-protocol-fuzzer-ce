@@ -26,7 +26,7 @@ namespace Peach {
 				showCfgHelp: true,
 				showStartHelp: true
 			});
-			
+
 			this.pitService.LoadPit().then((pit: IPit) => {
 				this.Pit = pit;
 				this.Job = {
@@ -51,9 +51,13 @@ namespace Peach {
 		}
 
 		public get ShowNoMonitors(): boolean {
-			return onlyIf(this.pitService.Pit, () => 
+			return onlyIf(this.pitService.Pit, () =>
 				this.pitService.IsConfigured && !this.pitService.HasMonitors
 			);
+		}
+
+		public get ShowWebProxy(): boolean {
+			return onlyIf(this.pitService.Pit, () => this.pitService.IsWebProxy);
 		}
 
 		public get CanStart(): boolean {
@@ -65,7 +69,7 @@ namespace Peach {
 				.then((job: IJob) => {
 					this.$state.go(C.States.Job, { job: job.id });
 				})
-			;
+				;
 		}
 
 		public OnCfgHelp(): void {
@@ -75,7 +79,7 @@ namespace Peach {
 		public OnStartHelp(): void {
 			this.storage.showStartHelp = !this.storage.showStartHelp;
 		}
-		
+
 		public get StartHelpClass() {
 			return { active: this.storage.showStartHelp };
 		}
@@ -83,7 +87,7 @@ namespace Peach {
 		public get CfgHelpClass() {
 			return { active: this.storage.showCfgHelp };
 		}
-		
+
 		public get StartHelpPrompt(): string {
 			return this.storage.showStartHelp ? 'Hide' : 'Help';
 		}

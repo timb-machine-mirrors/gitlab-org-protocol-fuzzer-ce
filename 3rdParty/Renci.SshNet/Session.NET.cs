@@ -17,7 +17,7 @@ namespace Renci.SshNet
         private const byte CarriageReturn = 0x0d;
         private const byte LineFeed = 0x0a;
 
-        private readonly TraceSource _log =
+        public static readonly TraceSource _log =
 #if DEBUG
             new TraceSource("SshNet.Logging", SourceLevels.All);
 #else
@@ -160,6 +160,10 @@ namespace Renci.SshNet
                 buffer.Add(data[0]);
             }
             while (!(buffer.Count > 0 && (buffer[buffer.Count - 1] == LineFeed || buffer[buffer.Count - 1] == Null)));
+
+#if DEBUG
+			Log(string.Format("SocketReadLine: {0}", BitConverter.ToString(buffer.ToArray())));
+#endif
 
             if (buffer.Count == 0)
                 response = null;

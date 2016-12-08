@@ -28,6 +28,10 @@ namespace Peach {
 			return this.pit;
 		}
 
+		public get IsWebProxy() {
+			return !_.isUndefined(this.pit) && !_.isUndefined(this.pit.webProxy);
+		}
+
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
 			const promise = this.$http.get(C.Api.Libraries);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
@@ -95,9 +99,11 @@ namespace Peach {
 				id: this.pit.id,
 				pitUrl: this.pit.pitUrl,
 				name: this.pit.name,
+				description: this.pit.description,
 				config: config,
 				agents: agents,
-				weights: this.pit.weights
+				weights: this.pit.weights,
+				webProxy: this.pit.webProxy
 			};
 
 			const promise = this.$http.post(this.pit.pitUrl, dto);
@@ -123,7 +129,12 @@ namespace Peach {
 			return this.SavePit();
 		}
 
-		public SaveConfig(pit: IPit): ng.IHttpPromise<IPit> {
+		public SaveWebProxy(webProxy: IWebProxy): ng.IPromise<IPit> {
+			this.pit.webProxy = webProxy;
+			return this.SavePit();
+		}
+
+		public NewConfig(pit: IPit): ng.IHttpPromise<IPit> {
 			const request: IPitCopy = {
 				pitUrl: pit.pitUrl,
 				name: pit.name,
@@ -132,13 +143,29 @@ namespace Peach {
 			return this.DoNewPit(request);
 		}
 
+		public EditConfig(pit: IPit): ng.IPromise<void> {
+			return this.$http.get(pit.pitUrl).then((response: ng.IHttpPromiseCallbackArg<IPit>) => {
+				const fullPit = response.data;
+				if (pit.name === fullPit.name) {
+					fullPit.description = pit.description;
+					return this.$http.post(pit.pitUrl, fullPit).then(() => {});
+				}
+				return this.NewConfig(pit).then(() => 
+					this.DeletePit(fullPit).then(() => {})
+				);
+			});
+		}
+
 		public MigratePit(legacyPit: IPit, originalPit: IPit): ng.IHttpPromise<IPit> {
 			const request: IPitCopy = {
 				legacyPitUrl: legacyPit.pitUrl,
 				pitUrl: originalPit.pitUrl
 			};
-			console.log('MigratePit', legacyPit, originalPit, request);
 			return this.DoNewPit(request);
+		}
+
+		public DeletePit(pit: IPit): ng.IHttpPromise<void> {
+			return this.$http.delete<void>(pit.pitUrl);
 		}
 
 		private DoNewPit(request: IPitCopy): ng.IHttpPromise<IPit> {
@@ -209,7 +236,7 @@ namespace Peach {
 			return view;
 		}
 
-		private CreateFlatDefinesView(src: IParameter[]): IParameter[] {
+		public CreateFlatDefinesView(src: IParameter[]): IParameter[] {
 			const skip = [
 				ParameterType.Group,
 				ParameterType.Monitor,

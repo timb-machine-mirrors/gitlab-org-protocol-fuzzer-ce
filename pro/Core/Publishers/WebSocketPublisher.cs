@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using System.ComponentModel;
 using vtortola.WebSockets;
 
 #pragma warning disable 4014

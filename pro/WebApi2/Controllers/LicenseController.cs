@@ -1,5 +1,7 @@
+using System.Linq;
+using System.Reflection;
 using System.Web.Http;
-using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.WebApi2.Utility;
 using LicenseModel = Peach.Pro.Core.WebServices.Models.License;
 
@@ -27,14 +29,12 @@ namespace Peach.Pro.WebApi2.Controllers
 		{
 			return new LicenseModel
 			{
-				IsValid = _license.IsValid,
-				IsInvalid = _license.IsInvalid,
-				IsMissing = _license.IsMissing,
-				IsExpired = _license.IsExpired,
+				Status = _license.Status,
 				ErrorText = _license.ErrorText,
 				Expiration = _license.Expiration,
-				Version = _license.Version,
+				Eula = _license.Eula,
 				EulaAccepted = _license.EulaAccepted,
+				Version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
 			};
 		}
 

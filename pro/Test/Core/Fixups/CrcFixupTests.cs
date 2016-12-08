@@ -76,6 +76,56 @@ namespace Peach.Pro.Test.Core.Fixups
 		}
 
 		[Test]
+		public void TestCrc32_16()
+		{
+			// standard test
+
+			string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+				<Peach>
+				   <DataModel name=""TheDataModel"">
+				       <Number name=""CRC"" size=""16"" signed=""false"">
+				           <Fixup class=""CrcFixup"">
+				               <Param name=""ref"" value=""Data""/>
+				               <Param name=""type"" value=""CRC32_16""/>
+				           </Fixup>
+				       </Number>
+				       <Blob name=""Data"" value=""Hello""/>
+				   </DataModel>
+
+				   <StateModel name=""TheState"" initialState=""Initial"">
+				       <State name=""Initial"">
+				           <Action type=""output"">
+				               <DataModel ref=""TheDataModel""/>
+				           </Action>
+				       </State>
+				   </StateModel>
+
+				   <Test name=""Default"">
+				       <StateModel ref=""TheState""/>
+				       <Publisher class=""Null""/>
+				   </Test>
+				</Peach>";
+
+			PitParser parser = new PitParser();
+
+			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			RunConfiguration config = new RunConfiguration();
+			config.singleIteration = true;
+
+			Engine e = new Engine(this);
+			e.startFuzzing(dom, config);
+
+			// Retuns the least significant 16bits of a crc32
+
+			// verify values
+			// -- this is the pre-calculated checksum from Peach2.3 on the blob: "Hello"
+			byte[] precalcChecksum = new byte[] { 0x82, 0x89 };
+			Assert.AreEqual(1, values.Count);
+			Assert.AreEqual(precalcChecksum, values[0].ToArray());
+		}
+
+		[Test]
 		public void TestLegacy()
 		{
 			// standard test

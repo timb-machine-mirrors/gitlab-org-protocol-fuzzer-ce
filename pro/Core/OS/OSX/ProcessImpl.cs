@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Mono.Unix.Native;
 using Peach.Core;
 using Logger = NLog.Logger;
 using SysProcess = System.Diagnostics.Process;
@@ -11,6 +12,8 @@ namespace Peach.Pro.Core.OS.OSX
 	[PlatformImpl(Platform.OS.OSX)]
 	public class ProcessImpl : Unix.ProcessImpl
 	{
+		private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		class OwnedProcess : BaseUnixProcess
 		{
 			protected override bool Attached { get { return false; } }
@@ -51,6 +54,8 @@ namespace Peach.Pro.Core.OS.OSX
 
 			protected override IEnumerable<SysProcess> GetProcessesByName(string name)
 			{
+				Logger.Trace("GetProcessByName: {0}", name);
+
 				foreach (var p in SysProcess.GetProcesses())
 				{
 					if (GetName(p.Id) == name)
@@ -327,10 +332,17 @@ namespace Peach.Pro.Core.OS.OSX
 			{
 				var ret = sysctl(mib, (uint)mib.Length, ptr.Pointer, ref argmax, IntPtr.Zero, 0);
 				if (ret == -1)
+				{
+					var errno = Stdlib.GetLastError();
+					Logger.Trace("Failed to get process info for pid {0}. {1}", pid, Stdlib.strerror(errno));
 					return ""; // ignore errors, usually access denied
+				}
 
 				// skip past argc which is an int
-				return Path.GetFileName(ptr.ReadString(sizeof(int)));
+				var path = ptr.ReadString(sizeof(int));
+				Logger.Trace("Pid: {0} -> {1}", pid, path);
+
+				return Path.GetFileName(path);
 			}
 		}
 

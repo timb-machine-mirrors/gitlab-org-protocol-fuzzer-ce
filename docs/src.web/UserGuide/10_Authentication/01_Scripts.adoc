@@ -1,0 +1,166 @@
+
+[[webproxy_Scripts]]
+=== Scripts
+
+The _Script_ configuration option allows custom code to be run after fuzzing but prior to sending outgoing HTTP requests.
+This is typically used to implement custom authentication required by the target web service.
+When the script is imported, it registers a function with the +peach.webproxy+ python module.
+The function will then be called with every outgoing request after all fuzzing has taken place.
+This allows arbitrary changes to be made on a per request basis.
+Headers can be added/removed and the body can be altered if needed.
+
+The source code to the webproxy module is available in the _Scripts_ sub-folder of your Peach installation.
+For development purposes, you can also add the _Scripts_ sub-folder to your _PYTHONPATH_ environment variable.
+This will enable the testing of python scripts outside of the webproxy scripting environment.
+
+==== `peach.webproxy` module
+
+This module is the API that all custom scripts will use to interact with the webproxy.
+
+`peach.webproxy.`**register_event**_(kind, fn)_::
++
+This function is called to register a user defined function `fn` with the webproxy.
+The function will be called whenever the specified `kind` of event is triggered.
++
+Supported values for event `kind` argument:
++
+`peach.webproxy.`*EVENT_ACTION*;;
++
+Occurs after an incoming HTTP request has been
+processed by the webproxy but before the request has been sent to the destination. +
++
+The user defined function for this event must accept three arguments:
+`context` `request` and `body`. +
++
+.Subscribing to the `EVENT_ACTION`
+========================
+[source,python]
+----
+from peach import webproxy
+
+def callback_fn(context, request, body):
+    print 'Event fired!'
+
+webproxy.register_event(webproxy.EVENT_ACTION, callback_fn)
+----
+========================
+
+==== `peach.webproxy.Request` object
+
+This object contains all the information about the current HTTP request.
+Requests have the following attributes:
+
+method::
+The method of the HTTP request.
+
+uri::
+The xref:peach_webproxy_Uri[peach.webproxy.Uri] object of the HTTP request.
+
+host::
+The value of the HTTP `Host` header.  Returns _None_ if the `Host` header is not defined.
+
+contentLength::
+The value of the HTTP `Content-Length` header.  Returns _None_ if the `Content-Length` header is not defined.
+
+contentEncoding::
+The value of the HTTP `Content-Encoding` header.  Returns _None_ if the `Content-Encoding` header is not defined.
+
+contentType::
+The value of the HTTP `Content-Type` header.  Returns _None_ if the `Content-Type` header is not defined.
+
+headers::
++
+A dictionary containing all headers in the HTTP request.  The key is not case sensitive.
+The value of the dictionary is a list of xref:peach_webproxy_Header[peach.webproxy.Header] objects.
++
+Get header value;;
++
+[source,python]
+----
+if 'Cookie' in request.headers:
+    print 'Cookie: %s' request.headers['Cookie'][0].value
+else:
+    print 'Not Found' 
+----
++
+Add/change header value;;
++
+[source,python]
+----
+request.headers['X-Custom-Header'] = 'header value'
+----
++
+Delete header;;
++
+[source,python]
+----
+del request.headers['X-Custom-Header']
+----
+
+[[peach_webproxy_Uri]]
+==== `peach.webproxy.Uri` object
+
+This object contains all the information about the current HTTP request.
+Requests have the following attributes:
+
+scheme::
+The scheme portion of the uri. Example: _http://_
+
+host::
+The host portion of the uri. Example: _peachfuzzer.com_
+
+port::
+The port portion of the uri. Example: _80_
+
+path::
+The path portion of the uri. Example: _/api/v1/users_
+
+query::
+The query portion of the uri. Example: _?filter=true_
+
+[[peach_webproxy_Header]]
+==== `peach.webproxy.Header` object
+
+This object contains the information for a single HTTP header.
+Headers have the following attributes:
+
+name::
+The name of the HTTP header. Example: _Accept-Charset_
+
+value::
+The value of the HTTP header. Example: _utf-8_
+
+.Sample AWS Authentication Script
+========================
+This example demonstrates how to set the +Authorization+ header in every outgoing request.
+
+[source,python]
+----
+from peach import webproxy <1>
+
+import base64
+import hmac
+
+from hashlib import sha1
+from email.Utils import formatdate
+
+AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
+AWS_SECRET_KEY = 'AWS_SECRET_KEY'
+
+def aws_auth(ctx, req, body): <2>
+    XAmzDate = formatdate()
+
+    hdrs = '%s\n\n%s\n\nx-amz-date:%s\n/?policy' % (req.method, req.contentType, XAmzDate)
+    h = hmac.new(AWS_SECRET_KEY, hdrs, sha1)
+    authToken = base64.encodestring(h.digest()).strip()
+
+    req.headers['x-amz-date'] = XAmzDate
+    req.headers['Authorization'] = 'AWS %s:%s' % (AWS_ACCESS_KEY_ID, authToken) <3>
+
+webproxy.register_event(webproxy.EVENT_ACTION, aws_auth) <4>
+----
+<1> Import peach.webproxy module to register for events
+<2> Function has three arguments: Context, Request, Body
+<3> Set the header value
+<4> Register function with Peach Web
+========================

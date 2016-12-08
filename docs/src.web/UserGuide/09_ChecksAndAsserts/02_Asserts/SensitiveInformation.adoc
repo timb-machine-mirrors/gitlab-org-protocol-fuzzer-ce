@@ -1,0 +1,32 @@
+[Assert_SensitiveInformation]
+== Sensitive Information Assert
+
+Information Leakage is an application weakness where an application reveals sensitive data, 
+such as technical details of the web application, environment, or user-specific data. 
+Sensitive data may be used by an attacker to exploit the target web application, its hosting 
+network, or its users. Therefore, leakage of sensitive data should be limited or prevented 
+whenever possible. Information Leakage, in its most common form, is the result of one or more 
+of the following conditions: A failure to scrub out HTML/Script comments containing sensitive 
+information, improper application or server configurations, or differences in page responses 
+for valid versus invalid data.
+
+This assert performs analysis of API responses and log messagess to detect the following:
+
+* Database error messages
+* Framework/server error messages
+* Sensitive PII
+* Version dislosure
+
+The assert comes pre-populated with a large list of regular expressions that are matched against
+responses and log messages.
+The provided list can be editted at various scope levels (Global, Project, Profile, Route) to 
+add, edit or remote entries.
+
+=== Related Checks
+
+xref:Check_SensitiveInformation[Sensitive Information Check]
+
+=== Configuration
+
+TODO
+

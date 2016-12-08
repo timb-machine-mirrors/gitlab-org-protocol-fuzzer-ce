@@ -120,8 +120,4 @@ include::22_ExtendingPeach/00_Section.adoc[]
 <<<
 include::23_Tutorials/00_Section.adoc[]
 
-:leveloffset: 0
-<<<
-include::24_SampleNinja/00_Section.adoc[]
-
 // end

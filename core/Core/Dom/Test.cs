@@ -135,10 +135,32 @@ namespace Peach.Core.Dom
 		public Platform.OS platform { get; set; }
 	}
 
-	public class StateModelRef
+	public interface IStateModelRef
+	{
+		void WritePit(XmlWriter pit);
+	}
+
+	[StateModelRef("StateModel")]
+	public class StateModelRef : IStateModelRef
 	{
 		[XmlAttribute("ref")]
 		public string refName { get; set; }
+
+		public virtual void WritePit(XmlWriter pit)
+		{
+			pit.WriteStartElement("StateModel");
+			pit.WriteAttributeString("ref", refName);
+			pit.WriteEndElement();
+		}
+	}
+
+	public class StateModelRefAttribute : PluginAttribute
+	{
+		public StateModelRefAttribute(string name)
+			: base(typeof(IStateModelRef), name, true)
+		{
+			Scope = PluginScope.Internal;
+		}
 	}
 
 	/// <summary>
@@ -148,6 +170,8 @@ namespace Peach.Core.Dom
 	/// </summary>
 	public class Test : INamed, IOwned<Dom>
 	{
+		static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		#region Obsolete Functions
 
 		[Obsolete("This property is obsolete and has been replaced by the Name property.")]
@@ -301,8 +325,8 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
 		/// </summary>
-		[XmlElement("StateModel")]
-		public StateModelRef stateModelRef { get; set; }
+		[PluginElement(typeof(IStateModelRef))]
+		public IStateModelRef stateModelRef { get; set; }
 
 		/// <summary>
 		/// Currently unused.  Exists for schema generation.
@@ -373,11 +397,20 @@ namespace Peach.Core.Dom
 				}
 			}
 
-			foreach (var element in stateModel.TuningTraverse())
+			if (weights.Count > 0)
 			{
-				SelectWeight item;
-				if (weights.TryGetValue(element.Key, out item))
-					element.Value.Weight = item.Weight;
+				foreach (var element in stateModel.TuningTraverse())
+				{
+					SelectWeight item;
+					if (weights.TryGetValue(element.Key, out item))
+					{
+						element.Value.Weight = item.Weight;
+					}
+					else
+					{
+						Logger.Trace("Missing weight specification for: {0}", element.Key);
+					}
+				}
 			}
 
 			// disable mutations for elements in a final state
@@ -424,15 +457,22 @@ namespace Peach.Core.Dom
 			if(MaxBackSearch != 80)
 				pit.WriteAttributeString("maxBackSearch", MaxBackSearch.ToString());
 
-			//foreach (var obj in publishers)
-			//	obj.WritePit(pit);
+			// TODO - Make this work for real
+			// Quick hack to make Swagger/Postman analyzers work better
+			foreach (var obj in publishers)
+			{
+				if (obj.GetType().Name != "WebApiPublisher") continue;
+
+				pit.WriteStartElement("Publisher");
+				pit.WriteAttributeString("class", "WebApi");
+				pit.WriteEndElement();
+			}
 
 			//foreach (var obj in weights)
 			//	obj.WritePit(pit);
 
 			//foreach (var obj in includedMutators)
 			//	obj.WritePit(pit);
-
 
 			if (agentRef != null)
 			{
@@ -445,11 +485,7 @@ namespace Peach.Core.Dom
 			}
 
 			if (stateModelRef != null)
-			{
-				pit.WriteStartElement("StateModel");
-				pit.WriteAttributeString("ref", stateModelRef.refName);
-				pit.WriteEndElement();
-			}
+				stateModelRef.WritePit(pit);
 
 			pit.WriteEndElement();
 		}

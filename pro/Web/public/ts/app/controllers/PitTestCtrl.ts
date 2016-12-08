@@ -11,29 +11,20 @@ namespace Peach {
 			C.Angular.$scope,
 			C.Angular.$state,
 			C.Services.Pit,
-			C.Services.Test,
-			C.Services.Wizard
+			C.Services.Test
 		];
 
 		constructor(
 			$scope: IPitTestScope,
 			private $state: ng.ui.IStateService,
 			private pitService: PitService,
-			private testService: TestService,
-			private wizardService: WizardService
+			private testService: TestService
 		) {
 			$scope.Title = "Test";
 			this.pitService.LoadPit();
-			this.track = this.wizardService.GetTrack(C.Tracks.Test);
 		}
 
-		private track: ITrack;
-		public Tracks: ITrackStatic[] = _.filter(WizardTracks, 'incompleteMsg');
 		public Title = 'Test';
-
-		private get isWizard(): boolean {
-			return this.$state.is(C.States.PitWizardTest);
-		}
 
 		public get ShowNotConfigured(): boolean {
 			return !this.pitService.IsConfigured;
@@ -41,10 +32,6 @@ namespace Peach {
 
 		public get ShowNoMonitors(): boolean {
 			return this.pitService.IsConfigured && !this.pitService.HasMonitors;
-		}
-
-		public get CanWizardBeginTest(): boolean {
-			return this.CanBeginTest && this.IsComplete(C.Tracks.Fault);
 		}
 
 		public get CanBeginTest(): boolean {
@@ -58,55 +45,12 @@ namespace Peach {
 			}) || false;
 		}
 
-		public IsComplete(track: string): boolean {
-			return this.wizardService.GetTrack(track).isComplete;
-		}
-
-		public TrackStatus(item: ITrackStatic) {
-			return this.IsComplete(item.id) ?
-				'label-success' : item.fail ?
-					'label-danger' : 'label-warning';
-		}
-
-		public TrackMessage(item: ITrackStatic) {
-			return this.IsComplete(item.id) ? 'Complete' : item.incompleteMsg;
-		}
-
-		public TrackLink(item: ITrackStatic) {
-			return this.IsComplete(item.id) ? false : _.isString(item.link);
-		}
-
 		public OnBeginTest() {
-			if (this.isWizard) {
-				this.track.isComplete = false;
-
-				const agents = _.flatten<IAgent>([
-					this.wizardService.GetTrack(C.Tracks.Fault).agents,
-					this.wizardService.GetTrack(C.Tracks.Data).agents,
-					this.wizardService.GetTrack(C.Tracks.Auto).agents
-				]);
-
-				const merged = this.wizardService.MergeAgents(agents);
-				const promise = this.pitService.SaveAgents(merged);
-				promise.then(() => {
-					this.startTest();
-				});
-			} else {
-				this.startTest();
-			}
-		}
-
-		private startTest() {
-			const promise = this.testService.BeginTest();
-			promise.then(() => {
-				if (this.isWizard) {
-					this.track.isComplete = true;
-				}
-			});
+			this.testService.BeginTest();
 		}
 
 		public OnNextTrack() {
-			this.$state.go(this.track.next.state);
+			this.$state.go(C.States.Pit);
 		}
 	}
 }

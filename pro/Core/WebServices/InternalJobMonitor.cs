@@ -1,8 +1,10 @@
 using System;
 using System.Threading;
 using Peach.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.WebServices
@@ -12,9 +14,15 @@ namespace Peach.Pro.Core.WebServices
 		static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		volatile JobRunner _runner;
 		Thread _thread;
+		ILicense _license;
 
-		public InternalJobMonitor()
+		// For unit tests
+		internal Action<Engine> TestHook { get; set; }
+
+		public InternalJobMonitor(ILicense license)
 		{
+			_license = license;
+
 			using (var db = new NodeDatabase())
 			{
 				db.Migrate();
@@ -90,23 +98,33 @@ namespace Peach.Pro.Core.WebServices
 			Logger.Trace("<<< Dispose");
 		}
 
+		public bool ProxyEvent(IProxyEvent args)
+		{
+			lock (this)
+			{
+				args.Handled = IsRunning && _runner.ProxyEvent(args);
+			}
+
+			return args.Handled;
+		}
+
 		protected override void OnStart(Job job)
 		{
 			var evtReady = new AutoResetEvent(false);
-			_runner = new JobRunner(job, PitLibraryPath, PitFile);
+			_runner = new JobRunner(_license, job, PitLibraryPath, PitFile);
 			_thread = new Thread(() =>
 			{
 				try
 				{
-					_runner.Run(evtReady);
+					_runner.Run(evtReady, TestHook);
 				}
-				catch
+				catch (Exception ex)
 				{
 					// Eat all exceptions on the worker thread of the internal job monitor
+					Logger.Debug(ex, "InternalJobMonitor exception");
 				}
 				finally
 				{
-
 					Logger.Trace("runner.Run() done");
 					_runner = null;
 				}
@@ -114,6 +132,7 @@ namespace Peach.Pro.Core.WebServices
 				if (InternalEvent != null)
 					InternalEvent(this, EventArgs.Empty);
 			});
+
 			_thread.Start();
 			if (!evtReady.WaitOne(1000))
 				throw new PeachException("Timeout waiting for job to start");

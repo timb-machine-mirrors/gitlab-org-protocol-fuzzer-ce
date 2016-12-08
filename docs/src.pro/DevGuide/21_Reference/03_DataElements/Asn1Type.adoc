@@ -55,6 +55,17 @@ If "true", always use the long encoding form (that is, multiple length octets) t
 If "false", also allow the short encoding form where the number of content octets is expressed in 7 bits (127 or less).
 The default is "false".
 
+xref:minOccurs[minOccurs]::
+	The minimum number of times this blob must occur. Defaults to 1.  +
+	* Used to define arrays with variable size. Arrays defined by min/maxOccurs generally have a relation
+	defined.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
+xref:maxOccurs[maxOccurs]::
+	The maximum number of times this blob can occur. Defaults to 1.  +
+	* Used to define arrays with static size.
+	* Adding this attribute, even with a value of 1, converts the element to an array.
+
 xref:mutable[mutable]:: Is this element mutable, default is "true".
 
 xref:name[name]:: Element name, default is "true".

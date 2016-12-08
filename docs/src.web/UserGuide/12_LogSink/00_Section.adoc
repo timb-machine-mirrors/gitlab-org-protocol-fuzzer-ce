@@ -1,0 +1,12 @@
+[LogSink]
+== Log Sink
+
+The log sink can consume syslog log messages. 
+
+=== SYslog
+
+blah blah
+
+=== Sending local logs
+
+blah blah blah

@@ -3,10 +3,10 @@
 //
 
 using System;
+using System.ComponentModel;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 using String = Peach.Core.Dom.String;
 
 namespace Peach.Pro.Core.Mutators

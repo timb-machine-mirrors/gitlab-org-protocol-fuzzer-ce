@@ -1,5 +1,6 @@
 ﻿<form name="form"
-			peach:unsaved>
+			peach:unsaved
+			autocomplete="off">
 	<p>
 		This page lists the information needed by the selected pit.
 		Some of the information applies to the Peach environment;
@@ -20,7 +21,7 @@
 			</span>
 			<span ng-show="vm.ShowValidation"
 						class="red">
-				You have some validation issues to correct.
+				Save is disabled until validation issues are fixed.
 			</span>
 		</div>
 		<div class="col-xs-6 text-right">

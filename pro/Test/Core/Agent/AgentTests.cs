@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using NLog;
 using NUnit.Framework;
@@ -11,7 +11,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.IO;
 using Peach.Core.Test;
-using Peach.Pro.Core.Publishers;
+using Peach.Pro.Core.OS;
 using Encoding = Peach.Core.Encoding;
 using Logger = NLog.Logger;
 using SysProcess = System.Diagnostics.Process;
@@ -23,19 +23,27 @@ namespace Peach.Pro.Test.Core.Agent
 	[Peach]
 	public class AgentTests
 	{
-		SingleInstance _si;
+		ISingleInstance _si;
 		SysProcess _process;
+		TempDirectory _tmpDir;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_si = SingleInstance.CreateInstance(GetType().FullName);
+			_si = Pal.SingleInstance(GetType().FullName);
 			_si.Lock();
+			_tmpDir = new TempDirectory();
+
+			File.Copy(
+				Assembly.GetExecutingAssembly().Location,
+				Path.Combine(_tmpDir.Path, "Peach.Pro.Test.dll")
+			);
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
+			_tmpDir.Dispose();
 			_si.Dispose();
 			_si = null;
 		}
@@ -78,7 +86,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 		void StartAgent(string protocol)
 		{
-			_process = Helpers.StartAgent(protocol);
+			_process = Helpers.StartAgent(protocol, _tmpDir.Path);
 		}
 
 		void StopAgent()
@@ -646,7 +654,7 @@ namespace Peach.Pro.Test.Core.Agent
 			Assert.That(actual, Is.EqualTo(expected));
 		}
 
-		[Publisher("TestRemoteFile", Internal = true)]
+		[Publisher("TestRemoteFile", Scope = PluginScope.Internal)]
 		[Parameter("FileName", typeof(string), "Name of file to open for reading/writing")]
 		public class TestRemoteFilePublisher : Peach.Core.Publishers.StreamPublisher
 		{

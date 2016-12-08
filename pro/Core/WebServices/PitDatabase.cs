@@ -14,6 +14,8 @@ using Peach.Pro.Core.WebServices.Models;
 using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Newtonsoft.Json;
+using Peach.Pro.Core.License;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -50,6 +52,10 @@ namespace Peach.Pro.Core.WebServices
 				public string Ref { get; set; }
 			}
 
+			public class WebProxyElement : ChildElement
+			{
+			}
+
 			public TestElement()
 			{
 				Children = new List<ChildElement>();
@@ -60,6 +66,7 @@ namespace Peach.Pro.Core.WebServices
 
 			[XmlElement("Agent", typeof(AgentReferenceElement))]
 			[XmlElement("StateModel", typeof(StateModelReferenceElement))]
+			[XmlElement("WebProxy", typeof(WebProxyElement))]
 			public List<ChildElement> Children { get; set; }
 
 			public IEnumerable<AgentReferenceElement> AgentRefs
@@ -70,6 +77,15 @@ namespace Peach.Pro.Core.WebServices
 			public IEnumerable<StateModelReferenceElement> StateModelRefs
 			{
 				get { return Children.OfType<StateModelReferenceElement>(); }
+			}
+
+			[XmlIgnore]
+			public bool IsWebProxy
+			{
+				get
+				{
+					return Children.OfType<WebProxyElement>().Any();
+				}
 			}
 		}
 
@@ -233,8 +249,10 @@ namespace Peach.Pro.Core.WebServices
 
 		Pit UpdatePitById(string guid, PitConfig data);
 		Pit UpdatePitByUrl(string url, PitConfig data);
-	
-		Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description);
+
+		void DeletePitById(string guid);
+
+		Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description);
 		Tuple<Pit, PitDetail> MigratePit(string legacyPitUrl, string pitUrl);
 	}
 
@@ -245,7 +263,7 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Static Helpers
 
-		private static PeachElement Parse(string fileName)
+		private static PeachElement Parse(string fileName, Stream input)
 		{
 			try
 			{
@@ -261,7 +279,7 @@ namespace Peach.Pro.Core.WebServices
 
 				var parserCtx = new XmlParserContext(settingsRdr.NameTable, nsMgrRdr, null, XmlSpace.Default);
 
-				using (var rdr = XmlReader.Create(fileName, settingsRdr, parserCtx))
+				using (var rdr = XmlReader.Create(input, settingsRdr, parserCtx))
 				{
 					var s = XmlTools.GetSerializer(typeof(PeachElement));
 					var elem = (PeachElement)s.Deserialize(rdr);
@@ -307,10 +325,11 @@ namespace Peach.Pro.Core.WebServices
 		internal static readonly string LegacyDir = "User";
 		internal static readonly string ConfigsDir = "Configs";
 
+		private readonly ILicense _license;
 		private string _pitLibraryPath;
 
-		private NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
-		private NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
+		private readonly NamedCollection<PitDetail> _entries = new NamedCollection<PitDetail>();
+		private readonly NamedCollection<LibraryDetail> _libraries = new NamedCollection<LibraryDetail>();
 		LibraryDetail _configsLib;
 
 		public event EventHandler<ValidationEventArgs> ValidationEventHandler;
@@ -332,12 +351,17 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
+		public PitDatabase(ILicense license)
+		{
+			_license = license;
+		}
+
 		public void Load(string path)
 		{
 			_pitLibraryPath = Path.GetFullPath(path);
 
-			_entries = new NamedCollection<PitDetail>();
-			_libraries = new NamedCollection<LibraryDetail>();
+			_entries.Clear();
+			_libraries.Clear();
 
 			AddLibrary("", "Pits", true, false);
 			_configsLib = AddLibrary(ConfigsDir, "Configurations", false, false);
@@ -397,7 +421,7 @@ namespace Peach.Pro.Core.WebServices
 						try
 						{
 							var item = AddEntry(lib, file);
-							if (LoadEventHandler != null)
+							if (item != null && LoadEventHandler != null)
 								LoadEventHandler(this, item);
 						}
 						catch (Exception ex)
@@ -415,6 +439,11 @@ namespace Peach.Pro.Core.WebServices
 		private PitDetail AddEntry(LibraryDetail lib, string fileName)
 		{
 			var detail = MakePitDetail(fileName, lib.Library.Locked);
+
+			var feature = _license.CanUsePit(detail.PitConfig.OriginalPit);
+			if (!feature.IsValid)
+				return null;
+
 			_entries.Add(detail);
 
 			// To maintain compatibility with older jobs, we need to continue
@@ -561,15 +590,14 @@ namespace Peach.Pro.Core.WebServices
 		/// <summary>
 		/// 
 		/// Throws:
-		///   UnauthorizedAccessException if the destination library is locked.
-		///   KeyNotFoundException if libraryUrl/pitUtl is not valid.
+		///   KeyNotFoundException if libraryUrl/pitUrl is not valid.
 		///   ArgumentException if a pit with the specified name already exists.
 		/// </summary>
 		/// <param name="pitUrl">The url of the source pit to copy.</param>
 		/// <param name="name">The name of the newly copied pit.</param>
 		/// <param name="description">The description of the newly copied pit.</param>
 		/// <returns>The newly copied pit.</returns>
-		public Tuple<Pit, PitDetail> CopyPit(string pitUrl, string name, string description)
+		public Tuple<Pit, PitDetail> NewConfig(string pitUrl, string name, string description)
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("A non-empty pit name is required.", "name");
@@ -592,14 +620,24 @@ namespace Peach.Pro.Core.WebServices
 			if (File.Exists(dstFile))
 				throw new ArgumentException("A pit already exists with the specified name.");
 
-			var pitConfig = new PitConfig {
-				Name = name,
-				Description = description,
-				OriginalPit = srcPit.PitConfig.OriginalPit,
-				Config = new List<Param>(),
-				Agents = new List<Models.Agent>(),
-				Weights = new List<PitWeight>(),
-			};
+			PitConfig pitConfig;
+			if (srcPit.Locked)
+			{
+				pitConfig = new PitConfig
+				{
+					OriginalPit = srcPit.PitConfig.OriginalPit,
+					Config = new List<Param>(),
+					Agents = new List<Models.Agent>(),
+					Weights = new List<PitWeight>(),
+				};
+			}
+			else
+			{
+				pitConfig = LoadPitConfig(srcPit.Path);
+			}
+
+			pitConfig.Name = name;
+			pitConfig.Description = description;
 
 			SavePitConfig(dstFile, pitConfig);
 
@@ -663,7 +701,11 @@ namespace Peach.Pro.Core.WebServices
 				.ToList();
 
 			// 3. Parse legacyPit.xml
-			var contents = Parse(legacyFile);
+			PeachElement contents;
+			using (var stream = File.OpenRead(legacyFile))
+			{
+				contents = Parse(legacyFile, stream);
+			}
 
 			// 4. Extract Agents
 			var agents = contents.Children.OfType<PeachElement.AgentElement>();
@@ -701,9 +743,11 @@ namespace Peach.Pro.Core.WebServices
 			if (detail.Locked)
 				throw new UnauthorizedAccessException();
 
+			detail.PitConfig.Description = data.Description;
 			detail.PitConfig.Config = data.Config; // TODO: defines.ApplyWeb(config);
 			detail.PitConfig.Agents = data.Agents.FromWeb();
 			detail.PitConfig.Weights = data.Weights;
+			detail.PitConfig.WebProxy = data.WebProxy;
 
 			SavePitConfig(detail.Path, detail.PitConfig);
 
@@ -715,6 +759,19 @@ namespace Peach.Pro.Core.WebServices
 			PitDetail pit;
 			_entries.TryGetValue(url, out pit);
 			return UpdatePitById(pit.Id, data);
+		}
+
+		public void DeletePitById(string guid)
+		{
+			var detail = GetPitDetailById(guid);
+			if (detail == null)
+				throw new KeyNotFoundException();
+		
+			if (detail.Locked)
+				throw new UnauthorizedAccessException();
+
+			File.Delete(detail.Path);
+			_entries.Remove(detail);
 		}
 
 		private PitDetail GetPitDetailById(string guid)
@@ -745,6 +802,76 @@ namespace Peach.Pro.Core.WebServices
 
 		#region Pit Config/Agents/Metadata
 
+		bool ExtractCalls(PitResource pitResource,
+		                  string xmlPath, 
+		                  Stream input, 
+		                  string stateModel, 
+		                  string ns,
+		                  HashSet<string> calls)
+		{
+			var contents = Parse(xmlPath, input);
+
+			if (string.IsNullOrEmpty(stateModel))
+			{
+
+				if (contents.Children.OfType<PeachElement.TestElement>().Any(x => x.IsWebProxy))
+					return true;
+
+				stateModel = contents.Children.OfType<PeachElement.TestElement>()
+									 .SelectMany(x => x.StateModelRefs)
+									 .Select(x => x.Ref)
+									 .FirstOrDefault();
+			}
+
+			foreach (var sm in contents.Children.OfType<PeachElement.StateModelElement>())
+			{
+				var name = string.IsNullOrEmpty(ns) ? sm.Name : "{0}:{1}".Fmt(ns, sm.Name);
+				if (name == stateModel)
+				{
+					var methods = sm.States.SelectMany(x => x.Actions)
+					                .Where(x => x.Type == "call" && x.Publisher == "Peach.Agent")
+					                .Select(x => x.Method);
+					foreach (var method in methods)
+						calls.Add(method);
+					return false;
+				}
+			}
+
+			foreach (var inc in contents.Children.OfType<PeachElement.IncludeElement>())
+			{
+				using (var stream = pitResource.Load(inc.Source))
+				{
+					ExtractCalls(pitResource, inc.Source, stream, stateModel, inc.Ns, calls);
+				}
+			}
+
+			return false;
+		}
+
+		private static WebProxy DefaultWebProxy()
+		{
+			return new WebProxy
+			{
+				Routes = new List<WebRoute>
+				{
+					new WebRoute
+					{
+						Url = "*",
+						Mutate = true,
+						FaultOnStatusCodes = WebProxyRoute.DefaultFaultStatusCodes.ToList(),
+						Headers = new List<WebHeader>
+						{
+							new WebHeader
+							{
+								Name = "*",
+								Mutate = true
+							}
+						}
+					}
+				}
+			};
+		}
+
 		private Pit MakePit(PitDetail detail)
 		{
 			var pitXml = Path.Combine(_pitLibraryPath, detail.PitConfig.OriginalPit);
@@ -752,9 +879,13 @@ namespace Peach.Pro.Core.WebServices
 			var defs = PitDefines.ParseFile(pitConfig, _pitLibraryPath);
 			var metadata = PitCompiler.LoadMetadata(pitXml);
 
-			var calls = new List<string>();
-			if (metadata != null && metadata.Calls != null)
-				calls = metadata.Calls;
+			var calls = new HashSet<string>();
+			var pitResource = new PitResource(_license, _pitLibraryPath, pitXml);
+			bool isWebProxy;
+			using (var stream = File.OpenRead(pitXml))
+			{
+				isWebProxy = ExtractCalls(pitResource, pitXml, stream, null, null, calls);
+			}
 
 			var pit = new Pit {
 				Id = detail.Id,
@@ -769,9 +900,10 @@ namespace Peach.Pro.Core.WebServices
 				Config = detail.PitConfig.Config,
 				Agents = detail.PitConfig.Agents,
 				Weights = detail.PitConfig.Weights,
+				WebProxy = isWebProxy ? (detail.PitConfig.WebProxy ?? DefaultWebProxy()) : null,
 				Metadata = new PitMetadata {
-					Defines = defs.ToWeb(),
-					Monitors = MonitorMetadata.Generate(calls),
+					Defines = defs.ToWeb(detail.PitConfig.Config),
+					Monitors = MonitorMetadata.Generate(calls.ToList()),
 					Fields = metadata != null ? metadata.Fields : null,
 				}
 			};

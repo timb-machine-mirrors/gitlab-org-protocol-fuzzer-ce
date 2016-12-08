@@ -74,10 +74,6 @@ This example uses the zip analyzer to decompose a .docx file into its underlying
 		<Publisher class="Zip">
 			<Param name="FileName" value="fuzzed.docx" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
@@ -85,9 +81,6 @@ This example uses the zip analyzer to decompose a .docx file into its underlying
 Output from the example that decomposes a .docx file into its underlying streams.
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.1.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 22910.
 
@@ -355,19 +348,12 @@ This example also maps all '.xml' files to the data model 'XmlModel' that furthe
 		<Publisher class="Zip">
 			<Param name="FileName" value="fuzzed.docx" />
 		</Publisher>
-
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
 
 Output from the example that decomposes a .docx file into its underlying streams and maps all '.xml' files to the data model 'XmlModel'.
 ----
-
-[[ Peach Pro v3.1.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 6071.
 

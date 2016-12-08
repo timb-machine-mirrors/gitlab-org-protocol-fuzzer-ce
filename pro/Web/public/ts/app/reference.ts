@@ -2,9 +2,6 @@
 /// <reference path="utils.ts" />
 /// <reference path="ng.ts" />
 /// <reference path="const.ts" />
-/// <reference path="wizards/auto.ts" />
-/// <reference path="wizards/data.ts" />
-/// <reference path="wizards/fault.ts" />
 
 /** Managed references (unordered) */
 //grunt-start
@@ -27,9 +24,9 @@
 /// <reference path="controllers/PitConfigDefinesCtrl.ts" />
 /// <reference path="controllers/PitConfigMonitorsCtrl.ts" />
 /// <reference path="controllers/PitConfigTuningCtrl.ts" />
+/// <reference path="controllers/PitConfigWebProxyCtrl.ts" />
 /// <reference path="controllers/PitCtrl.ts" />
 /// <reference path="controllers/PitTestCtrl.ts" />
-/// <reference path="controllers/WizardCtrl.ts" />
 /// <reference path="def/angular-ui-bootstrap/angular-ui-bootstrap.d.ts" />
 /// <reference path="def/angular-ui-router/angular-ui-router.d.ts" />
 /// <reference path="def/angularjs/angular-mocks.d.ts" />
@@ -44,11 +41,15 @@
 /// <reference path="directives/AutoFocusDirective.ts" />
 /// <reference path="directives/ComboboxDirective.ts" />
 /// <reference path="directives/DefinesDirective.ts" />
+/// <reference path="directives/FaultAssetsDirective.ts" />
+/// <reference path="directives/FaultFilesDirective.ts" />
 /// <reference path="directives/FaultsDirective.ts" />
+/// <reference path="directives/HeadersDirective.ts" />
 /// <reference path="directives/JobsDirective.ts" />
 /// <reference path="directives/MonitorDirective.ts" />
 /// <reference path="directives/ParameterDirective.ts" />
 /// <reference path="directives/ParameterInputDirective.ts" />
+/// <reference path="directives/RouteDirective.ts" />
 /// <reference path="directives/SmartTableDirective.ts" />
 /// <reference path="directives/TestDirective.ts" />
 /// <reference path="directives/UniqueDirective.ts" />
@@ -61,12 +62,10 @@
 /// <reference path="models/Metrics.ts" />
 /// <reference path="models/Pit.ts" />
 /// <reference path="models/PitTest.ts" />
-/// <reference path="models/Wizard.ts" />
 /// <reference path="services/EulaService.ts" />
 /// <reference path="services/JobService.ts" />
 /// <reference path="services/PitService.ts" />
 /// <reference path="services/TestService.ts" />
-/// <reference path="services/WizardService.ts" />
 //grunt-end
 
 /** Angular module dependencies

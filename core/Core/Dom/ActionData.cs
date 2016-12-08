@@ -9,7 +9,7 @@ using System.ComponentModel;
 namespace Peach.Core.Dom
 {
 	[Serializable]
-	public class ActionData : INamed
+	public class ActionData : INamed, IActionDataXpath
 	{
 		#region Obsolete Functions
 
@@ -129,10 +129,10 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public ulong MaxOutputSize
+		public virtual ulong MaxOutputSize
 		{
 			get;
-			private set;
+			protected set;
 		}
 
 		/// <summary>
@@ -148,7 +148,8 @@ namespace Peach.Core.Dom
 			if (originalDataModel == null)
 			{
 				// Store off the max output size
-				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+				if (MaxOutputSize == 0)
+					MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
 
 				// Apply data samples
 				var option = allData.FirstOrDefault();
@@ -193,7 +194,8 @@ namespace Peach.Core.Dom
 				System.Diagnostics.Debug.Assert(originalDataModel == null);
 
 				// Store off the max output size
-				MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
+				if (MaxOutputSize == 0)
+					MaxOutputSize = action.parent.parent.parent.context.test.maxOutputSize;
 
 				// Cache the model before any cracking has ever occured
 				// since we can't crack into an model that has previously
@@ -265,7 +267,7 @@ namespace Peach.Core.Dom
 		/// run count so the name will be the same across multiple
 		/// runs of the action via a re-enterant state.
 		/// </summary>
-		public string modelName
+		public virtual string modelName
 		{
 			get
 			{
@@ -275,5 +277,14 @@ namespace Peach.Core.Dom
 					return string.Join(".", action.parent.Name, action.Name, Name, dataModel.Name);
 			}
 		}
+
+		public virtual IEnumerable<ActionData> XpathData
+		{
+			get
+			{
+				return Enumerable.Empty<ActionData>();
+			}
+		}
+
 	}
 }

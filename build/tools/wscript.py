@@ -6,7 +6,7 @@ from waflib.TaskGen import feature, after_method, before_method
 from waflib.Build import InstallContext
 from waflib.Configure import conf
 from waflib import Utils, Logs, Configure, Context, Options, Errors
-from tools import pkg, hooks, nuget, test, gump
+from tools import pkg, hooks, nuget, test, gump, paket
 
 """
 Variables:
@@ -38,6 +38,7 @@ def store_version(option, opt, value, parser):
 	setattr(parser.values, 'ver_branch', str(branch))
 
 def options(opt):
+	opt.load('tools.paket')
 	opt.load('tools.idegen')
 	opt.load('tools.test')
 
@@ -144,6 +145,8 @@ def configure(ctx):
 				if missing and Options.options.strict:
 					raise Exception('Missing Features: %s' % ','.join(missing))
 
+				arch_env.append_value('supported_features', name)
+
 				cfgs = ctx.env.VARIANTS
 
 				if not cfgs:
@@ -204,7 +207,7 @@ def verify_external(bld):
 
 def run_makexsd(bld):
 	if bld.is_install and bld.variant != 'doc':
-		makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
+		makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 		env = os.environ.copy()
 		env['TERM'] = 'xterm'
 		ret = bld.exec_command(makexsd, cwd=bld.env.BINDIR, env=env)

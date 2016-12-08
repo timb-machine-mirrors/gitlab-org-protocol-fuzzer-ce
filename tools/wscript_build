@@ -3,6 +3,7 @@
 tools = [
 	'nunit.py',
 	'trampoline.py',
+	'web_unit_tests.py',
 ]
 
 files = [
@@ -16,3 +17,9 @@ bld(
 	install_755 = tools,
 	install_644 = files,
 )
+
+subdirs = [
+	'AsmVersion',
+]
+
+bld.recurse(subdirs)

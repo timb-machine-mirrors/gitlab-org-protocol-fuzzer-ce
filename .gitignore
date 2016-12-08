@@ -15,6 +15,7 @@ packages/
 
 # Visual Studio 2015
 *.VC.db
+*.VC.opendb
 .vs/
 
 # python generated files
@@ -27,8 +28,7 @@ packages/
 
 # MonoDevelop files
 *.pidb
-Peach.net.userprefs
-Peach.userprefs
+*.userprefs
 test-results/
 *.resources
 
@@ -80,7 +80,7 @@ _Resharper*
 /pro/Web.baseDir.ts
 /pro/Web/Gruntfile.js*
 /pro/Web/Gruntfile.min*
-/pro/Web2
+/pro/Web/npm-debug.log
 
 # NUnit files
 TestResult.xml
@@ -90,3 +90,18 @@ TestResult.xml
 /docs/Gemfile.lock
 /docs/src.pro/DevGuide/DevGuide.html
 /docs/src.pro/UserGuide/UserGuide.html
+
+# Emacs backup files
+*~
+
+# Downloader site
+/pro/Downloader/Web.local.config
+
+# paket
+paket/.paket/paket.exe
+paket/packages
+paket/nas
+
+# Rider EAP
+.idea
+

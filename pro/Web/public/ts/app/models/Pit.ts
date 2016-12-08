@@ -84,6 +84,7 @@ namespace Peach {
 		agents: IAgent[];
 		weights?: IPitWeight[];
 		metadata?: IPitMetadata;
+		webProxy?: IWebProxy;
 	
 		// only used by client-side
 		definesView?: IParameter[];
@@ -94,5 +95,31 @@ namespace Peach {
 		pitUrl: string;
 		name?: string;
 		description?: string;
+	}
+
+	export interface IWebProxy {
+		routes: IWebRoute[];
+	}
+
+	export interface IWebRoute {
+		url: string;
+		swagger: string;
+		script: string;
+		mutate: boolean;
+		baseUrl: string;
+		faultOnStatusCodes: number[];
+		headers: IWebHeader[];
+
+		// only used by front-end
+		mutateChoice: string;
+		faultOnStatusCodesText: string;
+	}
+
+	export interface IWebHeader {
+		name: string;
+		mutate: boolean;
+
+		// only used by front-end
+		mutateChoice: string;
 	}
 }

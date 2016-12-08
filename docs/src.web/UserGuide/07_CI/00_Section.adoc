@@ -1,0 +1,11 @@
+[[webproxy_CI]]
+=== CI Integration
+
+{product] currently provides generic CI integration via command line usage.
+Future releases will include plugins for leading CI systems.
+
+
+>>>
+include::GenericRunner.adoc[]
+
+// end

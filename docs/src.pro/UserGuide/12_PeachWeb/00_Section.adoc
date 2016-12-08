@@ -1,0 +1,39 @@
+== Peach Web
+
+Peach Web enables Peach to perform fuzz testing of various web services and web APIs.
+Any web service or API system that utilizes HTTP as the transport layer with JSON, XML or formdata is supported.
+Examples include REST, SOAP and JSON-API.
+
+Testing is performed by sending valid traffic through Peach's web proxy to the test target.
+As requests pass through the web proxy, they are modified to create test cases.
+Transport layer security (SSL/TLS) is supported along with client cert authentication.
+Web socket traffic is also supported, but is not tested at this time (pass through only).
+
+Peach Web has been designed to integrate into the development process to provide immediate feedback on API security.
+This is an optional, but recommended method for usage.
+
+<<<
+include::01_Usage.adoc[]
+
+<<<
+include::02_CI.adoc[]
+
+<<<
+include::03_TrafficGenerator.adoc[]
+
+<<<
+include::04_IssueTracker.adoc[]
+
+<<<
+include::05_Configuration.adoc[]
+
+<<<
+include::06_Authentication.adoc[]
+
+<<<
+include::07_Scripts.adoc[]
+
+<<<
+include::08_Examples.adoc[]
+
+// end

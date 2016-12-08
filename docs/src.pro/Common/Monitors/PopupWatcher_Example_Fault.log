@@ -1,8 +1,5 @@
 >peach -1 --debug example.xml
 
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 55395.
 Peach.Core.Agent.Agent StartMonitor: Monitor PopupWatcher
 Peach.Core.Agent.Agent SessionStarting: Monitor

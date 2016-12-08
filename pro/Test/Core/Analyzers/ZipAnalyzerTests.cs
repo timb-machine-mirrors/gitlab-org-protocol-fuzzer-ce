@@ -75,7 +75,7 @@ namespace Peach.Pro.Test.Core.Analyzers
 	</DataModel>
 
 	<DataModel name='BinModel'>
-		<Blob>
+		<Blob constraint='1 == 1'>
 			<Analyzer class='Binary'/>
 		</Blob>
 	</DataModel>
@@ -99,6 +99,61 @@ namespace Peach.Pro.Test.Core.Analyzers
 			var block = dom.dataModels[2][0] as Peach.Core.Dom.Block;
 			Assert.NotNull(block);
 			Assert.AreEqual(2, block.Count);
+		}
+
+		[Test]
+		public void Crack3()
+		{
+			var inner = new MemoryStream();
+
+			using (var z = new ZipFile())
+			{
+				z.AddEntry("foo.xml", new MemoryStream(Encoding.ASCII.GetBytes("<Elem>Hello</Elem>")));
+				z.AddEntry("bar.bin", new MemoryStream(Encoding.ASCII.GetBytes("World")));
+
+				z.Save(inner);
+			}
+
+			inner.Seek(0, SeekOrigin.Begin);
+
+			var bs = new BitStream();
+
+			using (var z = new ZipFile())
+			{
+				z.AddEntry("bar.zip", inner);
+
+				z.Save(bs);
+			}
+
+			bs.Seek(0, SeekOrigin.Begin);
+
+			string xml = @"
+<Peach>
+	<DataModel name='ZipModel'>
+		<Blob>
+			<Analyzer class='Zip' />
+		</Blob>
+	</DataModel>
+
+	<DataModel name='BinModel'>
+		<Blob>
+			<Analyzer class='Zip'>
+				<Param name='Map' value='/\.zip$/ZipModel/' />
+			</Analyzer>
+		</Blob>
+	</DataModel>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+
+			var cracker = new DataCracker();
+			cracker.CrackData(dom.dataModels[1], bs);
+
+			Assert.AreEqual(1, dom.dataModels[1].Count);
+			var block = dom.dataModels[1][0] as Peach.Core.Dom.Block;
+			Assert.NotNull(block);
+			Assert.AreEqual(1, block.Count);
 		}
 	}
 }

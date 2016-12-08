@@ -28,12 +28,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Fixups.Libraries;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {

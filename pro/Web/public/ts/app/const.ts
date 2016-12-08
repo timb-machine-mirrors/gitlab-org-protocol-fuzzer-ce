@@ -17,8 +17,12 @@ namespace Peach.C {
 		export const Combobox = 'peachCombobox';
 		export const Defines = 'peachDefines';
 		export const Faults = 'peachFaults';
+		export const FaultAssets = 'peachFaultAssets';
+		export const FaultFiles = 'peachFaultFiles';
 		export const Jobs = 'peachJobs';
 		export const Monitor = 'peachMonitor';
+		export const Route = 'peachRoute';
+		export const Headers = 'peachHeaders';
 		export const Parameter = 'peachParameter';
 		export const ParameterInput = 'peachParameterInput';
 		export const ParameterCombo = 'peachParameterCombo';
@@ -46,8 +50,12 @@ namespace Peach.C {
 		export const Combobox = 'ComboboxController';
 		export const Defines = 'DefinesController';
 		export const Faults = 'FaultsDirectiveController';
+		export const FaultAssets = 'FaultAssetsController';
+		export const FaultFiles = 'FaultFilesController';
 		export const Jobs = 'JobsDirectiveController';
 		export const Monitor = 'MonitorController';
+		export const Route = 'RouteController';
+		export const Headers = 'HeadersController';
 		export const Parameter = 'ParameterController';
 		export const ParameterInput = 'ParameterInputController';
 		export const Test = 'TestController';
@@ -62,7 +70,6 @@ namespace Peach.C {
 		export const HttpError = 'HttpErrorService';
 		export const Job = 'JobService';
 		export const Test = 'TestService';
-		export const Wizard = 'WizardService';
 	}
 
 	export namespace Api {
@@ -139,19 +146,11 @@ namespace Peach.C {
 		}
 		export namespace Pit {
 			export const Configure = 'html/pit/configure.html';
-			export namespace Wizard {
-				export const Intro = 'html/pit/wizard/intro.html';
-				export const Track = 'html/pit/wizard/track.html';
-				export const TrackIntro = 'html/pit/wizard/:track/intro.html';
-				export const Question = 'html/pit/wizard/question.html';
-				export const TrackDone = 'html/pit/wizard/:track/done.html';
-				export const Test = 'html/pit/wizard/test.html';
-				export const QuestionType = 'html/pit/q/:type.html';
-			}
 			export namespace Advanced {
 				export const Variables = 'html/pit/advanced/variables.html';
 				export const Monitoring = 'html/pit/advanced/monitoring.html';
 				export const Tuning = 'html/pit/advanced/tuning.html';
+				export const WebProxy = 'html/pit/advanced/webproxy.html';
 				export const Test = 'html/pit/advanced/test.html';
 			}
 		}
@@ -166,20 +165,17 @@ namespace Peach.C {
 			export const StartJob = 'html/modal/StartJob.html';
 			export const AddMonitor = 'html/modal/AddMonitor.html';
 		}
-		export namespace Eula {
-			export const Acedemic = 'html/eula/Acedemic.html';
-			export const Developer = 'html/eula/Developer.html';
-			export const Enterprise = 'html/eula/Enterprise.html';
-			export const Professional = 'html/eula/Professional.html';
-			export const Trial = 'html/eula/Trial.html';
-		}
 		export namespace Directives {
 			export const Agent = 'html/directives/agent.html';
 			export const Combobox = 'html/directives/combobox.html';
 			export const Defines = 'html/directives/defines.html';
 			export const Faults = 'html/directives/faults.html';
+			export const FaultAssets = 'html/directives/fault/assets.html';
+			export const FaultFiles = 'html/directives/fault/files.html';
 			export const Jobs = 'html/directives/jobs.html';
 			export const Monitor = 'html/directives/monitor.html';
+			export const Route = 'html/directives/route.html';
+			export const Headers = 'html/directives/headers.html';
 			export const Parameter = 'html/directives/parameter.html';
 			export const Question = 'html/directives/question.html';
 			export const Test = 'html/directives/test.html';
@@ -204,13 +200,11 @@ namespace Peach.C {
 
 		export const Pit = 'pit';
 
-		export const PitWizard = 'pit.wizard';
-		export const PitWizardTest = 'pit.wizard.test';
-
 		export const PitAdvanced = 'pit.advanced';
 		export const PitAdvancedVariables = 'pit.advanced.variables';
 		export const PitAdvancedMonitoring = 'pit.advanced.monitoring';
 		export const PitAdvancedTuning = 'pit.advanced.tuning';
+		export const PitAdvancedWebProxy = 'pit.advanced.webproxy';
 		export const PitAdvancedTest = 'pit.advanced.test';
 	}
 }

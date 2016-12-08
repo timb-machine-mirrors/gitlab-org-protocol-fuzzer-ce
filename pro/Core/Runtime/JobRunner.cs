@@ -1,17 +1,24 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Loggers;
+using Peach.Pro.Core.Publishers;
 using Peach.Pro.Core.Storage;
+using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices;
 using Peach.Pro.Core.WebServices.Models;
 using Logger = NLog.Logger;
+using Monitor = System.Threading.Monitor;
 
 namespace Peach.Pro.Core.Runtime
 {
@@ -24,12 +31,15 @@ namespace Peach.Pro.Core.Runtime
 		readonly RunConfiguration _config;
 		readonly string _pitLibraryPath;
 		readonly PitConfig _pitConfig;
+		readonly object _proxySync = new object();
 		bool _shouldStop;
 		Engine _engine;
 		Thread _currentThread;
+		ILicense _license;
 
-		public JobRunner(Job job, string pitLibraryPath, string pitFile)
+		public JobRunner(ILicense license, Job job, string pitLibraryPath, string pitFile)
 		{
+			_license = license;
 			_pitLibraryPath = pitLibraryPath;
 			_pitConfig = PitDatabase.LoadPitConfig(pitFile);
 
@@ -73,7 +83,8 @@ namespace Peach.Pro.Core.Runtime
 			{
 				_currentThread = Thread.CurrentThread;
 
-				_jobLogger.Initialize(_config);
+				var jobLicense = _license.NewJob(_config.pitFile, _pitConfig.Name, _config.id.ToString());
+				_jobLogger.Initialize(_config, _license, jobLicense);
 
 				evtReady.Set();
 
@@ -101,6 +112,10 @@ namespace Peach.Pro.Core.Runtime
 				_engine = new Engine(_jobLogger);
 				if (hooker != null) // this is used for unit testing
 					hooker(_engine);
+				if (test.stateModel is WebProxyStateModel)
+					PrepareProxyFuzzer();
+				else
+					CompleteProxyEvents();
 				_engine.startFuzzing(dom, _config);
 			}
 			catch (ApplicationException ex) // PeachException or SoftException
@@ -128,9 +143,67 @@ namespace Peach.Pro.Core.Runtime
 			}
 			finally
 			{
-				Logger.Debug("Flushing Logs");
+				CompleteProxyEvents();
+
+				Logger.Debug("Flushing Logs (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version);
 				LogManager.Flush();
 				_jobLogger.RestoreLogging(_config.id);
+			}
+		}
+
+		private void PrepareProxyFuzzer()
+		{
+			_engine.TestStarting += c =>
+			{
+				c.StateModelStarting += ProxyStateModelStarting;
+			};
+		}
+
+		private void ProxyStateModelStarting(RunContext context, StateModel sm)
+		{
+			// Once the state model starts, promote all pending proxy
+			// commands over to the publisher and update where we
+			// queue future events.
+
+			context.StateModelStarting -= ProxyStateModelStarting;
+
+			var pub = (WebApiProxyPublisher)context.test.publishers[0];
+
+			lock (_proxySync)
+			{
+				Debug.Assert(_proxyEvents != null);
+				Debug.Assert(!_proxyEvents.IsAddingCompleted);
+
+				_proxyEvents.CompleteAdding();
+
+				foreach (var item in _proxyEvents)
+				{
+					pub.Requests.Add(item);
+				}
+
+				_proxyEvents.Dispose();
+				_proxyEvents = pub.Requests;
+			}
+		}
+
+		private void CompleteProxyEvents()
+		{
+			lock (_proxySync)
+			{
+				if (_proxyEvents == null || _proxyEvents.IsAddingCompleted)
+					return;
+
+				_proxyEvents.CompleteAdding();
+
+				foreach (var item in _proxyEvents)
+				{
+					item.Handled = false;
+
+					lock (item)
+						Monitor.Pulse(item);
+				}
+
+				_proxyEvents = null;
 			}
 		}
 
@@ -161,6 +234,7 @@ namespace Peach.Pro.Core.Runtime
 		{
 			_shouldStop = true;
 			_pausedEvt.Set();
+			_jobLogger.Stop();
 		}
 
 		public void Abort()
@@ -177,6 +251,40 @@ namespace Peach.Pro.Core.Runtime
 				_currentThread.Join();
 			}
 			Logger.Trace("<<< Abort");
+		}
+
+		BlockingCollection<IProxyEvent> _proxyEvents = new BlockingCollection<IProxyEvent>();
+
+		public bool ProxyEvent(IProxyEvent item)
+		{
+			lock (_proxySync)
+			{
+				if (_proxyEvents == null)
+					return false;
+
+				Monitor.Enter(item);
+
+				try
+				{
+					_proxyEvents.Add(item);
+				}
+				catch (InvalidOperationException)
+				{
+					// BlockingQueue was closed so mark the event as failed
+					Monitor.Exit(item);
+					return false;
+				}
+			}
+
+			try
+			{
+				Monitor.Wait(item);
+				return item.Handled;
+			}
+			finally
+			{
+				Monitor.Exit(item);
+			}
 		}
 
 		List<KeyValuePair<string, string>> ParseConfig()
@@ -224,7 +332,7 @@ namespace Peach.Pro.Core.Runtime
 			var defs = ParseConfig();
 			args[PitParser.DEFINED_VALUES] = defs;
 
-			var parser = new ProPitParser();
+			var parser = new ProPitParser(_license, _pitLibraryPath, _config.pitFile);
 
 			using (var db = new NodeDatabase())
 			{

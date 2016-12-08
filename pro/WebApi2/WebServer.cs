@@ -17,13 +17,38 @@ using Peach.Pro.Core.WebServices;
 using Peach.Pro.WebApi2.Utility;
 using Swashbuckle.Application;
 using Swashbuckle.Swagger;
-using SimpleInjector;
-using SimpleInjector.Integration.WebApi;
+using Peach.Pro.Core.License;
+using Autofac;
+using Autofac.Integration.WebApi;
+using System.Reflection;
 
 namespace Peach.Pro.WebApi2
 {
-	public class WebServer : IWebStatus
+	public class WebServer : BaseWebServer
 	{
+		public WebServer(ILicense license, string pitLibraryPath, IJobMonitor jobMonitor)
+			: base(new WebStartup(
+					license,
+					new WebContext(pitLibraryPath),
+					jobMonitor,
+					ctx =>
+					{
+						var pitdb = new PitDatabase(license);
+						if (!string.IsNullOrEmpty(pitLibraryPath))
+							pitdb.Load(pitLibraryPath);
+						return pitdb;
+					}
+				))
+		{
+		}
+	}
+
+	public class BaseWebServer : IWebStatus
+	{
+		// If we use "+" on mono, there is a 10 sec startup & shutdown delay
+		// as we try and resolve the ip for dns name "+"
+		private static readonly string AnyHost = Platform.IsRunningOnMono() ? "*" : "+";
+
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
 		// ReSharper disable InconsistentNaming
 		private const int ERROR_ACCESS_DENIED = 5;
@@ -31,14 +56,12 @@ namespace Peach.Pro.WebApi2
 		private const int ERROR_ALREADY_EXISTS = 183;
 		// ReSharper restore InconsistentNaming
 
-		readonly IWebContext _context;
-		readonly IJobMonitor _jobMonitor;
+		readonly IWebStartup _startup;
 		IDisposable _server;
 
-		public WebServer(string pitLibraryPath, IJobMonitor jobMonitor)
+		public BaseWebServer(IWebStartup startup)
 		{
-			_context = new WebContext(pitLibraryPath);
-			_jobMonitor = jobMonitor;
+			_startup = startup;
 		}
 
 		public void Start(int? port)
@@ -63,7 +86,7 @@ namespace Peach.Pro.WebApi2
 
 			while (_server == null)
 			{
-				var url = "http://+:{0}/".Fmt(port);
+				var url = "http://{0}:{1}/".Fmt(AnyHost, port);
 
 				try
 				{
@@ -75,7 +98,7 @@ namespace Peach.Pro.WebApi2
 						typeof(ITraceOutputFactory).FullName,
 						typeof(NullTraceOutputFactory).AssemblyQualifiedName
 					);
-					_server = WebApp.Start(options, OnStartup);
+					_server = WebApp.Start(options, _startup.OnStartup);
 
 					Uri = new Uri("http://{0}:{1}/".Fmt(GetLocalIp(), port));
 				}
@@ -155,18 +178,56 @@ namespace Peach.Pro.WebApi2
 
 		public void Dispose()
 		{
+			if (_startup != null)
+				_startup.Dispose();
+
 			if (_server != null)
 				_server.Dispose();
-
-			if (_jobMonitor != null)
-				_jobMonitor.Dispose();
 		}
 
-		internal static HttpConfiguration CreateHttpConfiguration(
-			IWebContext context,
+		private static string GetLocalIp()
+		{
+			try
+			{
+				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+				{
+					s.Connect(new IPAddress(0x01010101), 1);
+
+					return ((IPEndPoint)s.LocalEndPoint).Address.ToString();
+				}
+			}
+			catch
+			{
+				return "localhost";
+			}
+		}
+	}
+
+	public interface IWebStartup : IDisposable
+	{
+		void OnStartup(IAppBuilder app);
+	}
+
+	public class WebStartup : IWebStartup
+	{
+		readonly ILicense _license;
+		readonly IWebContext _context;
+		readonly IJobMonitor _jobMonitor;
+		readonly Func<IComponentContext, IPitDatabase> _pitDatabaseFactory;
+
+		public WebStartup(
 			ILicense license,
+			IWebContext context,
 			IJobMonitor jobMonitor,
-			Func<IPitDatabase> pitDatabaseCreator)
+			Func<IComponentContext, IPitDatabase> pitDatabaseFactory)
+		{
+			_license = license;
+			_context = context;
+			_jobMonitor = jobMonitor;
+			_pitDatabaseFactory = pitDatabaseFactory;
+		}
+
+		public void OnStartup(IAppBuilder app)
 		{
 			var cfg = new HttpConfiguration();
 
@@ -193,40 +254,28 @@ namespace Peach.Pro.WebApi2
 				c.OperationFilter<CommonResponseFilter>();
 				c.SchemaFilter<RequiredParameterFilter>();
 				c.MapType<TimeSpan>(() => new Schema { type = "integer", format = "int64" });
-			}).EnableSwaggerUi();
+			}).EnableSwaggerUi(c =>
+			{
+				// Prevent "Error" badge from showing up when the UI tries to
+				// GET http://online.swagger.io/validator?url=http://localhost:8888/swagger/docs/v1
+				c.DisableValidator();
+			});
 
-			var container = new Container();
-			container.Options.DefaultScopedLifestyle = new WebApiRequestLifestyle();
+			var builder = new ContainerBuilder();
 
-			container.RegisterSingleton(context);
-			container.RegisterSingleton(license);
-			container.RegisterSingleton(jobMonitor);
-			container.Register(pitDatabaseCreator, Lifestyle.Scoped);
+			builder.RegisterInstance(_context).As<IWebContext>();
+			builder.RegisterInstance(_license).As<ILicense>();
+			builder.RegisterInstance(_jobMonitor).As<IJobMonitor>();
+			builder.Register(_pitDatabaseFactory).As<IPitDatabase>();
 
-			container.RegisterWebApiControllers(cfg);
+			builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+			builder.RegisterWebApiFilterProvider(cfg);
 
-			container.Verify();
+			var container = builder.Build();
+			cfg.DependencyResolver = new AutofacWebApiDependencyResolver(container);
 
-			cfg.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);
-
-			return cfg;
-		}
-
-		private void OnStartup(IAppBuilder app)
-		{
-			var cfg = CreateHttpConfiguration(
-				_context,
-				Core.License.Instance,
-				_jobMonitor,
-				() =>
-				{
-					var pitdb = new PitDatabase();
-					if (!string.IsNullOrEmpty(_context.PitLibraryPath))
-						pitdb.Load(_context.PitLibraryPath);
-					return pitdb;
-				}
-			);
-
+			app.UseAutofacMiddleware(container);
+			app.UseAutofacWebApi(cfg);
 			app.UseWebApi(cfg);
 
 			// We don't need to do any favicon.ico specific stuff.
@@ -235,15 +284,25 @@ namespace Peach.Pro.WebApi2
 			AddStaticContent(app, "", "public");
 
 			AddStaticContent(app, "/docs/user", "docs/webhelp");
-			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp");
+			AddStaticContent(app, "/docs/dev", "sdk/docs/webhelp", "public/html/no_sdk");
 		}
 
-		private static void AddStaticContent(IAppBuilder app, string requestPath, string fileSystem)
+		private static void AddStaticContent(
+			IAppBuilder app,
+			string requestPath,
+			string fileSystem,
+			string alternate = null)
 		{
 			var fullPath = Path.Combine(Utilities.ExecutionDirectory, fileSystem);
-
 			if (!Directory.Exists(fullPath))
-				return;
+			{
+				if (alternate == null)
+					return;
+
+				fullPath = Path.Combine(Utilities.ExecutionDirectory, alternate);
+				if (!Directory.Exists(fullPath))
+					return;
+			}
 
 			var opts = new FileServerOptions
 			{
@@ -267,21 +326,10 @@ namespace Peach.Pro.WebApi2
 			app.UseFileServer(opts);
 		}
 
-		private static string GetLocalIp()
+		public void Dispose()
 		{
-			try
-			{
-				using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
-				{
-					s.Connect(new IPAddress(0x01010101), 1);
-
-					return ((IPEndPoint)s.LocalEndPoint).Address.ToString();
-				}
-			}
-			catch
-			{
-				return "localhost";
-			}
+			if (_jobMonitor != null)
+				_jobMonitor.Dispose();
 		}
 	}
 }

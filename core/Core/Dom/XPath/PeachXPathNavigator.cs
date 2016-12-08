@@ -102,79 +102,6 @@ namespace Peach.Core.Dom.XPath
 
 		#endregion
 
-		#region Dom Entry
-
-		class RootEntry : Entry
-		{
-			private readonly Dom _dom;
-
-			public RootEntry(Dom dom)
-				: base(dom, 0, dom.Name, XPathNodeType.Root)
-			{
-				_dom = dom;
-			}
-
-			public override Entry GetFirstChild()
-			{
-				if (_dom.tests.Count == 0)
-					return null;
-
-				return new TestEntry(_dom.tests[0], 0);
-			}
-
-			public override Entry GetFirstAttr()
-			{
-				return null;
-			}
-		}
-
-		#endregion
-
-		#region Test Entry
-
-		class TestEntry : Entry
-		{
-			private readonly Test _test;
-
-			public TestEntry(Test test, int index)
-				: base(test, index)
-			{
-				_test = test;
-			}
-
-			public override Entry GetFirstChild()
-			{
-				if (_test.stateModel == null)
-					return null;
-
-				return new StateModelEntry(_test.stateModel);
-			}
-
-			public override Entry GetNext()
-			{
-				var tests = _test.parent.tests;
-				var next = Index + 1;
-
-				if (next == tests.Count)
-					return null;
-
-				return new TestEntry(tests[next], next);
-			}
-
-			public override Entry GetPrev()
-			{
-				var tests = _test.parent.tests;
-				var next = Index - 1;
-
-				if (next < 0)
-					return null;
-
-				return new TestEntry(tests[next], next);
-			}
-		}
-
-		#endregion
-
 		#region State Model Entry
 
 		class StateModelEntry : Entry
@@ -328,11 +255,15 @@ namespace Peach.Core.Dom.XPath
 
 			public override Entry GetFirstChild()
 			{
-				var actionData = _action.allData.FirstOrDefault();
+				var actionData = _action.XpathData.FirstOrDefault();
 				if (actionData == null)
 					return null;
 
-				return new ModelEntry(actionData, 0);
+				if (string.IsNullOrEmpty(actionData.Name))
+					return new ModelEntry(actionData.dataModel);
+
+				return new ActionParamEntry(_action, actionData, 0);
+
 			}
 
 			public override Entry GetNext()
@@ -433,16 +364,20 @@ namespace Peach.Core.Dom.XPath
 
 		#endregion
 
-		#region Data Model Entry
+		#region Action Param Entry
 
-		class ModelEntry : Entry
+		class ActionParamEntry : Entry
 		{
-			private readonly ActionData _actionData;
+			private readonly IActionDataXpath _parent;
+			private readonly ActionData _actionParam;
 
-			public ModelEntry(ActionData actionData, int index)
-				: base(actionData.dataModel, index)
+			public ActionParamEntry(IActionDataXpath parent, ActionData actionParam, int index)
+				: base(actionParam, index)
 			{
-				_actionData = actionData;
+				Debug.Assert(actionParam.Name != null);
+
+				_parent = parent;
+				_actionParam = actionParam;
 
 				var idx = Name.LastIndexOf(':');
 				if (idx > 0)
@@ -454,21 +389,30 @@ namespace Peach.Core.Dom.XPath
 
 			public override Entry GetFirstChild()
 			{
-				if (_actionData.dataModel.Count == 0)
-					return null;
+				var actionData = _actionParam.XpathData.FirstOrDefault();
+				if (actionData == null)
+				{
+					// Have child parameters, must not have a data model
+					Debug.Assert(_actionParam.dataModel != null);
 
-				return ElementEntry.Make(_actionData.dataModel);
+					if (_actionParam.dataModel.Count == 0)
+						return null;
+
+					return new ModelEntry(_actionParam.dataModel);
+				}
+
+				// Don't have child parameters, must have a data model
+				Debug.Assert(_actionParam.dataModel == null);
+
+				return EntryAt(_actionParam, actionData, 0);
 			}
 
 			public override Entry GetNext()
 			{
 				var idx = Index + 1;
-				var next = _actionData.action.allData.ElementAtOrDefault(idx);
+				var next = _parent.XpathData.ElementAtOrDefault(idx);
 
-				if (next == null)
-					return null;
-
-				return new ModelEntry(next, idx);
+				return EntryAt(_parent, next, idx);
 			}
 
 			public override Entry GetPrev()
@@ -477,17 +421,71 @@ namespace Peach.Core.Dom.XPath
 					return null;
 
 				var idx = Index - 1;
-				var next = _actionData.action.allData.ElementAtOrDefault(idx);
+				var next = _parent.XpathData.ElementAtOrDefault(idx);
 
-				if (next == null)
-					return null;
-
-				return new ModelEntry(next, idx);
+				return EntryAt(_parent, next, idx);
 			}
 
 			public override Entry GetFirstAttr()
 			{
-				return new ElementAttrEntry(_actionData.dataModel, 0);
+				return new NamedAttrEntry(_actionParam);
+			}
+
+			private static Entry EntryAt(IActionDataXpath parent, ActionData actionData, int index)
+			{
+				if (actionData == null)
+					return null;
+
+				if (!string.IsNullOrEmpty(actionData.Name))
+					return new ActionParamEntry(parent, actionData, index);
+
+				Debug.Assert(actionData.dataModel != null);
+				return new ModelEntry(actionData.dataModel);
+			}
+		}
+
+		#endregion
+
+		#region Data Model Entry
+
+		class ModelEntry : Entry
+		{
+			private readonly DataModel _dataModel;
+
+			public ModelEntry(DataModel dataModel)
+				: base(dataModel, 0)
+			{
+				_dataModel = dataModel;
+
+				var idx = Name.LastIndexOf(':');
+				if (idx > 0)
+				{
+					NamespaceUri = Name.Substring(0, idx);
+					LocalName = Name.Substring(idx + 1);
+				}
+			}
+
+			public override Entry GetFirstChild()
+			{
+				if (_dataModel.Count == 0)
+					return null;
+
+				return ElementEntry.Make(_dataModel);
+			}
+
+			public override Entry GetNext()
+			{
+				return null;
+			}
+
+			public override Entry GetPrev()
+			{
+				return null;
+			}
+
+			public override Entry GetFirstAttr()
+			{
+				return new ElementAttrEntry(_dataModel, 0);
 			}
 		}
 

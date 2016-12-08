@@ -524,10 +524,10 @@ namespace Peach.Pro.Test.Core.Godel
 		[Test]
 		public void IncludedGodel()
 		{
-			var tmp1 = Path.GetTempFileName();
-			var tmp2 = Path.GetTempFileName();
-
-			string dm_xml = @"
+			using (var tmp1 = new TempFile())
+			using (var tmp2 = new TempFile())
+			{
+				string dm_xml = @"
 <Peach>
 	<Godel name='godel1' inv='str(self.dataModel.find(""str"").InternalValue) == ""Hello World""'/>
 
@@ -537,7 +537,7 @@ namespace Peach.Pro.Test.Core.Godel
 </Peach>
 ";
 
-			string sm_xml = @"
+				string sm_xml = @"
 <Peach>
 	<Include ns='other' src='{0}'/>
 
@@ -550,9 +550,9 @@ namespace Peach.Pro.Test.Core.Godel
 		</State>
 	</StateModel>
 </Peach>
-".Fmt(tmp1);
+".Fmt(tmp1.Path);
 
-			string xml = @"
+				string xml = @"
 <Peach>
 	<Include ns='sm' src='{0}'/>
 
@@ -565,13 +565,11 @@ namespace Peach.Pro.Test.Core.Godel
 		</Mutators>
 	</Test>
 </Peach>
-".Fmt(tmp2);
+".Fmt(tmp2.Path);
 
-			File.WriteAllText(tmp1, dm_xml);
-			File.WriteAllText(tmp2, sm_xml);
+				File.WriteAllText(tmp1.Path, dm_xml);
+				File.WriteAllText(tmp2.Path, sm_xml);
 
-			try
-			{
 				var faults = new List<Fault>();
 
 				var e = new Engine(null);
@@ -579,19 +577,16 @@ namespace Peach.Pro.Test.Core.Godel
 
 				var parser = new ProPitParser();
 				var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml))) as Pro.Core.Godel.Dom;
-				var config = new RunConfiguration();
-				config.range = true;
-				config.rangeStart = 1;
-				config.rangeStop = 1;
+				var config = new RunConfiguration
+				{
+					range = true,
+					rangeStart = 1,
+					rangeStop = 1
+				};
 				e.startFuzzing(dom, config);
 
 				Assert.AreEqual(1, faults.Count);
 				Assert.AreEqual("Godel post-inv expression for Action 'sm:SM.Initial.Action' failed.", faults[0].description);
-			}
-			finally
-			{
-				File.Delete(tmp1);
-				File.Delete(tmp2);
 			}
 		}
 	}

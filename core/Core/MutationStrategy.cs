@@ -41,7 +41,6 @@ namespace Peach.Core
 	/// strategy allows one to fully control which elements
 	/// are mutated, by which mutators, and when.
 	/// </summary>
-	[Serializable]
 	public abstract class MutationStrategy
 	{
 		protected MutationStrategy(Dictionary<string, Variant> args)
@@ -51,22 +50,14 @@ namespace Peach.Core
 		public virtual void Initialize(RunContext context, Engine engine)
 		{
 			Context = context;
-			Engine = engine;
 		}
 
 		public virtual void Finalize(RunContext context, Engine engine)
 		{
 			Context = null;
-			Engine = null;
 		}
 
 		public RunContext Context
-		{
-			get;
-			private set;
-		}
-
-		public Engine Engine
 		{
 			get;
 			private set;
@@ -231,7 +222,7 @@ namespace Peach.Core
 			if (Context.test == null)
 				throw new ArgumentException("Error, _context.test == null");
 
-			Func<Type, MutatorAttribute, bool> predicate = delegate(Type type, MutatorAttribute attr)
+			Func<Type, MutatorAttribute, bool> predicate = (type, attr) =>
 			{
 				if (Context.test.includedMutators.Count > 0 && !Context.test.includedMutators.Contains(type.Name))
 					return false;
@@ -241,12 +232,12 @@ namespace Peach.Core
 
 				return true;
 			};
-			var ret = new List<Type>(ClassLoader.GetAllTypesByAttribute(predicate));
 
 			// Different environments enumerate the mutators in different orders.
 			// To ensure mutation strategies run mutators in the same order everywhere
 			// we have to have a well defined order.
-			ret.Sort(new Comparison<Type>(CompareMutator));
+			var ret = ClassLoader.GetAllTypesByAttribute(predicate).ToList();
+			ret.Sort(CompareMutator);
 			return ret;
 		}
 
@@ -271,11 +262,17 @@ namespace Peach.Core
 	{
 	}
 
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public class MutationStrategyAttribute : PluginAttribute
 	{
-		public MutationStrategyAttribute(string name, bool isDefault = false)
-			: base(typeof(MutationStrategy), name, isDefault)
+		[Obsolete("This constructor is obsolete. Use the constructor without isDefault instead.")]
+		public MutationStrategyAttribute(string name, bool isDefault)
+			: base(typeof(MutationStrategy), name, true)
+		{
+		}
+
+		public MutationStrategyAttribute(string name)
+			: base(typeof(MutationStrategy), name, true)
 		{
 		}
 	}

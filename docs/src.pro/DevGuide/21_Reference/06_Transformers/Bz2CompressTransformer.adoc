@@ -90,10 +90,6 @@ This example uses Bz2Compress to compress a value, write the value to the consol
     <Publisher class="File" name="FilePubWrite">
       <Param name="FileName" value="compressed.bin" />
     </Publisher>
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -101,9 +97,6 @@ This example uses Bz2Compress to compress a value, write the value to the consol
 Output from this example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 47050.
 

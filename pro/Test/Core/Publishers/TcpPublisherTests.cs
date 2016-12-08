@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -626,5 +627,104 @@ namespace Peach.Pro.Test.Core.Publishers
 			l.Stop();
 		}
 
+
+		[Test]
+		public void TestSoftExceptionControlIteration()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action type='open' name='open' />
+			<Action type='output' name='output'>
+				<DataModel name='DM'>
+					<Blob value='Hello' />
+				</DataModel>
+			</Action>
+			<Action type='input' name='input'>
+				<DataModel name='DM'>
+					<Blob length='5' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' controlIteration='1'>
+		<StateModel ref='SM'/>
+
+		<Publisher class='Tcp'>
+			<Param name='Host' value='127.0.0.1'/>
+			<Param name='Port' value='0'/>
+			<Param name='Lifetime' value='session'/>
+		</Publisher>
+	</Test>
+</Peach>";
+
+			var dom = ParsePit(xml);
+			var cfg = new RunConfiguration { range = true, rangeStart = 1, rangeStop = 2 };
+			var e = new Engine(null);
+			var localEp = new IPEndPoint(IPAddress.Loopback, 0);
+			var l = new TcpListener(localEp);
+
+			byte[] rx = null;
+			Socket cli = null;
+			var len = 0;
+
+			l.Start();
+			localEp.Port = ((IPEndPoint)l.LocalEndpoint).Port;
+
+			((TcpClientPublisher)dom.tests[0].publishers[0]).Port = (ushort)localEp.Port;
+
+			e.TestStarting += ctx =>
+			{
+				ctx.ActionFinished += (c, a) =>
+				{
+					if (a.Name == "open")
+					{
+						cli = l.AcceptSocket();
+					}
+					else if (a.Name == "output")
+					{
+						Assert.NotNull(cli, "Client should be non-null");
+
+						rx = new byte[5];
+						len = cli.Receive(rx);
+
+						if (c.controlRecordingIteration)
+						{
+							cli.Send(rx, len, SocketFlags.None);
+							cli.Shutdown(SocketShutdown.Send);
+						}
+						else if (c.reproducingFault && c.controlIteration && c.reproducingIterationJumpCount == 0)
+						{
+							cli.Send(rx, len, SocketFlags.None);
+							cli.Shutdown(SocketShutdown.Send);
+						}
+
+						cli.Close();
+					}
+				};
+			};
+
+			var f = new List<Fault[]>();
+			e.Fault += (c, it, sm, faults) =>
+			{
+				f.Add(faults);
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			Assert.NotNull(cli, "Should have gotten connection");
+			Assert.NotNull(rx, "Should have gotten msg");
+
+			l.Stop();
+
+			Assert.AreEqual(1, f.Count);
+			Assert.AreEqual(1, f[0].Length);
+
+			var msg = f[0][0].description;
+
+			StringAssert.Contains("Timed out waiting for input from the publisher.", msg);
+		}
 	}
 }

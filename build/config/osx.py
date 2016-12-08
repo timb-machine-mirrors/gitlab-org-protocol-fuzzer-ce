@@ -14,15 +14,15 @@ tools = [
 	'misc',
 	'tools.utils',
 	'tools.externals',
+	'tools.tsc',
 	'tools.version',
+	'tools.paket',
 ]
 
 optional_tools = [
 	'tools.asan',
-	'tools.mdoc',
 	'tools.mkbundle',
 	'tools.test',
-	'tools.tsc',
 	'tools.zip',
 ]
 
@@ -48,6 +48,7 @@ def prepare(conf):
 	env['MCS']  = 'mcs'
 
 	env['SYSROOT'] = find_directory([ 
+		'MacOSX10.12.sdk', 
 		'MacOSX10.11.sdk', 
 		'MacOSX10.10.sdk', 
 		'MacOSX10.9.sdk', 
@@ -138,6 +139,7 @@ def configure(conf):
 		'cxxshlib',
 		'cxxprogram',
 		'fake_lib',
+		'nuget_lib',
 		'cs',
 		'debug',
 		'release',

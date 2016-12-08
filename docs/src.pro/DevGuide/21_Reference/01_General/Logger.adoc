@@ -1,23 +1,26 @@
 [[Logger]]
 == Loggers
 
-A logger records the fuzzing run (including any faults) and data collected by monitors.
+Loggers allow adding additional logging methods into Peach.  Every Peach fuzzing job will always receive the default Peach logger.  Typical reasons for adding custom loggers include:
 
-IMPORTANT: If a logger is not configured, this information will not be stored.
+* Integration into end-user systems
+* Custom notification (SMS, Email, Pager)
 
-{product} includes a file system logger. The logging system is extensible, allowing you to add custom loggers by writing  plug-ins.
+NOTE: It may be easier to use the Peach REST API for performing integration work.
 
 [[Loggers_File]]
 === File
 
 The file system logger needs a specified path.  Peach creates a folder containing the run name and time stamp.  Inside of this folder are the actual logs.  Until the first fault emerges, Peach logs very little information to conserve disk space.
 
+TIP: The source to this monitor is provided in the SDK as an example.
+
 [source,xml]
-----
+--------
 <Logger class="File">
     <Param name="Path" value="logfolder" />
 </Logger>
-----
+--------
 
 ==== Parameters
 

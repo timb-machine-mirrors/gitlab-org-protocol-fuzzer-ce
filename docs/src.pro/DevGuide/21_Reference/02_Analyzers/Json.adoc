@@ -1,5 +1,5 @@
-[[Analyzers_Json]]
 
+[[Analyzers_Json]]
 == JSON Analyzer
 
 This analyzer converts JSON strings into a full data model. 
@@ -20,13 +20,13 @@ IMPORTANT: The JSON analyzer requires data from a String data type.
 ----
 
 ----
-peach --analyzer=Json input.txt output.xml
+pittool analyzer Json input.txt output.xml
 ----
 
 === Command Line Syntax
 
 ----
-peach --analyzer=Json <input file> <output file>
+pittool analyzer Json <input file> <output file>
 ----
 
 input file::
@@ -81,9 +81,6 @@ This example uses the JSON analyzer on inline data.
 Output from inline example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 56481.
 
@@ -143,9 +140,6 @@ This example uses the JSON analyzer on an external file containing JSON encoded 
 Output from JSON data file example.
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 33175.
 

@@ -1,0 +1,13 @@
+[[ChecksAndAsserts]]
+== Checks and Asserts
+
+This section includes information about each Check and Assert in {product}.
+For each check information about what is tested and how to configure is provided.
+
+<<<
+include::01_Checks/00_Section.adoc[]
+
+<<<
+include::02_Asserts/00_Section.adoc[]
+
+// end

@@ -88,10 +88,6 @@ namespace Peach.Core.Analyzers
 			Analyzer.defaultParser = new PitParser();
 		}
 
-		public PitParser()
-		{
-		}
-
 		[Obsolete("This method is obsolete and should not be used.")]
 		public static List<KeyValuePair<string, string>> parseDefines(string definedValuesFile)
 		{
@@ -193,7 +189,7 @@ namespace Peach.Core.Analyzers
 
 		public Dom.Dom asParser(Dictionary<string, object> args, TextReader data)
 		{
-			return asParser(args,data, string.Empty, true);
+			return asParser(args, data, string.Empty, true);
 		}
 
 		public override Dom.Dom asParser(Dictionary<string, object> args, Stream data)
@@ -229,7 +225,7 @@ namespace Peach.Core.Analyzers
 			return new Dom.StateModel();
 		}
 
-		protected virtual Dom.Dom asParser(Dictionary<string, object> args, TextReader data, string dataName, bool parse)
+		public virtual Dom.Dom asParser(Dictionary<string, object> args, TextReader data, string dataName, bool parse)
 		{
 			// Reset the data element auto-name suffix back to zero
 			Resetter.Reset();
@@ -419,58 +415,34 @@ namespace Peach.Core.Analyzers
 				switch (child.Name)
 				{
 					case "Include":
-						string ns = child.getAttrString("ns");
-						string fileName = child.getAttrString("src");
-						fileName = fileName.Replace("file:", "");
-						string normalized = Path.GetFullPath(fileName);
-
-						if (!File.Exists(normalized))
-						{
-							string newFileName = Utilities.GetAppResourcePath(fileName);
-							normalized = Path.GetFullPath(newFileName);
-							if (!File.Exists(normalized))
-								throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
-							fileName = newFileName;
-						}
-
-						var newDom = asParser(args, fileName);
-						newDom.Name = ns;
-						dom.ns.Add(newDom);
-
-						foreach (var item in newDom.Python.Paths)
-							dom.Python.AddSearchPath(item);
-
-						foreach (var item in newDom.Python.Modules)
-							dom.Python.ImportModule(item);
-
-						foreach (var item in newDom.Ruby.Paths)
-							dom.Ruby.AddSearchPath(item);
-
-						foreach (var item in newDom.Ruby.Modules)
-							dom.Ruby.ImportModule(item);
-
-						break;
-
-					case "Require":
-						dom.Ruby.ImportModule(child.getAttrString("require"));
+						handleInclude(dom, args, child);
 						break;
 
 					case "Import":
-						dom.Python.ImportModule(child.getAttrString("import"));
+						var module = child.getAttrString("import");
+						try
+						{
+							dom.Python.ImportModule(module);
+						}
+						catch (ArgumentException ex)
+						{
+							// If the user tries to import a python extension via their pit,
+							// IronPython will try to generate the C# class bindings and
+							// subsequently fail because the class name already exists.
+							// Provide a more useful error message in this case.
+
+							if (ex.Message != "Duplicate type name within an assembly.")
+								throw;
+
+							throw new PeachException("Failed to import python module '{0}' because it was already loaded from the plugins folder.  Remove <Import import=\"{0}\" /> from your pit and try again.".Fmt(module), ex);
+						}
 						break;
 
 					case "PythonPath":
 						dom.Python.AddSearchPath(child.getAttrString("path"));
 						break;
 
-					case "RubyPath":
-						dom.Ruby.AddSearchPath(child.getAttrString("require"));
-						break;
-
 					case "Python":
-						break;
-
-					case "Ruby":
 						break;
 
 					case "Defaults":
@@ -577,6 +549,33 @@ namespace Peach.Core.Analyzers
 			}
 		}
 
+		protected virtual void handleInclude(Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
+		{
+			var ns = child.getAttrString("ns");
+			var fileName = child.getAttrString("src");
+			fileName = fileName.Replace("file:", "");
+			var normalized = Path.GetFullPath(fileName);
+
+			if (!File.Exists(normalized))
+			{
+				string newFileName = Utilities.GetAppResourcePath(fileName);
+				normalized = Path.GetFullPath(newFileName);
+				if (!File.Exists(normalized))
+					throw new PeachException("Error, Unable to locate Pit file [" + normalized + "].\n");
+				fileName = newFileName;
+			}
+
+			var newDom = asParser(args, fileName);
+			newDom.Name = ns;
+			dom.ns.Add(newDom);
+
+			foreach (var item in newDom.Python.Paths)
+				dom.Python.AddSearchPath(item);
+
+			foreach (var item in newDom.Python.Modules)
+				dom.Python.ImportModule(item);
+		}
+
 		#endregion
 
 		#region Defaults
@@ -649,7 +648,7 @@ namespace Peach.Core.Analyzers
 				location = node.getAttr("location", null),
 				password = node.getAttr("password", null)
 			};
-			
+
 			if (agent.location == null)
 				agent.location = "local://";
 
@@ -1003,7 +1002,8 @@ namespace Peach.Core.Analyzers
 		/// </summary>
 		/// <param name="node">Node to read values from</param>
 		/// <param name="element">Element to set values on</param>
-		public void handleCommonDataElementValue(XmlNode node, DataElement element)
+		/// <param name="context">If element is detached (no parent) provide context Dom instance</param>
+		public void handleCommonDataElementValue(XmlNode node, DataElement element, Dom.Dom context = null)
 		{
 			if (!node.hasAttr("value"))
 				return;
@@ -1057,14 +1057,28 @@ namespace Peach.Core.Analyzers
 					localScope["self"] = element;
 					localScope["node"] = node;
 					localScope["Parser"] = this;
-					localScope["Context"] = ((DataModel)element.root).dom;
+					localScope["Context"] = context ?? ((DataModel)element.root).dom;
 
-					var obj = element.EvalExpression(value, localScope);
+					object obj;
+
+					try
+					{
+						obj = element.EvalExpression(value, localScope, context);
+					}
+					catch (SoftException ex)
+					{
+						throw new PeachException(ex.Message, ex);
+					}
 
 					if (obj == null)
-						throw new PeachException("Error, the value of " + element.debugName + " is not a valid eval statement.");
+						throw new PeachException("Error, the value of the eval statement of " + element.debugName + " returned null.");
 
-					element.DefaultValue = new Variant(obj.ToString());
+					var asVariant = Scripting.ToVariant(obj);
+
+					if (asVariant == null)
+						throw new PeachException("Error, the value of the eval statement of " + element.debugName + " returned unsupported type '" + obj.GetType() +"'.");
+
+					element.DefaultValue = asVariant;
 					break;
 				case "string":
 					// No action requried, default behaviour
@@ -1260,6 +1274,8 @@ namespace Peach.Core.Analyzers
 			var stateModel = CreateStateModel();
 			stateModel.Name = name;
 			stateModel.parent = parent;
+			stateModel.initialStateName = initialState;
+			stateModel.finalStateName = finalState;
 
 			foreach (XmlNode child in node.ChildNodes)
 			{
@@ -1378,7 +1394,9 @@ namespace Peach.Core.Analyzers
 
 		protected virtual void handleActionResult(XmlNode node, Dom.Actions.Call action)
 		{
-			action.result = new ActionResult()
+			var name = node.getAttr("name", "Result");
+
+			action.result = new ActionResult(name)
 			{
 				action = action
 			};
@@ -1466,7 +1484,7 @@ namespace Peach.Core.Analyzers
 			handleActionAttr(node, action, "ref", "method", "property", "setXpath", "valueXpath");
 		}
 
-		protected virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
+		public virtual void handleActionData(XmlNode node, ActionData data, string type, bool hasData)
 		{
 			var dom = data.action.parent.parent.parent;
 
@@ -1529,7 +1547,7 @@ namespace Peach.Core.Analyzers
 			action.Name = name;
 			action.parent = parent;
 			action.FieldId = node.getAttr("fieldId", null);
-			action.when = node.getAttr("when",null);
+			action.when = node.getAttr("when", null);
 			action.publisher = node.getAttr("publisher", null);
 			action.onStart = node.getAttr("onStart", null);
 			action.onComplete = node.getAttr("onComplete", null);
@@ -1562,7 +1580,7 @@ namespace Peach.Core.Analyzers
 
 			if (node.hasAttr("ref"))
 			{
-				string refName = node.getAttrString("ref");
+				var refName = node.getAttrString("ref");
 
 				var other = dom.getRef(refName, a => a.datas);
 				if (other == null)
@@ -1660,19 +1678,21 @@ namespace Peach.Core.Analyzers
 
 					DataElement tmp;
 					if (child.getAttr("valueType", "string").ToLower() == "string")
-						tmp = new Dom.String { stringType = StringType.utf8 };
+						tmp = new Dom.String {stringType = StringType.utf8};
 					else
 						tmp = new Blob();
 
-					// Hack to call common value parsing code.
-					handleCommonDataElementValue(child, tmp);
+					tmp.debugName = "Field '{0}'".Fmt(name);
 
+					// Hack to call common value parsing code.
+					handleCommonDataElementValue(child, tmp, dom);
+	
 					foreach (var fieldData in dataSet.OfType<DataField>())
 					{
 						fieldData.Fields.Remove(name);
 						fieldData.Fields.Add(new DataField.Field
 						{
-							Name = name, 
+							Name = name,
 							Value = tmp.DefaultValue
 						});
 					}
@@ -1756,10 +1776,12 @@ namespace Peach.Core.Analyzers
 			foreach (XmlNode child in node.ChildNodes)
 			{
 				if (child.Name == "Logger")
+				{
 					test.loggers.Add(handlePlugin<Logger, LoggerAttribute>(child, null, false));
+				}
 
 				// Include
-				if (child.Name == "Include")
+				else if (child.Name == "Include")
 				{
 					var attr = child.getAttr("ref", null);
 
@@ -1775,7 +1797,7 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Exclude
-				if (child.Name == "Exclude")
+				else if (child.Name == "Exclude")
 				{
 					var attr = child.getAttr("ref", null);
 
@@ -1791,7 +1813,7 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Weight
-				if (child.Name == "Weight")
+				else if (child.Name == "Weight")
 				{
 					var attr = child.getAttrString("xpath");
 					var val = child.getAttrString("weight");
@@ -1804,13 +1826,13 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Strategy
-				if (child.Name == "Strategy")
+				else if (child.Name == "Strategy")
 				{
 					test.strategy = handlePlugin<MutationStrategy, MutationStrategyAttribute>(child, null, false);
 				}
 
 				// Agent
-				if (child.Name == "Agent")
+				else if (child.Name == "Agent")
 				{
 					var refName = child.getAttrString("ref");
 
@@ -1856,7 +1878,7 @@ namespace Peach.Core.Analyzers
 				}
 
 				// StateModel
-				if (child.Name == "StateModel")
+				else if (child.Name == "StateModel")
 				{
 					string strRef = child.getAttrString("ref");
 
@@ -1870,13 +1892,13 @@ namespace Peach.Core.Analyzers
 				}
 
 				// Publisher
-				if (child.Name == "Publisher")
+				else if (child.Name == "Publisher")
 				{
 					handlePublishers(child, test);
 				}
 
 				// Mutator
-				if (child.Name == "Mutators")
+				else if (child.Name == "Mutators")
 				{
 					string mode = child.getAttrString("mode");
 
@@ -1894,6 +1916,11 @@ namespace Peach.Core.Analyzers
 							throw new PeachException("Error, Mutators element has invalid 'mode' attribute '" + mode + "'");
 					}
 				}
+
+				else
+				{
+					handleTestChild(child, test);
+				}
 			}
 
 			if (test.stateModel == null)
@@ -1910,6 +1937,10 @@ namespace Peach.Core.Analyzers
 			return test;
 		}
 
+		protected virtual void handleTestChild(XmlNode node, Test test)
+		{
+			
+		}
 		protected virtual void handlePublishers(XmlNode node, Dom.Test parent)
 		{
 			var cls = node.getAttrString("class");

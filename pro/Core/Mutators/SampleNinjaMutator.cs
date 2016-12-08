@@ -2,13 +2,12 @@
 // Copyright (c) Peach Fuzzer, LLC
 //
 
-using System.Data.SQLite;
-using System;
+using System.ComponentModel;
 using System.IO;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+using Peach.Pro.Core.Storage;
 
 namespace Peach.Pro.Core.Mutators
 {
@@ -16,61 +15,46 @@ namespace Peach.Pro.Core.Mutators
 	[Description("Will use existing samples to generate mutated files.")]
 	public class SampleNinja : Mutator
 	{
-		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
-		readonly int _count = 0;
-		uint pos = 0;
-		readonly Guid ElementId = Guid.Empty;
-		readonly string NinjaDB = null;
+		readonly ElementQuery _element;
+		readonly string _dbPath;
 
 		public SampleNinja(DataElement obj)
 			: base(obj)
 		{
 			var pitFile = GetPitFile(obj);
-			NinjaDB = Path.GetFullPath(pitFile) + ".ninja";
 
-			using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
+			_dbPath = Path.ChangeExtension(Path.GetFullPath(pitFile), ".ninja");
+
+			using (var db = new SampleNinjaDatabase(_dbPath))
 			{
-				Connection.Open();
-
-				// Get the total number of elements we can generate for this data element.
-				using (var cmd = new SQLiteCommand(Connection))
-				{
-					cmd.CommandText = @"select count('x'), e.elementid from element e, sampleelement se where e.name = ? and se.elementid = e.elementid";
-
-					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-
-					if(obj.parent is Peach.Core.Dom.Array)
-						cmd.Parameters[0].Value = obj.parent.Name;
-					else
-						cmd.Parameters[0].Value = obj.Name;
-
-					using (var reader = cmd.ExecuteReader())
-					{
-						if (!reader.Read())
-							throw new PeachException(string.Format("Error, failed to find element in sample ninja db: [{0}]",
-								obj.Name));
-
-						_count = reader.GetInt32(0);
-						ElementId = reader.GetGuid(1);
-					}
-				}
+				_element = db.GetElement(NormalizeName(obj));
+				if (_element == null)
+					throw new PeachException("Error, failed to find element in sample ninja db: [{0}]".Fmt(
+						obj.fullName
+					));
 			}
 		}
 
 		public override uint mutation
 		{
-			get { return pos; }
-			set { pos = value; }
+			get { return Pos; }
+			set { Pos = value; }
 		}
 
 		public override int count
 		{
-			get { return _count; }
+			get { return _element.Count; }
 		}
+
+		public uint Pos { get; set; }
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
+			if (!obj.isMutable)
+				return false;
+
 			var pitFile = GetPitFile(obj);
 			if (pitFile == null)
 			{
@@ -78,74 +62,41 @@ namespace Peach.Pro.Core.Mutators
 				return false;
 			}
 
-			var ninjaDb = Path.GetFullPath(pitFile) + ".ninja";
-
-			// If our database doesn't exist JETTISON!
-			if (!File.Exists(ninjaDb))
+			var dbPath = Path.ChangeExtension(Path.GetFullPath(pitFile), ".ninja");
+			if (!File.Exists(dbPath))
 			{
-				logger.Trace("ninja database not found, disabling mutator. \"" + ninjaDb + "\".");
+				logger.Trace("ninja database not found, disabling mutator. \"{0}\".", dbPath);
 				return false;
 			}
 
-			if (!obj.isMutable) return false;
-
-			using (var Connection = new SQLiteConnection("data source=" + ninjaDb))
+			using (var db = new SampleNinjaDatabase(dbPath))
 			{
-				Connection.Open();
-
-				// Get the total number of elements we can generate for this data element.
-				using (var cmd = new SQLiteCommand(Connection))
-				{
-					cmd.CommandText = @"select count('x') from element e where e.name = ?";
-
-					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.String));
-
-					// For arrays, normalize to wrapper name
-					if (obj.parent is Peach.Core.Dom.Array)
-						cmd.Parameters[0].Value = obj.parent.Name;
-					else
-						cmd.Parameters[0].Value = obj.Name;
-
-					var ret = cmd.ExecuteScalar();
-
-					if(ret != null && (Int64)ret > 0)
-						return true;
-
-					logger.Trace("Element \"" + obj.fullName + "\" not found in ninja db, not enabling.");
-					return false;
-				}
+				var element = db.GetElement(NormalizeName(obj));
+				if (element != null && element.Count > 0)
+					return true;
+			
+				logger.Trace("Element \"{0}\" not found in ninja db, not enabling.", obj.fullName);
+				return false;
 			}
 		}
 
 		public byte[] GetAt(uint index)
 		{
-			using (var Connection = new SQLiteConnection("data source=" + NinjaDB))
+			using (var db = new SampleNinjaDatabase(_dbPath))
 			{
-				Connection.Open();
-
-				// Get the total number of elements we can generate for this data element.
-				using (var cmd = new SQLiteCommand(Connection))
-				{
-					cmd.CommandText = 
-						"select se.data from sampleelement se "+
-						"where se.elementid = ? LIMIT 1 OFFSET " + pos + ";";
-
-					cmd.Parameters.Add(new SQLiteParameter(System.Data.DbType.Guid));
-					cmd.Parameters[0].Value = ElementId;
-
-					var reader = cmd.ExecuteReader();
-					if (!reader.Read())
-						throw new PeachException(string.Format("SampleNinjaMutator error getting back row.  Position: {0} Count: {1}",
-							pos, count));
-
-					return (byte[])reader[0];
-				}
+				var data = db.GetDataAt(_element, index);
+				if (data == null)
+					throw new PeachException("SampleNinjaMutator error getting back row. Position: {0} Count: {1}".Fmt(
+						Pos,
+						count
+					));
+				return data;
 			}
 		}
 
 		public override void sequentialMutation(DataElement obj)
 		{
-			obj.MutatedValue = new Variant(GetAt(pos));
+			obj.MutatedValue = new Variant(GetAt(Pos));
 			obj.mutationFlags = MutateOverride.Default;
 			obj.mutationFlags |= MutateOverride.TypeTransform;
 		}
@@ -158,14 +109,25 @@ namespace Peach.Pro.Core.Mutators
 			obj.mutationFlags |= MutateOverride.TypeTransform;
 		}
 
-		private static string GetPitFile(DataElement elem)
+		static string GetPitFile(DataElement elem)
 		{
 			var root = elem.getRoot() as DataModel;
 			if (root == null)
 				return null;
 
+			if (root.actionData == null)
+				return null;
+
 			var dom = root.actionData.action.parent.parent.parent;
 			return dom.context.config.pitFile;
+		}
+
+		// For arrays, normalize to wrapper name
+		static string NormalizeName(DataElement element)
+		{
+			if (element.parent is Array)
+				return element.parent.Name;
+			return element.Name;
 		}
 	}
 }

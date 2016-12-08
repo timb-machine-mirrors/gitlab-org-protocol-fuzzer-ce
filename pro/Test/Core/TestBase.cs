@@ -1,14 +1,19 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
-using Peach.Pro.Core.Runtime;
 using Peach.Core.Test;
+using Peach.Pro.Core.Runtime;
+
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
 
 namespace Peach.Pro.Test.Core
 {
 	[SetUpFixture]
-	internal class TestBase : SetUpFixture
+	public class TestBase : SetUpFixture
 	{
 		TempDirectory _tmpDir;
 
@@ -17,7 +22,7 @@ namespace Peach.Pro.Test.Core
 		{
 			DoSetUp();
 
-			Program.LoadPlatformAssembly();
+			BaseProgram.Initialize();
 
 			_tmpDir = new TempDirectory();
 			Configuration.LogRoot = _tmpDir.Path;
@@ -30,11 +35,16 @@ namespace Peach.Pro.Test.Core
 
 			DoTearDown();
 		}
+
+		public static Peach.Core.Dom.Dom ParsePit(string xml, Dictionary<string, object> args = null)
+		{
+			return new ProPitParser().asParser(args, new StringReader(xml));
+		}
 	}
 
 	[TestFixture]
 	[Quick]
-	internal class CommonTests : TestFixture
+	public class CommonTests : TestFixture
 	{
 		public CommonTests()
 			: base(Assembly.GetExecutingAssembly())

@@ -104,10 +104,6 @@ xref:Action_input[input]:: Data received via input is read from the SSL input bu
 			<Param name="AcceptTimeout" value="3000"/>
 			<Param name="ServerCertPath" value="cert.pfx" />
 		</Publisher>
-		 
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----

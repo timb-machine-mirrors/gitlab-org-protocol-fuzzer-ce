@@ -78,6 +78,10 @@ def save_failed(asm, test, fixture, filename, duration, message):
 	with open(filename, 'w') as fout:
 		fout.write(xml)
 
+def category_filter(comma_sep_list):
+	categories = ["cat == %s" % x.strip() for x in comma_sep_list.split(',')]
+	return " || ".join(categories)
+
 def run_nunit(args, asm, fixture, outdir):
 	test = fixture.attrib['fullname']
 	result = '.'.join([
@@ -89,7 +93,7 @@ def run_nunit(args, asm, fixture, outdir):
 	cmd = dotnet([
 		nunit,
 		'--labels=All',
-		'--where:cat==%s' % args.include,
+		"--where:%s" % category_filter(args.include),
 		'--result=%s' % result,
 		asm,
 		'--test=%s' % test,
@@ -191,7 +195,7 @@ def main():
 		explore = dotnet([
 			nunit,
 			'--explore=%s' % tmp.name,
-			'--where:cat==%s' % args.include,
+			"--where:%s" % category_filter(args.include),
 		], newpg=False) + args.input
 
 	subprocess.check_call(explore)

@@ -117,17 +117,6 @@ namespace Peach.Core.Dom
 		/// This method is only called by the DataCracker and never from DataElement.
 		/// </remarks>
 		public abstract long GetValue();
-
-		/// <summary>
-		/// Set value on from side
-		/// </summary>
-		/// <remarks>
-		/// I'm not sure this method is used anymore.  It's been replaced by CalculateFromValue.
-		/// 
-		/// TODO - Remove me?
-		/// </remarks>
-		/// <param name="value"></param>
-		public abstract void SetValue(Variant value);
 	}
 
 	/// <summary>

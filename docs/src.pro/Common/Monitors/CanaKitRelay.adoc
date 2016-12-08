@@ -13,8 +13,8 @@ then toggle power after a fault occurs to return the device to a known, stable s
 Supporting devices can include recording devices,
 lighting,
 heating devices,
-sound or motion generators,
-even turning on an espresso machine after every 10,000th test iteration.
+sound or motion generators.
+An example is turning on an espresso machine after every 10,000th test iteration.
 * Emulate a button push by inserting the device into a circuit containing the button.
 The idea is to automate the press of a button,
 such as `NumLock`,
@@ -35,7 +35,7 @@ installation,
 and the relay command set,
 see http://www.canakit.com/4-port-usb-relay-controller.html[CanaKit 4-Port USB Relay Controller].
 
-You can purchase the CanaKit from the manufacturer at previous web site or from Amazon.com.
+You can purchase the CanaKit from the manufacturer at the previous web site or from Amazon.com.
 In each case,
 the kit price is about $60.00 U.S. plus shipping costs.
 
@@ -84,8 +84,10 @@ Windows dynamically assigns a serial port to the USB channel for the connection.
 You can see the port assignment by looking at the `Ports(COM and LPT)` entry in the Device Manager.
 The Device Manager is available from the System applet in the Control Panel.
 
-NOTE: For controlling power to devices using 3-prong outlets,
-Peach provides a monitor for the xref:Monitors_IpPower9258[IpPower9258 Network AC Power Controller Network AC Power].
+NOTE: For controlling power to devices using 3-prong outlets, Peach
+provides the xref:Monitors_IpPower9258[IpPower9258],
+xref:Monitors_ApcPower[ApcPower], and
+xref:Monitors_SnmpPower[SnmpPower] monitors.
 
 === Parameters
 

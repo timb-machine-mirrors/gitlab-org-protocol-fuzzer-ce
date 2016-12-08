@@ -1,82 +1,57 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Collections;
+using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Serialization.Formatters;
 using System.Threading;
-using NLog;
+using Peach.Core;
+using Peach.Pro.Core.OS.Windows.Publishers.Com;
 
-namespace Peach.Core.ComContainer
+namespace Peach.Pro.ComContainer
 {
 	public class Program
 	{
-		public static bool Shutdown = false;
-
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
-			var ipcChannelName = "Peach_Com_Container";
+			var asm = Assembly.GetExecutingAssembly();
 
-			if (args.Length == 1 && args[0] == "-h")
+			Console.WriteLine("> Peach Com Container v{0}", asm.GetName().Version);
+			Console.WriteLine("> {0}", asm.GetCopyright());
+			Console.WriteLine();
+
+			var provider = new BinaryServerFormatterSinkProvider
 			{
-				Console.WriteLine("> Peach.Pro.ComContainer");
-				Console.WriteLine("> {0}\n", Assembly.GetExecutingAssembly().GetCopyright());
+				TypeFilterLevel = TypeFilterLevel.Full
+			};
 
-				Console.WriteLine("Syntax:");
-				Console.WriteLine(" Peach.Pro.ComContainer.exe IPC_CHANNEL_NAME\n\n");
+			var props = new Hashtable();
+			props["name"] = "ipc";
+			props["portName"] = "Peach_Com_Container";
 
-				return;
-			}
+			var channel = new IpcChannel(props, null, provider);
 
-			if (args.Length == 1)
-				ipcChannelName = args[0];
-
-			IpcChannel ipcChannel = new IpcChannel(ipcChannelName);
-			ChannelServices.RegisterChannel(ipcChannel, false);
+			ChannelServices.RegisterChannel(channel, false);
 
 			try
 			{
 				RemotingConfiguration.RegisterWellKnownServiceType(
-					typeof(ComContainer), "PeachComContainer", WellKnownObjectMode.Singleton);
+					typeof(ComContainerServer),
+					"PeachComContainer",
+					WellKnownObjectMode.Singleton);
 
-				while (!Shutdown)
-					Thread.Sleep(200);
+				Thread.Sleep(Timeout.Infinite);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
 			}
 			finally
 			{
-				ChannelServices.UnregisterChannel(ipcChannel);
+				ChannelServices.UnregisterChannel(channel);
 			}
 		}
 	}

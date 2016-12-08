@@ -1,0 +1,42 @@
+[Check_HtmlInjection]
+== HTML Injection Check
+
+[cols="1,4"]
+|====
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS)[2013-A3-Cross-Site Scripting (XSS)]
+| CWE | https://cwe.mitre.org/data/definitions/79.html[CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')] +
+| PCI | 6.5.7 Cross site scripting (XSS)
+|====
+
+Cross-site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into 
+a user's browser instance. A browser instance can be a standard web browser client, or a browser object 
+embedded in a software product such as the browser within WinAmp, an RSS reader, or an email client. 
+The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, 
+Flash, or any other browser-supported technology.
+
+This check injections various HTML snippets that demonstraight a XSS issue.  
+The response is then analyzed to determine if the XSS injection has been included in any
+field or response body identified as contianing HTML.
+
+The check comes pre-populated with a list of HTML injections.
+The provided list can be editted at various scope levels (Global, Project, Profile, Route) to add, edit or remote entries.
+
+NOTE: This check has limited ability to determine if XSS issues exist in your frontend application.
+The detection process is limited to analysis of API results.  
+To reduce false positives failures only occur when the field or response is known to by HTML.  
+For fields, the field must contain
+other HTML elements.  
+For response bodies the content type must be text/html.
+This is not a substitue for testing your frontend application.
+
+=== Configuration
+
+TODO
+
+=== Operation
+
+|====
+| Test generation 
+|====
+
+This is a mutational check that produces test cases by modifying requests made by the traffic generator.

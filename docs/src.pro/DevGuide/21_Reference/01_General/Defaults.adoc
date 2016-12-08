@@ -69,9 +69,6 @@ Produces the following output:
 
 [source,xml]
 ----
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
-
 [*] Test 'Default' starting with random seed 54950.
 
 [R1,-,-] Performing iteration

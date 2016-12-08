@@ -9,8 +9,7 @@ namespace Peach {
 			C.Angular.$uibModal,
 			C.Angular.$window,
 			C.Services.Eula,
-			C.Services.Pit,
-			C.Services.Wizard
+			C.Services.Pit
 		];
 
 		constructor(
@@ -19,8 +18,7 @@ namespace Peach {
 			private $modal: ng.ui.bootstrap.IModalService,
 			private $window: ng.IWindowService,
 			private eulaService: EulaService,
-			private pitService: PitService,
-			private wizardService: WizardService
+			private pitService: PitService
 		) {
 			$scope.vm = this;
 			$scope.$root.$on(C.Angular.$stateChangeSuccess, () => {
@@ -33,8 +31,9 @@ namespace Peach {
 				});
 			});
 
-			this.eulaService.Verify().then((license : ILicense) => {
+			this.eulaService.Verify().then(license => {
 				this.license = license;
+				this.Version = license.version;
 			});
 		}
 
@@ -42,7 +41,21 @@ namespace Peach {
 		private isMenuMin: boolean = false;
 		private license: ILicense;
 		public Metrics = C.MetricsList;
-		public WizardTracks = Peach.WizardTracks;
+		public Version: string;
+
+		private configStepsDefault = [
+			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
+			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
+			{ id: C.States.PitAdvancedTest, name: 'Test' }
+		];
+
+		private configStepsWebProxy = [
+			{ id: C.States.PitAdvancedWebProxy, name: 'Web Proxy' },
+			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
+			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
+			{ id: C.States.PitAdvancedTest, name: 'Test' }
+		];
 
 		private get LicenseExpiration(): moment.Moment {
 			if (_.isUndefined(this.license)) {
@@ -67,12 +80,9 @@ namespace Peach {
 			return this.$state.params['pit'];
 		}
 
-		public ConfigSteps = [
-			{ id: C.States.PitAdvancedVariables, name: 'Variables' },
-			{ id: C.States.PitAdvancedMonitoring, name: 'Monitoring' },
-			{ id: C.States.PitAdvancedTuning, name: 'Tuning' },
-			{ id: C.States.PitAdvancedTest, name: 'Test' }
-		];
+		public get ConfigSteps() {
+			return this.pitService.IsWebProxy ? this.configStepsWebProxy : this.configStepsDefault;
+		}
 
 		public OnItemClick(event: ng.IAngularEvent, enabled) {
 			if (!enabled) {
@@ -83,7 +93,6 @@ namespace Peach {
 
 		private subMenus = [
 			{ state: C.States.JobMetrics, collapsed: true },
-			{ state: C.States.PitWizard, collapsed: true },
 			{ state: C.States.PitAdvanced, collapsed: true },
 			{ state: 'help', collapsed: true }
 		];
@@ -110,10 +119,6 @@ namespace Peach {
 				count = this.$scope.job.faultCount;
 			}
 			return count || '';
-		}
-
-		public IsComplete(step: string): boolean {
-			return this.wizardService.GetTrack(step).isComplete;
 		}
 
 		public get IsMenuMinimized(): boolean {
@@ -145,6 +150,10 @@ namespace Peach {
 			return this.$state.includes(name);
 		}
 
+		public ShowQuickStart(): boolean {
+			return this.ShowMenu('pit') && !this.pitService.IsWebProxy;
+		}
+
 		public MetricUrl(metric: C.IMetric): string {
 			const state = [C.States.JobMetrics, metric.id].join('.');
 			const params = { job: this.JobId };
@@ -160,17 +169,6 @@ namespace Peach {
 			return undefined;
 		}
 		
-		public WizardActive(track: ITrackStatic) {
-			if (track.id == C.Tracks.Intro) {
-				if (this.$state.is(track.start)) {
-					return 'active';
-				}
-			} else if (this.$state.includes(track.start)) {
-				return 'active';
-			}
-			return undefined;
-		}
-
 		public ShortcutClass(section: string) {
 			//if (this.$state.includes(section)) {
 			//	return 'active-shortcut';

@@ -72,11 +72,7 @@ xref:Action_output[output]:: Send data
       <Param name="DataBits" value="8"/>
       <Param name="Parity" value="None"/>
       <Param name="StopBits" value="One"/>
-    </Publisher>
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
-  </Test>
+    </Publisher>  </Test>
 </Peach>
 ----
 ===========================

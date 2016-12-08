@@ -109,16 +109,16 @@ namespace Peach.Core
 		/// </summary>
 		public MutationStrategy context = null;
 
-		bool hasRelation;
-		bool hasFixup;
+		readonly bool hasRelation;
+		readonly bool hasFixup;
 
-		public Mutator(DataElement obj)
+		protected Mutator(DataElement obj)
 		{
 			hasRelation = obj.relations.HasOf();
 			hasFixup = obj.fixup != null;
 		}
 
-		public Mutator(StateModel obj)
+		protected Mutator(StateModel obj)
 		{
 		}
 
@@ -130,10 +130,7 @@ namespace Peach.Core
 		/// </remarks>
 		public virtual string Name
 		{
-			get
-			{
-				return GetType().Name;
-			}
+			get { return GetType().Name; }
 		}
 
 		/// <summary>

@@ -4,6 +4,9 @@ using System.Reflection;
 using Peach.Core;
 using Random = Peach.Core.Random;
 
+// This assembly contains Peach plugins
+[assembly: PluginAssembly]
+
 namespace Peach.Pro.Core
 {
 	public static class Extensions

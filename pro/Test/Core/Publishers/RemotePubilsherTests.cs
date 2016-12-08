@@ -1,9 +1,11 @@
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Test;
+using Peach.Pro.Core.OS;
 
 namespace Peach.Pro.Test.Core.Publishers
 {
@@ -12,18 +14,26 @@ namespace Peach.Pro.Test.Core.Publishers
 	[Peach]
 	class RemotePublisherTests
 	{
-		SingleInstance _si;
+		ISingleInstance _si;
+		TempDirectory _tmpDir;
 
 		[SetUp]
 		public void SetUp()
 		{
-			_si = SingleInstance.CreateInstance(GetType().FullName);
+			_si = Pal.SingleInstance(GetType().FullName);
 			_si.Lock();
+			_tmpDir = new TempDirectory();
+
+			File.Copy(
+				Assembly.GetExecutingAssembly().Location,
+				Path.Combine(_tmpDir.Path, "Peach.Pro.Test.dll")
+			);
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
+			_tmpDir.Dispose();
 			_si.Dispose();
 			_si = null;
 		}
@@ -152,7 +162,7 @@ namespace Peach.Pro.Test.Core.Publishers
 
 		public void RunRemote(string protocol, string xml)
 		{
-			var process = Helpers.StartAgent(protocol);
+			var process = Helpers.StartAgent(protocol, _tmpDir.Path);
 
 			try
 			{

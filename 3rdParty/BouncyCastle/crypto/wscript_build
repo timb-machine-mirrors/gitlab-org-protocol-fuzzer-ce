@@ -8,10 +8,12 @@ deps = [
 ]
 
 bld(
+	name = 'BouncyCastle.Crypto.dll',
+	solutions = ['Peach.sln', 'PeachWeb.sln'],
 	features = 'cs',
 	use = deps,
+	platform = 'AnyCPU',
 	source = bld.path.ant_glob('src/**/*.cs bzip2/**/*.cs'),
-	name = 'BouncyCastle.Crypto.dll',
 	namespace = 'Org.BouncyCastle',
 	csflags = [
 		'/nowarn:0168', # Variable declared but never used
@@ -21,6 +23,7 @@ bld(
 		'/nowarn:0414', # Field assigned but never used
 		'/nowarn:0219', # Variable assigned but never used
 		'/nowarn:0618', # Calling obsolete function
+		'/nowarn:0672', # Member overrides obsolete member
 	],
 	version = False,
 	csdoc = False,

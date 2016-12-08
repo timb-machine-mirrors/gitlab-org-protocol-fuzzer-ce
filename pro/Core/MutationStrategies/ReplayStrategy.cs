@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using Action = Peach.Core.Dom.Action;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.MutationStrategies
 {
-	[MutationStrategy("Replay", true, Internal = true)]
+	[MutationStrategy("Replay", Scope = PluginScope.Internal)]
 	[Description("Replay an existing set of data sets")]
 	public class ReplayStrategy : MutationStrategy
 	{

@@ -8,6 +8,7 @@ using Peach.Core;
 using Peach.Pro.Core;
 using Random = Peach.Core.Random;
 using Peach.Core.Test;
+using Peach.Pro.Core.Mutators.Utility;
 
 namespace Peach.Pro.Test.Core
 {
@@ -227,7 +228,7 @@ namespace Peach.Pro.Test.Core
 			var pctRhs = 1.0 * dict[0] / (dict[0] + dict[1]);
 			var pctLhs = 1.0 * dict[0] / (dict[0] + dict[-1]);
 
-			File.WriteAllLines("test_edge.simple.csv", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
+			//File.WriteAllLines("test_edge.simple.csv", dict.Select(kv => "{0},{1}".Fmt(kv.Key, kv.Value)));
 
 			Assert.LessOrEqual(pctLhs, 0.51);
 			Assert.LessOrEqual(pctRhs, 0.51);

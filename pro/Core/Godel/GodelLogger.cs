@@ -24,7 +24,7 @@ namespace Peach.Pro.Core.Godel
 				return;
 
 			// Create a script scope
-			var scope = context.dom.Python.CreateScope();
+			var scope = context.test.parent.Python.CreateScope();
 
 			// Pre-compile all the expressions
 			foreach (var item in sm.godel)

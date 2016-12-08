@@ -28,9 +28,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Peach.Core;
 using Peach.Core.Dom;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Fixups
 {
@@ -59,37 +59,32 @@ namespace Peach.Pro.Core.Fixups
 			state["self"] = this;
 			state["ref"] = from;
 			state["data"] = from.Value;
+
+			object data;
+
 			try
 			{
-				object value = parent.EvalExpression(expression, state);
-
-				if (value is byte[])
-					return new Variant((byte[])value);
-
-				if (value is string)
-				{
-					string str = value as string;
-					byte[] strbytes = new byte[str.Length];
-
-					for (int i = 0; i < strbytes.Length; ++i)
-						strbytes[i] = (byte)str[i];
-
-					return new Variant(strbytes);
-				}
-
-				if (value is int)
-					return new Variant(Convert.ToInt32(value));
-
-				throw new PeachException(
-					"ExpressionFixup expected a return value of string or int but got '{0}'".Fmt(value.GetType().Name)
-				);
+				data = parent.EvalExpression(expression, state);
 			}
-			catch (System.Exception ex)
+			catch (Exception ex)
 			{
 				throw new PeachException(
 					"ExpressionFixup expression threw an exception!\nExpression: {0}\n Exception: {1}".Fmt(expression, ex.ToString()), ex
 				);
 			}
+
+			if (data == null)
+				throw new PeachException("Error, expression fixup returned null.");
+
+			var asVariant = Scripting.ToVariant(data);
+
+			if (asVariant == null)
+				throw new PeachException("Error, expression fixup returned unknown type '{0}'.".Fmt(data.GetType()));
+
+			if (parent is Blob && asVariant.GetVariantType() == Variant.VariantType.String)
+				return new Variant(Encoding.ISOLatin1.GetBytes((string)asVariant));
+
+			return asVariant;
 		}
 	}
 }

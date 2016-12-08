@@ -96,10 +96,6 @@ This example demonstrates the default case of padding. The AlignTo attribute ali
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -108,9 +104,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 56742.
 
@@ -158,10 +151,6 @@ This example aligns the pad  data to a 32-bit boundary.
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -170,9 +159,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 51106.
 
@@ -224,10 +210,6 @@ This example demonstrates padding with unaligned data preceding and following th
 		<StateModel ref="TheStateModel"/>
 
 		<Publisher class="ConsoleHex" />
-
-		<Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
 	</Test>
 </Peach>
 ----
@@ -236,9 +218,6 @@ Produces the following output:
 
 ----
 > peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 49630.
 

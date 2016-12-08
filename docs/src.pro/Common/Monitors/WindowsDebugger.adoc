@@ -12,7 +12,7 @@ process, or service.
 
 The _WindowsDebugger_ performs automation, fault detection, and data collection.
 
-* Automation manages when the fuzzing target (process, service, etc) starts and restarts:
+* Automation manages when the fuzzing target (process, service, etc) starts and restarts. This can occur
 at the start of a fuzzing session, at the start of each iteration, after detecting a fault,
 or upon receiving a call from the state model.
 * Fault detection watches and reports crashes and faults--when the target exits prematurely,
@@ -49,6 +49,10 @@ are sometimes false positives or anti-debugging faults, defaults to false.
 
 IgnoreSecondChanceGuardPage:: Ignores faults from the second chance guard page. These faults
 are sometimes false positives or anti-debugging faults, defaults to false.
+
+IgnoreFirstChanceReadAv:: Ignores faults from the first chance read access violations. These faults
+are sometimes false positives, defaults to false.  Whem monitoring a Java process,
+it is recommended to set this parameter to true.
 
 NoCpuKill:: Allows or disallows the CPU to idle. If true, the CPU can idle without terminating
 the target. If false, Peach polls and then terminates the target if it is caught idling. The

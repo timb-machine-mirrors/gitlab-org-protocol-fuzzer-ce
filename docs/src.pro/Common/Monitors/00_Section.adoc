@@ -18,6 +18,7 @@ that monitor is available in all supported operating systems.
 |Monitor    |Fault Detection  |Data Collection  |Automation  |Operating Systems footnote:[When an operating system is listed, the monitor is available only for the listed operating system. A blank entry indicates the monitor is available for Windows, Linux, and OS X operating systems.]
 |xref:Monitors_Android[Android]                  |X   |    |X   |
 |xref:Monitors_AndroidEmulator[Android Emulator] |X   |    |X   |
+|xref:Monitors_ApcPower[APC Power]               |    |    |X   |
 |xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |Windows
 |xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |
 |xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |
@@ -25,6 +26,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |OS X
 |xref:Monitors_CrashWrangler[Crash Wrangler]     |X   |X   |X   |OS X
 |xref:Monitors_Gdb[Gdb]                          |X   |X   |X   |Linux, OS X
+|xref:Monitors_GdbServer[GdbServer]              |X   |X   |X   |Linux, OS X
 |xref:Monitors_IpPower9258[IpPower9258]          |    |    |X   |
 |xref:Monitors_LinuxCoreFile[LinuxCoreFile]      |X   |X   |    |Linux
 |xref:Monitors_MemoryMonitor[Memory]             |X   |    |    |
@@ -37,6 +39,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_RunCommand[Run Command]           |X   |X   |X   |
 |xref:Monitors_SaveFile[Save File]               |    |X   |    |
 |xref:Monitors_Serial[Serial Port]               |X   |X   |X   |
+|xref:Monitors_SnmpPower[SNMP Power]             |    |    |X   |
 |xref:Monitors_Socket[Socket Listener]           |X   |X   |    |
 |xref:Monitors_SshCommand[SSH Command]           |X   |X   |X   |
 |xref:Monitors_SshDownloader[SSH Downloader]     |    |X   |    |

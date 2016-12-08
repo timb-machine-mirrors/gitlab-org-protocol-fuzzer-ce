@@ -13,18 +13,9 @@ from Peach.Core.IO import BitwiseStream, BitStream
 from Peach.Core.Dom import DataElement
 from Peach.Pro.Core.Transformers import BasePythonTransformer
 
-
-
-# Add the special assembly that our Python extensions will 
-# appear in. This is the list of assemblies that Peach checks
-# for extension types.
-for a in System.AppDomain.CurrentDomain.GetAssemblies():
-	if a.FullName.startswith("Snippets.scripting"):
-		Peach.Core.ClassLoader.AssemblyCache[a.FullName] = a
-
 # Create wrappers for class attributes we will use
 TransformerAttr = clrtype.attribute(Peach.Core.TransformerAttribute)
-DescriptionAttr = clrtype.attribute(Peach.Core.DescriptionAttribute)
+DescriptionAttr = clrtype.attribute(System.ComponentModel.DescriptionAttribute)
 ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
 class PythonTransformer(BasePythonTransformer):
@@ -49,6 +40,7 @@ class PythonTransformer(BasePythonTransformer):
 	]
 
 	@clrtype.accepts(DataElement, System.Collections.Generic.Dictionary[clr.GetClrType(str), Variant])
+	@clrtype.returns()
 	def __init__(self, parent, args):
 		print '>>> TRANSFORMER INIT Param1=%s' % (str(args['Param1']))
 		pass

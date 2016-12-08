@@ -5,13 +5,6 @@ The {peachweb} is an interactive interface to {product} that simplifies monitori
 
 The {peachweb} works with Pits from the included Pit Library. With a little configuration, the Pits will be ready to run. Once you settle on a Pit that you want to use, you can configure the Pit to detect faults, to collect data, or to automate the fuzzing session.
 
-The {peachweb} provides support for two work styles:
-
-* The Quick Start Wizard leads users through the process of configuring a pit using a question/answer style.
-* An advanced Configuration section includes forms for variables and monitors that the user can fill out without the question/answer dialog.
-
-Both work styles provide a configuration test, so that you know the pit is configured in a reasonable manner before its use.
-
 === {peachweb} Installation Requirements
 
 The {peachweb} uses modern web technologies, such as HTML 5. Yet,  {peachweb} requires two things to run:
@@ -69,7 +62,7 @@ The Page title identifies the page you are on and establishes the context of you
 ===== 2. Menu Entries
 Menu entries are located along the left edge of the browser window. These buttons identify the functionality immediately at your disposal. Whether you want to explore your Pit Library, investigate a completed fuzzing job, or get some assistance from Help or the Forums, the menu is there for you.
 
-The entries in the menu change according to the work context. For example, when you start working with a Pit, the menu entries change to accommodate editing a Pit definition. Click an entry in the menu to start working on that item. There is also an option to collapse the menu. 
+The entries in the menu change according to the work context. For example, when you start working with a Pit, the menu entries change to accommodate editing a Pit definition. Click an entry in the menu to start working on that item. There is also an option to collapse the menu.
 
 ===== 3. Menu Icons
 Located above the menu entries, the menu icons are always present and do not change. The icons are always:
@@ -82,13 +75,8 @@ Located above the menu entries, the menu icons are always present and do not cha
 Click a menu icon to move there.
 
 ===== 4. Breadcrumb menu
-The breadcrumb menu is above the Page Title. The breadcrumb menu identifies your position in the Peach Web UI menus. For example, when you Start the QuickStart wizard with the `JPG_Test1` configuration (a sample configuration), the breadcrumb menu displays +
-`Home / Library / JPG_Test1 / Quick Start`.
-
-image::{images}/Common/WebUI/QS01_QuickStart.png[]
-
-Portions of the breadcrumb menu are links and marked appropriately by color. For example, the
-`Home`, `Library`, and `JPG_Test1` entries of the menu are links when you launch the QuickStart Wizard. Click an entry in the menu to start working on that item.
+The breadcrumb is located above the Page Title and identifies your position within the Peach Web UI.
+Portions of the breadcrumb are links and marked appropriately by color.
 
 ==== A Quick Tour of the {peachweb}
 
@@ -122,16 +110,14 @@ Peach has user forums that serve as a knowledge base of user questions, and as a
 
 image::{images}/Common/WebUI/H6_PeachForums.png[]
 
-include::01_Wizard.adoc[]
+include::01_Config_Variables.adoc[]
 
-include::02_Config_Variables.adoc[]
+include::02_Config_Monitors.adoc[]
 
-include::03_Config_Monitors.adoc[]
+include::03_Config_Tuning.adoc[]
 
-include::04_Config_Tuning.adoc[]
+include::04_Config_Test.adoc[]
 
-include::05_Config_Test.adoc[]
-
-include::06_Job.adoc[]
+include::05_Job.adoc[]
 
 // end

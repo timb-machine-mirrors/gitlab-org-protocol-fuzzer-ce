@@ -55,11 +55,19 @@ namespace Peach.Core.Dom
 	public delegate void ActionFinishedEventHandler(Action action);
 
 	/// <summary>
+	/// Used by the xpath navigator to get all action data children.
+	/// </summary>
+	public interface IActionDataXpath
+	{
+		IEnumerable<ActionData> XpathData { get; }
+	}
+
+	/// <summary>
 	/// Base class for state model actions such as sending output, calling a method, etc.
 	/// </summary>
 	[DebuggerDisplay("{name}: {type}")]
 	[Serializable]
-	public abstract class Action : INamed, IFieldNamed
+	public abstract class Action : INamed, IFieldNamed, IActionDataXpath
 	{
 		#region Obsolete Functions
 
@@ -68,7 +76,7 @@ namespace Peach.Core.Dom
 
 		#endregion
 
-		protected static NLog.Logger logger = LogManager.GetCurrentClassLogger();
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
 		[NonSerialized]
 		protected Dictionary<string, object> scope = new Dictionary<string, object>();
@@ -236,7 +244,7 @@ namespace Peach.Core.Dom
 		/// This should be performed in StateModel to every State/Action at
 		/// start of the iteration.
 		/// </remarks>
-		public void UpdateToOriginalDataModel()
+		public virtual void UpdateToOriginalDataModel()
 		{
 			foreach (var item in allData)
 			{
@@ -250,6 +258,18 @@ namespace Peach.Core.Dom
 		/// <param name="publisher"></param>
 		/// <param name="context"></param>
 		protected abstract void OnRun(Publisher publisher, RunContext context);
+
+		/// <summary>
+		/// All Data (DataModels &amp; DataSets) used by this action
+		/// that should be nagivable via xpath
+		/// </summary>
+		public virtual IEnumerable<ActionData> XpathData
+		{
+			get
+			{
+				return allData;
+			}
+		}
 
 		/// <summary>
 		/// All Data (DataModels &amp; DataSets) used by this action.

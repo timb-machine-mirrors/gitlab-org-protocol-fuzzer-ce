@@ -19,8 +19,8 @@ namespace Peach {
 		}
 
 		public Verify(): ng.IPromise<ILicense> {
-			return this.LoadLicense().then((l : ILicense) => {
-				return this.VerifyLicense(l);
+			return this.LoadLicense().then(license => {
+				return this.VerifyLicense(license);
 			});
 		}
 
@@ -32,22 +32,21 @@ namespace Peach {
 			return StripHttpPromise(this.$q, promise);
 		}
 
+		private LicenseStatusTitle(license: ILicense): string {
+			switch (license.status) {
+				case LicenseStatus.Missing:
+					return 'Missing License Detected';
+				case LicenseStatus.Expired:
+					return 'Expired License Detected';
+				case LicenseStatus.Invalid:
+					return 'Invalid License Detected';
+			}
+		}
+
 		private VerifyLicense(license: ILicense): ng.IPromise<ILicense> {
-			if (!license.isValid) {
-				let title: string;
-
-				if (license.isInvalid) {
-					title = 'Invalid License Detected';
-				} else if (license.isMissing) {
-					title = 'Missing License Detected';
-				} else if (license.isExpired) {
-					title = 'Expired License Detected';
-				} else {
-					title = 'License Error Detected';
-				}
-
+			if (license.status != LicenseStatus.Valid) {
 				return this.LicenseError({
-					Title: title,
+					Title: this.LicenseStatusTitle(license),
 					Body: license.errorText.split('\n')
 				}).then(() => {
 					return this.Verify();
@@ -60,52 +59,15 @@ namespace Peach {
 				return ret.promise;
 			}
 
-			let template: string;
-			let developer = false;
-
-			switch (license.version) {
-				case LicenseVersion.Enterprise:
-				case LicenseVersion.Distributed:
-					template = C.Templates.Eula.Enterprise;
-					break;
-				case LicenseVersion.ProfessionalWithConsulting:
-				case LicenseVersion.Professional:
-				case LicenseVersion.Developer:
-					template = C.Templates.Eula.Professional;
-					developer = true;
-					break;
-				case LicenseVersion.TrialAllPits:
-				case LicenseVersion.Trial:
-					template = C.Templates.Eula.Trial;
-					break;
-				case LicenseVersion.Academic:
-					template = C.Templates.Eula.Acedemic;
-					break;
-				case LicenseVersion.TestSuites:
-				case LicenseVersion.Studio:
-				default:
-					template = C.Templates.Eula.Professional;
-					break;
-			}
-
-			let result = this.DisplayEula(template);
-
-			if (developer) {
-				return result.then(() => {
-					return this.DisplayEula(C.Templates.Eula.Developer).then(() => {
-						return this.AcceptEula();
-					});
-				});
-			}
-
-			return result.then(() => {
-				return this.AcceptEula();
-			});
+			let promise = this.DisplayEula(license.eula);
+			return promise.then(() => {
+				return this.AcceptEula()
+			})
 		}
 
-		private DisplayEula(url: string): ng.IPromise<any> {
+		private DisplayEula(type: string): ng.IPromise<any> {
 			return this.$modal.open({
-				templateUrl: url,
+				templateUrl: `html/eula/${type}.html`,
 				controller: EulaController,
 				controllerAs: C.ViewModel,
 				backdrop: 'static',

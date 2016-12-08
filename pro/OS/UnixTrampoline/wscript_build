@@ -2,14 +2,21 @@
 
 deps = [
 	'System.dll',
-	'System.Runtime.Remoting.dll',
 	'System.Core.dll',
-	'Mono.Posix.dll',
+	'System.Runtime.Remoting.dll',
+]
+
+pkgs = [
+	'Mono.Posix-4.5',
 ]
 
 bld(
+	name = 'PeachTrampoline.exe',
 	features = 'cs',
 	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = ['net45'],
+	),
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'PeachTrampoline.exe',
 )

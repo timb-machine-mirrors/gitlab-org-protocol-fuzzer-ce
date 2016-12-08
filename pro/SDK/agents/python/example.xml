@@ -28,21 +28,18 @@
 						<String value="Parameter 2" />
 					</DataModel>
 				</Param>
+				<Result>
+					<DataModel name="Result">
+						<String name="Value" />
+					</DataModel>
+				</Result>
 			</Action>
 		</State>
 
 	</StateModel>
 
-	<Agent name="TheAgent" location="http://127.0.0.1:9980">
- 		<Monitor class="windowsdebugger">
-			<Param name="commandline" value="mspaint.exe fuzzed.png" />
-			<Param name="windbgpath" value="c:\program files (x86)\debugging tools for windows (x86)" />
-			<Param name="startoncall" value="scoobysnacks"/>
-		</Monitor>
-		<Monitor class="pageheap">
-			<Param name="executable" value="mspaint.exe"/>
-			<Param name="windbgpath" value="c:\program files (x86)\debugging tools for windows (x86)" />
-		</Monitor>
+	<Agent name="TheAgent" location="http://127.0.0.1:8080">
+		<!-- Remote agent defined in Test -->
  	</Agent>
 
 	<Test name="Default">
@@ -53,8 +50,8 @@
                 <Param name="Class" value="PublisherInAgent"/>
 
                 <!-- Parameters -->
-                <Param name="Host" value="127.0.0.1" />
-                <Param name="Port" value="8080" />
+                <Param name="Host" value="127.0.0.2" />
+                <Param name="Port" value="8888" />
         </Publisher>
 	</Test>
 

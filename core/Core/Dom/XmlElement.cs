@@ -206,9 +206,47 @@ namespace Peach.Core.Dom
 					continue;
 				}
 
+				var asCData = child as XmlCharacterData;
+				if (asCData != null && !asCData.mutationFlags.HasFlag(MutateOverride.TypeTransform))
+				{
+					asCData.GenXmlNode(doc, node);
+					continue;
+				}
+
 				var text = doc.CreateTextNode(ElemToStr(child));
 				node.AppendChild(text);
 			}
+		}
+
+		public override Variant DefaultValue
+		{
+			get { return GenerateDefaultValue(); } 
+			set { throw new NotSupportedException(); }
+		}
+
+		protected override Variant GenerateDefaultValue()
+		{
+			var enc = "utf-8";
+			var doc = new XmlDocument();
+
+			if (!string.IsNullOrEmpty(version) || !string.IsNullOrEmpty(encoding) || !string.IsNullOrEmpty(standalone))
+			{
+				var decl = doc.CreateXmlDeclaration(version, encoding, standalone);
+				doc.AppendChild(decl);
+				enc = encoding ?? enc;
+			}
+
+			GenXmlNode(doc, doc);
+
+			var bs = new BitStream();
+			var writer = new PeachXmlWriter(bs, enc);
+
+			doc.WriteTo(writer);
+			writer.Flush();
+			bs.Seek(0, SeekOrigin.Begin);
+
+			var reader = new BitReader(bs);
+			return new Variant(reader.ReadString());
 		}
 
 		protected override Variant GenerateInternalValue()

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
 using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
 using Peach.Pro.Core.Dom.Actions;
+using Peach.Pro.Core.Dom.Actions.Web;
 using Peach.Pro.Core.Godel;
+using Peach.Pro.Core.License;
+using Peach.Pro.Core.WebApi;
 using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
 using StateModel = Peach.Pro.Core.Godel.StateModel;
@@ -18,7 +22,24 @@ namespace Peach.Pro.Core
 	/// </summary>
 	public class ProPitParser : PitParser
 	{
-		static readonly Logger logger = LogManager.GetCurrentClassLogger();
+		public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+		private readonly IPitResource _pitResource;
+
+		public ProPitParser(
+			ILicense license,
+			string pitLibraryPath,
+			string pitPath,
+			ResourceRoot root = null)
+		{
+			_pitResource = new PitResource(license, pitLibraryPath, pitPath, root);
+		}
+
+		// should only be used for unit tests
+		internal ProPitParser()
+		{
+			_pitResource = new FilePitResource();
+		}
 
 		protected override Peach.Core.Dom.Dom CreateDom()
 		{
@@ -76,7 +97,7 @@ namespace Peach.Pro.Core
 
 			foreach (var stateModel in godelDom.stateModels)
 			{
-				var sm = (StateModel) stateModel;
+				var sm = (StateModel)stateModel;
 				foreach (var item in sm.godel)
 				{
 					if (!string.IsNullOrEmpty(item.refName))
@@ -131,6 +152,34 @@ namespace Peach.Pro.Core
 			}
 		}
 
+		protected override void handleInclude(Peach.Core.Dom.Dom dom, Dictionary<string, object> args, XmlNode child)
+		{
+			var ns = child.getAttrString("ns");
+			var src = child.getAttrString("src")
+				.Replace("file:", "");
+
+			var stream = _pitResource.Load(src);
+			if (stream == null)
+				throw new PeachException("Error, Unable to locate Pit file [{0}].\n".Fmt(src));
+
+			Peach.Core.Dom.Dom newDom;
+			using (stream)
+			{
+				var dataName = Path.GetFileNameWithoutExtension(src);
+				newDom = asParser(args, new StreamReader(stream), dataName, true);
+				newDom.fileName = src;
+			}
+
+			newDom.Name = ns;
+			dom.ns.Add(newDom);
+
+			foreach (var item in newDom.Python.Paths)
+				dom.Python.AddSearchPath(item);
+
+			foreach (var item in newDom.Python.Modules)
+				dom.Python.ImportModule(item);
+		}
+
 		private void deferParse(StateModel sm, string fullName, XmlNode node)
 		{
 			var godel = new GodelContext
@@ -161,6 +210,37 @@ namespace Peach.Pro.Core
 		{
 			var action = base.handleAction(node, parent);
 
+			if (action.type == "web")
+			{
+				if (!node.hasAttr("url"))
+					throw new PeachException("Error, Action of type 'web' must have a 'url' attribute.");
+				if (!node.hasAttr("method"))
+					throw new PeachException("Error, Action of type 'web' must have a 'method' attribute.");
+
+				var webAction = (WebAction) action;
+				webAction.Url = node.getAttrString("url");
+				webAction.Method = node.getAttrString("method");
+
+				foreach (XmlNode child in node)
+				{
+					if (child.Name == "Part")
+						handleActionPart(child, webAction);
+					else if (child.Name == "Response")
+						handleActionResponse(child, webAction);
+					else if (child.Name == "Path")
+						webAction.Paths.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Query")
+						webAction.Queries.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Header")
+						webAction.Headers.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "FormData")
+						webAction.FormDatas.Add(ActionWebParameter.PitParser(this, child, webAction));
+					else if (child.Name == "Body")
+						webAction.Body = ActionWebParameter.PitParser(this, child, webAction);
+
+				}
+			}
+
 			foreach (XmlNode child in node)
 			{
 				if (child.Name == "Godel")
@@ -179,6 +259,53 @@ namespace Peach.Pro.Core
 
 			return action;
 		}
+
+		protected void handleActionPart(XmlNode node, WebAction action)
+		{
+			var name = node.getAttrString("name");
+			var param = new ActionWebPart(name)
+			{
+				action = action
+			};
+
+			foreach (XmlNode child in node)
+			{
+				switch (child.Name)
+				{
+					case "Header":
+						var header = ActionWebParameter.PitParser(this, child, action);
+						header.PartName = name;
+						param.Headers.Add(header);
+						break;
+					case "FormData":
+						var formData = ActionWebParameter.PitParser(this, child, action);
+						formData.PartName = name;
+						param.FormDatas.Add(formData);
+						break;
+					case "Body":
+						var body = ActionWebParameter.PitParser(this, child, action);
+						body.PartName = name;
+						param.Body = body;
+						break;
+				}
+			}
+
+			action.Parts.Add(param);
+		}
+		protected void handleActionResponse(XmlNode node, WebAction action)
+		{
+			action.Response = new ActionWebResponse()
+			{
+				action = action
+			};
+
+			// Data model is not required.
+			if (node.ChildNodes.Count > 0)
+				handleActionData(node, action.Response, "<Response> child of ", false);
+			else
+				action.Response.dataModel = new DataModel("NULL");
+		}
+
 
 		protected override State handleState(XmlNode node, Peach.Core.Dom.StateModel parent)
 		{
@@ -207,6 +334,21 @@ namespace Peach.Pro.Core
 			}
 
 			return stateModel;
+		}
+
+		protected override void handleTestChild(XmlNode node, Test test)
+		{
+			if (node.Name == "WebProxy")
+			{
+				var opts = XmlTools.Deserialize<WebProxyOptions>(new StringReader(node.OuterXml));
+
+				test.stateModel = new WebProxyStateModel(opts);
+				test.stateModelRef = test.stateModel.CreateStateModelRef();
+				test.stateModel.parent = test.parent;
+
+				foreach (var map in opts.ContentTypeMap)
+					map.DataModel = (DataModel) test.parent.getRef(map.Ref, (DataElementContainer)null );
+			}
 		}
 	}
 }

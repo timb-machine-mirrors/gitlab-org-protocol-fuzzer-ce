@@ -30,9 +30,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Peach.Core.Dom;
 using Peach.Core.IO;
+using Action = System.Action;
 
 namespace Peach.Core
 {
@@ -71,6 +71,33 @@ namespace Peach.Core
 
 		private bool _hasStarted;
 		private bool _isOpen;
+
+		private void WrapFault(Action fn)
+		{
+			WrapFault(() =>
+			{
+				fn();
+				return (object)null;
+			});
+		}
+
+		protected T WrapFault<T>(Func<T> fn)
+		{
+			try
+			{
+				return fn();
+			}
+			catch (FaultException ex)
+			{
+				if (string.IsNullOrEmpty(ex.Fault.DetectionSource))
+					ex.Fault.DetectionSource = GetType().GetAttributes<PublisherAttribute>().First().Name;
+
+				if (string.IsNullOrEmpty(ex.Fault.DetectionName))
+					ex.Fault.DetectionName = Name;
+
+				throw;
+			}
+		}
 
 		#endregion
 
@@ -245,6 +272,19 @@ namespace Peach.Core
 		/// This method can be overriden by custom Publishers.
 		/// </remarks>
 		/// <seealso cref="OnInput"/>
+		/// <param name="dataModel">Data to send/write</param>
+		protected virtual void OnOutput(DataModel dataModel)
+		{
+			output(dataModel.Value);
+		}
+
+		/// <summary>
+		/// Send data
+		/// </summary>
+		/// <remarks>
+		/// This method can be overriden by custom Publishers.
+		/// </remarks>
+		/// <seealso cref="OnInput"/>
 		/// <param name="data">Data to send/write</param>
 		protected virtual void OnOutput(BitwiseStream data)
 		{
@@ -279,7 +319,7 @@ namespace Peach.Core
 		///		<item>Input action has completed.</item>
 		/// </list>
 		/// </remarks>
-		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="OnOutput(BitwiseStream)"/>
 		protected virtual void OnInput()
 		{
 			throw new PeachException("Error, action 'input' not supported by publisher");
@@ -289,7 +329,7 @@ namespace Peach.Core
 
 		#region Ctor
 
-		public Publisher(Dictionary<string, Variant> args)
+		protected Publisher(Dictionary<string, Variant> args)
 		{
 			ParameterParser.Parse(this, args);
 		}
@@ -356,7 +396,7 @@ namespace Peach.Core
 		public void accept()
 		{
 			Logger.Debug("accept()");
-			OnAccept();
+			WrapFault(OnAccept);
 		}
 
 		/// <summary>
@@ -376,7 +416,7 @@ namespace Peach.Core
 				return;
 
 			Logger.Debug("open()");
-			OnOpen();
+			WrapFault(OnOpen);
 
 			_isOpen = true;
 		}
@@ -399,7 +439,7 @@ namespace Peach.Core
 				return;
 
 			Logger.Debug("close()");
-			OnClose();
+			WrapFault(OnClose);
 
 			_isOpen = false;
 		}
@@ -419,7 +459,7 @@ namespace Peach.Core
 		public Variant call(string method, List<BitwiseStream> args)
 		{
 			Logger.Debug("call({0}) BitwiseStream Count: {1}", method, args.Count);
-			return OnCall(method, args);
+			return WrapFault(() => OnCall(method, args));
 		}
 
 		/// <summary>
@@ -437,7 +477,7 @@ namespace Peach.Core
 		public void setProperty(string property, Variant value)
 		{
 			Logger.Debug("setProperty({0}, {1})", property, value);
-			OnSetProperty(property, value);
+			WrapFault(() => OnSetProperty(property, value));
 		}
 
 		/// <summary>
@@ -455,7 +495,7 @@ namespace Peach.Core
 		public Variant getProperty(string property)
 		{
 			Logger.Debug("getProperty({0})", property);
-			return OnGetProperty(property);
+			return WrapFault(() => OnGetProperty(property));
 		}
 
 		/// <summary>
@@ -466,7 +506,7 @@ namespace Peach.Core
 		/// the OnOutput method can be overriden to implement functionality that should
 		/// occur when this method is called.
 		/// </remarks>
-		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="OnOutput(BitwiseStream)"/>
 		/// <seealso cref="input"/>
 		/// <param name="data">Data to send/write</param>
 		public void output(BitwiseStream data)
@@ -475,7 +515,7 @@ namespace Peach.Core
 			data.Seek(0, SeekOrigin.Begin);
 
 			Logger.Debug("output({0} bytes)", data.Length);
-			OnOutput(data);
+			WrapFault(() => OnOutput(data));
 		}
 
 		/// <summary>
@@ -491,7 +531,7 @@ namespace Peach.Core
 		public void input()
 		{
 			Logger.Debug("input()");
-			OnInput();
+			WrapFault(OnInput);
 		}
 
 		/// <summary>
@@ -536,11 +576,11 @@ namespace Peach.Core
 		/// the OnOutput method can be overriden to implement functionality that should
 		/// occur when this method is called.
 		/// </remarks>
-		/// <seealso cref="OnOutput"/>
+		/// <seealso cref="OnOutput(DataModel)"/>
 		/// <param name="dataModel">DataModel to send/write</param>
-		public virtual void output(DataModel dataModel)
+		public void output(DataModel dataModel)
 		{
-			output(dataModel.Value);
+			WrapFault(() => OnOutput(dataModel));
 		}
 
 		/// <summary>
@@ -558,7 +598,7 @@ namespace Peach.Core
 		public Variant call(string method, List<ActionParameter> args)
 		{
 			Logger.Debug("call({0}) ActionParameter Count: {1}", method, args.Count);
-			return OnCall(method, args);
+			return WrapFault(() => OnCall(method, args));
 		}
 
 		#endregion

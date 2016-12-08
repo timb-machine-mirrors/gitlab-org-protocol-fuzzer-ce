@@ -3,11 +3,11 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Mutators
 {
@@ -77,7 +77,17 @@ namespace Peach.Pro.Core.Mutators
 				}
 			}
 
-			Utility.SizedHelpers.ExpandTo(obj, value, OverrideRelation);
+			try
+			{
+				// In rair cases this can fail if the target of the 
+				// relation has already been mutated.
+
+				Utility.SizedHelpers.ExpandTo(obj, value, OverrideRelation);
+			}
+			catch (Exception ex)
+			{
+				throw new SoftException(ex);
+			}
 		}
 
 		protected override void performMutation(DataElement obj, ulong value)

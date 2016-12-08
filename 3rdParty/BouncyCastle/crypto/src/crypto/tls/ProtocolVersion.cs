@@ -17,7 +17,7 @@ namespace Org.BouncyCastle.Crypto.Tls
         private readonly int version;
         private readonly String name;
 
-        private ProtocolVersion(int v, String name)
+        public ProtocolVersion(int v, String name)
         {
             this.version = v & 0xffff;
             this.name = name;

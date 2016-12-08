@@ -37,3 +37,7 @@ using System.Runtime.InteropServices;
 // Allow internal functions to be accessed by the unit tests
 [assembly: InternalsVisibleTo("Peach.Pro.Test")]
 [assembly: InternalsVisibleTo("Peach.Pro.Test.WebApi")]
+[assembly: InternalsVisibleTo("Peach.Pro.Test.WebProxy")]
+[assembly: InternalsVisibleTo("Peach.Pro.Test.OS.Linux")]
+[assembly: InternalsVisibleTo("Peach.Pro.Test.OS.OSX")]
+[assembly: InternalsVisibleTo("Peach.Pro.Test.OS.Windows")]

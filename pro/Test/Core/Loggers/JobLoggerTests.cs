@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Moq;
 using NLog;
 using NUnit.Framework;
 using Peach.Core;
@@ -10,9 +11,11 @@ using Peach.Core.IO;
 using Peach.Core.Publishers;
 using Peach.Core.Test;
 using Peach.Pro.Core;
+using Peach.Pro.Core.License;
 using Peach.Pro.Core.Loggers;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
+using FaultSummary = Peach.Pro.Core.WebServices.Models.FaultSummary;
 using Logger = NLog.Logger;
 
 namespace Peach.Pro.Test.Core.Loggers
@@ -61,6 +64,17 @@ namespace Peach.Pro.Test.Core.Loggers
 		</Mutators>
 	</Test>
 </Peach>";
+
+		void InitializeLicense(Peach.Core.Dom.Dom dom, RunConfiguration cfg)
+		{
+			var license = new Mock<ILicense>();
+			license.Setup(x => x.CanUseMonitor("你好RandoFaulter")).Returns(true);
+			var jobLicense = new Mock<IJobLicense>();
+
+			var test = dom.tests["Default"];
+			var jobLogger = test.loggers.OfType<JobLogger>().Single();
+			jobLogger.Initialize(cfg, license.Object, jobLicense.Object);
+		}
 
 		[Test]
 		public void TestRelativePaths()
@@ -573,6 +587,153 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
+		public void TestBadUnicodeDescription()
+		{
+			const string xml = @"
+<Peach>
+	<DataModel name='DM'>
+		<String value='Hello World' fieldId='Test' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action type='output'>
+				<DataModel ref='DM' />
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default' faultWaitTime='0'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+		<Logger class='File' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(xml);
+			var cfg = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 1,
+				pitFile = "Test"
+			};
+
+			var e = new Engine(null);
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (ctx.controlIteration)
+					return;
+
+				ctx.Fault("Title", "Desc\xd800", "MajorHash", "MinorHash", "Exploitability", "Source");
+			};
+
+			e.startFuzzing(dom, cfg);
+
+			using (var db = new NodeDatabase())
+			{
+				var job = db.GetJob(cfg.id);
+				Assert.NotNull(job);
+				Assert.AreEqual(1, job.FaultCount);
+
+				using (var jobDb = new JobDatabase(job.DatabasePath))
+				{
+					var faults = jobDb.LoadTable<FaultDetail>().ToList();
+
+					Assert.AreEqual(1, faults.Count);
+					Assert.AreEqual("Desc�", faults[0].Description);
+				}
+			}
+		}
+
+		[Test]
+		public void TestTwoCoreFaults()
+		{
+			const string pit = @"
+<Peach>
+	<DataModel name='DM'>
+		<String name='Value' value='Hello' />
+	</DataModel>
+
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='act1' type='output'>
+				<DataModel ref='DM'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Agent name='Agent1'>
+		<Monitor name='mon1' class='你好RandoFaulter'>
+			<Param name='Fault' value='1' />
+		</Monitor>
+		<Monitor name='mon2' class='你好RandoFaulter'>
+			<Param name='Fault' value='1' />
+		</Monitor>
+	</Agent>
+
+	<Test name='Default' faultWaitTime='0'>
+		<Publisher class='Null'/>
+		<StateModel ref='SM'/>
+		<Logger class='File' />
+		<Agent ref='Agent1' />
+	</Test>
+</Peach>";
+
+			var dom = DataModelCollector.ParsePit(pit);
+			dom.tests[0].publishers[0] = new TestPub();
+
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 1,
+				rangeStop = 1,
+				pitFile = "TestTwoCoreFaults"
+			};
+
+			InitializeLicense(dom, config);
+
+			var e = new Engine(null);
+
+			e.IterationStarting += (ctx, it, tot) =>
+			{
+				if (!ctx.controlIteration)
+					ctx.InjectFault();
+			};
+
+			e.Fault += (ctx, it, sm, faults) =>
+			{
+				foreach (var f in faults)
+				{
+					f.title = f.monitorName + ": " + f.title;
+				}
+			};
+
+			e.startFuzzing(dom, config);
+
+			Job job;
+
+			using (var db = new NodeDatabase())
+			{
+				job = db.GetJob(config.id);
+			}
+
+			Assert.AreEqual(1, job.FaultCount);
+
+			using (var db = new JobDatabase(job.DatabasePath))
+			{
+				var faults = db.LoadTable<FaultSummary>().ToList();
+
+				Assert.AreEqual(job.FaultCount, faults.Count);
+
+				var f = db.GetFaultById(faults[0].Id, NameKind.Machine);
+
+				Assert.AreEqual("mon1: 你好 from RandoFaulter", f.Title);
+			}
+		}
+
+		[Test]
 		public void TestFaultFile()
 		{
 			const string xml = @"
@@ -619,6 +780,8 @@ namespace Peach.Pro.Test.Core.Loggers
 				rangeStop = 3,
 				pitFile = "LoggerTest"
 			};
+
+			InitializeLicense(dom, config);
 
 			var e = new Engine(null);
 
@@ -672,12 +835,6 @@ namespace Peach.Pro.Test.Core.Loggers
 						null,
 						"Initial.act3",
 						false, FaultFileType.Ouput),
-					new SavedFile("UnitTest.description.txt",
-						null,
-						null,
-						null,
-						"UnitTest.description.txt",
-						false, FaultFileType.Asset),
 					new SavedFile("Agent1.Monitor.你好RandoFaulter.description.txt",
 						"Agent1",
 						"你好RandoFaulter",
@@ -708,6 +865,12 @@ namespace Peach.Pro.Test.Core.Loggers
 						"Monitor",
 						"機除拍禁響地章手棚国歳違不.pcap",
 						false, FaultFileType.Asset),
+					new SavedFile("UnitTest.description.txt",
+						null,
+						null,
+						null,
+						"UnitTest.description.txt",
+						false, FaultFileType.Asset),
 					new SavedFile("fault.json",
 						null,
 						null,
@@ -732,12 +895,6 @@ namespace Peach.Pro.Test.Core.Loggers
 						null,
 						"Initial.act3",
 						true, FaultFileType.Ouput),
-					new SavedFile("Initial\\2\\UnitTest.description.txt",
-						null,
-						null,
-						null,
-						"UnitTest.description.txt",
-						true, FaultFileType.Asset),
 					new SavedFile("Initial\\2\\Agent1.Monitor.你好RandoFaulter.description.txt",
 						"Agent1",
 						"你好RandoFaulter",
@@ -767,6 +924,12 @@ namespace Peach.Pro.Test.Core.Loggers
 						"你好RandoFaulter",
 						"Monitor",
 						"機除拍禁響地章手棚国歳違不.pcap",
+						true, FaultFileType.Asset),
+					new SavedFile("Initial\\2\\UnitTest.description.txt",
+						null,
+						null,
+						null,
+						"UnitTest.description.txt",
 						true, FaultFileType.Asset),
 					new SavedFile("Initial\\2\\fault.json",
 						null,
@@ -931,8 +1094,8 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			e.TestStarting += ctx =>
 			{
-				ctx.engine.Fault += e_Fault;
-				ctx.engine.ReproFault += e_ReproFault;
+				e.Fault += e_Fault;
+				e.ReproFault += e_ReproFault;
 			};
 
 			e.IterationStarting += (ctx, it, tot) =>
@@ -956,11 +1119,11 @@ namespace Peach.Pro.Test.Core.Loggers
 
 		void VerifyFaults(string dir, RunContext context, uint currentIteration)
 		{
-			var pub = context.dom.tests[0].publishers[0] as TestPub;
+			var pub = context.test.publishers[0] as TestPub;
 			Assert.NotNull(pub);
 			Assert.AreEqual(6, pub.outputs.Count);
 
-			var logger = context.dom.tests[0].loggers[0] as JobLogger;
+			var logger = context.test.loggers[0] as JobLogger;
 			Assert.NotNull(logger);
 
 			var subdir = Directory.EnumerateDirectories(logger.BasePath).FirstOrDefault();

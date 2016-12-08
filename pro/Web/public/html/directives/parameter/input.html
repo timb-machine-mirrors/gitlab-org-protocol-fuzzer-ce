@@ -13,6 +13,9 @@
 	                        form="form"
 	                        param="param">
 	</peach:parameter-string>
+	<span class="help-text">
+		{{param.description}}
+	</span>
 	<span class="help-block"
 				ng-messages="form.param.$error"
 				ng-messages-include="html/messages.html">

@@ -4,12 +4,9 @@ import os
 from waflib import Task
 
 deps = [
-	'NLog.dll',
-	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.WebApi2.dll',
-	'SharpPcap.dll',
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
@@ -24,19 +21,20 @@ def glob_from(*parts):
 		top.ant_glob(os.path.join(path, '**'))
 	)
 
-python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.4', 'content')
+python_stdlib = glob_from('3rdParty', 'IronPython.StdLib.2.7.5', 'content')
 
-makexsd = '%s Peach.exe --makexsd' % bld.env.RUN_NETFX
+makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 
 app = bld(
+	name = 'Peach.exe',
 	features = 'cs',
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),
-	name = 'Peach.exe',
 	# mkbundle = True,
 	ver_product = 'Peach Fuzzing Platfom',
 	install_644 = {
 		python_stdlib[0] : python_stdlib[1],
+		bld.path : bld.path.ant_glob('Plugins/* pits/*'),
 	},
 	ide_content = bld.path.ant_glob('samples/**/*'),
 	ide_custom_commands = [
@@ -52,13 +50,10 @@ if bld.env.MCS and bld.env.DEST_OS != 'win32':
 common = [
 	# Peach
 	'Peach.exe',
+	'PeachAgent.exe',
 	'Peach.Pro.Web',
+	'PitTool.exe',
 
-	# Peach Platform Suppoort
-	'Peach.Pro.OS.Windows.dll',
-	'Peach.Pro.OS.Linux.dll',
-	'Peach.Pro.OS.OSX.dll',
-	
 	# Include sample programs so sample pits work
 	'SimpleHttpServer',
 	'CrashableServer',
@@ -71,19 +66,15 @@ common = [
 
 	# Windows side-process helpers
 	'Peach.Pro.ComContainer.exe',
-	'Peach.Pro.WindowsDebugInstance.exe',
 
 	'VMware-VIX',        # VMWare VIX API
 	'CrashWrangler',
 ]
 
 peach_pro = common + [
-	'peach-sdk',
-
 	# Helper Programs
 	'PeachValidator.exe',
 	'PeachMinset.exe',
-	'PeachSampleNinja.exe',
 
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
@@ -94,10 +85,10 @@ peach_pro = common + [
 
 internal = common + [
 	# Internal pit testing tools
+	'CrashTest',
+	'CrashTestDummy.exe',
 	'nunit-console',
 	'nunit-tools',
-	'pitc.exe',
-	'PitTester.exe',
 	'PeachWorker.exe',
 	'PeachService.exe',
 	'Peach.Core.Test.dll',
@@ -105,10 +96,8 @@ internal = common + [
 	'Peach.Pro.Test.OS.Linux.dll',
 	'Peach.Pro.Test.OS.OSX.dll',
 	'Peach.Pro.Test.OS.Windows.dll',
-	'Peach.Pro.Test.WebApi.dll',
+	'Peach.Pro.Test.WebApi.exe',
 	'UseAfterFree',
-	'CrashTest',
-	'CrashTestDummy.exe',
 ]
 
 bld(

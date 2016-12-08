@@ -14,16 +14,9 @@ from Peach.Core import Variant
 from Peach.Core.IO import BitwiseStream
 from Peach.Pro.Core.Publishers import BasePythonPublisher
 
-# Add the special assembly that our Python extensions will 
-# appear in. This is the list of assemblies that Peach checks
-# for extension types.
-for a in System.AppDomain.CurrentDomain.GetAssemblies():
-	if a.FullName.startswith("Snippets.scripting"):
-		Peach.Core.ClassLoader.AssemblyCache[a.FullName] = a
-
 # Create wrappers for class attributes we will use
 PublisherAttr = clrtype.attribute(Peach.Core.PublisherAttribute)
-DescriptionAttr = clrtype.attribute(Peach.Core.DescriptionAttribute)
+DescriptionAttr = clrtype.attribute(System.ComponentModel.DescriptionAttribute)
 ParameterAttr = clrtype.attribute(Peach.Core.ParameterAttribute)
 
 class PythonPublisher(BasePythonPublisher):
@@ -76,6 +69,7 @@ class PythonPublisher(BasePythonPublisher):
 		return self.logger
 
 	@clrtype.accepts()
+	@clrtype.returns()
 	def __init__(self):
 		print '>>> INIT'
 		print '>>>  Param1: %s' % self.param1
@@ -83,6 +77,7 @@ class PythonPublisher(BasePythonPublisher):
 		pass
 
 	@clrtype.accepts(BitwiseStream)
+	@clrtype.returns()
 	def OnOutput(self, data):
 		'''Output data as a json string'''
 

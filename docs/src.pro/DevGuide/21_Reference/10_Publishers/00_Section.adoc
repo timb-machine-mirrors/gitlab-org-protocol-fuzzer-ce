@@ -1,32 +1,6 @@
 [[Publisher]]
 === Publishers
 
-// Reviewed:
-//  - 02/20/2014: Seth & Mike: Outlined
-// * Multiple Publishers
-// * Types of actions implemented by publishers
-// * Stream vs. Stream with end (Tcp vs. File)
-// * Stream vs. Call based (Tcp vs. Com)
-// * Remote publishers
-// * List all action types we utilize
-
-//Updated:
-//  - 03/04/2014: Lynn: Added additional Publishers and the note about changeState
-
-//Updated:
-//  - 03/04/2014: Josh: Added...
-// Syntax
-// Examples:
-// * Multiple Publishers
-// * Types of actions implemented by publishers
-// * Stream vs. Stream with end (Tcp vs. File)
-// * Stream vs. Call based (Tcp vs. Com)
-// * Remote publishers
-// * List all action types we utilize
-
-// Updated:
-// 03/31/2014 Lynn: Renamed publisher xref files
-
 Publishers are the I/O interfaces Peach uses to send and receive data.
 
 Publishers support both stream and call based operations.
@@ -75,6 +49,8 @@ More information on creating a customer publisher can be found in the xref:Exten
  * xref:Publishers_Tcp[TcpClient]
  * xref:Publishers_TcpListener[TcpListener]
  * xref:Publishers_Udp[Udp]
+ * xref:Publishers_Usb[Usb]
+ * xref:Publishers_WebApi[WebApi]
  * xref:Publishers_WebService[WebService]
  * xref:Publishers_WebSocket[WebSocket]
  * xref:Publishers_Zip[Zip]
@@ -140,18 +116,12 @@ For example, you might use multiple publishers to communicate with a network ser
 			<Param name="Host" value="localhost"/>
 			<Param name="Port" value="54321"/>
 		</Publisher>
-		<Logger class="File">
-			<Param name="Path" value="logs"/>
-		</Logger>
 	</Test>
 </Peach>
 ----
 
 ----
 $ peach -1 --debug TwoPublisher.xml
-
-[[ Peach Pro v3.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 9324.
 Peach.Core.MutationStrategies.RandomStrategy Iteration: Switch iteration, setting controlIteration and controlRecordingIteration.
@@ -196,28 +166,55 @@ Peach.Core.Publishers.TcpClientPublisher stop()
 
 :leveloffset: 2
 include::AndroidMonkey.adoc[]
+
 include::CAN.adoc[]
+
 include::Com.adoc[]
+
 include::Console.adoc[]
+
 include::ConsoleHex.adoc[]
+
 include::File.adoc[]
+
 include::FilePerIteration.adoc[]
+
 include::Http.adoc[]
+
 include::I2C.adoc[]
+
 include::RawEther.adoc[]
+
 include::RawIPv4.adoc[]
+
 include::RawV4.adoc[]
+
 include::RawV6.adoc[]
+
 include::Remote.adoc[]
+
 include::Rest.adoc[]
+
 include::Serial.adoc[]
+
 include::Ssl.adoc[]
+
 include::SslListener.adoc[]
+
 include::Tcp.adoc[]
+
 include::TcpListener.adoc[]
+
 include::Udp.adoc[]
+
+include::Usb.adoc[]
+
+include::WebApi.adoc[]
+
 include::WebService.adoc[]
+
 include::WebSocket.adoc[]
+
 include::Zip.adoc[]
 
 // end

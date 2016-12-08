@@ -6,6 +6,7 @@ using Peach.Core.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using NLog;
 
 namespace Peach.Core.Dom.Actions
 {
@@ -13,6 +14,8 @@ namespace Peach.Core.Dom.Actions
 	[Serializable]
 	public class Input : Action
 	{
+		static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
 		protected BitStream _inputData;
 
 		public ActionData data { get; set; }
@@ -54,9 +57,13 @@ namespace Peach.Core.Dom.Actions
 
 				logger.Debug("Final pos: {0} length: {1} crack consumed: {2} bytes", endPos, pub.Length, endPos - startPos);
 			}
-			catch (CrackingFailure ex)
+			catch (CrackingFailure cex)
 			{
 				endPos = pub.Length;
+
+				var ex = startPos == endPos
+					? new TimeoutException("Timed out waiting for input from the publisher.", cex)
+					: (Exception)cex;
 
 				throw new SoftException(ex);
 			}

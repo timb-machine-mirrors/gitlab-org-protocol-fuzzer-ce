@@ -85,10 +85,6 @@ Three outputs with Once set to false. The number is incremented before each acti
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -97,9 +93,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 64358.
 
@@ -162,10 +155,6 @@ Three outputs with Once set to false and Offset to 5. The number is incremented 
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -174,9 +163,6 @@ Output of this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 26794.
 
@@ -238,10 +224,6 @@ Three outputs with Once set to true. Each action outputs the same incremented nu
     <StateModel ref="TheState"/>
 
     <Publisher class="ConsoleHex" />
-
-    <Logger class="File">
-      <Param name="Path" value="logs"/>
-    </Logger>
   </Test>
 </Peach>
 ----
@@ -250,9 +232,6 @@ Output from this example.
 
 ----
 >peach -1 --debug example.xml
-
-[[ Peach Pro v3.0.0.0
-[[ Copyright (c) Peach Fuzzer LLC
 
 [*] Test 'Default' starting with random seed 2157.
 
@@ -316,10 +295,6 @@ The group parameter coordinates the incrementing process among the data elements
       <StateModel ref="TheState"/>
 
       <Publisher class="ConsoleHex" />
-
-      <Logger class="File">
-        <Param name="Path" value="logs"/>
-      </Logger>
     </Test>
 </Peach>
 ----

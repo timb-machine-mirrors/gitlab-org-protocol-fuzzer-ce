@@ -137,7 +137,7 @@ namespace Peach.Core.Dom
 		/// <summary>
 		/// How many times has this state run
 		/// </summary>
-		public uint runCount { get; private set; }
+		public uint runCount { get; set; }
 
 		protected virtual void RunScript(string expr)
 		{
@@ -264,6 +264,14 @@ namespace Peach.Core.Dom
 
 			foreach (var action in actions)
 				action.UpdateToOriginalDataModel();
+
+			if (runCount > 1)
+			{
+				// If this is a record iteration, apply element mutability
+				// after datasets and analyzers have been applied
+				if (parent.parent.context.controlRecordingIteration)
+					parent.parent.context.test.markMutableElements();
+			}
 		}
 
 		[OnCloned]

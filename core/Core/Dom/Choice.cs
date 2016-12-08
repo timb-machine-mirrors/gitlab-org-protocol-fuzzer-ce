@@ -321,7 +321,7 @@ namespace Peach.Core.Dom
 			if (choiceElements.Count == 0)
 				throw new InvalidOperationException();
 
-			SelectedElement = choiceElements[0];
+			SelectElement(choiceElements[0]);
 		}
 
 		public static DataElement PitParser(PitParser context, XmlNode node, DataElementContainer parent)
@@ -400,6 +400,11 @@ namespace Peach.Core.Dom
 			}
 			private set
 			{
+				// The selected element should be never set to the same object instance
+				// that is in choiceElements.  It needs to be a Clone() so we can share
+				// the choiceElements collection across array elements.
+				Debug.Assert(!choiceElements.Contains(value));
+
 				while (Count > 0)
 				{
 					// Must use base here, our RemoveAt will
@@ -505,6 +510,20 @@ namespace Peach.Core.Dom
 			orig.choiceElements = orig.tmpChoiceElements;
 			orig.tmpChoiceElements = null;
 			choiceElements = orig.choiceElements;
+		}
+
+		public override DataElement this[int index]
+		{
+			get { return base[index]; }
+			set
+			{
+				var update = IndexOf(SelectedElement) == index;
+
+				base[index] = value;
+
+				if (update)
+					_selectedElement = value;
+			}
 		}
 	}
 }

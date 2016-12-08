@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
-using NLog;
 using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Pro.Core.Agent.Monitors.Utilities;
 using Monitor = Peach.Core.Agent.Monitor2;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Peach.Pro.Core.Agent.Monitors
 {
@@ -71,6 +70,12 @@ namespace Peach.Pro.Core.Agent.Monitors
 				var stdout = result.StdOut.ToString();
 				var stderr = result.StdErr.ToString();
 
+				if (Asan.CheckForAsanFault(stderr))
+				{
+					_data = Asan.AsanToMonitorData(stdout, stderr);
+					return;
+				}
+
 				_data = new MonitorData
 				{
 					Data = new Dictionary<string, Stream>()
@@ -79,11 +84,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 				_data.Data.Add("stdout", new MemoryStream(Encoding.UTF8.GetBytes(stdout)));
 				_data.Data.Add("stderr", new MemoryStream(Encoding.UTF8.GetBytes(stderr)));
 
-				if (Asan.CheckForAsanFault(stderr))
-				{
-					_data = Asan.AsanToMonitorData(stderr);
-				}
-				else if (_faultOnRegex != null)
+				if (_faultOnRegex != null)
 				{
 					var m = _faultOnRegex.Match(stdout);
 

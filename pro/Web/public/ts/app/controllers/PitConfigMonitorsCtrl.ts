@@ -32,7 +32,7 @@ namespace Peach {
 		}
 
 		public get ShowError(): boolean {
-			return this.$scope.form.$invalid && this.$scope.form.$dirty;
+			return this.$scope.form.$invalid;
 		}
 
 		public get ShowMissingAgents(): boolean {

@@ -8,6 +8,7 @@ using SysProcess = System.Diagnostics.Process;
 using Peach.Core;
 using Peach.Pro.Core.Storage;
 using Peach.Pro.Core.WebServices.Models;
+using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.WebServices
 {
@@ -74,10 +75,15 @@ namespace Peach.Pro.Core.WebServices
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex);
+					Logger.Debug(ex, "Exception in Kill");
 					return false;
 				}
 			}
+		}
+
+		public bool ProxyEvent(IProxyEvent args)
+		{
+			return false;
 		}
 
 		// used by unit tests
@@ -161,7 +167,7 @@ namespace Peach.Pro.Core.WebServices
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex);
+					Logger.Debug(ex, "Exception in SendCommand");
 					return false;
 				}
 			}
@@ -195,7 +201,7 @@ namespace Peach.Pro.Core.WebServices
 			}
 			catch (Exception ex)
 			{
-				Logger.Debug(ex);
+				Logger.Debug(ex, "Exception in LoggingTask");
 			}
 		}
 

@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Peach.Core;
 using Peach.Pro.Core;
 using Peach.Core.Test;
+using Peach.Pro.Core.Mutators.Utility;
 
 namespace Peach.Pro.Test.Core
 {

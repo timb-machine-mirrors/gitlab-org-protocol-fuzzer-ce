@@ -5,6 +5,7 @@ using Peach.Pro.OS.Windows.Agent.Monitors;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Peach.Pro.Core.OS.Windows;
 
 namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 {
@@ -18,7 +19,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 
 		private bool Check(string exe)
 		{
-			var dbgPath = WindowsDebuggerHybrid.FindWinDbg();
+			var dbgPath = WindowsKernelDebugger.FindWinDbg(null);
 			var p = ProcessHelper.Run(Path.Combine(dbgPath, "gflags.exe"), "/p", null, null, -1);
 			var stdout = p.StdOut.ToString();
 			var lines = stdout.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -65,6 +66,9 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 		[Test]
 		public void TestBasic()
 		{
+			if (!Privilege.IsUserAdministrator())
+				Assert.Ignore("User is not an administrator.");
+
 			var exe = "foobar";
 			var runner = new MonitorRunner(Monitor, new Dictionary<string, string>
 			{

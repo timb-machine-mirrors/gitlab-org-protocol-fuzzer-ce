@@ -28,6 +28,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Peach.Core.Agent;
 
 namespace Peach.Core
 {
@@ -55,8 +56,11 @@ namespace Peach.Core
 	}
 
 	/// <summary>
-	/// Thrown to stop current iteration and move to next.
+	/// Thrown to stop current test case and move to next.
 	/// </summary>
+	/// <remarks>
+	/// Used to indicate an error that should stop the current test case, but not the fuzzing job.
+	/// </remarks>
 	[Serializable]
 	public class SoftException : ApplicationException
 	{
@@ -108,7 +112,37 @@ namespace Peach.Core
 		}
 	}
 
+	/// <summary>
+	/// Thrown to indicate a fault has occured.
+	/// </summary>
+	/// <remarks>
+	/// This exception can be thrown by Publishers or Scripting code to
+	/// indicate a fault has occured.  The exception extends from
+	/// SoftException, so normal cleanup code will run when this exception
+	/// is thrown.
+	/// </remarks>
+	[Serializable]
+	public class FaultException : SoftException
+	{
+		public FaultSummary Fault { get; private set; }
 
+		public FaultException(FaultSummary fault)
+			: base(fault.Title)
+		{
+			Fault = fault;
+		}
+
+		public FaultException(FaultSummary fault, Exception innerException)
+			: base(fault.Title, innerException)
+		{
+			Fault = fault;
+		}
+
+		protected FaultException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+	}
 }
 
 // end

@@ -1,30 +1,4 @@
 ﻿
-//
-// Copyright (c) Michael Eddington
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in	
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-
-// Authors:
-//   Michael Eddington (mike@dejavusecurity.com)
-
-// $Id$
 
 using System;
 using System.Collections.Generic;
@@ -48,6 +22,8 @@ using System.Diagnostics;
 using Peach.Pro.Core.Dom.Actions;
 using Action = Peach.Core.Dom.Action;
 using State = Peach.Core.Dom.State;
+using Peach.Pro.Core.License;
+using System.Reflection;
 
 namespace Peach.Pro.Core.Loggers
 {
@@ -99,7 +75,7 @@ namespace Peach.Pro.Core.Loggers
 
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
-		const string DebugLogLayout = "${longdate} ${logger} ${message}";
+		const string DebugLogLayout = "${longdate} ${logger} ${message} ${exception:format=tostring}";
 
 		// Filter these loggers to the info level since they are spammy at debug
 		static readonly string[] FilteredLoggers =
@@ -120,6 +96,9 @@ namespace Peach.Pro.Core.Loggers
 		Exception _caught;
 		Target _tempTarget;
 		Message _lastMessage;
+		ILicense _license;
+		IJobLicense _jobLicense;
+		ulong _counter;
 
 		enum Category { Faults, Reproducing, NonReproducible }
 
@@ -141,8 +120,10 @@ namespace Peach.Pro.Core.Loggers
 			BasePath = Path.GetFullPath((string)path);
 		}
 
-		public void Initialize(RunConfiguration config)
+		public void Initialize(RunConfiguration config, ILicense license, IJobLicense jobLicense)
 		{
+			_license = license;
+			_jobLicense = jobLicense;
 			_tempTarget = new DatabaseTarget(config.id) { Layout = DebugLogLayout };
 			ConfigureLogging(null, _tempTarget);
 		}
@@ -171,8 +152,23 @@ namespace Peach.Pro.Core.Loggers
 					AddEvent(db,
 						context.config.id,
 						"Starting monitor",
-						"Starting monitor '{0}'".Fmt(cls),
-						CompleteTestEvents.Last);
+						"Starting monitor '{0}' named '{1}'".Fmt(cls, name),
+						CompleteTestEvents.Last
+					);
+
+					var url = new Uri(agent.Url);
+					if (url.Scheme == "local" || url.Scheme == "tcp")
+					{
+						var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
+						if (type.Assembly == Assembly.GetExecutingAssembly() &&
+						   !_license.CanUseMonitor(cls))
+						{
+							throw new PeachException(
+								"The {0} monitor is not supported with your current license. ".Fmt(cls) +
+								"Contact Peach Fuzzer sales for more information."
+							);
+						}
+					}
 				}
 			}
 		}
@@ -274,6 +270,12 @@ namespace Peach.Pro.Core.Loggers
 		{
 			Logger.Trace(">>> Engine_TestFinished");
 
+			if (_jobLicense != null)
+			{
+				_jobLicense.Dispose();
+				_jobLicense = null;
+			}
+
 			Job job;
 			if (_cache != null)
 			{
@@ -325,6 +327,25 @@ namespace Peach.Pro.Core.Loggers
 			uint currentIteration,
 			uint? totalIterations)
 		{
+			// prevent last iteration failures from showing up in this one
+			_lastMessage = null; 
+
+			if (!context.controlIteration && !context.controlRecordingIteration)
+			{
+				if (_counter >= 100)
+				{
+					Debug.Assert(_jobLicense != null);
+					if (!_jobLicense.CanExecuteTestCase())
+					{
+						throw new PeachException(
+							"Total number of FuzzFlex test cases reached. " +
+							"Contact sales@peachfuzzer.com for more test cases."
+						);
+					}
+				}
+				_counter++;
+			}
+			
 			_states.Clear();
 
 			var mode = JobMode.Fuzzing;
@@ -575,23 +596,12 @@ namespace Peach.Pro.Core.Loggers
 			// The combined fault will use Assets and not collectedData
 			var ret = new MergedFault { collectedData = null };
 
-			Fault coreFault = null;
-			var dataFaults = new List<Fault>();
-
-			// First find the core fault.
-			foreach (var fault in faults)
-			{
-				if (fault.type == FaultType.Fault)
-				{
-					coreFault = fault;
-					Logger.Debug("Found core fault [" + coreFault.title + "]");
-				}
-				else
-					dataFaults.Add(fault);
-			}
+			var coreFault = faults.FirstOrDefault(f => f.type == FaultType.Fault);
 
 			if (coreFault == null)
 				throw new PeachException("Error, we should always have a fault with type = Fault!");
+
+			Logger.Debug("Found core fault [" + coreFault.title + "]");
 
 			// Gather up data from the state model
 			foreach (var item in stateModel.dataActions)
@@ -615,7 +625,9 @@ namespace Peach.Pro.Core.Loggers
 				// Put description at beginning of list
 				if (!string.IsNullOrEmpty(fault.description))
 				{
-					ret.Assets.Add(MakeFileAsset(fault, "description.txt", Encoding.UTF8.GetBytes(fault.description)));
+					// Use System.Text.Encoding so invalid chars get substituted with '?'
+					var desc = System.Text.Encoding.UTF8.GetBytes(fault.description);
+					ret.Assets.Add(MakeFileAsset(fault, "description.txt", desc));
 				}
 
 				// Put collected data second
@@ -925,6 +937,13 @@ namespace Peach.Pro.Core.Loggers
 			_cache.Continue();
 		}
 
+		public void Stop()
+		{
+			// Will be null if stop gets called prior to TestStarting event
+			if (_cache != null)
+				_cache.Stop();
+		}
+
 		public void RestoreLogging(Guid id)
 		{
 			Logger.Trace("RestoreLogging>");
@@ -953,12 +972,17 @@ namespace Peach.Pro.Core.Loggers
 				ConcurrentWrites = false,
 				KeepFileOpen = !config.singleIteration,
 				ArchiveAboveSize = 10 * 1024 * 1024,
+				MaxArchiveFiles = 10,
 				ArchiveNumbering = ArchiveNumberingMode.Sequence,
 				Encoding = System.Text.Encoding.UTF8,
 			};
 
 			var oldTarget = _tempTarget;
-			_tempTarget = new AsyncTargetWrapper(target) { Name = target.Name };
+			_tempTarget = new AsyncTargetWrapper(target)
+			{
+				Name = target.Name,
+				OverflowAction = AsyncTargetWrapperOverflowAction.Block
+			};
 
 			ConfigureLogging(oldTarget, _tempTarget);
 

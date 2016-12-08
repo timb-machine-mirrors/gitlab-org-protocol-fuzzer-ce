@@ -250,21 +250,51 @@ namespace Peach.Core
 		#endregion
 
 		/// <summary>
+		/// Triggers a fault for the currently executing test case.
+		/// </summary>
+		/// <param name="title">Title of fault</param>
+		/// <param name="description">Description of fault</param>
+		/// <param name="majorHash">Major hash for fault. Set to null or empty string to skip bucketing.</param>
+		/// <param name="minorHash">Minor hash for fault. Set to null or empty string to skip bucketing.</param>
+		/// <param name="exploitability">Exploitability for fault</param>
+		/// <param name="detectionSource">Detection source, such as Monitor class attribute.</param>
+		/// <param name="detectionName">Detection name, such as name attribute</param>
+		/// <param name="agentName">Name of agent fault was reported by</param>
+		public void Fault(string title, string description, string majorHash, string minorHash, string exploitability, string detectionSource, string detectionName = null, string agentName = null)
+		{
+			throw new FaultException(new FaultSummary
+			{
+				Title = title,
+				Description = description,
+				MajorHash = majorHash,
+				MinorHash = minorHash,
+				Exploitablity = exploitability,
+				DetectionSource = detectionSource,
+				DetectionName = detectionName,
+				AgentName = agentName
+			});
+		}
+
+		/// <summary>
 		/// Configuration settings for this run
 		/// </summary>
 		public RunConfiguration config = null;
 
 		/// <summary>
-		/// Engine instance for this run
-		/// </summary>
-		[NonSerialized]
-		public Engine engine = null;
-
-		/// <summary>
 		/// Dom to use for this run
 		/// </summary>
+		[Obsolete]
+		public Dom.Dom dom
+		{
+			get { return test != null ? test.parent : null; }
+		}
+
+		/// <summary>
+		/// Engine instance for this run
+		/// </summary>
+		[Obsolete]
 		[NonSerialized]
-		public Dom.Dom dom = null;
+		public Engine engine = null;
 
 		/// <summary>
 		/// Current test being run
@@ -402,6 +432,8 @@ namespace Peach.Core
 
 		#region Reproduce Fault
 
+		public bool disableReproduction = false;
+
 		/// <summary>
 		/// True when we have found a fault and are in the process
 		/// of reproducing it.
@@ -424,6 +456,11 @@ namespace Peach.Core
 		/// Did the fault we are trying to reproduce occur on a control iteration.
 		/// </summary>
 		public bool reproducingControlIteration = false;
+
+		/// <summary>
+		/// Did the fault we are trying to reproduce occur on a control iteration.
+		/// </summary>
+		public bool reproducingControlRecordingIteration = false;
 
 		/// <summary>
 		/// Number of iterations to jump.

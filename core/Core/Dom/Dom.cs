@@ -66,13 +66,6 @@ namespace Peach.Core.Dom
 			get { return _python ?? (_python = new PythonScripting()); }
 		}
 
-		Scripting _ruby;
-
-		public Scripting Ruby
-		{
-			get { return _ruby ?? (_ruby = new RubyScripting()); }
-		}
-
 		public Dom()
 		{
 			Name = "";
