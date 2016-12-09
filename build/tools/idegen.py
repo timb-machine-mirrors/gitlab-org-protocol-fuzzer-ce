@@ -372,15 +372,11 @@ class vsnode_cs_target(msvs.vsnode_project):
 			else:
 				name = tg.name
 
-
 		# If taskgen is in multiple solutions, prepend sln name to csproj file
-		self.ctx = ctx
 		if len(getattr(tg, 'solutions', [])) > 1:
-			csproj = self.ctx.sln_name + '-' + name + '.csproj'
-		else:
-			csproj = name + '.csproj'
-		node = self.base.make_node(csproj) # the project file as a Node
+			name = ctx.sln_name + '-' + name
 
+		node = self.base.make_node(name + '.csproj') # the project file as a Node
 
 		msvs.vsnode_project.__init__(self, ctx, node)
 		self.name = name
