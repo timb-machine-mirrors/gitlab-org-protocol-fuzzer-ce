@@ -37,8 +37,7 @@ group peach-web
 
 	nuget Autofac
 	nuget Autofac.Extensions.DependencyInjection
-nuget CommonMark.NET
-	nuget Dapper
+	nuget CommonMark.NET
 	nuget DotNetZip
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
@@ -66,6 +65,7 @@ nuget CommonMark.NET
 	nuget Serilog.Settings.Configuration
 	nuget Serilog.Sinks.ColoredConsole
 	nuget Serilog.Sinks.Literate
+	nuget ServiceStack.OrmLite.PostgreSQL
 	nuget Slapper.AutoMapper
 	nuget SocketHttpListener
 	nuget Swashbuckle beta
