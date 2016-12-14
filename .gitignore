@@ -105,3 +105,6 @@ paket/nas
 # Rider EAP
 .idea
 
+# Packer artifacts
+web/packer/output-vmware-iso
+web/packer/packer_cache
