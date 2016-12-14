@@ -1,0 +1,29 @@
+[Check_CleartextAuthentication]
+== Cleartext Authentication Check
+
+[cols="1,4"]
+|====
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
+| CWE | https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
+| PCI | 6.5.4 Insecure communications
+|====
+
+Cleartext authentication vulnerabilities occur when authentication credentials are
+transported via unecrypted channels such as HTTP.
+This exposes the transmitted credentials to any attacker who can monitor (sniff) the network
+traffic during transmition.
+Sensitive information such as credentials should always be trasmitted via encrypted channels such as HTTPS.
+
+=== Configuration
+
+TODO
+
+=== Operation
+
+|====
+| Passive on all requests | No test generation | No traffic generation
+|====
+
+This is a global check, global checks operate on all responses and log messages for the defined scope
+(project or route).  Each response is analyzed to detect use of cleartext authentication over 
+unencrypted channels.
