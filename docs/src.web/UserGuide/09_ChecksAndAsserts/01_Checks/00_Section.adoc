@@ -8,8 +8,17 @@ Checks are broken up into global, passive, active and mutational....
 include::HtmlInjection.adoc[]
 
 >>>
+include::JsonInjection.adoc[]
+
+>>>
 include::SensitiveInformation.adoc[]
 
 >>>
+include::SessionCookie.adoc[]
+
+>>>
 include::SqlInjection.adoc[]
+
+>>>
+include::XmlInjection.adoc[]
 
