@@ -23,5 +23,8 @@ include::SessionCookie.adoc[]
 include::SqlInjection.adoc[]
 
 >>>
+include::Token.adoc[]
+
+>>>
 include::XmlInjection.adoc[]
 

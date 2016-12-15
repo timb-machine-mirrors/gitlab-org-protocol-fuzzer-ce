@@ -14,6 +14,11 @@ This exposes the transmitted credentials to any attacker who can monitor (sniff)
 traffic during transmition.
 Sensitive information such as credentials should always be trasmitted via encrypted channels such as HTTPS.
 
+Type of authentication mechanisms supported by check:
+
+ * HTTP Basic Authentication
+ * API Token
+
 === Configuration
 
 TODO
