@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Peach.Core;
 
-namespace Peach.Pro.Core
+namespace Peach.Pro.Core.Mutators.Utility
 {
 	class WeightedListDebugView<T> where T : IWeighted
 	{

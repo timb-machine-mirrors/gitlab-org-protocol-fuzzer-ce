@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Peach.Core;
+using Peach.Pro.Core.Mutators.Utility;
 using Random = Peach.Core.Random;
 
 // This assembly contains Peach plugins
