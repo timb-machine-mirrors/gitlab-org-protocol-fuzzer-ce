@@ -42,6 +42,7 @@ group peach-web
 	nuget FluentMigrator
 	nuget FluentMigrator.Runner
 	nuget Handlebars.Net
+	nuget jQWidgets.AspNetCore.Mvc.Bootstrap.TagHelpers
 	nuget LiquidState
 	nuget Microsoft.AspNet.WebApi.Client
 	nuget Microsoft.AspNetCore.Diagnostics
