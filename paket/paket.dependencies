@@ -37,6 +37,7 @@ group peach-web
 
 	nuget Autofac
 	nuget Autofac.Extensions.DependencyInjection
+	nuget BootstrapMvc.Bootstrap3Mvc6
 	nuget CommonMark.NET
 	nuget DotNetZip
 	nuget FluentMigrator
