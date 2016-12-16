@@ -339,34 +339,33 @@ def generate_binding_redirects(self):
 	if not getattr(self, 'GenerateBindingRedirects', False):
 		return
 
-	import xml.etree.ElementTree as ET
-	from xml.dom.minidom import parseString
-
-	asms = []
-	collect_assemblies(self, self.name, [], asms)
-
-	ns = {'asm': 'urn:schemas-microsoft-com:asm.v1'}
-
-	cmd = []
-	if self.env.CS_NAME == 'mono':
-		cmd = [ 'mono' ]
-
-	asms.sort(key=lambda x: os.path.basename(x), cmp=lambda x, y: cmp(x.lower(), y.lower()))
-	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + asms)
-	infos = Utils.subprocess.check_output(cmd) or ''
-
 	cfg = self.path.find_resource('app.config')
 	if not cfg.is_src():
 		return
+
+	import xml.etree.ElementTree as ET
+	from xml.dom.minidom import parseString
+
+	ns = {'asm': 'urn:schemas-microsoft-com:asm.v1'}
 
 	xml = ET.parse(cfg.abspath())
 	node = xml.find('runtime/asm:assemblyBinding', ns)
 	if node is None:
 		return
 
-	old = cfg.read(flags='rb', encoding='utf-8')
+	cmd = []
+	if self.env.CS_NAME == 'mono':
+		cmd = [ 'mono' ]
 
-	node.clear()
+	bindings = getattr(self, 'manual_bindings', {})
+
+	asms = []
+	collect_assemblies(self, self.name, [], asms)
+
+	# asms.sort(key=lambda x: os.path.basename(x), cmp=lambda x, y: cmp(x.lower(), y.lower()))
+	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + asms)
+	infos = Utils.subprocess.check_output(cmd) or ''
+
 	for info in infos.splitlines():
 		parts = info.split(', ')
 
@@ -378,15 +377,30 @@ def generate_binding_redirects(self):
 		if token == 'null':
 			continue
 
+		if name in bindings:
+			continue
+
+		bindings[name] = dict(
+			culture = culture,
+			publicKeyToken = token,
+			newVersion = version,
+			oldVersion = '0.0.0.0-%s' % version
+		)
+
+	index = sorted(bindings)
+
+	node.clear()
+	for name in index:
+		binding = bindings[name]
 		dependentAssembly = ET.SubElement(node, 'dependentAssembly')
 		ET.SubElement(dependentAssembly, 'assemblyIdentity', dict(
 			name=name,
-			publicKeyToken=token,
-			culture=culture
+			publicKeyToken=binding['publicKeyToken'],
+			culture=binding['culture']
 		))
 		ET.SubElement(dependentAssembly, 'bindingRedirect', dict(
-			oldVersion='0.0.0.0-%s' % version,
-			newVersion=version
+			oldVersion=binding['oldVersion'],
+			newVersion=binding['newVersion']
 		))
 
 	raw = ET.tostring(xml.getroot(), 'utf-8')
@@ -402,6 +416,7 @@ def generate_binding_redirects(self):
 	new = new.replace('<ns0:assemblyBinding>', '<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">')
 	new = new.replace('</ns0:assemblyBinding>', '</assemblyBinding>')
 
+	old = cfg.read(flags='rb', encoding='utf-8')
 	if old != new:
 		cfg.write(new, flags='wb', encoding='utf-8')
 

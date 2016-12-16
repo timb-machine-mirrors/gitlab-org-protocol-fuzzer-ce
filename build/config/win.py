@@ -64,8 +64,8 @@ def prepare(conf):
 		env['RESGEN'] = getattr(conf.all_envs.get('win_x86'), 'RESGEN', [ None ])[0]
 
 	pfiles = os.getenv('PROGRAMFILES(X86)', os.getenv('PROGRAMFILES'))
-	env['TARGET_FRAMEWORK'] = 'v4.6.1'
-	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4.6.1'
+	env['TARGET_FRAMEWORK'] = 'v4.5.1'
+	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4.5.1'
 	env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])
 
 	env['RUN_NETFX'] = ''
