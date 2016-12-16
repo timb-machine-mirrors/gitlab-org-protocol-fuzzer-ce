@@ -6,6 +6,13 @@ host_plat = [ 'win32' ]
 
 archs = [ 'x86', 'x64' ]
 
+# x86 compilation line:
+#cl /MT /EHs- /EHa- /wd4530 /DTARGET_WINDOWS /DBIGARRAY_MULTIPLIER=1 /D_CRT_SECURE_NO_DEPRECATE /D_SECURE_SCL=0 /nologo /Gy /Oi- /GR- /GS- /D__PIN__=1 /DPIN_CRT=1 /D_WINDOWS_H_PATH_="C:\Program Files (x86)\Windows Kits\8.1\Include\um" /D__i386__ /Zc:threadSafeInit- /DTARGET_IA32 /DHOST_IA32  /I../../../source/include/pin /I../../../source/include/pin/gen -I../../../extras/stlport/include -I../../../extras -I../../../extras/libstdc++/include -I../../../extras/crt/include -I../../../extras/crt -I../../../extras/crt/include/arch-x86 -I../../../extras/crt/include/kernel/uapi -I../../../extras/crt/include/kernel/uapi/asm-x86 /FIinclude/msvc_compat.h /I../../../extras/components/include /I../../../extras/xed-ia32/include /I../../../source/tools/InstLib /O2  /c /Foobj-ia32/MyPinTool.obj MyPinTool.cpp
+#MyPinTool.cpp
+#link /DLL /EXPORT:main /NODEFAULTLIB /NOLOGO /INCREMENTAL:NO /IGNORE:4210 /IGNORE:4049 /DYNAMICBASE /NXCOMPAT ../../../ia32/runtime/pincrt/crtbeginS.obj /MACHINE:x86 /ENTRY:Ptrace_DllMainCRTStartup@12 /BASE:0x55000000 /OPT:REF  /out:obj-ia32/MyPinTool.dll obj-ia32/MyPinTool.obj  /LIBPATH:../../../ia32/lib /LIBPATH:../../../ia32/lib-ext /LIBPATH:../../../ia32/runtime/pincrt /LIBPATH:../../../extras/xed-ia32/lib pin.lib xed.lib stlport-static.lib m-static.lib c-static.lib os-apis.lib pinvm.lib ntdll-32.lib kernel32.lib
+#   Creating library obj-ia32/MyPinTool.lib and object obj-ia32/MyPinTool.exp
+#pin.lib(pin_client.obj) : warning LNK4217: locally defined symbol ___sF imported in function "void __cdecl LEVEL_PINCLIENT::StartProgram(void)" (?StartProgram@LEVEL_PINCLIENT@@YAXXZ)
+
 tools = [
 	'msvc',
 	'cs',
