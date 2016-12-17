@@ -79,7 +79,7 @@ GROUP peach-web
 FRAMEWORK: NET451
 NUGET
   remote: https://www.nuget.org/api/v2
-    Autofac (4.2)
+    Autofac (4.2.1)
     Autofac.Extensions.DependencyInjection (4.0)
       Autofac (>= 4.0)
       Microsoft.Extensions.DependencyInjection.Abstractions (>= 1.0)
