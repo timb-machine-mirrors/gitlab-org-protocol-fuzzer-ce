@@ -14,6 +14,9 @@ include::HtmlInjection.adoc[]
 include::JsonInjection.adoc[]
 
 >>>
+include::SensitiveFile.adoc[]
+
+>>>
 include::SensitiveInformation.adoc[]
 
 >>>
