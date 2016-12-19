@@ -1,0 +1,53 @@
+
+=== Selenium
+
+Selenium test cases can be used with Peach Web via exporting them to a supported framework.
+For example, the JUnit 4 integration has an example of using exported Selenium test cases.
+The exported Selenium test cases have been modified to set the Proxy value in the target
+web driver.
+
+==== Custom Traffic Generators
+
+Custom traffic generators exercise the web APIs being tested in a loop.
+For best results it's recommended that the Peach Web Proxy API be used.
+This allows performing some test setup/tear down independent of the fuzzed API calls.
+The traffic generator should produce traffic until a call to the Peach Web Proxy APIs fail.
+This allows Peach to direct the length of testing.
+
+NOTE: An example traffic generator is included in the SDK as _SDK\webproxy\examples\flask_rest_target\hand_fuzz.py_.
+This traffic generator makes use of the Peach Web Proxy API.
+
+==== Proxy REST API
+
+The Proxy API allows for tight integration with application unit tests.
+As such the provided APIs match with typical unit test framework actions such as set-up and tear-down.  When using unit tests with Peach the typical flow is as follows:
+
+. POST /p/jobs - Start fuzzing job using WebProxy pit
+. PUT sessionSetUp
+. [One time set up actions here]
+LOOP:
+.. PUT testSetUp
+.. [Setup actions that occur on each iteration of fuzzing]
+.. PUT testCase w/test name
+.. [Requests that are fuzzed]
+.. PUT testTearDown
+.. [Tear down action that occur on each iteration of fuzzing]
+.. GOTO LOOP
+. PUT sessionTearDown - Once per fuzzing session
+. [Session tear down actions, occur once per-fuzzing session]
+
+NOTE: Interactive est api documentation can be viewed inside of Peach by navigating
+to "Help" -> "Rest API" then select the "Proxy" section.
+
+*****
+Peach Web provides a Python module 'peachproxy' that provides wrappers around the Peach Proxy API.
+The module is available in _SDK/webproxy/peachproxy_.
+It can be installed by running:
+
+----
+python setup.py install
+----
+
+The module provides functions for each the Peach Web Proxy APIs.
+
+*****
