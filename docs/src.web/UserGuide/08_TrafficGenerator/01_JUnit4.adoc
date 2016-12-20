@@ -1,0 +1,82 @@
+[tg_JUnit4]
+==== JUnit 4
+
+The JUnit 4 integrations is an extension to JUnit 4 to create a Peach Suite of test cases.
+Integration requires creating a special Suite of unit tests.
+
+Examples are provided with the source code:
+
+TestFlaskRestTarget.java::
+	JUnit 4 test cases that operate against the _flask_rest_target_.
+
+FuzzFlashRestTarget.java::
+	Example of a Peach Suite that uses the unit tests defined in _TestFlaskRestTarget_.
+
+===== Installation
+
+Build with Maven or Netbeans. A resulting jar file is produced in the _target_ folder.
+Dependencies are in _target/lib_.
+
+===== Usage
+
+Create a suite similar to "FuzzFlashRestTarget.java".  
+
+Example usage:
+
+All test classes to include are listed in the @PeachSuiteClasses attribute.
+
+[source=java]
+----
+@RunWith(com.peachfuzzer.web.frameworks.junit4.JUnit4PeachSuiteRunner.class)
+@PeachSuiteClasses(TestFlaskRestTarget.class)
+public class FuzzFlaskRestTarget {
+    @BeforeClass
+    public static void setProxy()
+    {
+        // Setup proxy options for our HTTP library
+        
+        // This code will vary depending on the HTTP library
+        // in use.
+        
+        Options.setOption(Option.PROXY, new HttpHost("127.0.0.1", 8001));
+    }
+    
+    @AfterClass
+    public static void removeProxy()
+    {
+        // Remove any proxy options for our HTTP library
+        
+        // This code will vary depending on the HTTP library
+        // in use.
+        
+        Options.setOption(Option.PROXY, null);
+    }
+}
+----
+
+===== Running
+
+For JUnit 4 runner, Peach controls when the runner should stop.
+
+The following environment variables are expected to bet set.
+These variables are normally set by the CI runner:
+
+PEACH_API:: URL to {product} API. Ex. http://10.0.0.1
+PEACH_SESSIONID:: ID for curent testing session. Returned from /api/sessions API.
+PEACH_PROXY:: URL to current proxy instance. Returned from /api/sessions API. Ex. http://10.0.0.1:1234
+
+
+.Windows
+----
+set PEACH_API=http://10.0.0.1
+set PEACH_SESSIONID=xxxxx
+set PEACH_PROXY=http://10.0.0.1:1234
+
+java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
+----
+
+.Linux
+----
+export PEACH_API_HOST=127.0.0.1:8888
+java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
+----
