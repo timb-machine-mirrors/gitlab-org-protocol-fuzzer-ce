@@ -32,46 +32,47 @@ nuget WebSocketSharp 1.0.3-rc9
 
 # careful, the packages directory for a group is always lower-case
 group peach-web
-	framework: net451
-	source https://www.nuget.org/api/v2
+framework: net451
+source https://www.nuget.org/api/v2
 
-	nuget Autofac
-	nuget Autofac.Extensions.DependencyInjection
-	nuget BootstrapMvc.Bootstrap3Mvc6
-	nuget CommonMark.NET
-	nuget DotNetZip
-	nuget FluentMigrator
-	nuget FluentMigrator.Runner
-	nuget Handlebars.Net
-	nuget jQWidgets.AspNetCore.Mvc.Bootstrap.TagHelpers
-	nuget LiquidState
-	nuget Microsoft.AspNet.WebApi.Client
-	nuget Microsoft.AspNetCore.Diagnostics
-	nuget Microsoft.AspNetCore.Hosting
-	nuget Microsoft.AspNetCore.Mvc
-	nuget Microsoft.AspNetCore.Routing
-	nuget Microsoft.AspNetCore.StaticFiles
-	nuget Microsoft.AspNetCore.TestHost
-	nuget Microsoft.Extensions.Configuration.CommandLine
-	nuget Microsoft.Extensions.Configuration.Json
-	nuget Microsoft.Extensions.FileProviders.Embedded
-	nuget Microsoft.Extensions.Logging.Console
-	nuget Microsoft.Extensions.Logging.Debug
-	nuget Minimatch
-	nuget Moq
-	nuget Npgsql
-	nuget NSwag.Core
-	nuget NUnit
-	nuget Serilog.Enrichers.Thread
-	nuget Serilog.Extensions.Logging
-	nuget Serilog.Settings.Configuration
-	nuget Serilog.Sinks.ColoredConsole
-	nuget Serilog.Sinks.Literate
-	nuget ServiceStack.OrmLite.PostgreSQL
-	nuget Slapper.AutoMapper
-	nuget SocketHttpListener
-	nuget Swashbuckle beta
-	nuget Swashbuckle.Swagger beta
-	nuget Swashbuckle.SwaggerGen beta
-	nuget Swashbuckle.SwaggerUi beta
-	nuget System.Runtime.CompilerServices.Unsafe
+nuget Autofac
+nuget Autofac.Extensions.DependencyInjection
+nuget BootstrapMvc.Bootstrap3Mvc6
+nuget CommonMark.NET
+nuget DotNetZip
+nuget FluentMigrator
+nuget FluentMigrator.Runner
+nuget Handlebars.Net
+nuget LiquidState
+nuget Microsoft.AspNet.WebApi.Client
+nuget Microsoft.AspNetCore.Diagnostics
+nuget Microsoft.AspNetCore.Hosting
+nuget Microsoft.AspNetCore.Mvc
+nuget Microsoft.AspNetCore.Routing
+nuget Microsoft.AspNetCore.StaticFiles
+nuget Microsoft.AspNetCore.TestHost
+nuget Microsoft.Extensions.Configuration.CommandLine
+nuget Microsoft.Extensions.Configuration.Json
+nuget Microsoft.Extensions.FileProviders.Embedded
+nuget Microsoft.Extensions.Logging.Console
+nuget Microsoft.Extensions.Logging.Debug
+nuget Minimatch
+nuget Moq
+nuget Npgsql
+nuget NSwag.Core
+nuget NUnit
+nuget Selenium.Support
+nuget Selenium.WebDriver
+nuget Serilog.Enrichers.Thread
+nuget Serilog.Extensions.Logging
+nuget Serilog.Settings.Configuration
+nuget Serilog.Sinks.ColoredConsole
+nuget Serilog.Sinks.Literate
+nuget ServiceStack.OrmLite.PostgreSQL
+nuget Slapper.AutoMapper
+nuget SocketHttpListener
+nuget Swashbuckle beta
+nuget Swashbuckle.Swagger beta
+nuget Swashbuckle.SwaggerGen beta
+nuget Swashbuckle.SwaggerUi beta
+nuget System.Runtime.CompilerServices.Unsafe
