@@ -7,11 +7,14 @@ namespace PeachService
 	{
 		static int Main(string[] args)
 		{
-			return new Service
+			using (var service = new Service
 			{
-				CreateWeb = (license, pitLibraryPath, jobMonitor) => 
+				CreateWeb = (license, pitLibraryPath, jobMonitor) =>
 					new WebServer(license, pitLibraryPath, jobMonitor)
-			}.Run(args);
+			})
+			{
+				return service.Run(args);
+			}
 		}
 	}
 }

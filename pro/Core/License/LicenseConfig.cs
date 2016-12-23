@@ -85,6 +85,7 @@ Example of an updated file is:
 				if (path != null)
 					return path;
 
+			    // Unix: $HOME/.config/Peach
 				path = Path.Combine(
 					Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 					"Peach"

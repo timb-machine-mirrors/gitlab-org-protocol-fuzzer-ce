@@ -14,28 +14,33 @@ using Peach.Pro.PitTester;
 
 namespace PitTool
 {
-
 	public partial class PitTool : BaseProgram
 	{
 		// global options
 		string _pitLibraryPath;
+
 		readonly NamedCollection<Command> _cmds = new NamedCollection<Command>();
 
 		// compile options
 		bool _no_verify;
+
 		bool _no_lint;
 		bool _no_meta;
 		bool _no_ninja;
 
 #if DEBUG
+
 		// protect options
 		string _prefix = "";
+
 		string _salt;
 #endif
 
 #if DEBUG
+
 		// test options
 		uint? _seed;
+
 		bool _notest;
 		bool _nodata;
 		bool _keepGoing;
@@ -46,7 +51,10 @@ namespace PitTool
 
 		static int Main(string[] args)
 		{
-			return new PitTool().Run(args);
+			using (var program = new PitTool())
+			{
+				return program.Run(args);
+			}
 		}
 
 		protected override void AddCustomOptions(OptionSet options)
@@ -141,6 +149,7 @@ namespace PitTool
 		}
 
 #if DEBUG
+
 		OptionSet MakeTestOptions()
 		{
 			var options = new OptionSet
@@ -155,9 +164,11 @@ namespace PitTool
 			};
 			return options;
 		}
+
 #endif
 
 #if DEBUG
+
 		OptionSet MakeProtectOptions()
 		{
 			var options = new OptionSet
@@ -167,6 +178,7 @@ namespace PitTool
 			};
 			return options;
 		}
+
 #endif
 
 		protected override int ShowUsage(List<string> args)
@@ -303,6 +315,7 @@ namespace PitTool
 		}
 
 #if DEBUG
+
 		int Protect(Command cmd, List<string> args)
 		{
 			if (args.Count != 2)
@@ -337,9 +350,11 @@ namespace PitTool
 
 			return 0;
 		}
+
 #endif
 
 #if DEBUG
+
 		int MakeTestAssembly(Command cmd, List<string> args)
 		{
 			if (args.Count != 2)
@@ -358,6 +373,7 @@ namespace PitTool
 
 			return 0;
 		}
+
 #endif
 
 		int Ninja(Command cmd, List<string> args)
@@ -381,6 +397,7 @@ namespace PitTool
 		}
 
 #if DEBUG
+
 		int Test(Command cmd, List<string> args)
 		{
 			if (args.Count != 1)
@@ -426,6 +443,7 @@ namespace PitTool
 
 			return 0;
 		}
+
 #endif
 
 		int Crack(Command cmd, List<string> args)
@@ -463,6 +481,7 @@ namespace PitTool
 		}
 
 #if DEBUG
+
 		void VerifyDataSets(string pitTestFile)
 		{
 			Console.WriteLine("Verifying pit data sets: {0}", pitTestFile);
@@ -525,6 +544,7 @@ namespace PitTool
 
 			Console.WriteLine();
 		}
+
 #endif
 
 		string ComputeVersionHash()
@@ -554,6 +574,5 @@ namespace PitTool
 				ComputeVersionHash(Assembly.Load(asmRef), cs, seen);
 			}
 		}
-
 	}
 }

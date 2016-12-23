@@ -1,4 +1,3 @@
-//using System.Diagnostics;
 using Peach.Pro.Core.Runtime;
 
 namespace PeachWorker
@@ -7,9 +6,12 @@ namespace PeachWorker
 	{
 		static int Main(string[] args)
 		{
-			//Debugger.Launch();
+			//System.Diagnostics.Debugger.Launch();
 
-			return new Worker().Run(args);
+			using (var worker = new Worker())
+			{
+				return worker.Run(args);
+			}
 		}
 	}
 }
