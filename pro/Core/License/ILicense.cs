@@ -30,7 +30,7 @@ namespace Peach.Pro.Core.License
 		public bool IsValid { get; set; }
 	}
 
-	public interface ILicense
+	public interface ILicense : IDisposable
 	{
 		LicenseStatus Status { get; }
 		string ErrorText { get; }

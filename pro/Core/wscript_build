@@ -132,7 +132,7 @@ bld(
 		group = 'peach-web',
 		frameworks = [ 'net20' ]
 	),
-	source = bld.path.ant_glob('Mutators/Utility/*.cs Mutators/String*.cs'),
+	source = bld.path.ant_glob('Mutators/Utility/*.cs Mutators/String*.cs Mutators/Double*.cs Mutators/Number*.cs'),
 	resource = [
 		'Resources/NamedSequences.txt',
 		'Resources/xmltests.zip',
