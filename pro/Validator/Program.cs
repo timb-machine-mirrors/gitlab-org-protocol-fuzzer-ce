@@ -18,7 +18,10 @@ namespace PeachValidator
 		[STAThread]
 		static void Main(string[] args)
 		{
-			new Program().Run(args);
+			using (var program = new Program())
+			{
+				program.Run(args);
+			}
 		}
 
 		protected override void AddCustomOptions(OptionSet options)
@@ -48,7 +51,7 @@ namespace PeachValidator
 			var pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 
 			PrepareLicensing(pitLibraryPath);
-			
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainForm(_license, pitLibraryPath, pit, sample, save));
@@ -59,7 +62,7 @@ namespace PeachValidator
 		protected override int ReportError(List<string> args, bool showUsage, Exception ex)
 		{
 			MessageBox.Show(ex.Message);
-			
+
 			return base.ReportError(args, showUsage, ex);
 		}
 	}
