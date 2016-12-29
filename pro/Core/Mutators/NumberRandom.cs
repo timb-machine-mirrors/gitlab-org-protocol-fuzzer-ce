@@ -28,7 +28,7 @@ namespace Peach.Pro.Core.Mutators
 				System.Diagnostics.Debug.Assert(obj is Peach.Core.Dom.String);
 
 				total = maxCount;
-				gen = () => new Variant(context.Random.Next(long.MinValue, long.MaxValue).ToString());
+				gen = () => new Variant(context.Random.NextInt64().ToString());
 			}
 			else if (asNum.Signed)
 			{
