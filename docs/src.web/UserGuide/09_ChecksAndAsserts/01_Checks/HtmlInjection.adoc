@@ -14,7 +14,7 @@ embedded in a software product such as the browser within WinAmp, an RSS reader,
 The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, 
 Flash, or any other browser-supported technology.
 
-This check injections various HTML snippets that demonstraight a XSS issue.  
+This check injects various HTML snippets that demonstraight a XSS issue.  
 The response is then analyzed to determine if the XSS injection has been included in any
 field or response body identified as contianing HTML.
 
