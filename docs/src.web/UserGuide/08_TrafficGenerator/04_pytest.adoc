@@ -1,5 +1,4 @@
 [tg_pytest]
-
 ==== pytest
 
 pytest-peach is a plugin for link:http://pytest.org[py.test] that integrates with Peach Web.

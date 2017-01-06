@@ -1,12 +1,12 @@
 [[Preface]]
 == Preface
 
-This document is one of two books that together form the official documentation of
-{product} {version}. This documentation set is written by the {product} team, and
+This document is the official documentation of {product} {version}. 
+This documentation set is written by the {product} team, and 
 represents a concerted effort to fully document all of the {product} features.
 
-This book, {peachug}, focuses on activities encountered in
-day-to-day usage of {product}. The organization of this book is predominantly task-driven.
+This book, {peachug}, focuses on activities encountered in day-to-day usage of {product}. 
+The organization of this book is predominantly task-driven.
 
 The primary audience for this guide is all associated roles including operations and end users.
 

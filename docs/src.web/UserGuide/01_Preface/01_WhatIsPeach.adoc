@@ -1,6 +1,15 @@
 === What is {product}?
 
-{product} (Peach) is a fuzzer for data consumers. Fuzzing is a software testing technique that
+{product} performs security testing of Web Serices/APIs. 
+Testing includes (for example) OWASP Top 10 and PCI 6.5 security issues and also includes fuzzing.
+{product} is designed to integrate into modern development models such as Agile and continuous integration (CI) cicles.
+{product} integrates with CI systems and is intended to be run automatically during daily builds.
+{product} is intended to be integrated into engineering groups with the least amount of workflow changes.
+
+* Primary usage
+** Testing Web APIs
+
+fuzzer for data consumers. Fuzzing is a software testing technique that
 introduces malformed data to parts of a computer system. How the tested item reacts to unexpected
 data becomes the source of security bugs.
 

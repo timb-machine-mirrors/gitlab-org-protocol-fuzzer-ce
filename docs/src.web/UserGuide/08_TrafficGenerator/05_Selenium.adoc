@@ -1,7 +1,9 @@
 [tg_Selenum]
 === Selenium
 
-Selenium test cases can be used with Peach Web via exporting them to a supported framework.
+Selenium test cases can be used with {product} via exporting them to a supported framework.
 For example, the JUnit 4 integration has an example of using exported Selenium test cases.
 The exported Selenium test cases have been modified to set the Proxy value in the target
 web driver.
+
+An example Selenium 
