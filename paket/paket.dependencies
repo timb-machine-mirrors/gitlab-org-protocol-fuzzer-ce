@@ -37,12 +37,15 @@ source https://www.nuget.org/api/v2
 
 nuget Autofac
 nuget Autofac.Extensions.DependencyInjection
+nuget Bootstrap.Multiselect
 nuget BootstrapMvc.Bootstrap3Mvc6
 nuget CommonMark.NET
+nuget datatables.net.bootstrap
 nuget DotNetZip
 nuget FluentMigrator
 nuget FluentMigrator.Runner
 nuget Handlebars.Net
+nuget jQuery < 2.0
 nuget LiquidState
 nuget Microsoft.AspNet.WebApi.Client
 nuget Microsoft.AspNetCore.Diagnostics
