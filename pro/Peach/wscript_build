@@ -101,7 +101,7 @@ internal = common + [
 ]
 
 bld(
-	features = 'zip',
+	features = 'peach zip',
 	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, bld.variant ]),
 	use = peach_pro,
 )
@@ -111,7 +111,7 @@ internal_variant = bld.variant \
 	.replace('release', 'internal')
 
 bld(
-	features = 'zip',
+	features = 'peach zip',
 	name = '-'.join([ 'peach-pro', bld.env.BUILDTAG, internal_variant ]),
 	use = internal,
 )

@@ -42,4 +42,5 @@ def configure(conf):
 		'doc',
 		'emit',
 		'subst',
+		'zip',
 	])
