@@ -59,7 +59,7 @@ userGuide = bld(
 	source = 'src.web/UserGuide/UserGuide.adoc',
 	images = 'src.web/images',
 	name = 'Peach_API_Security_User_Guide.pdf',
-	install_path = '${BINDIR}/Web/docs',
+	install_path = '${BINDIR}/Web',
 )
 
 bld(
@@ -67,7 +67,7 @@ bld(
 	source = 'src.web/UserGuide/UserGuide.adoc',
 	images = 'src.web/images',
 	name = 'webhelpApiUserGuide',
-	install_path = '${BINDIR}/Web/docs/webhelp',
+	install_path = '${BINDIR}/Web/webhelp',
 )
 
 def check_sources(ctx, tgs):
