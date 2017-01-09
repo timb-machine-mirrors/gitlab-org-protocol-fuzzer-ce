@@ -1,4 +1,4 @@
-[Check_SqlInjection]
+[[Check_SqlInjection]]
 == SQL and NoSQL Injection Check
 
 [cols="1,4"]

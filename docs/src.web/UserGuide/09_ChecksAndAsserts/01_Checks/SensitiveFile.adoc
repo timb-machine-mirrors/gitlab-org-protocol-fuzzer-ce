@@ -1,4 +1,4 @@
-[Check_SensitiveFile]
+[[Check_SensitiveFile]]
 == Sensitive File Check
 
 [cols="1,4"]

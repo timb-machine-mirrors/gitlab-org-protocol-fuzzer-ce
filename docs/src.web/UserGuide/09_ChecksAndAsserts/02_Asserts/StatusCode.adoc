@@ -1,4 +1,4 @@
-[Assert_StatusCode]
+[[Assert_StatusCode]]
 == Status Code Assert
 
 The status code assert is used to cause failures when response messages status code field does

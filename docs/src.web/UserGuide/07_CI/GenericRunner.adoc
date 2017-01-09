@@ -1,4 +1,4 @@
-[CI_GenericRunner]
+[[CI_GenericRunner]]
 == Generic CI Runner
 
 Generic integration with CI systems is provided by running a command that

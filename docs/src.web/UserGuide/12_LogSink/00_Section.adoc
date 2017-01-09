@@ -1,4 +1,4 @@
-[LogSink]
+[[LogSink]]
 == Log Sink
 
 The log sink can consume syslog log messages. 

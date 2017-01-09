@@ -1,4 +1,4 @@
-[Check_CleartextAuthentication]
+[[Check_CleartextAuthentication]]
 == Cleartext Authentication Check
 
 [cols="1,4"]

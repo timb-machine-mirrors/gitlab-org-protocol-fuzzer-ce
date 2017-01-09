@@ -76,10 +76,6 @@ include::09_ChecksAndAsserts/00_Section.adoc[]
 
 :leveloffset: 0
 <<<
-include::09_Asserts/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
 include::10_Authentication/00_Section.adoc[]
 
 :leveloffset: 0

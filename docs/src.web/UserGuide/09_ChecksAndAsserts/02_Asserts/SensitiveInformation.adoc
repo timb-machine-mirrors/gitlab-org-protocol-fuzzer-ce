@@ -1,4 +1,4 @@
-[Assert_SensitiveInformation]
+[[Assert_SensitiveInformation]]
 == Sensitive Information Assert
 
 Information Leakage is an application weakness where an application reveals sensitive data, 

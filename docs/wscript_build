@@ -54,6 +54,22 @@ bld(
 	install_path = '${BINDIR}/sdk',
 )
 
+userGuide = bld(
+	features = 'asciidoctor-pdf',
+	source = 'src.web/UserGuide/UserGuide.adoc',
+	images = 'src.web/images',
+	name = 'Peach_API_Security_User_Guide.pdf',
+	install_path = '${BINDIR}/Web/docs',
+)
+
+bld(
+	features = 'webhelp',
+	source = 'src.web/UserGuide/UserGuide.adoc',
+	images = 'src.web/images',
+	name = 'webhelpApiUserGuide',
+	install_path = '${BINDIR}/Web/docs/webhelp',
+)
+
 def check_sources(ctx, tgs):
 	if 'asciidoctor-pdf' not in ctx.env.supported_features:
 		return

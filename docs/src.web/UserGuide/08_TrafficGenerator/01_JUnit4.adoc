@@ -1,4 +1,4 @@
-[tg_JUnit4]
+[[tg_JUnit4]]
 ==== JUnit 4
 
 The JUnit 4 integrations is an extension to JUnit 4 to create a Peach Suite of test cases.

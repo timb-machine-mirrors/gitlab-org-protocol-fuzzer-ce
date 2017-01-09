@@ -1,4 +1,4 @@
-[Check_SensitiveInformation]
+[[Check_SensitiveInformation]]
 == Sensitive Information Check
 
 [cols="1,4"]

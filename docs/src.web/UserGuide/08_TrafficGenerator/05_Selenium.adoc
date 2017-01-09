@@ -1,4 +1,4 @@
-[tg_Selenum]
+[[tg_Selenum]]
 === Selenium
 
 Selenium test cases can be used with {product} via exporting them to a supported framework.

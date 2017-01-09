@@ -1,4 +1,4 @@
-[Check_JsonInjection]
+[[Check_JsonInjection]]
 == JSON Injection Check
 
 [cols="1,4"]

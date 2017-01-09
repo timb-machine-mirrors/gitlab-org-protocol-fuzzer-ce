@@ -1,4 +1,4 @@
-[tg_Custom]
+[[tg_Custom]]
 ==== Custom Traffic Generators
 
 Custom traffic generators exercise the web APIs being tested in a loop.

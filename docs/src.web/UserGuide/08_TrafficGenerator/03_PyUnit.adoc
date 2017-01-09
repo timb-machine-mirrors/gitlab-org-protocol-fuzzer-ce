@@ -1,4 +1,4 @@
-[tg_pyunit]
+[[tg_pyunit]]
 == Python Unittest (PyUnit)
 
 The Python unit testing framework, sometimes referred to as “PyUnit,” is one

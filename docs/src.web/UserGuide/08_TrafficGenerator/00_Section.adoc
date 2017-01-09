@@ -1,4 +1,4 @@
-[[TrafficGen]]
+[[webproxy_TrafficGen]]
 === Automated Test Integration
 
 Peach has support for several automated test frameworks with more under development.
