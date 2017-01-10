@@ -10,6 +10,9 @@ requires()
     command -v "$1" >/dev/null 2>&1 || { echo "'$1' is required but it's not installed.  Aborting." >&2; exit 1; }
 }
 
+# packer gomes from: https://www.packer.io/downloads.html
+# ovatool comes from: https://www.vmware.com/support/developer/ovf/
+
 requires "zip"
 requires "docker"
 requires "packer"
@@ -146,4 +149,4 @@ mv "peachweb/peachweb.ova/peachweb.ova" "${ovadir}/peachweb-${BUILDTAG}.ova"
 popd
 
 echo ""
-echo "Done!"
+echo "Successfully created ${ovadir}/peachweb-${BUILDTAG}.ova"
