@@ -49,7 +49,7 @@ if [ -z "$ESXI_PASSWORD" ]; then
     exit 1
 fi
 
-echo "Combining docs and biaries..."
+echo "Combining docs and binaries..."
 
 # Copy user guide html
 cp -av output/doc/Web/webhelp output/${VARIANT}/Web/wwwroot
