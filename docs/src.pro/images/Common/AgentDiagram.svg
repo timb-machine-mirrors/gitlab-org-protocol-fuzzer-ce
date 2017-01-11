@@ -14,7 +14,7 @@
    id="svg4910"
    inkscape:version="0.91 r13725"
    viewBox="0 0 148.16 85.879997"
-   sodipodi:docname="Picture2.svg">
+   sodipodi:docname="AgentDiagram.svg">
   <metadata
      id="metadata4992">
     <rdf:RDF>
@@ -23,7 +23,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -36,16 +36,16 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1200"
-     inkscape:window-height="1897"
+     inkscape:window-width="2560"
+     inkscape:window-height="1391"
      id="namedview4990"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.0971922"
-     inkscape:cx="255.3815"
-     inkscape:cy="99.574734"
-     inkscape:window-x="1912"
-     inkscape:window-y="-8"
+     inkscape:zoom="1.5516641"
+     inkscape:cx="206.97431"
+     inkscape:cy="136.61306"
+     inkscape:window-x="1680"
+     inkscape:window-y="23"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg4910" />
   <defs
@@ -78,18 +78,18 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="13.259368"
-     y="15.343017"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="11.973257"
+     y="15.600239"
      id="text4922"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
-       x="13.259368"
-       y="15.343017"
+       x="11.973257"
+       y="15.600239"
        id="tspan4924"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4926">Peach</tspan></tspan></text>
   <path
      style="fill:#e48312;fill-opacity:1;fill-rule:evenodd;stroke:none"
@@ -103,18 +103,18 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="103.69639"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:110.00000238%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="101.12417"
      y="10.487996"
      id="text4932"
-     sodipodi:linespacing="125%"><tspan
+     sodipodi:linespacing="110%"><tspan
        sodipodi:role="line"
-       x="103.69639"
+       x="101.12417"
        y="10.487996"
        id="tspan4934"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:110.00000238%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4936">Peach Agent</tspan></tspan></text>
   <path
      style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
@@ -128,18 +128,18 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="109.153"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="105.69721"
      y="25.069887"
      id="text4942"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
-       x="109.153"
+       x="105.69721"
        y="25.069887"
        id="tspan4944"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4946">Monitors</tspan></tspan></text>
   <path
      style="fill:none;stroke:none"
@@ -161,18 +161,18 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="106.22364"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="103.3135"
      y="39.30896"
      id="text4954"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
-       x="106.22364"
+       x="103.3135"
        y="39.30896"
        id="tspan4956"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4958">Debugger</tspan></tspan></text>
   <path
      style="fill:none;stroke:none"
@@ -194,33 +194,33 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="108.34414"
-     y="52.453743"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="106.52531"
+     y="52.635628"
      id="text4966"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
-       x="108.34414"
-       y="52.453743"
+       x="106.52531"
+       y="52.635628"
        id="tspan4968"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4970">Network </tspan></tspan></text>
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="108.72503"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="106.54243"
      y="60.071598"
      id="text4972"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
-       x="108.72503"
+       x="106.54243"
        y="60.071598"
        id="tspan4974"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4976">Capture</tspan></tspan></text>
   <path
      style="fill:none;stroke:none"
@@ -234,17 +234,17 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;line-height:125%;font-family:'Tw Cen MT';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
-     x="56.108089"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+     x="52.764202"
      y="15.343006"
      id="text4984"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
-       x="56.108089"
+       x="52.764202"
        y="15.343006"
        id="tspan4986"><tspan
          dx="0"
          dy="0"
-         style="font-style:normal;font-variant:normal;font-weight:400;font-size:6.3499999px;font-family:'Tw Cen MT';fill:#000000"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:125%;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000"
          id="tspan4988">Channel</tspan></tspan></text>
 </svg>
