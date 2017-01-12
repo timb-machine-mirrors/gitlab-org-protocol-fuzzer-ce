@@ -2,7 +2,8 @@
 
 docker run -it \
     --add-host vmblue:10.0.1.30 \
+    -e ESXI_PASSWORD=$ESXI_PASSWORD \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD:/build \
-    peach-pro $*
+    peach-pro build/make_web_release.sh $*
 docker rm $(docker ps -a -q) &>/dev/null
