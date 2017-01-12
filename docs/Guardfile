@@ -26,13 +26,27 @@ guard :bundler do
 end
 
 guard :shell do
-	watch(/^.+\.adoc$/) {|m|
+	watch(/^src.pro\/.+\.adoc$/) {|m|
 		puts m[0] + " has changed."
 		%x(
 			asciidoctor \
 				src.pro/DevGuide/DevGuide.adoc \
 				src.pro/UserGuide/UserGuide.adoc \
 				-a images=#{Dir.pwd}/src.pro/images \
+				-a BUILDTAG=#{major}.#{minor}.0.0 \
+				-a VER_MAJOR=#{major} \
+				-a VER_MINOR=#{minor} \
+				-a VER_BUILD=0 \
+				-a VER_BRANCH=0
+		) 
+	}
+
+	watch(/^src.web\/.+\.adoc$/) {|m|
+		puts m[0] + " has changed."
+		%x(
+			asciidoctor \
+				src.web/UserGuide/UserGuide.adoc \
+				-a images=#{Dir.pwd}/src.web/images \
 				-a BUILDTAG=#{major}.#{minor}.0.0 \
 				-a VER_MAJOR=#{major} \
 				-a VER_MINOR=#{minor} \
