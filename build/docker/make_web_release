@@ -1,6 +1,6 @@
 #!/bin/sh
 
-docker run -it \
+docker run \
     --add-host vmblue:10.0.1.30 \
     -e ESXI_PASSWORD=$ESXI_PASSWORD \
     -v /var/run/docker.sock:/var/run/docker.sock \
