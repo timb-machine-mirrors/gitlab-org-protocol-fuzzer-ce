@@ -1,4 +1,6 @@
 #!/bin/sh
 
+set -e
+
 docker build -t peach-pro $PWD/build/docker
 docker rmi $(docker images -q -f dangling=true) 2>/dev/null

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 docker run \
     --add-host vmblue:10.0.1.30 \
     -e ESXI_PASSWORD=$ESXI_PASSWORD \
