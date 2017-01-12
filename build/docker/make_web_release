@@ -8,4 +8,4 @@ docker run \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD:/build \
     peach-pro build/make_web_release.sh $*
-docker rm $(docker ps -a -q) &>/dev/null
+docker rm $(docker ps -a -q) &>/dev/null || true

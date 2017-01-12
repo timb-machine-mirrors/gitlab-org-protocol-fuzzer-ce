@@ -3,4 +3,4 @@
 set -e
 
 docker run -v $PWD:/build peach-pro ./waf $*
-docker rm $(docker ps -a -q) &>/dev/null
+docker rm $(docker ps -a -q) &>/dev/null || true
