@@ -122,7 +122,7 @@ var="${var/#\~/$HOME}"
 remote_var=""
 
 if [ ! -z "$ESXI_PASSWORD" ]; then
-    remote_var="remote_type='esx5'"
+    remote_var="-var remote_type=esx5"
 fi
 
 PACKER_CACHE_DIR="$HOME/.packer_cache" packer build \
