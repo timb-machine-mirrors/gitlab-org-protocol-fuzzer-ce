@@ -206,7 +206,7 @@ def verify_external(bld):
 			Logs.warn('Unreferenced Assembly: %s' % e)
 
 def run_makexsd(bld):
-	if bld.is_install and bld.variant != 'doc':
+	if bld.is_install and bld.variant != 'doc' and bld.env.BASENAME != 'web':
 		makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 		env = os.environ.copy()
 		env['TERM'] = 'xterm'

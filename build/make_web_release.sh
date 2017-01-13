@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VARIANT="linux_x86_64_release"
+VARIANT="web_release"
 REGISTRY="10.0.1.201:5000"
 
 set -e
@@ -24,11 +24,11 @@ key="$1"
 
 case $key in
     --debug)
-    VARIANT="linux_x86_64_debug"
+        VARIANT="web_debug"
     ;;
     --buildtag)
-    BUILDTAG="$2"
-    shift
+        BUILDTAG="$2"
+        shift
     ;;
     *)
         echo "USAGE: make_web_release.sh --buildtag 1.2.3 [--debug]"
@@ -43,28 +43,6 @@ if [ -z "$BUILDTAG" ]; then
     echo "USAGE: make_web_release.sh --buildtag 1.2.3 [--debug]"
     exit 1
 fi
-
-if [ -z "$ESXI_PASSWORD" ]; then
-    echo "ESXI_PASSWORD environment variable is not set!"
-    exit 1
-fi
-
-echo "Combining docs and binaries..."
-
-# Copy user guide html
-cp -av output/doc/Web/webhelp output/${VARIANT}/Web/wwwroot
-
-# Copy user guide pdf
-cp -av output/doc/Web/*.pdf output/${VARIANT}/Web/wwwroot
-
-# Zip sdk and place in wwwroot
-zipfile="$(pwd)/output/${VARIANT}/Web/wwwroot/peach-web-${BUILDTAG}-sdk.zip"
-
-echo "Zipping up SDK as ${zipfile}"
-
-pushd output/doc/Web/sdk
-zip -rv ${zipfile} *
-popd
 
 echo ""
 echo "Verifying docker registry ${REGISTRY}"
@@ -141,8 +119,16 @@ rm -rvf "peachweb" 2>/dev/null || {}
 
 # Packer doesn't support '~' expansion in its cache dir variable
 var="${var/#\~/$HOME}"
+remote_var=""
 
-PACKER_CACHE_DIR="$HOME/.packer_cache" packer build -var "buildtag=${BUILDTAG}" template.json
+if [ ! -z "$ESXI_PASSWORD" ]; then
+    remote_var="remote_type='esx5'"
+fi
+
+PACKER_CACHE_DIR="$HOME/.packer_cache" packer build \
+    -var "buildtag=${BUILDTAG}" \
+    ${remote_var} \
+    template.json
 
 mv "peachweb/peachweb.ova/peachweb.ova" "${ovadir}/peachweb-${BUILDTAG}.ova"
 
