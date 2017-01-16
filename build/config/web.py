@@ -2,11 +2,12 @@ import os.path
 from waflib import Utils
 from waflib.TaskGen import feature
 
-host_plat = [ 'darwin', 'linux' ]
+host_plat = [ 'darwin', 'linux', 'win32' ]
 
 archs = [ ]
 
 tools = [
+	'msvc',
 	'cs',
 	'misc',
 	'tools.asciidoctor-pdf',
@@ -27,7 +28,6 @@ def prepare(conf):
 
 	if Utils.unversioned_sys_platform() == 'win32':
 		pfiles = os.getenv('PROGRAMFILES(X86)', os.getenv('PROGRAMFILES'))
-		# env['MCS'] = getattr(conf.all_envs.get('win_x86'), 'MCS', [ None ])[0]
 		env['TARGET_FRAMEWORK'] = 'v4.5.1'
 		env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4.5.1'
 		env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])

@@ -868,6 +868,8 @@ class idegen(msvs.msvs_generator):
 		return bld.variant
 
 	def get_platform(self, env):
+		if env.SUBARCH == []:
+			return 'Win32'
 		return env.SUBARCH.replace('x86', 'Win32')
 
 	def get_platform_mono(self, env):
