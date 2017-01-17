@@ -45,6 +45,7 @@ nuget DotNetZip
 nuget FluentMigrator
 nuget FluentMigrator.Runner
 nuget Handlebars.Net
+nuget Humanizer.Core
 nuget jQuery < 2.0
 nuget LiquidState
 nuget Microsoft.AspNet.WebApi.Client

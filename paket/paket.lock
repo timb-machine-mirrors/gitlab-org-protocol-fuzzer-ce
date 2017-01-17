@@ -113,6 +113,7 @@ NUGET
     FluentMigrator.Runner (1.6.2)
       FluentMigrator (>= 1.6.2)
     Handlebars.Net (1.8)
+    Humanizer.Core (2.1)
     jQuery (1.12.4)
     LiquidState (8.2)
     Microsoft.AspNet.WebApi.Client (5.2.3)
