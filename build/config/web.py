@@ -12,6 +12,7 @@ tools = [
 	'misc',
 	'tools.asciidoctor-pdf',
 	'tools.doxygen',
+	'tools.flexnet',
 	'tools.paket',
 	'tools.utils',
 	'tools.version',
