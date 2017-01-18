@@ -500,7 +500,7 @@ NUGET
     System.Text.Encodings.Web (4.3)
     System.Threading.Timer (4.3)
 HTTP
-  remote: https://jenkins.int.dejavusecurity.com
+  remote: http://jenkins.int.dejavusecurity.com
     nvdcve-2.0-2002.xml.gz (/userContent/nvdcve-2.0-2002.xml.gz)
     nvdcve-2.0-2003.xml.gz (/userContent/nvdcve-2.0-2003.xml.gz)
     nvdcve-2.0-2004.xml.gz (/userContent/nvdcve-2.0-2004.xml.gz)
