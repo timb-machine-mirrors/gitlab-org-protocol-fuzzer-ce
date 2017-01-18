@@ -10,6 +10,7 @@ ccroot.lib_patterns['resource'] = ['%s']
 def install_files(self, dest, files, **kw):
 	inst_task = self.bld.install_files(dest, files, **kw)
 	save_inst_task(self, inst_task)
+	return inst_task
 
 @taskgen_method
 def install_as(self, dest, srcfile, **kw):
@@ -88,7 +89,7 @@ def dummy_platform(self):
 def install_fake_lib(self):
 	name = self.link_task.__class__.__name__
 	if name is not 'fake_csshlib':
-		install_outputs(self)
+		install_outputs(self, self)
 
 @feature('cs')
 @after_method('apply_cs')
@@ -141,21 +142,31 @@ def install_content2(self):
 	if content:
 		self.install_files('${BINDIR}', content, cwd=self.path, relative_trick=True)
 
-def install_outputs(self):
-	if getattr(self, 'has_installed', False):
+def install_once(self, ref, ref_task, inst_to):
+	has_installed = getattr(ref, 'has_installed', {})
+	past_task = has_installed.get(inst_to)
+	if past_task:
+		save_inst_task(self, past_task)
+		return True
+
+	inst_task = self.install_files(inst_to, ref_task.outputs, chmod=Utils.O755)
+	has_installed[inst_to] = inst_task
+	ref.has_installed = has_installed
+	return False
+
+def install_outputs(self, ref):
+	# install 3rdParty libs into ${LIBDIR}
+	inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
+
+	if install_once(self, ref, ref.link_task, inst_to):
 		return
 
-	self.has_installed = True
-
-	# install 3rdParty libs into ${LIBDIR}
-	self.install_files('${LIBDIR}', self.link_task.outputs, chmod=Utils.O755)
-
 	# install any pdb or .config files into ${LIBDIR}
-	for lib in self.link_task.outputs:
+	for lib in ref.link_task.outputs:
 		# only look for .config if we are mono - as they are the only ones that support this
 		config = self.env.CS_NAME == 'mono' and lib.parent.find_resource(lib.name + '.config')
 		if config:
-			self.install_files('${LIBDIR}', config, chmod=Utils.O644)
+			self.install_files(inst_to, config, chmod=Utils.O644)
 
 		name = lib.name
 		ext='.pdb'
@@ -167,7 +178,7 @@ def install_outputs(self):
 
 		pdb = lib.parent.find_resource(name)
 		if pdb:
-			self.install_files('${LIBDIR}', pdb, chmod=Utils.O755)
+			self.install_files(inst_to, pdb, chmod=Utils.O755)
 
 @feature('cs', 'msbuild')
 @before_method('apply_cs', 'apply_mbuild')
@@ -267,10 +278,16 @@ def apply_target_framework(self):
 
 	# Add TargetFrameworkAttribute to the assembly
 	self.env.EMIT_SOURCE = Utils.subst_vars(target_framework_template, self.env)
-	name = '.NETFramework,Version=%s.AssemblyAttributes.cs' % self.env.TARGET_FRAMEWORK
+	name = '.NETFramework,Version=%s.AssemblyAttributes.%s.cs' % (self.env.TARGET_FRAMEWORK, self.idx)
 	target = self.path.find_or_declare(name)
 	tsk = self.create_task('emit', None, [ target ])
 	self.source = self.to_nodes(self.source) + tsk.outputs
+
+@feature('cs')
+@before_method('use_cs')
+def install_packages(self):
+	if getattr(self.bld, 'is_idegen', False):
+		return
 
 	# For any use entries that can't be resolved to a task generator
 	# assume they are system reference assemblies and add them to the
@@ -281,13 +298,127 @@ def apply_target_framework(self):
 	for x in names:
 		try:
 			y = get(x)
-			if 'fake_lib' in getattr(y, 'features', ''):
+			features = getattr(y, 'features')
+			if 'fake_lib' in features or 'nuget_lib' in features:
 				y.post()
-				install_outputs(y)
+				install_outputs(self, y)
+			if 'cs' in features:
+				y.post()
+				inst_to = getattr(self, 'install_path', None) or '${BINDIR}'
+				if y.install_task and inst_to != y.install_task.dest:
+					install_once(self, y, y.cs_task, inst_to)
 			filtered.append(x)
 		except Errors.WafError:
 			self.env.append_value('ASSEMBLIES', x)
 	self.use = filtered
+
+def collect_assemblies(self, name, seen, into):
+	# Prevent infinite looping
+	if name in seen:
+		return
+	seen.append(name)
+
+	try:
+		y = self.bld.get_tgen_by_name(name)
+	except Errors.WafError:
+		return
+
+	features = getattr(y, 'features')
+	if 'fake_lib' in features or 'nuget_lib' in features:
+		y.post()
+		into.extend(map(lambda x: x.abspath(), y.link_task.outputs))
+	if 'cs' in features:
+		y.post()
+		# Recursivley collect dependencies
+		for x in self.to_list(getattr(y, 'use', [])):
+			collect_assemblies(self, x, seen, into)
+
+@feature('cs')
+@after_method('install_packages')
+def generate_binding_redirects(self):
+	if not getattr(self, 'GenerateBindingRedirects', False):
+		return
+
+	cfg = self.path.find_resource('app.config')
+	if not cfg.is_src():
+		return
+
+	import xml.etree.ElementTree as ET
+	from xml.dom.minidom import parseString
+
+	ns = {'asm': 'urn:schemas-microsoft-com:asm.v1'}
+
+	xml = ET.parse(cfg.abspath())
+	node = xml.find('runtime/asm:assemblyBinding', ns)
+	if node is None:
+		return
+
+	cmd = []
+	if self.env.CS_NAME == 'mono':
+		cmd = [ 'mono' ]
+
+	bindings = getattr(self, 'manual_bindings', {})
+
+	asms = []
+	collect_assemblies(self, self.name, [], asms)
+
+	# asms.sort(key=lambda x: os.path.basename(x), cmp=lambda x, y: cmp(x.lower(), y.lower()))
+	cmd.extend([ os.path.abspath(os.path.join('tools', 'AsmVersion.exe')) ] + asms)
+	infos = Utils.subprocess.check_output(cmd) or ''
+
+	for info in infos.splitlines():
+		parts = info.split(', ')
+
+		name = parts[0]
+		version = parts[1].split('=')[1]
+		culture = parts[2].split('=')[1]
+		token = parts[3].split('=')[1]
+
+		if token == 'null':
+			continue
+
+		if name in bindings:
+			continue
+
+		bindings[name] = dict(
+			culture = culture,
+			publicKeyToken = token,
+			newVersion = version,
+			oldVersion = '0.0.0.0-%s' % version
+		)
+
+	index = sorted(bindings)
+
+	node.clear()
+	for name in index:
+		binding = bindings[name]
+		dependentAssembly = ET.SubElement(node, 'dependentAssembly')
+		ET.SubElement(dependentAssembly, 'assemblyIdentity', dict(
+			name=name,
+			publicKeyToken=binding['publicKeyToken'],
+			culture=binding['culture']
+		))
+		ET.SubElement(dependentAssembly, 'bindingRedirect', dict(
+			oldVersion=binding['oldVersion'],
+			newVersion=binding['newVersion']
+		))
+
+	raw = ET.tostring(xml.getroot(), 'utf-8')
+	dom = parseString(raw)
+	pretty = dom.toprettyxml(indent="\t", encoding='utf-8')
+	nice = []
+	for line in pretty.splitlines():
+		if line.rstrip():
+			nice.append(line)
+
+	new = '\r\n'.join(nice)
+	new = new.replace('<configuration xmlns:ns0="urn:schemas-microsoft-com:asm.v1">', '<configuration>')
+	new = new.replace('<ns0:assemblyBinding>', '<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">')
+	new = new.replace('</ns0:assemblyBinding>', '</assemblyBinding>')
+
+	old = cfg.read(flags='rb', encoding='utf-8')
+	if old != new:
+		cfg.write(new, flags='wb', encoding='utf-8')
 
 @conf
 def clone_env(self, variant):

@@ -28,8 +28,7 @@ packages/
 
 # MonoDevelop files
 *.pidb
-Peach.net.userprefs
-Peach.userprefs
+*.userprefs
 test-results/
 *.resources
 
@@ -97,3 +96,15 @@ TestResult.xml
 
 # Downloader site
 /pro/Downloader/Web.local.config
+
+# paket
+paket/.paket/paket.exe
+paket/packages
+paket/nas
+
+# Rider EAP
+.idea
+
+# Packer artifacts
+web/packer/output-vmware-iso
+web/packer/packer_cache

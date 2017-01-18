@@ -1,0 +1,147 @@
+
+[[webproxy_Config]]
+=== Configuration
+
+Peach Web is exposed as a Peach Pit available from the Library screen in the Peach UI.
+To create a new configuration, select the _WebProxy_ pit from the Library menu.
+
+Peach Web configurations are performed in three steps:
+
+. Configuration of _Web Proxy_ routes
+. Configuration of _Variables_
+. Configuration of _Monitoring_
+
+==== Route Configuration
+
+One or more routes can be configured for use with Peach Web.
+Each route contains several configuration parameters.
+Route entries are matched in order.
+It's recommended that a final route entry be included with a Route pattern of +*+ as a catch all.
+
+Adding multiple routes allows different configurations based on matching a portion of the Path.
+For example, if two different APIs are accessed during testing _/storage/*_ and _/users/*_,
+each can have a different route entry allowing for different fault status codes
+or Swagger API specifications.
+
+_Required:_
+
+Path Pattern:: This pattern will match a specific route to a request.
+Define a pattern that matches the HTTP request path (excluding the sheme, host, and query)
+using single character wildcard (+?+) and multiple character wildcard (+*+). +
+Examples: `/storage/*` or `*/v?/*`
+
+_Optional:_
+
+Test::
+	Should the route be included or excluded from testing.
+	This setting affects all requests that match the route.
+	Default to _included_.
+
+Swagger::
+	Optionally provide the URL to a Swagger API JSON.
+	For example, _http://127.0.0.1:8888/swagger/docs/v1_ or _file:///opt/service/swagger.js_
+
+Script::
+	Optional path to a python script.
+	See xref:webproxy_Scripts[Scripts] for a full explanation and examples.
+
+Rewrite Base URL::
+	Optionally provide a new replacement base URL.
+	Only the scheme, host, and port are replaced.
+
+Failure Status Codes::
+	Optionally provide a comma separated list of HTTP status codes that
+	will result in a test failing. When a test fails it is logged as a fault in the tool.
+	Example: +500,501+
+	
+Header Testing::
++
+This parameter controls what HTTP headers are included/excluded from testing.
++
+Mutate;; Include or exclude the header from mutation.
+Pattern;; Pattern to match against HTTP headers.
++
+Headers support pattern matching using the single character wildcard (+?+) or multiple character wildcard (+*+).
+
+==== Variables
+
+The variables section includes configuration variables that affect Peach Web.
+
+Proxy Port (WebProxyPort)::
+	TCP port web proxy listens on. The default is _8001_.
+
+Client Certificate (ClientCert)::
+	Optionally specify a client certificate to use when authenticating to a target service.
+	If a client certificate is specified then the _Client Key_ must also be specified.
+	Certificate must be in PEM format.
+	
+Client Key (ClientKey)::
+	Optionally specify the matching secret key for the client certificate.
+	If a client key is specified then the _Client Certificate_ must also be specified.
+	Secret key must be in PEM format with no password.
+
+CA Certificate (CaCert)::
+	Optionally provide a CA certificate that will sign any auto-generated TLS certificates.
+	Certificates are auto-generated for targets using TLS.
+	To avoid trust issues in the traffic generator, a fixed CA certificate can be provided.
+	Requires also providing the _CA Private Key_ and _Server Private Key_.
+	Certificate must be in PEM format.
+	
+CA Private Key (CaKey)::
+	Provide the matching CA Private Key for the CA Certificate.
+	Private key must be in PEM format with no password.
+	
+Server Private Key (ServerKey)::
+	Provide a server private key that is used for auto-generated TLS certs.
+	Private key must be in PEM format with no password.
+
+Receive Timeout (Timeout)::
+	Duration in milliseconds to wait for an incoming connection/data.
+	Defaults to _3000_ milliseconds (3 seconds).
+
+==== Testing APIs with TLS
+
+When testing web APIs that use TLS (https), Peach Web will automatically create fake TLS certificates
+for the target web APIs.  This can cause problems for clients that expect to verify the certificates against
+known CAs.  To get around this issue it's recommended that a static CA certificate is generated and used
+to sign the auto-generated TLS certs.  This CA cert can then be marked as trusted by your traffic generator.
+
+Follow this process:
+
+Make sure that an empty password is specified when generating the keys.
+
+----
+openssl genrsa -out rootCA.key 2048
+openssl genrsa -out server.key 2048
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 1024 -out rootCA.pem
+----
+
+Once generated, they map to the following configuration variables:
+
+|====
+| rootCA.key | CA Private Key
+| rootCA.pem | CA Certificate
+| server.key | Server Private Key
+|====
+
+Update the configuration and restart Peach Web.
+
+==== Monitoring Configuration
+
+Monitoring configuration for Peach Web are usually fairly simple.
+It is highly recommended that service logs be sent to Peach Web via the syslog protocol.
+A _Syslog_ monitor can be configured to receive them and scan for possible errors.
+It's recommended that SQL messages trigger faults along with words like:
+
+ * Error
+ * Critical
+ * Exception
+ * Assert
+ 
+Difference databases have different types of error messages.
+For example, Oracle prefixes errors with ORA- and other prefixes.
+Integrating with logs provides a significant increase in faults being generated.
+
+
+// end
+

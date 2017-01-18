@@ -71,7 +71,7 @@ namespace Peach.Pro.Test.WebProxy
 
 		protected virtual RunConfiguration GetRunConfiguration()
 		{
-			return new RunConfiguration { singleIteration = true };
+			return new RunConfiguration { randomSeed = 1, singleIteration = true };
 		}
 
 		public void RunEngine(string xml, HookRequestEvent hookRequestEventPre = null, HookRequestEvent hookRequestEventPost = null, Action<Engine> hook = null)

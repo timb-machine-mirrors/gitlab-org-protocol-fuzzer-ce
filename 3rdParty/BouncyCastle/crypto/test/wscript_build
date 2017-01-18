@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 
 deps = [
+	'BouncyCastle.Crypto.dll',
 	'System.dll',
 	'System.Core.dll',
-	'nunit.framework.dll',
-	'BouncyCastle.Crypto.dll',
+]
+
+pkgs = [
+	'NUnit',
 ]
 
 bld(
-	features = 'cs',
+	name = 'BouncyCastle.Crypto.Tests.dll',
+	solutions = ['Peach.sln', 'PeachWeb.sln'],
+	features = 'cs paket',
 	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = ['net45'],
+	),
 	source = bld.path.ant_glob('src/**/*.cs'),
 	resource = bld.path.ant_glob('data/**/*'),
-	name = 'BouncyCastle.Crypto.Tests.dll',
 	namespace = 'UnitTests',
 	csflags = [
 		'/nowarn:0168', # Variable declared but never used

@@ -26,7 +26,7 @@ namespace Peach.Pro.Core.Runtime
 		Uri Uri { get; }
 	}
 
-	public abstract class BaseProgram
+	public abstract class BaseProgram : IDisposable
 	{
 		static readonly NLog.Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -40,7 +40,7 @@ namespace Peach.Pro.Core.Runtime
 		protected Func<List<string>, int> _cmd;
 
 		protected void PrepareLicensing(string pitLibraryPath)
-		{	
+		{
 			var config = new LicenseConfig();
 			if (config.DetectConfig)
 			{
@@ -50,12 +50,11 @@ namespace Peach.Pro.Core.Runtime
 				var root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
 				if (root == null)
 					throw new ApplicationException("Peach.Pro.Pits.dll could not be found.");
+
 				config.Manifest = PitResourceLoader.LoadManifest(root);
-				var license = new FlexeraLicense(config);
-				Console.WriteLine("Activating license, this may take a few moments.");
-				license.Activate();
-				Console.WriteLine("License has been activaed.");
-				_license = license;
+				_license = new FlexeraLicense(config);
+				if (!_license.IsValid())
+					throw new ApplicationException();
 			}
 			else
 			{
@@ -157,9 +156,9 @@ namespace Peach.Pro.Core.Runtime
 				else
 				{
 					var ver = ParseMonoVersion(str);
-					if (ver == null || 
-						ver < minVer || 
-						(ver.Major == badVer.Major && ver.Minor == badVer.Minor))
+					if (ver == null ||
+					    ver < minVer ||
+					    (ver.Major == badVer.Major && ver.Minor == badVer.Minor))
 					{
 						Console.WriteLine("The installed mono version {0} is not supported.", str);
 					}
@@ -170,8 +169,8 @@ namespace Peach.Pro.Core.Runtime
 				}
 			}
 
-			Console.WriteLine("Ensure mono version {0} or newer and not {1} is installed and try again.", 
-				minVer, 
+			Console.WriteLine("Ensure mono version {0} or newer and not {1} is installed and try again.",
+				minVer,
 				badVer
 			);
 			return false;
@@ -411,6 +410,15 @@ namespace Peach.Pro.Core.Runtime
 
 					return 0;
 				}
+			}
+		}
+
+		public void Dispose()
+		{
+			if (_license != null)
+			{
+				_license.Dispose();
+				_license = null;
 			}
 		}
 	}

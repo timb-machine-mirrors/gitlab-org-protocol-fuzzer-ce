@@ -1,0 +1,43 @@
+[[tg_pyunit]]
+== Python Unittest (PyUnit)
+
+The Python unit testing framework, sometimes referred to as “PyUnit,” is one
+of the most common test automation frameworks for Python.  
+A modified version of this framework is provided in the SDK.  
+The modified version makes it possible to use existing PyUnit tests with
+{product}.
+The modified version makes use of the peachproxy python library and is
+suitable for being launched by the provided CI runners.
+
+The modified PyUnit will call each test in a loop until Peach API
+Security completes testing, then move on to looping the next test.
+This continues until testing has completed.  The output from PyUnit
+will show the total number of unique tests complete, but will not
+show the actual call count for each test.
+
+The following environmental proxy variables are automatically set.
+If your test cases require custom settings to use an HTTP proxy
+they will need to be set externally or inside the test logic.
+No other modification is required to use PyUnit automated
+tests with Peach API Security.
+
+NOTE: Make sure +PYTHONPATH+ environmental variable is set and
+points to the modified version of PyUnit.
+
+=== Examples
+
+.test_flaskresttarget.py
+==========================
+
+Included in the +SDK/testrunners/unittest+ folder is an example
+PyUnit that targets the Flask REST Target available in 
++SDK/examples/flask_rest_target+.  
+The example can be run directly to see it's operation with the
+normaly PyUnit framework.  It can also be run via the generic CI
+runner to see it's operation with {product}.
+
+When running with the CI integration make sure the +PYTHONPATH+
+environmental variable is set correctly.
+Additionally the Flask REST Target must be running.
+
+==========================

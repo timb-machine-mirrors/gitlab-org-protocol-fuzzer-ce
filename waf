@@ -8,16 +8,16 @@ import sys, os, os.path
 subdir = 'build'
 
 if not subdir:
-        print 'Error, the "subdir" variable in "%s" must be configured' % os.path.join(cwd, 'waf')
-        sys.exit(1)
+	print 'Error, the "subdir" variable in "%s" must be configured' % os.path.join(cwd, 'waf')
+	sys.exit(1)
 
 if sys.platform == "cygwin":
-        print 'waf must be run from cmd.exe'
-        sys.exit(1)
+	print 'waf must be run from cmd.exe'
+	sys.exit(1)
 
 if os.getenv('DevEnvDir'):
-        print 'waf can not be run from a Visual Studio Command Prompt'
-        sys.exit(1)
+	print 'waf can not be run from a Visual Studio Command Prompt'
+	sys.exit(1)
 
 cwd = os.getcwd()
 build = os.path.join(cwd, subdir)
@@ -25,5 +25,9 @@ wafdir = os.path.join(cwd, subdir, 'waf')
 sys.path = [ build, wafdir ] + sys.path
 
 if __name__ == '__main__':
+	from waflib import Build
+	Build.CACHE_DIR = 'c4che_%s' % sys.platform
+	from waflib import Configure
+	Configure.WAF_CONFIG_LOG = 'config.%s.log' % sys.platform
 	from waflib import Scripting
 	Scripting.waf_entry_point(cwd, VERSION, wafdir)

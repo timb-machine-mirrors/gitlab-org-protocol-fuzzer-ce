@@ -6,6 +6,13 @@ host_plat = [ 'win32' ]
 
 archs = [ 'x86', 'x64' ]
 
+# x86 compilation line:
+#cl /MT /EHs- /EHa- /wd4530 /DTARGET_WINDOWS /DBIGARRAY_MULTIPLIER=1 /D_CRT_SECURE_NO_DEPRECATE /D_SECURE_SCL=0 /nologo /Gy /Oi- /GR- /GS- /D__PIN__=1 /DPIN_CRT=1 /D_WINDOWS_H_PATH_="C:\Program Files (x86)\Windows Kits\8.1\Include\um" /D__i386__ /Zc:threadSafeInit- /DTARGET_IA32 /DHOST_IA32  /I../../../source/include/pin /I../../../source/include/pin/gen -I../../../extras/stlport/include -I../../../extras -I../../../extras/libstdc++/include -I../../../extras/crt/include -I../../../extras/crt -I../../../extras/crt/include/arch-x86 -I../../../extras/crt/include/kernel/uapi -I../../../extras/crt/include/kernel/uapi/asm-x86 /FIinclude/msvc_compat.h /I../../../extras/components/include /I../../../extras/xed-ia32/include /I../../../source/tools/InstLib /O2  /c /Foobj-ia32/MyPinTool.obj MyPinTool.cpp
+#MyPinTool.cpp
+#link /DLL /EXPORT:main /NODEFAULTLIB /NOLOGO /INCREMENTAL:NO /IGNORE:4210 /IGNORE:4049 /DYNAMICBASE /NXCOMPAT ../../../ia32/runtime/pincrt/crtbeginS.obj /MACHINE:x86 /ENTRY:Ptrace_DllMainCRTStartup@12 /BASE:0x55000000 /OPT:REF  /out:obj-ia32/MyPinTool.dll obj-ia32/MyPinTool.obj  /LIBPATH:../../../ia32/lib /LIBPATH:../../../ia32/lib-ext /LIBPATH:../../../ia32/runtime/pincrt /LIBPATH:../../../extras/xed-ia32/lib pin.lib xed.lib stlport-static.lib m-static.lib c-static.lib os-apis.lib pinvm.lib ntdll-32.lib kernel32.lib
+#   Creating library obj-ia32/MyPinTool.lib and object obj-ia32/MyPinTool.exp
+#pin.lib(pin_client.obj) : warning LNK4217: locally defined symbol ___sF imported in function "void __cdecl LEVEL_PINCLIENT::StartProgram(void)" (?StartProgram@LEVEL_PINCLIENT@@YAXXZ)
+
 tools = [
 	'msvc',
 	'cs',
@@ -16,10 +23,10 @@ tools = [
 	'tools.externals',
 	'tools.tsc',
 	'tools.version',
+	'tools.paket',
 ]
 
 optional_tools = [
-	'tools.mdoc',
 	'tools.msbuild',
 	'tools.msi',
 	'tools.test',
@@ -33,31 +40,7 @@ def prepare(conf):
 	env['MSVC_VERSIONS'] = ['msvc 14.0', 'msvc 12.0', 'msvc 11.0', 'msvc 10.0', 'wsdk 7.1' ]
 	env['MSVC_TARGETS']  = 'x64' in env.SUBARCH and [ 'x64', 'x86_amd64' ] or [ 'x86' ]
 
-	env['PIN_VER'] = 'pin-2.14-71313-msvc12-windows'
-
-	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
-
 	env['EXTERNALS_x86'] = {
-		'pin' : {
-			'MSVC_VER'  : [ '18.00.40629' ], 
-			'INCLUDES'  : [
-				j(pin, 'source', 'include', 'pin'),
-				j(pin, 'source', 'include', 'pin', 'gen'),
-				j(pin, 'extras', 'components', 'include'),
-				j(pin, 'extras', 'xed-ia32', 'include'),
-			],
-			'HEADERS'   : [],
-			'STLIBPATH' : [
-				j(pin, 'ia32', 'lib'),
-				j(pin, 'ia32', 'lib-ext'),
-				j(pin, 'extras', 'xed-ia32', 'lib'),
-			],
-			'STLIB'     : [ 'pin', 'ntdll-32', 'pinvm', 'libxed' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32', 'HOST_IA32', 'USING_XED', '_HAS_EXCEPTIONS=0' ],
-			'CFLAGS'    : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'CXXFLAGS'  : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000' ],
-		},
 		'com' : {
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
@@ -69,26 +52,6 @@ def prepare(conf):
 	}
 
 	env['EXTERNALS_x64'] = {
-		'pin' : {
-			'MSVC_VER'  : [ '18.00.40629' ], 
-			'INCLUDES'  : [
-				j(pin, 'source', 'include', 'pin'),
-				j(pin, 'source', 'include', 'pin', 'gen'),
-				j(pin, 'extras', 'components', 'include'),
-				j(pin, 'extras', 'xed-intel64', 'include'),
-			],
-			'HEADERS'   : [],
-			'STLIBPATH'   : [
-				j(pin, 'intel64', 'lib'),
-				j(pin, 'intel64', 'lib-ext'),
-				j(pin, 'extras', 'xed-intel64', 'lib'),
-			],
-			'STLIB'     : [ 'pin', 'ntdll-64', 'pinvm', 'libxed' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', '_SECURE_SCL=0', 'TARGET_WINDOWS', 'TARGET_IA32E', 'HOST_IA32E', 'USING_XED', '_HAS_EXCEPTIONS=0' ],
-			'CFLAGS'    : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'CXXFLAGS'  : [ '/MT', '/GS-', '/GR-', '/EHs-', '/EHa-' ],
-			'LINKFLAGS' : [ '/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000' ],
-		},
 		'com' : {
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
@@ -137,6 +100,7 @@ def configure(conf):
 		'cxxshlib',
 		'cxxprogram',
 		'fake_lib',
+		'nuget_lib',
 		'cs',
 		'debug',
 		'release',

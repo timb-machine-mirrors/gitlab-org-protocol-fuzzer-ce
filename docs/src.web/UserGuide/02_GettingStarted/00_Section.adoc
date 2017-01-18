@@ -1,0 +1,10 @@
+[[JumpStart]]
+== Getting Started with the {product}
+
+This section provides a workflow that identifies the steps involved in setting up and running a fuzzing session. 
+Stepping through the Peach fuzzing workflow is the quickest way to begin fuzzing.
+
+<<<
+include::01_Usage.adoc[]
+
+// end

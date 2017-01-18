@@ -1,0 +1,38 @@
+[[Check_SqlInjection]]
+== SQL and NoSQL Injection Check
+
+[cols="1,4"]
+|====
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS)[2013-A3-Cross-Site Scripting (XSS)]
+| CWE | https://cwe.mitre.org/data/definitions/89.html[Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')]
+| PCI | A1 Injection
+|====
+
+A SQL injection attack consists of insertion or "injection" of a SQL query via the input 
+data from the client to the application. 
+A successful SQL injection exploit can read sensitive data from the database, modify 
+database data (Insert/Update/Delete), execute administration operations on the database 
+(such as shutdown the DBMS), recover the content of a given file present on the DBMS 
+file system and in some cases issue commands to the operating system. 
+SQL injection attacks are a type of injection attack, in which SQL commands are injected 
+into data-plane input in order to effect the execution of predefined SQL commands.
+
+This check modifies parameters in the request (path, query string, headers, json, xml, etc.)
+to try and create a syntax error in the SQL or NoSQL query.  Logs and responses are then 
+analyzed to try and detect if an error occured.  If an error is detected there is a high
+likelyhood that a vulnerability exists.
+
+The check comes pre-populated with a list of values used to cause SQL and NoSQL queries to fail.
+The provided list can be editted at various scope levels (Global, Project, Profile, Route) to add, edit or remote entries.
+
+=== Configuration
+
+TODO
+
+=== Operation
+
+|====
+| Test generation 
+|====
+
+This is a mutational check that produces test cases by modifying requests made by the traffic generator.

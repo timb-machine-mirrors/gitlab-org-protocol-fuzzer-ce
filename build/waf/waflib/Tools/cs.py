@@ -131,9 +131,9 @@ def doc_cs(self):
 	if not csdoc:
 		return
 
-	bintype = getattr(self, 'bintype', self.gen.endswith('.dll') and 'library' or 'exe')
-	if bintype != 'library':
-		return
+	# bintype = getattr(self, 'bintype', self.gen.endswith('.dll') and 'library' or 'exe')
+	# if bintype != 'library':
+	# 	return
 
 	node = self.cs_task.outputs[0]
 	out = node.change_ext('.xml')

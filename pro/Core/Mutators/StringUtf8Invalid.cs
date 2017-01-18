@@ -8,6 +8,7 @@ using Peach.Core;
 using Peach.Core.Dom;
 using Peach.Core.IO;
 using System.ComponentModel;
+using Peach.Pro.Core.Mutators.Utility;
 
 namespace Peach.Pro.Core.Mutators
 {

@@ -1,0 +1,33 @@
+== Checks
+
+Checks are broken up into global, passive, active and mutational....
+
+// TODO table of checks
+
+>>>
+include::CleartextAuthentication.adoc[]
+
+>>>
+include::HtmlInjection.adoc[]
+
+>>>
+include::JsonInjection.adoc[]
+
+>>>
+include::SensitiveFile.adoc[]
+
+>>>
+include::SensitiveInformation.adoc[]
+
+>>>
+include::SessionCookie.adoc[]
+
+>>>
+include::SqlInjection.adoc[]
+
+>>>
+include::Token.adoc[]
+
+>>>
+include::XmlInjection.adoc[]
+

@@ -1,33 +1,19 @@
 #!/usr/bin/env python
 
 deps = [
-	'Aspose.Words.dll',
 	'BouncyCastle.Crypto.dll',
-	'Castle.Core.dll',
-	'Dapper.dll',
 	'FlexNet.Library.dll',
 	'FlexNet.Operations.dll',
 	'FlxClientCommon.dll',
 	'FlxLicensingClient.dll',
-	'Ionic.Zip.dll',
 	'komodo_net.dll',
 	'Managed.Adb.dll',
-	'Mono.Posix.dll',
-	'Moq.dll',
-	'Newtonsoft.Json.dll',
-	'NLog.dll',
-	'nunit.framework.dll',
-	'PacketDotNet.dll',
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.PitTester.dll',
 	'Portable.Licensing.dll',
 	'Renci.SshNet.dll',
-	'SharpSnmpLib.Full.dll',
-	'SharpSnmpLib.Portable.dll',
-	'SharpPcap.dll',
-	'SocketHttpListener.dll',
 	'System.dll',
 	'System.Configuration.dll',
 	'System.Core.dll',
@@ -39,11 +25,36 @@ deps = [
 	'System.Xml.dll',
 ]
 
+pkgs = [
+	'Aspose.Words',
+	'Dapper',
+	'DotNetZip',
+	'Mono.Posix-4.5',
+	'Moq',
+	'Newtonsoft.Json',
+	'NLog',
+	'NUnit',
+	'SharpPcap',
+	'SocketHttpListener',
+]
+
+frameworks = [
+	'net45', 
+	'net3.5-client',
+	'net20', 
+	'net', 
+	'portable-net45+dnxcore50+sl4+wp71+win8+wpa81'
+]
+
 bld(
-	features = 'cs test',
-	use = deps,
-	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	name = 'Peach.Pro.Test.dll',
+	features = 'cs test paket',
+	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = frameworks
+	),
+	source = bld.path.ant_glob('**/*.cs **/*.resx'),
 	resource = bld.path.ant_glob('Resources/**/*'),
 	ide_use = 'CrashingProgram CrashingFileConsumer CrashableServer CrashTest',
 	namespace = 'Peach.Pro.Test.Core',

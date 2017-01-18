@@ -1,0 +1,24 @@
+[[webproxy_TrafficGen]]
+=== Automated Test Integration
+
+Peach has support for several automated test frameworks with more under development.
+If your automation framework is not currently supported please let support@peachfuzzer.com know
+so it can be added to our list and an interim solution found.
+
+>>>
+include::01_JUnit4.adoc[]
+
+>>>
+include::02_NUnit.adoc[]
+
+>>>
+include::03_PyUnit.adoc[]
+
+>>>
+include::04_pytest.adoc[]
+
+>>>
+include::05_Selenium.adoc[]
+
+>>>
+include::06_Custom.adoc[]

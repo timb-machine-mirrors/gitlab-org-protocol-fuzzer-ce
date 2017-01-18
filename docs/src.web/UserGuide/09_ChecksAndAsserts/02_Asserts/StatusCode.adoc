@@ -1,0 +1,29 @@
+[[Assert_StatusCode]]
+== Status Code Assert
+
+The status code assert is used to cause failures when response messages status code field does
+not match the required values.  This assert can work with whitelists of blacklists of status codes.
+Whitelists are lists of valid values, a failure is raised when a status code is found that is not 
+included in the whitelist.  Blacklists work in the oposit mannor, status codes that match the 
+list cause a failure to occur.
+
+The assert comes pre-populated with a  list of error status codes.
+The provided list can be editted at various scope levels (Global, Project, Profile, Route) to 
+add, edit or remote entries.
+
+=== Related Checks
+
+ * xref:Check_SqlInjection[SQL and NoSQL Injection Check]
+
+=== Configuration
+
+Is White List:: 
+    Indicates if the provided StatusCodes list should be treated as a whitelist or blacklist.
+    When StatusCodes is a whitelist, any status code returned that is not included in the list
+    will cause this assert to fail. For blacklist operation, only status codes in the list 
+    will trigger a failure.  Defaults to false, blacklist operation.
+
+Status Codes::
+    List of status codes that will be used to validate responses.  
+    Defaults to 500, 501, 502, 504
+

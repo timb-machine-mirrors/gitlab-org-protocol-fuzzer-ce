@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+docker run \
+    --add-host vmblue:10.0.1.30 \
+    --env-file $PACKER_SECRETS \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $HOME/.packer_cache:$HOME/.packer_cache \
+    -v $PWD:/build \
+    peach-pro build/make_web_release.sh $*
+docker rm $(docker ps -a -q) &>/dev/null || true

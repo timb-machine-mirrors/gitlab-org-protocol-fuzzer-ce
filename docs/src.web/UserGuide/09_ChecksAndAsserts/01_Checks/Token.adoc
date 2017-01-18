@@ -1,0 +1,43 @@
+[[Check_Token]]
+== Token Check
+
+[cols="1,4"]
+|====
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A2-Broken_Authentication_and_Session_Management[A2-Broken Authentication and Session Management]
+| CWE | https://cwe.mitre.org/data/definitions/285.html[CWE-285: Improper Authorization] https://cwe.mitre.org/data/definitions/331.html[CWE-331: Insufficient Entropy]
+| PCI | 6.5.10 Broken authentication and session management
+|====
+
+API Tokens are a common method of authenticating/authorizing access to APIs.
+When used this check performs upto four different validations of the tokens use.
+
+Entropy::
+API Tokens must be unpredictable (random enough) to prevent guessing attacks, where an attacker is able 
+to guess or predict a valid API Token through statistical analysis techniques. 
+For this purpose, a good PRNG (Pseudo Random Number Generator) must be used.
++
+API Tokens entropy is checked against the configured minimum (defaults to 128 bits).
+
+Modification of Token::
+The value of the API token is modified one for every operation it's used with.
+The HTTP status code of the response message is then checked to see if the request was successfull.
+
+Removal of Token::
+The API token is removed from the HTTP request.
+The HTTP status code of the response message is then checked to see if the request was successfull.
+
+Signature Modification::
+When using API Tokens that are signatures of the request, a modification to the request is made.
+The HTTP status code of the response message is then checked to see if the request was successfull.
+
+=== Configuration
+
+TODO
+
+=== Operation
+
+|====
+| Test generation 
+|====
+
+This is a mutational check that produces test cases by modifying requests made by the traffic generator.
