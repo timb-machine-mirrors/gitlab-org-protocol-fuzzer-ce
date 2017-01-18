@@ -4,10 +4,14 @@ from waflib.TaskGen import feature
 
 host_plat = [ 'darwin', 'linux', 'win32' ]
 
-archs = [ ]
+archs = []
 
-tools = [
-	'msvc',
+tools = []
+
+if Utils.unversioned_sys_platform() == 'win32':
+	tools.append('msvc')
+
+tools.extend([
 	'cs',
 	'misc',
 	'tools.asciidoctor-pdf',
@@ -18,7 +22,7 @@ tools = [
 	'tools.version',
 	'tools.webhelp',
 	'tools.zip',
-]
+])
 
 optional_tools = [
 ]
