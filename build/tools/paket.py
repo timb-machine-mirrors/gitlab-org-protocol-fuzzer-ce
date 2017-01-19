@@ -88,6 +88,7 @@ def read_paket(self, lockfile):
 
 	src = self.path.find_resource(lockfile)
 	if src:
+		ignore = False
 		contents = src.read()
 		for line in contents.splitlines():
 			if line.startswith('GROUP'):
@@ -96,17 +97,22 @@ def read_paket(self, lockfile):
 				groups[group] = pkgs
 				parent = None
 				node = root.find_dir(group)
-			suffix = line.lstrip(' ')
-			depth = (len(line) - len(suffix)) / 2
-			if depth == 2:
-				name = suffix.split()[0]
-				parent = pkgs.get(name)
-				if parent is None:
-					parent = Package(self, group, name, node.find_dir(name))
-					pkgs[name] = parent
-			elif depth == 3:
-				pkg = suffix.split()[0]
-				parent.deps.append(pkg)
+			elif line.startswith('NUGET'):
+				ignore = False
+			elif line.startswith('HTTP'):
+				ignore = True
+			elif not ignore:
+				suffix = line.lstrip(' ')
+				depth = (len(line) - len(suffix)) / 2
+				if depth == 2:
+					name = suffix.split()[0]
+					parent = pkgs.get(name)
+					if parent is None:
+						parent = Package(self, group, name, node.find_dir(name))
+						pkgs[name] = parent
+				elif depth == 3:
+					pkg = suffix.split()[0]
+					parent.deps.append(pkg)
 
 	self.env.PAKET_PACKAGES = groups
 

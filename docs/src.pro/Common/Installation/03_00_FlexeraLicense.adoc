@@ -2,7 +2,7 @@
 === Peach FuzzFlex
 
 Peach FuzzFlex is a flexible licensing model which allows users to purchase test cases in batches of 100k.
-Each test case that Peach executes is considered one 'use' of the Peach license against the total number of test cases purchased.
+Each test case that Peach executed is considered one 'use' of the Peach license against the total number of test cases purchased.
 
 After submitting a purchase order, Peach will create a user profile that can be used to access the Peach Fuzzer download site.
 The user can also be used to access the Licensing Operations Portal, used to check usage statistics, via the download site.

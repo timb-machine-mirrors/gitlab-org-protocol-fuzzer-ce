@@ -54,9 +54,13 @@ namespace Peach.Pro.Core.Mutators
 				case Variant.VariantType.String:
 					long longResult;
 					ulong ulongResult;
+					double doubleResult;
 
 					if ((signed && Int64.TryParse((string) value, out longResult)) || UInt64.TryParse((string) value, out ulongResult))
 						return value;
+
+					if (double.TryParse((string)value, out doubleResult))
+						return new Variant(doubleResult);
 
 					break;
 			}

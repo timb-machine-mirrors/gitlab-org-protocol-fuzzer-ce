@@ -8,4 +8,5 @@ subdirs = [
 	'Test',
 ]
 
-bld.recurse(subdirs)
+if bld.env.BASENAME != 'web':
+	bld.recurse(subdirs)

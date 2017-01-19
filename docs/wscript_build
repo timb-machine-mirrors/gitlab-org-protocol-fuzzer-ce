@@ -11,64 +11,72 @@ if 'webhelp' in bld.env.supported_features:
 	# Apply the peach webhelp theme to all webhelp builders
 	bld.set_webhelp_theme('../build/assets/webhelp')
 
-# The following 2 entires generate the Peach Pro doc using outline of v3Q4 update
-# Commnented out while I work on User Guide structuring.
+if bld.env.BASENAME == 'web':
+	webGuide = bld(
+		features = 'asciidoctor-pdf',
+		source = 'src.web/UserGuide/UserGuide.adoc',
+		images = 'src.web/images',
+		name = 'Peach_API_Security_User_Guide.pdf',
+		install_path = '${PREFIX}/Web/wwwroot/files',
+	)
 
-devGuide = bld(
-	features = 'asciidoctor-pdf',
-	source = 'src.pro/DevGuide/DevGuide.adoc',
-	images = 'src.pro/images',
-	name = 'Peach_Pro_Developer_Guide.pdf',
-	install_path = '${BINDIR}/sdk/docs',
-)
+	bld(
+		features = 'webhelp',
+		source = 'src.web/UserGuide/UserGuide.adoc',
+		images = 'src.web/images',
+		name = 'webhelpApiUserGuide',
+		install_path = '${PREFIX}/Web/wwwroot/webhelp',
+	)
 
-bld(
-	features = 'webhelp',
-	source = 'src.pro/DevGuide/DevGuide.adoc',
-	images = 'src.pro/images',
-	name = 'webhelpDevGuide',
-	install_path = '${BINDIR}/sdk/docs/webhelp',
-)
+	check_sources_list = [ webGuide ]
+else:
+	# The following 2 entires generate the Peach Pro doc using outline of v3Q4 update
+	# Commnented out while I work on User Guide structuring.
 
-# The following 2 entires generate the Peach Pro User Guide doc using (new in 2015)
-userGuide = bld(
-	features = 'asciidoctor-pdf',
-	source = 'src.pro/UserGuide/UserGuide.adoc',
-	images = 'src.pro/images',
-	name = 'Peach_Pro_User_Guide.pdf',
-	install_path = '${BINDIR}/docs',
-)
+	devGuide = bld(
+		features = 'asciidoctor-pdf',
+		source = 'src.pro/DevGuide/DevGuide.adoc',
+		images = 'src.pro/images',
+		name = 'Peach_Pro_Developer_Guide.pdf',
+		install_path = '${BINDIR}/sdk/docs',
+	)
 
-bld(
-	features = 'webhelp',
-	source = 'src.pro/UserGuide/UserGuide.adoc',
-	images = 'src.pro/images',
-	name = 'webhelpUserGuide',
-	install_path = '${BINDIR}/docs/webhelp',
-)
+	bld(
+		features = 'webhelp',
+		source = 'src.pro/DevGuide/DevGuide.adoc',
+		images = 'src.pro/images',
+		name = 'webhelpDevGuide',
+		install_path = '${BINDIR}/sdk/docs/webhelp',
+	)
 
-bld(
-	features = 'doxygen',
-	doxyfile = 'apidocs/apidocs.conf',
-	name = 'apidocs',
-	install_path = '${BINDIR}/sdk',
-)
+	# The following 2 entires generate the Peach Pro User Guide doc using (new in 2015)
+	userGuide = bld(
+		features = 'asciidoctor-pdf',
+		source = 'src.pro/UserGuide/UserGuide.adoc',
+		images = 'src.pro/images',
+		name = 'Peach_Pro_User_Guide.pdf',
+		install_path = '${BINDIR}/docs',
+	)
 
-userGuide = bld(
-	features = 'asciidoctor-pdf',
-	source = 'src.web/UserGuide/UserGuide.adoc',
-	images = 'src.web/images',
-	name = 'Peach_API_Security_User_Guide.pdf',
-	install_path = '${BINDIR}/Web',
-)
+	bld(
+		features = 'webhelp',
+		source = 'src.pro/UserGuide/UserGuide.adoc',
+		images = 'src.pro/images',
+		name = 'webhelpUserGuide',
+		install_path = '${BINDIR}/docs/webhelp',
+	)
 
-bld(
-	features = 'webhelp',
-	source = 'src.web/UserGuide/UserGuide.adoc',
-	images = 'src.web/images',
-	name = 'webhelpApiUserGuide',
-	install_path = '${BINDIR}/Web/webhelp',
-)
+	bld(
+		features = 'doxygen',
+		doxyfile = 'apidocs/apidocs.conf',
+		name = 'apidocs',
+		install_path = '${BINDIR}/sdk',
+	)
+
+	check_sources_list = [
+		devGuide,
+		userGuide,
+	]
 
 def check_sources(ctx, tgs):
 	if 'asciidoctor-pdf' not in ctx.env.supported_features:
@@ -106,4 +114,4 @@ def check_sources(ctx, tgs):
 
 		Logs.warn('%s Total Unreferenced Documentation Files' % len(extras))
 
-bld.add_post_fun(lambda x: check_sources(x, [devGuide, userGuide]))
+bld.add_post_fun(lambda x: check_sources(x, check_sources_list))
