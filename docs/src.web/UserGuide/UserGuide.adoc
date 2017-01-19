@@ -15,6 +15,7 @@ v{BUILDTAG}
 :version: v{VER_MAJOR}.{VER_MINOR}
 :peachurl: http://peachfuzzer.com
 :forumurl: https://forums.peachfuzzer.com
+:portalurl: https://dl.peachfuzzer.com
 :peachug: Peach API Security User Guide
 ifdef::backend-pdf[]
 :pagenums:
@@ -39,8 +40,6 @@ Suite 1064 +
 Seattle, WA 98122
 
 endif::[]
-
-// NOTE: This book documents the commercial version of Peach
 
 :leveloffset: 0
 <<<

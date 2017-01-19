@@ -1,0 +1,24 @@
+[[Install_ResourceRequirements]]
+=== Resource Recommendations
+
+The following are hardware recommendations for {product}.
+
+[options="header"]
+|========
+| Virtualization | Architecture | Cores | Ram  | Disk
+| VMWare         | 64-bit       | 2     | 4GB  | 60GB SSD
+| Virtual Box    | 64-bit       | 2     | 4GB  | 60GB SSD
+|========
+
+==== Amazon AWS EC2
+
+These recommendations are the same for both AWS Marketplace purchases
+as well as importing a machine image.
+
+[options="header"]
+|========
+| Cloud Provider | Instance Type
+| AWS EC2        | t2.medium
+|========
+
+// end
