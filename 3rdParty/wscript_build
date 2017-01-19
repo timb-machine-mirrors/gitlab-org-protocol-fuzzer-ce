@@ -20,34 +20,8 @@ flexnet = 'flexnet_client-2016.08'
 bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
 bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
 
-subdirs = [
-	'BouncyCastle/crypto',
-	'BouncyCastle/crypto/test',
-	'FlexNet.Operations-2016.R2',
-	'Google.CityHash',
-	'libusbdotnet',
-	'Managed.AndroidDebugBridge',
-	'pin',
-	'Portable.Licensing',
-	'Renci.SshNet',
-	'sqlite-3.8.11.1',
-	'Titanium-Web-Proxy/Titanium.Web.Proxy',
-	'TotalPhase/aardvark',
-	'TotalPhase/komodo',
-	'VMware-VIX-1.13.0-1295980',
-]
-
-bld.recurse(subdirs)
-
 if bld.env.CS_NAME != 'csc':
 	bld.read_csshlib('System.Data.SQLite.dll', paths=['System.Data.SQLite.Mono.1.0.98.1'])
-
-if bld.env.BASENAME == 'osx':
-	bld(
-		name='CrashWrangler',
-		install_path = '${BINDIR}',
-		install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
-	)
 
 nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.1/tools')
 
@@ -59,3 +33,35 @@ bld(
 		nunit_tools : nunit_tools.ant_glob('**/*'),
 	}
 )
+
+if bld.env.BASENAME == 'web':
+	subdirs = [
+		'BouncyCastle/crypto',
+		'BouncyCastle/crypto/test',
+	]
+else:
+	subdirs = [
+		'BouncyCastle/crypto',
+		'BouncyCastle/crypto/test',
+		'FlexNet.Operations-2016.R2',
+		'Google.CityHash',
+		'libusbdotnet',
+		'Managed.AndroidDebugBridge',
+		'pin',
+		'Portable.Licensing',
+		'Renci.SshNet',
+		'sqlite-3.8.11.1',
+		'Titanium-Web-Proxy/Titanium.Web.Proxy',
+		'TotalPhase/aardvark',
+		'TotalPhase/komodo',
+		'VMware-VIX-1.13.0-1295980',
+	]
+	
+	if bld.env.BASENAME == 'osx':
+		bld(
+			name='CrashWrangler',
+			install_path = '${BINDIR}',
+			install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
+		)
+
+bld.recurse(subdirs)

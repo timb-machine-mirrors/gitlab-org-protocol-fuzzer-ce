@@ -45,6 +45,7 @@ nuget DotNetZip
 nuget FluentMigrator
 nuget FluentMigrator.Runner
 nuget Handlebars.Net
+nuget Humanizer.Core
 nuget jQuery < 2.0
 nuget LiquidState
 nuget Microsoft.AspNet.WebApi.Client
@@ -79,3 +80,20 @@ nuget Swashbuckle.Swagger beta
 nuget Swashbuckle.SwaggerGen beta
 nuget Swashbuckle.SwaggerUi beta
 nuget System.Runtime.CompilerServices.Unsafe
+
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2002.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2003.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2004.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2005.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2006.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2007.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2008.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2009.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2010.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2011.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2012.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2013.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2014.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2015.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2016.xml.gz
+http http://jenkins.int.dejavusecurity.com/userContent/nvdcve-2.0-2017.xml.gz

@@ -202,11 +202,11 @@ def verify_external(bld):
 				tsk = getattr(tg, 'cs_task', None)
 				if tsk:
 					externals = [ x for x in externals if x not in tsk.dep_nodes ]
-		for e in externals:
-			Logs.warn('Unreferenced Assembly: %s' % e)
+		# for e in externals:
+		# 	Logs.warn('Unreferenced Assembly: %s' % e)
 
 def run_makexsd(bld):
-	if bld.is_install and bld.variant != 'doc':
+	if bld.is_install and bld.variant != 'doc' and bld.env.BASENAME != 'web':
 		makexsd = '%s PitTool.exe makexsd' % bld.env.RUN_NETFX
 		env = os.environ.copy()
 		env['TERM'] = 'xterm'

@@ -101,32 +101,33 @@ class zip(Task.Task):
 	color = 'PINK'
 
 	def run(self):
-		f = self.outputs[0]
-		basename = os.path.splitext(f.name)[0]
+		output = self.outputs[0]
+		basename = os.path.splitext(output.name)[0]
 
 		try:
-			os.unlink(f.abspath())
+			os.unlink(output.abspath())
 		except Exception:
 			pass
 
-		z = zipfile.ZipFile(f.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
+		zip = zipfile.ZipFile(output.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
 		for src, dest, attr in self.generator.zip_inputs:
 			dest = os.path.normpath(dest).replace('\\', '/')
-			fullSrc = src.abspath()
+			src_abspath = src.abspath()
 
-			if os.path.islink(fullSrc):
+			if os.path.islink(src_abspath):
 				zi = zipfile.ZipInfo(dest)
 				zi.create_system = 3
 				zi.external_attr = 2716663808L
 				# '0xA1ED0000L' is symlink attr magic
-				z.writestr(zi, os.readlink(fullSrc))
+				zip.writestr(zi, os.readlink(src_abspath))
 			else:
-				z.write(fullSrc, dest)
-				zi = z.getinfo(dest)
-				zi.external_attr = attr
+				zip.write(src_abspath, dest)
+				if attr is not None:
+					zi = zip.getinfo(dest)
+					zi.external_attr = attr
 
-		z.close()
+		zip.close()
 
 class sha(Task.Task):
 	color = 'PINK'
@@ -144,3 +145,23 @@ class sha(Task.Task):
 
 		dst.write('SHA1(%s)= %s\n' % (src.name, digest))
 
+@feature('simple_zip')
+def process_simple_zip(self):
+	self.zip_inputs = set()
+
+	for zip_spec in getattr(self, 'zip_spec', []):
+		relative = zip_spec['relative']
+		prefix = zip_spec['prefix']
+		for src in zip_spec['src']:
+			attr = stat.S_IMODE(os.stat(src.abspath()).st_mode)
+			dest = os.path.join(prefix, src.path_from(relative))
+			self.zip_inputs.add((src, dest, None))
+
+	self.zip_inputs = sorted(self.zip_inputs, key=lambda x: x[1])
+	srcs = [ x[0] for x in self.zip_inputs ]
+	dest = self.path.find_or_declare(self.name + '.zip')
+
+	self.zip_task = self.create_task('zip', srcs, dest)
+
+	inst_to = getattr(self, 'install_path', '${PKGDIR}')
+	self.install_files(inst_to, self.zip_task.outputs)
