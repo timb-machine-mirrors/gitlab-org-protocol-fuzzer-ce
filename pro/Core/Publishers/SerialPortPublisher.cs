@@ -72,7 +72,7 @@ namespace Peach.Pro.Core.Publishers
 			catch (Exception ex)
 			{
 				var msg = "Unable to open Serial Port {0}. {1}.".Fmt(PortName, ex.Message);
-				Logger.Error(msg);
+				Logger.Debug(msg);
 
 				// Always throw SoftExceptions
 				throw new SoftException(msg, ex);
