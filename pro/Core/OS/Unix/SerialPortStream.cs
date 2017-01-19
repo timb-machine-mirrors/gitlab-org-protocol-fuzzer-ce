@@ -252,7 +252,7 @@ namespace Peach.Pro.Core.OS.Unix
 
 		protected override void Dispose (bool disposing)
 		{
-			if (disposed)
+			if (!disposing || disposed)
 				return;
 			
 			disposed = true;
@@ -298,7 +298,7 @@ namespace Peach.Pro.Core.OS.Unix
 		{
 			try {
 				Dispose (false);
-			} catch (IOException) {
+			} catch (UnixIOException) {
 			}
 		}
 
