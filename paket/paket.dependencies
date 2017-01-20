@@ -60,6 +60,7 @@ nuget Microsoft.Extensions.Configuration.Json
 nuget Microsoft.Extensions.FileProviders.Embedded
 nuget Microsoft.Extensions.Logging.Console
 nuget Microsoft.Extensions.Logging.Debug
+nuget Microsoft.Extensions.Options.ConfigurationExtensions
 nuget Minimatch
 nuget Moq
 nuget Npgsql
