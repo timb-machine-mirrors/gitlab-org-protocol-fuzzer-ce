@@ -1,13 +1,8 @@
+=== Development/Engineering Team
 
-[[webproxy_Usage]]
-=== Usage
-
-This section provides some example usage patterns for Peach Web.
-
-==== Development/Engineering Team
-
-For teams building web services and web APIs, integration into the CI system or automated test system provides
-a lot of advantages over traditional web testing processes.
+For teams building web services and web APIs, integration into the CI 
+system or automated test system provides a lot of advantages over 
+traditional web testing processes.
 
  * Immediate feedback.
 When security testing occurs with every build, security issues are found and fixed much faster.
@@ -28,14 +23,14 @@ For example, nightly builds might be configured to run Peach Web testing for 2 h
 If security testing fails during those 2 hours, the build would be marked as such, similar to failing
 automated tests.
 + 
-For more information see the xref:webproxy_CI[CI Integration] section of the User Guide.
-    
+For more information see the xref:CI[CI Integration] section of the User Guide.
+
 Traffic Generator::
 +
 A traffic generator is needed that produces requests that are fuzzed.
 Traffic generators will replay the same traffic over and over allowing Peach Web to fuzz it.
 +
-The xref:webproxy_TrafficGen[Traffic Generator] section provides more information about what is needed.
+The xref:TrafficGen[Traffic Generator] section provides more information about what is needed.
 +
 There are two common methods:
 +
@@ -54,15 +49,5 @@ Issue Tracker Integration::
 Peach can automatically log found faults into popular issue trackers such as JIRA or Bugzilla.
 The scripts and documentation are provided in _SDK/tools/peach2bugzilla_ and _SDK/tools/peach2jira_.
 +
-For more information see the xref:webproxy_IssueTracker[Issue Tracker Integration] section of the User Guide.
+For more information see the xref:IssueTracker[Issue Tracker Integration] section of the User Guide.
 
-==== Redteam or Penetration Tester
-
-Use by individual testers such as redteam members or penetration testers can be achieved in several ways:
-
- * Attack proxies can forward input into Peach for testing.
-For example Burp Repeater can be used to forward requests through Peach multiple times.
- * A custom traffic generator script can be written in a language known by the tester such as Python.
-These scripts are easy and quick to author- existing sample code can be used in many cases.
- * Selenium Firefox plugin can be used to record a web session.
-Selenium then exports to formats like JUnit that have Peach integrations.

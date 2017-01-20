@@ -1,6 +1,10 @@
+[[IssueTracker]]
+== Issue Tracker Integration
 
-[[webproxy_IssueTracker]]
-=== Issue Tracker Integration
+WARNING: This section still under construction.
+Information provided is partial and may be out of date.
+
+/////////////////
 
 Peach Web can automatically submit security findings into an issue tracking system such as JIRA or Bugzilla.
 Submitted tickets can then be reviewed by the engineering team and go through a typical issue workflow.
@@ -102,3 +106,4 @@ To enable single issue per-bucket a custom issue field is required.
 .. Type: Free Text
 
 
+/////////////////

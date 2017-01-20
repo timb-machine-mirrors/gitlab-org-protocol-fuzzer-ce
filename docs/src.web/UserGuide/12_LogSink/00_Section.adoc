@@ -1,12 +1,5 @@
 [[LogSink]]
 == Log Sink
 
-The log sink can consume syslog log messages. 
-
-=== SYslog
-
-blah blah
-
-=== Sending local logs
-
-blah blah blah
+A single global log sink is automatically configured at port 512.
+Logs sent to this sink during testing will be analyzed by the current testing job.

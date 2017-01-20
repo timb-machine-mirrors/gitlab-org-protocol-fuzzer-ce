@@ -1,5 +1,5 @@
 [[tg_JUnit4]]
-==== JUnit 4
+== JUnit 4
 
 The JUnit 4 integrations is an extension to JUnit 4 to create a Peach Suite of test cases.
 Integration requires creating a special Suite of unit tests.
@@ -12,12 +12,12 @@ TestFlaskRestTarget.java::
 FuzzFlashRestTarget.java::
 	Example of a Peach Suite that uses the unit tests defined in _TestFlaskRestTarget_.
 
-===== Installation
+=== Installation
 
 Build with Maven or Netbeans. A resulting jar file is produced in the _target_ folder.
 Dependencies are in _target/lib_.
 
-===== Usage
+=== Usage
 
 Create a suite similar to "FuzzFlashRestTarget.java".  
 
@@ -54,29 +54,23 @@ public class FuzzFlaskRestTarget {
 }
 ----
 
-===== Running
+=== Running
+
+The JUnit 4 runner is expected to be called from one of the CI integrations scripts.
+It is not directly callable as it expectes session setup to already be performed.
 
 For JUnit 4 runner, Peach controls when the runner should stop.
 
-The following environment variables are expected to bet set.
+The following environment variables are expected to bet set when called.
 These variables are normally set by the CI runner:
 
 PEACH_API:: URL to {product} API. Ex. http://10.0.0.1
+PEACH_API_TOKEN:: API Token for {product}
 PEACH_SESSIONID:: ID for curent testing session. Returned from /api/sessions API.
 PEACH_PROXY:: URL to current proxy instance. Returned from /api/sessions API. Ex. http://10.0.0.1:1234
 
+Example PEACH_AUTOMATION_CMD:
 
-.Windows
 ----
-set PEACH_API=http://10.0.0.1
-set PEACH_SESSIONID=xxxxx
-set PEACH_PROXY=http://10.0.0.1:1234
-
-java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
-----
-
-.Linux
-----
-export PEACH_API_HOST=127.0.0.1:8888
-java org.junit.runner.JUnitCore com.peachfuzzer.web.frameworks.junit4.examples.FuzzFlaskRestTarget
+PEACH_AUTOMATION_CMD="java -cp \"testrunners/JUnit4Peach/target/JUnit4Peach-1.0-SNAPSHOT.jar;libraries/java/target/PeachProxy-1.0-SNAPSHOT.jar;testrunners/JUnit4Peach/target/lib/*\" org.junit.runner.JUnitCore com.peachfuzzer.web.junit4.examples.FuzzFlaskRestTarget"
 ----

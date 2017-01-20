@@ -1,33 +1,43 @@
 == Checks
 
+WARNING: This section still under construction.
+Information provided is partial and may be out of date.
+
 Checks are broken up into global, passive, active and mutational....
 
 // TODO table of checks
 
->>>
+:leveloffset: 2
 include::CleartextAuthentication.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::HtmlInjection.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::JsonInjection.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::SensitiveFile.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::SensitiveInformation.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::SessionCookie.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::SqlInjection.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::Token.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::XmlInjection.adoc[]
-

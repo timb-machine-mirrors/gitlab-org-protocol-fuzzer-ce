@@ -1,26 +1,26 @@
 [[tg_pytest]]
-==== pytest
+== pytest
 
-pytest-peach is a plugin for link:http://pytest.org[py.test] that integrates with Peach Web.
-Integration includes calling the correct Peach Fuzzer APIs to report test names and not
-fuzzing setup and teardown requests.
+pytest-peach is a plugin for link:http://pytest.org[pytest] that integrates with {product}.
+Integration includes calling the correct {product} APIs to report test names and 
+disable testing of setup/teardown methods.
 
 Pytest integration is provided as a pytest plugin called "pytest-peach".
-It's available in the SDK as "sdk\webproxy\testrunners\pytest-peach".
+It's available in the SDK as "sdk\testrunners\pytest".
 The plugin builds and installs via the command "python setup.py install".
 The plugin is also available via pip "pip install pytest-peach".
 
-===== Requirements
+=== Requirements
 
 You will need the following prerequisites in order to use pytest-peach:
 
 - Python 2.6, 2.7, 3.2, 3.3, 3.4, 3.5 or PyPy
-- py.test 2.8 or newer
+- pytest 2.8 or newer
 - Requests v2.11 or newer
 
-===== Installation
+=== Installation
 
-To install pytest-repeat:
+To install pytest-peach plugin:
 
 ----
 $ pip install pytest-repeat
@@ -32,26 +32,20 @@ $ pip install pytest-repeat
 $ python setup.py install
 ----
 
-===== Usage
+=== Usage
 
 ----
-pytest --peach=auto --peach_count=10000 test_target.py
+pytest --peach=on test_target.py
 ----
 
 *Arguments*
 
 _Required_
 
---peach=JOB_ID::
-   This argument enables the pytest Peach Fuzzer extention.
-   To interact with Peach Fuzzer an active job id is needed.
-   The easiest method is to self discover this id by setting it to +auto+.
-   Optionally a full job id can be supplied. The use of _auto_ is recommended.
+--peach=true::
+   This argument enables the pytest {product} extension.
 
-_Optional_
+=== Example PEACH_AUTOMATION_CMD
 
---peach_count=COUNT::
-   How many test case iterations per test to perform. Defaults to +1000+.
+  PEACH_AUTOMATION_CMD="pytest --peach=on testrunners/pytest/tests/test_target.py"
 
---peach_api=BASE_URL::
-   Base URL of Peach Fuzzer instance. Defaults to +http://127.0.0.1:8888+.

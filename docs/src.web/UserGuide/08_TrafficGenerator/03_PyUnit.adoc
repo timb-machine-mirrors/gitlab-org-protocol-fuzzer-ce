@@ -41,3 +41,13 @@ environmental variable is set correctly.
 Additionally the Flask REST Target must be running.
 
 ==========================
+
+=== PEACH_AUTOMATION_CMD
+
+Add a PYTHONPATH environment variable prior to calling CI script.
+This will make sure the {product} version of PyUnit is used.
+
+----
+PYTHONPATH=testrunners\unittest\unittest
+PEACH_AUTOMATION_CMD="python testrunners/unittest/test_flaskresttarget.py"
+----

@@ -1,13 +1,17 @@
 [[ChecksAndAsserts]]
 == Checks and Asserts
 
+WARNING: This section still under construction.
+Information provided is partial and may be out of date.
+
 This section includes information about each Check and Assert in {product}.
 For each check information about what is tested and how to configure is provided.
 
-<<<
+:leveloffset: 1
 include::01_Checks/00_Section.adoc[]
 
 <<<
+:leveloffset: 1
 include::02_Asserts/00_Section.adoc[]
 
 // end

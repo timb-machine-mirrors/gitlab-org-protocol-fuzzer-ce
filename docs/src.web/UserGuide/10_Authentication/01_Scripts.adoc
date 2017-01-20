@@ -1,6 +1,8 @@
-
-[[webproxy_Scripts]]
+[[Scripts]]
 === Scripts
+
+WARNING: This section still under construction.
+Information provided is partial and may be out of date.
 
 The _Script_ configuration option allows custom code to be run after fuzzing but prior to sending outgoing HTTP requests.
 This is typically used to implement custom authentication required by the target web service.

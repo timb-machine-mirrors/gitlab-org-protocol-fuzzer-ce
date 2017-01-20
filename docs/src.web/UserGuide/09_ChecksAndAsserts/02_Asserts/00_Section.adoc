@@ -1,12 +1,16 @@
 == Asserts
 
-Asserts are ....
+WARNING: This section still under construction.
+Information provided is partial and may be out of date.
+
+Asserts are methods used to detect failures during testing.
 
 // TODO table of checks
 
->>>
+:leveloffset: 2
 include::SensitiveInformation.adoc[]
 
->>>
+<<<
+:leveloffset: 2
 include::StatusCode.adoc[]
 

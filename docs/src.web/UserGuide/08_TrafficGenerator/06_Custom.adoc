@@ -7,40 +7,48 @@ This allows performing some test setup/tear down independent of the fuzzed API c
 The traffic generator should produce traffic until a call to the Peach Web Proxy APIs fail.
 This allows Peach to direct the length of testing.
 
-NOTE: An example traffic generator is included in the SDK as _SDK\webproxy\examples\flask_rest_target\hand_fuzz.py_.
-This traffic generator makes use of the Peach Web Proxy API.
+NOTE: An example traffic generator is included in the SDK as _SDK\testrunner\custom\python\hand_fuzz.py_.
 
-==== Proxy REST API
+TIP: Instead of writing a custom traffic generator from scratch consider writing a small
+automated test in pytest, pyunit or junit4.  You can then leverage existing plugins for 
+these test runners.  This is typically easier than writing a custom traffic generator script.
 
-The Proxy API allows for tight integration with application unit tests.
-As such the provided APIs match with typical unit test framework actions such as set-up and tear-down.  When using unit tests with Peach the typical flow is as follows:
+===== Logic flow from CI integration
 
-. POST /p/jobs - Start fuzzing job using WebProxy pit
-. PUT sessionSetUp
-. [One time set up actions here]
-LOOP:
-.. PUT testSetUp
-.. [Setup actions that occur on each iteration of fuzzing]
-.. PUT testCase w/test name
-.. [Requests that are fuzzed]
-.. PUT testTearDown
-.. [Tear down action that occur on each iteration of fuzzing]
-.. GOTO LOOP
-. PUT sessionTearDown - Once per fuzzing session
-. [Session tear down actions, occur once per-fuzzing session]
+This the the expected logic flow for custom traffic generators.
+Traffic generators should use an existing library for implementation.
 
-NOTE: Interactive est api documentation can be viewed inside of Peach by navigating
-to "Help" -> "Rest API" then select the "Proxy" section.
+. Loop over test(s)
+.. Call Peach libraries setup method
+.. Optionally perform any setup related logic (not tested)
+.. Call Peach libraries test method
+.. Generate traffic that is tested
+.. Call Peach libraries test teardown method
+.. Optionally perform any teardown logic (not tested)
+. Call libraries suite teardown method
 
-*****
-Peach Web provides a Python module 'peachproxy' that provides wrappers around the Peach Proxy API.
-The module is available in _SDK/webproxy/peachproxy_.
-It can be installed by running:
+===== Logic flow with no CI integration
 
-----
-python setup.py install
-----
+This the the expected logic flow for custom traffic generators.
+Traffic generators should use an existing library for implementation.
 
-The module provides functions for each the Peach Web Proxy APIs.
+. Call Session Setup method of library
+. Loop over test(s)
+.. Call Peach libraries setup method
+.. Optionally perform any setup related logic (not tested)
+.. Call Peach libraries test method
+.. Generate traffic that is tested
+.. Call Peach libraries test teardown method
+.. Optionally perform any teardown logic (not tested)
+. Call libraries suite teardown method
+. Call libraries session teardown method
 
-*****
+===== Examples
+
+.Python
+==========================
+
+An example traffic generator is included in the SDK as _SDK\testrunner\custom\python\hand_fuzz.py_.
+This example expected to be called form a CI integration script.
+
+==========================
