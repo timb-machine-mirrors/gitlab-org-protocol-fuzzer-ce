@@ -1,7 +1,7 @@
 [[JumpStart]]
 == Getting Started with the {product}
 
-This section will provide an introduction on using {product}.
+This section will provide an introduction to using {product}.
 Other sections of this {peachug} will be referenced to provide additional or supporting
 information.
 
