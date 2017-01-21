@@ -1,14 +1,14 @@
 === What is {product}?
 
 {product} performs security testing of Web Serices/APIs. 
-Testing includes (for example) OWASP Top 10 and PCI 6.5 security issues and also includes fuzzing.
-{product} is designed to integrate into modern development models such as Agile and continuous integration (CI) cicles.
-{product} integrates with CI systems and is intended to be run automatically during daily builds.
-{product} is intended to be integrated into engineering groups with the least amount of workflow changes.
+Testing includes OWASP Top 10 and PCI 6.5 security issues and also includes fuzzing.
+{product} is designed to integrate into modern development models such as Agile and continuous integration (CI) cycles.
+Integrations with CI systems enable the product to be run automatically during daily builds.
+{product} is intended to be integrated into engineering groups with minimal alterations to existing developer workflows.
 
 ==== Use cases
 
-{product} has two primary use cases, integration into engineering groups and use by security teamms
+{product} has two primary use cases, integration into engineering groups and use by security teams
 in an organization.
 
 // TODO - Expand
