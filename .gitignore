@@ -18,6 +18,10 @@ packages/
 *.VC.opendb
 .vs/
 
+# Visual Studio Code
+# python plugin uses ctags
+tags
+
 # python generated files
 *.pyc
 
