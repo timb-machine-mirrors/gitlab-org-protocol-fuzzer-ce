@@ -19,7 +19,7 @@ A typical deployment includes the following components:
 
 CI integration::
 The CI system's pipeline is configured to include {product} testing with specific types of builds.
-For example, nightly builds might be configured to run{product} testing for 2 hours each night.
+For example, nightly builds might be configured to run {product} testing for 2 hours each night.
 If security testing fails during those 2 hours, the build would be marked as such, similar to failing
 automated tests.
 + 
