@@ -2,8 +2,8 @@
 == Installation
 
 {product} is distributed as a virtual machine image.
-The installation process consists of creating an virtual machine instance and
-performing some initial configuration.
+The installation process consists of creating a virtual machine instance and
+performing some initial configuration steps.
 These steps can be performed by operations or IT staff and does not require training.
 
 include::01_ResourceRequirements.adoc[]
