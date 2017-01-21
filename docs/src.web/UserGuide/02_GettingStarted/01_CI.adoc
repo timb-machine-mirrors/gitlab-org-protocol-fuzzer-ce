@@ -9,7 +9,7 @@ When security testing occurs with every build, security issues are found and fix
  
  * Lowered cost of fixing security issues.
 The cost to fix a security issue starts increasing as time between when it was authored and discovered grows.
-By providing immediate feedback the time between write and fix is shortened.
+By providing immediate feedback, the time between write and fix is shortened.
 
  * Lowered Cost of Ownership.
 Re-purposing existing automated tests removes the need to maintain configurations for each API.
@@ -18,8 +18,8 @@ Re-using existing tests also quickly provides high test coverage with little eff
 A typical deployment includes the following components:
 
 CI integration::
-CI system's pipeline is configured to include Peach Web testing with specific types of builds.
-For example, nightly builds might be configured to run Peach Web testing for 2 hours each night.
+The CI system's pipeline is configured to include {product} testing with specific types of builds.
+For example, nightly builds might be configured to run{product} testing for 2 hours each night.
 If security testing fails during those 2 hours, the build would be marked as such, similar to failing
 automated tests.
 + 
@@ -27,8 +27,8 @@ For more information see the xref:CI[CI Integration] section of the User Guide.
 
 Traffic Generator::
 +
-A traffic generator is needed that produces requests that are fuzzed.
-Traffic generators will replay the same traffic over and over allowing Peach Web to fuzz it.
+A traffic generator is needed to produce requests that are then fuzzed.
+Traffic generators will replay the same traffic over and over allowing {product} to fuzz it.
 +
 The xref:TrafficGen[Traffic Generator] section provides more information about what is needed.
 +
@@ -37,7 +37,7 @@ There are two common methods:
 Automated Test Integration;;
 +
 Use existing test automation with one of Peach's framework integrations such as JUnit or pytest.
-The use of existing test automation provides a fast way to get Peach Web running.
+The use of existing test automation provides a fast way to get {product} running.
 +
 Custom Traffic Generator;;
 +
