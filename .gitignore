@@ -111,5 +111,6 @@ paket/nas
 .idea
 
 # Packer artifacts
+web/packer/output-peachweb
 web/packer/output-vmware-iso
 web/packer/packer_cache
