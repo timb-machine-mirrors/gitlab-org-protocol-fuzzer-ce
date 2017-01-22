@@ -52,7 +52,7 @@ if [ -z "$BUILDTAG" ]; then
     exit 1
 fi
 
-if [ -z "${CUSTOM_REGISTRY}"]; then
+if [ -z "${CUSTOM_REGISTRY}" ]; then
     echo ""
     echo "Verifying docker registry ${REGISTRY}"
     echo ""
