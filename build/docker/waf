@@ -2,5 +2,5 @@
 
 set -e
 
-docker run -v $PWD:/build peach-pro ./waf $*
-docker rm $(docker ps -a -q) &>/dev/null || true
+docker run -v $PWD:/build peachweb-toolchain ./waf $*
+docker system prune -f

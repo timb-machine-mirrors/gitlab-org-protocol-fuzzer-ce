@@ -11,6 +11,7 @@ RUN echo "deb http://http.debian.net/debian wheezy-backports main" > /etc/apt/so
 RUN apt-get update \
 	&& apt-get install -y \
 		apt-transport-https \
+		python-pip \
 		build-essential \
 		ca-certificates \
 		gnupg2 \
@@ -25,6 +26,8 @@ RUN apt-get update \
 		# openjdk-7-jdk \
 		# python \
 		# xsltproc \
+
+RUN pip install awscli
 
 RUN npm install -g \
 	typescript@1.6

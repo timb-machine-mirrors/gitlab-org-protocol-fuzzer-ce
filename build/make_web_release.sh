@@ -93,10 +93,10 @@ echo "Making docker container"
 echo ""
 
 $(aws ecr get-login)
-docker build -t peachweb:${BUILDTAG} output/${VARIANT}/Web
-docker tag peachweb:${BUILDTAG} ${REGISTRY}:${BUILDTAG}
-docker tag peachweb:${BUILDTAG} ${REGISTRY}:latest
+docker build -t peachweb output/${VARIANT}/Web
+docker tag peachweb ${REGISTRY}:${BUILDTAG}
 docker push ${REGISTRY}
+docker rmi ${REGISTRY}:${BUILDTAG}
 
 echo ""
 echo "Running packer"

@@ -2,5 +2,5 @@
 
 set -e
 
-docker build -t peach-pro $PWD/build/docker
-docker rmi $(docker images -q -f dangling=true) 2>/dev/null || true
+docker build -t peachweb-toolchain $PWD/build/docker
+docker system prune -f
