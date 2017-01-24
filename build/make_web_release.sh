@@ -1,8 +1,6 @@
 #!/bin/bash
 
 VARIANT="web_release"
-export REGISTRY="10.0.1.201:5000"
-CUSTOM_REGISTRY=
 
 set -e
 
@@ -11,12 +9,16 @@ requires() {
 }
 
 usage() {
-    echo "USAGE: make_web_release.sh --buildtag 1.2.3 [--debug] [--registry HOST:PORT]"
+    echo "USAGE: make_web_release.sh --registry REGISTRY --buildtag 1.2.3 [--debug]"
+    echo "To access AWS, there are two options for specifying credentials:"
+    echo "1. Set the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables."
+    echo '2. Use `aws configure` and then optionally use the AWS_PROFILE environment variable.'
 }
 
 # packer gomes from: https://www.packer.io/downloads.html
 # ovatool comes from: https://www.vmware.com/support/developer/ovf/
 
+requires "aws"
 requires "zip"
 requires "docker"
 requires "packer"
@@ -30,12 +32,11 @@ while [[ $# -gt 0 ]]; do
             VARIANT="web_debug"
         ;;
         --buildtag)
-            BUILDTAG="$2"
+            export BUILDTAG="$2"
             shift
         ;;
         --registry)
-            REGISTRY="$2"
-            CUSTOM_REGISTRY=yes
+            export REGISTRY="$2"
             shift
         ;;
         *)
@@ -48,88 +49,70 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$BUILDTAG" ]; then
+    echo "Missing --buildtag."
     usage
     exit 1
 fi
 
-if [ -z "${CUSTOM_REGISTRY}" ]; then
-    echo ""
-    echo "Verifying docker registry ${REGISTRY}"
-    echo ""
+if [ -z "$REGISTRY" ]; then
+    echo "Missing --registry."
+    echo "AWS ECR is: 318398917258.dkr.ecr.us-east-1.amazonaws.com/peachweb"
+    usage
+    exit 1
+fi
 
-    # Verify CA cert of private registry is correctly installed
-    docker pull ${REGISTRY}/peachweb >/dev/null || {
-        cat <<FOO
-    Error communicating with registry ${REGISTRY}
-
-    Ensure the registry's CA cert is properly installed by running:
-
-    cat <<EOF > "/etc/docker/certs.d/${REGISTRY}/ca.crt"
-    -----BEGIN CERTIFICATE-----
-    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
-    d/IJVFdjBuUQoiHg42CuyeUvLZEmhmaq
-    -----END CERTIFICATE-----
-    EOF
-FOO
+if [ -z "$AWS_DEFAULT_REGION" ]; then
+    export AWS_DEFAULT_REGION=$(aws configure get region)
+    if [ -z "$AWS_DEFAULT_REGION" ]; then
+        echo "Missing AWS_DEFAULT_REGION environment variable"
+        usage
         exit 1
-    }
+    fi
+fi
+
+if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+    export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
+    if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+        echo "Missing AWS_ACCESS_KEY_ID environment variable"
+        usage
+        exit 1
+    fi
+fi
+
+if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+    export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
+    if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "Missing AWS_SECRET_ACCESS_KEY environment variable"
+        usage
+        exit 1
+    fi
 fi
 
 echo ""
 echo "Making docker container"
 echo ""
 
+$(aws ecr get-login)
 docker build -t peachweb:${BUILDTAG} output/${VARIANT}/Web
-docker tag peachweb:${BUILDTAG} peachweb:latest
-docker tag peachweb:${BUILDTAG} ${REGISTRY}/peachweb:${BUILDTAG}
-docker tag peachweb:${BUILDTAG} ${REGISTRY}/peachweb:latest
-docker push ${REGISTRY}/peachweb
+docker tag peachweb:${BUILDTAG} ${REGISTRY}:${BUILDTAG}
+docker tag peachweb:${BUILDTAG} ${REGISTRY}:latest
+docker push ${REGISTRY}
 
 echo ""
-echo "Making ova"
+echo "Running packer"
 echo ""
 
 ovadir="$(pwd)/output"
 pushd web/packer
 
-# Ensure old packer directory is clean
-rm -rvf "peachweb" 2>/dev/null || {}
-
-# Packer doesn't support '~' expansion in its cache dir variable
-var="${var/#\~/$HOME}"
-remote_var=""
-
-if [ ! -z "$ESXI_PASSWORD" ]; then
+# support local and remote packer builds
+if [ -z "$ESXI_PASSWORD" ]; then
+    # Ensure old packer directory is clean
+    rm -rvf "output-vmware-iso" 2>/dev/null || {}
+    remote_var=""
+else
+    # Ensure old packer directory is clean
+    rm -rvf "peachweb" 2>/dev/null || {}
     remote_var="-var remote_type=esx5"
 fi
 
@@ -139,9 +122,13 @@ packer build \
     ${remote_var} \
     template.json
 
-mv "peachweb/peachweb.ova/peachweb.ova" "${ovadir}/peachweb-${BUILDTAG}.ova"
+if [ -z "$ESXI_PASSWORD" ]; then
+    ovftool "output-vmware-iso/peachweb.vmx" "${ovadir}/peachweb-${BUILDTAG}.ova"
+else
+    mv "peachweb/peachweb.ova/peachweb.ova" "${ovadir}/peachweb-${BUILDTAG}.ova"
+fi
 
 popd
 
 echo ""
-echo "Successfully created ${ovadir}/peachweb-${BUILDTAG}.ova"
+echo "Successfully created peachweb-${BUILDTAG}"
