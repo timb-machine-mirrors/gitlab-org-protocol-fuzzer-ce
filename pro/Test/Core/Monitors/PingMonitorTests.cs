@@ -55,6 +55,19 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
+		public void TestSuccessV6()
+		{
+			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
+			{
+				{ "Host", "::1" },
+			});
+
+			var faults = runner.Run();
+
+			Assert.AreEqual(0, faults.Length);
+		}
+
+		[Test]
 		public void TestFailure()
 		{
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
