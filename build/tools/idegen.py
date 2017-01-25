@@ -689,7 +689,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 			g['OutputType'] = 'library'
 		else:
 			g['OutputType'] = getattr(tg, 'bintype', tg.gen.endswith('.dll') and 'library' or 'exe')
-		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.base)
+		g['BaseIntermediateOutputPath'] = base.make_node('obj').path_from(self.base) + os.sep
 
 		# This should get rid of the obj/<arch>/<cfg>/TempPE folder
 		# but it still exists.  More info available here:
