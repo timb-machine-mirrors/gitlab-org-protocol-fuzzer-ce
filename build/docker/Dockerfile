@@ -2,7 +2,8 @@ FROM mono:latest
 
 RUN apt-get update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y curl software-properties-common
+	&& apt-get install -y curl software-properties-common \
+	&& rm -rf /var/lib/apt/lists/*
 
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 
