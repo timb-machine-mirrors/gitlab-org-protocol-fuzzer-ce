@@ -412,7 +412,7 @@ namespace PitTool
 
 			_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 
-			PrepareLicensing(_pitLibraryPath);
+			PrepareLicensing(_pitLibraryPath, false);
 
 			if (_profile)
 			{
@@ -458,7 +458,7 @@ namespace PitTool
 
 			_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 
-			PrepareLicensing(_pitLibraryPath);
+			PrepareLicensing(_pitLibraryPath, false);
 
 			// 0 = pit library path
 			// 1 = pit path
