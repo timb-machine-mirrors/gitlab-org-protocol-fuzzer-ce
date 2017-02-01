@@ -301,7 +301,10 @@ namespace Peach.Pro.Core
 
 			// Data model is not required.
 			if (node.ChildNodes.Count > 0)
+			{
+				action.Response.dataModel = null;
 				handleActionData(node, action.Response, "<Response> child of ", false);
+			}
 			else
 				action.Response.dataModel = new DataModel("NULL");
 		}
