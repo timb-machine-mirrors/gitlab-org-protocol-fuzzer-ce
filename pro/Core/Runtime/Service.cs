@@ -25,7 +25,7 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override int OnRun(List<string> args)
 		{
-			PrepareLicensing(_pitLibraryPath);
+			PrepareLicensing(_pitLibraryPath, false);
 
 			if (_license.Status != LicenseStatus.Valid)
 				return -1;

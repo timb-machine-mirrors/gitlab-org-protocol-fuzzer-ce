@@ -64,6 +64,7 @@ namespace Peach.Pro.Core.Runtime
 		private bool _nobrowser;
 		private static volatile bool _shouldStop;
 		private bool _polite;
+		private bool _forceActivation;
 
 		#region Public Properties
 
@@ -96,6 +97,14 @@ namespace Peach.Pro.Core.Runtime
 
 		protected override void AddCustomOptions(OptionSet options)
 		{
+			options.Add(
+				"activate",
+				"Force license activation. " +
+				"Licensing usually automatically reactivates as necessary, " +
+				"but if your license has recently changed, " +
+				"you can force an immediate activation.",
+				v => _forceActivation = true
+			);
 			options.Add(
 				"1",
 				"Perform a single test case",
@@ -264,7 +273,7 @@ namespace Peach.Pro.Core.Runtime
 			_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 			_definedValues[PitLibraryPath] = _pitLibraryPath;
 
-			PrepareLicensing(_pitLibraryPath);
+			PrepareLicensing(_pitLibraryPath, _forceActivation);
 
 			_config.commandLine = args.ToArray();
 

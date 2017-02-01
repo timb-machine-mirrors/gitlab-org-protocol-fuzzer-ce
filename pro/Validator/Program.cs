@@ -50,7 +50,7 @@ namespace PeachValidator
 
 			var pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 
-			PrepareLicensing(pitLibraryPath);
+			PrepareLicensing(pitLibraryPath, false);
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
