@@ -55,7 +55,7 @@ image::{images}/Install/Webmin_Config_ChangeAdminPass-2.png[]
 ==== SSL Certificate Installation
 
 The instance ships with a temporary self-signed SSL certificate.
-This certificate should be replaced with a custom self-signed or preferably a legitamit 
+This certificate should be replaced with a custom self-signed or preferably a legitimate 
 SSL certificate from your companies certificate authority.
 
 The admin panel provides several easy to use methods for configuring SSL.
@@ -102,7 +102,7 @@ image::{images}/Install/Webmin_Config_SSL-1.png[]
 
 ====== Step 3: Create Certificate Signing Request (CSR)
 
-Next a certificate signing request (CSR) must be generated.
+Next, a certificate signing request (CSR) must be generated.
 To start this process select the "Certificate Signing Request" tab and
 fill in the required information as shown in the following figure.
 To generate the CSR click the 'Create Now' button as shown in the 
