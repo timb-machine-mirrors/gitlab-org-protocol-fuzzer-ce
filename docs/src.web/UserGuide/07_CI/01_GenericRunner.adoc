@@ -7,7 +7,7 @@ The vast majority of CI systems support this method of integration.
 
 The generic CI integration script is available in SDK\ci\generic.
 
-To use, update the configuration at top of python file and
+To use the script, update the configuration at top of python file and
 configure your CI system to run.
 
 ==== CI Script Logic
@@ -25,10 +25,10 @@ The generic CI runner has this high-level flow:
 .. Call peachproxy.session_teardown()
 . If JUnit XML enabled:
 .. Call peachproxy.junit_xml()
-.. If faulures exit with PEACH_EXIT_CODE_FAILURE
+.. If failures exit with PEACH_EXIT_CODE_FAILURE
 .. Else exit with PEACH_EXIT_CODE_OK
 
-If any hard failure occurs exit with PEACH_EXIT_CODE_ERROR.
+If any hard failure occurs, exit with PEACH_EXIT_CODE_ERROR.
 
 ==== Environment Parameters
 
@@ -60,7 +60,7 @@ PEACH_AUTOMATION_CMD::
     Example: +python /opt/peachweb/sdk/examples/flask_rest_target/hand_fuzz.py+
 
 PEACH_JUNIT (optional)::
-    Generate industry standard JUNIT XML output of results.
+    Generate standard JUNIT XML output of results.
     This output can be used by CI's like Jenkins to display
     details of any failures directly in the CI.
     Example: +junit-peachapisec.xml+
@@ -97,7 +97,7 @@ PEACH_EXIT_CODE_ERROR (optional)::
 
 ==== Usage
 
-To use this script follow this process:
+To use the script, follow this process:
 
 Install requirements::
 +
