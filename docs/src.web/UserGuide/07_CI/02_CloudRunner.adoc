@@ -7,7 +7,7 @@ The vast majority of CI systems support this method of integration.
 
 The generic CI integration script is available in SDK\ci\generic.
 
-To use, update the configuration at top of python file and
+To use the script, update the configuration at top of python file and
 configure your CI system to run.
 
 === Environment Parameters
@@ -61,7 +61,7 @@ PEACH_EXIT_CODE_ERROR (optional)::
 
 ==== Usage
 
-To use this script follow this process:
+To use this script, follow this process:
 
 . Create and export a {product} configuration file.
 . Save file in place CI system can access
