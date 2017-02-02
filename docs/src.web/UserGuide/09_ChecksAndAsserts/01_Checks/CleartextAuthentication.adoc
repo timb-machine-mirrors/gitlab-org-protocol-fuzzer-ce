@@ -9,7 +9,7 @@
 |====
 
 Cleartext authentication vulnerabilities occur when authentication credentials are
-transported via unecrypted channels such as HTTP.
+transported via unencrypted channels such as HTTP.
 This exposes the transmitted credentials to any attacker who can monitor (sniff) the network
 traffic during transmition.
 Sensitive information such as credentials should always be trasmitted via encrypted channels such as HTTPS.
