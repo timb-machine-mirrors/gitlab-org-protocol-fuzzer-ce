@@ -3,10 +3,7 @@
 
 pytest-peach is a plugin for link:http://pytest.org[pytest] that integrates with {product}.
 Integration includes calling the correct {product} APIs to report test names and 
-disable testing of setup/teardown methods.
-
-Pytest integration is provided as a pytest plugin called "pytest-peach".
-It's available in the SDK as "sdk\testrunners\pytest".
+disable testing of setup/teardown methods. It's available in the SDK as "sdk\testrunners\pytest".
 The plugin builds and installs via the command "python setup.py install".
 The plugin is also available via pip "pip install pytest-peach".
 
