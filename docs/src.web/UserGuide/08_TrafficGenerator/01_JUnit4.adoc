@@ -57,7 +57,7 @@ public class FuzzFlaskRestTarget {
 === Running
 
 The JUnit 4 runner is expected to be called from one of the CI integrations scripts.
-It is not directly callable as it expectes session setup to already be performed.
+It is not directly callable as it expects session setup to have already been performed.
 
 For JUnit 4 runner, Peach controls when the runner should stop.
 
@@ -66,7 +66,7 @@ These variables are normally set by the CI runner:
 
 PEACH_API:: URL to {product} API. Ex. http://10.0.0.1
 PEACH_API_TOKEN:: API Token for {product}
-PEACH_SESSIONID:: ID for curent testing session. Returned from /api/sessions API.
+PEACH_SESSIONID:: ID for current testing session. Returned from /api/sessions API.
 PEACH_PROXY:: URL to current proxy instance. Returned from /api/sessions API. Ex. http://10.0.0.1:1234
 
 Example PEACH_AUTOMATION_CMD:
