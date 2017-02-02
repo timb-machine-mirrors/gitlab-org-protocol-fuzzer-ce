@@ -1,5 +1,5 @@
 [[tg_pyunit]]
-== Python Unittest (PyUnit)
+== Python Unit test (PyUnit)
 
 The Python unit testing framework, sometimes referred to as “PyUnit,” is one
 of the most common test automation frameworks for Python.  
@@ -33,7 +33,7 @@ Included in the +SDK/testrunners/unittest+ folder is an example
 PyUnit that targets the Flask REST Target available in 
 +SDK/examples/flask_rest_target+.  
 The example can be run directly to see it's operation with the
-normaly PyUnit framework.  It can also be run via the generic CI
+normal PyUnit framework.  It can also be run via the generic CI
 runner to see it's operation with {product}.
 
 When running with the CI integration make sure the +PYTHONPATH+
