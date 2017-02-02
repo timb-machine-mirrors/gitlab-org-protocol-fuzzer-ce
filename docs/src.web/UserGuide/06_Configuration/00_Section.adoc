@@ -3,7 +3,7 @@
 == Configuration
 
 {product} comes with a default project that is ready to use out of the box.
-New proejcts can also be created if needed.
+New projects can also be created if needed.
 
 === Profiles
 
@@ -12,35 +12,35 @@ The default profile configurations should be fine for most users.
 
 Quick::
     The quick profile is used for tests that need a fast turnaround.
-    For example, build performed during the day would use a Quick profile
-    so they are not overly impacted by instant security testing.
+    For example, builds performed during the day would use a Quick profile,
+    so they are not delayed by security testing.
     +
     The Quick profile should be used in combination with Nightly or Weekly.
     +
-    The Quick profile has fuzzing disabled.
+    Some checks are performed and fuzzing is disabled in the Quick profile.
 
 Nightly::
-    The nightly profile us used for overnight testing or testing that can take longer
+    The nightly profile is used for overnight testing or testing that can take longer
     to complete than Quick.
     All checks are performed during nightly with some fuzzing.
     +
-    It's recommended to use Nightly in comination with Weekly.
+    It's recommended to use Nightly in combination with Weekly.
 
 Weekly::
-    THe weekly profile is used for weekend testing, testing that requires longer
+    The weekly profile is used for testing over weekends. Weekly testing requires more time
     to complete than the Nightly profile.
-    The difference between Nightly and Weekly is the amount of fuzzing that is 
+    The weekly profile performs is the amount of fuzzing that is 
     performed during testing.
 
 Full::
     This profile is used for single-shot testing.
-    It performed complete testing in a single run.
+    It performs complete testing, including checks and fuzzing, in a single run.
     +
     This profile is recommended for manual runs
 
 === Ignored Failures
 
-In the event a failure is a false positive or the team decides not to fix the issue it 
+In the event a failure is a false positive or the team decides not to fix the issue, it 
 can be added to a list of ignored failures.
 When a failure is ignored the following occures:
 
