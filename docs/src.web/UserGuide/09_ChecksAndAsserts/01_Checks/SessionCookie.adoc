@@ -15,7 +15,7 @@ from accessing the same account. A stolen session ID can be used to view another
 user's account or perform a fraudulent transaction.
 
 One part of securing session ID's is to property mark them to expire and also require
-the correct set of flags to ensure they are not transmitted in the clear or accessable
+the correct set of flags to ensure they are not transmitted in the clear or accessible
 from scripting.
 
 This check performs the following:
