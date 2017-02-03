@@ -83,24 +83,25 @@ if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
     fi
 fi
 
-echo ""
-echo "Making docker container"
-echo ""
-
 docker_build() {
     VARIANT=$1
     TAG=peach_${VARIANT}
     REPO=${REGISTRY}/${TAG}
+
+    echo ""
+    echo "Making docker container: $REPO"
+    echo ""
+
     docker build -t ${TAG} output/${VARIANT}/Web
     docker tag ${TAG} ${REPO}:${BUILDTAG}
+    
+    $(aws ecr get-login)
+    docker push ${REPO}
+    docker rmi ${REPO}:${BUILDTAG}
 }
 
 docker_build web_vm
 docker_build web_ami
-
-$(aws ecr get-login)
-docker push ${REPO}
-docker rmi ${REPO}:${BUILDTAG}
 
 echo ""
 echo "Running packer"
