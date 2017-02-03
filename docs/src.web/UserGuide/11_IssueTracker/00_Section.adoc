@@ -1,7 +1,7 @@
 [[IssueTracker]]
 == Issue Tracker Integration
 
-WARNING: This section still under construction.
+WARNING: This section is still under construction.
 Information provided is partial and may be out of date.
 
 /////////////////
@@ -29,7 +29,7 @@ Monitor::
 External Entity/By Hand::
     Launched by an external actor or by hand.
     An external automation tool is configured to run the issue tracker integration script.
-    Peach must be running, but the testing finished when the script it run as it uses
+    Peach must be running but finished testing when the script is run, as it uses
     Peaches API to extract the fault data.
 
 ==== JIRA
