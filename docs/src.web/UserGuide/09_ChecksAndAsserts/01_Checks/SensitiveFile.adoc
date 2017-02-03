@@ -22,7 +22,7 @@ not be.
 This can include files common in home folders like such as command histories or files that
 contain secrets such as passwords.
 
-The check comes pre-populated with a list of common files/folders to checkfor.
+The check comes pre-populated with a list of common files/folders to check for.
 The provided list can be editted at various scope levels (Global, Project, Profile, Route) to add, edit or remote entries.
 
 Detection is based on result code.
