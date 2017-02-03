@@ -10,11 +10,11 @@
 
 JSON Injection is an attack technique used to manipulate or compromise the 
 logic of a JSON application or service. The injection of unintended JSON content 
-and/or structures into an JSON message can alter the intend logic of the 
+and/or structures into a JSON message can alter the intended logic of the 
 application. Further, JSON injection can cause the insertion of malicious content 
 into the resulting message/document.
 
-This check injects various special JSON characters that demonstraight an injection issue.  
+This check injects various special JSON characters that demonstrate an injection issue.  
 The response is then analyzed to determine if the JSON injection has been included in any
 response body identified as contianing JSON.
 
