@@ -10,7 +10,7 @@ of the following conditions: A failure to scrub out HTML/Script comments contain
 information, improper application or server configurations, or differences in page responses 
 for valid versus invalid data.
 
-This assert performs analysis of API responses and log messagess to detect the following:
+This assert performs analysis of API responses and log messages to detect the following:
 
 * Database error messages
 * Framework/server error messages
