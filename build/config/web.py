@@ -97,22 +97,32 @@ def configure(conf):
 		'/define:DEBUG;TRACE',
 	])
 
-	env.append_value('CSFLAGS_release', [
+	CSFLAGS_release = [
 		'/define:TRACE',
 		'/optimize+',
+	]
+
+	env.append_value('CSFLAGS_vm', CSFLAGS_release + [ 
+		'/define:VARIANT_VM'
+	])
+
+	env.append_value('CSFLAGS_ami', CSFLAGS_release + [
+		'/define:VARIANT_AMI'
 	])
 
 	env['CSPLATFORM'] = 'AnyCPU'
 	env['CSDOC'] = True
 
-	env.append_value('DEFINES_debug', [
-		'DEBUG',
-	])
-
-	env['VARIANTS'] = [ 'debug', 'release' ]
+	env['VARIANTS'] = [ 'debug', 'vm', 'ami' ]
 
 def debug(env):
 	env.CSDEBUG = 'full'
 
 def release(env):
 	env.CSDEBUG = 'pdbonly'
+
+def vm(env):
+	release(env)
+
+def ami(env):
+	release(env)

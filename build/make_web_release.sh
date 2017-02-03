@@ -1,7 +1,5 @@
 #!/bin/bash
 
-VARIANT="web_release"
-
 set -e
 
 requires() {
@@ -9,7 +7,7 @@ requires() {
 }
 
 usage() {
-    echo "USAGE: make_web_release.sh --registry REGISTRY --buildtag 1.2.3 [--debug]"
+    echo "USAGE: make_web_release.sh --registry REGISTRY --buildtag 1.2.3"
     echo "To access AWS, there are two options for specifying credentials:"
     echo "1. Set the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables."
     echo '2. Use `aws configure` and then optionally use the AWS_PROFILE environment variable.'
@@ -28,9 +26,6 @@ while [[ $# -gt 0 ]]; do
     key="$1"
 
     case $key in
-        --debug)
-            VARIANT="web_debug"
-        ;;
         --buildtag)
             export BUILDTAG="$2"
             shift
@@ -56,7 +51,7 @@ fi
 
 if [ -z "$REGISTRY" ]; then
     echo "Missing --registry."
-    echo "AWS ECR is: 318398917258.dkr.ecr.us-east-1.amazonaws.com/peachweb"
+    echo "AWS ECR is: 318398917258.dkr.ecr.us-east-1.amazonaws.com"
     usage
     exit 1
 fi
@@ -92,11 +87,20 @@ echo ""
 echo "Making docker container"
 echo ""
 
+docker_build() {
+    VARIANT=$1
+    TAG=peach_${VARIANT}
+    REPO=${REGISTRY}/${TAG}
+    docker build -t ${TAG} output/${VARIANT}/Web
+    docker tag ${TAG} ${REPO}:${BUILDTAG}
+}
+
+docker_build web_vm
+docker_build web_ami
+
 $(aws ecr get-login)
-docker build -t peachweb output/${VARIANT}/Web
-docker tag peachweb ${REGISTRY}:${BUILDTAG}
-docker push ${REGISTRY}
-docker rmi ${REGISTRY}:${BUILDTAG}
+docker push ${REPO}
+docker rmi ${REPO}:${BUILDTAG}
 
 echo ""
 echo "Running packer"
