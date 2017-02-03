@@ -1,10 +1,10 @@
 [[Assert_StatusCode]]
 == Status Code Assert
 
-The status code assert is used to cause failures when response messages status code field does
-not match the required values.  This assert can work with whitelists of blacklists of status codes.
+The status code assert is used to cause failures when a response message's status code field does
+not match the required values.  This assert can work with whitelists or blacklists of status codes.
 Whitelists are lists of valid values, a failure is raised when a status code is found that is not 
-included in the whitelist.  Blacklists work in the oposit mannor, status codes that match the 
+included in the whitelist.  Blacklists work in the opposite manor, status codes that match the 
 list cause a failure to occur.
 
 The assert comes pre-populated with a  list of error status codes.
