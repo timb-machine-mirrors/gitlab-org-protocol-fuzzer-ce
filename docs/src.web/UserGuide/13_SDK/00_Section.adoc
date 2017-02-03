@@ -1,12 +1,12 @@
 == SDK
 
-WARNING: This section still under construction.
+WARNING: This section is still under construction.
 Information provided is partial and may be out of date.
 
 The SDK can be downloaded from {product} via "Help -> SDK".
 The SDK contains:
 
- * Libraries for {product} API is various languages
+ * Libraries for {product} API in various languages
  * CI Integrations
  * Test runner plugins and examples
  * Example targets
