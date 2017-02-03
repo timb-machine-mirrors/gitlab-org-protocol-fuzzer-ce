@@ -9,7 +9,7 @@
 |====
 
 API Tokens are a common method of authenticating/authorizing access to APIs.
-When used this check performs upto four different validations of the tokens use.
+When used, this check performs up to four different validations of the tokens use.
 
 Entropy::
 API Tokens must be unpredictable (random enough) to prevent guessing attacks, where an attacker is able 
@@ -20,15 +20,15 @@ API Tokens entropy is checked against the configured minimum (defaults to 128 bi
 
 Modification of Token::
 The value of the API token is modified one for every operation it's used with.
-The HTTP status code of the response message is then checked to see if the request was successfull.
+The HTTP status code of the response message is then checked to see if the request was successful.
 
 Removal of Token::
 The API token is removed from the HTTP request.
-The HTTP status code of the response message is then checked to see if the request was successfull.
+The HTTP status code of the response message is then checked to see if the request was successful.
 
 Signature Modification::
 When using API Tokens that are signatures of the request, a modification to the request is made.
-The HTTP status code of the response message is then checked to see if the request was successfull.
+The HTTP status code of the response message is then checked to see if the request was successful.
 
 === Configuration
 
