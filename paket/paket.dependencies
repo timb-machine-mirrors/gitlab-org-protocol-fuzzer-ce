@@ -51,6 +51,7 @@ nuget Microsoft.AspNetCore.Diagnostics
 nuget Microsoft.AspNetCore.Hosting
 nuget Microsoft.AspNetCore.Mvc
 nuget Microsoft.AspNetCore.Routing
+nuget Microsoft.AspNetCore.Server.SocketHttpListener
 nuget Microsoft.AspNetCore.StaticFiles
 nuget Microsoft.AspNetCore.TestHost
 nuget Microsoft.Extensions.Configuration.CommandLine
