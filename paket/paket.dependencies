@@ -40,8 +40,6 @@ nuget BootstrapMvc.Bootstrap3Mvc6
 nuget CommonMark.NET
 nuget datatables.net.bootstrap
 nuget DotNetZip
-nuget FluentMigrator
-nuget FluentMigrator.Runner
 nuget Handlebars.Net
 nuget Humanizer.Core
 nuget jQuery < 2.0
@@ -73,7 +71,6 @@ nuget Serilog.Settings.Configuration
 nuget Serilog.Sinks.ColoredConsole
 nuget Serilog.Sinks.Literate
 nuget ServiceStack.OrmLite.PostgreSQL
-nuget Slapper.AutoMapper
 nuget SocketHttpListener
 nuget Swashbuckle beta
 nuget Swashbuckle.Swagger beta
