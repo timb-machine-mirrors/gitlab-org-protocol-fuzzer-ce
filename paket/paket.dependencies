@@ -35,8 +35,11 @@ source https://www.nuget.org/api/v2
 
 nuget Autofac
 nuget Autofac.Extensions.DependencyInjection
+nuget Bootstrap
+nuget bootstrap-toggle.less
 nuget Bootstrap.Multiselect
 nuget BootstrapMvc.Bootstrap3Mvc6
+nuget Bootswatch
 nuget CommonMark.NET
 nuget datatables.net.bootstrap
 nuget DotNetZip
