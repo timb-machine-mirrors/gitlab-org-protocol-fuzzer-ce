@@ -42,6 +42,8 @@ nuget datatables.net.bootstrap
 nuget DotNetZip
 nuget Handlebars.Net
 nuget Humanizer.Core
+nuget IronPython
+nuget IronPython.StdLib
 nuget jQuery < 2.0
 nuget LiquidState
 nuget Microsoft.AspNet.WebApi.Client
