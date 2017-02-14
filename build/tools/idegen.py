@@ -252,6 +252,15 @@ class source_file(object):
 		if proj_path != rel_path:
 			self.attrs['Link'] = proj_path
 
+class source_link(object):
+	def __init__(self, how, node, name, link=None):
+		self.how = how
+		self.node = node
+		self.name = name
+		self.attrs = OrderedDict()
+		if link:
+			self.attrs['Link'] = link
+
 class embed_resource(object):
 	def __init__(self, ctx, name, tsk):
 		self.node = tsk.outputs[0]
@@ -462,6 +471,31 @@ class vsnode_cs_target(msvs.vsnode_project):
 			dep.name = name
 
 			self.project_refs.append(dep)
+	
+	def collect_better_install(self, lst):
+		installs = getattr(self.tg, 'better_install', [])
+		for item in installs:
+			source_dir = item.get('source_dir', self.tg.path)
+			source_glob = item.get('source_glob', '**')
+			source_nodes = source_dir.ant_glob(source_glob)
+			target = item.get('target')
+			if target:
+				target = self.base.make_node(target)
+			for node in source_nodes:
+				entry = lst.get(node.abspath(), None)
+				if entry is None:
+					include = node.path_from(self.base)
+					rel_path = node.path_from(source_dir)
+					if target:
+						link = target.make_node(rel_path)
+					else:
+						link = self.base.make_node(rel_path)
+					link = link.path_from(self.base)
+					if link == include:
+						link = None
+					entry = source_link('Content', node, include, link)
+					lst[node.abspath()] = entry
+				entry.attrs['CopyToOutputDirectory'] = 'PreserveNewest'
 
 	def collect_install(self, lst, attr):
 		val = getattr(self.tg, attr, [])
@@ -544,6 +578,7 @@ class vsnode_cs_target(msvs.vsnode_project):
 		# Process installed files
 		self.collect_install(lst, 'install_644')
 		self.collect_install(lst, 'install_755')
+		self.collect_better_install(lst)
 
 		# Try and find the wscript_build
 		wscript = tg.path.find_resource('wscript_build')

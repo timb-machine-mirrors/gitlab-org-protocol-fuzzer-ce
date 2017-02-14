@@ -72,6 +72,25 @@ def do_install2(self, inst_to, cwd, items, chmod):
 		else:
 			self.install_files(inst_to, extras, env=self.env, cwd=cwd, relative_trick=True, chmod=chmod)
 
+@feature('*')
+@after_method('process_source')
+def apply_better_install(self):
+	installs = getattr(self, 'better_install', [])
+	for item in installs:
+		install_path = item.get('install_path', self.install_path)
+		inst_to = install_path + '/' + item.get('target', '')
+		source_dir = item.get('source_dir', self.path)
+		source_glob = item.get('source_glob', '**')
+		source_nodes = source_dir.ant_glob(source_glob)
+		self.install_files(
+			inst_to,
+			source_nodes,
+			env=self.env,
+			cwd=source_dir,
+			relative_trick=True,
+			chmod=item.get('chmod', 0o644),
+		)
+
 @feature(
 	'win', 'win_x86', 'win_x64', 
 	'unix',
