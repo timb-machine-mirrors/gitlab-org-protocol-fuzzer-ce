@@ -13,7 +13,7 @@ usage() {
     echo '2. Use `aws configure` and then optionally use the AWS_PROFILE environment variable.'
 }
 
-# packer gomes from: https://www.packer.io/downloads.html
+# packer comes from: https://www.packer.io/downloads.html
 # ovatool comes from: https://www.vmware.com/support/developer/ovf/
 
 requires "aws"
@@ -120,6 +120,9 @@ else
     rm -rvf "peachweb" 2>/dev/null || {}
     remote_var="-var remote_type=esx5"
 fi
+
+# prepare to install files
+tar cvf /tmp/files.tar -C files .
 
 export PACKER_CACHE_DIR="$HOME/.packer_cache"
 packer build \
