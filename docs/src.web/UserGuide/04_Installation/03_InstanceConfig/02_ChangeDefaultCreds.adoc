@@ -1,0 +1,33 @@
+[[Install_ChangeDefaultPassword]]
+==== Change Default credentials
+
+Once networking has been configured the very first configuration step is to
+set a new password for the default administrative user 'ubuntu' via the admin portal.
+
+===== Step 1: Login to {product} Admin Portal
+
+The admin portal for {product} can be accessed via the folling URL:
+
+  https://[IP]:10000/
+
+Login using the default credentials:
+
+  user: ubuntu
+  password: ubuntu
+
+===== Step 2: Navigate to Webmin Users
+
+Using the left hand naviagtion, select 'Webmin', then 'Webmin Users' as shown in the following figure.
+Next, click on the user 'root' as shown in the following figure.
+
+.Webmin Users Page
+image::{images}/Install/Webmin_Config_ChangeAdminPass-1.png[]
+
+===== Step 3: Set New Password
+
+From the 'Edit Webmin User' page, set the 'Password' drop-down to 'Set to ..' and
+type in the new password in the following text entry box as shown in the following image.
+Once set, click the 'Save' button.
+
+.Set New Admin Password
+image::{images}/Install/Webmin_Config_ChangeAdminPass-2.png[]
