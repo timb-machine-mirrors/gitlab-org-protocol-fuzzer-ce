@@ -31,32 +31,120 @@ in the project/profile configuration.
 === Licensing Concepts
 
 Activation ID::
-Activation IDs are used to license {product} instances.
-Each purchased instance will receive it's own activation ID.
-Activation IDs can be found via the link:{portalurl}[{product} Portal]
-on the licensing page.
+    Activation IDs are used to license {product} instances.
+    Each purchased instance will receive it's own activation ID.
+    Activation IDs can be found via the link:{portalurl}[{product} Portal]
+    on the licensing page.
 
 Device ID::
+Each {poroduct} instance has a unique device id.
+When an instance is activated an activation id is associated
+with a device id.
+An instances device id can be found in the Licensing section of
+the Settings page.
++
+To reclaim an activation id the device must be returned using the
+portal.
+See the reclaim license section for additional information.
 
 ==== How to identify unused activation IDs
 
-TODO
+To identify unused activation ids follow these steps.
+ 
+===== Step 1: Access Portal
+
+. Login to portal via link:https://dl.peachfuzzer.com[https://dl.peachfuzzer.com].
+. From the top navigation select the "Licensing" button
+
+===== Step 2: Identify Unused Activation IDs
+
+Compare list of device ids/activation ids to list of all activation ids.
+The delta between these lists are the unused activation ids.
 
 ==== How to find instance device ID
 
-TODO
+Each {poroduct} instance has a unique device id.
+When an instance is activated an activation id is associated
+with a device id.
+An instances device id can be found in the Licensing section of
+the Settings page.
 
+.Device ID
+image::{images}/Licensing/License_DeviceId.png[]
 
+To reclaim an activation id the device must be returned using the
+portal.
+See the reclaim license section for instructions.
+
+// -------------------------------------------
 include::02_Activation/00_Section.adoc[]
 
 === Reclaim license/Returning Device
 
-TODO
+An activation id/license cannot be reused unless the existing activated device
+is returned, freeing up the license for re-use.
+Perform the following steps to return a device.
+
+==== Step 1: Identify Device ID to Return
+
+The easiest method to determin the correct device id assumes the activated 
+instance is still running and available.
+
+. Access {product} in the normal mannor
+. Navigate to the Settings page using the top navigation links
+. Scroll down to the Licesning section
+. The device id is listed.
+
+.Device ID
+image::{images}/Licensing/License_DeviceId.png[]
+
+If the instance is no longer available, the device ID must be identified
+from the list of registered devices.  This could include checking the device
+id's of all available instances to determin which device id is not in active
+use.
+
+==== Step 2: Access Portal
+
+. Login to portal via link:https://dl.peachfuzzer.com[https://dl.peachfuzzer.com].
+. From the top navigation select the "Flexera Portal" button
+. Flexera licensing portal will load
+
+.Flexera Portal Navigation
+image::{images}/Licensing/Return_Device_ClickFlexera.png[]
+
+==== Step 3: Search Devices
+
+. Click on the Search Devices link
+
+.Search Devices
+image::{images}/Licensing/Return_Device_ClickSearchDevices.png[]
+
+==== Step 4: Return Device
+
+. Select "Action -> Return Device"
+
+.Return Device
+image::{images}/Licensing/Return_Device_ClickReturnDevice.png[]
+
+==== Step 5: Verify Device Removed
+
+. Navigate to the Licensing page on the portal
+. Verify device id is no longer listed
+
+==== Step 6: Destroy Instance
+
+If the instance who's license was just returned is still active, it should
+be terminated/removed to avoid breaking the licensing terms.
 
 === Licensing Expiring Warning
 
-TODO
+{product} will display a warning alert in the UI when the instance 
+license is near expiration.  This is intended to provide time to 
+aquire a new license and re-activate the instance.  If your seeing the
+license expiration warning, please contact {product} sales to assist in
+renewing your license.
 
 === How to purchase additional licenses
 
-TODO
+Additional licenses can be purchased through the {product} sales team via sales@peachfuzzer.com.
+
