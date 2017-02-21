@@ -11,6 +11,23 @@ Integrations with CI systems enable the product to be run automatically during d
 {product} has two primary use cases, integration into engineering groups and use by security teams
 in an organization.
 
-// TODO - Expand
+===== Integration into Engineering Team
+
+For teams building web services and web APIs, integration into the CI 
+system or automated test system provides a lot of advantages over 
+traditional web testing processes.
+
+ * Immediate feedback.
+When security testing occurs with every build, security issues are found and fixed much faster.
+ 
+ * Lowered cost of fixing security issues.
+The cost to fix a security issue starts increasing as time between when it was authored and discovered grows.
+By providing immediate feedback, the time between write and fix is shortened.
+
+ * Lowered Cost of Ownership.
+Re-purposing existing automated tests removes the need to maintain configurations for each API.
+Re-using existing tests also quickly provides high test coverage with little effort.
+
+
 
 // end

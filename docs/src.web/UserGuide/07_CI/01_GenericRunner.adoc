@@ -7,8 +7,8 @@ The vast majority of CI systems support this method of integration.
 
 The generic CI integration script is available in SDK\ci\generic.
 
-To use the script, update the configuration at top of python file and
-configure your CI system to run.
+To use the script, configure your CI system to run this script after setting
+correct environmental variables to provide needed configuration.
 
 ==== CI Script Logic
 
@@ -17,7 +17,7 @@ The generic CI runner has this high-level flow:
 . Load environment variables
 . Start new testing session
 .. Call peachproxy.session_setup()
-.. {product} provides a proxy port
+.. {product} provides a proxy port and session id
 . Launch automation
 . Poll {product} to check if tests have finished
 . Wait for automation or kill after timeout
@@ -112,7 +112,7 @@ Linux;;
 ----
 PEACH_PROJECT=Default \
 PEACH_PROFILE=Quick \
-PEACH_API=http://127.0.0.1:5000 \
+PEACH_API=http://10.10.10.10 \
 PEACH_API_TOKEN=b5638ae7-6e77-4585-b035-7d9de2e3f6b3 \
 PEACH_VERBOSE=True \
 PEACH_AUTOMATION_CMD=python testrunners/custom/python/hand_fuzz.py \
@@ -123,7 +123,7 @@ Windows;;
 ----
 set PEACH_PROJECT=Default
 set PEACH_PROFILE=Quick
-set PEACH_API=http://127.0.0.1:5000
+set PEACH_API=http://10.10.10.10
 set PEACH_API_TOKEN=b5638ae7-6e77-4585-b035-7d9de2e3f6b3
 set PEACH_VERBOSE=True
 set PEACH_AUTOMATION_CMD=python testrunners\custom\python\hand_fuzz.py
