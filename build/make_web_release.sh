@@ -118,7 +118,7 @@ if [ -z "$ESXI_PASSWORD" ]; then
     remote_var=""
 else
     # Ensure old packer directory is clean
-    rm -rvf "peachweb" 2>/dev/null || {}
+    rm -rvf "peachapisec" 2>/dev/null || {}
     remote_var="-var remote_type=esx5"
 fi
 
@@ -132,12 +132,12 @@ packer build \
     template.json
 
 if [ -z "$ESXI_PASSWORD" ]; then
-    ovftool "output-vmware-iso/peachweb.vmx" "${ovadir}/peachweb-${BUILDTAG}.ova"
+    ovftool "output-vmware-iso/peachapisec.vmx" "${ovadir}/peachapisec-${BUILDTAG}.ova"
 else
-    mv "peachweb/peachweb.ova/peachweb.ova" "${ovadir}/peachweb-${BUILDTAG}.ova"
+    mv "peachapisec/peachapisec.ova/peachapisec.ova" "${ovadir}/peachapisec-${BUILDTAG}.ova"
 fi
 
 popd
 
 echo ""
-echo "Successfully created peachweb-${BUILDTAG}"
+echo "Successfully created peachapisec-${BUILDTAG}"
