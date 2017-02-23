@@ -1,0 +1,14 @@
+=== Instance Configuration
+
+This section contains the steps required to configure a new instance of {product}.
+Configuring authentication is an optional, but recommended step.
+
+include::01_NetworkConfiguration.adoc[]
+
+include::02_ChangeDefaultCreds.adoc[]
+
+include::03_Ssl.adoc[]
+
+include::04_Authentication.adoc[]
+
+// end

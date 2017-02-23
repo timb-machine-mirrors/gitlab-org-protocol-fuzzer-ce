@@ -1,0 +1,13 @@
+=== Activation
+
+Prior to use each {product} instance must be activated.
+Two activation methods are provided:
+
+Online Activation:: This method requires the instance have internet access.
+Offline Activation:: This method can be used when no internet access is available.
+
+include::01_Online.adoc[]
+
+include::02_Offline.adoc[]
+
+// end

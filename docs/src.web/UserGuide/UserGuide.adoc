@@ -1,6 +1,7 @@
 :product: Peach API Security
+:company: Peach Fuzzer, LLC
 = {product}: User Guide
-Peach Fuzzer, LLC
+{company}
 v{BUILDTAG}
 :doctype: book
 :compat-mode:
@@ -17,6 +18,8 @@ v{BUILDTAG}
 :forumurl: https://forums.peachfuzzer.com
 :portalurl: https://dl.peachfuzzer.com
 :peachug: Peach API Security User Guide
+:skubasic: Basic
+:skuadvanced: Advanced
 ifdef::backend-pdf[]
 :pagenums:
 :source-highlighter: coderay
@@ -88,5 +91,9 @@ include::12_LogSink/00_Section.adoc[]
 :leveloffset: 0
 <<<
 include::13_SDK/00_Section.adoc[]
+
+:leveloffset: 0
+<<<
+include::14_Licensing/00_Section.adoc[]
 
 // end

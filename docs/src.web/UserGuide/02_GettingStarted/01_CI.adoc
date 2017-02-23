@@ -27,8 +27,9 @@ For more information see the xref:CI[CI Integration] section of the User Guide.
 
 Traffic Generator::
 +
-A traffic generator is needed to produce requests that are then fuzzed.
-Traffic generators will replay the same traffic over and over allowing {product} to fuzz it.
+A traffic generator is needed to produce requests that are then tested and/or fuzzed.
+Traffic generators will replay the same traffic over and over allowing {product} to modify them as
+needed to perform testing.
 +
 The xref:TrafficGen[Traffic Generator] section provides more information about what is needed.
 +

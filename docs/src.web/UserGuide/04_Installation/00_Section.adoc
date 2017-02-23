@@ -10,8 +10,10 @@ include::01_ResourceRequirements.adoc[]
 
 include::02_CreateInstance.adoc[]
 
-include::03_InstanceConfig.adoc[]
+include::03_InstanceConfig/00_Section.adoc[]
 
 include::04_AdminPanel.adoc[]
+
+include::05_Licensing.adoc[]
 
 // end

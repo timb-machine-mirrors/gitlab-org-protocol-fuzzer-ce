@@ -1,0 +1,8 @@
+=== Licensing
+
+This section covers basic product activation.
+
+include::../14_Licensing/02_Activation/01_Online.adoc[]
+
+include::../14_Licensing/02_Activation/02_Offline.adoc[]
+

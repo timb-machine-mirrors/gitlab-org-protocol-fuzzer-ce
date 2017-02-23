@@ -2,7 +2,6 @@
 ==== Custom Traffic Generators
 
 Custom traffic generators exercise the web APIs being tested in a loop.
-For best results it's recommended that the Peach Web Proxy API be used.
 This allows performing some test setup/tear down independent of the fuzzed API calls.
 The traffic generator should produce traffic until a call to the Peach Web Proxy APIs fail.
 This allows Peach to direct the length of testing.

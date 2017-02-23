@@ -1,0 +1,21 @@
+==== Authentication
+
+Authentication is currently supported via an Apache reverse proxy.
+Apache supports a number of authentication mechanisms from local through LDAP.
+The authentication panel gives access to the Apache configuration.
+
+===== Active Directory / LDAP
+
+// TODO
+
+Intructions for configuring active directory or LDAP authentication will
+be included in the non-beta {peachug}.
+Contact support for assistance until then.
+
+===== Local
+
+// TODO
+
+Intructions for configuring local authentication will
+be included in the non-beta {peachug}.
+Contact support for assistance until then.
