@@ -60,6 +60,7 @@ if [ -z "$AWS_DEFAULT_REGION" ]; then
     export AWS_DEFAULT_REGION=$(aws configure get region)
     if [ -z "$AWS_DEFAULT_REGION" ]; then
         echo "Missing AWS_DEFAULT_REGION environment variable"
+        echo "Default value is us-east-1"
         usage
         exit 1
     fi
