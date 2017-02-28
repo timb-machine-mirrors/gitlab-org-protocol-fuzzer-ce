@@ -38,6 +38,8 @@ def prepare(conf):
 		env['REFERENCE_ASSEMBLIES'] = j(pfiles, 'Reference Assemblies', 'Microsoft', 'Framework', '.NETFramework', env['TARGET_FRAMEWORK'])
 		env['RUN_NETFX'] = ''
 		env['MSVC_VERSIONS'] = ['msvc 14.0']
+		env['MSVC_TARGETS']  = 'x64' in env.SUBARCH and [ 'x64' ] or [ 'x86' ]
+
 	else:
 		env['MCS']  = 'mcs'
 		env['TARGET_FRAMEWORK'] = 'v4.5'
