@@ -4,8 +4,6 @@
 WARNING: This section is still under construction.
 Information provided is partial and may be out of date.
 
-/////////////////
-
 Peach Web can automatically submit security findings into an issue tracking system such as JIRA or Bugzilla.
 Submitted tickets can then be reviewed by the engineering team and go through a typical issue workflow.
 Peach Web supports two ticketing systems out of the box, JIRA and Bugzilla.  
@@ -21,21 +19,15 @@ when the testing has completed.
 +
 This is the recommended solution when integrating into a CI system.
     
-Monitor::
-    Launched by a monitor in your Peach configuration.
-    The Peach Web configuration has a local agent with a _Run Command_ monitor configured
-    to run at the end of the fuzzing session and launch the issue tracker integration script.
-    
 External Entity/By Hand::
     Launched by an external actor or by hand.
     An external automation tool is configured to run the issue tracker integration script.
     Peach must be running but finished testing when the script is run, as it uses
     Peaches API to extract the fault data.
 
-==== JIRA
+=== JIRA
 
 The script is located in _SDK/tools/peach2jira_.
-
 
 Core features:
 
@@ -44,18 +36,14 @@ Core features:
 * Optional custom field needed for best operation
 * Apply zero or more labels to created issues
 
-===== Configuration
+==== Configuration
 
 . Install Python v2.7
-. Install requests module (http://docs.python-requests.org/en/master/user/install/)
+. Install dependencies +pip install -r requirements.txt+
 . Configure JIRA
-. Update peach2jira with correct config values (see top of file)
-. Test integration with existing job
-. Trigger script via RunCommand monitor
-.. When: OnStop
-.. Command: peach2jira -u http://localhost:8888
+. Update +settings.json+ file with configuration
 
-====== _JIRA Configuration_
+===== _JIRA Configuration_
 
 . Create a user with access to project and REST API.
 
@@ -68,8 +56,7 @@ To enable single issue per-bucket a custom issue field is required.
 .. Name: Peach Bucket
 . Add field to Issue type "Bug"
 
-
-==== Bugzilla
+=== Bugzilla
 
 The script is located in _SDK/tools/peach2bugzilla_.
 
@@ -80,18 +67,15 @@ Core features:
 ** Re-open resolved issues when re-found
 * Optional custom field needed for best operation
 
-===== Configuration
+==== Configuration
 
 . Install Python v2.7
-. Install requests module (http://docs.python-requests.org/en/master/user/install/)
+. Install dependencies +pip install -r requirements.txt+
 . Configure Bugzilla
-. Update peach2bugilla with correct config values (see top of file)
+. Update +settings.json+
 . Test integration with existing job
-. Trigger script via RunCommand monitor
-.. When: OnStop
-.. Command: peach2bugzilla -u http://localhost:8888
 
-====== Bugzilla Configuration
+===== Bugzilla Configuration
 
 . Create a user with access to project and REST API.
 . Create an API key for the user and update peach2bugzilla script to reflect
@@ -104,6 +88,3 @@ To enable single issue per-bucket a custom issue field is required.
 .. Name: cf_peach
 .. Description: Peach
 .. Type: Free Text
-
-
-/////////////////

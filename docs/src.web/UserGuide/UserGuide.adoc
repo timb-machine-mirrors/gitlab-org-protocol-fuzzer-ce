@@ -25,7 +25,7 @@ ifdef::backend-pdf[]
 :source-highlighter: coderay
 
 [abstract]
-Copyright © 2016 Peach Fuzzer, LLC. All rights reserved.
+Copyright © 2017 Peach Fuzzer, LLC. All rights reserved.
 
 This document may not be distributed or used for commercial purposes without
 the explicit consent of the copyright holders.

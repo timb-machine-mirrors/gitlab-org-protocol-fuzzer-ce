@@ -115,11 +115,8 @@ Swagger::
 	For example, _http://127.0.0.1:8888/swagger/docs/v1_ or _file:///opt/service/swagger.js_
 
 Script::
-	Optional path to a python script.
+	Optional python script.  Examples provided in SDK/scripts.
 	See xref:Scripts[Scripts] for a full explanation and examples.
-    +
-    NOTE: This feature currently DISABLED in the early BETA.
-// TODO - Update this
 
 Rewrite Base URL::
 	Optionally provide a new replacement base URL.

@@ -3,3 +3,4 @@
 
 A single global log sink is automatically configured at port 512.
 Logs sent to this sink during testing will be analyzed by the current testing job.
+Logs are expected in syslog format which is supported by most logging frameworks.

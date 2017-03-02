@@ -136,6 +136,8 @@ The value of the HTTP header. Example: _utf-8_
 ========================
 This example demonstrates how to set the +Authorization+ header in every outgoing request.
 
+TIP: See SDK/scripts for a recent working example.
+
 [source,python]
 ----
 from peach import webproxy <1>

@@ -6,8 +6,8 @@ The following are hardware recommendations for {product}.
 [options="header"]
 |========
 | Virtualization | Architecture | Cores | Ram  | Disk
-| VMWare         | 64-bit       | 2     | 4GB  | 60GB SSD
-| Virtual Box    | 64-bit       | 2     | 4GB  | 60GB SSD
+| VMWare         | 64-bit       | 2     | 4GB  | 40GB SSD
+| Virtual Box    | 64-bit       | 2     | 4GB  | 40GB SSD
 |========
 
 The following ports are used and should be allowed as ingress for {product}.
@@ -22,6 +22,10 @@ The following ports are used and should be allowed as ingress for {product}.
 | tcp/8000 | N/A | Proxy port (only open during testing)
 | tcp/10000| Yes | Admin console
 |========
+
+Port 80 is not a hard requirement, but does increase the speed of testing.  
+If company policies do not allow for HTTP usage in your test networks, open port 443 and configure
+the PEACH_API setting to 'https' instead of 'http'.
 
 ==== Amazon AWS EC2
 
