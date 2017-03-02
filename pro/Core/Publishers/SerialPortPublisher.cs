@@ -260,6 +260,10 @@ namespace Peach.Pro.Core.Publishers
 					}
 				}
 			}
+			catch (ObjectDisposedException)
+			{
+				Logger.Debug("Finished reading from {0}: object disposed", PortName);
+			}
 			catch (Exception ex)
 			{
 				Logger.Debug("Error reading from {0}: {1}", PortName, ex.Message);
