@@ -127,6 +127,7 @@ tar cvf /tmp/files.tar -C files .
 
 export PACKER_CACHE_DIR="$HOME/.packer_cache"
 packer build \
+    -only=vmware-iso \
     -var "buildtag=${BUILDTAG}" \
     ${remote_var} \
     template.json
