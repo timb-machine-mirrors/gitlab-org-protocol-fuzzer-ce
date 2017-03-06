@@ -4,7 +4,7 @@
 WARNING: This section still under construction.
 Information provided is partial and may be out of date.
 
-Most service authentication mechanisms work automatically with Peach Web with only two main exceptions.
+Most service authentication mechanisms work automatically with {product} with only two main exceptions.
 Mechanisms that work include:
 
  * Cookie based auth
@@ -18,9 +18,9 @@ The two authentication types that require some special configuration are:
 
 === TLS User Certificates
 
-TLS user certificates are well supported by Peach Web and only require small configuration changes to get working.
+TLS user certificates are well supported by {product} and only require small configuration changes to get working.
 
-The current version of Peach Web only supports a single set of client certificates.
+The current version of {product} only supports a single set of client certificates.
 The certificate and matching private key can be set in the _WebProxy_ configuration on the variables
 screen.
 
@@ -28,7 +28,7 @@ screen.
 
 Some authentication systems, such as those used with major cloud providers like Amazon AWS, require
 computing the authentication token.  When computed tokens include parts of the HTTP request, a custom
-script must be created that is called by Peach Web any time a request is about to be sent.
+script must be created that is called by {product} any time a request is about to be sent.
 
 See xref:Scripts[Scripts] for more information and an example.
 

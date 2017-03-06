@@ -1,26 +1,22 @@
 [[IssueTracker]]
 == Issue Tracker Integration
 
-WARNING: This section is still under construction.
-Information provided is partial and may be out of date.
-
-Peach Web can automatically submit security findings into an issue tracking system such as JIRA or Bugzilla.
+{product} can automatically submit security findings into an issue tracking system such as JIRA or Bugzilla.
 Submitted tickets can then be reviewed by the engineering team and go through a typical issue workflow.
-Peach Web supports two ticketing systems out of the box, JIRA and Bugzilla.  
+{product} supports two ticketing systems out of the box, JIRA and Bugzilla.  
 Other systems can be supported by modifying one of the example Python scripts.
 
 Issue tracker integrations are provided as python scripts.
-These scripts can be used in two ways with Peach Web:
+These scripts can be used in two ways with {product}:
 
 CI Runner::
 Launched by the CI integration runner.
 In this method the generic CI runner or CI plugin is configured to launch the issue tracker integration script
 when the testing has completed.
 +
-The issue tracker integration scripts use the +PEACH_API+ and +PEACH_API_TOKEN+ environment variables to specify the Peach Web instance to query for fault data.
+The issue tracker integration scripts use the +PEACH_API+ and +PEACH_API_TOKEN+ environment variables to specify the {product} instance to query for fault data.
 +
 This is the recommended solution when integrating into a CI system.
-
     
 External Entity/By Hand::
     Launched by an external actor or by hand.
@@ -30,7 +26,7 @@ External Entity/By Hand::
 
 === JIRA
 
-The script is located in _SDK/tools/peach2jira_.
+The script is located in _SDK/issuetrackers/jira_.
 
 Core features:
 
@@ -61,7 +57,7 @@ To enable single issue per-bucket a custom issue field is required.
 
 === Bugzilla
 
-The script is located in _SDK/tools/peach2bugzilla_.
+The script is located in _SDK/issuetrackers/bugzilla_.
 
 Core features:
 

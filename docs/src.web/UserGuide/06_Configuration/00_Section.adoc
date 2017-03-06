@@ -86,7 +86,7 @@ Server Private Key::
 
 === Route Configuration
 
-One or more routes can be configured for use with Peach Web.
+One or more routes can be configured for use with {product}.
 Each route contains several configuration parameters.
 Route entries are matched in order.
 It's recommended that a final route entry be included with a Route pattern of +*+ as a catch all.

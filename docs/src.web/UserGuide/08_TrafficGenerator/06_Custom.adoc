@@ -3,7 +3,7 @@
 
 Custom traffic generators exercise the web APIs being tested in a loop.
 This allows performing some test setup/tear down independent of the fuzzed API calls.
-The traffic generator should produce traffic until a call to the Peach Web Proxy APIs fail.
+The traffic generator should produce traffic until a call to the {product} Proxy APIs fail.
 This allows Peach to direct the length of testing.
 
 NOTE: An example traffic generator is included in the SDK as _SDK\testrunner\custom\python\hand_fuzz.py_.

@@ -166,5 +166,5 @@ webproxy.register_event(webproxy.EVENT_ACTION, aws_auth) <4>
 <1> Import peach.webproxy module to register for events
 <2> Function has three arguments: Context, Request, Body
 <3> Set the header value
-<4> Register function with Peach Web
+<4> Register function with {product}
 ========================
