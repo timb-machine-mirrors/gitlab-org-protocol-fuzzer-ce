@@ -1,15 +1,15 @@
 == Licensing
 
 {product} is licenses in two ways depending on how it's purchased.
-When purchased directly through Peach Fuzzer, LLC, {product} is 
+When purchased directly through {company}, {product} is 
 licensed per instance.
 When purchased through a cloud provider marketplace billing occurs through
 the marketplace itself for each instance that is started.
 
-This chapter is intended for purchases made directly through Peach Fuzzer, LLC
+This chapter is intended for purchases made directly through {company}
 as cloud marketplace purchases are automatically licensed.
 
-For instances purchased through Peach Fuzzer, LLC, each instance must be activated through our licensing system.
+For instances purchased through {company}, each instance must be activated through our licensing system.
 When the instance is destroyed, it's license must be returned before it can be used again.
 
 === License Types

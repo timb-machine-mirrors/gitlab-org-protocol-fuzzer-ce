@@ -62,7 +62,7 @@ It is not directly callable as it expects session setup to have already been per
 For JUnit 4 runner, Peach controls when the runner should stop.
 
 The following environment variables are expected to bet set when called.
-These variables are normally set by the CI runner:
+These variables are normally set by the CI runner automatically:
 
 PEACH_API:: URL to {product} API. Ex. http://10.0.0.1
 PEACH_API_TOKEN:: API Token for {product}
