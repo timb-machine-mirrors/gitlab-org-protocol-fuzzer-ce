@@ -8,7 +8,7 @@ The authentication panel gives access to the Apache configuration.
 
 // TODO
 
-Intructions for configuring active directory or LDAP authentication will
+Instructions for configuring active directory or LDAP authentication will
 be included in the non-beta {peachug}.
 Contact support for assistance until then.
 
