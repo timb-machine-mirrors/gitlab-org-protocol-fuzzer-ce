@@ -16,6 +16,6 @@ The default administrator credentials are:
   User: ubuntu
   Password: ubuntu
 
-WARNING: The administrator credentials should be changed immediatly.  
+WARNING: The administrator credentials should be changed immediately.  
 Changing the credentials is a critical part of the installation process provided in this document.
 xref:Install_ChangeDefaultPassword[Change Default Credentials].
