@@ -1,7 +1,7 @@
 === Create Instance
 
 This section covers how to create an instance in various virtual machine software or cloud providers.
-It is assumes prior knowledge of the technologies and basic usage.
+It assumes prior knowledge of the technologies and basic usage.
 
 ==== VMWare vSphere
 
@@ -42,7 +42,7 @@ Import the virtual appliance::
     This is done via the File menu and the 'Import Virtual Appliance' option.
     Select the +.ova+ file that was downloaded from the Peach API Security
     customer portal at {portalurl}.
-    The defaults values can be used during import.
+    The default values can be used during import.
 
 Start Instance::
     The instance is now ready to be started and configured.
@@ -50,8 +50,8 @@ Start Instance::
 ==== Amazon AWS
 
 Two methods currently exist for starting {product} instances.
-The first method requires importing the machine image (OVA) file, 
-the scond requires purchasing Peach API Security through the Amazon
+The first method requires importing the machine image (OVA) file, while 
+the second requires purchasing Peach API Security through the Amazon
 Marketplace.
 
 ===== Import Image
@@ -60,7 +60,7 @@ Amazon provides good documentation about importing VM images, including OVAs.
 See the following section of the VM Import/Export User Guide: 
 http://docs.aws.amazon.com/vm-import/latest/userguide/import-vm-image.html[Step 3: Import Your VM as an Image]
 
-Once imported an instance of the AMI can be Launched.  
+Once imported, an instance of the AMI can be launched.  
 See the xref:Install_ResourceRequirements[Resource Requirements] section for recommendations on instance type.
 
 ===== Marketplace
