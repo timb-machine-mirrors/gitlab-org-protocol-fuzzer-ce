@@ -8,7 +8,7 @@ These scripts are easy and quick to author- existing sample code can be used in 
  * Selenium Firefox plugin can be used to record a web session.
 Selenium then exports to formats like JUnit that have Peach integrations.
 
- * Automated tests from the engineering group can be used with one of {product} test runner
+ * Automated tests from the engineering group can be used with one of the {product} test runner
  plugins.
 
  * Attack proxies can forward input into Peach for testing.
