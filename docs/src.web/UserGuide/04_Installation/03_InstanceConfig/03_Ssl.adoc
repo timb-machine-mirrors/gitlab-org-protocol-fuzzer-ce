@@ -3,7 +3,7 @@
 
 The instance ships with a temporary self-signed SSL certificate.
 This certificate should be replaced with a custom self-signed or preferably a legitimate 
-SSL certificate from your companies certificate authority.
+SSL certificate from your company's certificate authority.
 
 The admin panel provides several easy to use methods for configuring SSL.
 The SSL configuration for the admin panel will be used for {product} as well.
