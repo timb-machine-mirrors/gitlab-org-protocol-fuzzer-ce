@@ -2,8 +2,8 @@
 == Travis CI
 
 * No inbound access to build machines
-* Use cloud ci runner
-** Creates ssh tunnels to/from Peach API Security
+* Use cloud CI runner
+** Creates SSH tunnels to/from Peach API Security
 * Steps
 ** Create a working .travis.xml to build/test your product
 ** Create a new SSH key (id_rsa, id_rsa.pub)
