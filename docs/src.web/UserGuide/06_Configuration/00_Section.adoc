@@ -11,7 +11,7 @@ Profiles define different testing configurations primarily targetted at CI/CD su
 The default profile configurations should be fine for most users.
 
 Quick::
-    The quick profile is used for tests that need a fast turnaround.
+    The Quick profile is used for tests that need a fast turnaround.
     For example, builds performed during the day would use a Quick profile,
     so they are not delayed by security testing.
     +
@@ -20,20 +20,20 @@ Quick::
     Some checks are performed and fuzzing is disabled in the Quick profile.
 
 Nightly::
-    The nightly profile is used for overnight testing or testing that can take longer
+    The Nightly profile is used for overnight testing or testing that can take longer
     to complete than Quick.
     All checks are performed during nightly with some fuzzing.
     +
     It's recommended to use Nightly in combination with Weekly.
 
 Weekly::
-    The weekly profile is used for testing over weekends. Weekly testing requires more time
+    The Weekly profile is used for testing over weekends. Weekly testing requires more time
     to complete than the Nightly profile.
-    The weekly profile performs is the amount of fuzzing that is 
+    The Weekly profile performs is the amount of fuzzing that is 
     performed during testing.
 
 Full::
-    This profile is used for single-shot testing.
+    The Full profile is used for single-shot testing.
     It performs complete testing, including checks and fuzzing, in a single run.
     +
     This profile is recommended for manual runs
@@ -72,7 +72,7 @@ CA Certificate::
 	Optionally provide a CA certificate that will sign any auto-generated TLS certificates.
 	Certificates are auto-generated for targets using TLS.
 	To avoid trust issues in the traffic generator, a fixed CA certificate can be provided.
-	Requires also providing the _CA Private Key_ and _Server Private Key_.
+	This requires also providing the _CA Private Key_ and _Server Private Key_.
 	Certificate must be in PEM format.
 	
 CA Private Key::
