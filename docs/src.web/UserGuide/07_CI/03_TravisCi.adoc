@@ -42,7 +42,7 @@ env:
   PEACH_SSH_USER=ubuntu  <11>
   PEACH_CONFIG=cloud-generic/peach-web.project <12>
   PEACH_PROFILE=Quick <13>
-  PEACH_UI=http://52.52.169.252:5000 <14>
+  PEACH_UI=http://52.52.169.252 <14>
   PEACH_JUNIT=peach_output.xml <15>
   PEACH_AUTOMATION_CMD="pytest --peach=on pytest-peach/test_target.py" <16>
   PEACH_VERBOSE=False  <17>
