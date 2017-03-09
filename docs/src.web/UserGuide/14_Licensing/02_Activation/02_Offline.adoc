@@ -27,7 +27,7 @@ image::{images}/Licensing/Activate_NotActivatedAlert.png[]
 ===== Step 3: Enter Activation ID
 
 . Scroll to Licensing section of settings page
-. Paste copied activation ID into activation ID box
+. Paste the copied activation ID into activation ID box
 
 .Enter Activation ID
 image::{images}/Licensing/Activate_Licensing_ActivationId.png[]
@@ -50,7 +50,7 @@ image::{images}/Licensing/Activate_Licesning_Offline_DownloadRequest.png[]
 image::{images}/Licensing/Portal_LicensingPage.png[]
 
 . Click on Offline Activation Upload button
-. Select file downloaded from {product} in Step 4.
+. Select the file downloaded from {product} in Step 4.
 . Once processed a response file will automatically download.
 . Copy response download to machine with access to {product} instance.
 
