@@ -43,8 +43,8 @@ image::{images}/Licensing/Activate_Licesning_OnlineActivation.png[]
 
 ===== Step 5: Activated
 
-If activation was successfull the alert will turn green as shown below.
-If activation failed, an error will be displayed.
+The alert will turn green if the activation of successful, as shown below.
+An error will be displayed if the activation failed.
 
 Common reasons for activation failure include:
 
