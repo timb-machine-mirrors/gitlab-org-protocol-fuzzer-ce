@@ -14,7 +14,7 @@ Mechanisms that work include:
 The two authentication types that require some special configuration are:
 
  * TLS User Certificates
- * Hashed/computed keys.  For example, AWS authentication includes the hash of headers and body.
+ * Hashed/computed keys. For example, AWS authentication includes the hash of headers and body
 
 === TLS User Certificates
 
