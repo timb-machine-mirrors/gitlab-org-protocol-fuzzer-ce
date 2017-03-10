@@ -12,7 +12,7 @@ The following are hardware recommendations for {product}.
 
 The following ports are used and should be allowed as ingress for {product}.
 
-/// This table also on the InstanceConfig section
+// This table also on the InstanceConfig section
 [options="header"]
 |========
 | Port     | TLS | Usage

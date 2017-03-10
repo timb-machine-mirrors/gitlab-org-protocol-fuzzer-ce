@@ -2,7 +2,7 @@
 
 The following ports are used and should be allowed as ingress for {product}.
 
-/// This table also on the ResourceReqruiements section
+// This table also on the ResourceReqruiements section
 [options="header"]
 |========
 | Port     | TLS | Usage
@@ -17,7 +17,7 @@ The following ports are used and should be allowed as ingress for {product}.
 
 Initial network configuration is performed via a console application.
 Additional configuration can be performed through the admin portal located on port 10000.  
-The following URL can be used: +https://[IP]:10000/ to access the admin portal.
+The following URL can be used: +https://[IP]:10000/+ to access the admin portal.
 
 .{product} Console
 image::{images}/Install/ConfigurationConsole.png[]

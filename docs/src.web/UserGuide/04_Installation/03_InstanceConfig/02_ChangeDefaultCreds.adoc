@@ -2,7 +2,7 @@
 ==== Change Default credentials
 
 Once networking has been configured the very first configuration step is to
-set a new password for the default administrative user 'ubuntu' via the admin portal.
+set a new password for the default administrative user 'peach' via the admin portal.
 
 ===== Step 1: Login to {product} Admin Portal
 
@@ -12,8 +12,8 @@ The admin portal for {product} can be accessed via the folling URL:
 
 Login using the default credentials:
 
-  user: ubuntu
-  password: ubuntu
+  user: peach
+  password: peach
 
 ===== Step 2: Navigate to Webmin Users
 

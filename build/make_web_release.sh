@@ -114,16 +114,13 @@ pushd web/packer
 # support local and remote packer builds
 if [ -z "$ESXI_PASSWORD" ]; then
     # Ensure old packer directory is clean
-    rm -rvf "output-vmware-iso" 2>/dev/null || {}
+    rm -rvf "output-vmware-iso ${ovadir}/peachapisec-${BUILDTAG}.ova" 2>/dev/null || {}
     remote_var=""
 else
     # Ensure old packer directory is clean
     rm -rvf "peachapisec" 2>/dev/null || {}
     remote_var="-var remote_type=esx5"
 fi
-
-# prepare to install files
-tar cvf tmp/files.tar -C files .
 
 export PACKER_CACHE_DIR="$HOME/.packer_cache"
 packer build \

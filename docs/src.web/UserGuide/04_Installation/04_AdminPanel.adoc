@@ -13,8 +13,8 @@ Example, if your virtual appliance IP is +192.168.1.10+ then the url is:
 
 The default administrator credentials are:
 
-  User: ubuntu
-  Password: ubuntu
+  User: peach
+  Password: peach
 
 WARNING: The administrator credentials should be changed immediately.  
 Changing the credentials is a critical part of the installation process provided in this document.
