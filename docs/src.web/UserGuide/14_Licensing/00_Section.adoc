@@ -1,9 +1,9 @@
 == Licensing
 
-{product} is licenses in two ways depending on how it's purchased.
+{product} is licensed in two ways depending on how it's purchased.
 When purchased directly through {company}, {product} is 
 licensed per instance.
-When purchased through a cloud provider marketplace billing occurs through
+When purchased through a cloud provider marketplace, billing occurs through
 the marketplace itself for each instance that is started.
 
 This chapter is intended for purchases made directly through {company}
@@ -18,7 +18,7 @@ When the instance is destroyed, it's license must be returned before it can be u
 
 {product} {skubasic}::
 The {skubasic} version of {product} contains all features with the exception
-of the fuzzing modules.  This covers OWASP Top 10 and PCI 6.5, but does not
+of the fuzz testing modules.  This covers OWASP Top 10 and PCI 6.5, but does not
 perform additional fuzz testing.
 +
 The checks/asserts not included with this licenses will be shown as disabled
@@ -26,7 +26,7 @@ in the project/profile configuration.
 
 {product} {skuadvanced}::
     The {skuadvanced} version of {product} expands the {skubasic} feature set
-    adding in fuzzing of web apis.
+    by adding including fuzz testing modules.
 
 === Licensing Concepts
 
@@ -38,9 +38,9 @@ Activation ID::
 
 Device ID::
 Each {poroduct} instance has a unique device id.
-When an instance is activated an activation id is associated
+When an instance is activated, an activation id is associated
 with a device id.
-An instances device id can be found in the Licensing section of
+An instance's device id can be found in the Licensing section of
 the Settings page.
 +
 To reclaim an activation id the device must be returned using the
@@ -63,10 +63,10 @@ The delta between these lists are the unused activation ids.
 
 ==== How to find instance device ID
 
-Each {poroduct} instance has a unique device id.
+Each {oroduct} instance has a unique device id.
 When an instance is activated an activation id is associated
 with a device id.
-An instances device id can be found in the Licensing section of
+An instance's device id can be found in the Licensing section of
 the Settings page.
 
 .Device ID
@@ -87,10 +87,10 @@ Perform the following steps to return a device.
 
 ==== Step 1: Identify Device ID to Return
 
-The easiest method to determin the correct device id assumes the activated 
+The easiest method to determine the correct device id assumes the activated 
 instance is still running and available.
 
-. Access {product} in the normal mannor
+. Access {product} in the normal manner
 . Navigate to the Settings page using the top navigation links
 . Scroll down to the Licesning section
 . The device id is listed.
@@ -100,7 +100,7 @@ image::{images}/Licensing/License_DeviceId.png[]
 
 If the instance is no longer available, the device ID must be identified
 from the list of registered devices.  This could include checking the device
-id's of all available instances to determin which device id is not in active
+id's of all available instances to determine which device id is not in active
 use.
 
 ==== Step 2: Access Portal
@@ -129,7 +129,7 @@ image::{images}/Licensing/Return_Device_ClickReturnDevice.png[]
 ==== Step 5: Verify Device Removed
 
 . Navigate to the Licensing page on the portal
-. Verify device id is no longer listed
+. Verify the device id is no longer listed
 
 ==== Step 6: Destroy Instance
 
@@ -140,7 +140,7 @@ be terminated/removed to avoid breaking the licensing terms.
 
 {product} will display a warning alert in the UI when the instance 
 license is near expiration.  This is intended to provide time to 
-aquire a new license and re-activate the instance.  If your seeing the
+acquire a new license and re-activate the instance.  If you're seeing the
 license expiration warning, please contact {product} sales to assist in
 renewing your license.
 

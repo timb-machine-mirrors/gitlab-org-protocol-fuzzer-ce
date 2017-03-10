@@ -39,12 +39,12 @@ PEACH_API::
     If company policy prohibits the use of 'http', 'https' can be specified instead.
     This will cause testing to complete slower due to TLS negotiation.
     This environmental is required.
-    Example: +http://192.168.1.5:5000+
+    Example: +http://192.168.1.5+
 
 PEACH_API_TOKEN::
     URL to {product} APIs.
     This environmental is required.
-    Example: +http://192.168.1.5:5000+
+    Example: +http://192.168.1.5+
 
 PEACH_PROJECT::
     {product} project name.
