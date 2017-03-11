@@ -94,6 +94,7 @@ TestResult.xml
 /docs/Gemfile.lock
 /docs/src.pro/DevGuide/DevGuide.html
 /docs/src.pro/UserGuide/UserGuide.html
+/docs/src.web/UserGuide/UserGuide.html
 
 # Emacs backup files
 *~
