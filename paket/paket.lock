@@ -436,6 +436,7 @@ NUGET
       System.Buffers (>= 4.3)
       System.Diagnostics.Contracts (>= 4.3)
     Minimatch (2.0)
+    Moment.js (2.17.1)
     Moq (4.5.28)
       Castle.Core (>= 3.3.3)
     NETStandard.Library (1.6.1)

@@ -64,6 +64,7 @@ nuget Microsoft.Extensions.Logging.Console
 nuget Microsoft.Extensions.Logging.Debug
 nuget Microsoft.Extensions.Options.ConfigurationExtensions
 nuget Minimatch
+nuget Moment.js
 nuget Moq
 nuget Npgsql
 nuget NSwag.Core
