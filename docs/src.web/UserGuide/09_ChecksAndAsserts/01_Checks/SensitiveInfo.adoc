@@ -4,7 +4,7 @@
 [cols="1,4"]
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
-| CWE | https://cwe.mitre.org/data/definitions/200.html[CWE-200: Information Exposure] +
+| CWE | link:https://cwe.mitre.org/data/definitions/200.html[CWE-200: Information Exposure] +
 | PCI | 6.5.5 Information leakage and improper error handling
 |====
 
@@ -31,7 +31,7 @@ add, edit or remote entries.
 
 === Configuration
 
-TODO
+This check is not configurable.
 
 === Operation
 

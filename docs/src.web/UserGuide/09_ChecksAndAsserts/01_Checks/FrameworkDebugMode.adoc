@@ -4,9 +4,9 @@
 // TODO
 [cols="1,4"]
 |====
-| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
-| CWE | https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
-| PCI | TODO
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A5-Security_Misconfiguration[2013-A5-Security Misconfiguration]
+| CWE | link:https://cwe.mitre.org/data/definitions/285.html[CWE-285: Improper Authorization]
+| PCI | 6.5.8 Improper access control
 |====
 
 Tests to see if debug mode is enabled in various frameworks.  

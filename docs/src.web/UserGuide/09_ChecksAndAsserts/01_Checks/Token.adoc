@@ -4,7 +4,7 @@
 [cols="1,4"]
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A2-Broken_Authentication_and_Session_Management[A2-Broken Authentication and Session Management]
-| CWE | https://cwe.mitre.org/data/definitions/285.html[CWE-285: Improper Authorization] https://cwe.mitre.org/data/definitions/331.html[CWE-331: Insufficient Entropy]
+| CWE | link:https://cwe.mitre.org/data/definitions/285.html[CWE-285: Improper Authorization] https://cwe.mitre.org/data/definitions/331.html[CWE-331: Insufficient Entropy]
 | PCI | 6.5.10 Broken authentication and session management
 |====
 

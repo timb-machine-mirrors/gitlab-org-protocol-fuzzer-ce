@@ -4,15 +4,16 @@
 [cols="1,4"]
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
-| CWE | https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
+| CWE | link:https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
 | PCI | TODO
 |====
 
-TODO
+Looks for known version number strings and other identifying information.
+When found, uses the NVD vulnerability feed to report any known CVEs.
 
 === Configuration
 
-TODO
+Entries (Readonly):: View list of NVD entries.  This list is not editable.
 
 === Operation
 

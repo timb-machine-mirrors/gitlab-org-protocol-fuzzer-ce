@@ -4,22 +4,34 @@
 [cols="1,4"]
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
-| CWE | https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
+| CWE | link:https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
 | PCI | TODO
 |====
 
-TODO
+Tests redirects to determine if they can be abused by attackers.
+This check only operates when a parameters value is detected in a redirect.
+
+Unvalidated redirects and forwards are possible when a web 
+application accepts untrusted input that could cause the web
+application to redirect the request to a URL contained within
+untrusted input. By modifying untrusted URL input to a malicious
+site, an attacker may successfully launch a phishing scam and 
+steal user credentials. Because the server name in the modified
+link is identical to the original site, phishing attempts may
+have a more trustworthy appearance. Unvalidated redirect and
+forward attacks can also be used to maliciously craft a URL
+that would pass the application’s access control check and then
+forward the attacker to privileged functions that they would 
+normally not be able to access.
 
 === Configuration
 
-TODO
+Injections:: List of injections performed during open redirects testing.
 
 === Operation
 
 |====
-| Passive on all requests | No test generation | No traffic generation
+| Test generation | Parameter Scope
 |====
 
-This is a global check, global checks operate on all responses and log messages for the defined scope
-(project or route).  Each response is analyzed to detect use of cleartext authentication over 
-unencrypted channels.
+This is a mutational check that produces test cases by modifying requests made by the traffic generator.

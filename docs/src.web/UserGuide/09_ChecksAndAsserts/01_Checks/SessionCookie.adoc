@@ -4,7 +4,7 @@
 [cols="1,4"]
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A2-Broken Authentication and Session Management]
-| CWE | https://www.owasp.org/index.php/Top_10_2013-A2-Broken_Authentication_and_Session_Management[CWE-930: OWASP Top Ten 2013 Category A2 - Broken Authentication and Session Management] +
+| CWE | link:https://www.owasp.org/index.php/Top_10_2013-A2-Broken_Authentication_and_Session_Management[CWE-930: OWASP Top Ten 2013 Category A2 - Broken Authentication and Session Management] +
 | PCI | 6.5.10 Broken authentication and session management
 |====
 
@@ -31,7 +31,10 @@ add, edit or remote entries.
 
 === Configuration
 
-TODO
+Require HttpOnly:: Require HttpOnly cookie flag
+Require Secure:: Require Secure cookie flag
+Max Expiration:: Session cookie expiration time
+Entries:: Known session cookies and associated frameworks
 
 === Operation
 

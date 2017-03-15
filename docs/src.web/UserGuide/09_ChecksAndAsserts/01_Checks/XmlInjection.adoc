@@ -4,7 +4,7 @@
 [cols="1,4"]
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A1-Injection[2013-A1-Injection]
-| CWE | https://cwe.mitre.org/data/definitions/79.html[CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')] +
+| CWE | link:https://cwe.mitre.org/data/definitions/79.html[CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')] +
 | PCI | 6.5.1 Injection flaws
 |====
 
