@@ -21,7 +21,7 @@ Type of authentication mechanisms supported by check:
 
 === Configuration
 
-TODO
+This check is not configurable.
 
 === Operation
 

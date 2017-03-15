@@ -1,11 +1,14 @@
 [[ChecksAndAsserts]]
 == Checks and Asserts
 
-WARNING: This section still under construction.
-Information provided is partial and may be out of date.
+{product} is built on the concept of Checks that generate tests and Asserts that
+check to see if the test pass or failed.  Some checks allow the user to modify
+and configure which Asserts are performed.  This gives the end user allot of 
+flexibility, especially around limiting the number of false positives that 
+the system generates.
 
-This section includes information about each Check and Assert in {product}.
-For each check information about what is tested and how to configure is provided.
+This section includes information about each Check and Assert.  This 
+information includes operation and configuration of each component.
 
 :leveloffset: 1
 include::01_Checks/00_Section.adoc[]

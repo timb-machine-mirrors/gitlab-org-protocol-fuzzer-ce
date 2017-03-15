@@ -1,0 +1,32 @@
+[[ConfigSsl]]
+=== SSL Configuration
+
+The SSL Configuration section is used for the following reasons:
+
+ * Overriding global configuration
+ * Client certificate auth
+
+Client Certificate::
+	Optionally specify a client certificate to use when authenticating to a target service.
+	If a client certificate is specified then the _Client Key_ must also be specified.
+	Certificate must be in PEM format.
+	
+Client Private Key::
+	Optionally specify the matching secret key for the client certificate.
+	If a client key is specified then the _Client Certificate_ must also be specified.
+	Secret key must be in PEM format with no password.
+
+CA Certificate::
+	Optionally provide a CA certificate that will sign any auto-generated TLS certificates.
+	Certificates are auto-generated for targets using TLS.
+	To avoid trust issues in the traffic generator, a fixed CA certificate can be provided.
+	This requires also providing the _CA Private Key_ and _Server Private Key_.
+	Certificate must be in PEM format.
+	
+CA Private Key::
+	Provide the matching CA Private Key for the CA Certificate.
+	Private key must be in PEM format with no password.
+	
+Server Private Key::
+	Provide a server private key that is used for auto-generated TLS certs.
+	Private key must be in PEM format with no password.

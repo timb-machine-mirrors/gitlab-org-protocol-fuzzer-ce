@@ -1,14 +1,107 @@
 == Checks
 
-WARNING: This section still under construction.
-Information provided is partial and may be out of date.
+Checks implement the testing logic used by {product}.  Checks can be
+configured to run in different xref:ConfigProfiles[testing profiles].
 
-Checks are broken up into global, passive, active and mutational....
+Checks operate at various scope levels:
 
-// TODO table of checks
+Endpoint::
++
+Endpoints are different hosts that identified during testing.
+This is the authority portion of the URI.
+Checks that operate at the endpoint scope perform site wide
+tests such as SSL/TLS configuration.
++
+Endpoint checks will run once per endpoint during the course
+of a testing job.
 
+Resource::
++
+Resources are path combinations that are seen during testing.
+This is based on the RESTful definition of a resource.
+Our definition includes any identified folder structure that
+might not actually be a real resources.
++
+The types of checks that operate at this scope would include
+checking for sensitive file exposure.  Tests that do not
+care about which operations or verbs might occur with a
+resource.
++
+Resource checks will run once per resource during the course
+of a testing job.
+
+Operation::
++
+Operations are actions performed on a resource, in the case
+of REST APIs or service methods for SOAP endpoints.
+For REST this would be the various methods GET, POST,
+PUT, etc. 
+Testing performed at the operation level is indipendent of
+any parameters that are part of the operation call iteself.
+An example of operation testing would be authentication checks.
+Can the operation be performed when the authentication token
+is removed or modified.
++
+Operation checks will run once per operation during the
+course of a testing job.
+
+Parameter::
++
+Parameters are any piece of data identified when analysing
+the HTTP request.
+This includes path segments, querystring parameter,
+headers and body elements (JSON, XML, form data, etc.)
++
+The majority of testing time is spent on parameters.
+Examples of testing include SQL Injection testing and
+fuzzing.
++
+Parameter checks will run once per parameter during the
+course of a testing job.
+Even if an operation is seen being called in different
+ways, the parameter will get tested once.
+
+
+.Checks
+[options="header"]
+|=======================
+|Check                                                 |Scope      |Config Assertions
+| xref:Check_CleartextAuth[Cleartext Authentication]   | N/A       | No
+| xref:Check_FormBodyFuzzing[Form Body Fuzzing]        | Parameter | Yes
+| xref:Check_FrameworkDebugMode[Framework Debug Mode]  | Endpoint  | No
+| xref:Check_GenericFuzzing[Generic Fuzzing]           | Parameter | Yes
+| xref:Check_HtmlInjection[HTML Injection]             | Parameter | No
+| xref:Check_InsecureHttpMethods[Insecure HTTP Methods]| Resource  | No
+| xref:Check_JsonFuzzing[JSON Fuzzing]                 | Parameter | Yes
+| xref:Check_JsonInjection[JSON Injection]             | Parameter | No
+| xref:Check_KnownVulns[Known Vulnerabilities]         | Operation | No
+| xref:Check_OpenRedirect[Open Redirect]               | Parameter | No
+| xref:Check_SensitiveFile[Sensitive File Disclosure]  | Resource  | No
+| xref:Check_SensitiveInfo[Sensitive Information Disclosure] | N/A | No
+| xref:Check_SessionCookie[Session Cookie]             | Operation | No
+| xref:Check_SqlInjection[SQL Injection]               | Parameter | Yes
+| xref:Check_TlsServerConfig[TLS Server Configuration] | Endpoint  | No
+| xref:Check_Token[Authentication Token]               | Operation | No
+| xref:Check_XmlFuzzing[XML Fuzzing]                   | Parameter | Yes
+| xref:Check_XmlInjection[XML Injection]               | Parameter | No
+|=======================
+
+
+<<<
 :leveloffset: 2
-include::CleartextAuthentication.adoc[]
+include::CleartextAuth.adoc[]
+
+<<<
+:leveloffset: 2
+include::FormBodyFuzzing.adoc[]
+
+<<<
+:leveloffset: 2
+include::FrameworkDebugMode.adoc[]
+
+<<<
+:leveloffset: 2
+include::GenericFuzzing.adoc[]
 
 <<<
 :leveloffset: 2
@@ -16,7 +109,23 @@ include::HtmlInjection.adoc[]
 
 <<<
 :leveloffset: 2
+include::InsecureHttpMethods.adoc[]
+
+<<<
+:leveloffset: 2
+include::JsonFuzzing.adoc[]
+
+<<<
+:leveloffset: 2
 include::JsonInjection.adoc[]
+
+<<<
+:leveloffset: 2
+include::KnownVulns.adoc[]
+
+<<<
+:leveloffset: 2
+include::OpenRedirect.adoc[]
 
 <<<
 :leveloffset: 2
@@ -24,7 +133,7 @@ include::SensitiveFile.adoc[]
 
 <<<
 :leveloffset: 2
-include::SensitiveInformation.adoc[]
+include::SensitiveInfo.adoc[]
 
 <<<
 :leveloffset: 2
@@ -36,8 +145,18 @@ include::SqlInjection.adoc[]
 
 <<<
 :leveloffset: 2
+include::TlsServerConfig.adoc[]
+
+<<<
+:leveloffset: 2
 include::Token.adoc[]
 
 <<<
 :leveloffset: 2
+include::XmlFuzzing.adoc[]
+
+<<<
+:leveloffset: 2
 include::XmlInjection.adoc[]
+
+// end

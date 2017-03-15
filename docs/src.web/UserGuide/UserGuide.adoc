@@ -15,8 +15,9 @@ v{BUILDTAG}
 :toclevels: 2
 :version: v{VER_MAJOR}.{VER_MINOR}
 :peachurl: http://peachfuzzer.com
-:forumurl: https://forums.peachfuzzer.com
-:portalurl: https://dl.peachfuzzer.com
+:forumurl: https://portal.peachfuzzer.com
+:portalurl: https://portal.peachfuzzer.com
+:supportemail: support@peachfuzzer.com
 :peachug: Peach API Security User Guide
 :skubasic: Basic
 :skuadvanced: Advanced

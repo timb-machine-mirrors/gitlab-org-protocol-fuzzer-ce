@@ -1,0 +1,17 @@
+[[ConfigIgnoredFailures]]
+=== Ignored Failures
+
+In the event a failure is a false positive or the team decides not to fix the issue, it 
+can be added to a list of ignored failures.
+When a failure is ignored the following occures:
+
+ * Testing of this issue is still performed
+ * This failure will no longer be reported via JUnit output
+ * This failure will no longer be reported via ticketing integration (JIRA/Bugzilla)
+ * This failure will no longer block builds
+ 
+Any ignored failure will display in this section of the project configuration.
+
+To re-enable reporting of an ignored failure simply click the "X" button next to it in
+project page.  You will see the item get removed from the listing.  Also the ignored
+toggle button can be clicked in the failure details in the title bar of the failure.

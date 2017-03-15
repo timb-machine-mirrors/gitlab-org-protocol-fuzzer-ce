@@ -1,152 +1,28 @@
-
 [[Configuration]]
 == Configuration
 
-{product} comes with a default project that is ready to use out of the box.
-New projects can also be created if needed.
+{product} comes with project defaults that are reasonable to start with.  For new
+projects and teams just starting with {product} the configuration items that 
+are most likely to need attention early on are:
 
-=== Profiles
+. Route configuration.  Route configuration allows you to enable/disable testing
+of different hosts and API apths.
+. SSL client certificates.  If one or more of your services uses client certificates
+for authentication, they will need to be configured.
+. Authentication tokens.  Provide a list of any/all authentication tokens
+along with there expiration time.  This will enable special checks just for
+API authentication tokens.
 
-Profiles define different testing configurations primarily targetted at CI/CD support.
-The default profile configurations should be fine for most users.
+It's safe to start with defaults for other project settings and tweak them
+as needed.
 
-Quick::
-    The Quick profile is used for tests that need a fast turnaround.
-    For example, builds performed during the day would use a Quick profile,
-    so they are not delayed by security testing.
-    +
-    The Quick profile should be used in combination with Nightly or Weekly.
-    +
-    Some checks are performed and fuzzing is disabled in the Quick profile.
+include::01_Profiles.adoc[]
 
-Nightly::
-    The Nightly profile is used for overnight testing or testing that can take longer
-    to complete than Quick.
-    All checks are performed during nightly with some fuzzing.
-    +
-    It's recommended to use Nightly in combination with Weekly.
+include::02_IgnoredFailures.adoc[]
 
-Weekly::
-    The Weekly profile is used for testing over weekends. Weekly testing requires more time
-    to complete than the Nightly profile.
-    The Weekly profile performs is the amount of fuzzing that is 
-    performed during testing.
+include::03_Ssl.adoc[]
 
-Full::
-    The Full profile is used for single-shot testing.
-    It performs complete testing, including checks and fuzzing, in a single run.
-    +
-    This profile is recommended for manual runs
-
-=== Ignored Failures
-
-In the event a failure is a false positive or the team decides not to fix the issue, it 
-can be added to a list of ignored failures.
-When a failure is ignored the following occures:
-
- * Testing of this issue is still performed
- * This failure will no longer be reported via JUnit output
- * This failure will no longer be reported via ticketing integration (JIRA/Bugzilla)
- * This failure will no longer block builds
- 
-Any ignored failure will display in this section of the project configuration.
-
-=== SSL Configuration
-
-The SSL Configuration section is used for the following reasons:
-
- * Overriding global configuration
- * Client certificate auth
-
-Client Certificate::
-	Optionally specify a client certificate to use when authenticating to a target service.
-	If a client certificate is specified then the _Client Key_ must also be specified.
-	Certificate must be in PEM format.
-	
-Client Private Key::
-	Optionally specify the matching secret key for the client certificate.
-	If a client key is specified then the _Client Certificate_ must also be specified.
-	Secret key must be in PEM format with no password.
-
-CA Certificate::
-	Optionally provide a CA certificate that will sign any auto-generated TLS certificates.
-	Certificates are auto-generated for targets using TLS.
-	To avoid trust issues in the traffic generator, a fixed CA certificate can be provided.
-	This requires also providing the _CA Private Key_ and _Server Private Key_.
-	Certificate must be in PEM format.
-	
-CA Private Key::
-	Provide the matching CA Private Key for the CA Certificate.
-	Private key must be in PEM format with no password.
-	
-Server Private Key::
-	Provide a server private key that is used for auto-generated TLS certs.
-	Private key must be in PEM format with no password.
-
-
-=== Route Configuration
-
-One or more routes can be configured for use with {product}.
-Each route contains several configuration parameters.
-Route entries are matched in order.
-It's recommended that a final route entry be included with a Route pattern of +*+ as a catch all.
-
-Adding multiple routes allows different configurations based on matching a portion of the Path.
-For example, if two different APIs are accessed during testing _/storage/*_ and _/users/*_,
-each can have a different route entry allowing for different fault status codes
-or Swagger API specifications.
-
-_Required:_
-
-Path Pattern:: This pattern will match a specific route to a request.
-Define a pattern that matches the HTTP request path (excluding the sheme, host, and query)
-using single character wildcard (+?+) and multiple character wildcard (+*+). +
-Examples: `/storage/*` or `*/v?/*`
-
-_Optional:_
-
-Test::
-	Should the route be included or excluded from testing.
-	This setting affects all requests that match the route.
-	Default to _included_.
-
-Swagger::
-	Optionally provide the URL to a Swagger API JSON.
-	For example, _http://127.0.0.1:8888/swagger/docs/v1_ or _file:///opt/service/swagger.js_
-
-Script::
-	Optional python script.  Examples provided in SDK/scripts.
-	See xref:Scripts[Scripts] for a full explanation and examples.
-
-Rewrite Base URL::
-	Optionally provide a new replacement base URL.
-	Only the scheme, host, and port are replaced.
-
-Failure Status Codes::
-	Optionally provide a comma separated list of HTTP status codes that
-	will result in a test failing. When a test fails it is logged as a fault in the tool.
-	Example: +500,501+
-
-Header Testing::
-+
-This parameter controls what HTTP headers are included/excluded from testing.
-+
-Mutate;; Include or exclude the header from mutation.
-Pattern;; Pattern to match against HTTP headers.
-+
-Headers support pattern matching using the single character wildcard (+?+) or multiple character wildcard (+*+).
-
-API Tokens::
-+
-This parameter is used to list any/all authentication tokens parameter/headers used
-by the APIs under test.
-This will enable various checks related to API Tokens.
-+
-Name;; Include or exclude the header from mutation.
-Part;; Where to find the api token, headers, body, etc.
-Expires;; Expiration time for the token in minutes
-Signature;; Is token a signature of the request (URL, headers, body, etc.)
-
+include::04_Routes.adoc[]
 
 // end
 

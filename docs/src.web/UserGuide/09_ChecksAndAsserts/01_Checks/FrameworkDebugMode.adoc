@@ -1,0 +1,32 @@
+[[Check_FrameworkDebugMode]]
+== Framework Debug Mode
+
+// TODO
+[cols="1,4"]
+|====
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
+| CWE | https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
+| PCI | TODO
+|====
+
+Tests to see if debug mode is enabled in various frameworks.
+
+Frameworks Supported:
+
+ * ASP.NET
+ * Flask
+ 
+If your framework has a debug mode and is not listed, please email our support alias {supportemail}.
+We are actively looking to expand this check with additional framework support.
+
+=== Configuration
+
+This check is not configurable.
+
+=== Operation
+
+|====
+| Test generation | Endpoint Scope
+|====
+
+This is a mutational check that produces test cases by modifying requests made by the traffic generator.
