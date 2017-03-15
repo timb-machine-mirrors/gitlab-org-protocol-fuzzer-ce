@@ -2,12 +2,11 @@
 === Profiles
 
 Profiles define different testing configurations primarily targetted at CI/CD support.
-Profiles can be used in different build pipelines based required testing time.
-Over the course of a period of time (say week) all testing can be comapleted
+Profiles can be used in different build pipelines based on the required testing time.
+Over the course of a period of time (say week) all testing can be compeleted
 without overly delaying the release of new builds or deployments.
 
-The default profile configurations should be fine to start with.  During the course
-of your integration of the tool they can be adjusted as needed.
+The default profile configurations should be fine to start with. Profiles can be adjusted when you integrate {product}.
 
 Quick::
     The Quick profile is used for tests that need a fast turnaround.
@@ -40,11 +39,11 @@ Full::
 ==== Configuring which Checks Run
 
 To configure which checks run during specific profiles or change specific settings
-for said check, navigate to the project page using the top nav.  Each profile will
-be listed.  Click on the profile to view a list of Checks and there state (on/off).
+for said check, navigate to the project page using the top navigation bar.  Each profile will
+be listed.  Click on the profile to view a list of Checks and whether they are activated.
 
 Checks listed as On will run as part of the profile.  Checks can be toggled by
-clicking the On/Off toggle button.  To configure a specific Check click on it's
+clicking the On/Off toggle button.  To configure a specific Check, click on it's
 name in the list.  For more information about configuring a specific check see
 the xref:ChecksAndAsserts[Checks and Asserts] section of this document.
 
