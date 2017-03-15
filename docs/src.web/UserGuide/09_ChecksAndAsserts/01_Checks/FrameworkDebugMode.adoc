@@ -10,8 +10,8 @@
 |====
 
 Tests to see if debug mode is enabled in various frameworks.  
-Debug mode can allows various amounts of access, from simple extended error messages through command execution.
-Leaving debug mode on in production deployments represents a serious risk.
+Debug mode allows various amounts of access, from simple extended error messages through command execution.
+Leaving debug mode active in production deployments represents a serious risk.
 
 Frameworks Supported:
 
