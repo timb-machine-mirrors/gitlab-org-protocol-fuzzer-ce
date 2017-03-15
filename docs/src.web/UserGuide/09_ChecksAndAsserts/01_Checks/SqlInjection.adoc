@@ -23,11 +23,11 @@ analyzed to try and detect if an error occured.  If an error is detected there i
 likelyhood that a vulnerability exists.
 
 The check comes pre-populated with a list of values used to cause SQL and NoSQL queries to fail.
-The provided list can be editted at various scope levels (Global, Project, Profile, Route) to add, edit or remote entries.
+The provided list can be editted to add, edit or remove entries.
 
 === Configuration
 
-TODO
+Injections:: List of injections performed during SQL injection check.
 
 === Operation
 

@@ -19,16 +19,17 @@ The response is then analyzed to determine if the XML injection has been include
 response body identified as containing XML.
 
 The check comes pre-populated with a list of XML injections.
-The provided list can be editted at various scope levels (Global, Project, Profile, Route) to add, edit or remote entries.
+The provided list can be editted to add, edit or remove entries.
 
 === Configuration
 
-TODO
+Force Running:: Force check to run even if XML is not found in the request.
+Injections:: Injections performed by check
 
 === Operation
 
 |====
-| Test generation 
+| Test generation | Parameter Scope
 |====
 
 This is a mutational check that produces test cases by modifying requests made by the traffic generator.

@@ -5,21 +5,28 @@
 |====
 | OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
 | CWE | link:https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
-| PCI | TODO
+| PCI | 6.5.4 Insecure communications
 |====
 
-TODO
+Perform various checks regarding the configuration of SSL/TLS stack on server.
+
+* Weak cipher support
+* Weak protocol(s)
+* TLS compression enabled
+* Weak HMAC support
+
+Additional checks to be added in future.
 
 === Configuration
 
-TODO
+TLS Versions:: The allowed TLS versions can be configured
+TLS HMACs:: The allowed TLS hash function can be configured
+TLS Ciphers:: The allowed TLS ciphers can be configured or an existing profile used based on Mozilla recommendations
 
 === Operation
 
 |====
-| Passive on all requests | No test generation | No traffic generation
+| Traffic generation | Endpoint Scope
 |====
 
-This is a global check, global checks operate on all responses and log messages for the defined scope
-(project or route).  Each response is analyzed to detect use of cleartext authentication over 
-unencrypted channels.
+This check produces it's own network traffic to perform testing.
