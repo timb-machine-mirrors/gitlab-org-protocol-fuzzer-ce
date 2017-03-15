@@ -1,19 +1,19 @@
 [[Configuration]]
 == Configuration
 
-{product} comes with project defaults that are reasonable to start with.  For new
-projects and teams just starting with {product} the configuration items that 
+{product} comes with default projects to make getting started easier. For new
+projects and teams just starting with {product}, the configuration items that 
 are most likely to need attention early on are:
 
 . Route configuration.  Route configuration allows you to enable/disable testing
-of different hosts and API apths.
+of different hosts and API paths.
 . SSL client certificates.  If one or more of your services uses client certificates
 for authentication, they will need to be configured.
 . Authentication tokens.  Provide a list of any/all authentication tokens
-along with there expiration time.  This will enable special checks just for
+along with their expiration time.  This will enable special checks just for
 API authentication tokens.
 
-It's safe to start with defaults for other project settings and tweak them
+It's safe to start with defaults for other project settings and change them
 as needed.
 
 include::01_Profiles.adoc[]
