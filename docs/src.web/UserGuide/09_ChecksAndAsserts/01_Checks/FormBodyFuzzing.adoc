@@ -15,9 +15,9 @@ This check is only active when form data is identified in the body.
 
 .What is Fuzzing?
 ****
-Fuzzing or fuzz testing is an automated software testing technique that involves providing invalid, unexpected, or random data as inputs to a computer program. The program is then monitored for exceptions such as crashes, or failing built-in code assertions or for finding potential memory leaks. Typically, fuzzers are used to test programs that take structured inputs. This structure is specified, e.g., in a file format or protocol and distinguishes valid from invalid input. An effective fuzzer generates semi-valid inputs that are "valid enough" so that they are not directly rejected from the parser but able to exercise interesting behaviors deeper in the program and "invalid enough" so that they might stress different corner cases and expose errors in the parser.
+Fuzzing or fuzz testing is an automated software testing technique that involves providing invalid, unexpected, or random data as inputs to a computer program. The program is then monitored for exceptions such as crashes, failing built-in code assertions, or potential memory leaks. Typically, fuzzers are used to test programs that take structured inputs. This structure is specified, e.g., in a file format or protocol and distinguishes valid from invalid input. An effective fuzzer generates semi-valid inputs that are "valid enough" so that they are not directly rejected from the parser but able to exercise interesting behaviors deeper in the program and "invalid enough" so that they might stress different corner cases and expose errors in the parser.
 
-For the purpose of security, input that crosses a trust boundary is often the most interesting.[1] For example, it is more important to fuzz code that handles the upload of a file by any user than it is to fuzz the code that parses a configuration file that is accessible only to a privileged user.
+For the purpose of security, inputs that cross a trust boundary are often the most interesting.[1] For example, it is more important to fuzz code that handles the upload of a file by any user than it is to fuzz the code that parses a configuration file that is accessible only to a privileged user.
 
 -- link:https://en.wikipedia.org/wiki/Fuzzing[Fuzzing - Wikipedia]
 
