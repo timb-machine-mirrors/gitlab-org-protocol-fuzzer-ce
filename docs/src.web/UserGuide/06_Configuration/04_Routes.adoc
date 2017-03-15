@@ -14,7 +14,7 @@ or Swagger API specifications.
 _Required:_
 
 Path Pattern:: This pattern will match a specific route to a request.
-Define a pattern that matches the HTTP request path (excluding the sheme, host, and query)
+Define a pattern that matches the HTTP request path (excluding the scheme, host, and query)
 using single character wildcard (+?+) and multiple character wildcard (+*+). +
 Examples: `/storage/*` or `*/v?/*`
 
