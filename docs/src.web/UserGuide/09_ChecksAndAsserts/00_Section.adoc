@@ -3,8 +3,8 @@
 
 {product} is built on the concept of Checks that generate tests and Asserts that
 check to see if the test pass or failed.  Some checks allow the user to modify
-and configure which Asserts are performed.  This gives the end user allot of 
-flexibility, especially around limiting the number of false positives that 
+and configure which Asserts are performed.  This provides the user
+with flexibility, especially around limiting the number of false positives that 
 the system generates.
 
 This section includes information about each Check and Assert.  This 

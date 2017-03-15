@@ -1,8 +1,8 @@
 [[Assert_SensitiveInfo]]
 == Sensitive Information Assert
 
-Information Leakage is an application weakness where an application reveals sensitive data, 
-such as technical details of the web application, environment, or user-specific data. 
+Information Leakage is an application weakness where an application reveals sensitive data. 
+Examples include divulging technical details of the web application, environment, or user-specific data. 
 Sensitive data may be used by an attacker to exploit the target web application, its hosting 
 network, or its users. Therefore, leakage of sensitive data should be limited or prevented 
 whenever possible. Information Leakage, in its most common form, is the result of one or more 

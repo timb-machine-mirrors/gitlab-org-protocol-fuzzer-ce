@@ -28,5 +28,5 @@ CA Private Key::
 	Private key must be in PEM format with no password.
 	
 Server Private Key::
-	Provide a server private key that is used for auto-generated TLS certs.
+	Provide a server private key that is used for auto-generated TLS certificates.
 	Private key must be in PEM format with no password.

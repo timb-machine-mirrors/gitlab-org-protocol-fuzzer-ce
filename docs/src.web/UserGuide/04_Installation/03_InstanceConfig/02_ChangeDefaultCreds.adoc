@@ -1,7 +1,7 @@
 [[Install_ChangeDefaultPassword]]
 ==== Change Default credentials
 
-Once networking has been configured the very first configuration step is to
+Once networking has been configured, the very first configuration step is to
 set a new password for the default administrative user 'peach' via the admin portal.
 
 ===== Step 1: Login to {product} Admin Portal
@@ -17,7 +17,7 @@ Login using the default credentials:
 
 ===== Step 2: Navigate to Webmin Users
 
-Using the left hand naviagtion, select 'Webmin', then 'Webmin Users' as shown in the following figure.
+Using the left hand navigation, select 'Webmin', then 'Webmin Users' as shown in the following figure.
 Next, click on the user 'root' as shown in the following figure.
 
 .Webmin Users Page
