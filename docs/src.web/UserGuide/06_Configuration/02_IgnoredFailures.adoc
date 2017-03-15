@@ -3,7 +3,7 @@
 
 In the event that a failure is a false positive or that the team decides not to fix the issue, it 
 can be added to a list of ignored failures.
-When a failure is ignored the following occures:
+When a failure is ignored the following occurs:
 
  * Testing of this issue is still performed
  * This failure will no longer be reported via JUnit output
