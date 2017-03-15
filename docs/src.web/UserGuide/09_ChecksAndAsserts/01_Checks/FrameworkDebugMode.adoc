@@ -9,7 +9,9 @@
 | PCI | TODO
 |====
 
-Tests to see if debug mode is enabled in various frameworks.
+Tests to see if debug mode is enabled in various frameworks.  
+Debug mode can allows variouse amount of access, from simple extended error messages through command execution.
+Leaving debug mode on in production deployments represents a serious risk.
 
 Frameworks Supported:
 

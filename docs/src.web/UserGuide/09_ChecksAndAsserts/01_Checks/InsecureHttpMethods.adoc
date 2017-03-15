@@ -1,4 +1,4 @@
-[[Check_]]
+[[Check_InsecureHttpMethods]]
 == XXXX
 
 [cols="1,4"]

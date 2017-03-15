@@ -1,4 +1,4 @@
-[[Assert_SensitiveInformation]]
+[[Assert_SensitiveInfo]]
 == Sensitive Information Assert
 
 Information Leakage is an application weakness where an application reveals sensitive data, 
@@ -24,7 +24,7 @@ add, edit or remote entries.
 
 === Related Checks
 
-xref:Check_SensitiveInformation[Sensitive Information Check]
+xref:Check_SensitiveInfo[Sensitive Information Check]
 
 === Configuration
 

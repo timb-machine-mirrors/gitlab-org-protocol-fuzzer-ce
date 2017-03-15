@@ -1,25 +1,36 @@
-[[Check_]]
-== XXXX
+[[Check_GenericFuzzing]]
+== Generic Fuzzing
 
 [cols="1,4"]
 |====
-| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure[2013-A6-Sensitive Data Exposure]
-| CWE | https://cwe.mitre.org/data/definitions/319.html[CWE-319: Cleartext Transmission of Sensitive Information]
-| PCI | TODO
+| OWASP Top 10 | link:https://www.owasp.org/index.php/Top_10_2013-A1-Injection[2013-A1-Injection]
+| CWE | link:https://cwe.mitre.org/data/definitions/929.html[CWE-929: OWASP Top Ten 2013 Category A1 - Injection]
+| PCI | 6.5.1 Injection flaws
 |====
 
-TODO
+Performs fuzzing of parameters using a collection of mutation libraries.
+This testing does not have a specific bug-class goal as an outcome.
+Fuzz testing spans multiple categories of issues and also includes robustness testing.
+
+.What is Fuzzing?
+****
+Fuzzing or fuzz testing is an automated software testing technique that involves providing invalid, unexpected, or random data as inputs to a computer program. The program is then monitored for exceptions such as crashes, or failing built-in code assertions or for finding potential memory leaks. Typically, fuzzers are used to test programs that take structured inputs. This structure is specified, e.g., in a file format or protocol and distinguishes valid from invalid input. An effective fuzzer generates semi-valid inputs that are "valid enough" so that they are not directly rejected from the parser but able to exercise interesting behaviors deeper in the program and "invalid enough" so that they might stress different corner cases and expose errors in the parser.
+
+For the purpose of security, input that crosses a trust boundary is often the most interesting.[1] For example, it is more important to fuzz code that handles the upload of a file by any user than it is to fuzz the code that parses a configuration file that is accessible only to a privileged user.
+
+-- link:https://en.wikipedia.org/wiki/Fuzzing[Fuzzing - Wikipedia]
+
+****
 
 === Configuration
 
-TODO
+Fuzzing Count (int):: Set the number of fuzzing test cases per parameter.
+Unicode Fuzzing (bool):: Disable Unicode fuzzing
 
 === Operation
 
 |====
-| Passive on all requests | No test generation | No traffic generation
+| Test generation | Parameter Scope
 |====
 
-This is a global check, global checks operate on all responses and log messages for the defined scope
-(project or route).  Each response is analyzed to detect use of cleartext authentication over 
-unencrypted channels.
+This is a mutational check that produces test cases by modifying requests made by the traffic generator.

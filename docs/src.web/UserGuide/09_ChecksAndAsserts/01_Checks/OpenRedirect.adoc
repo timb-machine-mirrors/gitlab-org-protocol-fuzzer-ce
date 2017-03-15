@@ -1,5 +1,5 @@
-[[Check_]]
-== XXXX
+[[Check_OpenRedirect]]
+== Open Redirects
 
 [cols="1,4"]
 |====

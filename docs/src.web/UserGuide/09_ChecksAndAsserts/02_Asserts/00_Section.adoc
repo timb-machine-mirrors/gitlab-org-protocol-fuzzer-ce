@@ -8,7 +8,7 @@ Asserts are methods used to detect failures during testing.
 // TODO table of checks
 
 :leveloffset: 2
-include::SensitiveInformation.adoc[]
+include::SensitiveInfo.adoc[]
 
 <<<
 :leveloffset: 2
