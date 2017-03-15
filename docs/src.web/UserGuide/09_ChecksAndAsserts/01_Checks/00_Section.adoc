@@ -1,15 +1,15 @@
 == Checks
 
-Checks implement the testing logic used by {product}.  Checks can be
+Checks implement the testing logic used by {product}.  They can be
 configured to run in different xref:ConfigProfiles[testing profiles].
 
 Checks operate at various scope levels:
 
 Endpoint::
 +
-Endpoints are different hosts that identified during testing.
+Endpoints are different hosts that are identified during testing.
 This is the authority portion of the URI.
-Checks that operate at the endpoint scope perform site wide
+Checks that operate at the endpoint scope perform site-wide
 tests such as SSL/TLS configuration.
 +
 Endpoint checks will run once per endpoint during the course
@@ -20,10 +20,10 @@ Resource::
 Resources are path combinations that are seen during testing.
 This is based on the RESTful definition of a resource.
 Our definition includes any identified folder structure that
-might not actually be a real resources.
+might not actually be a real resource.
 +
 The types of checks that operate at this scope would include
-checking for sensitive file exposure.  Tests that do not
+checking for sensitive file exposure.  Tests do not
 care about which operations or verbs might occur with a
 resource.
 +
@@ -36,7 +36,7 @@ Operations are actions performed on a resource, in the case
 of REST APIs or service methods for SOAP endpoints.
 For REST this would be the various methods GET, POST,
 PUT, etc. 
-Testing performed at the operation level is indipendent of
+Testing performed at the operation level is independent of
 any parameters that are part of the operation call iteself.
 An example of operation testing would be authentication checks.
 Can the operation be performed when the authentication token
@@ -49,7 +49,7 @@ Parameter::
 +
 Parameters are any piece of data identified when analysing
 the HTTP request.
-This includes path segments, querystring parameter,
+This includes path segments, querystring parameters,
 headers and body elements (JSON, XML, form data, etc.)
 +
 The majority of testing time is spent on parameters.
