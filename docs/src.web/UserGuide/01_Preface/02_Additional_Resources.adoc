@@ -4,8 +4,7 @@
 More information about {product} is available on the Web:
 
 * http://peachfuzzer.com[Peach Fuzzer website]
-* https://dl.peachfuzzer.com[Peach Customer Portal/Download Site]
-* https://forums.peachfuzzer.com[Peach User Forums]
+* {portalurl}[Peach Customer Portal/Download Site]
 
 // TODO - Update with new support site and portal URL
 

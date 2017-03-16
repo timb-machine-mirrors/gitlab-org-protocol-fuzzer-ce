@@ -45,8 +45,7 @@ Core features:
 ===== _JIRA Configuration_
 
 . Create a user with access to project and REST API.
-
-.Add custom bucket field (optional)
+. Add custom bucket field (optional)
 
 To enable single issue per-bucket a custom issue field is required.
 
@@ -78,8 +77,7 @@ Core features:
 
 . Create a user with access to project and REST API.
 . Create an API key for the user and update +settings.json+ file
-
-.Add custom bucket field (optional)
+. Add custom bucket field (optional)
 
 To enable single issue per-bucket a custom issue field is required.
 
