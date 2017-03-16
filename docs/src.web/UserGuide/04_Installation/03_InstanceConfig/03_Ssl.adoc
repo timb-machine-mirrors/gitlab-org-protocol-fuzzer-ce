@@ -35,7 +35,7 @@ The admin portal for {product} can be accessed via the folling URL:
 
   https://[IP]:10000/
 
-Login using the default credentials (user: ubuntu, password: ubuntu) or if they have
+Login using the default credentials (user: peach, password: peach) or if they have
 already been changed, the new credentials.
 
 ====== Step 2: Navigate to SSL Encryption
@@ -93,7 +93,7 @@ The admin portal for {product} can be accessed via the folling URL:
 
   https://[IP]:10000/
 
-Login using the default credentials (user: ubuntu, password: ubuntu) or if they have
+Login using the default credentials (user: peach, password: peach) or if they have
 already been changed, the new credentials.
 
 ====== Step 2: Navigate to SSL Encryption
