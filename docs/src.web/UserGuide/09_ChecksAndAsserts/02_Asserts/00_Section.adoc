@@ -4,7 +4,7 @@
 {product} implements testing using xref:Checks[Checks] and Asserts.
 Checks generate test cases and Asserts detect test failures.
 Checks use asserts in two ways: 1) Built in so-called hardwired asserts; 2) User controllable asserts.
-For a check like TLS Server Configuration, the assertions are hardwired specific to that test.
+For a check like TLS Server Configuration, the assertions are hardwired specifically to that test.
 For other checks like SQL Injection, the assertions are user configurable.
 A default configuration will exist, but it can be changed by the user to control the specifics
 of how a failure is triggered.

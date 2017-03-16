@@ -4,7 +4,7 @@
 This assertion allows the user to configure custom criteria for determining when some checks should
 report a failure.
 The body of the test response is compared against the configured match parameters.
-This is useful when custom error pages are enabled that hide status codes, for example.
+This is useful when custom error pages are enabled that hide status codes.
 
 The comparison performed is against the full body prior to determination if the body is JSON, XML, etc.
 To check the contents of a JSON or XML field, use the xref:Assert_CustomParameterContains[Custom: Parameter Contains]
@@ -13,16 +13,16 @@ assertion instead.
 === Configuration
 
 Is Required (bool)::
-    Is match with search string or regex required?
+    Is a match with search string or regex required?
     If true, failures occur when match is not found.
     Defaults to false.
     
 Is Case Sensitive (bool)::
-    Is match case sensitive? 
+    Is the match case sensitive? 
     Defaults to false.
 
 Is Regex::
-    Is search string a regular expression?
+    Is the search string a regular expression?
     When true, a valid regular expression following the Microsoft.NET syntax
     is required.
     link:https://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx[Regular Expression Language - Quick Reference].

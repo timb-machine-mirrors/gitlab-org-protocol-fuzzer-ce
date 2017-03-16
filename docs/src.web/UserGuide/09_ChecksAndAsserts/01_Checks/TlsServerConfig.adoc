@@ -15,7 +15,7 @@ Perform various checks regarding the configuration of SSL/TLS stack on server.
 * TLS compression enabled
 * Weak HMAC support
 
-Additional checks to be added in future.
+Additional checks will be added in future releases. 
 
 === Configuration
 
