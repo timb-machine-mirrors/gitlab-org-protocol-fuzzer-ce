@@ -8,7 +8,7 @@ included in the whitelist.  Blacklists work in the opposite manor, status codes 
 list cause a failure to occur.
 
 The assert comes pre-populated with a  list of error status codes.
-The provided list can be editted to add, edit or remove entries.
+The provided list can be edited to add, edit or remove entries.
 
 === Configuration
 
