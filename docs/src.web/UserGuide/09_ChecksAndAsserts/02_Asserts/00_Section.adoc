@@ -9,6 +9,7 @@ For other checks like SQL Injection, the assertions are user configurable.
 A default configuration will exist, but it can be changed by the user to control the specifics
 of how a failure is triggered.
 
+
 .Assertions
 [options="header"]
 |=======================
