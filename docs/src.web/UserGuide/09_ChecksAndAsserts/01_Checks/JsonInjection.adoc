@@ -16,7 +16,7 @@ into the resulting message/document.
 
 This check injects various special JSON characters that demonstrate an injection issue.  
 The response is then analyzed to determine if the JSON injection has been included in any
-response body identified as contianing JSON.
+response body identified as containing JSON.
 
 The check comes pre-populated with a list of JSON injections.
 The provided list can be editted to add, edit or remove entries.
