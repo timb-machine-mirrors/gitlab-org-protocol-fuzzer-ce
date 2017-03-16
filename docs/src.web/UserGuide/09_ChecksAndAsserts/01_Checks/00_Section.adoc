@@ -33,9 +33,9 @@ of a testing job.
 
 Operation::
 +
-Operations are actions performed on a resource, in the case
-of REST APIs or service methods for SOAP endpoints.
-For REST this would be the various methods GET, POST,
+Operations are actions performed on a REST API resource
+or service methods for SOAP endpoints.
+For REST, this would be the various methods GET, POST,
 PUT, etc. 
 Testing performed at the operation level is independent of
 any parameters that are part of the operation call iteself.
@@ -48,7 +48,7 @@ course of a testing job.
 
 Parameter::
 +
-Parameters are any piece of data identified when analysing
+Parameters are any piece of data identified when analyzing
 the HTTP request.
 This includes path segments, querystring parameters,
 headers and body elements (JSON, XML, form data, etc.)
