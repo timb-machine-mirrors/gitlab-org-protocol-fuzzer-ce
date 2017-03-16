@@ -1,7 +1,14 @@
 [[Assert_CustomBodyContains]]
 == Custom: Body Contains
 
-TODO
+This assertion allows the user to configure custom criteria for determining when some checks should
+report a failure.
+The body of the test response is compared against the configured match parameters.
+This is useful when custom error pages are enabled that hide status codes, for example.
+
+The comparison performed is against the full body prior to determination if the body is JSON, XML, etc.
+To check the contents of a JSON or XML field, use the xref:Assert_CustomParameterContains[Custom: Parameter Contains]
+assertion instead.
 
 === Configuration
 

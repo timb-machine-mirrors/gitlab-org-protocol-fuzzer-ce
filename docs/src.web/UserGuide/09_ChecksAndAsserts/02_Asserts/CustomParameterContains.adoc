@@ -1,11 +1,17 @@
 [[Assert_CustomParameterContains]]
 == Custom: Parameter Contains
 
-TODO
+This assertion allows the user to configure custom criteria for determining when some checks should
+report a failure.
+A parameter name is specified, that when found, is compared against the configured match string.
 
 === Configuration
 
-Comparison Type:: Contains or Equals.
+Comparison Type:: 
+    Control how the match is made.
+    Options are Contains or Equals
+    This only affects non regular expression comparisons.
+    Defaults to contains.
 
 Parameter Part:: 
     Where is the parameter located? 
