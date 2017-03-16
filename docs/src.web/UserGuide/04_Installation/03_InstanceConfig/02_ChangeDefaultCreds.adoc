@@ -17,17 +17,16 @@ Login using the default credentials:
 
 ===== Step 2: Navigate to Webmin Users
 
-Using the left hand navigation, select 'Webmin', then 'Webmin Users' as shown in the following figure.
-Next, click on the user 'root' as shown in the following figure.
+Using the left hand navigation, select 'System', then 'Change Passwords' as shown in the following figure.
+Next, click on the user 'peach' as shown in the following figure.
 
 .Webmin Users Page
 image::{images}/Install/Webmin_Config_ChangeAdminPass-1.png[]
 
 ===== Step 3: Set New Password
 
-From the 'Edit Webmin User' page, set the 'Password' drop-down to 'Set to ..' and
-type in the new password in the following text entry box as shown in the following image.
-Once set, click the 'Save' button.
+Enter new password in the following text entry box as shown in the following image.
+Once set, click the 'Change' button.
 
 .Set New Admin Password
 image::{images}/Install/Webmin_Config_ChangeAdminPass-2.png[]
