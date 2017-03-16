@@ -1,9 +1,6 @@
 [[Auth]]
 == Authenticated Services
 
-WARNING: This section still under construction.
-Information provided is partial and may be out of date.
-
 Most service authentication mechanisms work automatically with {product} with only two main exceptions.
 Mechanisms that work include:
 

@@ -1,9 +1,6 @@
 [[Scripts]]
 === Scripts
 
-WARNING: This section is still under construction.
-Information provided is partial and may be out of date.
-
 The _Script_ configuration option allows custom code to be run after fuzzing but prior to sending outgoing HTTP requests.
 This is typically used to implement custom authentication required by the target web service.
 When the script is imported, it registers a function with the +peach.webproxy+ python module.
