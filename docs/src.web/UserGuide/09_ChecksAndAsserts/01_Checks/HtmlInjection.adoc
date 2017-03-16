@@ -8,7 +8,7 @@
 | PCI | 6.5.7 Cross site scripting (XSS)
 |====
 
-Cross-site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into 
+Cross-Site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into 
 a user's browser instance. A browser instance can be a standard web browser client, or a browser object 
 embedded in a software product, such as the browser within WinAmp, an RSS reader, or an email client. 
 The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, 
