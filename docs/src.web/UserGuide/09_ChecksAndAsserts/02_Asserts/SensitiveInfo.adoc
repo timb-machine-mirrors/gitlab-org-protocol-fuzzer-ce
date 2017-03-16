@@ -19,14 +19,19 @@ This assert performs analysis of API responses and log messages to detect the fo
 
 The assert comes pre-populated with a large list of regular expressions that are matched against
 responses and log messages.
-The provided list can be editted at various scope levels (Global, Project, Profile, Route) to 
-add, edit or remote entries.
-
-=== Related Checks
-
-xref:Check_SensitiveInfo[Sensitive Information Check]
+The provided list can be editted to add, edit or remove entries.
 
 === Configuration
 
-TODO
+Entries::
+    List of sensitive information regular expressions grouped by category.
 
+=== Related Asserts
+
+No related asserts
+
+=== Related Checks
+
+include::_CheckConfigAsserts.adoc[]
+
+// end

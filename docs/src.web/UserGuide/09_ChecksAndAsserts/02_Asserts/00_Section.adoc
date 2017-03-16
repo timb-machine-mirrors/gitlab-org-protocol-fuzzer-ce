@@ -1,12 +1,33 @@
+[[Asserts]]
 == Asserts
 
-WARNING: This section still under construction.
-Information provided is partial and may be out of date.
+{product} implements testing using xref:Checks[Checks] and Asserts.
+Checks generate test cases and Asserts detect test failures.
+Checks use asserts in two ways: 1) Built in so-called hardwired asserts; 2) User controllable asserts.
+For a check like TLS Server Configuration, the assertions are hardwired specific to that test.
+For other checks like SQL Injection, the assertions are user configurable.
+A default configuration will exist, but it can be changed by the user to control the specifics
+of how a failure is triggered.
 
-Asserts are methods used to detect failures during testing.
+.Assertions
+[options="header"]
+|=======================
+|Assert                                                           |Default
+| xref:Assert_CustomBodyContains[Custom: Body Contains]           | Off
+| xref:Assert_CustomParameterContains[Custom: Parameter Contains] | Off
+| xref:Assert_SensitiveInfo[Sensitive Information]                | On
+| xref:Assert_StatusCode[Status Code]                            | On
+|=======================
 
-// TODO table of checks
+<<<
+:leveloffset: 2
+include::CustomBodyContains.adoc[]
 
+<<<
+:leveloffset: 2
+include::CustomParameterContains.adoc[]
+
+<<<
 :leveloffset: 2
 include::SensitiveInfo.adoc[]
 
@@ -14,3 +35,4 @@ include::SensitiveInfo.adoc[]
 :leveloffset: 2
 include::StatusCode.adoc[]
 
+// end

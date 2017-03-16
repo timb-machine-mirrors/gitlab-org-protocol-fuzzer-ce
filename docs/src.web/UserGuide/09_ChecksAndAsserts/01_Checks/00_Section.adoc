@@ -1,3 +1,4 @@
+[[Checks]]
 == Checks
 
 Checks implement the testing logic used by {product}.  They can be

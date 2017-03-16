@@ -1,0 +1,35 @@
+[[Assert_CustomBodyContains]]
+== Custom: Body Contains
+
+TODO
+
+=== Configuration
+
+Is Required (bool)::
+    Is match with search string or regex required?
+    If true, failures occur when match is not found.
+    Defaults to false.
+    
+Is Case Sensitive (bool)::
+    Is match case sensitive? 
+    Defaults to false.
+
+Is Regex::
+    Is search string a regular expression?
+    When true, a valid regular expression following the Microsoft.NET syntax
+    is required.
+    link:https://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx[Regular Expression Language - Quick Reference].
+    Defaults to false.
+    
+Search String::
+    String to match on or regular expression if _Is Regex_ is true.
+
+=== Related Assertions
+
+* xref:Assert_CustomParameterContains[Custom: Parameter Contains]
+
+=== Related Checks
+
+include::_CheckConfigAsserts.adoc[]
+
+// end

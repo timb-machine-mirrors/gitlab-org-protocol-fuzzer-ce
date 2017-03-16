@@ -1,0 +1,10 @@
+
+// Checks with configurable assertions
+
+* xref:Check_FormBodyFuzzing[Form Body Fuzzing]
+* xref:Check_GenericFuzzing[Generic Fuzzing]
+* xref:Check_JsonFuzzing[JSON Fuzzing]
+* xref:Check_SqlInjection[SQL Injection]
+* xref:Check_XmlFuzzing[XML Fuzzing]
+
+// end

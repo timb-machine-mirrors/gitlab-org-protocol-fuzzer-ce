@@ -8,12 +8,7 @@ included in the whitelist.  Blacklists work in the opposite manor, status codes 
 list cause a failure to occur.
 
 The assert comes pre-populated with a  list of error status codes.
-The provided list can be editted at various scope levels (Global, Project, Profile, Route) to 
-add, edit or remote entries.
-
-=== Related Checks
-
- * xref:Check_SqlInjection[SQL and NoSQL Injection Check]
+The provided list can be editted to add, edit or remove entries.
 
 === Configuration
 
@@ -27,3 +22,12 @@ Status Codes::
     List of status codes that will be used to validate responses.  
     Defaults to 500, 501, 502, 504
 
+=== Related Asserts
+
+No related asserts
+
+=== Related Checks
+
+include::_CheckConfigAsserts.adoc[]
+
+// end
