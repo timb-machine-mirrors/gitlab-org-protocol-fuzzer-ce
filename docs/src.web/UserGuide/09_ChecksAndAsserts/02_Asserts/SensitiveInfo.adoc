@@ -19,7 +19,7 @@ This assert performs analysis of API responses and log messages to detect the fo
 
 The assert comes pre-populated with a large list of regular expressions that are matched against
 responses and log messages.
-The provided list can be editted to add, edit or remove entries.
+The provided list can be edited to add, edit or remove entries.
 
 === Configuration
 
