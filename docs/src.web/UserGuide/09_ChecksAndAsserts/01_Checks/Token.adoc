@@ -9,7 +9,7 @@
 |====
 
 API Tokens are a common method of authenticating/authorizing access to APIs.
-When used, this check performs up to four different validations of the tokens use.
+This check performs up to four different validations of the tokens used.
 
 Entropy::
 API Tokens must be unpredictable (random enough) to prevent guessing attacks, where an attacker is able 
@@ -19,7 +19,7 @@ For this purpose, a good PRNG (Pseudo Random Number Generator) must be used.
 API Tokens entropy is checked against the configured minimum (defaults to 128 bits).
 
 Modification of Token::
-The value of the API token is modified one for every operation it's used with.
+The value of the API token is modified once for every operation it's used with.
 The HTTP status code of the response message is then checked to see if the request was successful.
 
 Removal of Token::
