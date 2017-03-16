@@ -8,7 +8,7 @@
 | PCI | N/A
 |====
 
-Check for variouse HTTP methods that are considered insecure for variouse reasons (see configuration section).
+Check for various HTTP methods that are considered insecure for variouse reasons (see configuration section).
 
 === Configuration
 
@@ -18,8 +18,8 @@ Enable/disable checking for OPTIONS HTTP method.
 +
 The OPTIONS method is a low severity information disclosure issue.
 +
-Some API designers are using OPTIONS to allow for self discovery of resource
-actions.  This is a non-standard use for OPTIONS and is not wide spread at time
+Some API designers are using OPTIONS to allow for self-discovery of resource
+actions.  This is a non-standard use for OPTIONS and is not wide-spread at time
 of writing.  If OPTIONS is used for this purpose, this portion of the check can
 be disabled.
 
