@@ -37,7 +37,7 @@ Activation ID::
     on the licensing page.
 
 Device ID::
-Each {poroduct} instance has a unique device id.
+Each {product} instance has a unique device id.
 When an instance is activated, an activation id is associated
 with a device id.
 An instance's device id can be found in the Licensing section of
