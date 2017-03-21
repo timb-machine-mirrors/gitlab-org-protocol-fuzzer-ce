@@ -28,7 +28,7 @@ ignore = []
 
 # Returns true if the variant should be supported
 def supported_variant(name):
-	return name in [ 'win', 'linux', 'osx', 'doc', 'web' ]
+	return name in [ 'win', 'linux', 'osx', 'doc' ]
 
 def init(ctx):
 	wscript.init(ctx)

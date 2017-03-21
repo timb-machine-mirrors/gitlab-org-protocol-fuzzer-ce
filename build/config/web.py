@@ -66,6 +66,10 @@ def prepare(conf):
 def configure(conf):
 	env = conf.env
 
+	env.append_value('supported_features', [
+		'peach-web',
+	])
+
 	if Utils.unversioned_sys_platform() == 'win32':
 		if not os.path.isdir(env.REFERENCE_ASSEMBLIES):
 			raise Errors.WafError("Could locate .NET Framework %s reference assemblies in: %s" % (env.TARGET_FRAMEWORK, env.REFERENCE_ASSEMBLIES))

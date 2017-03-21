@@ -9,7 +9,7 @@ deps = [
 
 bld(
 	name = 'BouncyCastle.Crypto.dll',
-	solutions = ['Peach.sln', 'PeachWeb.sln'],
+#	solutions = ['Peach.sln', 'PeachWeb.sln'],
 	features = 'cs',
 	use = deps,
 	platform = 'AnyCPU',

@@ -3,7 +3,6 @@
 subdirs = [
 	'ComContainer',
 	'Core',
-	'Downloader',
 	'FlexNet/Library',
 	'FlexNet/Tool',
 	'NetworkFuzzer',

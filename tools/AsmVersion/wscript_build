@@ -6,7 +6,7 @@ deps = [
 
 bld(
 	name = 'AsmVersion.exe',
-	features = 'cs peach',
+	features = 'cs peach-web',
 	solutions = ['PeachWeb.sln'],
 	use = deps,
 	source = bld.path.ant_glob('**/*.cs'),

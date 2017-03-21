@@ -2,8 +2,8 @@
 
 bld(
 	name = 'Peach.Pro.Mutators.dll',
-	features = 'cs paket',
-	solutions = ['Peach.sln', 'PeachWeb.sln'],
+	features = 'cs paket peach-web',
+	solutions = ['PeachWeb.sln'],
 	use = [
 		'Peach.Web.Compat.dll',
 		'System.dll',
