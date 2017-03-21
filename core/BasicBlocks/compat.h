@@ -2,8 +2,13 @@
 
 #ifdef WIN32
 #define strncasecmp _strnicmp
+#if (_MSC_VER < 1800)
 #define XFMT "0x%16.16Ix"
 #define IFMT "%Iu"
+#else
+#define XFMT "0x%16.16zx"
+#define IFMT "%zu"
+#endif
 #else
 #include <strings.h>
 #define XFMT "0x%16.16zx"

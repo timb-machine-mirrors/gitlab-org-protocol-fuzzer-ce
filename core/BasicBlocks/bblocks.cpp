@@ -497,6 +497,16 @@ VOID Fini(INT32 code, VOID *v)
 	DBG(("  Invalid       : " IFMT, inavlid));
 }
 
+static INT stopping = 0;
+
+// Called when the application exits
+VOID PrepareForFini(VOID *v)
+{
+	UNUSED_ARG(v);
+	DBG(("Preparing for finish..."));
+	stopping = 1;
+}
+
 // Internal worker thread
 VOID ThreadProc(VOID *v)
 {
@@ -504,14 +514,14 @@ VOID ThreadProc(VOID *v)
 
 	uint64_t oldTicks = 0, newTicks = 0;
 	bool check = false;
-	int pid = PIN_GetPid();
+	int p = PIN_GetPid();
 
-	while (!PIN_IsProcessExiting())
+	while (!stopping)
 	{
 		if (!check)
-			DBG(("Starting CPU thread for pid: %d", pid));
+			DBG(("Starting CPU thread for pid: %d", p));
 
-		newTicks = GetProcessTicks(pid);
+		newTicks = GetProcessTicks(p);
 
 		if (check && oldTicks == newTicks)
 		{
@@ -556,7 +566,10 @@ int main(int argc, char* argv[])
 
 	// Create internal thread to monitor cpu usage
 	if (KnobCpuKill.Value())
+	{
+		PIN_AddPrepareForFiniFunction(PrepareForFini, NULL);
 		PIN_SpawnInternalThread(ThreadProc, NULL, 0, NULL);
+	}
 
 	// Start program, never returns
 	PIN_StartProgram();

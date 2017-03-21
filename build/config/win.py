@@ -6,13 +6,6 @@ host_plat = [ 'win32' ]
 
 archs = [ 'x86', 'x64' ]
 
-# x86 compilation line:
-#cl /MT /EHs- /EHa- /wd4530 /DTARGET_WINDOWS /DBIGARRAY_MULTIPLIER=1 /D_CRT_SECURE_NO_DEPRECATE /D_SECURE_SCL=0 /nologo /Gy /Oi- /GR- /GS- /D__PIN__=1 /DPIN_CRT=1 /D_WINDOWS_H_PATH_="C:\Program Files (x86)\Windows Kits\8.1\Include\um" /D__i386__ /Zc:threadSafeInit- /DTARGET_IA32 /DHOST_IA32  /I../../../source/include/pin /I../../../source/include/pin/gen -I../../../extras/stlport/include -I../../../extras -I../../../extras/libstdc++/include -I../../../extras/crt/include -I../../../extras/crt -I../../../extras/crt/include/arch-x86 -I../../../extras/crt/include/kernel/uapi -I../../../extras/crt/include/kernel/uapi/asm-x86 /FIinclude/msvc_compat.h /I../../../extras/components/include /I../../../extras/xed-ia32/include /I../../../source/tools/InstLib /O2  /c /Foobj-ia32/MyPinTool.obj MyPinTool.cpp
-#MyPinTool.cpp
-#link /DLL /EXPORT:main /NODEFAULTLIB /NOLOGO /INCREMENTAL:NO /IGNORE:4210 /IGNORE:4049 /DYNAMICBASE /NXCOMPAT ../../../ia32/runtime/pincrt/crtbeginS.obj /MACHINE:x86 /ENTRY:Ptrace_DllMainCRTStartup@12 /BASE:0x55000000 /OPT:REF  /out:obj-ia32/MyPinTool.dll obj-ia32/MyPinTool.obj  /LIBPATH:../../../ia32/lib /LIBPATH:../../../ia32/lib-ext /LIBPATH:../../../ia32/runtime/pincrt /LIBPATH:../../../extras/xed-ia32/lib pin.lib xed.lib stlport-static.lib m-static.lib c-static.lib os-apis.lib pinvm.lib ntdll-32.lib kernel32.lib
-#   Creating library obj-ia32/MyPinTool.lib and object obj-ia32/MyPinTool.exp
-#pin.lib(pin_client.obj) : warning LNK4217: locally defined symbol ___sF imported in function "void __cdecl LEVEL_PINCLIENT::StartProgram(void)" (?StartProgram@LEVEL_PINCLIENT@@YAXXZ)
-
 tools = [
 	'msvc',
 	'cs',
@@ -40,7 +33,52 @@ def prepare(conf):
 	env['MSVC_VERSIONS'] = ['msvc 14.0', 'msvc 12.0', 'msvc 11.0', 'msvc 10.0', 'wsdk 7.1' ]
 	env['MSVC_TARGETS']  = 'x64' in env.SUBARCH and [ 'x64', 'x86_amd64' ] or [ 'x86' ]
 
+	env['PIN_VER'] = 'pin-3.2-81205-msvc-windows'
+
+	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
+
 	env['EXTERNALS_x86'] = {
+		'pin' : {
+			'CXXFLAGS'  : [
+				'/MT', '/EHs-', '/EHa-', '/wd4530', '/Gy', '/Oi-',
+				'/GR-', '/GS-', '/Zc:threadSafeInit-',
+				'/I%s' % j(pin, 'source', 'include', 'pin'),
+				'/I%s' % j(pin, 'source', 'include', 'pin', 'gen'),
+				'/I%s' % j(pin, 'extras', 'stlport', 'include'),
+				'/I%s' % j(pin, 'extras'),
+				'/I%s' % j(pin, 'extras', 'libstdc++', 'include'),
+				'/I%s' % j(pin, 'extras', 'crt', 'include'),
+				'/I%s' % j(pin, 'extras', 'crt' ),
+				'/I%s' % j(pin, 'extras', 'crt', 'include', 'arch-x86'),
+				'/I%s' % j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi'),
+				'/I%s' % j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi', 'asm-x86'),
+				'/I%s' % j(pin, 'extras', 'components', 'include'),
+				'/I%s' % j(pin, 'extras', 'xed-ia32', 'include', 'xed'),
+				'/FIinclude/msvc_compat.h',
+			],
+			'STLIBPATH' : [
+				j(pin, 'ia32', 'lib'),
+				j(pin, 'ia32', 'lib-ext'),
+				j(pin, 'ia32', 'runtime', 'pincrt'),
+				j(pin, 'extras', 'xed-ia32', 'lib'),
+			],
+			'STLIB'     : [
+				'pin', 'xed', 'pinvm', 'stlport-static', 'm-static',
+				'c-static', 'os-apis', 'ntdll-32'
+			],
+			'DEFINES'   : [
+				'TARGET_WINDOWS', 'BIGARRAY_MULTIPLIER=1',
+				'__PIN__=1', 'PIN_CRT=1', '_HAS_EXCEPTIONS=0',
+				'__i386__', 'TARGET_IA32', 'HOST_IA32',
+			],
+			'LINKFLAGS' : [
+				'/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup@12', '/BASE:0x55000000',
+				'/FORCE:MULTIPLE', '/INCREMENTAL:NO',
+				'/IGNORE:4210', '/IGNORE:4217', '/IGNORE:4049',
+				'/NODEFAULTLIB', '/DYNAMICBASE', '/NXCOMPAT',
+				'crtbeginS.obj', 'kernel32.lib'
+			],
+		},
 		'com' : {
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
@@ -52,6 +90,47 @@ def prepare(conf):
 	}
 
 	env['EXTERNALS_x64'] = {
+		'pin' : {
+			'CXXFLAGS'  : [
+				'/MT', '/EHs-', '/EHa-', '/wd4530', '/Gy', '/Oi-',
+				'/GR-', '/GS-', '/Zc:threadSafeInit-',
+				'/I%s' % j(pin, 'source', 'include', 'pin'),
+				'/I%s' % j(pin, 'source', 'include', 'pin', 'gen'),
+				'/I%s' % j(pin, 'extras', 'stlport', 'include'),
+				'/I%s' % j(pin, 'extras'),
+				'/I%s' % j(pin, 'extras', 'libstdc++', 'include'),
+				'/I%s' % j(pin, 'extras', 'crt', 'include'),
+				'/I%s' % j(pin, 'extras', 'crt' ),
+				'/I%s' % j(pin, 'extras', 'crt', 'include', 'arch-x86_64'),
+				'/I%s' % j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi'),
+				'/I%s' % j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi', 'asm-x86'),
+				'/I%s' % j(pin, 'extras', 'components', 'include'),
+				'/I%s' % j(pin, 'extras', 'xed-intel64', 'include', 'xed'),
+				'/FIinclude/msvc_compat.h',
+			],
+			'STLIBPATH' : [
+				j(pin, 'intel64', 'lib'),
+				j(pin, 'intel64', 'lib-ext'),
+				j(pin, 'intel64', 'runtime', 'pincrt'),
+				j(pin, 'extras', 'xed-intel64', 'lib'),
+			],
+			'STLIB'     : [
+				'pin', 'xed', 'pinvm', 'stlport-static', 'm-static',
+				'c-static', 'os-apis', 'ntdll-64'
+			],
+			'DEFINES'   : [
+				'TARGET_WINDOWS', 'BIGARRAY_MULTIPLIER=1',
+				'__PIN__=1', 'PIN_CRT=1', '_HAS_EXCEPTIONS=0',
+				'__LP64__', 'TARGET_IA32E', 'HOST_IA32E',
+			],
+			'LINKFLAGS' : [
+				'/EXPORT:main', '/ENTRY:Ptrace_DllMainCRTStartup', '/BASE:0xC5000000',
+				'/FORCE:MULTIPLE', '/INCREMENTAL:NO',
+				'/IGNORE:4210', '/IGNORE:4217', '/IGNORE:4049',
+				'/NODEFAULTLIB', '/DYNAMICBASE', '/NXCOMPAT',
+				'crtbeginS.obj', 'kernel32.lib'
+			],
+		},
 		'com' : {
 			'DEFINES' : [ '_WINDLL' ],
 			'STLIB' : [ 'Ole32', 'OleAut32', 'Advapi32' ],
@@ -126,6 +205,13 @@ def configure(conf):
 		'/MT',
 		'/Ox',
 	]
+
+	for x in env['INCLUDES']:
+		win_h = os.path.join(x, 'Windows.h')
+		if os.path.exists(win_h):
+			# Pin needs this define, but its not known during prepare()
+			env.append_value('DEFINES', ['_WINDOWS_H_PATH_=%s' % x] )
+			break
 
 	env.append_value('CPPFLAGS', cppflags)
 	env.append_value('CPPFLAGS_debug', cppflags_debug)
