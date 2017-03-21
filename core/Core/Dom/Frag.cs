@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Xml;
 using NLog;
 using Peach.Core;
@@ -76,6 +77,11 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public DataElement Template { get; set; }
 
+		/// <summary>
+		/// Acknowledgement to use for fragments
+		/// </summary>
+		public DataElement Ack { get; set; }
+
 		public bool InputModel { get; set; }
 
 		public bool PayloadOptional { get; set; }
@@ -123,10 +129,13 @@ namespace Peach.Core.Dom
 					"Error: Frag '{0}' missing child element named 'Payload'.",
 					block.Name));
 
-			if (block.Count != 3)
+			var validNames = new List<string> { "Template", "Rendering", "Payload", "Ack" };
+			var badNames = block._childrenDict.Keys.Where(x => !validNames.Contains(x)).ToList();
+
+			if (badNames.Count != 0)
 				throw new PeachException(string.Format(
-					"Error: Frag '{0}' element has too many children. Expecting 3, found {1}.",
-					block.Name, block.Count - 1));
+					"Error: Frag '{0}' element has invalid child element{1} '{2}'.",
+					block.Name, block.Count == 1 ? "" : "s", string.Join("', '", badNames)));
 
 			if (!string.IsNullOrEmpty(block.TotalLengthField))
 				if (block["Template"].find(block.TotalLengthField) == null)
@@ -179,8 +188,16 @@ namespace Peach.Core.Dom
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);
 
-			Template.WritePit(pit);
+			var elem = Template ?? this["Template"];
+			elem.WritePit(pit);
+
 			this["Payload"].WritePit(pit);
+
+			if (!TryGetValue("Ack", out elem))
+				elem = Ack;
+
+			if (elem != null)
+				elem.WritePit(pit);
 
 			pit.WriteEndElement();
 		}
@@ -266,6 +283,15 @@ namespace Peach.Core.Dom
 
 				var value = Template.Value;
 				Debug.Assert(value != null);
+
+				// Also relocate our ack
+				DataElement elem;
+				if (TryGetValue("Ack", out elem))
+				{
+					Ack = elem;
+					Remove(elem, false);
+					Ack.parent = this;
+				}
 			}
 
 			if (!_childrenDict.ContainsKey("Payload") ||
