@@ -142,8 +142,8 @@ def prepare(conf):
 	env['TARGET_FRAMEWORK'] = 'v4.5'
 	env['TARGET_FRAMEWORK_NAME'] = '.NET Framework 4.5'
 
-	env['ASAN_CC'] = 'clang'
-	env['ASAN_CXX'] = 'clang++'
+	env['ASAN_CC'] = 'gcc'
+	env['ASAN_CXX'] = 'g++'
 
 	env['RUN_NETFX'] = 'mono'
 	env['PEACH_PLATFORM_DLL'] = 'Peach.Pro.OS.Linux.dll'
