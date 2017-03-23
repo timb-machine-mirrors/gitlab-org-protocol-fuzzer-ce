@@ -271,6 +271,7 @@ webproxy.register_event(webproxy.EVENT_ACTION, on_request)
 			var response = client.GetAsync(BaseUrl + "/unknown/api/values/5").Result;
 
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			Assert.True(Engine.Wait(5000), "Engine should have finished");
 			Assert.NotNull(options);
 			Assert.NotNull(options.Routes);
 			Assert.AreEqual(1, options.Routes.Count);

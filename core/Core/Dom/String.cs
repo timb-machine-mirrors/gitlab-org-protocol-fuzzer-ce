@@ -246,7 +246,7 @@ namespace Peach.Core.Dom
 			else
 				str.nullTerminated = context.getDefaultAttr(typeof(String), "nullTerminated", str.nullTerminated);
 
-			string type = "ascii";
+			string type = "utf8";
 			if (node.hasAttr("type"))
 				type = node.getAttrString("type");
 			else
