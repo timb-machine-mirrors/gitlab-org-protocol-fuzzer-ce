@@ -146,7 +146,7 @@
 #include <machine/_mcontext.h>
 
 #ifndef KERNEL
-#include <sys/_pthread/_pthread_attr_t.h>
+typedef __darwin_pthread_attr_t pthread_attr_t;
 #endif /* KERNEL */
 
 #include <sys/_types/_sigaltstack.h>

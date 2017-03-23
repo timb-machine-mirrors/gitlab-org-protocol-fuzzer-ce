@@ -67,45 +67,62 @@ def prepare(conf):
 	if '10.6' in env['SYSROOT']:
 		return
 
-	env['PIN_VER'] = 'pin-2.14-71313-clang.5.1-mac'
+	env['PIN_VER'] = 'pin-3.2-81205-clang-mac'
 
 	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
 	env['EXTERNALS'] = {
 		'pin' : {
-			'INCLUDES'  : [
-				j(pin, 'source', 'include', 'pin'),
-				j(pin, 'source', 'include', 'pin', 'gen'),
-				j(pin, 'extras', 'components', 'include'),
-			],
-			'HEADERS'   : [ 'pin.h' ],
-			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', 'TARGET_MAC', 'USING_XED', ],
+			'INCLUDES'  : [],
+			'HEADERS'   : [],
+			'DEFINES'   : [ 'BIGARRAY_MULTIPLIER=1', 'TARGET_MAC', '__PIN__=1', 'PIN_CRT=1', '__DARWIN_ONLY_UNIX_CONFORMANCE=1', '__DARWIN_UNIX03=0' ],
 			'CPPFLAGS'  : [
+				'-fno-exceptions',
+				'-funwind-tables',
+				'-fno-rtti',
+
+				'-I%s' % j(pin, 'source', 'include', 'pin'),
+				'-I%s' % j(pin, 'source', 'include', 'pin', 'gen'),
+				'-I%s' % j(pin, 'extras', 'components', 'include'),
+
+				'-isystem', j(pin, 'extras', 'stlport', 'include'),
+				'-isystem', j(pin, 'extras', 'libstdc++', 'include'),
+				'-isystem', j(pin, 'extras', 'crt', 'include'),
+
+				'-Xarch_i386',   '-isystem %s' % j(pin, 'extras', 'crt', 'include', 'arch-x86'),
+				'-Xarch_x86_64', '-isystem %s' % j(pin, 'extras', 'crt', 'include', 'arch-x86_64'),
+
+				'-isystem', j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi'),
+				'-isystem', j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi', 'asm-x86'),
+
 				'-Xarch_i386',   '-DTARGET_IA32',
 				'-Xarch_i386',   '-DHOST_IA32',
-				'-Xarch_i386',   '-I%s' % j(pin, 'extras', 'xed-ia32', 'include'),
+				'-Xarch_i386',   '-I%s' % j(pin, 'extras', 'xed-ia32', 'include', 'xed'),
 
 				'-Xarch_x86_64', '-DTARGET_IA32E',
 				'-Xarch_x86_64', '-DHOST_IA32E',
-				'-Xarch_x86_64', '-I%s' % j(pin, 'extras', 'xed-intel64', 'include'),
+				'-Xarch_x86_64', '-I%s' % j(pin, 'extras', 'xed-intel64', 'include', 'xed'),
 			],
 			'LINKFLAGS' : [
+				'-Xarch_i386',   j(pin, 'ia32', 'runtime', 'pincrt', 'crtbeginS.o'),
+				'-Xarch_x86_64', j(pin, 'intel64', 'runtime', 'pincrt', 'crtbeginS.o'),
+
+				'-w',
+				'-Wl,-exported_symbols_list,%s/source/include/pin/pintool.exp' % pin,
+
+				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'runtime', 'pincrt'),
 				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'lib'),
 				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'lib-ext'),
 				'-Xarch_i386',   '-L%s' % j(pin, 'extras', 'xed-ia32', 'lib'),
-				'-Xarch_i386',   '-l-lpin',
-				'-Xarch_i386',   '-l-lxed',
-				'-Xarch_i386',   '-l-lpindwarf',
 
+				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'runtime', 'pincrt'),
 				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'lib'),
 				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'lib-ext'),
 				'-Xarch_x86_64', '-L%s' % j(pin, 'extras', 'xed-intel64', 'lib'),
-				'-Xarch_x86_64', '-l-lpin',
-				'-Xarch_x86_64', '-l-lxed',
-				'-Xarch_x86_64', '-l-lpindwarf',
 
-				'-Wl,-exported_symbols_list',
-				'-Wl,%s/source/include/pin/pintool.exp' % pin,
+				'-lpin',       '-lxed',             '-lpin3dwarf',
+				'-nostdlib',   '-lstlport-dynamic', '-lm-dynamic',
+				'-lc-dynamic', '-lunwind-dynamic',
 			],
 			'ENV'       : { 'cxxshlib_PATTERN' : '%s.dylib' },
 		},
