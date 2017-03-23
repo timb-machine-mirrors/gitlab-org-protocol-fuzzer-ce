@@ -56,12 +56,15 @@ else:
 		'TotalPhase/komodo',
 		'VMware-VIX-1.13.0-1295980',
 	]
-	
+
 	if bld.env.BASENAME == 'osx':
 		bld(
 			name='CrashWrangler',
 			install_path = '${BINDIR}',
 			install_644 = bld.path.ant_glob('CrashWrangler/**/*'),
 		)
+
+	for f in bld.path.ant_glob('nHapi_version_24/*.dll'):
+		bld.read_csshlib(f.name, paths=[f.parent.name])
 
 bld.recurse(subdirs)

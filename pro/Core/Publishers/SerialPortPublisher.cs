@@ -60,12 +60,23 @@ namespace Peach.Pro.Core.Publishers
 			var maxRetryDelay = TimeSpan.FromMilliseconds(1000);
 			var maxTotalDelay = TimeSpan.FromMilliseconds(Timeout);
 
-			Retry.TimedBackoff(maxRetryDelay, maxTotalDelay, () =>
+			try
 			{
-				// Note: specify infinite read timeout, since we implement the timeout via WantBytes()
-				_serial = Pal.OpenSerial(PortName, Baudrate, DataBits, Parity, StopBits, DtrEnable,
-					RtsEnable, Handshake, SerialPort.InfiniteTimeout, Timeout, BufferSize, BufferSize);
-			});
+				Retry.TimedBackoff(maxRetryDelay, maxTotalDelay, () =>
+				{
+					// Note: specify infinite read timeout, since we implement the timeout via WantBytes()
+					_serial = Pal.OpenSerial(PortName, Baudrate, DataBits, Parity, StopBits, DtrEnable,
+						RtsEnable, Handshake, SerialPort.InfiniteTimeout, Timeout, BufferSize, BufferSize);
+				});
+			}
+			catch (Exception ex)
+			{
+				var msg = "Unable to open Serial Port {0}. {1}.".Fmt(PortName, ex.Message);
+				Logger.Debug(msg);
+
+				// Always throw SoftExceptions
+				throw new SoftException(msg, ex);
+			}
 
 			_thread = new Thread(ReadToEnd);
 
@@ -248,6 +259,10 @@ namespace Peach.Pro.Core.Publishers
 						Monitor.Pulse(_stream);
 					}
 				}
+			}
+			catch (ObjectDisposedException)
+			{
+				Logger.Debug("Finished reading from {0}: object disposed", PortName);
 			}
 			catch (Exception ex)
 			{

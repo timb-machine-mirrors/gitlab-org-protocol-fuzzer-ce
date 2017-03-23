@@ -161,6 +161,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 			switch (reply.Status)
 			{
 				case IPStatus.Success:
+					if (reply.Options == null) // Happens with ipv6 pings
+						return "Reply from {0}: bytes={1} time={2}ms".Fmt(
+							reply.Address, reply.Buffer.Length, reply.RoundtripTime);
 					return "Reply from {0}: bytes={1} time={2}ms TTL={3}".Fmt(
 						reply.Address, reply.Buffer.Length, reply.RoundtripTime,reply.Options.Ttl);
 				case IPStatus.Unknown:

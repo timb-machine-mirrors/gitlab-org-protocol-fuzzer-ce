@@ -63,7 +63,7 @@ namespace Peach.Pro.Test.Core
 		</State>
 	</StateModel>
 
-	<Test name='Default' maxOutputSize='100'>
+	<Test name='Default' maxOutputSize='##MaxOutputSize##'>
 		<StateModel ref='StateModel' />
 		<Publisher class='Null'/>
 		<Strategy class='Random'>
@@ -78,7 +78,10 @@ namespace Peach.Pro.Test.Core
 		static readonly PitConfig PitDefault = new PitConfig
 		{
 			OriginalPit = "Test.xml",
-			Config = new List<Param>(),
+			Config = new List<Param>
+			{
+				new Param { Key = "MaxOutputSize", Value = "100" }
+			},
 			Agents = new List<MAgent>(),
 			Weights = new List<PitWeight>(),
 		};
@@ -86,7 +89,10 @@ namespace Peach.Pro.Test.Core
 		static readonly PitConfig PitFail = new PitConfig
 		{
 			OriginalPit = "TestFail.xml",
-			Config = new List<Param>(),
+			Config = new List<Param>
+			{
+				new Param { Key = "MaxOutputSize", Value = "100" }
+			},
 			Agents = new List<MAgent>(),
 			Weights = new List<PitWeight>(),
 		};
@@ -94,7 +100,10 @@ namespace Peach.Pro.Test.Core
 		static readonly PitConfig PitWithMonitors = new PitConfig 
 		{
 			OriginalPit = "Test.xml",
-			Config = new List<Param>(),
+			Config = new List<Param>
+			{
+				new Param { Key = "MaxOutputSize", Value = "100" }
+			},
 			Agents = new List<MAgent>
 			{
 				new MAgent()
@@ -257,7 +266,6 @@ namespace Peach.Pro.Test.Core
 
 			public void Dispose()
 			{
-				JobRunner.Stop();
 				if (!_thread.Join(TimeSpan.FromSeconds(2)))
 					_thread.Abort();
 			}

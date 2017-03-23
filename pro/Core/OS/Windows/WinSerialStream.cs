@@ -40,6 +40,8 @@ namespace Peach.Pro.Core.OS.Windows
 		const uint EvErr = 0x0080;
 		const uint EvRing = 0x0100;
 
+		object mutex_overlapped = new object();
+		object mutex_handle = new object();
 		int handle;
 		int read_timeout;
 		int write_timeout;
@@ -193,9 +195,18 @@ namespace Peach.Pro.Core.OS.Windows
 				return;
 
 			disposed = true;
-			CloseHandle (handle);
-			Marshal.FreeHGlobal (write_overlapped);
-			Marshal.FreeHGlobal (read_overlapped);
+
+			lock (mutex_handle)
+			{
+				CloseHandle(handle);
+				handle = -1;
+			}
+
+			lock (mutex_overlapped)
+			{
+				Marshal.FreeHGlobal(write_overlapped);
+				Marshal.FreeHGlobal(read_overlapped);
+			}
 		}
 
 		void IDisposable.Dispose ()
@@ -257,20 +268,33 @@ namespace Peach.Pro.Core.OS.Windows
 
 			unsafe {
 				fixed (byte* ptr = buffer) {
-					if (ReadFile (handle, ptr + offset, count, out bytes_read, read_overlapped))
-						return bytes_read;
-				
-					// Test for overlapped behavior
-					if (Marshal.GetLastWin32Error () != FileIOPending)
-						ReportIOError (null);
+					lock(mutex_overlapped) {
+						int h;
 
-					if (!GetOverlappedResult (handle, read_overlapped, ref bytes_read, true))
-					{
-						// ERROR_OPERATION_ABORTED
-						if (Marshal.GetLastWin32Error() == 995)
-							return 0;
+						lock (mutex_handle)
+						{
+							h = handle;
 
-						ReportIOError (null);
+							// Close() was called, so treat as end of stream
+							if (h == -1)
+								return 0;
+
+							if (ReadFile(h, ptr + offset, count, out bytes_read, read_overlapped))
+								return bytes_read;
+
+							// Test for overlapped behavior
+							if (Marshal.GetLastWin32Error() != FileIOPending)
+								ReportIOError(null);
+						}
+
+						if (!GetOverlappedResult (h, read_overlapped, ref bytes_read, true))
+						{
+							// ERROR_OPERATION_ABORTED
+							if (Marshal.GetLastWin32Error() == 995)
+								return 0;
+
+							ReportIOError (null);
+						}
 					}
 				}
 			}

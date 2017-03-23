@@ -321,6 +321,7 @@ namespace Peach.Pro.Core.Runtime
 			{
 				var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
 				var evaluated = defs.Evaluate();
+				PitInjector.InjectDefines(_pitConfig, defs, evaluated);
 				return evaluated;
 			}
 
