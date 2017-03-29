@@ -273,6 +273,7 @@ namespace Peach.Pro.PitTester
 			// most of the time output(datamodel) should be called instead of this.
 			// however, with outfrag this is not possible.
 
+			Log("Output");
 			var data = _logger.Verify<TestData.Output>(Name);
 
 			if (data == null)
@@ -282,16 +283,29 @@ namespace Peach.Pro.PitTester
 			if (!IsControlIteration)
 				return;
 
-			var expected = data.Payload;
-
 			// Ensure we end on a byte boundary
 			var bs = actualStream.PadBits();
 			bs.Seek(0, SeekOrigin.Begin);
 			var actual = new BitReader(bs).ReadBytes((int)bs.Length);
 
-			// If data files are in use and VerifyDataSets is false, don't do a comparison
-			if (!_logger.VerifyDataSets)
-				return;
+			var expected = new byte[] { };
+			var cdataAvailable = !(data.Payload == null || data.Payload.Length == 0);
+			switch (data.VerifyAgainst)
+			{
+				case TestData.ExpectedOutputSource.DataFile:
+					throw new PeachException("Can't verifyAgainst=\"dataFile\" on frag outputs.");
+				case TestData.ExpectedOutputSource.CData:
+					if (!cdataAvailable && !data.Ignore)
+					{
+						var msg = string.Format(
+							"CDATA missing from '{0}' output action in pit test!",
+							data.ActionName);
+						FireError(msg);
+					}
+
+					expected = data.Payload;
+					break;
+			}
 
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
@@ -309,6 +323,9 @@ namespace Peach.Pro.PitTester
 					Console.WriteLine(msg);
 				
 				cb.Print();
+
+				if (!data.Ignore)
+					FireError(msg);
 			}
 
 		}
