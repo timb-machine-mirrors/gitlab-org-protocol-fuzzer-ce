@@ -362,7 +362,8 @@ namespace Peach.Core.Dom
 
 				context.Log("Cracking Payload");
 				var reassembledData = FragmentAlg.Reassemble();
-				context.CrackData(this["Payload"], reassembledData);
+				// Must use new data cracker so we treat Payload as the root
+				new DataCracker().CrackData(this["Payload"], reassembledData);
 			}
 		}
 	}
