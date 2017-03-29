@@ -137,8 +137,7 @@ namespace Peach.Core.Dom
 						strm = ms;
 					}
 
-					var cracker = new DataCracker();
-					cracker.CrackData(model, new BitStream(strm));
+					model.ApplyDataFile(model, new BitStream(strm));
 
 					// Apply field values
 					base.Apply(action, model);

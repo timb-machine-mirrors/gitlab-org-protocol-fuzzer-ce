@@ -27,6 +27,7 @@ namespace Peach.Core.Dom
 	[Parameter("fragmentLengthField", typeof(string), "Name of fragment length field in template model.", "")]
 	[Parameter("fragmentOffsetField", typeof(string), "Name of fragment offset field in template model.", "")]
 	[Parameter("fragmentIndexField", typeof(string), "Name of fragment index field in template model.", "")]
+	[Parameter("reassembleDataSet", typeof(bool), "Should data set files be reassembled.", "false")]
 	[Serializable]
 	public class Frag : Block
 	{
@@ -82,6 +83,8 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public DataElement Ack { get; set; }
 
+		public bool ReassembleDataSet { get; set; }
+
 		public bool InputModel { get; set; }
 
 		public bool PayloadOptional { get; set; }
@@ -105,6 +108,7 @@ namespace Peach.Core.Dom
 			block.FragmentLengthField = node.getAttr("fragmentLengthField", "");
 			block.FragmentOffsetField= node.getAttr("fragmentOffsetField", "");
 			block.FragmentIndexField = node.getAttr("fragmentIndexField", "");
+			block.ReassembleDataSet = node.getAttr("reassembleDataSet", false);
 			block.isMutable = false;
 
 			var type = ClassLoader.FindTypeByAttribute<FragmentAlgorithmAttribute>((t, a) => 0 == string.Compare(a.Name, block.Class, true));
@@ -200,6 +204,11 @@ namespace Peach.Core.Dom
 				elem.WritePit(pit);
 
 			pit.WriteEndElement();
+		}
+
+		public override void ApplyDataFile(DataElement model, BitStream bs)
+		{
+			base.ApplyDataFile(ReassembleDataSet ? model : this["Payload"], bs);
 		}
 
 		protected override string GetDisplaySuffix(DataElement child)

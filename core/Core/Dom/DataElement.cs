@@ -1798,6 +1798,12 @@ namespace Peach.Core.Dom
 			return ret;
 		}
 
+		public virtual void ApplyDataFile(DataElement model, BitStream bs)
+		{
+			var cracker = new DataCracker();
+			cracker.CrackData(model, bs);
+		}
+
 		#region Parent/Child Helpers
 
 		/// <summary>

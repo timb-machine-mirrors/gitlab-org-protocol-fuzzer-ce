@@ -79,6 +79,13 @@ fragmentIndexField::
     Name of fragment index field in _Template_ element.
     If the fragment template has a field for the offset of the current frament it can be automatically set using this attribute.
 
+reassembleDataSet::
+    Controls how a file based xref:Data[data set] is applied to a model containing a _Frag_ element.
+    If the value is _true_, the data set is expected to be fragmented and the _Frag_ element will perform reassembly.
+    If the value is _false_, the data set is not expected to be fragmented and is expected to only contain the value and will be applied directly to the _Payload_ element.
+    The default value is _false_.
+
+
 === Child Elements
 
 No supported child elements.
