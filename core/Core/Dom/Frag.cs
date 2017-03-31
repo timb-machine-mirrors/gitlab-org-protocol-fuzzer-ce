@@ -188,7 +188,10 @@ namespace Peach.Core.Dom
 
 			if (!string.IsNullOrEmpty(FragmentIndexField))
 				pit.WriteAttributeString("fragmentIndexField", FragmentIndexField);
-			
+
+			if (ReassembleDataSet)
+				pit.WriteAttributeString("reassembleDataSet", ReassembleDataSet.ToString().ToLower());
+
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);
 
