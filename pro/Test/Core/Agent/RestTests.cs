@@ -150,7 +150,7 @@ namespace Peach.Pro.Test.Core.Agent
 				var xml = @"
 <Peach>
 	<DataModel name='Item'>
-		<String value='foo' />
+		<String type='ascii' value='foo' />
 	</DataModel>
 
 	<StateModel name='SM' initialState='Initial'>

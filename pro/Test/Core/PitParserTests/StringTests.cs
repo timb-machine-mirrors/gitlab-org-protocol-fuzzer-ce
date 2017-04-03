@@ -21,7 +21,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
 				"	<DataModel name=\"TheDataModel\">" +
-				"		<String name=\"TheString\" value=\"abc\"/>" +
+				"		<String name=\"TheString\" type=\"ascii\" value=\"abc\"/>" +
 				"	</DataModel>" +
 				"</Peach>";
 
@@ -178,7 +178,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf8, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("\n", (string)str.DefaultValue);
 		}
@@ -400,7 +400,7 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			Peach.Core.Dom.String str = dom.dataModels[0][0] as Peach.Core.Dom.String;
 
 			Assert.AreNotEqual(null, str);
-			Assert.AreEqual(Peach.Core.Dom.StringType.ascii, str.stringType);
+			Assert.AreEqual(Peach.Core.Dom.StringType.utf8, str.stringType);
 			Assert.AreEqual(Variant.VariantType.String, str.DefaultValue.GetVariantType());
 			Assert.AreEqual("Hello World", (string)str.DefaultValue);
 			Assert.AreEqual(Encoding.ASCII.GetBytes("Hello World\0"), str.Value.ToArray());
