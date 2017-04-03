@@ -25,6 +25,18 @@ def configure(conf):
 		conf.cmd_and_log(dotnet + [bootstrapper], cwd='paket')
 		conf.cmd_and_log(dotnet + [paket, 'restore'], cwd='paket')
 
+		# Replace user-overridden files after paket restore
+		overrides = conf.path.find_dir('paket/overrides').ant_glob('*')
+		packages = conf.path.find_dir('paket/packages').ant_glob('**/*')
+
+		for p in packages:
+			for o in overrides:
+				if p.name == o.name:
+					if Logs.verbose > 0:
+						Logs.info('copy %s %s' % (o.abspath(), p.abspath()))
+					p.write(o.read())
+
+
 	conf.env.append_value('supported_features', 'paket')
 
 def options(ctx):
