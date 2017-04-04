@@ -504,6 +504,12 @@ namespace Peach.Pro.Test.Core.WebServices
 		[Quick]
 		class External : JobMonitorTests<ExternalJobMonitorFactory>
 		{
+			[OneTimeSetUp]
+			public void EnableTrace()
+			{
+				SetUpFixture.EnableTrace();
+			}
+
 			[Test]
 			[Repeat(10)]
 			public override void TestBasic()
