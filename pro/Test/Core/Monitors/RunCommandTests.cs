@@ -308,6 +308,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.NotNull(data);
 
+			Console.WriteLine(data.Fault.Description);
+
 			Assert.AreEqual("RunCommand", data.DetectionSource);
 			Assert.AreEqual("heap-use-after-free", data.Fault.Risk);
 			Assert.IsFalse(data.Fault.MustStop);
@@ -328,8 +330,8 @@ namespace Peach.Pro.Test.Core.Monitors
 				{
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					CollectionAssert.Contains(new[] { "C755DA91", "3BFFE0CC" }, data.Fault.MajorHash);
-					Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+					CollectionAssert.Contains(new[] { Monitor2.Hash("0x0000004008b2") }, data.Fault.MajorHash);
+					Assert.AreEqual(Monitor2.Hash("0x61400000fe44"), data.Fault.MinorHash);
 				}
 				else
 				{
