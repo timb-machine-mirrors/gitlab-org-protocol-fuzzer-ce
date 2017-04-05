@@ -72,7 +72,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			else
 			{
 				var ex = Assert.Throws<PeachException>(() => runner.Run());
-				Assert.AreEqual("ould not start monitor \"Ping\".  Error, the Ping monitor only supports IPv6 addresses on Windows.", ex.Message);
+				Assert.AreEqual("Could not start monitor \"Ping\".  Error, the Ping monitor only supports IPv6 addresses on Windows.", ex.Message);
 			}
 		}
 
