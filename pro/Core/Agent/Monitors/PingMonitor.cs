@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using NLog;
@@ -78,6 +79,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 				var len = Encoding.ASCII.GetByteCount(Data ?? "");
 				if (len > maxLen)
 					throw new PeachException("Error, the value of parameter 'Data' is longer than the maximum length of " + maxLen + ".");
+
+				IPAddress addr;
+				if (IPAddress.TryParse(Host, out addr))
+				{
+					if (addr.AddressFamily == AddressFamily.InterNetworkV6)
+						throw new PeachException("Error, the Ping monitor only supports IPv6 addresses on Windows.");
+				}
 			}
 		}
 
@@ -105,10 +113,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 					}
 					while (RetryCount >= count && reply.Status != IPStatus.Success);
 
-					Logger.Debug("DetectedFault(): {0} {1} {2}ms",
+					Logger.Error("DetectedFault(): {0} {1} {2}ms",
 						Host,
 						reply.Status == IPStatus.Success ? "replied" : "timed out",
-						Timeout);
+						reply.Status == IPStatus.Success ? reply.RoundtripTime : Timeout);
 
 					if (reply.Status != IPStatus.Success ^ FaultOnSuccess)
 					{

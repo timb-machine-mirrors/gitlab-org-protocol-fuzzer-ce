@@ -43,7 +43,14 @@ namespace Peach.Pro.Test.Core
 			Assert.Less(elapsed, TimeSpan.FromSeconds(1000));
 
 			// Process should not be running
-			Assert.Throws<ArgumentException>(() => ProcessHelper.GetProcessById(pid));
+			Assert.Throws<ArgumentException>(() =>
+			{
+				for (var i = 0; i < 10; ++i)
+				{
+					ProcessHelper.GetProcessById(pid);
+					Thread.Sleep(10);
+				}
+			});
 		}
 
 		[Test]

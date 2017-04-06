@@ -1139,7 +1139,7 @@ namespace Peach.Pro.Test.Core.MutationStrategies
 			string xml = @"
 <Peach>
 	<DataModel name='DM'>
-		<String name='str' value='Hello' minOccurs='1'/>
+		<Blob name='str' value='Hello' minOccurs='1'/>
 	</DataModel>
 
 	<StateModel name='SM' initialState='Initial'>

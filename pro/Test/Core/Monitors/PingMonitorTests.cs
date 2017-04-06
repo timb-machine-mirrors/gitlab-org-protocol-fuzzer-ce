@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using NUnit.Framework;
+using Peach.Core;
 using Peach.Core.Agent;
 using Peach.Core.Test;
 
@@ -62,9 +63,17 @@ namespace Peach.Pro.Test.Core.Monitors
 				{ "Host", "::1" },
 			});
 
-			var faults = runner.Run();
+			if (Platform.GetOS() == Platform.OS.Windows)
+			{
+				var faults = runner.Run();
 
-			Assert.AreEqual(0, faults.Length);
+				Assert.AreEqual(0, faults.Length);
+			}
+			else
+			{
+				var ex = Assert.Throws<PeachException>(() => runner.Run());
+				Assert.AreEqual("Could not start monitor \"Ping\".  Error, the Ping monitor only supports IPv6 addresses on Windows.", ex.Message);
+			}
 		}
 
 		[Test]
@@ -207,7 +216,7 @@ namespace Peach.Pro.Test.Core.Monitors
 					var sw = new Stopwatch();
 
 					sw.Start();
-					Assert.True(m.DetectedFault(), "Monitor should not have detected fault");
+					Assert.True(m.DetectedFault(), "Monitor should have detected fault");
 					sw.Stop();
 
 					var elapsed = sw.ElapsedMilliseconds;

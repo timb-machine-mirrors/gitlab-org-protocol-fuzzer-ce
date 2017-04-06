@@ -308,6 +308,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			Assert.NotNull(data);
 
+			Console.WriteLine(data.Fault.Description);
+
 			Assert.AreEqual("RunCommand", data.DetectionSource);
 			Assert.AreEqual("heap-use-after-free", data.Fault.Risk);
 			Assert.IsFalse(data.Fault.MustStop);
@@ -328,15 +330,15 @@ namespace Peach.Pro.Test.Core.Monitors
 				{
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					CollectionAssert.Contains(new[] { "C755DA91", "3BFFE0CC" }, data.Fault.MajorHash);
-					Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+					CollectionAssert.Contains(new[] { Monitor2.Hash("0x0000004008b2"), Monitor2.Hash("0x4008b9") }, data.Fault.MajorHash);
+					CollectionAssert.Contains(new[] { Monitor2.Hash("0x61400000fe44"), Monitor2.Hash("0x602e0001fc64") }, data.Fault.MinorHash);
 				}
 				else
 				{
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					CollectionAssert.Contains(new []{ "DF8C57E3", "7938DA7F" }, data.Fault.MajorHash);
-					CollectionAssert.Contains(new []{ "6B08385F", "552648B1" }, data.Fault.MinorHash);
+					CollectionAssert.Contains(new[] { Monitor2.Hash("0x80486de") }, data.Fault.MajorHash);
+					CollectionAssert.Contains(new[] { Monitor2.Hash("0xb5e03e24") }, data.Fault.MinorHash);
 				}
 			}
 		}

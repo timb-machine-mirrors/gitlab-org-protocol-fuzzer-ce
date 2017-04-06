@@ -188,7 +188,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			_jobMonitor.Setup(x => x.GetJob()).Returns(runningJob);
 			_jobMonitor.Setup(x => x.IsTracking(It.Is<Job>(job => job.Guid == runningJob.Guid))).Returns(true);
 
-			var j2 = new Job(new JobRequest(), "pit2.xml") { Pid = -1 };
+			var j2 = new Job(new JobRequest(), "pit2.xml") { Pid = ushort.MaxValue + 1 };
 
 			using (var db = new NodeDatabase())
 			{
@@ -306,7 +306,7 @@ namespace Peach.Pro.Test.WebApi.Controllers
 			{
 				StartDate = now - TimeSpan.FromHours(1),
 				HeartBeat = now,
-				Pid = -1,
+				Pid = ushort.MaxValue + 1,
 				Status = JobStatus.Running
 			};
 
