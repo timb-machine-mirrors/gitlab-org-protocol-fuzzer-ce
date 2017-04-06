@@ -133,6 +133,11 @@ namespace Peach.Core.Cracker
 		SortedDictionary<long, DataElement> _absolutePlacement;
 
 		/// <summary>
+		/// The element we are cracking from
+		/// </summary>
+		DataElement _root;
+
+		/// <summary>
 		/// The string to prefix log messages with.
 		/// </summary>
 		readonly StringBuilder _logPrefix;
@@ -436,6 +441,7 @@ namespace Peach.Core.Cracker
 			_elementsWithAnalyzer = new List<DataElement>();
 			_deferredPlacement = new List<DataElement>();
 			_absolutePlacement = new SortedDictionary<long, DataElement>();
+			_root = element;
 
 			// We want at least 1 byte before we begin
 			data.WantBytes(1);
@@ -1484,7 +1490,7 @@ namespace Peach.Core.Cracker
 			DataElement prev = elem;
 			bool? final = true;
 
-			while (true)
+			while (prev != _root)
 			{
 				// Get the next sibling
 				var curr = prev.nextSibling();
@@ -1506,7 +1512,7 @@ namespace Peach.Core.Cracker
 					if (end.Element != null)
 						return final;
 				}
-				else if (prev.parent == null)
+				else if (prev.parent == _root.parent)
 				{
 					// hit the top
 					break;

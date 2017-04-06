@@ -29,6 +29,8 @@
 using System;
 using System.Xml;
 using Peach.Core.Analyzers;
+using Peach.Core.Cracker;
+using Peach.Core.IO;
 
 namespace Peach.Core.Dom
 {
@@ -135,6 +137,12 @@ namespace Peach.Core.Dom
 			context.handleDataElementContainer(node, dataModel);
 
 			return dataModel;
+		}
+
+		public override void ApplyDataFile(DataElement model, BitStream bs)
+		{
+			if (Count > 0)
+				this[0].ApplyDataFile(model, bs);
 		}
 
 		Dom IOwned<Dom>.parent { get { return dom; } set { dom = value; } }
