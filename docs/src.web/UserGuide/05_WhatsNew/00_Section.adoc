@@ -1,6 +1,0 @@
-[[Brand_new_items]]
-== What's new in Peach API Security v{VER_MAJOR}.{VER_MINOR} (2017 Q1)
-
-This is our first release of {product}.  Everything in this release is new.
-For future releases, check back here for information on product updates.
-
