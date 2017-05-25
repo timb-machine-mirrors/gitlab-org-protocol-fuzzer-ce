@@ -12,9 +12,11 @@ a file named pdebug.svg in the source directory::
 		...
 """
 
-import os, time, sys, re
-try: from Queue import Queue
-except: from queue import Queue
+import time, sys, re, threading
+try:
+	from Queue import Queue
+except:
+	from queue import Queue
 from waflib import Runner, Options, Utils, Task, Logs, Errors
 
 #import random
@@ -125,7 +127,8 @@ def compile_template(line):
 	extr = []
 	def repl(match):
 		g = match.group
-		if g('dollar'): return "$"
+		if g('dollar'):
+			return "$"
 		elif g('backslash'):
 			return "\\"
 		elif g('subst'):
@@ -150,14 +153,14 @@ def compile_template(line):
 			app("lst.append(%r)" % params[x])
 
 		f = extr[x]
-		if f.startswith('if') or f.startswith('for'):
+		if f.startswith(('if', 'for')):
 			app(f + ':')
 			indent += 1
 		elif f.startswith('py:'):
 			app(f[3:])
-		elif f.startswith('endif') or f.startswith('endfor'):
+		elif f.startswith(('endif', 'endfor')):
 			indent -= 1
-		elif f.startswith('else') or f.startswith('elif'):
+		elif f.startswith(('else', 'elif')):
 			indent -= 1
 			app(f + ':')
 			indent += 1
@@ -207,23 +210,16 @@ def map_to_color(name):
 	return color2code['RED']
 
 def process(self):
-	m = self.master
-	if m.stop:
-		m.out.put(self)
-		return
-
-	self.master.set_running(1, id(Utils.threading.currentThread()), self)
-
-	# remove the task signature immediately before it is executed
-	# in case of failure the task will be executed again
+	m = self.generator.bld.producer
 	try:
+		# TODO another place for this?
 		del self.generator.bld.task_sigs[self.uid()]
-	except:
+	except KeyError:
 		pass
 
+	self.generator.bld.producer.set_running(1, self)
+
 	try:
-		self.generator.bld.returned_tasks.append(self)
-		self.log_display(self.generator.bld)
 		ret = self.run()
 	except Exception:
 		self.err_msg = Utils.ex_stack()
@@ -231,7 +227,6 @@ def process(self):
 
 		# TODO cleanup
 		m.error_handler(self)
-		m.out.put(self)
 		return
 
 	if ret:
@@ -250,8 +245,8 @@ def process(self):
 	if self.hasrun != Task.SUCCESS:
 		m.error_handler(self)
 
-	self.master.set_running(-1, id(Utils.threading.currentThread()), self)
-	m.out.put(self)
+	self.generator.bld.producer.set_running(-1, self)
+
 Task.TaskBase.process_back = Task.TaskBase.process
 Task.TaskBase.process = process
 
@@ -268,8 +263,26 @@ def do_start(self):
 		make_picture(self)
 Runner.Parallel.start = do_start
 
-def set_running(self, by, i, tsk):
-	self.taskinfo.put( (i, id(tsk), time.time(), tsk.__class__.__name__, self.processed, self.count, by)  )
+lock_running = threading.Lock()
+def set_running(self, by, tsk):
+	with lock_running:
+		try:
+			cache = self.lock_cache
+		except AttributeError:
+			cache = self.lock_cache = {}
+
+		i = 0
+		if by > 0:
+			vals = cache.values()
+			for i in range(self.numjobs):
+				if i not in vals:
+					cache[tsk] = i
+					break
+		else:
+			i = cache[tsk]
+			del cache[tsk]
+
+		self.taskinfo.put( (i, id(tsk), time.time(), tsk.__class__.__name__, self.processed, self.count, by)  )
 Runner.Parallel.set_running = set_running
 
 def name2class(name):
@@ -430,7 +443,7 @@ def make_picture(producer):
 
 	node = producer.bld.path.make_node('pdebug.svg')
 	node.write(txt)
-	Logs.warn('Created the diagram %r' % node.abspath())
+	Logs.warn('Created the diagram %r', node)
 
 def options(opt):
 	opt.add_option('--dtitle', action='store', default='Parallel build representation for %r' % ' '.join(sys.argv),

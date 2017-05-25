@@ -14,7 +14,7 @@ $ waf configure eclipse
 """
 
 import sys, os
-from waflib import Utils, Logs, Context, Options, Build, TaskGen, Scripting
+from waflib import Utils, Logs, Context, Build, TaskGen, Scripting
 from xml.dom.minidom import Document
 
 STANDARD_INCLUDES = [ '/usr/local/include', '/usr/include' ]
@@ -49,8 +49,10 @@ class eclipse(Build.BuildContext):
 			  "Unresolved Inclusion" errors in the Eclipse editor
 		@param pythonpath Optional project specific python paths
 		"""
+		hasc = hasjava = haspython = False
 		source_dirs = []
 		cpppath = self.env['CPPPATH']
+		javasrcpath = []
 		if sys.platform != 'win32':
 			cpppath += STANDARD_INCLUDES
 		Logs.warn('Generating Eclipse CDT project files')
@@ -60,42 +62,67 @@ class eclipse(Build.BuildContext):
 				if not isinstance(tg, TaskGen.task_gen):
 					continue
 
+				# Add local Python modules paths to configuration so object resolving will work in IDE
+				if 'py' in tg.features:
+					pypath = tg.path.relpath()
+					py_installfrom = getattr(tg, 'install_from', None)
+					if py_installfrom:
+						pypath += os.sep + py_installfrom
+					pythonpath.append(pypath)
+					haspython = True
+
+
+				# Add Java source directories so object resolving works in IDE
+				if 'java' in tg.features:
+					java_src = tg.path.relpath()
+					java_srcdir = getattr(tg, 'srcdir', None)
+					if java_srcdir:
+						if java_src == '.':
+							java_src = java_srcdir
+						else:
+							java_src += os.sep + java_srcdir
+					javasrcpath.append(java_src)
+					hasjava = True
+
 				tg.post()
 				if not getattr(tg, 'link_task', None):
 					continue
 
-				l = Utils.to_list(getattr(tg, "includes", ''))
-				sources = Utils.to_list(getattr(tg, 'source', ''))
 				features = Utils.to_list(getattr(tg, 'features', ''))
 
 				is_cc = 'c' in features or 'cxx' in features
 
-				bldpath = tg.path.bldpath()
-
-				base = os.path.normpath(os.path.join(self.bldnode.name, tg.path.srcpath()))
-
-				if is_cc:
-					sources_dirs = set([src.parent for src in tg.to_nodes(sources)])
-
 				incnodes = tg.to_incnodes(tg.to_list(getattr(tg, 'includes', [])) + tg.env['INCLUDES'])
 				for p in incnodes:
 					path = p.path_from(self.srcnode)
-					workspace_includes.append(path)
+
+					if (path.startswith("/")):
+						cpppath.append(path)
+					else:
+						workspace_includes.append(path)
 
 					if is_cc and path not in source_dirs:
 						source_dirs.append(path)
 
-		project = self.impl_create_project(sys.executable, appname)
+					hasc = True
+
+		project = self.impl_create_project(sys.executable, appname, hasc, hasjava, haspython)
 		self.srcnode.make_node('.project').write(project.toprettyxml())
 
-		waf = os.path.abspath(sys.argv[0])
-		project = self.impl_create_cproject(sys.executable, waf, appname, workspace_includes, cpppath, source_dirs)
-		self.srcnode.make_node('.cproject').write(project.toprettyxml())
+		if hasc:
+			waf = os.path.abspath(sys.argv[0])
+			project = self.impl_create_cproject(sys.executable, waf, appname, workspace_includes, cpppath, source_dirs)
+			self.srcnode.make_node('.cproject').write(project.toprettyxml())
 
-		project = self.impl_create_pydevproject(appname, sys.path, pythonpath)
-		self.srcnode.make_node('.pydevproject').write(project.toprettyxml())
+		if haspython:
+			project = self.impl_create_pydevproject(sys.path, pythonpath)
+			self.srcnode.make_node('.pydevproject').write(project.toprettyxml())
 
-	def impl_create_project(self, executable, appname):
+		if hasjava:
+			project = self.impl_create_javaproject(javasrcpath)
+			self.srcnode.make_node('.classpath').write(project.toprettyxml())
+
+	def impl_create_project(self, executable, appname, hasc, hasjava, haspython):
 		doc = Document()
 		projectDescription = doc.createElement('projectDescription')
 		self.add(doc, projectDescription, 'name', appname)
@@ -117,16 +144,21 @@ class eclipse(Build.BuildContext):
 			self.addDictionary(doc, arguments, k, v)
 
 		natures = self.add(doc, projectDescription, 'natures')
-		nature_list = """
-			core.ccnature
-			managedbuilder.core.ScannerConfigNature
-			managedbuilder.core.managedBuildNature
-			core.cnature
-		""".split()
-		for n in nature_list:
-			self.add(doc, natures, 'nature', oe_cdt + '.' + n)
 
-		self.add(doc, natures, 'nature', 'org.python.pydev.pythonNature')
+		if hasc:
+			nature_list = """
+				core.ccnature
+				managedbuilder.core.ScannerConfigNature
+				managedbuilder.core.managedBuildNature
+				core.cnature
+			""".split()
+			for n in nature_list:
+				self.add(doc, natures, 'nature', oe_cdt + '.' + n)
+
+		if haspython:
+			self.add(doc, natures, 'nature', 'org.python.pydev.pythonNature')
+		if hasjava:
+			self.add(doc, natures, 'nature', 'org.eclipse.jdt.core.javanature')
 
 		doc.appendChild(projectDescription)
 		return doc
@@ -156,11 +188,9 @@ class eclipse(Build.BuildContext):
 			GASErrorParser
 			GLDErrorParser
 		""".split()
-		ext = self.add(doc, extensions, 'extension',
-					{'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'})
+		self.add(doc, extensions, 'extension', {'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'})
 		for e in extension_list:
-			ext = self.add(doc, extensions, 'extension',
-					{'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'})
+			self.add(doc, extensions, 'extension', {'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'})
 
 		storageModule = self.add(doc, cconf, 'storageModule',
 				{'moduleId': 'cdtBuildSystem', 'version': '4.0.0'})
@@ -178,33 +208,32 @@ class eclipse(Build.BuildContext):
 				 'resourceTypeBasedDiscovery': 'false',
 				 'superClass': cdt_bld + '.prefbase.toolchain'})
 
-		targetPlatform = self.add(doc, toolChain, 'targetPlatform',
-				{ 'binaryParser': 'org.eclipse.cdt.core.ELF',
-				  'id': cdt_bld + '.prefbase.toolchain.1', 'name': ''})
+		self.add(doc, toolChain, 'targetPlatform', {'binaryParser': 'org.eclipse.cdt.core.ELF', 'id': cdt_bld + '.prefbase.toolchain.1', 'name': ''})
 
 		waf_build = '"%s" %s'%(waf, eclipse.fun)
 		waf_clean = '"%s" clean'%(waf)
-		builder = self.add(doc, toolChain, 'builder',
-						{'autoBuildTarget': waf_build,
-						 'command': executable,
-						 'enableAutoBuild': 'false',
-						 'cleanBuildTarget': waf_clean,
-						 'enableIncrementalBuild': 'true',
-						 'id': cdt_bld + '.settings.default.builder.1',
-						 'incrementalBuildTarget': waf_build,
-						 'managedBuildOn': 'false',
-						 'name': 'Gnu Make Builder',
-						 'superClass': cdt_bld + '.settings.default.builder'})
+		self.add(doc, toolChain, 'builder',
+					{'autoBuildTarget': waf_build,
+					 'command': executable,
+					 'enableAutoBuild': 'false',
+					 'cleanBuildTarget': waf_clean,
+					 'enableIncrementalBuild': 'true',
+					 'id': cdt_bld + '.settings.default.builder.1',
+					 'incrementalBuildTarget': waf_build,
+					 'managedBuildOn': 'false',
+					 'name': 'Gnu Make Builder',
+					 'superClass': cdt_bld + '.settings.default.builder'})
 
+		tool_index = 1;
 		for tool_name in ("Assembly", "GNU C++", "GNU C"):
 			tool = self.add(doc, toolChain, 'tool',
-					{'id': cdt_bld + '.settings.holder.1',
+					{'id': cdt_bld + '.settings.holder.' + str(tool_index),
 					 'name': tool_name,
 					 'superClass': cdt_bld + '.settings.holder'})
 			if cpppath or workspace_includes:
 				incpaths = cdt_bld + '.settings.holder.incpaths'
 				option = self.add(doc, tool, 'option',
-						{'id': incpaths+'.1',
+						{'id': incpaths + '.' +  str(tool_index),
 						 'name': 'Include Paths',
 						 'superClass': incpaths,
 						 'valueType': 'includePath'})
@@ -217,10 +246,12 @@ class eclipse(Build.BuildContext):
 								{'builtIn': 'false',
 								'value': '"%s"'%(i)})
 			if tool_name == "GNU C++" or tool_name == "GNU C":
-				self.add(doc,tool,'inputType',{ 'id':'org.eclipse.cdt.build.core.settings.holder.inType.1', \
-					'languageId':'org.eclipse.cdt.core.gcc','languageName':tool_name, \
+				self.add(doc,tool,'inputType',{ 'id':'org.eclipse.cdt.build.core.settings.holder.inType.' + str(tool_index), \
+					'languageId':'org.eclipse.cdt.core.gcc' if tool_name == "GNU C" else 'org.eclipse.cdt.core.g++','languageName':tool_name, \
 					'sourceContentType':'org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader', \
 					'superClass':'org.eclipse.cdt.build.core.settings.holder.inType' })
+			tool_index += 1
+
 		if source_dirs:
 			sourceEntries = self.add(doc, config, 'sourceEntries')
 			for i in source_dirs:
@@ -250,13 +281,12 @@ class eclipse(Build.BuildContext):
 							{'moduleId': 'cdtBuildSystem',
 							 'version': '4.0.0'})
 
-		project = self.add(doc, storageModule, 'project',
-					{'id': '%s.null.1'%appname, 'name': appname})
+		self.add(doc, storageModule, 'project', {'id': '%s.null.1'%appname, 'name': appname})
 
 		doc.appendChild(cproject)
 		return doc
 
-	def impl_create_pydevproject(self, appname, system_path, user_path):
+	def impl_create_pydevproject(self, system_path, user_path):
 		# create a pydevproject file
 		doc = Document()
 		doc.appendChild(doc.createProcessingInstruction('eclipse-pydev', 'version="1.0"'))
@@ -278,9 +308,23 @@ class eclipse(Build.BuildContext):
 			prop = self.add(doc, pydevproject, 'pydev_pathproperty',
 					{'name':'org.python.pydev.PROJECT_SOURCE_PATH'})
 			for i in user_path:
-				self.add(doc, prop, 'path', '/'+appname+'/'+i)
+				self.add(doc, prop, 'path', '/${PROJECT_DIR_NAME}/'+i)
 
 		doc.appendChild(pydevproject)
+		return doc
+
+	def impl_create_javaproject(self, javasrcpath):
+		# create a .classpath file for java usage
+		doc = Document()
+		javaproject = doc.createElement('classpath')
+		if javasrcpath:
+			for i in javasrcpath:
+				self.add(doc, javaproject, 'classpathentry',
+					{'kind': 'src', 'path': i})
+
+		self.add(doc, javaproject, 'classpathentry', {'kind': 'con', 'path': 'org.eclipse.jdt.launching.JRE_CONTAINER'})
+		self.add(doc, javaproject, 'classpathentry', {'kind': 'output', 'path': Context.g_module.out})
+		doc.appendChild(javaproject)
 		return doc
 
 	def addDictionary(self, doc, parent, k, v):
