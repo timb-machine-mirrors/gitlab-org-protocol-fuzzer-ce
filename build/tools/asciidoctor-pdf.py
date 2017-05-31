@@ -176,6 +176,9 @@ def run_asciidoctor_cmd(self, cmd, **kw):
 	except AttributeError:
 		bld.cwd = kw['cwd'] = bld.variant_dir
 
+	if not isinstance(kw['cwd'], str):
+		kw['cwd'] = kw['cwd'].abspath()
+
 	subprocess = Utils.subprocess
 	kw['shell'] = isinstance(cmd, str)
 	Logs.debug('runner: %r' % (cmd,))

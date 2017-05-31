@@ -48,6 +48,10 @@ def exec_command(self, cmd, **kw):
 	subprocess = Utils.subprocess
 	kw['shell'] = isinstance(cmd, str)
 
+	if 'cwd' in kw:
+		if not isinstance(kw['cwd'], str):
+			kw['cwd'] = kw['cwd'].abspath()
+
 	msg = self.logger or Logs
 	msg.debug('runner: %r' % cmd)
 	msg.debug('runner_env: kw=%s' % kw)
@@ -107,7 +111,7 @@ def format_error(self):
 # TaskBase
 def display(self):
 	sep = Logs.colors.NORMAL + ' | '
-	master = self.master
+	master = self.generator.bld.producer
 
 	def cur():
 		# the current task position, computed as late as possible
@@ -129,7 +133,7 @@ def display(self):
 	src_str = str([ x.name for x in self.inputs] )
 	tgt_str = str([ x.name for x in self.outputs ])
 
-	if isinstance(self.generator, Build.inst):
+	if isinstance(self, Build.inst):
 		return None
 
 	return "%s | %s | %s | %s | %s | %s\n" % (
@@ -141,26 +145,27 @@ def display(self):
 		colorize(tgt_str, Logs.colors.GREEN))
 
 # InstallContext
-def do_install(self, src, tgt, **kw):
-	if Logs.verbose <= 1 and self.progress_bar == 0:
-		self.progress_bar = -1;
+def do_install(self, src, tgt, lbl, **kw):
+	bld = self.generator.bld
+	if Logs.verbose <= 1 and bld.progress_bar == 0:
+		bld.progress_bar = -1;
 
-	ret = self.base_do_install(src, tgt, **kw)
+	ret = self.base_do_install(src, tgt, lbl, **kw)
 
-	if self.progress_bar != -1 or str(ret) == 'False':
+	if bld.progress_bar != -1 or str(ret) == 'False':
 		return ret
 
 	dest = os.path.split(tgt)[1]
 	filename = os.path.split(src)[1]
-	target = str(os.path.relpath(tgt, os.path.join(self.srcnode.abspath(), self.env.PREFIX)))
+	target = str(os.path.relpath(tgt, os.path.join(bld.srcnode.abspath(), self.env.PREFIX)))
 
 	msg = "%s | %s | %s | %s\n" % (
-		colorize(self.variant, Logs.colors.YELLOW),
+		colorize(bld.variant, Logs.colors.YELLOW),
 		colorize('Install', Logs.colors.NORMAL),
 		colorize(filename, Logs.colors.CYAN),
 		colorize(target, Logs.colors.GREEN))
 
-	self.to_log(msg)
+	bld.to_log(msg)
 
 TaskBase.base_format_error = TaskBase.format_error
 TaskBase.format_error = format_error
@@ -177,6 +182,6 @@ ConfigurationContext.find_program = find_program
 BuildContext.base_add_to_group = BuildContext.add_to_group
 BuildContext.add_to_group = add_to_group
 
-InstallContext.base_do_install = InstallContext.do_install
-InstallContext.do_install = do_install
+Build.inst.base_do_install = Build.inst.do_install
+Build.inst.do_install = do_install
 

@@ -223,6 +223,9 @@ def run_makexsd(bld):
 def build(bld):
 	subdirs = getattr(bld, 'subdirs', None)
 
+	if not Options.options.destdir:
+		Options.options.destdir = bld.path.abspath()
+
 	if subdirs:
 		bld.recurse(subdirs)
 		return

@@ -11,7 +11,6 @@ tools = [
 	'gxx',
 	'cs',
 	'resx',
-	'misc',
 	'tools.utils',
 	'tools.externals',
 	'tools.tsc',
@@ -139,6 +138,7 @@ def prepare(conf):
 		'network',
 		'unix',
 		'flexnetls',
+		'install_task',
 	])
 
 def configure(conf):

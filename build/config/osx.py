@@ -11,7 +11,6 @@ tools = [
 	'clang++',
 	'cs',
 	'resx',
-	'misc',
 	'tools.utils',
 	'tools.externals',
 	'tools.tsc',
@@ -165,6 +164,7 @@ def configure(conf):
 		'subst',
 		'network',
 		'unix',
+		'install_task',
 	])
 
 	env.append_value('CSFLAGS', [

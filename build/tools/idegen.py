@@ -220,6 +220,160 @@ CS_PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="utf-8"?>
 
 </Project>'''
 
+PROJECT_TEMPLATE = r'''<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0"
+	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<ItemGroup Label="ProjectConfigurations">
+		${for b in project.build_properties}
+		<ProjectConfiguration Include="${b.configuration}|${b.platform}">
+			<Configuration>${b.configuration}</Configuration>
+			<Platform>${b.platform}</Platform>
+		</ProjectConfiguration>
+		${endfor}
+	</ItemGroup>
+
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{${project.uuid}}</ProjectGuid>
+		<Keyword>MakeFileProj</Keyword>
+		<ProjectName>${project.name}</ProjectName>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+	${for b in project.build_properties}
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='${b.configuration}|${b.platform}'" Label="Configuration">
+		<ConfigurationType>Makefile</ConfigurationType>
+		<OutDir>${b.outdir}</OutDir>
+		${if getattr(project, 'platform_toolset', None)}
+		<PlatformToolset>${project.platform_toolset}</PlatformToolset>
+		${endif}
+	</PropertyGroup>
+	${endfor}
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+	</ImportGroup>
+
+	${for b in project.build_properties}
+	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='${b.configuration}|${b.platform}'">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	${endfor}
+
+	${for b in project.build_properties}
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='${b.configuration}|${b.platform}'">
+		<NMakeBuildCommandLine>${xml:project.get_build_command(b)}</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>${xml:project.get_rebuild_command(b)}</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>${xml:project.get_clean_command(b)}</NMakeCleanCommandLine>
+		<NMakeIncludeSearchPath>${xml:b.includes_search_path}</NMakeIncludeSearchPath>
+		<NMakePreprocessorDefinitions>${xml:b.preprocessor_definitions};$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+		<IncludePath>${xml:b.includes_search_path}</IncludePath>
+		<ExecutablePath>$(ExecutablePath)</ExecutablePath>
+
+		${if getattr(b, 'output_file', None)}
+		<NMakeOutput>${xml:b.output_file}</NMakeOutput>
+		${endif}
+		${if getattr(b, 'deploy_dir', None)}
+		<RemoteRoot>${xml:b.deploy_dir}</RemoteRoot>
+		${endif}
+	</PropertyGroup>
+	${endfor}
+
+	${for b in project.build_properties}
+		${if getattr(b, 'deploy_dir', None)}
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='${b.configuration}|${b.platform}'">
+		<Deploy>
+			<DeploymentType>CopyToHardDrive</DeploymentType>
+		</Deploy>
+	</ItemDefinitionGroup>
+		${endif}
+	${endfor}
+
+	<ItemGroup>
+		${for x in project.source}
+		<${project.get_key(x)} Include='${x.win32path()}' />
+		${endfor}
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+	</ImportGroup>
+</Project>'''
+
+SOLUTION_TEMPLATE = '''Microsoft Visual Studio Solution File, Format Version ${project.numver}
+# Visual Studio ${project.vsver}
+${for p in project.all_projects}
+Project("{${p.ptype()}}") = "${p.name}", "${p.title}", "{${p.uuid}}"
+${if getattr(p, 'project_sections', None)}
+${for sec,opts in p.project_sections.iteritems()}
+	${if opts}
+	ProjectSection(${sec[0]}) = ${sec[1]}
+		${for k,v in opts.iteritems()}
+		${k} = ${v}
+		${endfor}
+	EndProjectSection
+	${endif}
+${endfor}
+${endif}
+EndProject${endfor}
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		${if project.all_projects}
+		${for (configuration, platform) in project.all_projects[0].ctx.project_configurations()}
+		${configuration}|${platform} = ${configuration}|${platform}
+		${endfor}
+		${endif}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		${for p in project.all_projects}
+			${if hasattr(p, 'source')}
+			${for b in p.build_properties}
+		{${p.uuid}}.${b.configuration}|${b.platform_sln}.ActiveCfg = ${b.configuration_bld}|${b.platform}
+			${if getattr(b, 'is_active', getattr(p, 'is_active', None))}
+		{${p.uuid}}.${b.configuration}|${b.platform_sln}.Build.0 = ${b.configuration_bld}|${b.platform}
+			${endif}
+			${if getattr(b, 'is_deploy', getattr(p, 'is_deploy', None))}
+		{${p.uuid}}.${b.configuration}|${b.platform_sln}.Deploy.0 = ${b.configuration_bld}|${b.platform}
+			${endif}
+			${endfor}
+			${endif}
+		${endfor}
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	${for p in project.all_projects}
+		${if p.parent}
+		{${p.uuid}} = {${p.parent.uuid}}
+		${endif}
+	${endfor}
+	EndGlobalSection
+EndGlobal
+'''
+
+msvs.SOLUTION_TEMPLATE = SOLUTION_TEMPLATE
+msvs.PROJECT_TEMPLATE = PROJECT_TEMPLATE
+
+def default_collect_properties(self):
+	ret = []
+	for c in self.ctx.configurations:
+		for p in self.ctx.platforms:
+			x = msvs.build_property()
+			x.outdir = ''
+
+			x.configuration = c
+			x.platform = p
+			x.platform_sln = p
+
+			x.preprocessor_definitions = ''
+			x.includes_search_path = ''
+
+			# can specify "deploy_dir" too
+			ret.append(x)
+	self.build_properties = ret
+
+msvs.vsnode_project.collect_properties = default_collect_properties
+
 # Note, no newline at end of template file!
 
 class reference(object):

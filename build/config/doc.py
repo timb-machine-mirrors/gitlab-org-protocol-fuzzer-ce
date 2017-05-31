@@ -22,7 +22,6 @@ host_plat = [ 'win32', 'linux', 'darwin' ]
 archs = [ ]
 
 tools = [
-	'misc',        # subst
 	'tools.utils', # emit
 ]
 
@@ -43,4 +42,5 @@ def configure(conf):
 		'emit',
 		'subst',
 		'zip',
+		'install_task',
 	])

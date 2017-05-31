@@ -6,7 +6,7 @@ from waflib import Utils, Task, Logs, Options, Errors
 testlock = Utils.threading.Lock()
 
 def prepare_nunit_test(self):
-	self.ut_nunit = get_inst_node(self.generator, '${BINDIR}', 'nunit3-console.exe')
+	self.ut_nunit = self.generator.bld.path.make_node(['${BINDIR}', 'nunit3-console.exe'])
 	self.ut_cwd = self.ut_nunit.parent.abspath()
 	self.ut_exec = []
 
@@ -33,7 +33,7 @@ def get_inst_node(self, dest, name):
 	if Options.options.destdir:
 		dest = os.path.join(Options.options.destdir, os.path.splitdrive(dest)[1].lstrip(os.sep))
 
-	return self.bld.srcnode.make_node([dest, name])
+	return self.bld.root.make_node([dest, name])
 
 def run_after_last_test(self, test):
 	last_test = getattr(self.bld, 'last_utest_task', None)

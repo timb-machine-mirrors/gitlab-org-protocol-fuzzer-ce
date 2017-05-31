@@ -79,7 +79,7 @@ def install_webhelp(self, inst_to, srcs, cwd, tsk = None):
 
 	if inst:
 		if tsk:
-			inst.set_run_after(tsk)
+			#inst.set_run_after(tsk)
 			inst.runnable_status = lambda inst=inst: runnable_status(inst)
 
 		# Store inst task in install_extras for packaging
@@ -196,6 +196,9 @@ class webhelp(Task):
 				kw['cwd'] = bld.cwd
 		except AttributeError:
 			bld.cwd = kw['cwd'] = bld.variant_dir
+
+		if not isinstance(kw['cwd'], str):
+			kw['cwd'] = kw['cwd'].abspath()
 
 		subprocess = Utils.subprocess
 		kw['shell'] = isinstance(cmd, str)
