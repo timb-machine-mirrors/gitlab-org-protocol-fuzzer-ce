@@ -375,7 +375,7 @@ namespace Peach.Core.Publishers
 					}
 				}
 
-				Thread.Sleep(100);
+				Thread.Sleep(10);
 			}
 		}
 
