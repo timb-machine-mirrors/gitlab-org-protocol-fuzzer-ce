@@ -23,9 +23,12 @@ install GDB when the Mono installation completes.
 [NOTE]
 ====
 Peach Fuzzer, LLC,
-recommends using Ubuntu Linux version 14.04 LTS,
-and Mono .NET runtime version 4 from the mono project.
+recommends using Ubuntu Linux version 16.04 LTS,
+and Mono .NET runtime version 4.8.1 from the mono project.
 The mono project has `apt` packages for Ubuntu.
+
+Peach will not run with Mono version 5.0 or newer due to incompatibilities with IronPython.
+If you have Mono 5.0 installed, you must downgrade to 4.8.1.
 
 Peach will not run with version 4.4 of the Mono runtime as there are known
 handle leaks which can cause Peach to run out of memory during long fuzzing runs.
@@ -48,7 +51,7 @@ The following steps will prepare Peach to run properly:
 ----
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys  3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 
-echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
+echo "deb http://download.mono-project.com/repo/debian wheezy/snapshots/4.8.1.0 main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
 
 sudo apt-get update
 
@@ -69,8 +72,11 @@ followed by the Mono package and Peach.
 
 [NOTE]
 ====
-Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
+Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4.8.1 from the mono project.
 The mono project has `yum` packages for RHEL and CentOS distributions.
+
+Peach will not run with Mono version 5.0 or newer due to incompatibilities with IronPython.
+If you have Mono 5.0 installed, you must downgrade to 4.8.1.
 
 Peach will not run with version 4.4 of the Mono runtime as there are known
 handle leaks which can cause Peach to run out of memory during long fuzzing runs.
@@ -113,7 +119,7 @@ sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/
 .	Install the latest version of Mono using the following command:
 +
 ----
-sudo yum install mono-complete
+sudo yum install mono-complete-4.8.1.0-0.xamarin.1
 ----
 
 . Unzip the Peach distribution to the appropriate folder.
@@ -155,8 +161,11 @@ install GDB when the Mono installation completes.
 
 [NOTE]
 ====
-Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4 from the mono project.
+Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4.8.1 from the mono project.
 The mono project has packages for SLES distributions.
+
+Peach will not run with Mono version 5.0 or newer due to incompatibilities with IronPython.
+If you have Mono 5.0 installed, you must downgrade to 4.8.1.
 
 Peach will not run with version 4.4 of the Mono runtime as there are known
 handle leaks which can cause Peach to run out of memory during long fuzzing runs.
@@ -192,7 +201,7 @@ the installation steps are a checklist,
 not specific commands.
 The checklist follows:
 
-. Install the latest Mono runtime. Version 4 or greater is recommended.
+. Install the Mono runtime. Version 4.8.1 is recommended.
 . Unzip the Peach distribution to an appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
@@ -200,6 +209,11 @@ such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
 
 [NOTE]
 ====
+Peach Fuzzer, LLC, recommends using Mono .NET runtime version 4.8.1 from the mono project.
+
+Peach will not run with Mono version 5.0 or newer due to incompatibilities with IronPython.
+If you have Mono 5.0 installed, you must downgrade to 4.8.1.
+
 Peach will not run with version 4.4 of the Mono runtime as there are known
 handle leaks which can cause Peach to run out of memory during long fuzzing runs.
 If you have Mono 4.4 installed,
