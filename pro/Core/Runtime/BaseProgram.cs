@@ -138,6 +138,9 @@ namespace Peach.Pro.Core.Runtime
 			if (type == null)
 				return true;
 
+			// Mono 5.X doesn't yet work with IronPython
+			// https://bugzilla.xamarin.com/show_bug.cgi?id=57962
+			var maxVer = new Version(5, 0, 0);
 			var minVer = new Version(4, 0, 0);
 			var badVer = new Version(4, 4);
 
@@ -158,7 +161,8 @@ namespace Peach.Pro.Core.Runtime
 					var ver = ParseMonoVersion(str);
 					if (ver == null ||
 					    ver < minVer ||
-					    (ver.Major == badVer.Major && ver.Minor == badVer.Minor))
+					    (ver.Major == badVer.Major && ver.Minor == badVer.Minor) ||
+					    ver >= maxVer)
 					{
 						Console.WriteLine("The installed mono version {0} is not supported.", str);
 					}
@@ -169,8 +173,7 @@ namespace Peach.Pro.Core.Runtime
 				}
 			}
 
-			Console.WriteLine("Ensure mono version {0} or newer and not {1} is installed and try again.",
-				minVer,
+			Console.WriteLine("Ensure mono version 4.x and not {0} is installed and try again.",
 				badVer
 			);
 			return false;
