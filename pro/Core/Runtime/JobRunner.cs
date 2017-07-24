@@ -31,7 +31,6 @@ namespace Peach.Pro.Core.Runtime
 		readonly RunConfiguration _config;
 		readonly string _pitLibraryPath;
 		readonly PitConfig _pitConfig;
-		readonly object _proxySync = new object();
 		bool _shouldStop;
 		Engine _engine;
 		Thread _currentThread;
@@ -112,10 +111,6 @@ namespace Peach.Pro.Core.Runtime
 				_engine = new Engine(_jobLogger);
 				if (hooker != null) // this is used for unit testing
 					hooker(_engine);
-				if (test.stateModel is WebProxyStateModel)
-					PrepareProxyFuzzer();
-				else
-					CompleteProxyEvents();
 				_engine.startFuzzing(dom, _config);
 			}
 			catch (ApplicationException ex) // PeachException or SoftException
@@ -143,67 +138,10 @@ namespace Peach.Pro.Core.Runtime
 			}
 			finally
 			{
-				CompleteProxyEvents();
 
 				Logger.Debug("Flushing Logs (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version);
 				LogManager.Flush();
 				_jobLogger.RestoreLogging(_config.id);
-			}
-		}
-
-		private void PrepareProxyFuzzer()
-		{
-			_engine.TestStarting += c =>
-			{
-				c.StateModelStarting += ProxyStateModelStarting;
-			};
-		}
-
-		private void ProxyStateModelStarting(RunContext context, StateModel sm)
-		{
-			// Once the state model starts, promote all pending proxy
-			// commands over to the publisher and update where we
-			// queue future events.
-
-			context.StateModelStarting -= ProxyStateModelStarting;
-
-			var pub = (WebApiProxyPublisher)context.test.publishers[0];
-
-			lock (_proxySync)
-			{
-				Debug.Assert(_proxyEvents != null);
-				Debug.Assert(!_proxyEvents.IsAddingCompleted);
-
-				_proxyEvents.CompleteAdding();
-
-				foreach (var item in _proxyEvents)
-				{
-					pub.Requests.Add(item);
-				}
-
-				_proxyEvents.Dispose();
-				_proxyEvents = pub.Requests;
-			}
-		}
-
-		private void CompleteProxyEvents()
-		{
-			lock (_proxySync)
-			{
-				if (_proxyEvents == null || _proxyEvents.IsAddingCompleted)
-					return;
-
-				_proxyEvents.CompleteAdding();
-
-				foreach (var item in _proxyEvents)
-				{
-					item.Handled = false;
-
-					lock (item)
-						Monitor.Pulse(item);
-				}
-
-				_proxyEvents = null;
 			}
 		}
 
@@ -251,40 +189,6 @@ namespace Peach.Pro.Core.Runtime
 				_currentThread.Join();
 			}
 			Logger.Trace("<<< Abort");
-		}
-
-		BlockingCollection<IProxyEvent> _proxyEvents = new BlockingCollection<IProxyEvent>();
-
-		public bool ProxyEvent(IProxyEvent item)
-		{
-			lock (_proxySync)
-			{
-				if (_proxyEvents == null)
-					return false;
-
-				Monitor.Enter(item);
-
-				try
-				{
-					_proxyEvents.Add(item);
-				}
-				catch (InvalidOperationException)
-				{
-					// BlockingQueue was closed so mark the event as failed
-					Monitor.Exit(item);
-					return false;
-				}
-			}
-
-			try
-			{
-				Monitor.Wait(item);
-				return item.Handled;
-			}
-			finally
-			{
-				Monitor.Exit(item);
-			}
 		}
 
 		List<KeyValuePair<string, string>> ParseConfig()

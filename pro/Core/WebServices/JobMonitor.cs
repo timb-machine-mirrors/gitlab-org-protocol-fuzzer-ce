@@ -23,8 +23,6 @@ namespace Peach.Pro.Core.WebServices
 		bool Kill();
 
 		EventHandler InternalEvent { set; }
-
-		bool ProxyEvent(IProxyEvent args);
 	}
 
 	public abstract class BaseJobMonitor
