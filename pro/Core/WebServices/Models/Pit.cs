@@ -43,8 +43,6 @@ namespace Peach.Pro.Core.WebServices.Models
 
 		public List<PitWeight> Weights { get; set; }
 
-		public WebProxy WebProxy { get; set; }
-
 		public PitMetadata Metadata { get; set; }
 	}
 }
