@@ -61,6 +61,14 @@
 
         #endregion
 
+        protected override void Dispose(bool disposing)
+        {
+            // Break any pending readers
+            Flush();
+
+            base.Dispose(disposing);
+        }
+
         #region Public properties
 
         /// <summary>
