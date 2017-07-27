@@ -45,6 +45,8 @@ namespace LibUsbDotNet.LudnMonoLibUsb
         internal static MonoUsbProfileList mMonoUSBProfileList;
         private readonly MonoUsbProfile mMonoUSBProfile;
 
+        private int mClaimedInteface;
+
         internal MonoUsbDevice(ref MonoUsbProfile monoUSBProfile)
             : base(null, null)
         {
@@ -290,9 +292,7 @@ namespace LibUsbDotNet.LudnMonoLibUsb
                 if (activeEndpoint.EpNum == (byte)readEndpointID) 
                     return (UsbEndpointReader)activeEndpoint;
 
-            byte altIntefaceID = mClaimedInterfaces.Count == 0 ? UsbAltInterfaceSettings[0] : UsbAltInterfaceSettings[mClaimedInterfaces[mClaimedInterfaces.Count - 1]];
-
-            UsbEndpointReader epNew = new MonoUsbEndpointReader(this, readBufferSize, altIntefaceID, readEndpointID, endpointType);
+            UsbEndpointReader epNew = new MonoUsbEndpointReader(this, readBufferSize, readEndpointID, endpointType);
             return (UsbEndpointReader) ActiveEndpoints.Add(epNew);
         }
 
@@ -308,23 +308,19 @@ namespace LibUsbDotNet.LudnMonoLibUsb
                 if (activeEndpoint.EpNum == (byte)writeEndpointID)
                     return (UsbEndpointWriter)activeEndpoint;
 
-            byte altIntefaceID = mClaimedInterfaces.Count == 0 ? UsbAltInterfaceSettings[0] : UsbAltInterfaceSettings[mClaimedInterfaces[mClaimedInterfaces.Count - 1]];
-
-            UsbEndpointWriter epNew = new MonoUsbEndpointWriter(this, altIntefaceID, writeEndpointID, endpointType);
+            UsbEndpointWriter epNew = new MonoUsbEndpointWriter(this, writeEndpointID, endpointType);
             return (UsbEndpointWriter) mActiveEndpoints.Add(epNew);
         }
 
-		/// <summary>
-		/// Sets the USB devices active configuration value. 
-		/// </summary>
-		/// <param name="config">The active configuration value. 
-		/// A zero value means the device is not configured and a non-zero value indicates the device is configured.
-		/// According to the libusb documentation, a value of -1 should be used to indicate unconfigured device.</param>
-		/// <returns>True on success.</returns>
-		/// <remarks>
-		/// A USB device can have several different configurations, but only one active configuration.
-		/// </remarks>
-		public bool SetConfiguration(short config)
+        /// <summary>
+        /// Sets the USB devices active configuration value. 
+        /// </summary>
+        /// <param name="config">The active configuration value. A zero value means the device is not configured and a non-zero value indicates the device is configured.</param>
+        /// <returns>True on success.</returns>
+        /// <remarks>
+        /// A USB device can have several different configurations, but only one active configuration.
+        /// </remarks>
+        public bool SetConfiguration(byte config)
         {
             int ret = MonoUsbApi.SetConfiguration((MonoUsbDeviceHandle) mUsbHandle, config);
             if (ret != 0)
@@ -404,52 +400,43 @@ namespace LibUsbDotNet.LudnMonoLibUsb
             }
         }
 
-        /// <summary>
-        /// Claims the specified interface of the device.
-        /// </summary>
-        /// <param name="interfaceID">The interface to claim.</param>
-        /// <returns>True on success.</returns>
-        public bool ClaimInterface(int interfaceID)
-        {
-            if (mClaimedInterfaces.Contains(interfaceID)) return true;
+	    /// <summary>
+	    /// Claims the specified interface of the device.
+	    /// </summary>
+	    /// <param name="interfaceID">The interface to claim.</param>
+	    /// <returns>True on success.</returns>
+	    public bool ClaimInterface(int interfaceID)
+	    {
+		    int ret;
+		    return ClaimInterface(interfaceID, out ret);
+	    }
 
-            int ret = MonoUsbApi.ClaimInterface((MonoUsbDeviceHandle)mUsbHandle, interfaceID);
-            if (ret != 0)
-            {
-                UsbError.Error(ErrorCode.MonoApiError, ret, "ClaimInterface Failed", this);
-                return false;
-            }
-            mClaimedInterfaces.Add(interfaceID);
-            return true;
-        }
-
-        public bool GetAltInterface(out int alternateID)
-        {
-            int interfaceID = mClaimedInterfaces.Count == 0 ? 0 : mClaimedInterfaces[mClaimedInterfaces.Count - 1];
-            return GetAltInterface(interfaceID, out alternateID);
-        }
+		/// <summary>
+		/// Claims the specified interface of the device.
+		/// </summary>
+		/// <param name="interfaceID">The interface to claim.</param>
+		/// <param name="ret">The libusb error code.</param>
+	    /// <returns>True on success.</returns>
+		public bool ClaimInterface(int interfaceID, out int ret)
+	    {
+		    ret = MonoUsbApi.ClaimInterface((MonoUsbDeviceHandle)mUsbHandle, interfaceID);
+		    if (ret != 0)
+		    {
+			    UsbError.Error(ErrorCode.MonoApiError, ret, "ClaimInterface Failed", this);
+			    return false;
+		    }
+		    mClaimedInteface = interfaceID;
+		    return true;
+	    }
 
         /// <summary>
-        /// Gets the alternate interface number for the specified interfaceID.
-        /// </summary>
-        /// <param name="interfaceID">The interface number of to get the alternate setting for.</param>
-        /// <param name="alternateID">The currrently selected alternate interface number.</param>
-        /// <returns>True on success.</returns>
-        public bool GetAltInterface(int interfaceID, out int alternateID)
-        {
-            alternateID = UsbAltInterfaceSettings[interfaceID & (UsbConstants.MAX_DEVICES - 1)];
-            return true;
-        }
-        /// <summary>
-        /// Releases an interface that was previously claimed with <see cref="ClaimInterface"/>.
-        /// </summary>
-        /// <param name="interfaceID">The interface to release.</param>
-        /// <returns>True on success.</returns>
-        public bool ReleaseInterface(int interfaceID)
+		/// Releases an interface that was previously claimed with <see cref="ClaimInterface"/>.
+		/// </summary>
+		/// <param name="interfaceID">The interface to release.</param>
+		/// <returns>True on success.</returns>
+		public bool ReleaseInterface(int interfaceID)
         {
             int ret = MonoUsbApi.ReleaseInterface((MonoUsbDeviceHandle) mUsbHandle, interfaceID);
-            if (!mClaimedInterfaces.Remove(interfaceID)) return true;
-
             if (ret != 0)
             {
                 UsbError.Error(ErrorCode.MonoApiError, ret, "ReleaseInterface Failed", this);
@@ -463,27 +450,15 @@ namespace LibUsbDotNet.LudnMonoLibUsb
         /// </summary>
         /// <param name="alternateID">The alternate interface to select for the most recent claimed interface See <see cref="ClaimInterface"/>.</param>
         /// <returns>True on success.</returns>
-        public bool SetAltInterface(int interfaceID, int alternateID)
+        public bool SetAltInterface(int alternateID)
         {
-            int ret = MonoUsbApi.SetInterfaceAltSetting((MonoUsbDeviceHandle) mUsbHandle, interfaceID, alternateID);
+            int ret = MonoUsbApi.SetInterfaceAltSetting((MonoUsbDeviceHandle) mUsbHandle, mClaimedInteface, alternateID);
             if (ret != 0)
             {
                 UsbError.Error(ErrorCode.MonoApiError, ret, "SetAltInterface Failed", this);
                 return false;
             }
-            UsbAltInterfaceSettings[interfaceID & (UsbConstants.MAX_DEVICES-1)] = (byte)alternateID;
             return true;
-        }
-
-        /// <summary>
-        /// Sets an alternate interface for the most recent claimed interface.
-        /// </summary>
-        /// <param name="alternateID">The alternate interface to select for the most recent claimed interface See <see cref="ClaimInterface"/>.</param>
-        /// <returns>True on success.</returns>
-        public bool SetAltInterface(int alternateID)
-        {
-            if (mClaimedInterfaces.Count == 0) throw new UsbException(this, "You must claim an interface before setting an alternate interface.");
-            return SetAltInterface(mClaimedInterfaces[mClaimedInterfaces.Count - 1], alternateID);
         }
 
         #endregion
@@ -496,7 +471,7 @@ namespace LibUsbDotNet.LudnMonoLibUsb
         {
             configInfoListRtn = new List<UsbConfigInfo>();
             UsbError usbError = null;
-            //List<MonoUsbConfigDescriptor> configList = new List<MonoUsbConfigDescriptor>();
+            List<MonoUsbConfigDescriptor> configList = new List<MonoUsbConfigDescriptor>();
             int iConfigs = usbDevice.Info.Descriptor.ConfigurationCount;
 
             for (int iConfig = 0; iConfig < iConfigs; iConfig++)

@@ -69,13 +69,14 @@ namespace LibUsbDotNet
 
                 if (ep.mEpNum != 0)
                 {
-                    senderText += string.Format(" Ep 0x{0:X2} ", ep.mEpNum);
+
+                    senderText = senderText+=string.Format(" Ep 0x{0:X2} ", ep.mEpNum);
                 }
             }
             else if (mSender is Type)
             {
                 Type t = mSender as Type;
-                senderText += string.Format(" {0} ", t.Name);
+                senderText = senderText += string.Format(" {0} ", t.Name);
             }
             mErrorCode = errorCode;
             mWin32ErrorNumber = win32ErrorNumber;

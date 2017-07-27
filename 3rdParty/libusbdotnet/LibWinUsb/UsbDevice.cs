@@ -81,9 +81,6 @@ namespace LibUsbDotNet
         internal SafeHandle mUsbHandle;
         internal UsbRegistry mUsbRegistry;
 
-        protected readonly Byte[] UsbAltInterfaceSettings = new byte[UsbConstants.MAX_DEVICES];
-        protected readonly List<int> mClaimedInterfaces = new List<int>();
-
         internal UsbDevice(UsbApiBase usbApi, SafeHandle usbHandle)
         {
             mUsbApi = usbApi;
@@ -291,9 +288,7 @@ namespace LibUsbDotNet
                 if (activeEndpoint.EpNum == (byte) writeEndpointID) 
                     return (UsbEndpointWriter) activeEndpoint;
 
-            byte altIntefaceID = mClaimedInterfaces.Count == 0 ? UsbAltInterfaceSettings[0] : UsbAltInterfaceSettings[mClaimedInterfaces[mClaimedInterfaces.Count - 1]];
-
-            UsbEndpointWriter epNew = new UsbEndpointWriter(this, altIntefaceID, writeEndpointID, endpointType);
+            UsbEndpointWriter epNew = new UsbEndpointWriter(this, writeEndpointID, endpointType);
             return (UsbEndpointWriter) mActiveEndpoints.Add(epNew);
         }
 
@@ -447,9 +442,7 @@ namespace LibUsbDotNet
                 if (activeEndpoint.EpNum == (byte) readEndpointID) 
                     return (UsbEndpointReader) activeEndpoint;
 
-            byte altIntefaceID = mClaimedInterfaces.Count == 0 ? UsbAltInterfaceSettings[0] : UsbAltInterfaceSettings[mClaimedInterfaces[mClaimedInterfaces.Count - 1]];
-
-            UsbEndpointReader epNew = new UsbEndpointReader(this, readBufferSize, altIntefaceID, readEndpointID, endpointType);
+            UsbEndpointReader epNew = new UsbEndpointReader(this, readBufferSize, readEndpointID, endpointType);
             return (UsbEndpointReader) mActiveEndpoints.Add(epNew);
         }
 

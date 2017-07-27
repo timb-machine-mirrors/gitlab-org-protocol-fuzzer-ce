@@ -1,22 +1,22 @@
 ; LibUsbDotNet Setup Script File
 
 [Setup]
-AppName                 =$(BaseName)
-AppVerName              =$(FriendlyName)
-VersionInfoDescription  =$(BaseName) Setup
-VersionInfoVersion      =$(Version)
+AppName                 =LibUsbDotNet
+AppVerName              =LibUsbDotNet 2.2.8
+VersionInfoDescription  =LibUsbDotNet Setup
+VersionInfoVersion      =2.2.8.104
 AppPublisher        =Travis Robinson
 AppPublisherURL     =http://sourceforge.net/projects/libusbdotnet/
 AppSupportURL       =http://libusbdotnet.sourceforge.net/
 AppUpdatesURL       =http://sourceforge.net/projects/libusbdotnet/
 AppCopyright        =Copyright (C) 2010 Travis Robinson.  All rights reserved.
-DefaultDirName      ={pf}\$(BaseName)
-DefaultGroupName    =$(BaseName)
+DefaultDirName      ={pf}\LibUsbDotNet
+DefaultGroupName    =LibUsbDotNet
 AllowNoIcons        =yes
 LicenseFile         = copyright.txt
 InfoBeforeFile      = welcome.txt
 ;InfoAfterFile       = final.txt
-OutputBaseFilename  =$(BaseName)_Setup.$(FriendlyVersion)
+OutputBaseFilename  =LibUsbDotNet_Setup.2.2.8
 Compression         =lzma
 SolidCompression    =yes
 ; requires Win2k, or higher
@@ -74,27 +74,27 @@ Name: tasklibusb;  Description: Install libusb-win32 with filter capabilities?; 
 
 [Files]
 ; LibUsb-win32 x86
-Source: "$(LIBUSB_WIN32_BIN)\x86\libusb0_x86.dll"; DestName: libusb0.dll; DestDir: {sys}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX86; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\x86\libusb0.sys"; DestDir: {sys}\drivers; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX86; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\x86\install-filter.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsX86; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\x86\install-filter-win.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion; Check: IsX86; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\x86\libusb0_x86.dll"; DestName: libusb0.dll; DestDir: {sys}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX86; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\x86\libusb0.sys"; DestDir: {sys}\drivers; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX86; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\x86\install-filter.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsX86; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\x86\install-filter-win.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion; Check: IsX86; Tasks: tasklibusb
 
 ; LibUsb-win32 AMD 64bit
-Source: "$(LIBUSB_WIN32_BIN)\x86\libusb0_x86.dll"; DestName: libusb0.dll; DestDir: {syswow64}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\amd64\libusb0.sys"; DestDir: {sys}\drivers; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\amd64\libusb0.dll"; DestDir: {sys}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\amd64\install-filter.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsX64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\amd64\install-filter-win.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion; Check: IsX64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\x86\libusb0_x86.dll"; DestName: libusb0.dll; DestDir: {syswow64}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\amd64\libusb0.sys"; DestDir: {sys}\drivers; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\amd64\libusb0.dll"; DestDir: {sys}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsX64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\amd64\install-filter.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsX64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\amd64\install-filter-win.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion; Check: IsX64; Tasks: tasklibusb
 
 ; LibUsb-win32 Itanium 64bit
-Source: "$(LIBUSB_WIN32_BIN)\x86\libusb0_x86.dll"; DestName: libusb0.dll; DestDir: {syswow64}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsI64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\ia64\libusb0.sys"; DestDir: {sys}\drivers; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsI64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\ia64\libusb0.dll"; DestDir: {sys}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsI64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\ia64\install-filter.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsI64; Tasks: tasklibusb
-Source: "$(LIBUSB_WIN32_BIN)\ia64\install-filter-win.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion; Check: IsI64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\x86\libusb0_x86.dll"; DestName: libusb0.dll; DestDir: {syswow64}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsI64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\ia64\libusb0.sys"; DestDir: {sys}\drivers; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsI64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\ia64\libusb0.dll"; DestDir: {sys}; Flags: uninsneveruninstall replacesameversion restartreplace promptifolder; Check: IsI64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\ia64\install-filter.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsI64; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\ia64\install-filter-win.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion; Check: IsI64; Tasks: tasklibusb
 
 ; LibUsb-win32 Common
-Source: "$(LIBUSB_WIN32_BIN)\inf-wizard.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Tasks: tasklibusb
+Source: "Z:\packages\libusb-win32\bin\inf-wizard.exe"; DestDir: {app}\libusb-win32; Flags: ignoreversion recursesubdirs createallsubdirs; Tasks: tasklibusb
 
 ; Runtime Files
 Source: .\bin\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs ignoreversion; Components: dll
