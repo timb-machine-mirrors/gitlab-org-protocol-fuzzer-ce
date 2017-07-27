@@ -41,63 +41,23 @@ namespace LibUsbDotNet.LudnMonoLibUsb.Internal
         {
         }
 
-
         #region IDisposable Members
 
-        /// <summary>Explicitly closes and frees the handle.</summary>
-        public new virtual void Dispose()
+        public new void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            freeTransfer();
         }
-
-        private bool mbDisposed2;
-        /// <summary>
-        /// Cancels any pending transfer and frees resources.
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (!mbDisposed2)
-            {
-                mbDisposed2 = true;
-                freeTransfer();
-                if (disposing)
-                {
-                    // Dispose managed resources.
-                }
-                base.Dispose();
-            }
-        }
-
 
         #endregion
-
-        ~MonoUsbTransferContext() { Dispose(false); }
-
-
         private void allocTransfer(UsbEndpointBase endpointBase, bool ownsTransfer, int isoPacketSize, int count)
         {
             int numIsoPackets = 0;
-
-            // Patch for using libusb-1.0 on windows with libusbwK.sys
-            EndpointType endpointType = endpointBase.Type;
-            if (UsbDevice.IsLinux)
-            {
-
-                if (isoPacketSize > 0)
-                    numIsoPackets = count/isoPacketSize;
-            }
-            else
-            {
-                if (endpointType == EndpointType.Isochronous)
-                    endpointType = EndpointType.Bulk;
-            }
-            ///////////////////////////////////////////////////////////////
-            
+            if (isoPacketSize > 0)
+                numIsoPackets = count/isoPacketSize;
             freeTransfer();
             mTransfer = MonoUsbTransfer.Alloc(numIsoPackets);
             mOwnsTransfer = ownsTransfer;
-            mTransfer.Type = endpointType;
+            mTransfer.Type = endpointBase.Type;
             mTransfer.Endpoint = endpointBase.EpNum;
             mTransfer.NumIsoPackets = numIsoPackets;
 
@@ -105,7 +65,6 @@ namespace LibUsbDotNet.LudnMonoLibUsb.Internal
                 mCompleteEventHandle = GCHandle.Alloc(mTransferCompleteEvent);
             mTransfer.PtrUserData = GCHandle.ToIntPtr(mCompleteEventHandle);
             
-
             if (numIsoPackets > 0)
                 mTransfer.SetIsoPacketLengths(isoPacketSize);
 
@@ -142,6 +101,8 @@ namespace LibUsbDotNet.LudnMonoLibUsb.Internal
 
             mTransfer.PtrCallbackFn = Marshal.GetFunctionPointerForDelegate(mMonoUsbTransferCallbackDelegate);
 
+            mTransfer.Type = EndpointBase.Type;
+            mTransfer.Endpoint = EndpointBase.EpNum;
             
             mTransfer.ActualLength = 0;
             mTransfer.Status = 0;
@@ -167,10 +128,16 @@ namespace LibUsbDotNet.LudnMonoLibUsb.Internal
 
             mTransfer.PtrCallbackFn = Marshal.GetFunctionPointerForDelegate(mMonoUsbTransferCallbackDelegate);
 
+            mTransfer.Type = EndpointBase.Type;
+            mTransfer.Endpoint = EndpointBase.EpNum;
+
             mTransfer.ActualLength = 0;
             mTransfer.Status = 0;
             mTransfer.Flags = MonoUsbTransferFlags.None;
         }
+        // Clean up the globally allocated memory. 
+
+        ~MonoUsbTransferContext() { Dispose(); }
 
         /// <summary>
         /// Submits the transfer.

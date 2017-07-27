@@ -36,6 +36,7 @@ namespace LibUsbDotNet.LibUsb
     /// </remarks> 
     public class LibUsbDevice : UsbDevice, IUsbDevice
     {
+        private readonly List<int> mClaimedInterfaces = new List<int>();
         private readonly string mDeviceFilename;
 
 
@@ -82,17 +83,6 @@ namespace LibUsbDotNet.LibUsb
 
         #region IUsbDevice Members
 
-        /// <summary>
-        /// Gets the alternate interface number for the previously claimed interface. <see cref="IUsbDevice.ClaimInterface"/>
-        /// </summary>
-        /// <param name="alternateID">The alternate interface number.</param>
-        /// <returns>True on success.</returns>
-        public bool GetAltInterface(out int alternateID)
-        {
-            int interfaceID = mClaimedInterfaces.Count == 0 ? 0 : mClaimedInterfaces[mClaimedInterfaces.Count - 1];
-            return GetAltInterface(interfaceID, out alternateID);
-        }
-
         ///<summary>
         /// Opens the USB device handle.
         ///</summary>
@@ -113,20 +103,34 @@ namespace LibUsbDotNet.LibUsb
             return true;
         }
 
-        /// <summary>
-        /// Claims the specified interface of the device.
-        /// </summary>
-        /// <param name="interfaceID">The interface to claim.</param>
-        /// <returns>True on success.</returns>
-        public bool ClaimInterface(int interfaceID)
+	    /// <summary>
+	    /// Claims the specified interface of the device.
+	    /// </summary>
+	    /// <param name="interfaceID">The interface to claim.</param>
+	    /// <returns>True on success.</returns>
+	    public bool ClaimInterface(int interfaceID)
+	    {
+		    int ret;
+		    return ClaimInterface(interfaceID, out ret);
+	    }
+
+		/// <summary>
+		/// Claims the specified interface of the device.
+		/// </summary>
+		/// <param name="interfaceID">The interface to claim.</param>
+		/// <param name="ret">Error code from libusb.</param>
+		/// <returns>True on success.</returns>
+		public bool ClaimInterface(int interfaceID, out int ret)
         {
+	        ret = 0;
+
             if (mClaimedInterfaces.Contains(interfaceID)) return true;
 
             LibUsbRequest req = new LibUsbRequest();
             req.Iface.ID = interfaceID;
             req.Timeout = UsbConstants.DEFAULT_TIMEOUT;
 
-            int ret;
+            //int ret;
             bool bSuccess = UsbIoSync(LibUsbIoCtl.CLAIM_INTERFACE, req, LibUsbRequest.Size, IntPtr.Zero, 0, out ret);
             if (bSuccess)
                 mClaimedInterfaces.Add(interfaceID);
@@ -192,14 +196,12 @@ namespace LibUsbDotNet.LibUsb
         /// <summary>
         /// Sets the USB devices active configuration value. 
         /// </summary>
-        /// <param name="config">The active configuration value. 
-        /// A zero value means the device is not configured and a non-zero value indicates the device is configured.
-        /// According to the libusb documentation, a value of -1 should be used to indicate unconfigured device.</param>
+        /// <param name="config">The active configuration value. A zero value means the device is not configured and a non-zero value indicates the device is configured.</param>
         /// <returns>True on success.</returns>
         /// <remarks>
         /// A USB device can have several different configurations, but only one active configuration.
         /// </remarks>
-        public bool SetConfiguration(short config)
+        public bool SetConfiguration(byte config)
         {
             int uTransferLength;
 
@@ -286,38 +288,7 @@ namespace LibUsbDotNet.LibUsb
             req.Timeout = UsbConstants.DEFAULT_TIMEOUT;
 
             int ret;
-            if (UsbIoSync(LibUsbIoCtl.SET_INTERFACE, req, LibUsbRequest.Size, IntPtr.Zero, 0, out ret))
-            {
-                UsbAltInterfaceSettings[interfaceID] = (byte) alternateID;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Gets the alternate interface number for the specified interfaceID.
-        /// </summary>
-        /// <param name="interfaceID">The interface number of to get the alternate setting for.</param>
-        /// <param name="alternateID">The currrently selected alternate interface number.</param>
-        /// <returns>True on success.</returns>
-        public bool GetAltInterface(int interfaceID, out int alternateID)
-        {
-            LibUsbRequest req = new LibUsbRequest();
-            req.Iface.ID = interfaceID;
-            req.Timeout = UsbConstants.DEFAULT_TIMEOUT;
-
-            int ret;
-            GCHandle gc = GCHandle.Alloc(req, GCHandleType.Pinned);
-            bool success;
-
-            alternateID = -1;
-            if ((success = UsbIoSync(LibUsbIoCtl.GET_INTERFACE, req, LibUsbRequest.Size, gc.AddrOfPinnedObject(), 1, out ret)) == true)
-            {
-                alternateID = Marshal.ReadByte(gc.AddrOfPinnedObject());
-                UsbAltInterfaceSettings[interfaceID] = (byte)alternateID;
-            }
-            gc.Free();
-            return success;
+            return UsbIoSync(LibUsbIoCtl.SET_INTERFACE, req, LibUsbRequest.Size, IntPtr.Zero, 0, out ret);
         }
 
         /// <summary>

@@ -41,17 +41,15 @@ namespace LibUsbDotNet
     /// </example>
     public interface IUsbDevice : IUsbInterface
     {
-		/// <summary>
-		/// Sets the USB devices active configuration value. 
-		/// </summary>
-		/// <param name="config">The active configuration value. 
-		/// A zero value means the device is not configured and a non-zero value indicates the device is configured.
-		/// According to the libusb documentation, a value of -1 should be used to indicate unconfigured device.</param>
-		/// <returns>True on success.</returns>
-		/// <remarks>
-		/// A USB device can have several different configurations, but only one active configuration.
-		/// </remarks>
-		bool SetConfiguration(short config);
+        /// <summary>
+        /// Sets the USB devices active configuration value. 
+        /// </summary>
+        /// <param name="config">The active configuration value. A zero value means the device is not configured and a non-zero value indicates the device is configured.</param>
+        /// <returns>True on success.</returns>
+        /// <remarks>
+        /// A USB device can have several different configurations, but only one active configuration.
+        /// </remarks>
+        bool SetConfiguration(byte config);
 
         /// <summary>
         /// Gets the USB devices active configuration value. 
@@ -59,6 +57,13 @@ namespace LibUsbDotNet
         /// <param name="config">The active configuration value. A zero value means the device is not configured and a non-zero value indicates the device is configured.</param>
         /// <returns>True on success.</returns>
         bool GetConfiguration(out byte config);
+
+        /// <summary>
+        /// Sets an alternate interface for the most recent claimed interface.
+        /// </summary>
+        /// <param name="alternateID">The alternate interface to select for the most recent claimed interface See <see cref="MonoUsbDevice.ClaimInterface"/>.</param>
+        /// <returns>True on success.</returns>
+        bool SetAltInterface(int alternateID);
 
         /// <summary>
         /// Gets the selected alternate interface of the specified interface.
@@ -75,12 +80,20 @@ namespace LibUsbDotNet
         /// <returns>True on success.</returns>
         bool ClaimInterface(int interfaceID);
 
-        /// <summary>
-        /// Releases an interface that was previously claimed with <see cref="ClaimInterface"/>.
-        /// </summary>
-        /// <param name="interfaceID">The interface to release.</param>
-        /// <returns>True on success.</returns>
-        bool ReleaseInterface(int interfaceID);
+	    /// <summary>
+	    /// Claims the specified interface of the device.
+	    /// </summary>
+	    /// <param name="interfaceID">The interface to claim.</param>
+	    /// <param name="ret">Error code from libusb.</param>
+	    /// <returns>True on success.</returns>
+	    bool ClaimInterface(int interfaceID, out int ret);
+
+		/// <summary>
+		/// Releases an interface that was previously claimed with <see cref="ClaimInterface"/>.
+		/// </summary>
+		/// <param name="interfaceID">The interface to release.</param>
+		/// <returns>True on success.</returns>
+		bool ReleaseInterface(int interfaceID);
 
         /// <summary>
         /// Sends a usb device reset command.

@@ -94,7 +94,6 @@ namespace LibUsbDotNet
             public UsbDevice Device;
             public int Ep; // Endpoint number (1-15)
             public int Intf; // Interface number
-            public int Altf; // Alternate setting Interface number
             public bool IsCancelled;
             public int IsoPacketSize; // Isochronous packet size (defaults to the endpoints max packet size)
             public bool IsUserAborted;
@@ -188,7 +187,7 @@ namespace LibUsbDotNet
             test.Priority = ThreadPriority.Normal;
         }
 
-        private static UsbInterfaceInfo usb_find_interface(UsbConfigInfo config_descriptor, int interface_number, int alt_interface_number, out UsbInterfaceInfo first_interface)
+        private static UsbInterfaceInfo usb_find_interface(UsbConfigInfo config_descriptor, int interface_number, out UsbInterfaceInfo first_interface)
         {
             first_interface = null;
 
@@ -198,8 +197,7 @@ namespace LibUsbDotNet
             {
                 if (ReferenceEquals(first_interface, null))
                     first_interface = interfaces[intfIndex];
-                if (interfaces[intfIndex].Descriptor.InterfaceID == interface_number &&
-                    (alt_interface_number==-1 || interfaces[intfIndex].Descriptor.AlternateID == alt_interface_number))
+                if (interfaces[intfIndex].Descriptor.InterfaceID == interface_number)
                 {
                     return interfaces[intfIndex];
                 }
@@ -217,7 +215,6 @@ namespace LibUsbDotNet
 
                 case UsbDevice.DriverModeType.LibUsb:
                     UsbDevice.ForceLibUsbWinBack = false;
-                    UsbDevice.ForceLegacyLibUsb = true;
                     return UsbDevice.AllLibUsbDevices;
 
                 case UsbDevice.DriverModeType.WinUsb:
@@ -246,7 +243,7 @@ namespace LibUsbDotNet
                         if (foundDevice.Info.Descriptor.ConfigurationCount > 0)
                         {
                             UsbInterfaceInfo firstInterface;
-                            UsbInterfaceInfo foundInterface = usb_find_interface(foundDevice.Configs[0], test.Intf, test.Altf, out firstInterface);
+                            UsbInterfaceInfo foundInterface = usb_find_interface(foundDevice.Configs[0], test.Intf, out firstInterface);
                             if (!ReferenceEquals(foundInterface, null))
                             {
                                 return foundDevice;
@@ -701,9 +698,6 @@ namespace LibUsbDotNet
                 else if (GetParamIntValue(arg, "intf=", ref testParams.Intf))
                 {
                 }
-                else if (GetParamIntValue(arg, "altf=", ref testParams.Altf))
-                {
-                }
                 else if (GetParamIntValue(arg, "ep=", ref testParams.Ep))
                 {
                     testParams.Ep &= 0xf;
@@ -859,8 +853,7 @@ namespace LibUsbDotNet
             for (i = 0; i < transferParam.Test.BufferCount; i++)
                 transferParam.Buffer[i] = new byte[transferParam.Test.BufferSize];
 
-RefetchAltInterface:
-            if (ReferenceEquals((testInterface = usb_find_interface(test.Device.Configs[0], test.Intf, test.Altf, out firstInterface)), null))
+            if (ReferenceEquals((testInterface = usb_find_interface(test.Device.Configs[0], test.Intf, out firstInterface)), null))
             {
                 CONERR("failed locating interface {0:X2}h!\n", test.Intf);
                 FreeTransferParam(ref transferParam);
@@ -899,11 +892,6 @@ RefetchAltInterface:
                 goto Done;
             }
 
-            if (transferParam.Ep.EndpointInfo.Descriptor.MaxPacketSize==0)
-            {
-                transferParam.Test.Altf++;
-                goto RefetchAltInterface;
-            }
             if ((transferParam.Test.BufferSize%transferParam.Ep.EndpointInfo.Descriptor.MaxPacketSize) > 0)
             {
                 CONERR("buffer size {0} is not an interval of EP{1:X2}h maximum packet size of {2}!\n",
@@ -1091,7 +1079,6 @@ RefetchAltInterface:
             CONMSG("{0} Test Information\n", TestDisplayString[(byte) testParam.TestType & 3]);
             CONMSG("\tVid / Pid       : {0:X4}h / {1:X4}h\n", testParam.Vid, testParam.Pid);
             CONMSG("\tInterface #     : {0:X2}h\n", testParam.Intf);
-            CONMSG("\tAlt Interface # : {0:X2}h\n", testParam.Altf);
             CONMSG("\tPriority        : {0}\n", testParam.Priority);
             CONMSG("\tBuffer Size     : {0}\n", testParam.BufferSize);
             CONMSG("\tBuffer Count    : {0}\n", testParam.BufferCount);
@@ -1188,7 +1175,7 @@ RefetchAltInterface:
                     testParam.Vid = testParam.Device.Info.Descriptor.VendorID;
                     testParam.Pid = testParam.Device.Info.Descriptor.ProductID;
 
-                    if (usb_find_interface(testParam.Device.Configs[0], testParam.Intf, testParam.Altf, out firstInterface) == null)
+                    if (usb_find_interface(testParam.Device.Configs[0], testParam.Intf, out firstInterface) == null)
                     {
                         // the specified (or default) interface didn't exist, use the first one.
                         if (firstInterface != null)
@@ -1248,7 +1235,6 @@ RefetchAltInterface:
                 CONERR("device {0:X4}:{1:X4} not found!\n", Test.Vid, Test.Pid);
                 goto Done;
             }
-
             // If "NoTestSelect" appears in the command line then don't send the control
             // messages for selecting the test type.
             //
@@ -1262,6 +1248,24 @@ RefetchAltInterface:
             }
 
             CONMSG("Benchmark device {0:X4}:{1:X4} opened..\n", Test.Vid, Test.Pid);
+
+            // If reading from the device create the read transfer param. This will also create
+            // a thread in a suspended state.
+            //
+            if ((Test.TestType & BENCHMARK_DEVICE_TEST_TYPE.TestTypeRead) != 0)
+            {
+                ReadTest = CreateTransferParam(Test, Test.Ep | 0x80);
+                if (ReadTest == null) goto Done;
+            }
+
+            // If writing to the device create the write transfer param. This will also create
+            // a thread in a suspended state.
+            //
+            if ((Test.TestType & BENCHMARK_DEVICE_TEST_TYPE.TestTypeWrite) != 0)
+            {
+                WriteTest = CreateTransferParam(Test, Test.Ep);
+                if (WriteTest == null) goto Done;
+            }
 
             // If this is a "whole" usb device (libusb-win32, linux libusb-1.0)
             // it exposes an IUsbDevice interface. If not (WinUSB) the 
@@ -1283,33 +1287,9 @@ RefetchAltInterface:
                 // Claim interface #0.
                 if (!wholeUsbDevice.ClaimInterface(Test.Intf))
                 {
-                    CONERR("select interface #{0}!\n{1}\n", Test.Intf, UsbDevice.LastErrorString);
+                    CONERR("claiming interface #{0}!\n{1}\n", Test.Intf, UsbDevice.LastErrorString);
                     goto Done;
                 }
-            }
-
-            if (!((IUsbInterface)Test.Device).SetAltInterface(Test.Altf))
-            {
-                CONERR("select alt interface #{0}!\n{1}\n", Test.Altf, UsbDevice.LastErrorString);
-                goto Done;
-            }                
-
-            // If reading from the device create the read transfer param. This will also create
-            // a thread in a suspended state.
-            //
-            if ((Test.TestType & BENCHMARK_DEVICE_TEST_TYPE.TestTypeRead) != 0)
-            {
-                ReadTest = CreateTransferParam(Test, Test.Ep | 0x80);
-                if (ReadTest == null) goto Done;
-            }
-
-            // If writing to the device create the write transfer param. This will also create
-            // a thread in a suspended state.
-            //
-            if ((Test.TestType & BENCHMARK_DEVICE_TEST_TYPE.TestTypeWrite) != 0)
-            {
-                WriteTest = CreateTransferParam(Test, Test.Ep);
-                if (WriteTest == null) goto Done;
             }
 
             if (Test.Verify)
