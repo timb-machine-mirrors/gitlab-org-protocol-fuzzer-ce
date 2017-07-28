@@ -17,6 +17,7 @@
         "SerialPort",
         "Socket",
         "SshCommand",
+        "SshProcess",
         "Syslog",
         "TcpPort",
         "WindowsDebugger",
@@ -634,6 +635,44 @@
           "CheckValue",
           "FaultOnMatch"
          ]
+      }
+    ],
+    "SshProcess": [
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Executable",
+          "Arguments"
+        ]
+      },
+      {
+        "Name": "Connection Parameters",
+        "Items": [
+          "Host",
+          "Username",
+          "Password",
+          "KeyPath"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "RestartOnEachTest",
+          "RestartAfterFault",
+          "",
+          "StartOnCall",
+          "WaitForExitOnCall"
+        ]
+      },
+      {
+        "Name": "Advanced",
+        "Collapsed": true,
+        "Items": [
+          "FaultOnEarlyExit",
+          "",
+          "StartTimeout",
+          "WaitForExitTimeout"
+        ]
       }
     ],
     "SshDownloader": [
