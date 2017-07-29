@@ -51,7 +51,7 @@ namespace LibUsbDotNet.Main
         private UsbTransfer mTransferContext;
         private UsbEndpointInfo mUsbEndpointInfo;
         private EndpointType mEndpointType;
-        private UsbInterfaceInfo mUsbInterfacetInfo;
+        //private UsbInterfaceInfo mUsbInterfacetInfo;
 
         internal UsbEndpointBase(UsbDevice usbDevice, byte epNum, EndpointType endpointType)
         {
@@ -136,7 +136,8 @@ namespace LibUsbDotNet.Main
             {
                 if (ReferenceEquals(mUsbEndpointInfo, null))
                 {
-                    if (!LookupEndpointInfo(Device.Configs[0], mEpNum, out mUsbInterfacetInfo, out mUsbEndpointInfo))
+	                UsbInterfaceInfo mUsbInterfacetInfo;
+					if (!LookupEndpointInfo(Device.Configs[0], mEpNum, out mUsbInterfacetInfo, out mUsbEndpointInfo))
                     {
                         // throw new UsbException(this, String.Format("Failed locating endpoint {0} for the current usb configuration.", mEpNum));
                         return null;
