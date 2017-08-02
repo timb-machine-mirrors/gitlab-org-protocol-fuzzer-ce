@@ -709,6 +709,14 @@ namespace Peach.Core
 								throw new PeachException("Fault detected on control iteration.");
 							}
 
+							// A control iteration after a fault produced a fault so automation
+							// did not correctly restart the target
+							if (context.controlIterationAfterFault)
+							{
+								logger.Debug("runTest: Fault detected on control iteration");
+								throw new PeachException("Fault detected on control iteration.");
+							}
+
 							// Fault reproduced, so skip forward to were we left off.
 							lastReproFault = context.reproducingInitialIteration;
 
@@ -726,6 +734,11 @@ namespace Peach.Core
 							context.reproducingFault = false;
 							context.reproducingIterationJumpCount = 0;
 
+							if (test.TargetLifetime == Test.Lifetime.Session)
+							{
+								context.controlIterationAfterFault = true;
+							}
+
 							logger.Debug("runTest: Reproduced fault, continuing fuzzing at iteration {0}", iterationCount);
 						}
 						else
@@ -734,6 +747,15 @@ namespace Peach.Core
 							OnReproFault(iterationCount, test.stateModel, context.faults.ToArray());
 
 							logger.Debug("runTest: Attempting to reproduce fault.");
+
+							// If target lifetime is session, and the fault did not occur
+							// on a control iteration, we need to run a control iteration
+							// to ensure automation has properly restarted the target
+							if (test.TargetLifetime == Test.Lifetime.Session)
+							{
+								context.controlIterationAfterFault = !context.controlIteration;
+								context.controlIteration = true;
+							}
 
 							context.reproducingFault = true;
 							controlAfterRepro = false;
@@ -759,6 +781,16 @@ namespace Peach.Core
 						}
 						else if (test.TargetLifetime == Test.Lifetime.Session)
 						{
+							if (context.controlIterationAfterFault)
+							{
+								// Repro failed on 1st control iteration following fault
+								// This means automation worked so now try and reproduce
+								// the last test case
+								context.controlIterationAfterFault = false;
+								context.controlIteration = false;
+								--iterationCount;
+							}
+							else
 							if ((context.test.controlIteration == 0 && iterationCount == context.reproducingInitialIteration) ||
 								(context.controlIteration && iterationCount == context.reproducingInitialIteration && (context.reproducingControlIteration ^ controlAfterRepro)))
 							{
@@ -909,6 +941,13 @@ namespace Peach.Core
 						if (reproducedFault)
 						{
 							reproducedFault = false;
+						}
+						if (context.controlIterationAfterFault)
+						{
+							// Inject a control iteration to verify automation
+							// resets the target after a fault is detected
+							context.controlIterationAfterFault = false;
+							context.controlIteration = true;
 						}
 						else
 						{

@@ -432,6 +432,8 @@ namespace Peach.Core
 
 		#region Reproduce Fault
 
+		public bool controlIterationAfterFault = false;
+
 		public bool disableReproduction = false;
 
 		/// <summary>
