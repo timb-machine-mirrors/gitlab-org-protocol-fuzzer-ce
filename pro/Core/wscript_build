@@ -139,6 +139,9 @@ if bld.env.BASENAME != 'web':
 		])
 		root = bld.path.find_or_declare('OS/Windows')
 		asm.install_755[root] = root.ant_glob('Debuggers/DebugEngine/*.dll')
+		
+		linux_root = bld.path.find_or_declare('OS/Linux')
+		asm.install_755[root] = linux_root.ant_glob('gdb/**/*')
 
 	if 'linux' in bld.env['supported_features']:
 		root = bld.path.find_or_declare('OS/Linux')
