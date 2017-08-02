@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using NLog;
@@ -100,18 +101,18 @@ quit
 		protected Regex reDescription = new Regex(@"^Short description: (.*)$", RegexOptions.Multiline);
 		protected Regex reOther = new Regex(@"^Other tags: (.*)$", RegexOptions.Multiline);
 
-		public string GdbPath { get; private set; }
-		public string Executable { get; private set; }
-		public string Arguments { get; private set; }
-		public bool RestartOnEachTest { get; private set; }
+		public string GdbPath { get; set; }
+		public string Executable { get; set; }
+		public string Arguments { get; set; }
+		public bool RestartOnEachTest { get; set; }
 		public bool RestartAfterFault { get; set; }
-		public bool FaultOnEarlyExit { get; private set; }
-		public bool NoCpuKill { get; private set; }
-		public string StartOnCall { get; private set; }
-		public string WaitForExitOnCall { get; private set; }
-		public int WaitForExitTimeout { get; private set; }
-		public string HandleSignals { get; private set; }
-		public string Script { get; private set; }
+		public bool FaultOnEarlyExit { get; set; }
+		public bool NoCpuKill { get; set; }
+		public string StartOnCall { get;  set; }
+		public string WaitForExitOnCall { get; set; }
+		public int WaitForExitTimeout { get; set; }
+		public string HandleSignals { get; set; }
+		public string Script { get; set; }
 
 		public GdbDebugger(string name)
 			: base(name)
@@ -141,20 +142,20 @@ quit
 
 		protected string FindExploitable()
 		{
-			var target = "gdb/exploitable/exploitable.py";
+			var target = Path.Combine("gdb", "exploitable", "exploitable.py");
 
 			var dirs = new List<string> {
 				Utilities.ExecutionDirectory,
 				Environment.CurrentDirectory,
 			};
 
-			string path = Environment.GetEnvironmentVariable("PATH");
+			var path = Environment.GetEnvironmentVariable("PATH");
 			if (!string.IsNullOrEmpty(path))
 				dirs.AddRange(path.Split(Path.PathSeparator));
 
 			foreach (var dir in dirs)
 			{
-				string full = Path.Combine(dir, target);
+				var full = Path.Combine(dir, target);
 				if (File.Exists(full))
 					return full;
 			};
@@ -333,7 +334,9 @@ quit
 			PopulateTemplateParameters(locals);
 
 			var cmd = Render.StringToString(_template, locals);
+			cmd = cmd.Replace("\r", "");
 			File.WriteAllText(_gdbCmd, cmd);
+			File.WriteAllText(@"c:\temp\script.txt", cmd);
 
 			logger.Debug("Wrote gdb commands to '{0}'", _gdbCmd);
 			logger.Trace(cmd);
