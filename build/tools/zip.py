@@ -38,6 +38,12 @@ def get_zip_src(self, tsk):
 	bindir = Utils.subst_vars(zip_root, tsk.env)
 	destpath = os.path.relpath(destpath, bindir)
 
+	link = getattr(tsk, 'link', None)
+	if link:
+		w = tsk.get_install_path()
+		src = tsk.path.find_or_declare(w)
+		self.zip_inputs.append((src, destpath, Utils.O755))
+
 	for src in tsk.source:
 		if src.name.endswith('.pdb') or src.name.endswith('.mdb'):
 			continue
@@ -77,9 +83,14 @@ def apply_zip_srcs(self):
 	self.zip_inputs = set()
 
 	for y in self.zip_use:
-		tsk = getattr(y, 'install_task', None)
-		if tsk:
-			self.get_zip_src(tsk)
+		vnum = getattr(y, 'vnum_install_task', None)
+		if vnum:
+			for x in vnum:
+				self.get_zip_src(x)
+		else:
+			tsk = getattr(y, 'install_task', None)
+			if tsk:
+				self.get_zip_src(tsk)
 		for tsk in getattr(y, 'install_extras', []):
 			self.get_zip_src(tsk)
 

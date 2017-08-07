@@ -139,6 +139,7 @@ def prepare(conf):
 		'unix',
 		'flexnetls',
 		'install_task',
+		'mono', # so we bundle sqlite
 	])
 
 def configure(conf):

@@ -97,6 +97,7 @@ def apply_better_install(self):
 	'linux', 'linux_x86', 'linux_x86_64', 
 	'osx', 
 	'doc',
+	'mono',
 	'debug', 'release', 
 	'com', 'pin', 'network', 'peach', 'flexnetls')
 def dummy_platform(self):
