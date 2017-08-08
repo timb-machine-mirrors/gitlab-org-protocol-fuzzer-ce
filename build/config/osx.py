@@ -165,6 +165,7 @@ def configure(conf):
 		'network',
 		'unix',
 		'install_task',
+		'mono', # so we bundle sqlite
 	])
 
 	env.append_value('CSFLAGS', [

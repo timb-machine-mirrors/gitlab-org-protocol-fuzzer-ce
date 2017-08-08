@@ -276,16 +276,19 @@ namespace Peach.Pro.Core
 						var header = ActionWebParameter.PitParser(this, child, action);
 						header.PartName = name;
 						param.Headers.Add(header);
+						param.Parameter.Parameters.Add(header.Parameter);
 						break;
 					case "FormData":
 						var formData = ActionWebParameter.PitParser(this, child, action);
 						formData.PartName = name;
 						param.FormDatas.Add(formData);
+						param.Parameter.Parameters.Add(formData.Parameter);
 						break;
 					case "Body":
 						var body = ActionWebParameter.PitParser(this, child, action);
 						body.PartName = name;
 						param.Body = body;
+						param.Parameter.Parameters.Add(body.Parameter);
 						break;
 				}
 			}

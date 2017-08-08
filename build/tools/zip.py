@@ -38,18 +38,25 @@ def get_zip_src(self, tsk):
 	bindir = Utils.subst_vars(zip_root, tsk.env)
 	destpath = os.path.relpath(destpath, bindir)
 
-	for src in tsk.source:
+	if tsk.type == 'symlink_as':
+		w = tsk.get_install_path()
+		src = self.bld.root.make_node(w)
+		self.zip_inputs.add((src, destpath, Utils.O755))
+		return
+
+	for src in self.to_nodes(tsk.install_from):
 		if src.name.endswith('.pdb') or src.name.endswith('.mdb'):
 			continue
-		elif not hasattr(tsk, 'relative_trick'):
+		elif tsk.type == 'install_as':
 			destfile = destpath
 		elif tsk.relative_trick:
-			destfile = os.path.join(destpath, src.path_from(tsk.path))
+			destfile = os.path.join(destpath, src.path_from(tsk.relative_base))
 			for k, v in zip_rewrites.items():
 				if k in destfile:
 					destfile = destfile.replace(k, v)
 		else:
 			destfile = os.path.join(destpath, src.name)
+
 			for k, v in zip_rewrites.items():
 				if k in destfile:
 					destfile = destfile.replace(k, v)
@@ -77,11 +84,17 @@ def apply_zip_srcs(self):
 	self.zip_inputs = set()
 
 	for y in self.zip_use:
-		tsk = getattr(y, 'install_task', None)
-		if tsk:
-			self.get_zip_src(tsk)
-		for tsk in getattr(y, 'install_extras', []):
-			self.get_zip_src(tsk)
+		vnum = getattr(y, 'vnum_install_task', None)
+		if vnum:
+			for x in vnum:
+				self.get_zip_src(x)
+		else:
+			tsk = getattr(y, 'install_task', None)
+			if tsk:
+				self.get_zip_src(tsk)
+		for tg in getattr(y, 'install_extras', []):
+			tg.post()
+			self.get_zip_src(tg.install_task)
 
 	zip_extras = getattr(self, 'zip_extras', [])
 	for y in zip_extras:

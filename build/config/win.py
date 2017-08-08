@@ -20,7 +20,6 @@ tools = [
 
 optional_tools = [
 	'tools.msbuild',
-	'tools.msi',
 	'tools.test',
 	'tools.zip',
 ]

@@ -53,6 +53,7 @@ common = [
 	'PeachAgent.exe',
 	'Peach.Pro.Web',
 	'PitTool.exe',
+	'sqlite3',
 
 	# Include sample programs so sample pits work
 	'SimpleHttpServer',

@@ -203,6 +203,7 @@ namespace Peach.Pro.Test.Core.Loggers
 				"*   2",
 				"* C 3",
 				"    3 Fault",
+				"* C 3",
 				"*   3",
 				"* C 3",
 				"    4",
@@ -255,7 +256,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 				if ((!ctx.reproducingFault && ctx.currentIteration == 3 && !ctx.controlIteration) ||
 					(ctx.reproducingFault && ctx.currentIteration == 3 && ctx.controlIteration && ctx.reproducingIterationJumpCount > 1) ||
-					(!ctx.reproducingFault && ctx.currentIteration == 4))
+					(!ctx.reproducingFault && ctx.currentIteration == 4 && !ctx.controlIteration))
 				{
 					ctx.faults.Add(new Fault
 					{
@@ -284,13 +285,16 @@ namespace Peach.Pro.Test.Core.Loggers
 				"    2",
 				"  C 3",
 				"    3 Fault",
+				"* C 3",
 				"*   3",
 				"* C 3",
 				"*   1",
 				"* C 2",
 				"*   2",
 				"* C 3 Fault",
+				"  C 4",
 				"    4 Fault",
+				"* C 4",
 				"*   4",
 				"* C 4",
 				"  C 5",
@@ -378,7 +382,9 @@ namespace Peach.Pro.Test.Core.Loggers
 				"    2",
 				"  C 3",
 				"    3 Fault",
+				"* C 3",
 				"*   3 Fault",
+				"  C 4",
 				"    4",
 				"  C 5",
 				"    5"
@@ -698,6 +704,8 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			e.IterationStarting += (ctx, it, tot) =>
 			{
+				ctx.agentManager.Message(ctx.controlIteration.ToString());
+
 				if (!ctx.controlIteration)
 					ctx.InjectFault();
 			};
@@ -787,7 +795,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			e.IterationStarting += (ctx, it, tot) =>
 			{
-				if (it == 2)
+				if (!ctx.controlIteration && it == 2)
 					ctx.InjectFault();
 			};
 
@@ -1100,7 +1108,7 @@ namespace Peach.Pro.Test.Core.Loggers
 
 			e.IterationStarting += (ctx, it, tot) =>
 			{
-				if (it == 2)
+				if (!ctx.controlIteration && it == 2)
 					ctx.InjectFault();
 			};
 

@@ -97,6 +97,7 @@ def apply_better_install(self):
 	'linux', 'linux_x86', 'linux_x86_64', 
 	'osx', 
 	'doc',
+	'mono',
 	'debug', 'release', 
 	'com', 'pin', 'network', 'peach', 'flexnetls')
 def dummy_platform(self):
@@ -175,7 +176,10 @@ def install_once(self, ref, ref_task, inst_to):
 
 def install_outputs(self, ref):
 	# install 3rdParty libs into ${LIBDIR}
-	inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
+	inst_to = getattr(self, 'install_path', '${LIBDIR}')
+
+	if not inst_to:
+		return
 
 	if install_once(self, ref, ref.link_task, inst_to):
 		return
@@ -323,8 +327,8 @@ def install_packages(self):
 				install_outputs(self, y)
 			if 'cs' in features:
 				y.post()
-				inst_to = getattr(self, 'install_path', None) or '${BINDIR}'
-				if y.install_task and inst_to != y.install_task.dest:
+				inst_to = getattr(self, 'install_path', '${BINDIR}')
+				if inst_to and y.install_task and inst_to != y.install_task.dest:
 					install_once(self, y, y.cs_task, inst_to)
 			filtered.append(x)
 		except Errors.WafError:
