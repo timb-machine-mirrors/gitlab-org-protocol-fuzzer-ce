@@ -22,6 +22,8 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("RemoteExecutable", typeof(string), "Optional, if remote GDB server supports extended remote mode and multi-process capabilities, this is the remote exec file-name", "")]
 
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
+	[Parameter("GdbExecutable", typeof(string), "Path to gdb", "/usr/bin/gdb")]
+	[Parameter("GdbArgumentTemplate", typeof(string), "Path to gdb", "{0}")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
@@ -32,6 +34,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 	[Parameter("HandleSignals", typeof(string), "Signals to consider faults. Space separated list of signals/exceptions to handle as faults.", "SIGSEGV SIGFPE SIGABRT SIGILL SIGPIPE SIGBUS SIGSYS SIGXCPU SIGXFSZ EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC")]
 	[Parameter("Script", typeof(string), "Script file used to drive GDB and perform crash analysis.", "")]
+	[Parameter("Cygpath", typeof(string), "If using cygwin compiled GDB, provide cygpath.exe executable", "")]
 	public class GdbServerMonitor : GdbDebugger
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -89,9 +92,9 @@ quit
 ";
 		protected string _gdbConnectError = null;
 
-		public string Target { get; private set; }
-		public string LocalExecutable { get; private set; }
-		public string RemoteExecutable { get; private set; }
+		public string Target { get; set; }
+		public string LocalExecutable { get; set; }
+		public string RemoteExecutable { get; set; }
 
 		public GdbServerMonitor(string name)
 			: base(name)
@@ -112,6 +115,7 @@ quit
 
 			// GdbServer specific
 			locals["gdbConnectError"] = _gdbConnectError;
+
 			// Monitor Parameters
 			locals["target"] = Target;
 			locals["localExecutable"] = LocalExecutable;
@@ -125,6 +129,12 @@ quit
 			locals["waitForExitOnCall"] = WaitForExitOnCall;
 			locals["waitForExitTimeout"] = WaitForExitTimeout;
 			locals["handleSignals"] = HandleSignals;
+
+			if (!string.IsNullOrEmpty(Cygpath))
+			{
+				locals["localExecutableCygwin"] = ConvertPathToCygwin(LocalExecutable);
+				locals["gdbConnectErrorCygwin"] = ConvertPathToCygwin(_gdbConnectError);
+			}
 		}
 
 		protected override void _Start()
@@ -140,7 +150,16 @@ quit
 
 			try
 			{
-				_gdb.Start(GdbPath, "-batch -n -x {0}".Fmt(_gdbCmd), null, _tmpDir.Path);
+				var tmpDir = _tmpDir.Path;
+				var args = GdbArgumentTemplate.Fmt("-batch -n -x {0}".Fmt(_gdbCmd));
+
+				if (!string.IsNullOrEmpty(Cygpath))
+				{
+					tmpDir = ConvertPathToCygwin(_tmpDir.Path);
+					args = GdbArgumentTemplate.Fmt("-batch -n -x {0}".Fmt(ConvertPathToCygwin(_gdbCmd)));
+				}
+
+				_gdb.Start(GdbPath, args, null, tmpDir);
 			}
 			catch (Exception ex)
 			{

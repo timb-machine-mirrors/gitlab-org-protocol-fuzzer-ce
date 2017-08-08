@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
@@ -11,6 +12,7 @@ using Peach.Core.Agent;
 using Encoding = Peach.Core.Encoding;
 using Monitor = Peach.Core.Agent.Monitor2;
 using Nustache.Core;
+using Process = Peach.Core.Process;
 
 namespace Peach.Pro.OS.Linux.Agent.Monitors
 {
@@ -25,6 +27,8 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
+	[Parameter("GdbExecutable", typeof(string), "GDB Executable with Path", "/usr/bin/gdb")]
+	[Parameter("GdbArgumentTemplate", typeof(string), "Command line template.  Must contain '{0}' for Peaches arguments", "{0}")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
@@ -33,6 +37,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	[Parameter("HandleSignals", typeof(string), "Signals to consider faults. Space separated list of signals/exceptions to handle as faults.", "SIGSEGV SIGFPE SIGABRT SIGILL SIGPIPE SIGBUS SIGSYS SIGXCPU SIGXFSZ EXC_BAD_ACCESS EXC_BAD_INSTRUCTION EXC_ARITHMETIC")]
 	[Parameter("Script", typeof(string), "Script file used to drive GDB and perform crash analysis.", "")]
+	[Parameter("Cygpath", typeof(string), "If using cygwin compiled GDB, provide cygpath.exe executable", "")]
 	public class GdbDebugger : Monitor
 	{
 		static NLog.Logger logger = LogManager.GetCurrentClassLogger();
@@ -101,7 +106,15 @@ quit
 		protected Regex reDescription = new Regex(@"^Short description: (.*)$", RegexOptions.Multiline);
 		protected Regex reOther = new Regex(@"^Other tags: (.*)$", RegexOptions.Multiline);
 
-		public string GdbPath { get; set; }
+		public string GdbExecutable { get; set; }
+		public string GdbArgumentTemplate { get; set; }
+
+		public string GdbPath
+		{
+			get { return GdbExecutable; }
+			set { GdbExecutable = value; }
+		}
+
 		public string Executable { get; set; }
 		public string Arguments { get; set; }
 		public bool RestartOnEachTest { get; set; }
@@ -113,6 +126,7 @@ quit
 		public int WaitForExitTimeout { get; set; }
 		public string HandleSignals { get; set; }
 		public string Script { get; set; }
+		public string Cygpath { get; set; }
 
 		public GdbDebugger(string name)
 			: base(name)
@@ -125,17 +139,20 @@ quit
 
 		public override void StartMonitor(Dictionary<string, string> args)
 		{
+			ParameterParser.Parse(this, args);
+
 			if (!string.IsNullOrEmpty(Script))
 			{
 				if (File.Exists(Script))
+				{
+					logger.Trace("Overriding _template with '{0}'", Script);
 					_template = File.ReadAllText(Script);
+				}
 				else
 				{
 					throw new SoftException(string.Format("Error, Script file not found for Gdb monitor: {0}", Script));
 				}
 			}
-
-			base.StartMonitor(args);
 
 			_exploitable = FindExploitable();
 		}
@@ -173,7 +190,7 @@ quit
 
 			try
 			{
-				_gdb.Start(GdbPath, "-batch -n -x {0}".Fmt(_gdbCmd), null, _tmpDir.Path);
+				_gdb.Start(GdbExecutable, GdbArgumentTemplate.Fmt("-batch -n -x {0}".Fmt(_gdbCmd)), null, _tmpDir.Path);
 			}
 			catch (Exception ex)
 			{
@@ -314,6 +331,46 @@ quit
 			locals["waitForExitOnCall"] = WaitForExitOnCall;
 			locals["waitForExitTimeout"] = WaitForExitTimeout;
 			locals["handleSignals"] = HandleSignals;
+
+			if (!string.IsNullOrEmpty(Cygpath))
+			{
+				locals["executableCygwin"] = ConvertPathToCygwin(Executable);
+			}
+		}
+
+		/// <summary>
+		/// Convert a windows path to cygwin path using cygpath.exe
+		/// </summary>
+		/// <param name="path">windows path to convert</param>
+		/// <returns></returns>
+		protected string ConvertPathToCygwin(string path)
+		{
+			var pinfo = new ProcessStartInfo();
+			pinfo.UseShellExecute = false;
+			pinfo.RedirectStandardOutput = true;
+			pinfo.FileName = Cygpath;
+
+			if (!path.Contains("\""))
+				path = "\"" + path + "\"";
+
+			pinfo.Arguments = path;
+
+			// Start the child process.
+			var p = new System.Diagnostics.Process {StartInfo = pinfo};
+			// Redirect the output stream of the child process.
+			p.Start();
+
+			// Do not wait for the child process to exit before
+			// reading to the end of its redirected stream.
+			// p.WaitForExit();
+			// Read the output stream first and then wait.
+			var output = p.StandardOutput.ReadToEnd().Trim(new []{'\n','\r',' ', '\t'});
+
+			p.WaitForExit();
+
+			logger.Trace("ConvertPathToCygwin: '{0}' -> '{1}'", path, output);
+
+			return output;
 		}
 
 		public override void SessionStarting()
@@ -330,6 +387,15 @@ quit
 			locals["gdbPid"] = _gdbPid;
 			locals["gdbCmd"] = _gdbCmd;
 			locals["exploitableScript"] = _exploitable;
+
+			if (!string.IsNullOrEmpty(Cygpath))
+			{
+				locals["gdbTempDirCygwin"] = ConvertPathToCygwin(_gdbLog);
+				locals["gdbLogCygwin"] = ConvertPathToCygwin(_gdbLog);
+				locals["gdbPidCygwin"] = ConvertPathToCygwin(_gdbPid);
+				locals["gdbCmdCygwin"] = ConvertPathToCygwin(_gdbCmd);
+				locals["exploitableScriptCygwin"] = ConvertPathToCygwin(_exploitable);
+			}
 
 			PopulateTemplateParameters(locals);
 
