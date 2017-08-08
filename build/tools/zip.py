@@ -84,17 +84,20 @@ def apply_zip_srcs(self):
 	self.zip_inputs = set()
 
 	for y in self.zip_use:
+		y.post()
 		vnum = getattr(y, 'vnum_install_task', None)
 		if vnum:
 			for x in vnum:
 				self.get_zip_src(x)
 		else:
-			tsk = getattr(y, 'install_task', None)
-			if tsk:
-				self.get_zip_src(tsk)
+			for tsk in y.tasks:
+				if tsk.__class__.__name__ == 'inst':
+					self.get_zip_src(tsk)
 		for tg in getattr(y, 'install_extras', []):
 			tg.post()
-			self.get_zip_src(tg.install_task)
+			for tsk in tg.tasks:
+				if tsk.__class__.__name__ == 'inst':
+					self.get_zip_src(tsk)
 
 	zip_extras = getattr(self, 'zip_extras', [])
 	for y in zip_extras:
