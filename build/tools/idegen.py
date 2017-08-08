@@ -1398,6 +1398,17 @@ class multi_idegen(BuildContext):
 
 		return ret
 
+class idegen2017(multi_idegen):
+	'''generates a visual studio 2012 solution'''
+	cmd = 'msvs2017'
+	fun = multi_idegen.fun
+
+	def init(self, generator):
+		generator.numver = '12.00'
+		generator.vsver  = '2017'
+		generator.platform_toolset = 'v141'
+		generator.vsnode_cs_target = vsnode_cs_target2012
+
 class idegen2012(multi_idegen):
 	'''generates a visual studio 2012 solution'''
 	cmd = 'msvs2012'
