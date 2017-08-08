@@ -324,7 +324,7 @@ def install_packages(self):
 				install_outputs(self, y)
 			if 'cs' in features:
 				y.post()
-				inst_to = getattr(self, 'install_path', None) or '${BINDIR}'
+				inst_to = getattr(self, 'install_path', None) or '${LIBDIR}'
 				if y.install_task and inst_to != y.install_task.dest:
 					install_once(self, y, y.cs_task, inst_to)
 			filtered.append(x)

@@ -18,18 +18,21 @@ class ZipContext(PkgContext):
 
 	def __init__(self, **kw):
 		super(ZipContext, self).__init__(**kw)
-		self.installed_files = []
-
-	def do_install(self, src, tgt, chmod=Utils.O644, **kw):
-		self.installed_files.append(tgt)
-		super(ZipContext, self).do_install(src, tgt, chmod=chmod, **kw)
 
 	def execute(self):
 		super(ZipContext, self).execute()
-		if self.installed_files:
-			self.archive()
 
-	def archive(self):
+		files = []
+
+		for g in self.groups:
+			for tg in g:
+				if 'install_task' in tg.features:
+					files.extend(tg.install_task.outputs)
+
+		if files:
+			self.archive(files)
+
+	def archive(self, files):
 		env = self.env
 
 		base_path = self.path.make_node(env.PREFIX)
@@ -45,10 +48,7 @@ class ZipContext(PkgContext):
 
 		zip = zipfile.ZipFile(arch.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
-		for x in self.installed_files:
-			n = self.path.find_node(x)
-			if not n:
-				raise Errors.WafError("Source not found: %s" % x)
+		for n in files:
 			if not n.is_child_of(base_path):
 				continue
 			archive_name = n.path_from(base_path)
