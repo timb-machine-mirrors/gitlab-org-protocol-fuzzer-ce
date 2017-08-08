@@ -152,7 +152,7 @@ def use_nuget(self):
 	for pkg in pkgs:
 		use_packages_recurse(self, pkg, settings, tgs)
 
-	for tg in sorted(tgs):
+	for tg in sorted(tgs, key=lambda x: x.target):
 		# print 'use: %s' % tg.name
 		use.append(tg.name)
 
