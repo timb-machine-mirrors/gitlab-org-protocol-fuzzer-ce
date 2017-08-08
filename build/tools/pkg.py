@@ -53,7 +53,7 @@ class ZipContext(PkgContext):
 				continue
 			archive_name = n.path_from(base_path)
 			if Logs.verbose > 0:
-				Logs.info(' + add %s (from %s)' % (archive_name, x))
+				Logs.info(' + add %s (from %s)' % (archive_name, n))
 			else:
 				sys.stdout.write('.')
 				sys.stdout.flush()
