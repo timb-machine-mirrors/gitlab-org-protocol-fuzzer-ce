@@ -25,6 +25,7 @@ xref:name[name]::
 	Name of the boolean value.
 
 isNull:: Set default value of this element to null (defaults to false)
+type:: Type controls the output encoding allowing both traditional json and also binary json (bson). Supported values: 'json' or 'bson'. Defaults to 'json'.
 
 xref:value[value]::
 	The default value to assign to the boolean.

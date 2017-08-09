@@ -43,6 +43,7 @@ xref:name[name]::
 	Name of the number.
 isNull::
     Is this elements value null. JSON output will be +null+ instead of value.
+type:: Type controls the output encoding allowing both traditional json and also binary json (bson). Supported values: 'json' or 'bson'. Defaults to 'json'.
 xref:value[value]::
 	The default value to assign to the number.
 xref:valueType[valueType]::
