@@ -55,6 +55,7 @@ NUGET
     Moq (4.5.9)
       Castle.Core (>= 3.3.3)
     Newtonsoft.Json (6.0.8)
+    nHapi (2.5.0.6)
     NLog (4.3.2)
     NUnit (3.2.1)
     NUnit.ConsoleRunner (3.2.1)

@@ -98,16 +98,6 @@ namespace Peach.Pro.Core.WebServices
 			Logger.Trace("<<< Dispose");
 		}
 
-		public bool ProxyEvent(IProxyEvent args)
-		{
-			lock (this)
-			{
-				args.Handled = IsRunning && _runner.ProxyEvent(args);
-			}
-
-			return args.Handled;
-		}
-
 		protected override void OnStart(Job job)
 		{
 			var evtReady = new AutoResetEvent(false);

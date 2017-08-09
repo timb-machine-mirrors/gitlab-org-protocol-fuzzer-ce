@@ -341,20 +341,5 @@ namespace Peach.Pro.Core
 
 			return stateModel;
 		}
-
-		protected override void handleTestChild(XmlNode node, Test test)
-		{
-			if (node.Name == "WebProxy")
-			{
-				var opts = XmlTools.Deserialize<WebProxyOptions>(new StringReader(node.OuterXml));
-
-				test.stateModel = new WebProxyStateModel(opts);
-				test.stateModelRef = test.stateModel.CreateStateModelRef();
-				test.stateModel.parent = test.parent;
-
-				foreach (var map in opts.ContentTypeMap)
-					map.DataModel = (DataModel) test.parent.getRef(map.Ref, (DataElementContainer)null );
-			}
-		}
 	}
 }

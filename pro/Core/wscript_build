@@ -63,13 +63,6 @@ if bld.env.BASENAME != 'web':
 		'System.Web.Services.dll',
 		'System.Xml.dll',
 		'Titanium.Web.Proxy.dll',
-		'NHapi.Base.dll',
-		'NHapi.Model.V21.dll',
-		'NHapi.Model.V22.dll',
-		'NHapi.Model.V23.dll',
-		'NHapi.Model.V231.dll',
-		'NHapi.Model.V24.dll',
-		'NHapi.Model.V25.dll',
 	]
 
 	pkgs = [
@@ -81,6 +74,7 @@ if bld.env.BASENAME != 'web':
 		'Microsoft.Diagnostics.Runtime',
 		'Mono.Posix-4.5',
 		'Newtonsoft.Json',
+		'nHapi',
 		'NLog',
 		'Nustache',
 		'PacketDotNet',
