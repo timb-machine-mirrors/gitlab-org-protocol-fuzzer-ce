@@ -150,7 +150,7 @@ class App(cmd2.Cmd):
             print "  Name must be PIT-ConfigName."
             return
         
-        pitSource = pit[:pit.index("-")]
+        pitSource = pit[:pit.rfind("-")]
         masterPitSourceUrl = self.getPitUrl(master, "Pits", pitSource)
         masterPitUrl = self.getPitUrl(master, "Configurations", masterPitName)
         
