@@ -22,33 +22,6 @@ The new download site improves the download speed and responsiveness of the site
 
 Descriptions of new features and improvements for Professional and Enterprise follow:
 
-==== Web Proxy
-
-A new method for web API testing has been added into Peach in the form of a man in the middle proxy.
-HTTP traffic is sent through the proxy where it is fuzzed and forwarded to a target service.
-This feature is geared for tight integration into development CI systems.
-
-NOTE: The Web Proxy feature is being licensed as a separate feature.
-Please contact sales@peachfuzzer.com for a trial license.
-
-==== JUnit 4 Integration for Web Proxy
-
-JUnit 4 integration extension for use with Peach.
-This enables using existing JUnit 4 test automation in conjunction with the Peach Web Proxy feature.
-See the User Guide for more information.
-
-==== Python pytest Integration for Web Proxy
-
-pytest integration plugin for use with Peach.
-This enables using existing pytest automation in conjunction with the Peach Web feature.
-See the User Guide for more information.
-
-==== Peach Proxy Python Module
-
-This module wraps the new Peach Web Proxy API.  It's main use is to allow
-developers to create traffic generators for the Peach Web Proxy feature. It's
-available in the SDK under 'webproxy/peachproxy'. See the developer guide for more information.
-
 ==== Web Action
 
 A new action 'web' has been added in this release allowing for much easier modeling

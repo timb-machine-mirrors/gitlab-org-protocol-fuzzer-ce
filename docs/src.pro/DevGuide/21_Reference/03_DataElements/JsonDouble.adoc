@@ -39,6 +39,7 @@ propertyName::
     Property name for element when child of xref:JsonObject[JsonObject].
 isNull::
     Is this elements value null. Json output will be +null+ instead of value.
+type:: Type controls the output encoding allowing both traditional json and also binary json (bson). Supported values: 'json' or 'bson'. Defaults to 'json'.
 xref:value[value]::
 	The default value to assign to the floating point number.
 xref:valueType[valueType]::

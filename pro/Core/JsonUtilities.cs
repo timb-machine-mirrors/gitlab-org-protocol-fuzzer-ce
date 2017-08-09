@@ -7,6 +7,21 @@ using Peach.Pro.Core.WebServices;
 
 namespace Peach.Pro.Core
 {
+	/// <summary>
+	/// Json encoding to use
+	/// </summary>
+	public enum JsonType
+	{
+		/// <summary>
+		/// Encode as standard json
+		/// </summary>
+		json,
+		/// <summary>
+		/// Encode as binary-json (bson)
+		/// </summary>
+		bson
+	}
+
 	class JsonPathConverter : JsonConverter
 	{
 		public override bool CanConvert(Type objectType)

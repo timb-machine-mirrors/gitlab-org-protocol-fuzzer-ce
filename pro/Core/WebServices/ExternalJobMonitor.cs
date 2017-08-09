@@ -81,11 +81,6 @@ namespace Peach.Pro.Core.WebServices
 			}
 		}
 
-		public bool ProxyEvent(IProxyEvent args)
-		{
-			return false;
-		}
-
 		// used by unit tests
 		// kill the worker without setting _pendingKill
 		// this should test Restarts

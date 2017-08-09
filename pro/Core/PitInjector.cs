@@ -52,30 +52,6 @@ namespace Peach.Pro.Core
 					test.agents.Add(domAgent);
 				}
 			}
-
-			if (cfg.WebProxy == null)
-				return;
-
-			var opts = new WebProxyOptions
-			{
-				Proxy = null,
-				Routes = new List<WebProxyRoute>(
-					cfg.WebProxy.Routes.Select(r => new WebProxyRoute()
-					{
-						BaseUrl = r.BaseUrl,
-						FaultOnStatusCodes = r.FaultOnStatusCodes,
-						Mutate = r.Mutate,
-						Script = r.Script,
-						SwaggerAttr = r.Swagger,
-						Url = r.Url,
-					})
-				)
-			};
-
-			foreach (var sm in dom.tests.Select(t => t.stateModel).OfType<WebProxyStateModel>())
-			{
-				sm.Options = opts;
-			}
 		}
 
 		private static string Expand(IEnumerable<KeyValuePair<string, string>> defs, string value)
