@@ -1,4 +1,77 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Detect OS, Distribution, Version
+
+OS=unknown
+DIST=unknown
+DIST_VERSION=unknown
+
+if [ "$(uname)" == "Darwin" ]; then
+    # Do something under Mac OS X platform        
+	OS=darwin
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    # Do something under GNU/Linux platform
+	OS=linux
+	# ## Detect Linux distribution
+	if [ -f /etc/os-release ]; then
+		# freedesktop.org and systemd
+		. /etc/os-release
+		DIST=$ID
+		DIST_VERSION=$VERSION_ID
+	elif type lsb_release >/dev/null 2>&1; then
+		# linuxbase.org
+		DIST=$(lsb_release -si)
+		DIST_VERSION=$(lsb_release -sr)
+	elif [ -f /etc/lsb-release ]; then
+		# For some versions of Debian/Ubuntu without lsb_release command
+		. /etc/lsb-release
+		DIST=$DISTRIB_ID
+		DIST_VERSION=$DISTRIB_RELEASE
+	elif [ -f /etc/debian_version ]; then
+		# Older Debian/Ubuntu/etc.
+		DIST=Debian
+		DIST_VERSION=$(cat /etc/debian_version)
+	elif [ -f /etc/SuSe-release ]; then
+		# Older SuSE/etc.
+		echo ""
+		echo "Error, unsupported version of SUSE detected."
+		echo ""
+		echo "  An older, unsupported version of Linux was detected."
+		echo "  Please contact support (support@peachfuzzer.com) for"
+		echo "  assistance."
+		echo ""
+		exit 1
+	elif [ -f /etc/redhat-release ]; then
+		# Older Red Hat, CentOS, etc.
+		echo ""
+		echo "Error, unsupported version of Redhat/CentOS/RHEL detected."
+		echo ""
+		echo "  An older, unsupported version of Linux was detected."
+		echo "  Please contact support (support@peachfuzzer.com) for"
+		echo "  assistance."
+		echo ""
+		echo ""
+		exit 1
+	fi
+
+	DIST=${DIST,,}
+	DIST_VERSION=${DIST_VERSION,,}
+
+elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+    # Do something under 32 bits Windows NT platform
+	OS=windows
+	DIST=mingw
+elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
+    # Do something under 64 bits Windows NT platform
+	OS=windows
+	DIST=mingw
+elif [ "$(expr substr $(uname -s) 1 9)" == "CYGWIN_NT" ]; then
+    # Do something under 64 bits Windows NT platform
+	OS=windows
+	DIST=cygwin
+fi
+
+# Figure out our peach folder and debug options
 
 DIRNAME="`dirname ${0}`"
 DEBUG=""
@@ -7,6 +80,17 @@ case "$*" in
     DEBUG="--debug"
     ;;
 esac
+
+# Update dllmap as needed
+if [ "$OS" == "linux" ]; then
+
+	PCAP=`ldconfig -p | grep libpcap | cut -d ' ' -f 1 | tr -d '[:space:]'`
+	if [ ! -z "$PCAP" ]; then
+		#echo "PCAP: '$PCAP'"
+		sed -i "s/libpcap.so[^\"]*/$PCAP/g" ${DIRNAME}/SharpPcap.dll.config
+	fi
+
+fi
 
 MONO="$(which mono)"
 if [ -z $MONO ];
@@ -30,3 +114,5 @@ then
 fi
 
 ${MONO} --gc=sgen ${DEBUG} ${DIRNAME}/Peach.exe $@
+
+# end
