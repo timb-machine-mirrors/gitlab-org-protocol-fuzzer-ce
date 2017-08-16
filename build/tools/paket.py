@@ -76,6 +76,8 @@ class Package(object):
 		# print 'make: %s, %s, %s' % (fx, node, is_ref)
 		tg = bld(
 			name='%s:%s:%s:%s' % (self.group, self.name, fx, node.name),
+			install_path = '${BINDIR}',
+			install_644 = node.parent.ant_glob("*.config"),
 			features='nuget_lib',
 			node=node,
 			is_ref=is_ref
