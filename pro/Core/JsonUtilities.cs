@@ -5,7 +5,10 @@ using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using Peach.Core.IO;
+using Peach.Pro.Core.Dom;
 using Peach.Pro.Core.WebServices;
+using Stream = System.IO.Stream;
 
 namespace Peach.Pro.Core
 {
@@ -93,18 +96,87 @@ namespace Peach.Pro.Core
 			var sb = Value as Stream;
 			if (sb != null)
 			{
-				((CustomJsonWriter)writer).WriteTypeTransformValue(sb);
+				((IRawWriter)writer).WriteTypeTransformValue(sb);
 				return;
 			}
 
-			((CustomJsonWriter)writer).WriteTypeTransformValue((byte[])Value);
+			((IRawWriter)writer).WriteTypeTransformValue((byte[])Value);
+		}
+	}
+
+	public interface IRawWriter
+	{
+		void WriteTypeTransformValue(Stream bs);
+		void WriteTypeTransformValue(byte[] buf);
+	}
+
+	public static class CustomElementWriter
+	{
+		public static BitwiseStream GenerateInternalValue(IJsonElement elem)
+		{
+			if (elem.Type == JsonType.json)
+			{
+				var bs = new BitStream();
+				var sw = new StreamWriter(bs, Peach.Core.Encoding.UTF8.RawEncoding);
+				var jsonWriter = new CustomJsonWriter(sw);
+
+				elem.SerializeToJson(jsonWriter);
+
+				jsonWriter.Flush();
+				sw.Flush();
+
+				bs.Seek(0, SeekOrigin.Begin);
+				return bs;
+			}
+
+			// else bson
+			var bbs = new BitStream();
+			var bsonWriter = new CustomBsonWriter(bbs);
+
+			elem.SerializeToJson(bsonWriter);
+			bsonWriter.Flush();
+			bbs.Flush();
+			bbs.Seek(0, SeekOrigin.Begin);
+
+			return bbs;
 		}
 	}
 
 	/// <summary>
 	/// Allow writing out Binary data
 	/// </summary>
-	public class CustomJsonWriter : JsonTextWriter
+	public class CustomBsonWriter : BsonWriter, IRawWriter
+	{
+		private readonly Stream _writer;
+
+		public CustomBsonWriter(Stream writer)
+			: base(writer)
+		{
+			_writer = writer;
+		}
+
+		public void WriteTypeTransformValue(Stream bs)
+		{
+			Flush();
+
+			var origPosition = bs.Position;
+			bs.Position = 0;
+			bs.CopyTo(_writer);
+			bs.Position = origPosition;
+		}
+
+		public void WriteTypeTransformValue(byte[] buf)
+		{
+			Flush();
+
+			_writer.Write(buf, 0, buf.Length);
+		}
+	}
+
+	/// <summary>
+	/// Allow writing out Binary data
+	/// </summary>
+	public class CustomJsonWriter : JsonTextWriter, IRawWriter
 	{
 		private readonly StreamWriter _writer;
 
@@ -116,7 +188,7 @@ namespace Peach.Pro.Core
 
 		public void WriteTypeTransformValue(Stream bs)
 		{
-			WriteRaw("");
+			WriteRawValue("");
 
 			Flush();
 
@@ -124,19 +196,16 @@ namespace Peach.Pro.Core
 			bs.Position = 0;
 			bs.CopyTo(_writer.BaseStream);
 			bs.Position = origPosition;
-
-			WriteRawValue("");
 		}
 
 		public void WriteTypeTransformValue(byte[] buf)
 		{
-			WriteRaw("");
+			WriteRawValue("");
 
 			Flush();
 
 			_writer.BaseStream.Write(buf, 0, buf.Length);
 
-			WriteRawValue("");
 		}
 	}
 }
