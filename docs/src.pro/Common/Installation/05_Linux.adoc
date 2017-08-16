@@ -58,7 +58,19 @@ sudo apt-get update
 sudo apt-get install mono-complete
 
 ----
+
+.	Install libpcap using the following command:
++
+----
+sudo apt-get install libpcap
+----
+
 . Optionally, install the GNU Debugger (GDB) to enable debugging of local processes.
++
+----
+sudo apt-get install gdb
+----
+
 . Unzip the Peach distribution to the appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
@@ -122,6 +134,12 @@ sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/
 sudo yum install mono-complete-4.8.1.0-0.xamarin.1
 ----
 
+.	Install libpcap using the following command:
++
+----
+sudo yum install libpcap
+----
+
 . Unzip the Peach distribution to the appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
@@ -173,25 +191,61 @@ If you have Mono 4.4 installed,
 you can either upgrade to 4.6+ or downgrade to 4.2.
 ====
 
-. Install Mono using One-Click install file
-+
-From a web browser on SLES, browse to:
-+
-----
-http://download.mono-project.com/repo/mono-complete.ymp
-----
-+
-Or, from the command line run:
+
+The following steps provide the needed details:
+
+. Import the GPG signing key for the mono package using the following command. Note the long search key:
 +
 ----
-/sbin/OCICLI http://download.mono-project.com/repo/mono-complete.ymp
+sudo rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
 ----
+
+. Add and enable the mono project repository using the zypper configuration manager:
 +
+----
+sudo zypper ar -f http://download.mono-project.com/repo/centos/ mono
+----
+
+.	Install the latest supported version of Mono using the following command:
++
+----
+sudo zypper in mono-complete=4.8.1.0-0.xamarin.1
+----
+
+.	Install libpcap using the following command:
++
+----
+sudo zypper in libpcap
+----
+
 . Optionally, install the GNU Debugger (GDB) for debugging local processes.
++
+----
+sudo yum install gdb
+----
+
 . Unzip the Peach binary distribution to the appropriate folder.
 The file is a zip file with the extension `.zip`.
 Use the filename that begins with `peach-pro` and contains the appropriate architecture for your system,
 such as +peach-pro-{BUILDTAG}-linux_x86_64_release.zip+.
+
+[TIP]
+=====
+If you receive and error regarding libMonoPosixHelper the +/etc/mono/config+ file may need to be edited.
+To edit locate a line that looks like the following (the path may be different):
+
+----
+<dllmap dll="MonoPosixHelper" target="/usr/lib/libMonoPosixHelper.so" os="!windows" />
+----
+
+Once found use the Linux _find_ command to locate the shared library:
+
+----
+find /usr -name "*libMonoPosixHelper.so"
+----
+
+And finally, update the +/etc/mono/config+ entry to the correct path.
+=====
 
 
 ==== Other Linux Distributions
