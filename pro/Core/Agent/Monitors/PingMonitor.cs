@@ -33,7 +33,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public bool FaultOnSuccess { get; set; }
 
 		private MonitorData _data;
-
+		private IPAddress _address;
 
 		private static bool CheckPermissions()
 		{
@@ -87,6 +87,13 @@ namespace Peach.Pro.Core.Agent.Monitors
 						throw new PeachException("Error, the Ping monitor only supports IPv6 addresses on Windows.");
 				}
 			}
+
+			if (!IPAddress.TryParse(Host, out _address))
+			{
+				_address = Dns.GetHostAddresses(Host)[0];
+			}
+
+			Logger.Trace("Resolved '{0}' as '{1}'", Host, _address);
 		}
 
 		public override bool DetectedFault()
@@ -107,8 +114,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 						count++;
 						Logger.Trace("DetectedFault(): Checking for fault, attempt #{0} to ping {1}", count, Host);
 						reply = string.IsNullOrEmpty(Data)
-							? ping.Send(Host, Timeout)
-							: ping.Send(Host, Timeout, Encoding.UTF8.GetBytes(Data));
+							? ping.Send(_address, Timeout)
+							: ping.Send(_address, Timeout, Encoding.UTF8.GetBytes(Data));
 						Debug.Assert(reply != null);
 					}
 					while (RetryCount >= count && reply.Status != IPStatus.Success);
