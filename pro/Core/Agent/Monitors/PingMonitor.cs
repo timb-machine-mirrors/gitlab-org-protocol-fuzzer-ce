@@ -109,8 +109,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		{
 			if (Platform.IsRunningOnMono())
 			{
-				Logger.Trace("Using MonoPing");
-
 				using (var ping = new MonoPing())
 				{
 					return string.IsNullOrEmpty(Data)
@@ -121,7 +119,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 			using (var ping = new Ping())
 			{
-				Logger.Trace("Using Microsoft.NET Ping");
 				var reply = string.IsNullOrEmpty(Data)
 					? ping.Send(address, timeout)
 					: ping.Send(address, timeout, Encoding.UTF8.GetBytes(data));
@@ -265,6 +262,10 @@ namespace Peach.Pro.Core.Agent.Monitors
 		}
 	}
 
+	/// <summary>
+	/// Port of the Mono 5 Ping class to work around several bugs in the Mono 4.8.1 Ping.
+	/// This would also allow us to add IPv6 support if wanted.
+	/// </summary>
 	public class MonoPing : Component, IDisposable
 	{
 		[StructLayout(LayoutKind.Sequential)]
@@ -283,7 +284,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		}
 
 		const int DefaultCount = 1;
-		static bool canSendPrivileged;
 		const int default_timeout = 4000; // 4 sec.
 		ushort identifier;
 
@@ -295,21 +295,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 		CancellationTokenSource cts;
 
-		public event PingCompletedEventHandler PingCompleted;
-
-		static MonoPing()
-		{
-			if (Environment.OSVersion.Platform == PlatformID.Unix)
-			{
-				CheckLinuxCapabilities();
-				if (!canSendPrivileged && WindowsIdentity.GetCurrent().Name == "root")
-					canSendPrivileged = true;
-
-			}
-			else
-				canSendPrivileged = true;
-		}
-
 		public MonoPing()
 		{
 			// Generate a new random 16 bit identifier for every ping
@@ -319,53 +304,8 @@ namespace Peach.Pro.Core.Agent.Monitors
 			identifier = (ushort)(randomIdentifier[0] + (randomIdentifier[1] << 8));
 		}
 
-		[DllImport("libc", EntryPoint = "capget")]
-		static extern int capget(ref cap_user_header_t header, ref cap_user_data_t data);
-
-		static void CheckLinuxCapabilities()
-		{
-			try
-			{
-				cap_user_header_t header = new cap_user_header_t();
-				cap_user_data_t data = new cap_user_data_t();
-
-				header.version = _LINUX_CAPABILITY_VERSION_1;
-
-				int ret = -1;
-
-				try
-				{
-					ret = capget(ref header, ref data);
-				}
-				catch (Exception)
-				{
-				}
-
-				if (ret == -1)
-					return;
-
-				canSendPrivileged = (data.effective & (1 << 13)) != 0;
-			}
-			catch
-			{
-				canSendPrivileged = false;
-			}
-		}
-
 		void IDisposable.Dispose()
 		{
-		}
-
-		protected void OnPingCompleted(PingCompletedEventArgs e)
-		{
-			if (cts != null)
-			{
-				cts.Dispose();
-				cts = null;
-			}
-
-			if (PingCompleted != null)
-				PingCompleted(this, e);
 		}
 
 		// Sync
@@ -453,8 +393,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 
 					try
 					{
-						rc = s.ReceiveFrom(bytes, 0, 100, SocketFlags.None,
-							ref endpoint);
+						rc = s.ReceiveFrom(bytes, 0, 100, SocketFlags.None, ref endpoint);
 					}
 					catch (SocketException e)
 					{
@@ -957,6 +896,5 @@ namespace Peach.Pro.Core.Agent.Monitors
 			// internal IPOptions options;
 			// internal IntPtr data; data os after tjos
 		}
-
 	}
 }
