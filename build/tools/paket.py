@@ -74,10 +74,12 @@ class Package(object):
 
 	def make_nuget_lib(self, bld, fx, node, is_ref):
 		# print 'make: %s, %s, %s' % (fx, node, is_ref)
+		# nuget_lib will make a fake_csshlib which will
+		# cause install_outputs() to be called and it will
+		# put the .dll, .pdb and .config into the ${BINDIR}
 		tg = bld(
 			name='%s:%s:%s:%s' % (self.group, self.name, fx, node.name),
 			install_path = '${BINDIR}',
-			install_644 = node.parent.ant_glob("*.config"),
 			features='nuget_lib',
 			node=node,
 			is_ref=is_ref
