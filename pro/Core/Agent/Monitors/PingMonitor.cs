@@ -293,8 +293,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 		static readonly byte[] default_buffer = new byte[0];
 
 
-		CancellationTokenSource cts;
-
 		public MonoPing()
 		{
 			// Generate a new random 16 bit identifier for every ping
