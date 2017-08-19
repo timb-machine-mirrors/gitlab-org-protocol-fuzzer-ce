@@ -1,57 +1,39 @@
 [[Brand_new_items]]
-== What's new in Peach Platform v{VER_MAJOR}.{VER_MINOR} (2016 Q3)
+== What's new in Peach Platform v{VER_MAJOR}.{VER_MINOR} (2017 Q3)
 
-This is our third release of 2016.
-This release focuses on adding Web API testing capabilities. If you are interested in using a new feature that has been added to an existing license,
-re-download Peach Fuzzer by visiting https://dl.peachfuzzer.com.
+This release focuses on bug fixes and expanding the data modeling capabilities of {product}.
 
-=== Peach FuzzFlex Licensing Model
+=== Frag Acknowledgements 
 
-Peach Fuzzer’s FuzzFlex solution allows organizations to scale Peach Fuzzer to meet their needs and budget. FuzzFlex users experience the full power of the platform: unlimited concurrencies, access to a library of over 100 off-the-shelf Peach Pits, developer access to support custom protocols. FuzzFlex users purchase test cases in batches of 100k.
-Each test case that Peach executes is considered one 'use' of the Peach license against the
-total number of test cases purchased.
-
-Please contact sales@peachfuzzer.com for more information about this new licensing model.
-
-=== Peach Download Site
-
-A new download site has been deployed that supports both our existing licensing system for Professional and Enterprise users as well as our new FuzzFlex licensing system.
-The new download site improves the download speed and responsiveness of the site.
-
-=== Peach Professional/Enterprise
-
-Descriptions of new features and improvements for Professional and Enterprise follow:
-
-==== Web Action
-
-A new action 'web' has been added in this release allowing for much easier modeling
-of web api requests.  This action can only be used with the new WebApi publishers.
+The Frag element was expanded to include acknowledgements.
+The acknowledgement is an optional DataModel included in the Frag element.
+When outputting fragments, the state model will try and receive an acknowledgement after each transmission.
+When inputting fragments, the state model will automatically transmit an acknowledgement after each reception.
+This allows for modeling more advanced fragmentation schemes.
+Lastly, how DataSets are applied to Frag elements was improved.
+The user can now specify if the data set contains a sequence of fragments or the reassembled payload.
 See the developer guide for more information.
 
-==== WebApi Publisher
+=== JsonRaw Element
 
-A new publisher has been added that supports the new 'web' action type.
+A new JsonRaw element was added.
+This element is used to embeded raw string or binary data into a JSON document.
 See the developer guide for more information.
 
-==== Updated Swagger Analyzer
+=== BSON Support
 
-The Swagger analyzer has been updated to generate web actions.
+The JSON modeling elements were expanded to allow encoding as BSON data.
 See the developer guide for more information.
 
-==== Updated Postman Analyzer
+=== SSH Process Monitor
 
-The Postman analyzer has been updated to generate web actions.
-See the developer guide for more information.
+A new SSH Process monitor was added.
+This monitor works the same as the current Process monitor, however the monitoring is performed over an SSH connection.
+This enables monitoring of remote processes on target systems that are unable to run a Peach Agent.
 
-==== Updated WindowsDebugger Monitor
+=== ASTM Pit
 
-The WindowsDebugger monitor has been updated with new options to ignore first chance read A/V exceptions.
-This facilitates easier usage with targets that host the JVM.
-See the developer guide for more information.
-
-==== Scripts Folder
-
-A new top level folder +Scripts+ has been added that contains global python modules.
-A new peach.webproxy module has been added to enable scripting extensions for the web proxy feature.
+ASTM is a protocol used for the two-way transmission of requests and results between laboratory instruments and information systems.
+The pit library was expanded to enable testing of ASTM host devices and ASTM instruments.
 
 // end
