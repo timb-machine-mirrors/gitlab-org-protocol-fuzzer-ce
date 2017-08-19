@@ -98,6 +98,13 @@ a _JsonInteger_ element,
 and a _JsonBlob_ element can exist in the same _JsonObject_.
 A _JsonObject_ can contain other _JsonObjects_, or nest, as deeply as needed.
 
+xref:JsonRaw[]::
++
+The _JsonRaw_ element is used to embeded raw string or binary data into a JSON document.
+This allows creation of json that does not adhere to the JSON specification.
++
+This is a container element that is able to host other data elements.
+
 xref:JsonString[]::
 +
 Represents a JSON string of Unicode characters.
@@ -189,6 +196,8 @@ include::JsonDouble.adoc[]
 include::JsonInteger.adoc[]
 
 include::JsonObject.adoc[]
+
+include::JsonRaw.adoc[]
 
 include::JsonString.adoc[]
 
