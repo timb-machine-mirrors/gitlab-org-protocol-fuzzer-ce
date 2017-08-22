@@ -6,7 +6,8 @@ from waflib import Utils, Task, Logs, Options, Errors
 testlock = Utils.threading.Lock()
 
 def prepare_nunit_test(self):
-	self.ut_nunit = self.generator.bld.path.make_node(['${BINDIR}', 'nunit3-console.exe'])
+	bindir = Utils.subst_vars('${BINDIR}', self.env)
+	self.ut_nunit = self.generator.bld.path.make_node([bindir, 'nunit3-console.exe'])
 	self.ut_cwd = self.ut_nunit.parent.abspath()
 	self.ut_exec = []
 
@@ -111,6 +112,7 @@ class utest(Task.Task):
 		if opts.trace:
 			env.update({ 'PEACH_TRACE' : '1' })
 
+		print self.ut_exec
 		retcode = Utils.subprocess.call(self.ut_exec, cwd=cwd, env=env)
 
 		tup = (getattr(self, 'ut_nunit', self.inputs[0]).name, retcode)
