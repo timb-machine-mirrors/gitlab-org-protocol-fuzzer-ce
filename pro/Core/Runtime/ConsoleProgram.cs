@@ -538,7 +538,8 @@ namespace Peach.Pro.Core.Runtime
 			// Parse pit.xml.config to poopulate system defines and add
 			// -D command line overrides.
 			// This will succeed even if pitConfig doesn't exist.
-			var defs = PitDefines.ParseFile(xmlConfig, _definedValues);
+			
+			var defs = PitDefines.ParseFile(xmlConfig, _definedValues, _config.id);
 
 			foreach (var item in _configFiles)
 			{

@@ -492,6 +492,25 @@ namespace Peach.Pro.Core
 		/// </summary>
 		/// <param name="fileName">Config file to deserialize.</param>
 		/// <param name="pitLibraryPath">Value of PitLibraryPath system define.</param>
+		/// <param name="jobId">Job identifer.</param>
+		/// <param name="includeSystemDefs">Whether to include system defines</param>
+		/// <returns></returns>
+		public static PitDefines ParseFile(string fileName, string pitLibraryPath, Guid jobId, bool includeSystemDefs = true)
+		{
+			if (pitLibraryPath == null)
+				throw new ArgumentNullException("pitLibraryPath");
+
+			return ParseFile(fileName, pitLibraryPath, null, jobId, includeSystemDefs);
+		}
+
+		/// <summary>
+		/// Deserialize a pit defines file.
+		/// 1. If the file does not exist, an empty defines object will be returned.
+		/// 2. The returned object will include all the SystemDefines.
+		/// 3. PitLibraryPath system define will be set to pitLibraryPath argument.
+		/// </summary>
+		/// <param name="fileName">Config file to deserialize.</param>
+		/// <param name="pitLibraryPath">Value of PitLibraryPath system define.</param>
 		/// <param name="includeSystemDefs">Whether to include system defines</param>
 		/// <returns></returns>
 		public static PitDefines ParseFile(string fileName, string pitLibraryPath, bool includeSystemDefs = true)
@@ -499,7 +518,7 @@ namespace Peach.Pro.Core
 			if (pitLibraryPath == null)
 				throw new ArgumentNullException("pitLibraryPath");
 
-			return ParseFile(fileName, pitLibraryPath, null, includeSystemDefs);
+			return ParseFile(fileName, pitLibraryPath, null, Guid.Empty, includeSystemDefs);
 		}
 
 		/// <summary>
@@ -511,13 +530,14 @@ namespace Peach.Pro.Core
 		/// </summary>
 		/// <param name="fileName">Config file to deserialize.</param>
 		/// <param name="overrides">Command line overrides.</param>
+		/// <param name="jobId">Job identifer.</param>
 		/// <returns></returns>
-		public static PitDefines ParseFile(string fileName, IEnumerable<KeyValuePair<string, string>> overrides)
+		public static PitDefines ParseFile(string fileName, IEnumerable<KeyValuePair<string, string>> overrides, Guid jobId)
 		{
 			if (overrides == null)
 				throw new ArgumentNullException("overrides");
 
-			return ParseFile(fileName, null, overrides);
+			return ParseFile(fileName, null, overrides, jobId);
 		}
 
 		public static PitDefines ParseFile(
@@ -526,12 +546,22 @@ namespace Peach.Pro.Core
 			IEnumerable<KeyValuePair<string, string>> overrides,
 			bool includeSystemDefs = true)
 		{
+			return ParseFile(fileName, pitLibraryPath, overrides, Guid.Empty, includeSystemDefs);
+		}
+
+		public static PitDefines ParseFile(
+			string fileName,
+			string pitLibraryPath,
+			IEnumerable<KeyValuePair<string, string>> overrides,
+			Guid jobId,
+			bool includeSystemDefs = true)
+		{
 			if (!File.Exists(fileName))
-				return Parse(null, pitLibraryPath, overrides, includeSystemDefs);
+				return Parse(null, pitLibraryPath, overrides, jobId, includeSystemDefs);
 
 			using (var stream = File.OpenRead(fileName))
 			{
-				return Parse(stream, pitLibraryPath, overrides, includeSystemDefs);
+				return Parse(stream, pitLibraryPath, overrides, jobId, includeSystemDefs);
 			}
 		}
 
@@ -539,6 +569,7 @@ namespace Peach.Pro.Core
 			Stream stream,
 			string pitLibraryPath,
 			IEnumerable<KeyValuePair<string, string>> overrides,
+			Guid jobId,
 			bool includeSystemDefs = true)
 		{
 			var defs = stream != null ? XmlTools.Deserialize<PitDefines>(stream) : new PitDefines();
@@ -546,6 +577,13 @@ namespace Peach.Pro.Core
 			if (includeSystemDefs)
 			{
 				defs.SystemDefines.AddRange(new Define[] {
+					new SystemDefine
+					{
+						Key = "Peach.JobId",
+						Name = "Peach Job Id",
+						Description = "Job ID for current fuzzing run",
+						Value = jobId.ToString()
+					},
 					new SystemDefine {
 						Key = "Peach.OS",
 						Name = "Peach OS",

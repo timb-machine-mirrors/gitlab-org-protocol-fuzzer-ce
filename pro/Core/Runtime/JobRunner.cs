@@ -207,7 +207,7 @@ namespace Peach.Pro.Core.Runtime
 							CompleteTestEvents.Last
 						);
 
-						var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
+						var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath, _config.id);
 						var evaluated = defs.Evaluate();
 						PitInjector.InjectDefines(_pitConfig, defs, evaluated);
 
@@ -223,7 +223,7 @@ namespace Peach.Pro.Core.Runtime
 			}
 			else
 			{
-				var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath);
+				var defs = PitDefines.ParseFile(pitConfigFile, _pitLibraryPath, _config.id);
 				var evaluated = defs.Evaluate();
 				PitInjector.InjectDefines(_pitConfig, defs, evaluated);
 				return evaluated;
