@@ -647,7 +647,7 @@ namespace Peach.Pro.Test.Core.WebServices
 
 				var cfgFile = Path.Combine(_root.Path, "Image", "IMG.xml.config");
 				var extras = new List<KeyValuePair<string, string>>();
-				var defs = PitDefines.ParseFile(cfgFile, extras);
+				var defs = PitDefines.ParseFile(cfgFile, extras, Guid.Empty);
 
 				var evaluated = defs.Evaluate();
 				PitInjector.InjectDefines(cfg, defs, evaluated);

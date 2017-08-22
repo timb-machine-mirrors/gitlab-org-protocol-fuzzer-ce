@@ -255,7 +255,7 @@ namespace Peach.Pro.Test.Core
 
 			using (var f = new TempFile(xml))
 			{
-				var defs = PitDefines.ParseFile(f.Path, overrides);
+				var defs = PitDefines.ParseFile(f.Path, overrides, Guid.Empty);
 
 				Assert.AreEqual(9, defs.SystemDefines.Count);
 				Assert.AreEqual(1, defs.Platforms.Count);
@@ -307,7 +307,7 @@ namespace Peach.Pro.Test.Core
 
 			using (var f = new TempFile(xml))
 			{
-				var defs = PitDefines.ParseFile(f.Path, overrides);
+				var defs = PitDefines.ParseFile(f.Path, overrides, Guid.Empty);
 
 				Assert.AreEqual(9, defs.SystemDefines.Count);
 				Assert.AreEqual(2, defs.Platforms.Count);
