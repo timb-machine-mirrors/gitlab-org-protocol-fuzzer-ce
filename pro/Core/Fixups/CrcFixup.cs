@@ -71,13 +71,16 @@ namespace Peach.Pro.Core.Fixups
 
 				return new Variant((ushort)Crc16Dnp3.ComputeChecksum(buff));
 			}
-			else if (type == CRCTool.CRCCode.CRC8_MOD256)
+
+			if (type == CRCTool.CRCCode.CRC8_MOD256)
 			{
 				byte crc = 0;
-
-				while (data.Position < data.Length)
+				unchecked
 				{
-					crc += (byte)data.ReadByte();
+					while (data.Position < data.Length)
+					{
+						crc += (byte) data.ReadByte();
+					}
 				}
 
 				return new Variant((byte)crc);
