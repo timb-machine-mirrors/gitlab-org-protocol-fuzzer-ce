@@ -5,6 +5,7 @@ using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using Peach.Core.Dom;
 using Peach.Core.IO;
 using Peach.Pro.Core.Dom;
 using Peach.Pro.Core.WebServices;
@@ -133,7 +134,17 @@ namespace Peach.Pro.Core
 			var bbs = new BitStream();
 			var bsonWriter = new CustomBsonWriter(bbs);
 
-			elem.SerializeToJson(bsonWriter);
+			if (elem is DataElementContainer)
+			{
+				elem.SerializeToJson(bsonWriter);
+			}
+			else
+			{
+				bsonWriter.WriteStartArray();
+				elem.SerializeToJson(bsonWriter);
+				bsonWriter.WriteEndArray();
+			}
+
 			bsonWriter.Flush();
 			bbs.Flush();
 			bbs.Seek(0, SeekOrigin.Begin);
@@ -157,6 +168,8 @@ namespace Peach.Pro.Core
 
 		public void WriteTypeTransformValue(Stream bs)
 		{
+			WriteUndefined();
+
 			Flush();
 
 			var origPosition = bs.Position;
