@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+TARGET="${TARGET:-Peach.exe}"
+
+# Optionally souurce a user's environment file
+USER_ENV="$(dirname ${0})/Peach.user.env"
+if [ -e "${USER_ENV}" ]; then
+	source ${USER_ENV}
+	ERRORCODE=$?
+	if [[ $ERRORCODE -ne 0 ]]; then
+		exit $ERRORCODE
+	fi
+fi
+
 # Detect OS, Distribution, Version
 
 OS=unknown
@@ -7,11 +19,14 @@ DIST=unknown
 DIST_LIKE=unknown
 DIST_VERSION=unknown
 
-if [ "$(uname)" == "Darwin" ]; then
-    # Do something under Mac OS X platform        
+if [ "${SKIP_OS_DETECT}" == "true" ]; then
+	# Skip platform detection
+	SKIP_OS_DETECT="true"
+elif [ "$(uname)" == "Darwin" ]; then
+	# Do something under Mac OS X platform
 	OS=darwin
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    # Do something under GNU/Linux platform
+	# Do something under GNU/Linux platform
 	OS=linux
 	# ## Detect Linux distribution
 	if [ -f /etc/os-release ]; then
@@ -60,15 +75,15 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 	DIST_VERSION=${DIST_VERSION,,}
 
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-    # Do something under 32 bits Windows NT platform
+	# Do something under 32 bits Windows NT platform
 	OS=windows
 	DIST=mingw
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-    # Do something under 64 bits Windows NT platform
+	# Do something under 64 bits Windows NT platform
 	OS=windows
 	DIST=mingw
 elif [ "$(expr substr $(uname -s) 1 9)" == "CYGWIN_NT" ]; then
-    # Do something under 64 bits Windows NT platform
+	# Do something under 64 bits Windows NT platform
 	OS=windows
 	DIST=cygwin
 fi
@@ -145,6 +160,6 @@ then
 	echo "See: http://www.mono-project.com/docs/getting-started/install"
 fi
 
-${MONO} --gc=sgen ${DEBUG} ${DIRNAME}/Peach.exe $@
+${MONO} --gc=sgen ${DEBUG} ${DIRNAME}/${TARGET} $@
 
 # end
