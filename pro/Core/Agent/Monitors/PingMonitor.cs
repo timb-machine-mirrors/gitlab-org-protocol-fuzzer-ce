@@ -123,10 +123,14 @@ namespace Peach.Pro.Core.Agent.Monitors
 					? ping.Send(address, timeout)
 					: ping.Send(address, timeout, Encoding.UTF8.GetBytes(data));
 
+				MonoPing.PingOptions options = null;
+				if (reply.Options != null)
+					options = new MonoPing.PingOptions(reply.Options.Ttl, reply.Options.DontFragment);
+
 				return new MonoPing.PingReply(
 					reply.Address, 
 					reply.Buffer, 
-					new MonoPing.PingOptions(reply.Options.Ttl, reply.Options.DontFragment), 
+					options, 
 					reply.RoundtripTime, 
 					reply.Status);
 			}

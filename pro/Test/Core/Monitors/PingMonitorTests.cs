@@ -166,38 +166,27 @@ namespace Peach.Pro.Test.Core.Monitors
 		public void TestBadHost()
 		{
 			// RFC6761 says .invalid is guranteed to be an invalid TLD
-			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
-			{
-				{ "Host", "some.host.invalid" },
-			});
+			var ex = Assert.Throws<PeachException>(() => 
+				new MonitorRunner("Ping", new Dictionary<string, string>
+				{
+					{ "Host", "some.host.invalid" },
+				}).Run());
 
-			var faults = runner.Run();
-
-			Verify(faults, "(Could not resolve host)|(No such host is known)", true);
+			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", ex.Message);
 		}
 
 		[Test]
 		public void TestBadHostSuccess()
 		{
 			// RFC6761 says .invalid is guranteed to be an invalid TLD
-			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
-			{
-				{ "Host", "some.host.invalid" },
-				{ "FaultOnSuccess", "true" },
-			})
-			{
-				DetectedFault = m =>
+			var ex = Assert.Throws<PeachException>(() =>
+				new MonitorRunner("Ping", new Dictionary<string, string>
 				{
-					Assert.False(m.DetectedFault(), "Monitor should not detect fault");
+					{ "Host", "some.host.invalid" },
+					{ "FaultOnSuccess", "true" },
+				}).Run());
 
-					// Trigger data collection
-					return true;
-				}
-			};
-
-			var faults = runner.Run();
-
-			Verify(faults, "(Could not resolve host)|(No such host is known)", false);
+			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", ex.Message);
 		}
 
 		[TestCase(1000)]
