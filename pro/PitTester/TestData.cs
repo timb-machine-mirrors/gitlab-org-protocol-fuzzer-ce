@@ -258,12 +258,27 @@ namespace Peach.Pro.PitTester
 			public override string ActionType { get { return "setProperty"; } }
 		}
 
+		public enum ValueType
+		{
+			[XmlEnum("hex")]
+			Hex,
+			[XmlEnum("text")]
+			Text,
+			[XmlEnum("xml")]
+			Xml
+		}
+
 		public abstract class DataAction : Action
 		{
 			protected DataAction()
 			{
 				Payload = new byte[0];
+				ValueType = ValueType.Hex;
 			}
+
+			[XmlAttribute("valueType")]
+			[DefaultValue(TestData.ValueType.Hex)]
+			public ValueType ValueType { get; set; }
 
 			[XmlIgnore]
 			public byte[] Payload { get; private set; }
@@ -273,8 +288,16 @@ namespace Peach.Pro.PitTester
 			{
 				get
 				{
-					var msg = Utilities.HexDump(Payload, 0, Payload.Length);
-					return new XmlNode[] { new XmlDocument().CreateCDataSection(msg) };
+					if (ValueType == ValueType.Hex)
+					{
+						var msg = Utilities.HexDump(Payload, 0, Payload.Length);
+						return new XmlNode[] {new XmlDocument().CreateCDataSection(msg)};
+					}
+					else
+					{
+						var msg = Encoding.UTF8.GetString(Payload);
+						return new XmlNode[] { new XmlDocument().CreateTextNode(msg) };
+					}
 				}
 				set
 				{
@@ -287,7 +310,9 @@ namespace Peach.Pro.PitTester
 					if (value.Length != 1)
 						throw new InvalidOperationException();
 
-					Payload = FromCData(value[0].Value);
+					Payload = ValueType == ValueType.Hex
+						? FromCData(value[0].Value)
+						: Encoding.UTF8.GetBytes(value[0].Value);
 				}
 			}
 		}

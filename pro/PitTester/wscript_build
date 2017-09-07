@@ -6,11 +6,14 @@ deps = [
 	'System.dll',
 	'System.Core.dll',
 	'System.Xml.dll',
+	'Facades/System.Runtime.dll',
+	'Facades/System.Collections.dll',
 ]
 
 pkgs = [
 	'NLog',
 	'NUnit',
+	'DiffPlex',
 ]
 
 bld(
@@ -19,7 +22,15 @@ bld(
 	use = deps,
 	use_packages = pkgs,
 	paket_settings = dict(
-		frameworks = ['net45'],
+		frameworks = [
+			'net45',
+			'netstandard1.0'
+		],
+		excludes = [
+			'Microsoft.CodeAnalysis.Analyzers',
+			'NETStandard.Library',
+			'System.Diagnostics.Contracts',
+		],
 	),
 	source = bld.path.ant_glob('**/*.cs'),
 )

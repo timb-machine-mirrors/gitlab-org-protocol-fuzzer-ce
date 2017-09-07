@@ -2,6 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml;
+using DiffPlex;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using NLog;
 using Peach.Core;
 using Peach.Core.Dom;
@@ -250,7 +255,12 @@ namespace Peach.Pro.PitTester
 			}
 
 			var cb = new ConsoleBuffer();
-			if (BinDiff(dataModel, expected, actual, skipList, cb))
+
+			var different = data.ValueType == TestData.ValueType.Xml
+				? XmlDiff(expected, actual, cb)
+				: BinDiff(dataModel, expected, actual, skipList, cb);
+
+			if (different)
 			{
 				string msg;
 				if (data.Ignore)
@@ -310,8 +320,14 @@ namespace Peach.Pro.PitTester
 			if (Logger.IsDebugEnabled)
 				Logger.Debug("\n\n" + Utilities.HexDump(actual, 0, actual.Length));
 
+
 			var cb = new ConsoleBuffer();
-			if (BinDiff(new DataModel(), expected, actual, new List<Tuple<string, long, long>>(), cb))
+
+			var different = data.ValueType == TestData.ValueType.Xml
+				? XmlDiff(expected, actual, cb)
+				: BinDiff(new DataModel(), expected, actual, new List<Tuple<string, long, long>>(), cb);
+
+			if (different)
 			{
 				string msg;
 				if (data.Ignore)
@@ -327,7 +343,67 @@ namespace Peach.Pro.PitTester
 				if (!data.Ignore)
 					FireError(msg);
 			}
+		}
 
+		static string NormalizeXml(byte[] bytes)
+		{
+			var ms = new MemoryStream(bytes);
+			var rdr = XmlReader.Create(ms);
+
+			var doc = new XmlDocument();
+			doc.Load(rdr);
+
+			var sb = new StringBuilder();
+
+			var writer = XmlWriter.Create(sb, new XmlWriterSettings
+			{
+				Indent = true,
+				IndentChars = "    ",
+				NewLineChars = "\n",
+				Encoding = System.Text.Encoding.UTF8,
+				OmitXmlDeclaration = true,
+				NewLineHandling = NewLineHandling.Replace
+			});
+
+			doc.WriteTo(writer);
+			writer.Flush();
+
+			sb.Append('\n');
+
+			return sb.ToString();
+		}
+
+		bool XmlDiff(byte[] expected, byte[] actual, ConsoleBuffer cb)
+		{
+			var expectedText = NormalizeXml(expected);
+			var actualText = NormalizeXml(actual);
+
+			var diffBuilder = new InlineDiffBuilder(new Differ());
+			var diff = diffBuilder.BuildDiffModel(expectedText, actualText);
+
+			var different = false;
+
+			foreach (var line in diff.Lines)
+			{
+				switch (line.Type)
+				{
+					case ChangeType.Inserted:
+						cb.Append(ConsoleColor.Red, ConsoleColor.Black, "+ " + line.Text);
+						different = true;
+						break;
+					case ChangeType.Deleted:
+						cb.Append(ConsoleColor.Green, ConsoleColor.Black, "- " + line.Text);
+						different = true;
+						break;
+					default:
+						cb.Append(ConsoleColor.White, ConsoleColor.Black, "  " + line.Text);
+						break;
+				}
+
+				cb.Append("\n");
+			}
+
+			return different;
 		}
 
 		bool BinDiff(DataModel dataModel, byte[] expected, byte[] actual, List<Tuple<string, long,long>> skipList, ConsoleBuffer cb)

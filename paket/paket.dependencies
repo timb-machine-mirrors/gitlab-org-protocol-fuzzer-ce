@@ -5,6 +5,7 @@ source https://www.nuget.org/api/v2
 nuget Aspose.Words 15.3.0
 nuget Autofac.WebApi2.Owin 3.3.0
 nuget Dapper 1.42
+nuget DiffPlex 1.4.1
 nuget DotNetZip 1.9.8
 nuget Lextm.SharpSnmpLib 9.0.1
 nuget Microsoft.AspNet.WebPages 3.2.3

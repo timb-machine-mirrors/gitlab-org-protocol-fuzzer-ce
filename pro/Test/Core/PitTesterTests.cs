@@ -896,5 +896,111 @@ SGVsbG8=
 				);
 			}
 		}
+
+		[Test]
+		public void TestTextOutput()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Out' type='output'>
+				<DataModel name='Out'>
+					<String value='Hello World' />
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData pit='test.xml'>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Out' publisher='Pub'/>
+		<Output action='TheState.Initial.Out' valueType='text' publisher='Pub'>Hello World</Output>
+	</Test>
+</TestData>
+";
+
+			using (var tmpDir = new TempDirectory())
+			{
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				ThePitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
+			}
+		}
+
+
+		[Test]
+		public void TestXmlOutput()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='Out' type='output'>
+				<DataModel name='Out'>
+					<XmlElement elementName='Foo'>
+						<XmlAttribute attributeName='attr'>
+							<String value='attr-value' />
+						</XmlAttribute>
+						<XmlElement elementName='InnerFoo' />
+						<XmlElement elementName='InnerFoo'>
+							<String value='Inner Text' />
+						</XmlElement>
+					</XmlElement>
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData pit='test.xml'>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.Out' publisher='Pub'/>
+		<Output action='TheState.Initial.Out' valueType='xml' publisher='Pub'>
+<![CDATA[
+<Foo	attr='attr-value' >
+
+		<InnerFoo          />
+        <InnerFoo>Inner Text</InnerFoo>
+
+</Foo>
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+
+			using (var tmpDir = new TempDirectory())
+			{
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				ThePitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
+			}
+		}
 	}
 }
