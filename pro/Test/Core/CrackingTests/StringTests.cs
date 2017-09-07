@@ -6,6 +6,7 @@ using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Cracker;
 using Peach.Core.Dom;
+using Peach.Core.IO;
 using Peach.Core.Test;
 
 namespace Peach.Pro.Test.Core.CrackingTests
@@ -15,14 +16,33 @@ namespace Peach.Pro.Test.Core.CrackingTests
 	[Peach]
 	class StringTests
 	{
+		[Test] public void CrackStringInvalidUnicodeFailure()
+		{
+			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
+			             "	<DataModel name=\"TheDataModel\">" +
+			             "		<String/>" +
+			             "		<String value='\r\n' token='true'/>" +
+			             "		<String/>" +
+			             "	</DataModel>" +
+			             "</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var data = new BitStream(new byte[]{ 0x31, 0x35, 0x38, 0xDE, 0x0D, 0x0A, 0x43, 0x6F });
+
+			var cracker = new DataCracker();
+			Assert.Throws<CrackingFailure>(() => cracker.CrackData(dom.dataModels[0], data));
+		}
+
 		[Test]
 		public void CrackSizedString()
 		{
 			string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Peach>\n" +
-				"	<DataModel name=\"TheDataModel\">" +
-				"		<String length=\"5\"/>" +
-				"	</DataModel>" +
-				"</Peach>";
+			             "	<DataModel name=\"TheDataModel\">" +
+			             "		<String length=\"5\"/>" +
+			             "	</DataModel>" +
+			             "</Peach>";
 
 			PitParser parser = new PitParser();
 			Peach.Core.Dom.Dom dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
