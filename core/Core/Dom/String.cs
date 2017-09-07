@@ -27,6 +27,7 @@
 // $Id$
 
 using System;
+using System.IO;
 using System.Text;
 using System.Xml;
 
@@ -335,9 +336,16 @@ namespace Peach.Core.Dom
 			{
 				try
 				{
-					var rdr = new BitReader((BitwiseStream)value);
-					rdr.BaseStream.Seek(0, System.IO.SeekOrigin.Begin);
+					var rdr = new BitReader((BitwiseStream) value);
+					rdr.BaseStream.Seek(0, SeekOrigin.Begin);
 					final = rdr.ReadString(encoding);
+				}
+				catch (IOException e)
+				{
+					if (!e.Message.StartsWith("Couldn't convert last"))
+						throw;
+
+					throw new PeachException("Error, " + debugName + " value contains invalid " + stringType + " bytes.", e);
 				}
 				catch (DecoderFallbackException ex)
 				{
