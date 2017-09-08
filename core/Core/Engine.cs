@@ -547,6 +547,9 @@ namespace Peach.Core
 
 					try
 					{
+						logger.Debug("runTest: Iteration Starting: {0}, {1} =============================",
+							iterationCount, iterationTotal);
+
 						OnIterationStarting(iterationCount, iterationTotal.HasValue ? iterationStop : iterationTotal);
 
 						if (context.controlIteration)
