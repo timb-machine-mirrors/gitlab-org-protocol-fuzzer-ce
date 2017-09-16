@@ -17,9 +17,9 @@ None.
 
 _Optional:_
 
-FormatString:: 
+FormatString::
 +
-A format string in the Microsoft.NET format. Changing the format string allows controling how the number is converted to hex.  For example a value of +X2+ would produce a two digit hex number (00, 01, ...).  Defaults to +'X'+.
+A format string in the Microsoft.NET format. Changing the format string allows controling how the number is converted to hex.  For example a value of +X2+ would produce a two digit hex number (00, 01, .., FF).  Defaults to +X+.
 +
 For additional information see link:https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings[Standard Numeric Format Strings]
 
