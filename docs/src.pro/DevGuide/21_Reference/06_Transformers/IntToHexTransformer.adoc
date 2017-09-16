@@ -2,23 +2,6 @@
 [[Transformers_IntToHexTransformer]]
 == IntToHex
 
-// Reviewed:
-//  - 02/19/2014: Seth & Adam: Outlined
-// TODO:
-// Verify parameters expand parameter description
-// Full pit example using hex console
-// expand  general description
-// Identify direction / actions supported for (Input/Output/Call/setProperty/getProperty)
-// See AES for format
-// Test output, input
-
-// Updated:
-// 2/19/14: Mick
-// verified params
-// added supported actions
-// expanded description
-// added full example
-
 [horizontal]
 Type:: Encoder/Decoder
 
@@ -28,7 +11,17 @@ The xref:Transformer[Transformer] can bidirectionally transform this data from h
 
 === Parameters
 
+_Required:_
+
 None.
+
+_Optional:_
+
+FormatString:: 
++
+A format string in the Microsoft.NET format. Changing the format string allows controling how the number is converted to hex.  For example a value of +X2+ would produce a two digit hex number (00, 01, ...).  Defaults to +'X'+.
++
+For additional information see link:https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings[Standard Numeric Format Strings]
 
 === Attributes
 
