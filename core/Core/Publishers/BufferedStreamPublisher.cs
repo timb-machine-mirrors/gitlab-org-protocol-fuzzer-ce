@@ -369,7 +369,7 @@ namespace Peach.Core.Publishers
 
 					if ((DateTime.Now - start) >= TimeSpan.FromMilliseconds(Timeout))
 					{
-						Logger.Debug("WantBytes({0}): Timeout waiting for data", count);
+						Logger.Debug("WantBytes({0}): Timeout waiting for data.  Timeout is {1} ms", count, Timeout);
 						_timeout = true;
 						return;
 					}
