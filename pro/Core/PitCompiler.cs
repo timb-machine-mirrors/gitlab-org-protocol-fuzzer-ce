@@ -331,6 +331,7 @@ namespace Peach.Pro.Core
 
 		private void VerifyPit(string fileName, PitLintContext ctx)
 		{
+			var justFileName = Path.GetFileName(fileName);
 			var idxDeclaration = 0;
 #if DEBUG
 			var idxCopyright = 0;
@@ -358,51 +359,51 @@ namespace Peach.Pro.Core
 
 						var split = rdr.Value.Split('\n');
 						if (split.Length <= 1)
-							_errors.Add("Long form copyright message is missing.");
+							_errors.Add("{0}: Long form copyright message is missing.".Fmt(justFileName));
 					}
 #endif
 					else if (rdr.NodeType == XmlNodeType.Element)
 					{
 						if (rdr.Name != "Peach")
 						{
-							_errors.Add("The first xml element is not <Peach>.");
+							_errors.Add("{0}: The first xml element is not <Peach>.".Fmt(justFileName));
 							break;
 						}
 
 #if DEBUG
 						if (!rdr.MoveToAttribute("description"))
-							_errors.Add("Pit is missing description attribute.");
+							_errors.Add("{0} Pit is missing description attribute.".Fmt(justFileName));
 						else if (string.IsNullOrEmpty(rdr.Value))
-							_errors.Add("Pit description is empty.");
+							_errors.Add("{0} Pit description is empty.".Fmt(justFileName));
 
 						const string author = "Peach Fuzzer, LLC";
 
 						if (!rdr.MoveToAttribute("author"))
-							_errors.Add("Pit is missing author attribute.");
+							_errors.Add("{0}: Pit is missing author attribute.".Fmt(justFileName));
 						else if (author != rdr.Value)
-							_errors.Add("Pit author is '{0}' but should be '{1}'.".Fmt(rdr.Value, author));
+							_errors.Add("{2}: Pit author is '{0}' but should be '{1}'.".Fmt(rdr.Value, author, justFileName));
 	
 						if (!rdr.MoveToAttribute("schemaLocation", XmlSchema.InstanceNamespace))
-							_errors.Add("Pit is missing xsi:schemaLocation attribute.");
+							_errors.Add("{0}: Pit is missing xsi:schemaLocation attribute.".Fmt(justFileName));
 						else if (SchemaLocation != rdr.Value)
-							_errors.Add("Pit xsi:schemaLocation is '{0}' but should be '{1}'.".Fmt(rdr.Value, SchemaLocation));
+							_errors.Add("{2}: Pit xsi:schemaLocation is '{0}' but should be '{1}'.".Fmt(rdr.Value, SchemaLocation, justFileName));
 #endif
 
 						if (!rdr.MoveToAttribute("xmlns"))
-							_errors.Add("Pit is missing xmlns attribute.");
+							_errors.Add("{0}: Pit is missing xmlns attribute.".Fmt(justFileName));
 						else if (Namespace != rdr.Value)
-							_errors.Add("Pit xmlns is '{0}' but should be '{1}'.".Fmt(rdr.Value, Namespace));
+							_errors.Add("{2}: Pit xmlns is '{0}' but should be '{1}'.".Fmt(rdr.Value, Namespace, justFileName));
 
 						break;
 					}
 				}
 
 				if (idxDeclaration != 1)
-					_errors.Add("Pit is missing xml declaration.");
+					_errors.Add("{0}: Pit is missing xml declaration.".Fmt(justFileName));
 
 #if DEBUG
 				if (idxCopyright == 0)
-					_errors.Add("Pit is missing top level copyright message.");
+					_errors.Add("{0}: Pit is missing top level copyright message.".Fmt(justFileName));
 #endif
 			}
 
@@ -421,17 +422,17 @@ namespace Peach.Pro.Core
 				var expected = ctx.IsTest ? 1 : 0;
 
 				if (it.Count != expected)
-					_errors.Add("Number of <Test> elements is {0} but should be {1}.".Fmt(it.Count, expected));
+					_errors.Add("{2}: Number of <Test> elements is {0} but should be {1}.".Fmt(it.Count, expected, justFileName));
 
 				while (it.MoveNext())
 				{
 					var maxSize = it.Current.GetAttribute("maxOutputSize", string.Empty);
 					if (string.IsNullOrEmpty(maxSize))
-						_errors.Add("<Test> element is missing maxOutputSize attribute.");
+						_errors.Add("{0}: <Test> element is missing maxOutputSize attribute.".Fmt(justFileName));
 
 					var lifetime = it.Current.GetAttribute("targetLifetime", string.Empty);
 					if (string.IsNullOrEmpty(lifetime))
-						_errors.Add("<Test> element is missing targetLifetime attribute.");
+						_errors.Add("{0}: <Test> element is missing targetLifetime attribute.".Fmt(justFileName));
 
 					var nonDeterminisitic = it.Current.GetAttribute("nonDeterministicActions", string.Empty);
 					ctx.NonDeterministicActions = !string.IsNullOrEmpty(nonDeterminisitic) && bool.Parse(nonDeterminisitic);
@@ -444,18 +445,18 @@ namespace Peach.Pro.Core
 						if (parts.Any(fileFuzzing.Contains) || parts.Last().Contains("Client"))
 						{
 							if (lifetime != "iteration")
-								_errors.Add("<Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime));
+								_errors.Add("{1}: <Test> element has incorrect targetLifetime attribute. Expected 'iteration' but found '{0}'.".Fmt(lifetime, justFileName));
 						}
 						else
 						{
 							if (lifetime != "session")
-								_errors.Add("<Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime));
+								_errors.Add("{1}: <Test> element has incorrect targetLifetime attribute. Expected 'session' but found '{0}'.".Fmt(lifetime, justFileName));
 						}
 					}
 
 					var loggers = it.Current.Select("p:Logger", nsMgr);
 					if (loggers.Count != 0)
-						_errors.Add("Number of <Logger> elements is {0} but should be 0.".Fmt(loggers.Count));
+						_errors.Add("{1}: Number of <Logger> elements is {0} but should be 0.".Fmt(loggers.Count, justFileName));
 #endif
 					var stateModel = it.Current.Select("p:StateModel", nsMgr);
 					if (stateModel.Count == 1 && stateModel.MoveNext())
@@ -476,7 +477,7 @@ namespace Peach.Pro.Core
 								(!value.StartsWith("##") || !value.EndsWith("##")))
 							{
 								_errors.Add(
-									"<Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name) +
+									"{1}: <Publisher> parameter '{0}' is hard-coded, use a PitDefine ".Fmt(name, justFileName) +
 									"(suppress with 'Allow_HardCodedParamValue')"
 								);
 							}
@@ -496,13 +497,13 @@ namespace Peach.Pro.Core
 						var pub = ClassLoader.FindPluginByName<PublisherAttribute>(cls);
 						if (pub == null)
 						{
-							_errors.Add("<Publisher> class '{0}' is not recognized.".Fmt(cls));
+							_errors.Add("{1}: <Publisher> class '{0}' is not recognized.".Fmt(cls, justFileName));
 						}
 						else
 						{
 							var pri = pub.GetAttributes<PublisherAttribute>().First();
 							if (pri.Name != cls)
-								_errors.Add("'{0}' <Publisher> is referenced with deprecated name '{1}'.".Fmt(pri.Name, cls));
+								_errors.Add("{2}: '{0}' <Publisher> is referenced with deprecated name '{1}'.".Fmt(pri.Name, cls, justFileName));
 
 							string[] optionalParams;
 							if (!OptionalParams.TryGetValue(pri.Name, out optionalParams))
@@ -511,7 +512,7 @@ namespace Peach.Pro.Core
 							foreach (var attr in pub.GetAttributes<ParameterAttribute>())
 							{
 								if (!optionalParams.Contains(attr.name) && !parms.Contains(attr.name))
-									_errors.Add("{0} publisher missing configuration for parameter '{1}'.".Fmt(pri.Name, attr.name));
+									_errors.Add("{2}: {0} publisher missing configuration for parameter '{1}'.".Fmt(pri.Name, attr.name, justFileName));
 							}
 						}
 					}
@@ -541,25 +542,25 @@ namespace Peach.Pro.Core
 						else if (meth == "ExitIterationEvent")
 							gotEnd = true;
 						else if (!gotStart && !ShouldSkipRule(actions, "Skip_StartIterationEvent"))
-							_errors.Add(string.Format("StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'ExitIterationEvent'.", smName, meth));
+							_errors.Add(string.Format("{2}: StateModel '{0}' has an unexpected call action.  Method is '{1}' and should be 'StartIterationEvent' or 'ExitIterationEvent'.", smName, meth, justFileName));
 					}
 
 					if (!gotStart)
-						_errors.Add(string.Format("StateModel '{0}' does not call agent with 'StartIterationEvent'.", smName));
+						_errors.Add(string.Format("{1}: StateModel '{0}' does not call agent with 'StartIterationEvent'.", smName, justFileName));
 
 					if (!gotEnd)
-						_errors.Add(string.Format("StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName));
+						_errors.Add(string.Format("{1}: StateModel '{0}' does not call agent with 'ExitIterationEvent'.", smName, justFileName));
 
 					var whenAction = sm.Current.Select("p:State/p:Action[@when]", nsMgr);
 					while (whenAction.MoveNext())
 					{
 						var when = whenAction.Current.GetAttribute("when", string.Empty);
 						if (when.Contains("controlIteration") && !ShouldSkipRule(whenAction, "Allow_WhenControlIteration"))
-							_errors.Add("Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml));
+							_errors.Add("{1}: Action has when attribute containing controlIteration: {0}".Fmt(whenAction.Current.OuterXml, justFileName));
 
 						// "context.controlIteration" is deterministic, so allow that to pass the lint check
 						if (when != "context.controlIteration" && !ctx.NonDeterministicActions && !ShouldSkipRule(whenAction, "Allow_WhenNonDeterministicActions"))
-							_errors.Add("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true': {0}".Fmt(whenAction.Current.OuterXml));
+							_errors.Add("{1}: Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true': {0}".Fmt(whenAction.Current.OuterXml, justFileName));
 					}
 				}
 
@@ -567,7 +568,7 @@ namespace Peach.Pro.Core
 				while (badValues.MoveNext())
 				{
 					if (badValues.Current.GetAttribute("valueType", "") != "hex")
-						_errors.Add("Element has value attribute with embedded newline: {0}".Fmt(badValues.Current.OuterXml));
+						_errors.Add("{1}: Element has value attribute with embedded newline: {0}".Fmt(badValues.Current.OuterXml, justFileName));
 				}
 			}
 		}
