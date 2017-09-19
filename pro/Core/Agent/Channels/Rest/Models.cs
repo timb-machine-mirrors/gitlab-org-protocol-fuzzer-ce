@@ -143,6 +143,12 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 		[JsonProperty("isControlIteration")]
 		public bool IsControlIteration { get; set; }
+
+		[JsonProperty("isIterationAfterFault")]
+		public bool IsIterationAfterFault { get; set; }
+
+		[JsonProperty("isControlRecordingIteration")]
+		public bool IsControlRecordingIteration { get; set; }
 	}
 
 	internal abstract class VariantMessage

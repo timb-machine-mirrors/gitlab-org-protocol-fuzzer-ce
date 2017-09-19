@@ -167,6 +167,8 @@ namespace Peach.Core.Dom
 				{
 					publisher.Iteration = context.test.strategy.Iteration;
 					publisher.IsControlIteration = context.controlIteration;
+					publisher.IsIterationAfterFault = context.FaultOnPreviousIteration;
+					publisher.IsControlRecordingIteration = context.controlRecordingIteration;
 				}
 
 				_dataActions.Clear();

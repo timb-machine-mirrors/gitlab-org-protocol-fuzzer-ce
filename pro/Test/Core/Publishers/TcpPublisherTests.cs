@@ -163,6 +163,13 @@ namespace Peach.Pro.Test.Core.Publishers
 			Socket.BeginAccept(OnAccept, null);
 		}
 
+		public void Stop()
+		{
+			Socket.Close();
+			Socket.Dispose();
+			Socket = null;
+		}
+
 		public void OnAccept(IAsyncResult ar)
 		{
 			try
@@ -253,6 +260,54 @@ namespace Peach.Pro.Test.Core.Publishers
 		<Publisher class=""{1}"">
 			<Param name=""{2}"" value=""127.0.0.1""/>
 			<Param name=""Port"" value=""{3}""/>
+			<Param name=""RetryMode"" value=""{4}""/>
+		</Publisher>
+	</Test>
+
+</Peach>
+";
+		public string templateListener = @"
+<Peach>
+
+	<DataModel name=""TheDataModel"">
+		<String name=""str"" value=""Hello World""/>
+	</DataModel>
+
+	<DataModel name=""TheDataModel2"">
+		<String name=""str"" value=""Hello World""/>
+	</DataModel>
+
+	<StateModel name=""ListenState"" initialState=""InitialState"">
+		<State name=""InitialState"">
+			<Action name=""Accept"" type=""accept""/>
+
+			<Action name=""Recv"" type=""input"">
+				<DataModel ref=""TheDataModel""/>
+			</Action>
+
+			<Action name=""Send"" type=""output"">
+				<DataModel ref=""TheDataModel2""/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<StateModel name=""ClientState"" initialState=""InitialState"">
+		<State name=""InitialState"">
+			<Action name=""Recv"" type=""input"">
+				<DataModel ref=""TheDataModel""/>
+			</Action>
+
+			<Action name=""Send"" type=""output"">
+				<DataModel ref=""TheDataModel2""/>
+			</Action>
+		</State>
+	</StateModel>
+
+<Test name=""Default"">
+		<StateModel ref=""{0}""/>
+		<Publisher class=""{1}"">
+			<Param name=""{2}"" value=""127.0.0.1""/>
+			<Param name=""Port"" value=""{3}""/>
 		</Publisher>
 	</Test>
 
@@ -264,7 +319,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			var cli = new SimpleTcpClient(port, clientShutdown);
 			cli.Start();
 
-			var xml = string.Format(template, "ListenState", "TcpListener", "Interface", port);
+			var xml = string.Format(templateListener, "ListenState", "TcpListener", "Interface", port);
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
@@ -311,7 +366,7 @@ namespace Peach.Pro.Test.Core.Publishers
 			var cli = new SimpleTcpServer(port, serverShutdown);
 			cli.Start();
 
-			var xml = string.Format(template, "ClientState", "TcpClient", "Host", port);
+			var xml = string.Format(template, "ClientState", "TcpClient", "Host", port, "Always");
 
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
@@ -356,7 +411,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		public void TestConnectRetry()
 		{
 			// Should throw PeachException if unable to connect during a control iteration
-			var xml = string.Format(template, "ClientState", "TcpClient", "Host", 20);
+			var xml = string.Format(template, "ClientState", "TcpClient", "Host", 20, "Always");
 			var parser = new PitParser();
 			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
 
@@ -375,6 +430,133 @@ namespace Peach.Pro.Test.Core.Publishers
 
 			Assert.Less(delta, 10500);
 			Assert.Greater(delta, 10000);
+		}
+
+		[Test]
+		public void TestConnectRetry2()
+		{
+			// Should throw PeachException if unable to connect during a control iteration
+			var xml = string.Format(template, "ClientState", "TcpClient", "Host", 20, "FirstAndAfterFault");
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration { singleIteration = true };
+
+			var e = new Engine(this);
+
+			var sw = new Stopwatch();
+			sw.Start();
+
+			Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+
+			sw.Stop();
+
+			var delta = sw.ElapsedMilliseconds;
+
+			Assert.Less(delta, 10500);
+			Assert.Greater(delta, 10000);
+		}
+
+		[Test]
+		public void TestConnectRetryNever()
+		{
+			// Should throw PeachException if unable to connect during a control iteration
+			var xml = string.Format(template, "ClientState", "TcpClient", "Host", 20, "Never");
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+
+			var config = new RunConfiguration { singleIteration = true };
+
+			var e = new Engine(this);
+
+			var sw = new Stopwatch();
+			sw.Start();
+
+			Assert.Throws<PeachException>(() => e.startFuzzing(dom, config));
+
+			sw.Stop();
+
+			var delta = sw.ElapsedMilliseconds;
+
+			Assert.Less(delta, 8500);
+		}
+
+		[Test]
+		public void TestConnectFaultOnConnectFailure()
+		{
+			var port = TestBase.MakePort(45000, 46000);
+			SimpleTcpServer cli;
+
+			// Should throw PeachException if unable to connect during a control iteration
+			var xml = @"
+<Peach>
+
+	<DataModel name=""TheDataModel"">
+		<String name=""str"" value=""Hello World""/>
+	</DataModel>
+
+	<DataModel name=""TheDataModel2"">
+		<String name=""str"" value=""Hello World""/>
+	</DataModel>
+
+	<StateModel name=""ListenState"" initialState=""InitialState"">
+		<State name=""InitialState"">
+			<Action name=""Accept"" type=""accept""/>
+
+			<Action name=""Recv"" type=""input"">
+				<DataModel ref=""TheDataModel""/>
+			</Action>
+
+			<Action name=""Send"" type=""output"">
+				<DataModel ref=""TheDataModel2""/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<StateModel name=""ClientState"" initialState=""InitialState"">
+		<State name=""InitialState"">
+			<Action name=""Recv"" type=""input"">
+				<DataModel ref=""TheDataModel""/>
+			</Action>
+
+			<Action name=""Send"" type=""output"">
+				<DataModel ref=""TheDataModel2""/>
+			</Action>
+		</State>
+	</StateModel>
+
+<Test name=""Default"" targetLifetime=""iteration"">
+		<StateModel ref=""{0}""/>
+		<Publisher class=""{1}"">
+			<Param name=""{2}"" value=""127.0.0.1""/>
+			<Param name=""Port"" value=""{3}""/>
+			<Param name=""RetryMode"" value=""{4}""/>
+		</Publisher>
+	</Test>
+
+</Peach>
+".Fmt("ClientState", "TcpClient", "Host", port, "Never");
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(Encoding.ASCII.GetBytes(xml)));
+			var fault = false;
+
+			var config = new RunConfiguration { range = true, rangeStart = 1, rangeStop = 1 };
+
+			var e = new Engine(this);
+			e.IterationStarting += (context, iteration, iterations) =>
+			{
+				if (!context.controlIteration) return;
+				cli = new SimpleTcpServer(port, false, false);
+				cli.Start();
+			};
+
+			e.Fault += (context, iteration, model, data) =>
+			{
+				fault = true;
+			};
+
+			e.startFuzzing(dom, config);
+			Assert.IsTrue(fault);
 		}
 
 		[Test]

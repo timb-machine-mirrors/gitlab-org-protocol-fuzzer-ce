@@ -75,12 +75,14 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 				_publisherUri = new Uri(_client._baseUrl, resp.Url);
 			}
 
-			public void Open(uint iteration, bool isControlIteration)
+			public void Open(uint iteration, bool isControlIteration, bool isControlRecordingIteration, bool isIterationAfterFault)
 			{
 				var req = new PublisherOpenRequest
 				{
 					Iteration = iteration,
 					IsControlIteration = isControlIteration,
+					IsControlRecordingIteration = isControlRecordingIteration,
+					IsIterationAfterFault = isIterationAfterFault
 				};
 
 				Guard("Open", () => Send("PUT", "/open", req));

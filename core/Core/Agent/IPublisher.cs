@@ -9,7 +9,7 @@ namespace Peach.Core.Agent
 	{
 		Stream InputStream { get; }
 
-		void Open(uint iteration, bool isControlIteration);
+		void Open(uint iteration, bool isControlIteration, bool isControlRecordingIteration, bool isIterationAfterFault);
 		void Close();
 		void Accept();
 		Variant Call(string method, List<BitwiseStream> args);

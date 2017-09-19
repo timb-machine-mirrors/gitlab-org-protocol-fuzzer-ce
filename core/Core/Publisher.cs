@@ -130,6 +130,20 @@ namespace Peach.Core
 			set;
 		}
 
+		/// <summary>
+		/// Is iteration after a fault has occured?
+		/// </summary>
+		public bool IsIterationAfterFault
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Is control record iteration?
+		/// </summary>
+		public bool IsControlRecordingIteration { get; set; }
+
 		#endregion
 
 		#region Implementation Functions

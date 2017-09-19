@@ -177,8 +177,10 @@ namespace Peach.Pro.Core.Agent.Channels
 				Exec("Stop", () => Proxy.Dispose());
 			}
 
-			public void Open(uint iteration, bool isControlIteration)
+			public void Open(uint iteration, bool isControlIteration, bool isControlRecordingIteration, bool isIterationAfterFault)
 			{
+				//NOTE: not updating legacy code.  depricated and should get removed.
+
 				Exec("Open", () => Proxy.Open(iteration, isControlIteration));
 			}
 
@@ -670,6 +672,7 @@ namespace Peach.Pro.Core.Agent.Channels
 
 		public void Open(uint iteration, bool isControlIteration)
 		{
+			//NOTE: not updating legacy code.  depricated and should get removed.
 			_pub.Iteration = iteration;
 			_pub.IsControlIteration = isControlIteration;
 			_pub.open();

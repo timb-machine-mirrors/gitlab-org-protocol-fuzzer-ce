@@ -70,10 +70,12 @@ namespace Peach.Core.Agent.Channels
 				_publisher = null;
 			}
 
-			public void Open(uint iteration, bool isControlIteration)
+			public void Open(uint iteration, bool isControlIteration, bool isControlRecordingIteration, bool isIterationAfterFault)
 			{
 				_publisher.Iteration = iteration;
 				_publisher.IsControlIteration = isControlIteration;
+				_publisher.IsControlRecordingIteration = isControlRecordingIteration;
+				_publisher.IsIterationAfterFault = isIterationAfterFault;
 				_publisher.open();
 			}
 

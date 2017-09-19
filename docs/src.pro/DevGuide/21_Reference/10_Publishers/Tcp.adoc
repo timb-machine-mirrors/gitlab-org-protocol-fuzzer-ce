@@ -2,11 +2,6 @@
 [[Publishers_Tcp]]
 == Tcp Client Publisher
 
-// Reviewed:
-//  - 02/13/2014: Seth & Adam: Outlined
-// Params are good
-// give full pit to run for example
-
 The _Tcp_ Client publisher connects to a remote TCP service.
 
 Since it is easy to confuse _Tcp_ Client and _TcpListener_, here's the difference:
@@ -33,6 +28,26 @@ Host:: Hostname or IP address of remote host
 Port:: Destination port number
 
 _Optional:_
+
+RetryMode:: 
++
+Connection retry method, defaults to +FirstAndAfterFault+.
++
+_Options:_
++
+Never;; Never attempt a reconnection
+FirstAndAfterFault;; Only reattempt a connection when the remote host may be have restarted by Peach. This will be on first iteration and after a fault was detected.
+Always;; Always attempt a reconnection
+
+FaultOnConnectionFailure:: Log a fault when unable to connect to remote host. Defaults to true.
+Lifetime::
++
+Lifetime of connection.  Defaults to +Iteration+.
++
+_Options:_
++
+Iteration;; Connection lasts lifetime of a testcase/iteration.
+Session;; Connection lasts lifetime of testing session. Reconnects if connection is closed, but otherwise the connection will be left open.
 
 Timeout:: How long to wait in milliseconds for data. Defaults to 3,000.
 ConnectTimeout:: How long to wait in milliseconds for a new connection. Defaults to 10,000.

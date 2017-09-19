@@ -61,7 +61,7 @@ namespace Peach.Core.Agent
 
 		protected override void OnOpen()
 		{
-			_publisher.Open(Iteration, IsControlIteration);
+			_publisher.Open(Iteration, IsControlIteration, IsControlRecordingIteration, IsIterationAfterFault);
 		}
 
 		protected override void OnClose()

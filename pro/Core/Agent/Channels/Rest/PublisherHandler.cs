@@ -82,6 +82,8 @@ namespace Peach.Pro.Core.Agent.Channels.Rest
 
 				_publisher.Iteration = args.Iteration;
 				_publisher.IsControlIteration = args.IsControlIteration;
+				_publisher.IsControlRecordingIteration = args.IsControlRecordingIteration;
+				_publisher.IsIterationAfterFault = args.IsIterationAfterFault;
 				_publisher.open();
 
 				return RouteResponse.Success();

@@ -72,6 +72,8 @@ namespace Peach.Pro.Core.Agent.Channels
 		{
 			public uint iteration { get; set; }
 			public bool isControlIteration { get; set; }
+			public bool isControlRecordingIteration { get; set; }
+			public bool isIterationAfterFault { get; set; }
 			public string Cls { get; set; }
 			public Dictionary<string, string> args { get; set; }
 		}
@@ -93,6 +95,18 @@ namespace Peach.Pro.Core.Agent.Channels
 		class IsControlIterationRequest
 		{
 			public bool isControlIteration { get; set; }
+		}
+
+		[Serializable]
+		class IsControlRecordingIteration
+		{
+			public bool isControlRecordingIteration { get; set; }
+		}
+
+		[Serializable]
+		class IsIterationAfterFault
+		{
+			public bool isIterationAfterFault { get; set; }
 		}
 
 		[Serializable]
@@ -208,10 +222,12 @@ namespace Peach.Pro.Core.Agent.Channels
 				publisher = null;
 			}
 
-			public void Open(uint iteration, bool isControlIteration)
+			public void Open(uint iteration, bool isControlIteration, bool isControlRecordingIteration, bool isIterationAfterFault)
 			{
 				publisher.Iteration = iteration;
 				publisher.IsControlIteration = isControlIteration;
+				publisher.IsControlRecordingIteration = isControlRecordingIteration;
+				publisher.IsIterationAfterFault = isIterationAfterFault;
 				publisher.open();
 			}
 
@@ -383,6 +399,8 @@ namespace Peach.Pro.Core.Agent.Channels
 				var request = new CreatePublisherRequest();
 				request.iteration = Iteration;
 				request.isControlIteration = IsControlIteration;
+				request.isControlRecordingIteration = IsControlRecordingIteration;
+				request.isIterationAfterFault = IsIterationAfterFault;
 				request.Cls = Class;
 				request.args = Args;
 
@@ -415,6 +433,12 @@ namespace Peach.Pro.Core.Agent.Channels
 				var req2 = new IsControlIterationRequest { isControlIteration = IsControlIteration };
 				Send("Set_IsControlIteration", JsonConvert.SerializeObject(req2));
 
+				var req3 = new IsControlRecordingIteration { isControlRecordingIteration = IsControlRecordingIteration };
+				Send("Set_IsControlRecordingIteration", JsonConvert.SerializeObject(req3));
+
+				var req4 = new IsIterationAfterFault { isIterationAfterFault = IsIterationAfterFault };
+				Send("Set_IsIterationAfterFault", JsonConvert.SerializeObject(req4));
+
 				Send("open");
 			}
 
@@ -439,6 +463,12 @@ namespace Peach.Pro.Core.Agent.Channels
 
 					var req2 = new IsControlIterationRequest { isControlIteration = IsControlIteration };
 					Send("Set_IsControlIteration", JsonConvert.SerializeObject(req2));
+
+					var req3 = new IsControlRecordingIteration { isControlRecordingIteration = IsControlRecordingIteration };
+					Send("Set_IsControlRecordingIteration", JsonConvert.SerializeObject(req3));
+
+					var req4 = new IsIterationAfterFault { isIterationAfterFault = IsIterationAfterFault };
+					Send("Set_IsIterationAfterFault", JsonConvert.SerializeObject(req4));
 				}
 
 				var request = new OnCallRequest();

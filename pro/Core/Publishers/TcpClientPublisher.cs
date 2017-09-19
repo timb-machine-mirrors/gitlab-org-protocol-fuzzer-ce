@@ -11,11 +11,29 @@ using Peach.Core.Dom;
 
 namespace Peach.Pro.Core.Publishers
 {
+	public enum TcpClientRetry
+	{
+		/// <summary>
+		/// Never retry connection to remote host
+		/// </summary>
+		Never,
+		/// <summary>
+		/// Retry on first connection or after fault.
+		/// </summary>
+		FirstAndAfterFault,
+		/// <summary>
+		/// Always retry connection.
+		/// </summary>
+		Always,
+	}
+
 	[Publisher("Tcp")]
 	[Alias("TcpClient")]
 	[Alias("tcp.Tcp")]
 	[Parameter("Host", typeof(string), "Hostname or IP address of remote host")]
 	[Parameter("Port", typeof(ushort), "Remote port to connect to")]
+	[Parameter("RetryMode", typeof(TcpClientRetry), "Connection retry method, defaults to FirstAndAfterFault", "FirstAndAfterFault")]
+	[Parameter("FaultOnConnectionFailure", typeof(bool), "Log a fault when unable to connect to remote host.  Defaults to true.", "true")]
 	[Parameter("Lifetime", typeof(Test.Lifetime), "Lifetime of connection (Iteration, Session)", "Iteration")]
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
 	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
@@ -28,6 +46,8 @@ namespace Peach.Pro.Core.Publishers
 		public string Host { get; protected set; }
 		public int ConnectTimeout { get; protected set; }
 		public Test.Lifetime Lifetime { get; protected set; }
+		public TcpClientRetry RetryMode { get; protected set; }
+		public bool FaultOnConnectionFailure { get; protected set; }
 
 		public TcpClientPublisher(Dictionary<string, Variant> args)
 			: base(args)
@@ -38,8 +58,25 @@ namespace Peach.Pro.Core.Publishers
 		{
 			var timeout = ConnectTimeout;
 			var sw = new Stopwatch();
+			var retryConnection = true;
 
-			for (int i = 1; _tcp == null; i *= 2)
+			switch (RetryMode)
+			{
+				case TcpClientRetry.Never:
+					retryConnection = false;
+					break;
+				
+				case TcpClientRetry.FirstAndAfterFault:
+					retryConnection = IsControlRecordingIteration || IsIterationAfterFault;
+					break;
+
+				case TcpClientRetry.Always:
+				default:
+					retryConnection = true;
+					break;
+			}
+
+			for (var i = 1; _tcp == null; i *= 2)
 			{
 				try
 				{
@@ -52,6 +89,7 @@ namespace Peach.Pro.Core.Publishers
 					var ar = _tcp.BeginConnect(Host, Port, null, null);
 					if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeout)))
 						throw new TimeoutException("Timed out connecting to remote host {0} port {1}.".Fmt(Host, Port));
+
 					_tcp.EndConnect(ar);
 				}
 				catch (Exception ex)
@@ -66,19 +104,51 @@ namespace Peach.Pro.Core.Publishers
 
 					timeout -= (int)sw.ElapsedMilliseconds;
 
-					if (timeout > 0)
+					if (retryConnection && timeout > 0)
 					{
-						int waitTime = Math.Min(timeout, i);
+						var waitTime = Math.Min(timeout, i);
 						timeout -= waitTime;
 
-						Logger.Trace("Unable to connect to remote host {0} on port {1}.  Trying again in {2}ms...", Host, Port, waitTime);
+						Logger.Debug("Unable to connect to remote host {0} on port {1}.  Trying again in {2}ms...", Host, Port, waitTime);
 						Thread.Sleep(waitTime);
+
+						continue;
 					}
-					else
-					{
-						Logger.Debug("Unable to connect to remote host {0} on port {1}.", Host, Port);
+
+					Logger.Debug("Unable to connect to remote host {0} on port {1}.", Host, Port);
+
+					if(!FaultOnConnectionFailure || IsControlIteration || IsControlRecordingIteration)
 						throw new SoftException(ex);
-					}
+
+					var fault = new FaultSummary
+					{
+						Title = "Unable to connect to remote host {0} on port {1}.".Fmt(Host, Port),
+						Description = 
+@"Peach was unable to create a TCP connection to a remote host.
+
+Host: {0}
+Port: (1)
+
+This usually means the device/software under test:
+
+ 1. Crashed or exited during testing
+ 2. Overwhelmed and could not respond correctly 
+ 3. In an invalid state and non responsive 
+ 4. Had just restarted and was unable to process the request 
+
+This can happen during testing when a series of test cases cause the 
+target service to misbehave or even crash.
+
+Extended error information:
+
+{2}".Fmt(Host, Port, ex.Message),
+
+						MajorHash = FaultSummary.Hash("{0}:{1}".Fmt(Host,Port)),
+						MinorHash = FaultSummary.Hash("{0}:{1}:{2}".Fmt(Host,Port,Iteration)),
+						Exploitablity = "Unknown"
+					};
+
+					throw new FaultException(fault);
 				}
 			}
 

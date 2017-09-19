@@ -409,7 +409,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				pub.Open(100, false);
+				pub.Open(100, false, false, false);
 				pub.Close();
 			}
 			finally
@@ -445,7 +445,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				try
 				{
-					pub.Open(100, false);
+					pub.Open(100, false, false, false);
 
 					Assert.NotNull(pub.InputStream);
 					Assert.AreEqual(0, pub.InputStream.Length);
@@ -531,13 +531,13 @@ namespace Peach.Pro.Test.Core.Agent
 
 				try
 				{
-					pub.Open(100, false);
+					pub.Open(100, false, false, false);
 					pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello")));
 					pub.Close();
 
 					Assert.AreEqual("Hello", File.ReadAllText(tmp));
 
-					pub.Open(101, false);
+					pub.Open(101, false, false, false);
 					pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello")));
 					pub.Output(new BitStream(Encoding.ASCII.GetBytes("World")));
 					pub.Close();
@@ -545,7 +545,7 @@ namespace Peach.Pro.Test.Core.Agent
 					Assert.AreEqual("HelloWorld", File.ReadAllText(tmp));
 
 
-					pub.Open(102, false);
+					pub.Open(102, false, false, false);
 					pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello")));
 					pub.Close();
 
@@ -590,7 +590,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				try
 				{
-					pub.Open(100, false);
+					pub.Open(100, false, false, false);
 
 					var v1 = pub.Call("null", args);
 
@@ -663,7 +663,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 				try
 				{
-					pub.Open(100, false);
+					pub.Open(100, false, false, false);
 
 					var ex = Assert.Throws<PeachException>(() =>
 						pub.Output(new BitStream(Encoding.ASCII.GetBytes("Hello"))));
@@ -699,7 +699,7 @@ namespace Peach.Pro.Test.Core.Agent
 
 			try
 			{
-				pub.Open(100, false);
+				pub.Open(100, false, false, false);
 
 				const string method = "GET http://foo.com/{0}";
 				var args = new List<BitwiseStream>
