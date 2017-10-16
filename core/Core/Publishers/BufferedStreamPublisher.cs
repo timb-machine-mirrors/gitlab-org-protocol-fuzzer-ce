@@ -64,6 +64,17 @@ namespace Peach.Core.Publishers
 			}
 		}
 
+		/// <summary>
+		/// Called by OnReadComplete after new data added to buffer.
+		/// </summary>
+		/// <remarks>
+		/// Allows children to perform initial processing of data
+		/// if needed.
+		/// </remarks>
+		protected virtual void HandleReadCompleted()
+		{
+		}
+
 		protected void OnReadComplete(IAsyncResult ar)
 		{
 			lock (_clientLock)
@@ -98,6 +109,8 @@ namespace Peach.Core.Publishers
 
 							if (Logger.IsDebugEnabled)
 								Logger.Debug("\n\n" + Utilities.HexDump(_recvBuf, 0, len, startAddress: prevLen));
+
+							HandleReadCompleted();
 						}
 
 						ScheduleRead();
