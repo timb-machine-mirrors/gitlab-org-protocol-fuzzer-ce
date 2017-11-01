@@ -8,6 +8,7 @@ using Peach.Core.Agent;
 using Peach.Pro.Core.OS.Windows.Debugger;
 using Peach.Pro.OS.Windows.Agent.Monitors;
 using System.ComponentModel;
+using System.Threading;
 
 namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 {
@@ -34,6 +35,8 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("ServiceStartTimeout", typeof(int), "How many seconds to wait for target windows service to start", "60")]
+	[Parameter("PostStartPause", typeof(int), "How many milliseconds to wait after starting program", "0")]
+	[Parameter("WorkingDirectory", typeof(string), "Directory to launch executable from.", "")]
 	public class WindowsDebuggerHybrid : Monitor2
 	{
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
@@ -57,6 +60,8 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		public bool RestartOnEachTest { get; set; }
 		public bool RestartAfterFault { get; set; }
 		public int ServiceStartTimeout { get; set; }
+		public int PostStartPause { get; set; }
+		public string WorkingDirectory { get; set; }
 
 		private IDebuggerInstance _debugger;
 		private bool _replay;
@@ -208,6 +213,10 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		{
 			Debug.Assert(_debugger == null);
 
+			var cwd = Directory.GetCurrentDirectory();
+			if (!string.IsNullOrEmpty(WorkingDirectory))
+				Directory.SetCurrentDirectory(WorkingDirectory);
+
 			_debugger = _replay
 				? GetDebuggerInstance<DebuggerProxy<DebugEngineInstance>>()
 				//? GetDebuggerInstance<DebugEngineInstance>()
@@ -224,9 +233,14 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 				throw new NotSupportedException();
 
 			OnInternalEvent(EventArgs.Empty);
+
+			Thread.Sleep(PostStartPause);
+
+			if (!string.IsNullOrEmpty(WorkingDirectory))
+				Directory.SetCurrentDirectory(cwd);
 		}
 
-		private void _StopDebugger()
+private void _StopDebugger()
 		{
 			Debug.Assert(_debugger != null);
 
