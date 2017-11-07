@@ -174,7 +174,6 @@ class xmllint(Task):
 
 fail_re = re.compile('^Error.*$', re.MULTILINE)
 
-@update_outputs
 class webhelp(Task):
 	run_str = '${XSLTPROC} --stringparam base.dir ${OUTPUT_DIR} ${WEBHELP_XSL} ${SRC}'
 	color   = 'PINK'
@@ -244,27 +243,36 @@ class webhelp(Task):
 				if m:
 					ret = m.group(0)
 
-		if not ret:
-			# gather the list of output files from webhelp
-			# @update_outputs will make waf generate node signatures
-			self.outputs = self.generator.output_dir.ant_glob('*', quiet=True)
-
 		return ret
 
-@update_outputs
 class webindex(Task):
 	run_str = '${JAVA} ${OUTPUT_DIR} ${WEBINDEX_OPTS} '
 	color   = 'PINK'
 	vars    = [ 'WEBINDEX_OPTS', 'OUTPUT_DIR' ]
 	after   = [ 'webhelp' ]
 
-	def exec_command(self, cmd, **kw):
-		ret = super(webindex, self).exec_command(cmd, **kw)
-
-		if not ret:
-			# gather the list of output files from webindex
-			# @update_outputs will make waf generate node signatures
-			self.outputs = self.generator.output_dir.ant_glob('search/*', quiet=True)
-
+	def runnable_status(self):
+		ret = super(Task, self).runnable_status()
+		if ret == SKIP_ME:
+			# in case the files were removed
+			nodes = self.generator.output_dir.ant_glob('**/*', quiet=True)
+			self.add_install(nodes)
 		return ret
+
+	def add_install(self, nodes):
+		# Install all webhelp html and search files once the webindex has been generated
+		self.outputs += nodes
+		if getattr(self.generator, 'install_path', None):
+			self.generator.add_install_files(install_to=self.generator.install_path,
+				install_from=self.outputs,
+				postpone=False,
+				cwd=self.generator.output_dir,
+				relative_trick=True)
+
+	def post_run(self):
+		nodes = self.generator.output_dir.ant_glob('**/*', quiet=True)
+		for x in nodes:
+			self.generator.bld.node_sigs[x] = self.uid()
+		self.add_install(nodes)
+		return super(Task, self).post_run()
 

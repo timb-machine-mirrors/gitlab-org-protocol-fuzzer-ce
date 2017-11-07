@@ -26,8 +26,9 @@ class ZipContext(PkgContext):
 
 		for g in self.groups:
 			for tg in g:
-				if 'install_task' in tg.features:
-					files.extend(tg.install_task.outputs)
+				tsk = getattr(tg, 'install_task', None)
+				if tsk:
+					files.extend(tsk.outputs)
 
 		if files:
 			self.archive(files)
