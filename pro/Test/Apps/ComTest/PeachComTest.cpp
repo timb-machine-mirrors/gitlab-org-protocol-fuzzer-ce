@@ -7,6 +7,9 @@
 // We want to use unsafe strcpy() and strcat()
 #pragma warning(disable: 4996)
 
+// Tell cl.exe to let us write stack smashing bugs
+#pragma warning(disable: 4789)
+
 void Call1(char *buff)
 {
 	strcpy(buff, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
