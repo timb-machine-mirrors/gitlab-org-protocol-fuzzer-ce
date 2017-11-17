@@ -162,6 +162,7 @@ namespace Peach.Core.Dom.Actions
 					if (element == null)
 						continue;
 
+					logger.Debug("Slurp, setting {0} from {1}", element.fullName, source.fullName);
 					element.DefaultValue = source.DefaultValue;
 				}
 			}
@@ -177,7 +178,8 @@ namespace Peach.Core.Dom.Actions
 			var element = container as DataElement;
 			foreach (var part in parts.Skip(1))
 			{
-				if (!container.TryGetValue(part, out element))
+				container = element as DataElementContainer;
+				if (container == null || !container.TryGetValue(part, out element))
 					return null;
 			}
 

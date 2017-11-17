@@ -7,6 +7,8 @@ using Peach.Core.Dom;
 using Peach.Core.Test;
 using System.Collections.Generic;
 using Peach.Core.IO;
+using Peach.Pro.Core.Publishers;
+using NLog;
 
 namespace Peach.Pro.Test.Core.StateModel
 {
@@ -612,6 +614,109 @@ namespace Peach.Pro.Test.Core.StateModel
 		string StringValue(BitwiseStream bs)
 		{
 			return System.Text.Encoding.ASCII.GetString(bs.ToArray());
+		}
+
+		class TestPublisher : Peach.Core.Publishers.StreamPublisher
+		{
+			private static readonly NLog.Logger ClassLogger = NLog.LogManager.GetCurrentClassLogger();
+
+			private int _seqNum = 0;
+
+			public TestPublisher(Dictionary<string, Variant> args) : base(args)
+			{
+			}
+
+			protected override NLog.Logger Logger { get { return ClassLogger; } }
+
+			protected override void OnOpen()
+			{
+				stream = new MemoryStream(Encoding.ASCII.GetBytes((++_seqNum).ToString()));
+			}
+
+			protected override void OnOutput(BitwiseStream data)
+			{
+			}
+		}
+
+		[Test]
+		public void TestChangesCache()
+		{
+			string xml = @"
+<Peach>
+	<DataModel name='TheDataModel1'>
+		<String name='String1' />
+	</DataModel>
+	<DataModel name='TheDataModel2'>
+		<Block name='b' mutable='false'>
+			<Choice mutable='false'>
+				<Block mutable='false'>
+					<String name='String2' mutable='false' value='foo' />
+				</Block>
+				<Block mutable='false'>
+					<String name='Alt'/>
+				</Block>
+			</Choice>
+		</Block>
+		<String name='CRLF' value='0d0a' valueType='hex' mutable='false' />
+		<String name='Payload' value='Hello World' />
+	</DataModel>
+
+	<StateModel name='TheStateModel' initialState='InitialState'>
+		<State name='InitialState'>
+			<Action name='Action1' type='input'>
+				<DataModel ref='TheDataModel1'/>
+			</Action>
+
+			<Action name='Action2' type='slurp' valueXpath='//String1' setXpath='//String2' />
+
+			<Action name='Action3' type='output'>
+				<DataModel ref='TheDataModel2'/>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheStateModel'/>
+		<Publisher class='Null'/>
+	</Test>
+</Peach>";
+
+			var parser = new PitParser();
+			var dom = parser.asParser(null, new MemoryStream(ASCIIEncoding.ASCII.GetBytes(xml)));
+			var config = new RunConfiguration
+			{
+				range = true,
+				rangeStart = 0,
+				rangeStop = 10,
+			};
+			var e = new Engine(null);
+			var results = new List<string>();
+			e.IterationFinished += (context, iteration) =>
+			{
+				var sm = context.test.stateModel;
+				var initial = sm.initialState;
+
+				var dm0 = initial.actions[0].dataModel;
+				var dm2 = initial.actions[2].dataModel;
+
+				var result = string.Join("|",
+					StringValue(dm0.Value),
+					StringValue(dm2.Value)
+				);
+
+				results.Add(result);
+			};
+
+			dom.tests[0].publishers[0] = new TestPublisher(new Dictionary<string, Variant>()) {Name = "Pub"};
+
+			e.startFuzzing(dom, config);
+
+			Assert.AreEqual(11, results.Count);
+			for (var i = 0; i < results.Count; ++i)
+			{
+				var expected = "{0}|{0}\r\n".Fmt(i + 1);
+				StringAssert.StartsWith(expected, results[i]);
+			}
 		}
 	}
 }
