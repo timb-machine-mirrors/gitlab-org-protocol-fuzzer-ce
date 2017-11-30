@@ -20,6 +20,8 @@ npm install
 bower install
 ----
 
+Your project can stop working at any moment because its dependencies can change. Prevent this by migrating to Yarn: https://bower.io/blog/2017/how-to-migrate-away-from-bower/
+
 I usually have two terminals open at all times running these commands:
 
 This one is for unit test.

@@ -39,7 +39,7 @@ namespace Peach.Pro.Core.Runtime
 		protected ILicense _license;
 		protected Func<List<string>, int> _cmd;
 
-		protected void PrepareLicensing(string pitLibraryPath, bool forceActivation)
+		protected void PrepareLicensing(string pitLibraryPath, bool forceActivation, bool deactivate = false)
 		{
 			var config = new LicenseConfig();
 			if (config.DetectConfig)
@@ -52,9 +52,11 @@ namespace Peach.Pro.Core.Runtime
 					throw new ApplicationException("Peach.Pro.Pits.dll could not be found.");
 
 				config.Manifest = PitResourceLoader.LoadManifest(root);
-				_license = new FlexeraLicense(config, forceActivation);
+				_license = new FlexeraLicense(config, forceActivation, deactivate);
 				if (!_license.IsValid())
-					throw new ApplicationException();
+					throw new ApplicationException(deactivate
+						? "Deactivation was successful."
+						: "The licence is invalid.");
 			}
 			else
 			{

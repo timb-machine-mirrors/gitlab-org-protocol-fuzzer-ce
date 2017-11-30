@@ -65,6 +65,7 @@ namespace Peach.Pro.Core.Runtime
 		private static volatile bool _shouldStop;
 		private bool _polite;
 		private bool _forceActivation;
+		private bool _forceDeactivation;
 
 		#region Public Properties
 
@@ -104,6 +105,14 @@ namespace Peach.Pro.Core.Runtime
 				"but if your license has recently changed, " +
 				"you can force an immediate activation.",
 				v => _forceActivation = true
+			);
+			options.Add(
+				"deactivate",
+				"Return activated license. " +
+				"Licensing usually automatically reactivates as necessary, " +
+				"but if your license has recently changed, " +
+				"you can force an immediate activation.",
+				v => _forceDeactivation = true
 			);
 			options.Add(
 				"1",
@@ -273,7 +282,7 @@ namespace Peach.Pro.Core.Runtime
 			_pitLibraryPath = FindPitLibrary(_pitLibraryPath);
 			_definedValues[PitLibraryPath] = _pitLibraryPath;
 
-			PrepareLicensing(_pitLibraryPath, _forceActivation);
+			PrepareLicensing(_pitLibraryPath, _forceActivation, _forceDeactivation);
 
 			_config.commandLine = args.ToArray();
 
