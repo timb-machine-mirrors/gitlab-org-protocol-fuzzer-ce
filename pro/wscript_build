@@ -34,7 +34,13 @@ subdirs = [
 	'XmlGenerator',
 ]
 
+# Only build can tool on windows
+if bld.env.BASENAME.startswith('win_'):
+	subdirs.append('PeachCanTool')
+
 if bld.env.BASENAME == 'web':
 	subdirs = [ 'Core' ]
 
 bld.recurse(subdirs)
+
+# end

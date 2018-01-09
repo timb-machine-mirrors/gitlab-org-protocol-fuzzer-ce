@@ -136,6 +136,7 @@ if bld.env.BASENAME != 'web':
 		deps.extend([
 			'UIAutomationClient.dll',
 			'UIAutomationTypes.dll',
+			'vxlapi_NET.dll',
 		])
 		root = bld.path.find_or_declare('OS/Windows')
 		asm.install_755[root] = root.ant_glob('Debuggers/DebugEngine/*.dll')

@@ -54,6 +54,7 @@ else:
 		'Titanium-Web-Proxy/Titanium.Web.Proxy',
 		'TotalPhase/aardvark',
 		'TotalPhase/komodo',
+		'VectorXL',
 		'VMware-VIX-1.13.0-1295980',
 	]
 
