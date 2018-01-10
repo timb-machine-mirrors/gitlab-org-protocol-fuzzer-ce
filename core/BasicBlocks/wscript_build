@@ -9,6 +9,9 @@ def make_bld(tgt, variant):
 	clone['CPPFLAGS_debug'] = [ x for x in flags if not x.startswith('/MT') ]
 	clone['DEFINES_debug'] = []
 
+	if bld.env.DEST_OS is 'win32':
+		clone['LINKFLAGS'].append('/ignore:4281')
+
 	bld(
 		features = 'cxx cxxshlib pin',
 		source = 'bblocks.cpp compat.cpp',
