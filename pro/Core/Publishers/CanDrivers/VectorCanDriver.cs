@@ -538,8 +538,15 @@ namespace Peach.Pro.Core.Publishers.CanDrivers
 		public bool IsEnabled { get; set; }
 		public int BaudRate
 		{
-			get => (int) Config.busParams.dataCan.bitrate;
-			set => Config.busParams.dataCan.bitrate = (uint) value;
+			get
+			{
+				return (int)Config.busParams.dataCan.bitrate;
+			}
+
+			set
+			{
+				Config.busParams.dataCan.bitrate = (uint)value;
+			}
 		}
 
 		public int Samples { get; set; }
