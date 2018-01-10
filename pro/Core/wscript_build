@@ -113,7 +113,9 @@ if bld.env.BASENAME != 'web':
 		paket_settings = dict(
 			frameworks = frameworks,
 		),
-		source = bld.path.ant_glob('**/*.cs'),
+		source = bld.path.ant_glob('**/*.cs', excl=[
+			'Publishers/CanDrivers/VectorCanDriver.cs'
+			]),
 		resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 		embed = embed,
 		ide_content = 'WebServices/Models/Model.cd',
@@ -133,6 +135,7 @@ if bld.env.BASENAME != 'web':
 	)
 
 	if 'win' in bld.env['supported_features']:
+		asm.source += bld.path.ant_glob('Publishers/CanDrivers/VectorCanDriver.cs')
 		deps.extend([
 			'UIAutomationClient.dll',
 			'UIAutomationTypes.dll',
