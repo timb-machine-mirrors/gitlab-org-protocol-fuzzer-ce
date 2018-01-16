@@ -77,6 +77,9 @@ peach_pro = common + [
 	'PeachValidator.exe',
 	'PeachMinset.exe',
 
+	# CAN Recorder
+	'PeachCanRecorder.exe',
+
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
 	'bblocks',
