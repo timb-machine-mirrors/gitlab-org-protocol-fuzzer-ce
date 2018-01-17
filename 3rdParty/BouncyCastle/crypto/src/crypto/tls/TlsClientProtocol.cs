@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
-
+using NLog;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 
@@ -10,6 +10,8 @@ namespace Org.BouncyCastle.Crypto.Tls
     public class TlsClientProtocol
         :   TlsProtocol
     {
+	    private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
         protected TlsClient mTlsClient = null;
         internal TlsClientContextImpl mTlsClientContext = null;
 
@@ -141,10 +143,13 @@ namespace Org.BouncyCastle.Crypto.Tls
 
             if (this.mResumedSession)
             {
-                if (type != HandshakeType.finished || this.mConnectionState != CS_SERVER_HELLO)
-                    throw new TlsFatalAlert(AlertDescription.unexpected_message);
+	            if (type != HandshakeType.finished || this.mConnectionState != CS_SERVER_HELLO)
+	            {
+					Logger.Trace("HandleHandshakeMessage: type != HandshakeType.finished || this.mConnectionState != CS_SERVER_HELLO");
+		            throw new TlsFatalAlert(AlertDescription.unexpected_message);
+	            }
 
-                ProcessFinishedMessage(buf);
+	            ProcessFinishedMessage(buf);
                 this.mConnectionState = CS_SERVER_FINISHED;
 
                 SendFinishedMessage();
@@ -159,6 +164,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
             case HandshakeType.certificate:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.certificate");
+
                 switch (this.mConnectionState)
                 {
                 case CS_SERVER_HELLO:
@@ -197,6 +204,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.certificate_status:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.certificate_status");
+
                 switch (this.mConnectionState)
                 {
                 case CS_SERVER_CERTIFICATE:
@@ -227,6 +236,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.finished:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.finished");
+
                 switch (this.mConnectionState)
                 {
                 case CS_CLIENT_FINISHED:
@@ -255,6 +266,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.server_hello:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.server_hello");
+
                 switch (this.mConnectionState)
                 {
                 case CS_CLIENT_HELLO:
@@ -292,6 +305,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.supplemental_data:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.supplemental_data");
+
                 switch (this.mConnectionState)
                 {
                 case CS_SERVER_HELLO:
@@ -306,6 +321,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.server_hello_done:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.server_hello_done");
+
                 switch (this.mConnectionState)
                 {
                 case CS_SERVER_HELLO:
@@ -430,6 +447,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.server_key_exchange:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.server_key_exchange");
+
                 switch (this.mConnectionState)
                 {
                 case CS_SERVER_HELLO:
@@ -463,6 +482,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.certificate_request:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.certificate_request");
+
                 switch (this.mConnectionState)
                 {
                 case CS_SERVER_CERTIFICATE:
@@ -508,6 +529,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.session_ticket:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.session_ticket");
+
                 switch (this.mConnectionState)
                 {
                 case CS_CLIENT_FINISHED:
@@ -539,6 +562,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
             case HandshakeType.hello_request:
             {
+	            Logger.Trace("HandleHandshakeMessage: HandshakeType.hello_request");
+
                 AssertEmpty(buf);
 
                 /*
@@ -582,20 +607,31 @@ namespace Org.BouncyCastle.Crypto.Tls
 
         protected virtual void ReceiveServerHelloMessage(MemoryStream buf)
         {
+	        Logger.Trace(">> ReceiveServerHelloMessage");
+
             {
                 ProtocolVersion server_version = TlsUtilities.ReadVersion(buf);
-                if (server_version.IsDtls)
-                    throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            if (server_version.IsDtls)
+	            {
+					Logger.Trace("ReceiveServerHelloMessage: server_version.IsDtls");
+		            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            }
 
-                // Check that this matches what the server is Sending in the record layer
-                if (!server_version.Equals(this.mRecordStream.ReadVersion))
-                    throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            // Check that this matches what the server is Sending in the record layer
+	            if (!server_version.Equals(this.mRecordStream.ReadVersion))
+	            {
+		            Logger.Trace("ReceiveServerHelloMessage: !server_version.Equals(this.mRecordStream.ReadVersion)");
+		            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            }
 
-                ProtocolVersion client_version = Context.ClientVersion;
-                if (!server_version.IsEqualOrEarlierVersionOf(client_version))
-                    throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            ProtocolVersion client_version = Context.ClientVersion;
+	            if (!server_version.IsEqualOrEarlierVersionOf(client_version))
+	            {
+		            Logger.Trace("ReceiveServerHelloMessage: !server_version.IsEqualOrEarlierVersionOf(client_version)");
+		            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            }
 
-                this.mRecordStream.SetWriteVersion(server_version);
+	            this.mRecordStream.SetWriteVersion(server_version);
                 ContextAdmin.SetServerVersion(server_version);
                 this.mTlsClient.NotifyServerVersion(server_version);
             }
@@ -606,9 +642,13 @@ namespace Org.BouncyCastle.Crypto.Tls
             this.mSecurityParameters.serverRandom = TlsUtilities.ReadFully(32, buf);
 
             this.mSelectedSessionID = TlsUtilities.ReadOpaque8(buf);
-            if (this.mSelectedSessionID.Length > 32)
-                throw new TlsFatalAlert(AlertDescription.illegal_parameter);
-            this.mTlsClient.NotifySessionID(this.mSelectedSessionID);
+	        if (this.mSelectedSessionID.Length > 32)
+	        {
+		        Logger.Trace("ReceiveServerHelloMessage: this.mSelectedSessionID.Length > 32");
+		        throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	        }
+
+	        this.mTlsClient.NotifySessionID(this.mSelectedSessionID);
             this.mResumedSession = this.mSelectedSessionID.Length > 0 && this.mTlsSession != null
                 && Arrays.AreEqual(this.mSelectedSessionID, this.mTlsSession.SessionID);
 
@@ -622,6 +662,7 @@ namespace Org.BouncyCastle.Crypto.Tls
                 || CipherSuite.IsScsv(selectedCipherSuite)
                 || !TlsUtilities.IsValidCipherSuiteForVersion(selectedCipherSuite, Context.ServerVersion))
             {
+	            Logger.Trace("ReceiveServerHelloMessage: Unable to agree on ciphersuite");
                 throw new TlsFatalAlert(AlertDescription.illegal_parameter);
             }
             this.mTlsClient.NotifySelectedCipherSuite(selectedCipherSuite);
@@ -631,9 +672,13 @@ namespace Org.BouncyCastle.Crypto.Tls
              * offered ones.
              */
             byte selectedCompressionMethod = TlsUtilities.ReadUint8(buf);
-            if (!Arrays.Contains(this.mOfferedCompressionMethods, selectedCompressionMethod))
-                throw new TlsFatalAlert(AlertDescription.illegal_parameter);
-            this.mTlsClient.NotifySelectedCompressionMethod(selectedCompressionMethod);
+	        if (!Arrays.Contains(this.mOfferedCompressionMethods, selectedCompressionMethod))
+	        {
+		        Logger.Trace("ReceiveServerHelloMessage: Unable to agree on compression");
+		        throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	        }
+
+	        this.mTlsClient.NotifySelectedCompressionMethod(selectedCompressionMethod);
 
             /*
              * RFC3546 2.2 The extended server hello message format MAY be sent in place of the server
@@ -724,6 +769,7 @@ namespace Org.BouncyCastle.Crypto.Tls
                 if (selectedCipherSuite != this.mSessionParameters.CipherSuite
                     || selectedCompressionMethod != this.mSessionParameters.CompressionAlgorithm)
                 {
+	                Logger.Trace("ReceiveServerHelloMessage: mResumedSession: cipher or compression don't match");
                     throw new TlsFatalAlert(AlertDescription.illegal_parameter);
                 }
 
@@ -790,6 +836,8 @@ namespace Org.BouncyCastle.Crypto.Tls
              * existing cipher suites.
              */
             this.mSecurityParameters.verifyDataLength = 12;
+
+	        Logger.Trace("<< ReceiveServerHelloMessage");
         }
 
         protected virtual void SendCertificateVerifyMessage(DigitallySigned certificateVerify)
@@ -803,6 +851,8 @@ namespace Org.BouncyCastle.Crypto.Tls
 
         protected virtual void SendClientHelloMessage()
         {
+	        Logger.Trace(">> SendClientHelloMessage");
+
             this.mRecordStream.SetWriteVersion(this.mTlsClient.ClientHelloRecordLayerVersion);
 
             ProtocolVersion client_version = this.mTlsClient.ClientVersion;
@@ -893,6 +943,8 @@ namespace Org.BouncyCastle.Crypto.Tls
             }
 
             message.WriteToRecordStream(this);
+
+	        Logger.Trace("<< SendClientHelloMessage");
         }
 
         protected virtual void SendClientKeyExchangeMessage()

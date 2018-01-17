@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using NLog;
 using Org.BouncyCastle.Utilities;
 
 namespace Org.BouncyCastle.Crypto.Tls
@@ -8,6 +8,8 @@ namespace Org.BouncyCastle.Crypto.Tls
     /// <summary>An implementation of the TLS 1.0/1.1/1.2 record layer, allowing downgrade to SSLv3.</summary>
     internal class RecordStream
     {
+	    private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
+
         private const int DEFAULT_PLAINTEXT_LIMIT = (1 << 14);
 
         internal const int TLS_HEADER_SIZE = 5;
@@ -92,20 +94,26 @@ namespace Org.BouncyCastle.Crypto.Tls
 
         internal virtual void SentWriteCipherSpec()
         {
-            if (mPendingCompression == null || mPendingCipher == null)
-                throw new TlsFatalAlert(AlertDescription.handshake_failure);
+	        if (mPendingCompression == null || mPendingCipher == null)
+	        {
+		        Logger.Trace("SentWriteCipherSpec: pendingcompression or pendingcipher null");
+		        throw new TlsFatalAlert(AlertDescription.handshake_failure);
+	        }
 
-            this.mWriteCompression = this.mPendingCompression;
+	        this.mWriteCompression = this.mPendingCompression;
             this.mWriteCipher = this.mPendingCipher;
             this.mWriteSeqNo = 0;
         }
 
         internal virtual void ReceivedReadCipherSpec()
         {
-            if (mPendingCompression == null || mPendingCipher == null)
-                throw new TlsFatalAlert(AlertDescription.handshake_failure);
+	        if (mPendingCompression == null || mPendingCipher == null)
+	        {
+		        Logger.Trace("ReceivedReadCipherSpec: pendingcompression or pendingcipher null");
+		        throw new TlsFatalAlert(AlertDescription.handshake_failure);
+	        }
 
-            this.mReadCompression = this.mPendingCompression;
+	        this.mReadCompression = this.mPendingCompression;
             this.mReadCipher = this.mPendingCipher;
             this.mReadSeqNo = 0;
         }
@@ -115,6 +123,12 @@ namespace Org.BouncyCastle.Crypto.Tls
             if (mReadCompression != mPendingCompression || mWriteCompression != mPendingCompression
                 || mReadCipher != mPendingCipher || mWriteCipher != mPendingCipher)
             {
+	            Logger.Trace("FinaliseHandshake - Unable to agree. rcomp: {0}, wcomp: {1}, rcypher: {2}, wcypher: {3}",
+		            mReadCompression != mPendingCompression,
+		            mWriteCompression != mPendingCompression,
+					mReadCipher != mPendingCipher, 
+		            mWriteCipher != mPendingCipher);
+
                 throw new TlsFatalAlert(AlertDescription.handshake_failure);
             }
             this.mPendingCompression = null;
@@ -133,13 +147,17 @@ namespace Org.BouncyCastle.Crypto.Tls
              * RFC 5246 6. If a TLS implementation receives an unexpected record type, it MUST send an
              * unexpected_message alert.
              */
+	        Logger.Trace("ReadRecord - CheckType");
             CheckType(type, AlertDescription.unexpected_message);
 
             if (!mRestrictReadVersion)
             {
                 int version = TlsUtilities.ReadVersionRaw(recordHeader, TLS_HEADER_VERSION_OFFSET);
-                if ((version & 0xffffff00) != 0x0300)
-                    throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            if ((version & 0xffffff00) != 0x0300)
+	            {
+		            Logger.Trace("ReadRecord - Bad TLS Version");
+		            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	            }
             }
             else
             {
@@ -150,6 +168,7 @@ namespace Org.BouncyCastle.Crypto.Tls
                 }
                 else if (!version.Equals(mReadVersion))
                 {
+	                Logger.Trace("ReadRecord - Version missmatch between messages");
                     throw new TlsFatalAlert(AlertDescription.illegal_parameter);
                 }
             }
@@ -192,10 +211,13 @@ namespace Org.BouncyCastle.Crypto.Tls
              * RFC 5264 6.2.1 Implementations MUST NOT send zero-length fragments of Handshake, Alert,
              * or ChangeCipherSpec content types.
              */
-            if (decoded.Length < 1 && type != ContentType.application_data)
-                throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	        if (decoded.Length < 1 && type != ContentType.application_data)
+	        {
+		        Logger.Trace("DecodeAndVerify: decoded.Lenth < 1 && type != COntentType.application_data");
+		        throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+	        }
 
-            return decoded;
+	        return decoded;
         }
 
         internal virtual void WriteRecord(byte type, byte[] plaintext, int plaintextOffset, int plaintextLength)
@@ -219,10 +241,13 @@ namespace Org.BouncyCastle.Crypto.Tls
              * RFC 5264 6.2.1 Implementations MUST NOT send zero-length fragments of Handshake, Alert,
              * or ChangeCipherSpec content types.
              */
-            if (plaintextLength < 1 && type != ContentType.application_data)
-                throw new TlsFatalAlert(AlertDescription.internal_error);
+	        if (plaintextLength < 1 && type != ContentType.application_data)
+	        {
+				Logger.Trace("WriteRecord: Failure: plaintextLength < 1 && type != ContentType.application_data");
+		        throw new TlsFatalAlert(AlertDescription.internal_error);
+	        }
 
-            if (type == ContentType.handshake)
+	        if (type == ContentType.handshake)
             {
                 UpdateHandshakeData(plaintext, plaintextOffset, plaintextLength);
             }
@@ -327,14 +352,18 @@ namespace Org.BouncyCastle.Crypto.Tls
             case ContentType.heartbeat:
                 break;
             default:
+	            Logger.Trace("CheckType: Unknown type");
                 throw new TlsFatalAlert(alertDescription);
             }
         }
 
         private static void CheckLength(int length, int limit, byte alertDescription)
         {
-            if (length > limit)
-                throw new TlsFatalAlert(alertDescription);
+	        if (length > limit)
+	        {
+		        Logger.Trace("CheckLength: Failure {0} > {1}", length, limit);
+		        throw new TlsFatalAlert(alertDescription);
+	        }
         }
     }
 }

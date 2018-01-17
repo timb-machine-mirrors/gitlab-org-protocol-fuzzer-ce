@@ -7,11 +7,20 @@ deps = [
 	'Microsoft.CSharp.dll',
 ]
 
+pkgs = [
+	'NLog',
+]
+
+
 bld(
 	name = 'BouncyCastle.Crypto.dll',
 #	solutions = ['Peach.sln', 'PeachWeb.sln'],
-	features = 'cs',
+	features = 'cs paket',
 	use = deps,
+	use_packages = pkgs,
+	paket_settings = dict(
+		frameworks = ['net45', 'net'],
+	),
 	platform = 'AnyCPU',
 	source = bld.path.ant_glob('src/**/*.cs bzip2/**/*.cs'),
 	namespace = 'Org.BouncyCastle',

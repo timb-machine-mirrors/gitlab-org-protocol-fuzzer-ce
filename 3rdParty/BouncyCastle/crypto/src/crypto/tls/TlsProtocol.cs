@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
-
+using NLog;
 using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
@@ -10,6 +10,7 @@ namespace Org.BouncyCastle.Crypto.Tls
 {
     public abstract class TlsProtocol
     {
+	    private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly string TLS_ERROR_MESSAGE = "Internal TLS error, this could be an attack";
 
         /*
@@ -488,6 +489,7 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
                 if (!mRecordStream.ReadRecord())
                 {
+	                Logger.Warn("Stream is closed");
                     this.FailWithError(AlertLevel.warning, AlertDescription.close_notify, "Stream is closed", null);
                     throw new EndOfStreamException();
                 }
@@ -496,6 +498,7 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
                 if (!mClosed)
                 {
+	                Logger.Warn(e, "Failed to read record");
                     this.FailWithError(AlertLevel.fatal, e.AlertDescription, "Failed to read record", e);
                 }
                 throw e;
@@ -504,6 +507,7 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
                 if (!mClosed)
                 {
+	                Logger.Warn(e, "Failed to read record");
                     this.FailWithError(AlertLevel.fatal, AlertDescription.internal_error, "Failed to read record", e);
                 }
                 throw e;
@@ -520,6 +524,7 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
                 if (!mClosed)
                 {
+	                Logger.Warn(e, "Failed to write record");
                     this.FailWithError(AlertLevel.fatal, e.AlertDescription, "Failed to write record", e);
                 }
                 throw e;
@@ -528,6 +533,7 @@ namespace Org.BouncyCastle.Crypto.Tls
             {
                 if (!mClosed)
                 {
+	                Logger.Warn(e, "Failed to write record");
                     this.FailWithError(AlertLevel.fatal, AlertDescription.internal_error, "Failed to write record", e);
                 }
                 throw e;
@@ -784,6 +790,8 @@ namespace Org.BouncyCastle.Crypto.Tls
          */
         protected virtual void FailWithError(byte alertLevel, byte alertDescription, string message, Exception cause)
         {
+			Logger.Debug(cause, message);
+
             /*
              * Check if the connection is still open.
              */

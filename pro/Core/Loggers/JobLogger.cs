@@ -992,7 +992,7 @@ namespace Peach.Pro.Core.Loggers
 		void ConfigureLogging(Target oldTarget, Target newTarget)
 		{
 			var nconfig = LogManager.Configuration;
-
+			
 			if (oldTarget != null)
 			{
 				nconfig.RemoveTarget(oldTarget.Name);
@@ -1013,7 +1013,11 @@ namespace Peach.Pro.Core.Loggers
 					nconfig.LoggingRules.Add(rule);
 				}
 
-				var defaultRule = new LoggingRule("*", LogLevel.Debug, newTarget);
+				var defaultRule = new LoggingRule(
+					"*", 
+					Logger.IsTraceEnabled ? LogLevel.Trace : LogLevel.Debug, 
+					newTarget);
+
 				_tempRules.Add(defaultRule);
 				nconfig.LoggingRules.Add(defaultRule);
 			}
