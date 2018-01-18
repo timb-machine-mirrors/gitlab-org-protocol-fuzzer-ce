@@ -19,14 +19,17 @@ namespace Org.BouncyCastle.Crypto.Tls
 
         public virtual void NotifySecureRenegotiation(bool secureRenegotiation)
         {
-            if (!secureRenegotiation)
-            {
-                /*
-                 * RFC 5746 3.4/3.6. In this case, some clients/servers may want to terminate the handshake instead
-                 * of continuing; see Section 4.1/4.3 for discussion.
-                 */
-                throw new TlsFatalAlert(AlertDescription.handshake_failure);
-            }
+			// PEACH 01/18/2018 - Mike: This is causing TLS negotiation with customer
+			//                    TLS stack to fail.  Commenting out for now.
+			//
+            //if (!secureRenegotiation)
+            //{
+            //    /*
+            //     * RFC 5746 3.4/3.6. In this case, some clients/servers may want to terminate the handshake instead
+            //     * of continuing; see Section 4.1/4.3 for discussion.
+            //     */
+            //    throw new TlsFatalAlert(AlertDescription.handshake_failure);
+            //}
         }
 
         public abstract TlsCompression GetCompression();
