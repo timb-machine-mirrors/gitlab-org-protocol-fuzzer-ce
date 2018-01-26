@@ -1,39 +1,26 @@
 [[Brand_new_items]]
-== What's new in Peach Platform v{VER_MAJOR}.{VER_MINOR} (2017 Q3)
+== What's new in {product} v{VER_MAJOR}.{VER_MINOR}
 
-This release focuses on bug fixes and expanding the data modeling capabilities of {product}.
+:numbered!:
 
-=== Frag Acknowledgements 
+This section provides a high-level view of the changes introduced this
+release of {product}.
 
-The Frag element was expanded to include acknowledgements.
-The acknowledgement is an optional DataModel included in the Frag element.
-When outputting fragments, the state model will try and receive an acknowledgement after each transmission.
-When inputting fragments, the state model will automatically transmit an acknowledgement after each reception.
-This allows for modeling more advanced fragmentation schemes.
-Lastly, how DataSets are applied to Frag elements was improved.
-The user can now specify if the data set contains a sequence of fragments or the reassembled payload.
-See the developer guide for more information.
+ifdef::backend-pdf[]
+:new: image:Changelog/new-pdf.svg[]
+:chg: image:Changelog/changed-pdf.svg[]
+:fix: image:Changelog/fixed-pdf.svg[]
+endif::[]
 
-=== JsonRaw Element
+ifndef::backend-pdf[]
+:new: image:Changelog/new-web.svg[]
+:chg: image:Changelog/changed-web.svg[]
+:fix: image:Changelog/fixed-web.svg[]
+endif::[]
 
-A new JsonRaw element was added.
-This element is used to embeded raw string or binary data into a JSON document.
-See the developer guide for more information.
+// START-WHATSNEW
+// END-WHATSNEW
 
-=== BSON Support
+:numbered:
 
-The JSON modeling elements were expanded to allow encoding as BSON data.
-See the developer guide for more information.
-
-=== SSH Process Monitor
-
-A new SSH Process monitor was added.
-This monitor works the same as the current Process monitor, however the monitoring is performed over an SSH connection.
-This enables monitoring of remote processes on target systems that are unable to run a Peach Agent.
-
-=== ASTM Pit
-
-ASTM is a protocol used for the two-way transmission of requests and results between laboratory instruments and information systems.
-The pit library was expanded to enable testing of ASTM host devices and ASTM instruments.
-
-// end
+// end 
