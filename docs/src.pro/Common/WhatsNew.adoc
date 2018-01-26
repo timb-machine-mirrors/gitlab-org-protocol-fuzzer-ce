@@ -13,9 +13,9 @@ ifdef::backend-pdf[]
 endif::[]
 
 ifndef::backend-pdf[]
-:new: image:../images/Changelog/new-web.svg[]
-:chg: image:../images/Changelog/changed-web.svg[]
-:fix: image:../images/Changelog/fixed-web.svg[]
+:new: image:images/Changelog/new-web.svg[]
+:chg: image:images/Changelog/changed-web.svg[]
+:fix: image:images/Changelog/fixed-web.svg[]
 endif::[]
 
 // START-WHATSNEW
