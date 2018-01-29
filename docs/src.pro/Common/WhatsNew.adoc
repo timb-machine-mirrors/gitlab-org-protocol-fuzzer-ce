@@ -6,17 +6,17 @@
 This section provides a high-level view of the changes introduced this
 release of {product}.
 
-ifdef::backend-pdf[]
+//ifdef::backend-pdf[]
 :new: image:../images/Changelog/new-pdf.svg[]
 :chg: image:../images/Changelog/changed-pdf.svg[]
 :fix: image:../images/Changelog/fixed-pdf.svg[]
-endif::[]
+//endif::[]
 
-ifndef::backend-pdf[]
-:new: image:images/Changelog/new-web.svg[]
-:chg: image:images/Changelog/changed-web.svg[]
-:fix: image:images/Changelog/fixed-web.svg[]
-endif::[]
+//ifndef::backend-pdf[]
+//:new: image:images/Changelog/new-web.svg[]
+//:chg: image:images/Changelog/changed-web.svg[]
+//:fix: image:images/Changelog/fixed-web.svg[]
+//endif::[]
 
 // START-WHATSNEW
 // END-WHATSNEW
