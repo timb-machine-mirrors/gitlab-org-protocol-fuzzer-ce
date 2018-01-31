@@ -54,9 +54,17 @@ bld(
 	install_path = '${BINDIR}/sdk',
 )
 
+installGuide = bld(
+	features = 'asciidoctor-pdf',
+	source = 'src.pro/UserGuide/InstallationGuide.adoc',
+	images = 'src.pro/images',
+	name = 'Peach_Pro_Installation_Guide.pdf',
+	install_path = '${BINDIR}/docs',
+)
 check_sources_list = [
 	devGuide,
 	userGuide,
+    installGuide,
 ]
 
 def check_sources(ctx, tgs):
