@@ -20,6 +20,7 @@ devGuide = bld(
 	images = 'src.pro/images',
 	name = 'Peach_Pro_Developer_Guide.pdf',
 	install_path = '${BINDIR}/sdk/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
 
 bld(
@@ -37,6 +38,7 @@ userGuide = bld(
 	images = 'src.pro/images',
 	name = 'Peach_Pro_User_Guide.pdf',
 	install_path = '${BINDIR}/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
 
 bld(
@@ -60,6 +62,7 @@ installGuide = bld(
 	images = 'src.pro/images',
 	name = 'Peach_Pro_Installation_Guide.pdf',
 	install_path = '${BINDIR}/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
 check_sources_list = [
 	devGuide,
