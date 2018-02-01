@@ -64,10 +64,21 @@ installGuide = bld(
 	install_path = '${BINDIR}/docs',
     require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
+
+whatsNew = bld(
+	features = 'asciidoctor-pdf',
+	source = 'src.pro/UserGuide/WhatsNew.adoc',
+	images = 'src.pro/images',
+	name = 'Peach_Pro_Changes.pdf',
+	install_path = '${BINDIR}/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
+)
+
 check_sources_list = [
 	devGuide,
 	userGuide,
     installGuide,
+    whatsNew,
 ]
 
 def check_sources(ctx, tgs):
