@@ -1,6 +1,5 @@
 :product: Peach Fuzzer Professional
-
-= {product}: User Guide
+= {product}: Installation Guide
 Peach Fuzzer, LLC
 v{BUILDTAG}
 :doctype: book
@@ -36,45 +35,15 @@ endif::[]
 
 // NOTE: This book documents the commercial version of Peach
 
-:leveloffset: 0
-<<<
-include::01_Preface/00_Section.adoc[]
+[[Preface]]
+== Preface
+This document, the {product} Installation Guide, focuses strictly on installing {product} on all supported operating systems.
+The same installation instructions can also be found in the {product} User Guide under the "Installation" section.
+This guide is provided for convenience and does not contain any additional information that is not also present in the {product} User Guide.
 
 :leveloffset: 0
 <<<
-include::02_GettingStarted/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::03_FuzzingIntro/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::04_Installation/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::05_WhatsNew/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::06_RunningPeach/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::07_Recipes/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::08_Agents/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::09_Monitors/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::10_FaultReproduction/00_Section.adoc[]
+include::../Common/Installation/00_Section.adoc[]
 
 :leveloffset: 0
 <<<

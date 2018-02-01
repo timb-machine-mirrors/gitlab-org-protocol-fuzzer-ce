@@ -14,25 +14,20 @@ def configure(conf):
 	conf.find_program('ruby')
 	conf.find_program('bundle')
 
-	root = j(conf.get_third_party(), 'asciidoctor-pdf')
-	gemfile = j(root, 'asciidoctor-pdf.gemspec')
-
-	# Write out a custom Gemfile that points to asciidoctor-pdf
-	# This is to 1) include coderay and 2) keep the .lock file
-	# out of the source directory
 	plat = Utils.unversioned_sys_platform()
-	gem = conf.bldnode.make_node('asciidoctor-pdf.%s.gemspec' % plat)
 
-	# Need to use relative path with unix style directory seperators
-	rel = os.path.relpath(root, gem.parent.abspath()).replace('\\', '/')
+	gemdir = conf.bldnode.make_node('gems.%s' % plat)
+	bindir = j(gemdir.abspath(), 'bin')
+	gemfile = gemdir.find_or_declare('Gemfile')
 
-	gem.write('''
+	gemfile.write('''
 source 'https://rubygems.org'
 
-gem 'coderay', '1.1.0'
-
-gemspec :path => "%s"
-''' % rel)
+gem 'coderay', '~> 1.1.0'
+gem 'prawn', '~> 2.1.0'
+gem 'asciidoctor', '~> 1.5.0'
+gem 'asciidoctor-pdf', '1.5.0.alpha.15'
+''')
 
 	parts = v.BUILDTAG.split('.')
 
@@ -49,8 +44,6 @@ gemspec :path => "%s"
 		'VER_BRANCH=%s' % (len(parts) == 4 and parts[3] or v.VER_BRANCH),
 	]
 
-	v.ASCIIDOCTOR_PDF = j(root, 'bin', 'asciidoctor-pdf')
-	v.ASCIIDOCTOR_PDF_GEMFILE = gem.abspath()
 	v.ASCIIDOCTOR_PDF_OPTS = v.ASCIIDOCTOR_OPTS
 	v.ASCIIDOCTOR_PDF_THEME_DEPS = []
 	v.ASCIIDOCTOR_PDF_THEME_OPTS = []
@@ -59,15 +52,20 @@ gemspec :path => "%s"
 	v.ASCIIDOCTOR_HTML_THEME_OPTS = []
 
 	# Run bundler which will prepare all the prerequisites
-	conf.cmd_and_log(v.BUNDLE + [ '--gemfile=%s' % v.ASCIIDOCTOR_PDF_GEMFILE ])
+	conf.cmd_and_log(v.BUNDLE + [
+		'--gemfile=%s' % gemfile,
+		'--path=%s' % gemdir,
+		'--binstubs=%s' % bindir,
+	])
 
 	# Try and find asciidoctor, that is expected to come down
 	# as part of the bundle
-	adr = conf.find_program('asciidoctor')
-	(out,err) = conf.cmd_and_log(adr + ['--version'], output=Context.BOTH)
+	adr = conf.find_program('asciidoctor', path_list=[ bindir ], exts = '')
+	conf.find_program('asciidoctor-pdf', path_list=[ bindir ], exts = '')
+	# (out,err) = conf.cmd_and_log(adr + ['--version'], output=Context.BOTH)
 
-	if 'Asciidoctor 1.5.' not in out:
-		raise Errors.WafError("Expected Asciidoctor 1.5.x but found:\n%s" % out)
+	# if 'Asciidoctor 1.5.' not in out:
+	#	raise Errors.WafError("Expected Asciidoctor 1.5.x but found:\n%s" % out)
 
 	v.append_value('supported_features', 'asciidoctor-pdf')
 
@@ -141,6 +139,10 @@ def apply_asciidoctor_pdf(self):
 			raise Errors.WafError("image directory not found: %r in %r" % (images, self))
 		tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '-a', 'images=%s' % img.path_from(srcs[0].parent) ])
 		self.images = img
+
+	req = self.to_nodes(getattr(self, 'require', []))
+	for r in req:
+		tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '-r', r.abspath() ])
 
 def asciidoctor_scan(self):
 	depnodes = [x for x in self.themes()]
@@ -220,17 +222,17 @@ def run_asciidoctor_cmd(self, cmd, **kw):
 	return ret
 
 class asciidoctor_pdf(Task):
-	run_str = '${BUNDLE} exec ${RUBY} ${ASCIIDOCTOR_PDF} ${ASCIIDOCTOR_PDF_OPTS} ${ASCIIDOCTOR_PDF_THEME_OPTS} -o ${TGT} ${SRC}'
+	run_str = '${RUBY} ${ASCIIDOCTOR_PDF} ${ASCIIDOCTOR_PDF_OPTS} ${ASCIIDOCTOR_PDF_THEME_OPTS} -o ${TGT} ${SRC}'
 	color   = 'PINK'
 	vars    = ['ASCIIDOCTOR_PDF_OPTS', 'ASCIIDOCTOR_PDF_THEME_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: x.env.ASCIIDOCTOR_PDF_THEME_DEPS
 
-	def exec_command(self, cmd, **kw):
-		env = dict(self.env.env or os.environ)
-		env.update(BUNDLE_GEMFILE = self.env['ASCIIDOCTOR_PDF_GEMFILE'])
-		kw['env'] = env
-		return run_asciidoctor_cmd(self, cmd, **kw)
+	# def exec_command(self, cmd, **kw):
+	# 	env = dict(self.env.env or os.environ)
+	# 	env.update(BUNDLE_GEMFILE = self.env['ASCIIDOCTOR_PDF_GEMFILE'])
+	# 	kw['env'] = env
+	# 	return run_asciidoctor_cmd(self, cmd, **kw)
 
 class asciidoctor_html(Task):
 	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_HTML_OPTS} ${ASCIIDOCTOR_HTML_THEME_OPTS} -b html5 -o ${TGT} ${SRC}'
@@ -239,12 +241,10 @@ class asciidoctor_html(Task):
 	vars    = ['ASCIIDOCTOR_HTML_OPTS', 'ASCIIDOCTOR_HTML_THEME_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: x.env.ASCIIDOCTOR_HTML_THEME_DEPS
-	exec_command = run_asciidoctor_cmd
 
 class asciidoctor(Task):
-	run_str = '${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
+	run_str = '${RUBY} ${ASCIIDOCTOR} ${ASCIIDOCTOR_OPTS} -o ${TGT} ${SRC}'
 	color   = 'PINK'
 	vars    = ['ASCIIDOCTOR_OPTS']
 	scan    = asciidoctor_scan
 	themes  = lambda x: []
-	exec_command = run_asciidoctor_cmd

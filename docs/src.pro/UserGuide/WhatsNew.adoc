@@ -1,6 +1,5 @@
 :product: Peach Fuzzer Professional
-
-= {product}: User Guide
+= {product}: What's New
 Peach Fuzzer, LLC
 v{BUILDTAG}
 :doctype: book
@@ -36,48 +35,7 @@ endif::[]
 
 // NOTE: This book documents the commercial version of Peach
 
-:leveloffset: 0
-<<<
-include::01_Preface/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::02_GettingStarted/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::03_FuzzingIntro/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::04_Installation/00_Section.adoc[]
-
-:leveloffset: 0
 <<<
 include::05_WhatsNew/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::06_RunningPeach/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::07_Recipes/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::08_Agents/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::09_Monitors/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::10_FaultReproduction/00_Section.adoc[]
-
-:leveloffset: 0
-<<<
-include::11_Appendixes/00_Section.adoc[]
 
 // end

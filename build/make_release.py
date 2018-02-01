@@ -237,7 +237,7 @@ def main():
 
 		manifest = dict(
 			dist = [ x for x in names if filter_release(x) ],
-			files = [ sdk ],
+			files = [ sdk, 'Peach_Pro_Installation_Guide.pdf', 'Peach_Pro_Changes.pdf' ],
 			flexnetls = [ x for x in names if 'flexnetls' in x ],
 			product = r['product'],
 			build = args.buildtag,
@@ -260,6 +260,14 @@ def main():
 		make_sdk(sdk_path, filter_docs(docs, sdk_filter))
 
 		rel = os.path.join(path, 'release.json')
+
+		# installation guide is special because it should be its own download
+		installguide = filter_docs(docs, ['docs/Peach_Pro_Installation_Guide.pdf'])
+		shutil.copy(os.path.join(installguide[0][0], installguide[0][1]), path)
+
+		whatsnew = filter_docs(docs, ['docs/Peach_Pro_Changes.pdf'])
+		shutil.copy(os.path.join(whatsnew[0][0], whatsnew[0][1]), path)
+
 
 		for f in manifest['dist']:
 			src = os.path.join(reldir, f)

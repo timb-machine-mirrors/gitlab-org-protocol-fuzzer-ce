@@ -20,6 +20,7 @@ devGuide = bld(
 	images = 'src.pro/images',
 	name = 'Peach_Pro_Developer_Guide.pdf',
 	install_path = '${BINDIR}/sdk/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
 
 bld(
@@ -37,6 +38,7 @@ userGuide = bld(
 	images = 'src.pro/images',
 	name = 'Peach_Pro_User_Guide.pdf',
 	install_path = '${BINDIR}/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
 
 bld(
@@ -54,9 +56,29 @@ bld(
 	install_path = '${BINDIR}/sdk',
 )
 
+installGuide = bld(
+	features = 'asciidoctor-pdf',
+	source = 'src.pro/UserGuide/InstallationGuide.adoc',
+	images = 'src.pro/images',
+	name = 'Peach_Pro_Installation_Guide.pdf',
+	install_path = '${BINDIR}/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
+)
+
+whatsNew = bld(
+	features = 'asciidoctor-pdf',
+	source = 'src.pro/UserGuide/WhatsNew.adoc',
+	images = 'src.pro/images',
+	name = 'Peach_Pro_Changes.pdf',
+	install_path = '${BINDIR}/docs',
+    require = '../build/assets/asciidoctor-pdf-extensions.rb',
+)
+
 check_sources_list = [
 	devGuide,
 	userGuide,
+    installGuide,
+    whatsNew,
 ]
 
 def check_sources(ctx, tgs):
