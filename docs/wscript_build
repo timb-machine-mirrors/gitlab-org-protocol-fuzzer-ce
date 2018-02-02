@@ -39,6 +39,7 @@ userGuide = bld(
 	name = 'Peach_Pro_User_Guide.pdf',
 	install_path = '${BINDIR}/docs',
 	require = '../build/assets/asciidoctor-pdf-extensions.rb',
+	extra_install = '${BINDIR}/docs/publish',
 )
 
 bld(

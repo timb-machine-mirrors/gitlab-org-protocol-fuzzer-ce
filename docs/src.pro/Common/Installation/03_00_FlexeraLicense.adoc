@@ -24,15 +24,7 @@ information.
 Deploying a local license server requires changes to your account.
 Please contact licensing@peachfuzzer.com for more information about the process.
 
-[[License_FuzzFlex_CLS]]
-==== Cloud License Server
-
-A Cloud License Server provides functionality for serving and monitoring a counted pool of licenses
-for Peach FuzzFlex.
-A persistent connection to the Internet is required so that usage data can be uploaded to
-the Cloud License Server while a Peach FuzzFlex job is running.
-
-===== Downloading Peach FuzzFlex
+==== Downloading Peach FuzzFlex
 
 . When your Peach Fuzzer welcome email arrives, click the link to reset your initial password.
 . Navigate to https://dl.peachfuzzer.com with your preferred web browser.
@@ -59,6 +51,44 @@ image::{images}/Common/Installation/Portal_EULA_Flex.png[]
 . The download will begin.
 Depending on your network connection,
 this could take a few minutes.
+
+[[License_FuzzFlex_CLS]]
+==== Cloud License Server (Online Synchronization)
+
+A Cloud License Server provides functionality for serving and monitoring a counted pool of licenses
+for Peach FuzzFlex.
+A persistent connection to the Internet is required so that usage data can be uploaded to
+the Cloud License Server while a Peach FuzzFlex job is running.
+{product} will automatically activate the first time it is run.
+
+NOTE: If a proxy server is required to connect to the Internet, it must be configured as described below. 
+
+==== Windows Proxy configuration
+
+On Windows, the system proxy setting is the correct way to configure the proxy peach will use to connect to the licensing server.
+
+Windows 10:: The system proxy settings are configured at Settings > Network & Internet > Proxy.
+From there you will be able to enter the IP and Port of the proxy server.
+
+Windows 8:: The system proxy settings are configured at PC Settings > Network Proxy.
+From there you will be able to enter the IP and Port of the proxy server.
+
+Windows 7:: The system proxy settings are configured through the Internet Settings dialog.
+Open the Internet Options window located at Control Panel > Network and Internet > Internet Options. +
+1. Click the “Connections” tab at the top of the Internet Options window. +
+2. Click the “LAN Settings” button at the bottom of the window. +
+3. Click the “Advanced” button under Proxy Server will allow you to change advanced settings and enable a manual proxy server.
+
+==== Linux Proxy Configuration
+
+The proxy configuration on Linux is controlled via two environment variables +http_proxy+ and +https_proxy+.
+Ensure both variables are set prior to starting {product}.
+
+[source]
+----
+export http_proxy=http://xxxxx
+export https_proxy=https://xxxxx
+----
 
 [[License_FuzzFlex_LLS]]
 ==== Local License Server (Offline Synchronization)
