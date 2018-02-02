@@ -20,24 +20,6 @@ endif::[]
 
 // START-WHATSNEW
 
-=== v{BUILDTAG}
-
- * {new} Added Installation Guide document
- * {fix} Fixed several small UI issues in CAN Recording tool
-
-=== v4.3.158
-
- * {fix} Remove XML Generator documentation
-
-=== v4.3.153
-
- * {fix} Improve the local license server activation instructions
-
-=== v4.3.152
-
- * {new} Peach CAN Recorder with Vector XL support
- * {new} Support node locked licenses
-
 // END-WHATSNEW
 
 :numbered:
