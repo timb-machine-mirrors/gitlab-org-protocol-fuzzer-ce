@@ -63,6 +63,7 @@ installGuide = bld(
 	name = 'Peach_Pro_Installation_Guide.pdf',
 	install_path = '${BINDIR}/docs',
     require = '../build/assets/asciidoctor-pdf-extensions.rb',
+	extra_install = '${BINDIR}/docs/publish'
 )
 
 whatsNew = bld(
@@ -72,6 +73,7 @@ whatsNew = bld(
 	name = 'Peach_Pro_Changes.pdf',
 	install_path = '${BINDIR}/docs',
     require = '../build/assets/asciidoctor-pdf-extensions.rb',
+	extra_install = '${BINDIR}/docs/publish',
 )
 
 check_sources_list = [
