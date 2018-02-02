@@ -8,6 +8,7 @@ import zipfile
 import shutil
 import json
 import datetime
+import ntpath
 
 '''
 This script expects the following directory structure:
@@ -41,6 +42,7 @@ docfile  = os.path.join(outdir, 'doc.zip')
 tmpdir   = os.path.join(outdir, 'tmp')
 
 peach_docs = [ 'docs/*' ]
+publish_docs = [ 'docs/publish/*' ]
 sdk_filter = [ 'sdk/*' ]
 
 releases = [
@@ -237,7 +239,7 @@ def main():
 
 		manifest = dict(
 			dist = [ x for x in names if filter_release(x) ],
-			files = [ sdk, 'Peach_Pro_Installation_Guide.pdf', 'Peach_Pro_Changes.pdf' ],
+			files = [ sdk ] + [ntpath.basename(v) for x,v in filter_docs(docs, publish_docs)],
 			flexnetls = [ x for x in names if 'flexnetls' in x ],
 			product = r['product'],
 			build = args.buildtag,
@@ -261,12 +263,8 @@ def main():
 
 		rel = os.path.join(path, 'release.json')
 
-		# installation guide is special because it should be its own download
-		installguide = filter_docs(docs, ['docs/Peach_Pro_Installation_Guide.pdf'])
-		shutil.copy(os.path.join(installguide[0][0], installguide[0][1]), path)
-
-		whatsnew = filter_docs(docs, ['docs/Peach_Pro_Changes.pdf'])
-		shutil.copy(os.path.join(whatsnew[0][0], whatsnew[0][1]), path)
+		for d, v in filter_docs(docs, publish_docs):
+			shutil.copy(os.path.join(d, v), path)
 
 
 		for f in manifest['dist']:

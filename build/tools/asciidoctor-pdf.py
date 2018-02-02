@@ -118,6 +118,10 @@ def apply_asciidoctor_pdf(self):
 	inst_to = getattr(self, 'install_path', '${BINDIR}')
 	inst = self.install_files(inst_to, tsk.outputs, chmod=Utils.O644)
 
+	extra_install = getattr(self, 'extra_install', None)
+	if extra_install:
+		self.install_files(extra_install, tsk.outputs, chmod=Utils.O644)
+
 	tsk.env.append_value('ASCIIDOCTOR_PDF_OPTS', [ '--trace' ])
 
 	self.compiled_tasks = [ tsk ]
