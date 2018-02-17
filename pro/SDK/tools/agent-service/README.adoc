@@ -3,12 +3,12 @@
 
 Core features:
 
-* Allows PeachAgent.exe to run as a service on a linux server
+* Allows peachagent to run as a service on a linux server
 
 == Configuration
 
-. Assumes that PeachAgent.exe is in /opt/peach on your linux server. 
-.. Modify the WorkingDirectory and ExecStart to include the proper path to PeachAgent.exe if necessary
+. Assumes that peachagent is in /opt/peach on your linux server. 
+.. Modify the WorkingDirectory and ExecStart to include the proper path to peachagent if necessary
 
 == Installation
 . Copy peachagent.service into /etc/systemd/system/ (do NOT create a symlink here to the file)
@@ -16,4 +16,4 @@ Core features:
 . sudo systemctl daemon-reload
 . sudo systemctl start peachagent
 
-PeachAgent.exe will now automatically start on boot and can be managed with systemctl
+peachagent will now automatically start on boot and can be managed with systemctl

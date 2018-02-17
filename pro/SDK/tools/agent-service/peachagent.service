@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/peach
-ExecStart=/opt/peach/PeachAgent.exe
+ExecStart=/opt/peach/peachagent
 Restart=on-failure
 
 [Install]
