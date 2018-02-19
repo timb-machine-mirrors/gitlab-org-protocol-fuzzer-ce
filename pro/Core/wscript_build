@@ -59,6 +59,7 @@ if bld.env.BASENAME != 'web':
 		'System.Runtime.Serialization.dll',
 		'System.ServiceProcess.dll',
 		'System.Net.Http.dll',
+		'System.Net.Http.WebRequest.dll',
 		'System.Web.dll',
 		'System.Web.Services.dll',
 		'System.Xml.dll',
