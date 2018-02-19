@@ -49,9 +49,12 @@ The following steps will prepare Peach to run properly:
 . Install the latest `mono-complete` package.
 +
 ----
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys  3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+sudo apt-key adv \
+  --keyserver keyserver.ubuntu.com \
+  --recv-keys  3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 
-echo "deb http://download.mono-project.com/repo/debian wheezy/snapshots/4.8.1.0 main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
+echo "deb http://download.mono-project.com/repo/debian wheezy/snapshots/4.8.1.0 main" \
+  | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
 
 sudo apt-get update
 
@@ -62,7 +65,7 @@ sudo apt-get install mono-complete
 .	Install libpcap using the following command:
 +
 ----
-sudo apt-get install libpcap
+sudo apt-get install libpcap0.8
 ----
 
 . Optionally, install the GNU Debugger (GDB) to enable debugging of local processes.

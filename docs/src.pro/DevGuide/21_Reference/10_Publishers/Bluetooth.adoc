@@ -1,0 +1,16 @@
+
+=== Notes
+
+BCM20702 USB Adapter:
+
+https://plugable.com/2014/06/23/plugable-usb-bluetooth-adapter-solving-hfphsp-profile-issues-on-linux/
+
+Ubuntu 17.10
+ Kernel:: 4.13.0-32-generic
+ Bluez:: 5.46
+
+sudo apt-get install bluetooth
+wget https://s3.amazonaws.com/plugable/bin/fw-0a5c_21e8.hcd
+sudo mkdir /lib/firmware/brcm
+sudo mv fw-0a5c_21e8.hcd /lib/firmware/brcm/BCM20702A0-0a5c-21e8.hcd
+sudo cp /lib/firmware/brcm/BCM20702A0-0a5c-21e8.hcd /lib/firmware/brcm/BCM20702A1-0a5c-21e8.hcd
