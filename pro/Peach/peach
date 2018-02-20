@@ -126,7 +126,8 @@ if [ "$OS" == "linux" ]; then
 	fi
 
 	# find pcap
-	PCAP=`$LDCONFIG -p | grep libpcap | cut -d ' ' -f 1 | tr -d '[:space:]'`
+    # head -n 1 will ensure that if multiple entries are found we only take the first one
+	PCAP=`$LDCONFIG -p | grep libpcap | head -n 1 | cut -d ' ' -f 1 | tr -d '[:space:]'`
 	if [ ! -z "$PCAP" ]; then
 		#echo "PCAP: '$PCAP'"
 		sed -i "s/libpcap.so[^\"]*/$PCAP/g" ${DIRNAME}/SharpPcap.dll.config
