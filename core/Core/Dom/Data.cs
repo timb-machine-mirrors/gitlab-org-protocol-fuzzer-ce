@@ -32,7 +32,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.XPath;
 using Peach.Core.Cracker;
+using Peach.Core.Dom.XPath;
 using Peach.Core.IO;
 
 namespace Peach.Core.Dom
@@ -179,6 +181,7 @@ namespace Peach.Core.Dom
 		public class Field
 		{
 			public string Name { get; set; }
+			public bool IsXpath { get; set; }
 			public Variant Value { get; set; }
 		}
 
@@ -197,6 +200,12 @@ namespace Peach.Core.Dom
 			FieldId = dataSet.FieldId;
 			Fields = new FieldCollection();
 		}
+
+		[NonSerialized]
+		private PeachXmlNamespaceResolver _resolver;
+
+		[NonSerialized]
+		private PeachXPathNavigator _navigator;
 
 		public string Name { get; protected set; }
 
@@ -217,7 +226,10 @@ namespace Peach.Core.Dom
 
 			foreach (var kv in Fields)
 			{
-				ApplyField(action, model, kv.Name, kv.Value);
+				if (kv.IsXpath)
+					ApplyXpath(action, model, kv.Name, kv.Value);
+				else
+					ApplyField(action, model, kv.Name, kv.Value);
 			}
 
 			model.evaulateAnalyzers();
@@ -269,6 +281,40 @@ namespace Peach.Core.Dom
 			}
 		}
 
+
+		protected void ApplyXpath(Action action, DataModel model, string xpath, Variant value)
+		{
+			if (_navigator == null)
+			{
+				_resolver = new PeachXmlNamespaceResolver();
+				_navigator = new PeachXPathNavigator(model);
+			}
+
+			XPathNodeIterator iter;
+
+			try
+			{
+				iter = _navigator.Select(xpath, _resolver);
+			}
+			catch (XPathException ex)
+			{
+				throw new PeachException("Error, Field contains invalid xpath selector. [{0}]".Fmt(xpath), ex);
+			}
+
+			if (!iter.MoveNext())
+				throw new SoftException("Error, Field xpath returned no values. [" + xpath + "]");
+
+			do
+			{
+				var setElement = ((PeachXPathNavigator)iter.Current).CurrentNode as DataElement;
+				if (setElement == null)
+					continue;
+
+				setElement.DefaultValue = value;
+			}
+			while (iter.MoveNext());
+
+		}
 
 		protected static void ApplyField(Action action, DataElementContainer model, string field, Variant value)
 		{

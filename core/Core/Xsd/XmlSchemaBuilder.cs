@@ -392,7 +392,16 @@ namespace Peach.Core.Xsd
 			/// Format of name is: "Element" or "Block.Block.Element".
 			/// </summary>
 			[XmlAttribute(DataType = "string", Namespace = XmlSchema.Namespace)]
+			[DefaultValue(null)]
 			public string name { get; set; }
+
+			/// <summary>
+			/// Name of field to specify a default value for.
+			/// Format of name is: "Element" or "Block.Block.Element".
+			/// </summary>
+			[XmlAttribute(DataType = "string", Namespace = XmlSchema.Namespace)]
+			[DefaultValue(null)]
+			public string xpath { get; set; }
 
 			/// <summary>
 			/// Default value for template field.

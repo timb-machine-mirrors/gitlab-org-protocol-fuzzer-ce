@@ -628,6 +628,12 @@ namespace Peach.Core.Dom.XPath
 			_currentNode = new StateModelEntry(sm);
 		}
 
+		public PeachXPathNavigator(DataModel dm)
+		{
+			_position = new LinkedList<Entry>();
+			_currentNode = new ModelEntry(dm);
+		}
+
 		private PeachXPathNavigator(PeachXPathNavigator other)
 		{
 			_position = new LinkedList<Entry>(other._position);

@@ -1672,7 +1672,13 @@ namespace Peach.Core.Analyzers
 
 				foreach (var child in fields)
 				{
-					var name = child.getAttrString("name");
+					var xpath = child.getAttr("xpath", null);
+					var name = child.getAttr("name", null);
+					if (name == null && xpath == null)
+						throw new PeachException("Error, 'Field' element is missing required attribute 'name' or 'xpath'.");
+					if (name == null)
+						name = xpath;
+
 					if (!dupes.Add(name))
 						throw new PeachException("Error, Data element has multiple entries for field '" + name + "'.");
 
@@ -1692,6 +1698,7 @@ namespace Peach.Core.Analyzers
 						fieldData.Fields.Remove(name);
 						fieldData.Fields.Add(new DataField.Field
 						{
+							IsXpath = xpath != null,
 							Name = name,
 							Value = tmp.DefaultValue
 						});
