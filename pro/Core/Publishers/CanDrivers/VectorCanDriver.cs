@@ -126,6 +126,39 @@ namespace Peach.Pro.Core.Publishers.CanDrivers
 
 		public ICanDriver Driver => this;
 
+		public void ClearApplConfig()
+		{
+			try
+			{
+
+				uint channelCount = 0;
+				XLDefine.XL_HardwareType hwType = XLDefine.XL_HardwareType.XL_HWTYPE_NONE;
+				uint hwIndex = 0;
+				uint hwChannel = 0;
+
+				while (_driver.XL_GetApplConfig(
+					       _appName,
+					       channelCount,
+					       ref hwType,
+					       ref hwIndex,
+					       ref hwChannel,
+					       XLDefine.XL_BusTypes.XL_BUS_TYPE_CAN) == XLDefine.XL_Status.XL_SUCCESS)
+				{
+					_driver.XL_SetApplConfig(_appName, channelCount,
+						XLDefine.XL_HardwareType.XL_HWTYPE_NONE,
+						0,
+						0,
+						XLDefine.XL_BusTypes.XL_BUS_TYPE_NONE);
+
+					channelCount++;
+				}
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+		}
+
 		public bool IsOpen { get; protected set; }
 		public void Open()
 		{
@@ -138,22 +171,34 @@ namespace Peach.Pro.Core.Publishers.CanDrivers
 			_accessMask = 0;
 			var appChannelCount = -1;
 
+			ClearApplConfig();
+
 			var activeChannels = _channels.Where(x => x.IsEnabled);
 			foreach (var channel in activeChannels)
 			{
-				_accessMask |= _driver.XL_GetChannelMask(channel.Config.hwType, channel.Config.hwIndex, channel.Config.channelIndex);
-
-				var ret = _driver.XL_SetApplConfig(_appName, (uint) ++appChannelCount, 
-					XLDefine.XL_HardwareType.XL_HWTYPE_NONE, 
+				var ret = _driver.XL_SetApplConfig(
+					_appName, 
+					(uint) ++appChannelCount, 
+					channel.Config.hwType, 
 					channel.Config.hwIndex, 
 					channel.Config.channelIndex, 
-					XLDefine.XL_BusTypes.XL_BUS_TYPE_CAN);
+					channel.Config.busParams.busType);
 
 				if (ret != XLDefine.XL_Status.XL_SUCCESS)
 				{
 					throw new ApplicationException("XL_SetAppConfig(..., {0}, {1}, {2}, ...) failed for '{3}'".Fmt(
 						appChannelCount, channel.Config.hwIndex, channel.Config.channelIndex, channel.Name));
 				}
+
+				var channelMask = _driver.XL_GetChannelMask(
+					channel.Config.hwType,
+					channel.Config.hwIndex,
+					channel.Config.channelIndex);
+
+				if(channelMask == 0)
+					channelMask = channel.Config.channelMask;
+
+				_accessMask |= channelMask;
 			}
 
 			if (appChannelCount == -1)
