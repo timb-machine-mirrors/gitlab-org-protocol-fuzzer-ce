@@ -68,6 +68,7 @@ if bld.env.BASENAME != 'web':
 	pkgs = [
 		'Aspose.Words',
 		'Dapper',
+		'NDesk.DBus',
 		'DotNetZip',
 		'Lextm.SharpSnmpLib',
 		'Microsoft.AspNet.WebApi.Client',
