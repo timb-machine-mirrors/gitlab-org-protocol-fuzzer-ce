@@ -25,6 +25,7 @@ Encoding:: Encoding scheme used on the data in the file. Values are
 +
 * Raw - This is the default value.
 * Pem - Base-64 X.509 encoding.
+Required:: Does the file have to exist? Defaults to true. When false, the blob will be empty with length of zero.
 
 === Examples
 
