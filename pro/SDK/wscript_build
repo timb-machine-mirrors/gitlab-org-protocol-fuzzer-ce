@@ -29,20 +29,23 @@ bld(
 	install_path = None, # Compile only, don't install in ${BINDIR}
 )
 
-bld(
-	name = 'ExampleCanDriver.dll',
-	features = 'cs paket',
-	source = bld.path.ant_glob('extend/can_bus_driver/*.cs'),
-	use = [
-		'Peach.Core.dll',
-		'System.dll',
-		'System.Core.dll',
-		'System.Xml.dll',
-		'vxlapi_NET.dll',
-	],
-	use_packages = ['NLog'],
-	paket_settings = dict(
-		frameworks = ['net45'],
-	),
-	install_path = None, # Compile only, don't install in ${BINDIR}
-)
+if 'win' in bld.env['supported_features']:
+	bld(
+		name = 'ExampleCanDriver.dll',
+		features = 'cs paket',
+		source = bld.path.ant_glob('extend/can_bus_driver/*.cs'),
+		use = [
+			'Peach.Core.dll',
+			'System.dll',
+			'System.Core.dll',
+			'System.Xml.dll',
+			'vxlapi_NET.dll',
+		],
+		use_packages = ['NLog'],
+		paket_settings = dict(
+			frameworks = ['net45'],
+		),
+		install_path = None, # Compile only, don't install in ${BINDIR}
+	)
+
+# end
