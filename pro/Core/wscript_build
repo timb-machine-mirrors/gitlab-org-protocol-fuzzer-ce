@@ -114,7 +114,7 @@ if bld.env.BASENAME != 'web':
 			frameworks = frameworks,
 		),
 		source = bld.path.ant_glob('**/*.cs', excl=[
-			'Publishers/CanDrivers/VectorCanDriver.cs'
+			'Publishers/Can/*.cs'
 			]),
 		resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 		embed = embed,
@@ -135,7 +135,7 @@ if bld.env.BASENAME != 'web':
 	)
 
 	if 'win' in bld.env['supported_features']:
-		asm.source += bld.path.ant_glob('Publishers/CanDrivers/VectorCanDriver.cs')
+		asm.source += bld.path.ant_glob('Publishers/Can/*.cs')
 		deps.extend([
 			'UIAutomationClient.dll',
 			'UIAutomationTypes.dll',
