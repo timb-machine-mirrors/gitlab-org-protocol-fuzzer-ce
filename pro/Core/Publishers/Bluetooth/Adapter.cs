@@ -9,8 +9,11 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-		private static readonly InterfaceAttribute Attr =
+		private static readonly InterfaceAttribute AdapterAttr =
 			typeof(IAdapter).GetCustomAttributes(false).OfType<InterfaceAttribute>().First();
+
+		private static readonly InterfaceAttribute AdvertAttr =
+			typeof(IAdvertisingManager).GetCustomAttributes(false).OfType<InterfaceAttribute>().First();
 
 		private readonly IAdapter _adapter;
 		private readonly IAdvertisingManager _advertMgr;
@@ -39,7 +42,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public IDictionary<string, object> Properties
 		{
-			get { return _props.GetAll(Attr.Name); }
+			get { return _props.GetAll(AdapterAttr.Name); }
 		}
 
 		public string Introspect()
@@ -96,14 +99,19 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		}
 
+		private T Get<T>(string name, InterfaceAttribute iface)
+		{
+			return (T)_props.Get(iface.Name, name);
+		}
+
 		private T Get<T>(string name)
 		{
-			return (T)_props.Get(Attr.Name, name);
+			return Get<T>(name, AdapterAttr);
 		}
 
 		private void Set<T>(string name, T value)
 		{
-			_props.Set(Attr.Name, name, value);
+			_props.Set(AdapterAttr.Name, name, value);
 		}
 
 		public string Address
@@ -170,6 +178,21 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public string Modalias
 		{
 			get { return Get<string>("Modalias"); }
+		}
+
+		public byte ActiveInstances
+		{
+			get { return Get<byte>("ActiveInstances", AdvertAttr); }
+		}
+
+		public byte SupportedInstances
+		{
+			get { return Get<byte>("SupportedInstances", AdvertAttr); }
+		}
+
+		public string[] SupportedIncludes
+		{
+			get { return Get<string[]>("SupportedIncludes", AdvertAttr); }
 		}
 	}
 }

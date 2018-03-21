@@ -1,10 +1,127 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using NDesk.DBus;
 
 namespace Peach.Pro.Core.Publishers.Bluetooth
 {
+	public class OrderedDict<TKey, TValue> : IDictionary<TKey, TValue>
+	{
+		private class Collection : KeyedCollection<TKey, KeyValuePair<TKey, TValue>>
+		{
+			public bool ContainsKey(TKey key)
+			{
+				return Dictionary != null && Dictionary.ContainsKey(key);
+			}
+
+			protected override TKey GetKeyForItem(KeyValuePair<TKey, TValue> item)
+			{
+				return item.Key;
+			}
+		}
+
+		private readonly Collection _items = new Collection();
+
+		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+		{
+			return _items.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		public void Add(KeyValuePair<TKey, TValue> item)
+		{
+			_items.Add(item);
+		}
+
+		public void Clear()
+		{
+			_items.Clear();
+		}
+
+		public bool Contains(KeyValuePair<TKey, TValue> item)
+		{
+			return _items.Contains(item);
+		}
+
+		public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+		{
+			_items.CopyTo(array, arrayIndex);
+		}
+
+		public bool Remove(KeyValuePair<TKey, TValue> item)
+		{
+			return _items.Remove(item);
+		}
+
+		public int Count
+		{
+			get { return _items.Count; }
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public bool ContainsKey(TKey key)
+		{
+			return _items.ContainsKey(key);
+		}
+
+		public void Add(TKey key, TValue value)
+		{
+			_items.Add(new KeyValuePair<TKey, TValue>(key, value));
+		}
+
+		public bool Remove(TKey key)
+		{
+			return _items.Remove(key);
+		}
+
+		public bool TryGetValue(TKey key, out TValue value)
+		{
+			throw new NotImplementedException();
+		}
+
+		public TValue this[TKey key]
+		{
+			get
+			{
+				return _items[key].Value;
+			}
+			set
+			{
+				_items.Remove(key);
+				_items.Add(new KeyValuePair<TKey, TValue>(key, value));
+			}
+		}
+
+		public ICollection<TKey> Keys
+		{
+			get
+			{
+				return _items.Select(kv => kv.Key).ToList();
+			}
+		}
+
+		public ICollection<TValue> Values
+		{
+			get
+			{
+				return _items.Select(kv => kv.Value).ToList();
+			}
+		}
+	}
+
 	public class GattApplication : ObjectManager
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -37,7 +154,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		{
 			Logger.Trace("GetManagedObjects>");
 
-			var ret = new Dictionary<ObjectPath, IDictionary<string, IDictionary<string, object>>>();
+			var ret = new OrderedDict<ObjectPath, IDictionary<string, IDictionary<string, object>>>();
 
 			foreach (var svc in Services)
 			{

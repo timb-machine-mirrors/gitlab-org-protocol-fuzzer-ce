@@ -135,7 +135,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 			_device = new Device(_bus, devicePath);
 
-			Logger.Debug(_device.Introspect());
+			//Logger.Debug(_device.Introspect());
 
 			{
 				var sw = Stopwatch.StartNew();
@@ -256,10 +256,15 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			}
 		}
 
+		public void Iterate()
+		{
+			_bus.Iterate();
+		}
+
 		public void Serve(GattApplication app)
 		{
-			_adapter.Discoverable = true;
-			_adapter.DiscoverableTimeout = 0;
+			_adapter.Powered = false;
+			_adapter.Powered = true;
 
 			_bus.Register(app.Path, app);
 
@@ -288,12 +293,15 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 				}
 			}
 
+			Logger.Debug("AdvertisingManager> Active: {0}, Supported: {1}, Included: {2}",
+				_adapter.ActiveInstances, _adapter.SupportedInstances, string.Join(",", _adapter.SupportedIncludes));
+
 			Logger.Debug("Serve> Registering application: {0}", app.Path);
 
 			_adapter.RegisterApplication(app.Path, new Dictionary<string, object>());
 
 			app.Advertisement.Path = new ObjectPath(string.Format("{0}/advertisement", app.Path));
-			app.Advertisement.ServiceUUIDs = app.Services.Select(x => x.UUID).ToArray();
+			app.Advertisement.ServiceUUIDs = app.Services.Where(x => x.Advertise).Select(x => x.UUID).ToArray();
 			app.Advertisement.LocalName = "peach";
 			app.Advertisement.IncludeTxPower = true;
 			app.Advertisement.Type = "peripheral";
@@ -303,6 +311,10 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			Logger.Debug("Serve> Registering advertisements: {0}", app.Advertisement.Path);
 
 			_adapter.RegisterAdvertisement(app.Advertisement.Path, new Dictionary<string, object>());
+
+			_adapter.DiscoverableTimeout = 0;
+			_adapter.Discoverable = true;
+
 		}
 
 		private IEnumerable<RemoteService> EnumerateServices(ObjectPath devicePath)

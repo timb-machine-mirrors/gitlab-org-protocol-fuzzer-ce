@@ -14,6 +14,14 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public ObjectPath Path { get; set; }
 
+		public LocalAdvertisement()
+		{
+			ServiceUUIDs = new string[0];
+			ManufacturerData = new Dictionary<ushort, object>();
+			SolicitUUIDs = new string[0];
+			ServiceData = new Dictionary<string, object>();
+		}
+
 		public void Release()
 		{
 			Logger.Trace("Release>");
@@ -54,7 +62,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			{
 				{"Type", Type},
 				{"ServiceUUIDs", ServiceUUIDs},
-				//{"ManufacturerData", ManufacturerData},
+				{"ManufacturerData", ManufacturerData},
 				//{"SolicitUUIDs", SolicitUUIDs},
 				//{"ServiceData", ServiceData},
 				{"LocalName", LocalName},

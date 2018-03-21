@@ -67,6 +67,7 @@ namespace Peach.Pro.Core.Publishers
 				mgr.Dispose();
 				throw new SoftException(ex);
 			}
+
 			try
 			{
 				mgr.Connect(Pair, Trust);

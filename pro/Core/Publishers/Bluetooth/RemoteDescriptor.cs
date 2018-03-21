@@ -71,5 +71,4 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public byte[] Value { get { return Get<byte[]>("Vaue"); } }
 		public string[] Flags { get { return Get<string[]>("Flags"); } }
 	}
-
 }

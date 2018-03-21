@@ -18,6 +18,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			Characteristics = new List<LocalCharacteristic>();
 		}
 
+		public bool Advertise { get; set; }
 		public ObjectPath Path { get; set; }
 		public List<LocalCharacteristic> Characteristics { get; private set; }
 
