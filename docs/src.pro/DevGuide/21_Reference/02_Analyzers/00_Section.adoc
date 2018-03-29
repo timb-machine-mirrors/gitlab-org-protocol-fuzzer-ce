@@ -29,6 +29,10 @@ include::Binary.adoc[]
 
 <<<
 
+include::Bson.adoc[]
+
+<<<
+
 include::Json.adoc[]
 
 <<<
