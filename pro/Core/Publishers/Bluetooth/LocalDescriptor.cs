@@ -8,8 +8,8 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 {
 	public class LocalDescriptor : IDescriptor, IGattProperties
 	{
-		public delegate byte[] ReadHandler(LocalDescriptor chr, Dictionary<string, object> options);
-		public delegate void WriteHandler(LocalDescriptor chr, byte[] value, Dictionary<string, object> options);
+		public delegate byte[] ReadHandler(LocalDescriptor chr, IDictionary<string, object> options);
+		public delegate void WriteHandler(LocalDescriptor chr, byte[] value, IDictionary<string, object> options);
 
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -33,7 +33,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public ObjectPath Characteristic { get; set; }
 		public string[] Flags { get; set; }
 
-		public byte[] ReadValue(Dictionary<string, object> options)
+		public byte[] ReadValue(IDictionary<string, object> options)
 		{
 			Logger.Debug("ReadValue>");
 			foreach (var kv in options)
@@ -42,7 +42,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			return Read(this, options);
 		}
 
-		public void WriteValue(byte[] value, Dictionary<string, object> options)
+		public void WriteValue(byte[] value, IDictionary<string, object> options)
 		{
 			Logger.Debug("WriteValue> Length: {0}", value.Length);
 			foreach (var kv in options)
@@ -83,7 +83,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			};
 		}
 
-		public event PropertiesChangedHandler PropertiesChangedEvent
+		public event PropertiesChangedHandler PropertiesChanged
 		{
 			add { }
 			remove { }

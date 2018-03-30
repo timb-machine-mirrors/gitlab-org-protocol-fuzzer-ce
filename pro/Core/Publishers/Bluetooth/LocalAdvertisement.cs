@@ -30,9 +30,9 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public string Type { get; set; }
 		public string LocalName { get; set; }
 		public string[] ServiceUUIDs { get; set; }
-		public Dictionary<ushort, object> ManufacturerData { get; set; }
+		public IDictionary<ushort, object> ManufacturerData { get; set; }
 		public string[] SolicitUUIDs { get; set; }
-		public Dictionary<string, object> ServiceData { get; set; }
+		public IDictionary<string, object> ServiceData { get; set; }
 		public bool IncludeTxPower { get; set; }
 
 		public string InterfaceName
@@ -70,7 +70,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			};
 		}
 
-		public event PropertiesChangedHandler PropertiesChangedEvent
+		public event PropertiesChangedHandler PropertiesChanged
 		{
 			add { }
 			remove { }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using NDesk.DBus;
 using org.freedesktop.DBus;
 
@@ -8,8 +10,8 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 {
 	public class LocalCharacteristic : ICharacteristic, IGattProperties
 	{
-		public delegate byte[] ReadHandler(LocalCharacteristic chr, Dictionary<string, object> options);
-		public delegate void WriteHandler(LocalCharacteristic chr, byte[] value, Dictionary<string, object> options);
+		public delegate byte[] ReadHandler(LocalCharacteristic chr, IDictionary<string, object> options);
+		public delegate void WriteHandler(LocalCharacteristic chr, byte[] value, IDictionary<string, object> options);
 
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -35,7 +37,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public ObjectPath Service { get; set; }
 		public string[] Flags { get; set; }
 
-		public byte[] ReadValue(Dictionary<string, object> options)
+		public byte[] ReadValue(IDictionary<string, object> options)
 		{
 			Logger.Debug("ReadValue>");
 			foreach (var kv in options)
@@ -44,7 +46,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			return Read(this, options);
 		}
 
-		public void WriteValue(byte[] value, Dictionary<string, object> options)
+		public void WriteValue(byte[] value, IDictionary<string, object> options)
 		{
 			Logger.Debug("WriteValue> Length: {0}", value.Length);
 			foreach (var kv in options)
@@ -53,17 +55,44 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			Write(this, value, options);
 		}
 
+		Thread th;
+
 		public void StartNotify()
 		{
 			Logger.Debug("StartNotify>");
+
+			th = new Thread(() =>
+			{
+				var i = 0;
+				while (true)
+				{
+				Thread.Sleep(1000);
+
+				Logger.Debug("PropertyChanged> Signal Count: {0}", PropertiesChanged != null ? PropertiesChanged.GetInvocationList().Length : -1);
+
+				if (PropertiesChanged != null)
+					PropertiesChanged(Attr.Name, new Dictionary<string, object>()
+					{
+						{ "Value", Encoding.UTF8.GetBytes((++i).ToString()) }
+					}, new string[0]);
+				}
+			});
+
+			th.Start();
 		}
 
 		public void StopNotify()
 		{
 			Logger.Debug("StopNotify>");
+
+			if (th != null)
+			{
+				th.Abort();
+				th = null;
+			}
 		}
 
-		public void AcquireNotify(Dictionary<string, object> options, out int fd, out ushort mtu)
+		public void AcquireNotify(IDictionary<string, object> options, out int fd, out ushort mtu)
 		{
 			Logger.Debug("AcquireNotify>");
 			fd = 0;
@@ -102,11 +131,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			};
 		}
 
-		public event PropertiesChangedHandler PropertiesChangedEvent
-		{
-			add { }
-			remove { }
-		}
+		public event PropertiesChangedHandler PropertiesChanged;
 
 		#endregion
 	}

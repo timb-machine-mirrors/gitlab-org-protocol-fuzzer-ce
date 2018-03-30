@@ -21,7 +21,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		{
 			_dev = bus.GetObject<IDevice>(path);
 			_props = bus.GetObject<Properties>(path);
-			_props.PropertiesChangedEvent += OnPropertiesChanged;
+			_props.PropertiesChanged += OnPropertiesChanged;
 			_info = bus.GetObject<Introspectable>(path);
 
 			Path = path;
@@ -70,7 +70,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_dev.Pair();
 		}
 
-		private void OnPropertiesChanged(string s, Dictionary<string, object> d, string[] a)
+		private void OnPropertiesChanged(string s, IDictionary<string, object> d, string[] a)
 		{
 			Logger.Debug("OnPropertiesChanged> {0} ({1})", s, string.Join(",", a));
 
@@ -116,8 +116,8 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public string[] UUIDs { get { return Get<string[]>("UUIDs"); } }
 		public string Modalias { get { return Get<string>("Modalias"); } }
 		public ObjectPath Adapter { get { return Get<ObjectPath>("Adapter"); } }
-		public Dictionary<ushort, object> ManufacturerData { get { return Get<Dictionary<ushort, object>>("ManufacturerData"); } }
-		public Dictionary<string, object> ServiceData { get { return Get<Dictionary<string, object>>("ServiceData"); } }
+		public IDictionary<ushort, object> ManufacturerData { get { return Get<IDictionary<ushort, object>>("ManufacturerData"); } }
+		public IDictionary<string, object> ServiceData { get { return Get<IDictionary<string, object>>("ServiceData"); } }
 		public short TxPower { get { return Get<short>("TxPower"); } }
 		public bool ServicesResolved { get { return Get<bool>("ServicesResolved"); } }
 	}

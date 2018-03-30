@@ -18,7 +18,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public RemoteService(Bus bus, ObjectPath path)
 		{
 			_props = bus.GetObject<Properties>(path);
-			_props.PropertiesChangedEvent += OnPropertiesChanged;
+			_props.PropertiesChanged += OnPropertiesChanged;
 			_info = bus.GetObject<Introspectable>(path);
 
 			Path = path;
@@ -47,7 +47,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			return _info.IntrospectPretty();
 		}
 
-		private void OnPropertiesChanged(string s, Dictionary<string, object> d, string[] a)
+		private void OnPropertiesChanged(string s, IDictionary<string, object> d, string[] a)
 		{
 			Logger.Debug("OnPropertiesChanged> {0} ({1})", s, string.Join(",", a));
 

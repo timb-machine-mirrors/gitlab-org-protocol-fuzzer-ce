@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NDesk.DBus;
 using org.freedesktop.DBus;
 
@@ -7,6 +8,11 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 {
 	public class RemoteCharacteristic : ICharacteristic
 	{
+		private class NotifyLock
+		{
+			public bool Notifying;
+		}
+
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		private static readonly InterfaceAttribute Attr =
@@ -15,13 +21,17 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		private readonly ICharacteristic _char;
 		private readonly Properties _props;
 		private readonly Introspectable _info;
+		private readonly NotifyLock _mutex;
+		private readonly Queue<byte[]> _notifications;
 
 		public RemoteCharacteristic(Bus bus, ObjectPath path)
 		{
 			_char = bus.GetObject<ICharacteristic>(path);
 			_props = bus.GetObject<Properties>(path);
-			_props.PropertiesChangedEvent += OnPropertiesChanged;
+			_props.PropertiesChanged += OnPropertiesChanged;
 			_info = bus.GetObject<Introspectable>(path);
+			_mutex = new NotifyLock {Notifying = false};
+			_notifications = new Queue<byte[]>();
 
 			Path = path;
 			Descriptors = new ByUuid<RemoteDescriptor>();
@@ -49,38 +59,84 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			return _info.IntrospectPretty();
 		}
 
-		public byte[] ReadValue(Dictionary<string, object> options)
+		public byte[] ReadValue(IDictionary<string, object> options)
 		{
 			return _char.ReadValue(options);
 		}
 
-		public void WriteValue(byte[] value, Dictionary<string, object> options)
+		public void WriteValue(byte[] value, IDictionary<string, object> options)
 		{
 			_char.WriteValue(value, options);
 		}
 
 		public void StartNotify()
 		{
-			_char.StartNotify();
+			lock (_mutex)
+			{
+				if (!_mutex.Notifying)
+				{
+					_mutex.Notifying = true;
+					_char.StartNotify();
+				}
+			}
 		}
 
 		public void StopNotify()
 		{
-			_char.StopNotify();
+			lock (_mutex)
+			{
+				if (_mutex.Notifying)
+				{
+					_mutex.Notifying = false;
+					_notifications.Clear();
+					_char.StopNotify();
+				}
+			}
 		}
 
-		public void AcquireNotify(Dictionary<string, object> options, out int fd, out ushort mtu)
+		public void AcquireNotify(IDictionary<string, object> options, out int fd, out ushort mtu)
 		{
 			_char.AcquireNotify(options, out fd, out mtu);
 		}
 
-		private void OnPropertiesChanged(string s, Dictionary<string, object> d, string[] a)
+		public byte[] GetNotification(int millisecondsTimeout)
 		{
-			Logger.Debug("OnPropertiesChanged> {0} ({1})", s, string.Join(",", a));
+			lock (_mutex)
+			{
+				if (!_mutex.Notifying)
+				{
+					_mutex.Notifying = true;
+					_char.StartNotify();
+				}
+
+				if (_notifications.Count == 0 && !Monitor.Wait(_mutex, millisecondsTimeout))
+					return null;
+
+				return _notifications.Dequeue();
+			}
+		}
+
+		private void OnPropertiesChanged(string s, IDictionary<string, object> d, string[] a)
+		{
+			Logger.Trace("OnPropertiesChanged> {0} ({1})", s, string.Join(",", a));
 
 			foreach (var kv in d)
-				Logger.Debug("OnPropertiesChanged>  {0}={1}", kv.Key, kv.Value);
+				Logger.Trace("OnPropertiesChanged>  {0}={1}", kv.Key, kv.Value);
 
+			object value;
+			if (!d.TryGetValue("Value", out value))
+				return;
+
+			lock (_mutex)
+			{
+				if (_mutex.Notifying)
+				{
+					var asBytes = (byte[])value;
+					Logger.Debug("OnPropertiesChanged> Notify: {0}", string.Join("", asBytes.Select(x => x.ToString("X2"))));
+					_notifications.Enqueue(asBytes);
+					Monitor.Pulse(_mutex);
+				}
+			}
 		}
 
 		private T Get<T>(string name)

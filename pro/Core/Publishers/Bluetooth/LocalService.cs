@@ -58,7 +58,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			};
 		}
 
-		public event PropertiesChangedHandler PropertiesChangedEvent
+		public event PropertiesChangedHandler PropertiesChanged
 		{
 			add { }
 			remove { }

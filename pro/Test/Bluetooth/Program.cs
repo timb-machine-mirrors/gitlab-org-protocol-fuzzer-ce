@@ -157,13 +157,13 @@ namespace Peach.Pro.Test.Bluetooth
 										Read = (d,o) => ToBytes("546865726D6F6D6574657244656D6F2034"),
 										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
 									},
-									new LocalDescriptor
-									{
-										UUID = "00002902-0000-1000-8000-00805f9b34fb",
-										Flags = new[] { "read", "write" },
-										Read = (d,o) => ToBytes("0000"),
-										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
-									}
+									//new LocalDescriptor
+									//{
+									//	UUID = "00002902-0000-1000-8000-00805f9b34fb",
+									//	Flags = new[] { "read", "write" },
+									//	Read = (d,o) => ToBytes("0000"),
+									//	Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
+									//}
 								},
 								Flags = new[] { "read", "write" },
 							},
@@ -181,13 +181,13 @@ namespace Peach.Pro.Test.Bluetooth
 										Read = (d,o) => ToBytes("043C"),
 										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
 									},
-									new LocalDescriptor
-									{
-										UUID = "00002902-0000-1000-8000-00805f9b34fb",
-										Flags = new[] { "read", "write" },
-										Read = (d,o) => ToBytes("0000"),
-										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
-									}
+									//new LocalDescriptor
+									//{
+									//	UUID = "00002902-0000-1000-8000-00805f9b34fb",
+									//	Flags = new[] { "read", "write" },
+									//	Read = (d,o) => ToBytes("0000"),
+									//	Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
+									//}
 								},
 								Flags = new[] { "read", "write" },
 							},
@@ -198,13 +198,13 @@ namespace Peach.Pro.Test.Bluetooth
 								Write = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
 								Descriptors =
 								{
-									new LocalDescriptor
-									{
-										UUID = "00002902-0000-1000-8000-00805f9b34fb",
-										Flags = new[] { "read", "write" },
-										Read = (d,o) => ToBytes("0000"),
-										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
-									}
+									//new LocalDescriptor
+									//{
+									//	UUID = "00002902-0000-1000-8000-00805f9b34fb",
+									//	Flags = new[] { "read", "write" },
+									//	Read = (d,o) => ToBytes("0000"),
+									//	Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
+									//}
 								},
 								Flags = new[] { "read", "write", "notify" },
 							},
@@ -222,13 +222,13 @@ namespace Peach.Pro.Test.Bluetooth
 								Write = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
 								Descriptors =
 								{
-									new LocalDescriptor
-									{
-										UUID = "00002902-0000-1000-8000-00805f9b34fb",
-										Flags = new[] { "read", "write" },
-										Read = (d,o) => ToBytes("0000"),
-										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
-									}
+									//new LocalDescriptor
+									//{
+									//	UUID = "00002902-0000-1000-8000-00805f9b34fb",
+									//	Flags = new[] { "read", "write" },
+									//	Read = (d,o) => ToBytes("0000"),
+									//	Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
+									//}
 								},
 								Flags = new[] { "indicate" },
 							},
@@ -268,7 +268,16 @@ Service: 00001801-0000-1000-8000-00805f9b34fb, Primary: True
 				if (args.Length == 2)
 				{
 					mgr.Device = args[1];
-					mgr.Connect(false, false);
+					mgr.Connect(false, true);
+
+					var svc = mgr.RemoteServices[Guid.Parse("0000ffe0-0000-1000-8000-00805f9b34fb")];
+					var chr = svc.Characteristics[Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb")];
+
+					var d = mgr.RemoteServices.SelectMany(x => x.Characteristics).SelectMany(x => x.Descriptors).First();
+
+					Console.WriteLine(d.Introspect());
+
+					chr.StartNotify();
 
 					Console.WriteLine("Connected, press any key to continue");
 				}
@@ -276,18 +285,15 @@ Service: 00001801-0000-1000-8000-00805f9b34fb, Primary: True
 				{
 					mgr.Serve(app);
 					Console.WriteLine("Registered, press any key to continue");
+				}
 
-					while (true)
-					{
-						mgr.Iterate();
-						Thread.Sleep(1000);
-					}
+				while (true)
+				{
+					mgr.Iterate();
+					Thread.Sleep(1000);
+					Console.WriteLine("Iterate");
 				}
 			}
-
-			Console.ReadLine();
-
-			return 0;
 		}
 	}
 }

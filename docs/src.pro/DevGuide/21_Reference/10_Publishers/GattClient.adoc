@@ -1,4 +1,109 @@
+<<<
+[[Publishers_GattClient]]
+== GATT Client Publisher
 
+The _GATT Client_ publisher is used for
+
+=== Syntax
+
+[source,xml]
+----
+<Publisher class="GattClient">
+	<Param name="Adapter" value="hci0" />
+	<Param name="Device" value="01:02:03:04:05:06" />
+</Publisher>
+----
+
+=== Parameters
+
+_Required:_
+
+Adapter:: Local adapter name (eg: hci0)
+Device:: Remote device address (eg: 01:02:03:04:05:06)
+
+_Optional:_
+
+DiscoverTimeout:: How many milliseconds to wait when discovering the device. The default value is 10000ms.
+ConnectTimeout:: How many milliseconds to wait when connecting to the device. The default value is 10000ms.
+PairTimeout:: How many milliseconds to wait when pairing with the device. The default value is 10000ms.
+Pair:: Should the publisher pair with the device. The default value is false.
+Trust:: Should the publisher trust the device.  The default value is false.
+
+=== Actions
+
+xref:Action_start[start]:: Implicit Action to start the Publisher.
+xref:Action_stop[stop]:: Implicit Action to stop the Publisher.
+xref:Action_call[call]::
++
+The method attribute defines the operation to perform.
+The supported methods are:
++
+readCharacteristic;; Read the value of a characteristic
+writeCharacteristic;; Write a value to a characteristic
+readDescriptor;; Read the value of a descriptor
+writeDescriptor;; Write a value to a descriptor
+getNotification;; Get a notification from a characteristic
++
+Each method requires a minimum of two parameters.
+The first parameter specifies the UUID of the service.
+The second parameter specifies the UUID of the characteristic.
+When calling +readDescriptor+ and +writeDescriptor+, the third parameter specifies the UUID of the descriptor.
+When calling +writeCharacteristic+ and +writeDescriptor+, the last parameter specifies the data to write.
+When calling +readCharacteristic+, +readDescriptor+ and +getNotification+, the data is returned via the action result.
+
+=== Examples
+
+.Read Attribute Example
+======================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach>
+  <DataModel name="GUID">
+    <String name="Value" mutable="false" />
+  </DataModel>
+
+  <DataModel name="String">
+    <String name="Value" />
+  </DataModel>
+
+  <StateModel name="SM" initialState="Initial">
+    <State name="Initial">
+      <Action type="call" method="readCharacteristic">
+        <Param name="Service">
+          <DataModel ref="GUID" />
+          <Data>
+            <!-- Device Information -->
+            <Field name="Value" value="0000180a-0000-1000-8000-00805f9b34fb" />
+          </Data>
+        </Param>
+        <Param name="Characteristic">
+          <DataModel ref="GUID" />
+          <Data>
+            <!-- Model Number String -->
+            <Field name="Value" value="00002a24-0000-1000-8000-00805f9b34fb" />
+          </Data>
+        </Param>
+        <Result name="Value">
+          <DataModel ref="String" />
+        </Result>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default" maxOutputSize="20">
+    <StateModel ref="SM" />
+    <Publisher class="GattClient">
+      <Param name="Adapter" value="hci0" />
+      <Param name="Device" value="50:33:8b:d9:8b:f4" />
+      <Param name="Pair" value="false" />
+      <Param name="Trust" value="true" />
+    </Publisher>
+  </Test>
+
+</Peach>
+----
+======================
 
 .Write Attribute Example
 ======================
@@ -51,4 +156,55 @@
 
 </Peach>
 ----
+
+.Get Notification Example
 ======================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach>
+  <DataModel name="GUID">
+    <String name="Value" mutable="false" />
+  </DataModel>
+
+  <DataModel name="Blob">
+    <Blob name="Value" />
+  </DataModel>
+
+  <StateModel name="SM" initialState="Initial">
+    <State name="Initial">
+      <Action type="call" method="getNotification">
+        <Param name="Service">
+          <DataModel ref="GUID" />
+          <Data>
+            <Field name="Value" value="0000ffe0-0000-1000-8000-00805f9b34fb" />
+          </Data>
+        </Param>
+        <Param name="Characteristic">
+          <DataModel ref="GUID" />
+          <Data>
+            <Field name="Value" value="0000ffe1-0000-1000-8000-00805f9b34fb" />
+          </Data>
+        </Param>
+        <Result name="Value">
+          <DataModel ref="Blob" />
+        </Result>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default" maxOutputSize="20">
+    <StateModel ref="SM" />
+    <Publisher class="GattClient">
+      <Param name="Adapter" value="hci0" />
+      <Param name="Device" value="94:E3:6D:A3:87:D7" />
+      <Param name="Pair" value="false" />
+      <Param name="Trust" value="true" />
+    </Publisher>
+  </Test>
+
+</Peach>
+----
+
+======================
+

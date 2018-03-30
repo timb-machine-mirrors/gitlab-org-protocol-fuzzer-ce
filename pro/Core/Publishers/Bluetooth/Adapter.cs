@@ -29,7 +29,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_props = bus.GetObject<Properties>(path);
 			_info = bus.GetObject<Introspectable>(path);
 
-			_props.PropertiesChangedEvent += OnPropertiesChanged;
+			_props.PropertiesChanged += OnPropertiesChanged;
 
 			Path = path;
 		}
@@ -55,7 +55,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_adapter.StartDiscovery();
 		}
 
-		public void SetDiscoveryFilter(Dictionary<string, object> filter)
+		public void SetDiscoveryFilter(IDictionary<string, object> filter)
 		{
 			_adapter.SetDiscoveryFilter(filter);
 		}
@@ -70,7 +70,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_adapter.RemoveDevice(device);
 		}
 
-		public void RegisterApplication(ObjectPath application, Dictionary<string, object> options)
+		public void RegisterApplication(ObjectPath application, IDictionary<string, object> options)
 		{
 			_mgr.RegisterApplication(application, options);
 		}
@@ -80,7 +80,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_mgr.UnregisterApplication(application);
 		}
 
-		public void RegisterAdvertisement(ObjectPath application, Dictionary<string, object> options)
+		public void RegisterAdvertisement(ObjectPath application, IDictionary<string, object> options)
 		{
 			_advertMgr.RegisterAdvertisement(application, options);
 		}
@@ -90,7 +90,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_advertMgr.UnregisterAdvertisement(application);
 		}
 
-		private void OnPropertiesChanged(string s, Dictionary<string, object> d, string[] a)
+		private void OnPropertiesChanged(string s, IDictionary<string, object> d, string[] a)
 		{
 			Logger.Debug("OnPropertiesChanged> {0} ({1})", s, string.Join(",", a));
 
