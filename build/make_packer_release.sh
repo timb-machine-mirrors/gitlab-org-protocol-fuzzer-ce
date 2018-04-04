@@ -75,6 +75,7 @@ fi
 
 # Ensure tmp directory for .tar files is clean
 rm -rvf "tmp" 2>/dev/null || {}
+mkdir tmp
 
 # If packer is unable to connect over VNC to the esxi server
 # ensure that the firewall settings did not get reset
