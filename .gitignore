@@ -117,6 +117,9 @@ web/packer/output-peachweb
 web/packer/output-vmware-iso
 web/packer/packer_cache
 web/packer/tmp
+packer/tmp
+packer/output-vmware-iso
+packer/packer_cache
 
 # vim swapfiles
 *.swp
