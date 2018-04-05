@@ -12,6 +12,7 @@ usage() {
 # ovatool comes from: https://www.vmware.com/support/developer/ovf/
 
 requires "packer"
+requires "jq"
 if [ -z $ESXI_PASSWORD ]; then
     requires "ovftool"
 fi
@@ -57,7 +58,7 @@ if [ -z "$FILES_DIR" ]; then
     exit 1
 fi
 
-ovadir="$(pwd)/output"
+ovadir="$(pwd)/output/release/${BUILDTAG}"
 pushd packer
 
 ESXI_PASSWORD=""
@@ -96,6 +97,9 @@ if [ -z "$ESXI_PASSWORD" ]; then
 else
     mv "peach_targetvm/peach-targetvm.ova/peach-targetvm.ova" "${ovadir}/peach-targetvm-${BUILDTAG}.ova"
 fi
+
+# last step is to modify the release.json to include the .ova as a file
+jq --arg OVANAME peach-targetvm-${BUILDTAG}.ova '.files += [$OVANAME]' ${ovadir}/release.json > ${ovadir}/release.json.tmp && mv ${ovadir}/release.json.tmp ${ovadir}/release.json
 
 popd
 
