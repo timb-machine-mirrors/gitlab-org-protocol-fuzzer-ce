@@ -1,0 +1,54 @@
+
+
+.Write Attribute Example
+======================
+[source,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<Peach>
+  <DataModel name="GUID">
+    <String name="Value" mutable="false" />
+  </DataModel>
+
+  <DataModel name="Blob">
+    <Blob name="Value" />
+  </DataModel>
+
+  <StateModel name="SM" initialState="Initial">
+    <State name="Initial">
+      <Action type="call" method="writeCharacteristic">
+        <Param name="Service">
+          <DataModel ref="GUID" />
+          <Data>
+            <Field name="Value" value="00008b09-0000-1000-8000-00805f9b34fb" />
+          </Data>
+        </Param>
+        <Param name="Characteristic">
+          <DataModel ref="GUID" />
+          <Data>
+            <Field name="Value" value="00008a81-0000-1000-8000-00805f9b34fb" />
+          </Data>
+        </Param>
+        <Param name="Value">
+          <DataModel ref="Blob" />
+          <Data>
+            <Field name="Value" value="hello" />
+          </Data>
+        </Param>
+      </Action>
+    </State>
+  </StateModel>
+
+  <Test name="Default" maxOutputSize="20">
+    <StateModel ref="SM" />
+    <Publisher class="GattClient">
+      <Param name="Adapter" value="hci0" />
+      <Param name="Device" value="50:33:8b:d9:8b:f4" />
+      <Param name="Pair" value="false" />
+      <Param name="Trust" value="true" />
+    </Publisher>
+  </Test>
+
+</Peach>
+----
+======================

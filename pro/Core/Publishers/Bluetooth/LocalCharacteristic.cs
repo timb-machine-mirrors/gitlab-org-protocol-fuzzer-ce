@@ -63,6 +63,13 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			Logger.Debug("StopNotify>");
 		}
 
+		public void AcquireNotify(Dictionary<string, object> options, out int fd, out ushort mtu)
+		{
+			Logger.Debug("AcquireNotify>");
+			fd = 0;
+			mtu = 0;
+		}
+
 		#endregion
 
 		#region IGattProperties

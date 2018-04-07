@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using org.freedesktop.DBus;
 
@@ -13,11 +14,22 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		string InterfaceName { get; }
 	}
 
-	public class ByUuid<T> : KeyedCollection<string, T> where T : IUuid
+	public class ByUuid<T> : KeyedCollection<Guid, T> where T : IUuid
 	{
-		protected override string GetKeyForItem(T item)
+		public bool TryGetValue(Guid key, out T value)
 		{
-			return item.UUID;
+			if (Dictionary == null)
+			{
+				value = default(T);
+				return false;
+			}
+
+			return Dictionary.TryGetValue(key, out value);
+		}
+
+		protected override Guid GetKeyForItem(T item)
+		{
+			return Guid.ParseExact(item.UUID, "D");
 		}
 	}
 }

@@ -36,6 +36,11 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public int ConnectTimeout { get; set; } = 10000;
 		public int PairTimeout { get; set; } = 10000;
 
+		public ByUuid<RemoteService> RemoteServices
+		{
+			get { return _device.Services; }
+		}
+
 		private void IntefacesRemoved(ObjectPath path, string[] interfaces)
 		{
 			lock (_mutex)
@@ -49,7 +54,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		{
 			lock (_mutex)
 			{
-				Logger.Trace("InterfacesRemoved> {0}", path);
+				Logger.Trace("InterfacesAdded> {0}", path);
 				Monitor.Pulse(_mutex);
 			}
 		}
@@ -92,7 +97,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			}
 		}
 
-		public void Connect()
+		public void Connect(bool pair, bool trust)
 		{
 			var devicePath = FindDevice(_adapter.Path);
 
@@ -129,6 +134,8 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			Logger.Debug("Connect> Found Device: {0}", devicePath);
 
 			_device = new Device(_bus, devicePath);
+
+			Logger.Debug(_device.Introspect());
 
 			{
 				var sw = Stopwatch.StartNew();
@@ -171,7 +178,14 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 				}
 			}
 
-			if (!_device.Paired)
+			if (trust && !_device.Trusted)
+			{
+				Logger.Debug("Connect> Trusting...");
+
+				_device.Trusted = true;
+			}
+
+			if (pair && !_device.Paired)
 			{
 				Logger.Debug("Connect> Pairing...");
 
@@ -197,7 +211,6 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 				}
 			}
 
-
 			foreach (var kv in _device.Properties)
 			{
 				Logger.Trace("  {0}={1}", kv.Key, kv.Value);
@@ -214,7 +227,7 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 				foreach (var c in svc.Characteristics)
 				{
 					var v = c.Flags.Contains("read")
-						? ", Value: " + string.Join("", c.ReadValue(new Dictionary<string, object>()).Select(x => x.ToString("X2")))
+						? ", Value: " + TryReadValue(c)
 						: "";
 
 					Logger.Trace("    Char: {0}, Flags: {1}{2}", c.UUID, string.Join("|", c.Flags), v);
@@ -228,6 +241,18 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 						Logger.Trace("     Descriptor: {0}{1}", d.UUID, v2);
 					}
 				}
+			}
+		}
+
+		string TryReadValue(ICharacteristic c)
+		{
+			try
+			{
+				return string.Join("", c.ReadValue(new Dictionary<string, object>()).Select(x => x.ToString("X2")));
+			}
+			catch (Exception ex)
+			{
+				return ex.Message;
 			}
 		}
 

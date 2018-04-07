@@ -47,9 +47,9 @@ namespace Peach.Pro.Test.Bluetooth
 				if (args.Length == 2)
 				{
 					mgr.Device = args[1];
-					mgr.Connect();
+					mgr.Connect(false, false);
 
-					Console.WriteLine("Registered, press any key to continue");
+					Console.WriteLine("Connected, press any key to continue");
 				}
 				else
 				{

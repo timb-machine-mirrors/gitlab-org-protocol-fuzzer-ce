@@ -69,6 +69,11 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			_char.StopNotify();
 		}
 
+		public void AcquireNotify(Dictionary<string, object> options, out int fd, out ushort mtu)
+		{
+			_char.AcquireNotify(options, out fd, out mtu);
+		}
+
 		private void OnPropertiesChanged(string s, Dictionary<string, object> d, string[] a)
 		{
 			Logger.Debug("OnPropertiesChanged> {0} ({1})", s, string.Join(",", a));

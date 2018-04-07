@@ -36,6 +36,8 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		void StartNotify();
 		void StopNotify();
 
+		void AcquireNotify(Dictionary<string, object> options, out int fd, out ushort mtu);
+
 		ObjectPath Service { get; }
 		string[] Flags { get; }
 	}
