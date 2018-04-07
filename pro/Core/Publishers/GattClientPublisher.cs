@@ -25,8 +25,6 @@ namespace Peach.Pro.Core.Publishers
 		private const int Mtu = 20;
 
 		private static readonly NLog.Logger ClassLogger = LogManager.GetCurrentClassLogger();
-		private readonly Dictionary<RemoteDescriptor, List<byte[]>> _descriptors;
-		private readonly Dictionary<RemoteCharacteristic, List<byte[]>> _characteristics;
 		private readonly object _mutex;
 		private Thread _thread;
 		private Manager _mgr;
@@ -49,8 +47,6 @@ namespace Peach.Pro.Core.Publishers
 		public GattClientPublisher(Dictionary<string, Variant> args)
 			: base(args)
 		{
-			_descriptors = new Dictionary<RemoteDescriptor, List<byte[]>>();
-			_characteristics = new Dictionary<RemoteCharacteristic, List<byte[]>>();
 			_mutex = new object();
 		}
 
@@ -134,8 +130,6 @@ namespace Peach.Pro.Core.Publishers
 
 				_thread.Join();
 				_thread = null;
-				_descriptors.Clear();
-				_characteristics.Clear();
 				_lastWasError = false;
 			}
 		}
@@ -152,8 +146,6 @@ namespace Peach.Pro.Core.Publishers
 
 				_thread.Join();
 				_thread = null;
-				_descriptors.Clear();
-				_characteristics.Clear();
 			}
 		}
 
