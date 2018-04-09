@@ -5,7 +5,7 @@ set -ex
 . build/common.sh
 
 usage() {
-    echo "USAGE: make_packer_release.sh --buildtag 1.2.3 --filesdir /path/to/files"
+    echo "USAGE: make_packer_release.sh --buildtag 1.2.3 --filesdir /path/to/files [--publish true|false]"
 }
 
 # packer comes from: https://www.packer.io/downloads.html
@@ -34,6 +34,9 @@ while [[ $# -gt 0 ]]; do
             export FILES_DIR="$2"
             shift
         ;;
+        --publish)
+            export PUBLISH_AMI="$2"
+            shift
         *)
             usage
             echo "Unknown Option: $key"
@@ -48,15 +51,27 @@ if [ -z "$BUILDTAG" ]; then
     exit 1
 fi
 
-echo ""
-echo "Running packer"
-echo ""
+if [ -z "$PUBLISH_AMI" ];
+    echo "--publish not set, defaulting to false"
+    export PUBLISH_AMI="false"
+fi
+
+if [ "$PUBLISH_AMI" == "true" ]; then
+    export BUILD_SUFFIX="prod"
+else
+    export BUILD_SUFFIX="test"
+fi
 
 if [ -z "$FILES_DIR" ]; then
     echo "Missing --filesdir"
     usage
     exit 1
 fi
+
+echo ""
+echo "Running packer"
+echo ""
+
 
 ovadir="$(pwd)/output/release/${BUILDTAG}"
 pushd packer
@@ -87,7 +102,7 @@ export PACKER_CACHE_DIR="/root/.packer_cache"
 
 packer build \
     -var "buildtag=${BUILDTAG}" \
-    -var "ami_name_suffix=test" \
+    -var "ami_name_suffix=${BUILD_SUFFIX}" \
     -var "files_dir=${FILES_DIR}" \
     ${remote_var} \
     template.json
