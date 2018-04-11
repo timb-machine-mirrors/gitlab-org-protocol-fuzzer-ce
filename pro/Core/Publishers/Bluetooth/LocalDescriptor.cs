@@ -1,16 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NDesk.DBus;
-using org.freedesktop.DBus;
-using Peach.Core;
 
 namespace Peach.Pro.Core.Publishers.Bluetooth
 {
 	public class LocalDescriptor : IDescriptor, IGattProperties
 	{
-		public delegate byte[] ReadHandler(LocalDescriptor chr, IDictionary<string, object> options);
-		public delegate void WriteHandler(LocalDescriptor chr, byte[] value, IDictionary<string, object> options);
-
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		public static readonly InterfaceAttribute Attr =
@@ -18,14 +15,51 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public LocalDescriptor()
 		{
-			Read = (c, o) => new byte[0];
-			Write = (c, v, o) => { };
+			_mutex = new object();
+			_inputs = new Queue<byte[]>();
+			_value = new byte[0];
 		}
 
 		public ObjectPath Path { get; set; }
+		public Action<IDescriptor, byte[], IDictionary<string, object>> OnWrite { get; set; }
 
-		public ReadHandler Read { get; set; }
-		public WriteHandler Write { get; set; }
+		private readonly object _mutex;
+		private readonly Queue<byte[]> _inputs;
+		private byte[] _value;
+
+		public byte[] Value
+		{
+			get
+			{
+				lock (_mutex)
+				{
+					return _value;
+				}
+			}
+			set
+			{
+				lock (_mutex)
+				{
+					_value = value;
+				}
+			}
+		}
+
+		public byte[] Read(int timeout)
+		{
+			lock (_mutex)
+			{
+				if (_inputs.Count == 0 && !Monitor.Wait(_mutex, timeout))
+					return null;
+
+				return _inputs.Dequeue();
+			}
+		}
+
+		public void Write(byte[] value)
+		{
+			Value = value;
+		}
 
 		#region IDescriptor
 
@@ -35,11 +69,18 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public byte[] ReadValue(IDictionary<string, object> options)
 		{
-			Logger.Debug("ReadValue>");
+			byte[] value;
+
+			lock (_mutex)
+			{
+				value = _value;
+			}
+
+			Logger.Debug("ReadValue> Length: {0}", value.Length);
 			foreach (var kv in options)
 				Logger.Debug("  {0}={1}", kv.Key, kv.Value);
 
-			return Read(this, options);
+			return value;
 		}
 
 		public void WriteValue(byte[] value, IDictionary<string, object> options)
@@ -48,7 +89,14 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			foreach (var kv in options)
 				Logger.Debug("  {0}={1}", kv.Key, kv.Value);
 
-			Write(this, value, options);
+			if (OnWrite != null)
+				OnWrite(this, value, options);
+
+			lock (_mutex)
+			{
+				_inputs.Enqueue(value);
+				Monitor.Pulse(_mutex);
+			}
 		}
 
 		#endregion

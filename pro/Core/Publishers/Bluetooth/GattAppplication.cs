@@ -135,13 +135,13 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 		public GattApplication()
 		{
 			Path = new ObjectPath("/com/peach");
-			Services = new List<LocalService>();
+			Services = new ByUuid<LocalService>();
 			Advertisement = new LocalAdvertisement();
 		}
 
 		public ObjectPath Path { get; set; }
 
-		public List<LocalService> Services { get; private set; }
+		public ByUuid<LocalService> Services { get; private set; }
 
 		public LocalAdvertisement Advertisement { get; private set; }
 

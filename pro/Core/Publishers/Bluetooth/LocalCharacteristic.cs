@@ -1,18 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using NDesk.DBus;
-using org.freedesktop.DBus;
 
 namespace Peach.Pro.Core.Publishers.Bluetooth
 {
 	public class LocalCharacteristic : ICharacteristic, IGattProperties
 	{
-		public delegate byte[] ReadHandler(LocalCharacteristic chr, IDictionary<string, object> options);
-		public delegate void WriteHandler(LocalCharacteristic chr, byte[] value, IDictionary<string, object> options);
-
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		public static readonly InterfaceAttribute Attr =
@@ -20,16 +15,63 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public LocalCharacteristic()
 		{
-			Descriptors = new List<LocalDescriptor>();
-			Read = (c, o) => new byte[0];
-			Write = (c, v, o) => { };
+			Descriptors = new ByUuid<LocalDescriptor>();
+			_mutex = new object();
+			_inputs = new Queue<byte[]>();
+			_notify = false;
+			_value = new byte[0];
 		}
 
 		public ObjectPath Path { get; set; }
-		public List<LocalDescriptor> Descriptors { get; private set; }
+		public ByUuid<LocalDescriptor> Descriptors { get; private set; }
+		public Action<ICharacteristic, byte[], IDictionary<string, object>> OnWrite { get; set; }
 
-		public ReadHandler Read { get; set; }
-		public WriteHandler Write { get; set; }
+		private readonly object _mutex;
+		private readonly Queue<byte[]> _inputs;
+		private bool _notify;
+		private byte[] _value;
+
+		public byte[] Value
+		{
+			get
+			{
+				lock (_mutex)
+				{
+					return _value;
+				}
+			}
+			set
+			{
+				// Save the value so when the client requests it we have it
+				lock (_mutex)
+				{
+					_value = value;
+
+					if (!_notify)
+						return;
+				}
+
+				// If a client has requested notifications, tell them of the new value
+				if (PropertiesChanged != null)
+					PropertiesChanged(Attr.Name, new Dictionary<string, object> { { "Value", value } }, new string[0]);
+			}
+		}
+
+		public byte[] Read(int timeout)
+		{
+			lock (_mutex)
+			{
+				if (_inputs.Count == 0 && !Monitor.Wait(_mutex, timeout))
+					return null;
+
+				return _inputs.Dequeue();
+			}
+		}
+
+		public void Write(byte[] value)
+		{
+			Value = value;
+		}
 
 		#region ICharacteristic
 
@@ -39,11 +81,18 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public byte[] ReadValue(IDictionary<string, object> options)
 		{
-			Logger.Debug("ReadValue>");
+			byte[] value;
+
+			lock (_mutex)
+			{
+				value = _value;
+			}
+
+			Logger.Debug("ReadValue> Length: {0}", value.Length);
 			foreach (var kv in options)
 				Logger.Debug("  {0}={1}", kv.Key, kv.Value);
 
-			return Read(this, options);
+			return value;
 		}
 
 		public void WriteValue(byte[] value, IDictionary<string, object> options)
@@ -52,43 +101,33 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 			foreach (var kv in options)
 				Logger.Debug("  {0}={1}", kv.Key, kv.Value);
 
-			Write(this, value, options);
-		}
+			if (OnWrite != null)
+				OnWrite(this, value, options);
 
-		Thread th;
+			lock (_mutex)
+			{
+				_inputs.Enqueue(value);
+				Monitor.Pulse(_mutex);
+			}
+		}
 
 		public void StartNotify()
 		{
 			Logger.Debug("StartNotify>");
 
-			th = new Thread(() =>
+			lock (_mutex)
 			{
-				var i = 0;
-				while (true)
-				{
-				Thread.Sleep(1000);
-
-				Logger.Debug("PropertyChanged> Signal Count: {0}", PropertiesChanged != null ? PropertiesChanged.GetInvocationList().Length : -1);
-
-				if (PropertiesChanged != null)
-					PropertiesChanged(Attr.Name, new Dictionary<string, object>()
-					{
-						{ "Value", Encoding.UTF8.GetBytes((++i).ToString()) }
-					}, new string[0]);
-				}
-			});
-
-			th.Start();
+				_notify = true;
+			}
 		}
 
 		public void StopNotify()
 		{
 			Logger.Debug("StopNotify>");
 
-			if (th != null)
+			lock (_mutex)
 			{
-				th.Abort();
-				th = null;
+				_notify = false;
 			}
 		}
 

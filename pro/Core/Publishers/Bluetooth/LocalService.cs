@@ -15,12 +15,12 @@ namespace Peach.Pro.Core.Publishers.Bluetooth
 
 		public LocalService()
 		{
-			Characteristics = new List<LocalCharacteristic>();
+			Characteristics = new ByUuid<LocalCharacteristic>();
 		}
 
 		public bool Advertise { get; set; }
 		public ObjectPath Path { get; set; }
-		public List<LocalCharacteristic> Characteristics { get; private set; }
+		public ByUuid<LocalCharacteristic> Characteristics { get; private set; }
 
 		#region IService
 

@@ -69,7 +69,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a50-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("010D0000001001")
+								Value = ToBytes("010D0000001001")
 							},
 							new LocalCharacteristic
 							{
@@ -77,7 +77,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a2a-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("FE006578706572696D656E74616C")
+								Value =  ToBytes("FE006578706572696D656E74616C")
 							},
 							new LocalCharacteristic
 							{
@@ -85,7 +85,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a29-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("4775616E67646F6E672042696F6C69676874204D6564697465636820436F2E2C4C74642E00")
+								Value = ToBytes("4775616E67646F6E672042696F6C69676874204D6564697465636820436F2E2C4C74642E00")
 							},
 							new LocalCharacteristic
 							{
@@ -93,7 +93,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a28-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("56312E3000")
+								Value = ToBytes("56312E3000")
 							},
 							new LocalCharacteristic
 							{
@@ -101,7 +101,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a27-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("56312E3000")
+								Value = ToBytes("56312E3000")
 							},
 							new LocalCharacteristic
 							{
@@ -109,7 +109,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a26-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("56312E3000")
+								Value = ToBytes("56312E3000")
 							},
 							new LocalCharacteristic
 							{
@@ -117,7 +117,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a25-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read", "write" },
-								Read = (c,o) => ToBytes("313030303030303100")
+								Value = ToBytes("313030303030303100")
 							},
 							new LocalCharacteristic
 							{
@@ -125,7 +125,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a24-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("424C542D4D313000")
+								Value = ToBytes("424C542D4D313000")
 							},
 							new LocalCharacteristic
 							{
@@ -133,7 +133,7 @@ namespace Peach.Pro.Test.Bluetooth
 								UUID = "00002a23-0000-1000-8000-00805f9b34fb",
 								Descriptors = {},
 								Flags = new[] { "read" },
-								Read = (c,o) => ToBytes("D787A300006DE394")
+								Value = ToBytes("D787A300006DE394")
 							},
 						}
 					},
@@ -154,8 +154,8 @@ namespace Peach.Pro.Test.Bluetooth
 									{
 										UUID = "00002901-0000-1000-8000-00805f9b34fb",
 										Flags = new[] { "read", "write" },
-										Read = (d,o) => ToBytes("546865726D6F6D6574657244656D6F2034"),
-										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
+										Value = ToBytes("546865726D6F6D6574657244656D6F2034"),
+										OnWrite = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
 									},
 									//new LocalDescriptor
 									//{
@@ -170,16 +170,16 @@ namespace Peach.Pro.Test.Bluetooth
 							new LocalCharacteristic
 							{
 								UUID = "00002a21-0000-1000-8000-00805f9b34fb",
-								Read = (c,o) => ToBytes("0000"),
-								Write = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
+								Value = ToBytes("0000"),
+								OnWrite = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
 								Descriptors =
 								{
 									new LocalDescriptor
 									{
 										UUID = "00002906-0000-1000-8000-00805f9b34fb",
 										Flags = new[] { "read", "write" },
-										Read = (d,o) => ToBytes("043C"),
-										Write = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
+										Value = ToBytes("043C"),
+										OnWrite = (d, v, o) => Console.WriteLine("WriteDesc> {0} {1}", d.UUID, ToHexString(v))
 									},
 									//new LocalDescriptor
 									//{
@@ -194,8 +194,8 @@ namespace Peach.Pro.Test.Bluetooth
 							new LocalCharacteristic
 							{
 								UUID = "0000ffe1-0000-1000-8000-00805f9b34fb",
-								Read = (c,o) => ToBytes("0000"),
-								Write = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
+								Value = ToBytes("0000"),
+								OnWrite = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
 								Descriptors =
 								{
 									//new LocalDescriptor
@@ -211,15 +211,15 @@ namespace Peach.Pro.Test.Bluetooth
 							new LocalCharacteristic
 							{
 								UUID = "00002a1d-0000-1000-8000-00805f9b34fb",
-								Read = (c,o) => ToBytes("09"),
-								Write = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
+								Value = ToBytes("09"),
+								OnWrite = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
 								Flags = new[] { "read" },
 							},
 							new LocalCharacteristic
 							{
 								UUID = "00002a1c-0000-1000-8000-00805f9b34fb",
-								Read = (c,o) => ToBytes("0000"),
-								Write = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
+								Value = ToBytes("0000"),
+								OnWrite = (c,v,o) => Console.WriteLine("WriteDesc> {0} {1}", c.UUID, ToHexString(v)),
 								Descriptors =
 								{
 									//new LocalDescriptor
@@ -284,6 +284,24 @@ Service: 00001801-0000-1000-8000-00805f9b34fb, Primary: True
 				else
 				{
 					mgr.Serve(app);
+
+					var th = new Thread(() =>
+					{
+						var chr = app.Services
+							.SelectMany(x => x.Characteristics)
+							.First(x => x.Flags.Contains("notify"));
+
+						var i = 0;
+
+						while (true)
+						{
+							chr.Write(Encoding.UTF8.GetBytes((++i).ToString()));
+							Thread.Sleep(1000);
+						}
+					});
+
+					th.Start();
+
 					Console.WriteLine("Registered, press any key to continue");
 				}
 
