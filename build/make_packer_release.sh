@@ -5,7 +5,7 @@ set -ex
 . build/common.sh
 
 usage() {
-    echo "USAGE: make_packer_release.sh --buildtag 1.2.3 --filesdir /path/to/files [--publish true|false]"
+    echo "USAGE: make_packer_release.sh --buildtag 1.2.3 --settings /path/to/packersecrets/file --filesdir /path/to/files [--publish true|false]"
 }
 
 # packer comes from: https://www.packer.io/downloads.html
@@ -37,6 +37,11 @@ while [[ $# -gt 0 ]]; do
         --publish)
             export PUBLISH_AMI="$2"
             shift
+        ;;    
+        --settings)
+            export PACKER_SECRETS="$2"
+            shift
+        ;;
         *)
             usage
             echo "Unknown Option: $key"
@@ -54,6 +59,10 @@ fi
 if [ -z "$PUBLISH_AMI" ];
     echo "--publish not set, defaulting to false"
     export PUBLISH_AMI="false"
+fi
+
+if [ -z "$PACKER_SECRETS" ];
+    echo "warning: --settings not used, packer secrets must be set from environment variables or errors may occur"
 fi
 
 if [ "$PUBLISH_AMI" == "true" ]; then
@@ -76,17 +85,15 @@ echo ""
 ovadir="$(pwd)/output/release/${BUILDTAG}"
 pushd packer
 
-ESXI_PASSWORD=""
 
-# support local and remote packer builds
-if [ -z "$ESXI_PASSWORD" ]; then
-    # Ensure old packer directory is clean
+if [ -z "$PACKER_SECRETS" ]; then
     rm -rvf "output-vmware-iso ${ovadir}/peach-targetvm-${BUILDTAG}.ova" 2>/dev/null || {}
     remote_var=""
+    packer_vars=""
 else
-    # Ensure old packer directory is clean
     rm -rvf "peach-targetvm" 2>/dev/null || {}
     remote_var="-var remote_type=esx5"
+    packer_vars="-var-file=${PACKER_SECRETS}"
 fi
 
 # Ensure tmp directory for .tar files is clean
@@ -104,10 +111,11 @@ packer build \
     -var "buildtag=${BUILDTAG}" \
     -var "ami_name_suffix=${BUILD_SUFFIX}" \
     -var "files_dir=${FILES_DIR}" \
+    ${packer_vars} \
     ${remote_var} \
     template.json
 
-if [ -z "$ESXI_PASSWORD" ]; then
+if [ -z "$PACKER_SECRETS" ]; then
     ovftool "output-vmware-iso/peach-targetvm.vmx" "${ovadir}/peach-targetvm-${BUILDTAG}.ova"
 else
     mv "peach_targetvm/peach-targetvm.ova/peach-targetvm.ova" "${ovadir}/peach-targetvm-${BUILDTAG}.ova"
