@@ -13,9 +13,6 @@ usage() {
 
 requires "packer"
 requires "jq"
-if [ -z $ESXI_PASSWORD ]; then
-    requires "ovftool"
-fi
 
 
 while [[ $# -gt 0 ]]; do
@@ -50,6 +47,7 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
+
 if [ -z "$BUILDTAG" ]; then
     echo "Missing --buildtag."
     usage
