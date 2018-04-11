@@ -54,12 +54,12 @@ if [ -z "$BUILDTAG" ]; then
     exit 1
 fi
 
-if [ -z "$PUBLISH_AMI" ];
+if [ -z "$PUBLISH_AMI" ]; then
     echo "--publish not set, defaulting to false"
     export PUBLISH_AMI="false"
 fi
 
-if [ -z "$PACKER_SECRETS" ];
+if [ -z "$PACKER_SECRETS" ]; then
     echo "warning: --settings not used, packer secrets must be set from environment variables or errors may occur"
 fi
 
