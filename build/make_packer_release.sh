@@ -103,7 +103,7 @@ mkdir tmp
 # https://nickcharlton.net/posts/using-packer-esxi-6.html
 
 export AWS_DEFAULT_REGION="us-west-1"
-export PACKER_CACHE_DIR="/root/.packer_cache"
+export PACKER_CACHE_DIR="${JENKINS_HOME}/.packer_cache"
 
 packer build \
     -var "buildtag=${BUILDTAG}" \
