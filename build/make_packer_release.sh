@@ -104,6 +104,7 @@ mkdir tmp
 
 export AWS_DEFAULT_REGION="us-west-1"
 export PACKER_CACHE_DIR="${JENKINS_HOME}/.packer_cache"
+export PACKER_LOG=1
 
 packer build \
     -var "buildtag=${BUILDTAG}" \
