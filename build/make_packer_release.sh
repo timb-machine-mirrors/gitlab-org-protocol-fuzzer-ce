@@ -10,10 +10,12 @@ usage() {
 
 # packer comes from: https://www.packer.io/downloads.html
 # ovatool comes from: https://www.vmware.com/support/developer/ovf/
+# ovftool is implicitly run via packer when building on esxi
+# ovftool is run by this script when building via vmware
 
 requires "packer"
 requires "jq"
-
+requires "ovftool"
 
 while [[ $# -gt 0 ]]; do
     key="$1"
