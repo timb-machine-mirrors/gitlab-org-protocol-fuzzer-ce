@@ -118,7 +118,7 @@ packer build \
 if [ -z "$PACKER_SECRETS" ]; then
     ovftool "output-vmware-iso/peach-targetvm.vmx" "${ovadir}/peach-targetvm-${BUILDTAG}.ova"
 else
-    mv "peach_targetvm/peach-targetvm.ova/peach-targetvm.ova" "${ovadir}/peach-targetvm-${BUILDTAG}.ova"
+    mv "output-vmware-iso/peach-targetvm.ova" "${ovadir}/peach-targetvm-${BUILDTAG}.ova"
 fi
 
 # last step is to modify the release.json to include the .ova as a file
