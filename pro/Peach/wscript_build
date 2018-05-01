@@ -80,6 +80,9 @@ peach_pro = common + [
 	# CAN Recorder
 	'PeachCanRecorder.exe',
 
+	# UI Web Recorder tool
+	'PeachWebRecorder.exe',
+
 	# Basic Block Pin Tool
 	'pin',               # Pin Binaries
 	'bblocks',

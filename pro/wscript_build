@@ -9,6 +9,7 @@ subdirs = [
 	'OS/UnixTrampoline',
 	'Peach',
 	'PeachAgent',
+	'PeachWebRecorder',
 	'PitTester',
 	'PitTool',
 	'Service',
