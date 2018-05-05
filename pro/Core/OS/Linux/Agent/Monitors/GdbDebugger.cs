@@ -124,6 +124,8 @@ quit
 
 		public override void StartMonitor(Dictionary<string, string> args)
 		{
+			base.StartMonitor(args);
+
 			if (!string.IsNullOrEmpty(Script))
 			{
 				if (File.Exists(Script))
@@ -133,8 +135,6 @@ quit
 					throw new SoftException(string.Format("Error, Script file not found for Gdb monitor: {0}", Script));
 				}
 			}
-
-			base.StartMonitor(args);
 
 			_exploitable = FindExploitable();
 		}
