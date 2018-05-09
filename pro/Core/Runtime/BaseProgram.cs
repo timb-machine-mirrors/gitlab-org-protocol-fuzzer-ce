@@ -52,7 +52,14 @@ namespace Peach.Pro.Core.Runtime
 					throw new ApplicationException("Peach.Pro.Pits.dll could not be found.");
 
 				config.Manifest = PitResourceLoader.LoadManifest(root);
-				_license = new FlexeraLicense(config, forceActivation, deactivate);
+				
+				_license = new FlexeraLicense(config, new FlexeraLicense.FlexeraOptions()
+				{
+					ForceActivation = forceActivation,
+					Deactivate = deactivate,
+					Retry = false
+				});
+
 				if (!_license.IsValid())
 					throw new ApplicationException(deactivate
 						? "Deactivation was successful."

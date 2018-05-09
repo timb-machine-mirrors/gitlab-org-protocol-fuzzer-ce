@@ -70,7 +70,12 @@ namespace Peach.Core
 			}
 		}
 
-		public static void TimedBackoff(TimeSpan maxRetryDelay, TimeSpan maxTotalDelay, Action fn)
+		public static void TimedBackoff(bool retry, TimeSpan maxRetryDelay, TimeSpan maxTotalDelay, Action fn)
+		{
+			TimedBackoff(maxRetryDelay, maxTotalDelay, fn, retry);
+		}
+
+		public static void TimedBackoff(TimeSpan maxRetryDelay, TimeSpan maxTotalDelay, Action fn, bool retry = true)
 		{
 			var retryDelay = TimeSpan.FromMilliseconds(1);
 			var sw = Stopwatch.StartNew();
@@ -86,7 +91,7 @@ namespace Peach.Core
 				{
 					var remain = maxTotalDelay - sw.Elapsed;
 
-					if (remain <= TimeSpan.Zero)
+					if (remain <= TimeSpan.Zero || !retry)
 						throw;
 
 					if (retryDelay.CompareTo(remain) >= 0)
