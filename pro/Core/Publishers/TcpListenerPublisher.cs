@@ -16,6 +16,8 @@ namespace Peach.Pro.Core.Publishers
 	[Parameter("Timeout", typeof(int), "How many milliseconds to wait when receiving data (default 3000)", "3000")]
 	[Parameter("SendTimeout", typeof(int), "How many milliseconds to wait when sending data (default infinite)", "-1")]
 	[Parameter("AcceptTimeout", typeof(int), "How many milliseconds to wait for a connection (default 3000)", "3000")]
+	[Parameter("ReadAvailableMode", typeof(bool), "During input operation wait 'Timeout' ms for first byte, then continue reading till end of available data (default false)", "false")]
+	[Parameter("ReadAvailableTimeout", typeof(int), "Continue reading available data until timeout occurs waiting for data. Default 150ms.", "150")]
 	public class TcpListenerPublisher : TcpPublisher
 	{
 		private static NLog.Logger logger = LogManager.GetCurrentClassLogger();

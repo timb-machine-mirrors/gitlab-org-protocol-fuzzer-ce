@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
@@ -26,6 +27,13 @@ namespace Peach.Core.Publishers
 
 		public int Timeout { get; set; }
 		public bool NoWriteException { get; set; }
+		public int ReadAvailableTimeout { get; set; }
+
+		/// <summary>
+		/// Special mode in which Input will wait for a single byte with Timeout timeout,
+		/// but keep reading any available data after that till a timeout of 250 ms
+		/// </summary>
+		public bool ReadAvailableMode { get; set; }
 
 		protected int _sendTimeout = -1;
 		protected int _sendLen = 0;
@@ -280,6 +288,9 @@ namespace Peach.Core.Publishers
 			// Also, ensure the read timeout is reset on every input action.
 			_timeout = false;
 			WantBytes(1);
+
+			if (ReadAvailableMode || !_timeout)
+				ReadAllAvailable();
 		}
 
 		protected override void OnOutput(BitwiseStream data)
@@ -361,7 +372,7 @@ namespace Peach.Core.Publishers
 			//	Logger.Debug("WantBytes({0}): Available: {1}", count, _buffer.Length - _buffer.Position);
 			//}
 
-			DateTime start = DateTime.Now;
+			var sw = Stopwatch.StartNew();
 
 			// Wait up to Timeout milliseconds to see if count bytes become available
 			while (true)
@@ -380,13 +391,48 @@ namespace Peach.Core.Publishers
 					if ((_buffer.Length - _buffer.Position) >= count || _timeout)
 						return;
 
-					if ((DateTime.Now - start) >= TimeSpan.FromMilliseconds(Timeout))
+					if (sw.ElapsedMilliseconds > Timeout)
 					{
 						Logger.Debug("WantBytes({0}): Timeout waiting for data.  Timeout is {1} ms", count, Timeout);
 						_timeout = true;
 						return;
 					}
 				}
+
+				Thread.Sleep(10);
+			}
+		}
+
+		/// <summary>
+		/// Continue reading data until no data is received for 150 ms
+		/// </summary>
+		public void ReadAllAvailable()
+		{
+			var timeout = ReadAvailableTimeout;
+			var currentLength = _buffer.Length;
+			var sw = Stopwatch.StartNew();
+
+			// Wait up to Timeout milliseconds to see if count bytes become available
+			while (true)
+			{
+				lock (_clientLock)
+				{
+					// If the connection has been closed, we are not going to get anymore bytes.
+					if (_client == null)
+						return;
+				}
+
+				lock (_bufferLock)
+				{
+					if (_buffer.Length > currentLength)
+					{
+						currentLength = _buffer.Length;
+						sw.Restart();
+					}
+				}
+
+				if (sw.ElapsedMilliseconds >= timeout)
+					return;
 
 				Thread.Sleep(10);
 			}

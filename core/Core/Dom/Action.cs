@@ -431,6 +431,16 @@ namespace Peach.Core.Dom
 		/// <param name="pit"></param>
 		public abstract void WritePitBody(XmlWriter pit);
 
+		private string WritePitGetType()
+		{
+			var actionType = type.ToLower();
+			if (actionType == "getproperty")
+				return "getProperty";
+			if (actionType == "setproperty")
+				return "setProperty";
+			return actionType;
+		}
+
 		public void WritePit(XmlWriter pit)
 		{
 			pit.WriteStartElement("Action");
@@ -444,7 +454,7 @@ namespace Peach.Core.Dom
 				pit.WriteAttributeString("when", when);
 
 			if (!string.IsNullOrEmpty(type))
-				pit.WriteAttributeString("type", type.ToLower());
+				pit.WriteAttributeString("type", WritePitGetType());
 
 			if (!string.IsNullOrEmpty(FieldId))
 				pit.WriteAttributeString("fieldId", FieldId);

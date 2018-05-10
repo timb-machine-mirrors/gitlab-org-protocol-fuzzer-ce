@@ -865,13 +865,14 @@ namespace Peach.Core
 				}
 				catch
 				{
-					throw new SoftException("Can't convert to int, 'value' is an unsupported type.");
+					throw new SoftException("Can't convert to ushort, 'value' is an unsupported type.");
 				}
 			}
 
 			return ret;
 		}
 	}
+
 
 	/// <summary>
 	/// Used to indicate a class is a valid Publisher and 
