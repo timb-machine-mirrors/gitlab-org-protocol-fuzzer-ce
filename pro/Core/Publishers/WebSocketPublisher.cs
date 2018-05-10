@@ -12,6 +12,7 @@ using NLog;
 using Peach.Core;
 using Peach.Core.IO;
 using System.ComponentModel;
+using System.Diagnostics;
 using vtortola.WebSockets;
 
 #pragma warning disable 4014
@@ -217,8 +218,8 @@ namespace Peach.Pro.Core.Publishers
 
 			_msgQueue.Post(msg);
 
-			var startTime = DateTime.Now;
-			while ((DateTime.Now - startTime).TotalMilliseconds < Timeout)
+			var sw = Stopwatch.StartNew();
+			while (sw.ElapsedMilliseconds < Timeout)
 			{
 				if (!_clientReady.WaitOne(0))
 					throw new SoftException("Web socket connection lost.");
