@@ -4,7 +4,7 @@
 
 The _StringUtf16BomLength_ mutator produces test cases for Unicode UTF-16 strings by altering an individual string in two ways:
 
-* Adjust the length of the string using the xref:StringLengthVariance[StringLengthVariance] mutator
+* Adjust the length of the string using the xref:Mutators_StringLengthVariance[StringLengthVariance] mutator
 * Insert 1 to 6 Unicode Byte Ordering Marks (BOMs) in arbitrary places in the string
 
 BOMs are not considered characters, and using them can cause buffer length calculations to be incorrect.
