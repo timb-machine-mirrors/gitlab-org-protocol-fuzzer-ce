@@ -15,7 +15,7 @@ Peach can use custom implementations of the following to extend its functionalit
 * xref:Agent[Agents]
 * xref:Analyzers[Analyzers]
 * xref:Fixup[Fixups]
-* xref:Loggers[Loggers]
+* xref:Logger[Loggers]
 * xref:Monitors[Monitors]
 * xref:Publisher[Publishers]
 * xref:Transformer[Transformers]

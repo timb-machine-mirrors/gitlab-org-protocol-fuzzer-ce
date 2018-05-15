@@ -4,7 +4,7 @@
 
 The _StringUtf32BomStatic_ mutator produces test cases for Unicode UTF-32 strings by creating a mutated string in two ways:
 
-* Create a string using the xref:StringStatic[StringStatic] mutator
+* Create a string using the xref:Mutators_StringStatic[StringStatic] mutator
 * Inject 1 to 6 Unicode Byte Ordering Marks (BOMs) in arbitrary places in the string
 
 BOMs are not considered characters, and injecting BOMs into a string that might be filtered could cause

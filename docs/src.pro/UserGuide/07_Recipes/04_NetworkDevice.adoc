@@ -202,7 +202,7 @@ image::{images}/UserGuide/Recipes/NetworkDevice_TcpPort.png[scale="50"]
 The *Host* parameter specifies the hostname of the target or the IPv4 address of the
 target. The `##TargetIPv4##` value is a configuration variable that you set to identify
 the target. Its operation is similar to operating system environment variables.
-For more information, see <<Variables>>.
+For more information, see Variables.
 
 The *Port* value should be set to the appropriate port number of the target device
 used by the service under test. In this example, the service is using TCP on port 80

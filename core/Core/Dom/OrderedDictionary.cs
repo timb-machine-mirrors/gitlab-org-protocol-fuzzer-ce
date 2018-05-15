@@ -42,18 +42,18 @@ namespace Peach.Core.Dom
 	public interface IOrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ITryGetValue<TKey, TValue>
 	{
 		/// <summary>
-		/// Inserts a new entry into the <see cref="T:IOrderedDictionary`2">IOrderedDictionary&lt;TKey,TValue&gt;</see> collection with the specified key and value at the specified index.
+		/// Inserts a new entry into the IOrderedDictionary&lt;TKey,TValue&gt; collection with the specified key and value at the specified index.
 		/// </summary>
 		/// <param name="index">The zero-based index at which the element should be inserted.</param>
 		/// <param name="key">The key of the entry to add.</param>
 		/// <param name="value">The value of the entry to add. The value can be null if the type of the values in the dictionary is a reference type.</param>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than 0.<br/>
 		/// -or-<br/>
-		/// <paramref name="index"/> is greater than <see cref="System.Collections.ICollection.Count"/>.</exception>
-		/// <exception cref="ArgumentException">An element with the same key already exists in the <see cref="T:IOrderedDictionary`2">IOrderedDictionary&lt;TKey,TValue&gt;</see>.</exception>
-		/// <exception cref="NotSupportedException">The <see cref="T:IOrderedDictionary`2">IOrderedDictionary&lt;TKey,TValue&gt;</see> is read-only.<br/>
+		/// <paramref name="index"/> is greater than Count.</exception>
+		/// <exception cref="ArgumentException">An element with the same key already exists in the IOrderedDictionary&lt;TKey,TValue&gt;.</exception>
+		/// <exception cref="NotSupportedException">The IOrderedDictionary&lt;TKey,TValue&gt; is read-only.<br/>
 		/// -or-<br/>
-		/// The <see cref="T:IOrderedDictionary`2">IOrderedDictionary&lt;TKey,TValue&gt;</see> has a fized size.</exception>
+		/// The IOrderedDictionary&lt;TKey,TValue&gt; has a fized size.</exception>
 		void Insert(int index, TKey key, TValue value);
 
 		/// <summary>
@@ -63,7 +63,7 @@ namespace Peach.Core.Dom
 		/// <value>The value of the item at the specified index.</value>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than 0.<br/>
 		/// -or-<br/>
-		/// <paramref name="index"/> is equal to or greater than <see cref="System.Collections.ICollection.Count"/>.</exception>
+		/// <paramref name="index"/> is equal to or greater than Count.</exception>
 		TValue this[int index]
 		{
 			get;
@@ -71,10 +71,10 @@ namespace Peach.Core.Dom
 		}
 		
 		/// <summary>
-		/// Returns the zero-based index of the specified key in the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see>
+		/// Returns the zero-based index of the specified key in the OrderedDictionary&lt;TKey,TValue&gt;
 		/// </summary>
-		/// <param name="key">The key to locate in the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see></param>
-		/// <returns>The zero-based index of <paramref name="key"/>, if <paramref name="key"/> is found in the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see>; otherwise, -1</returns>
+		/// <param name="key">The key to locate in the OrderedDictionary&lt;TKey,TValue&gt;</param>
+		/// <returns>The zero-based index of <paramref name="key"/>, if <paramref name="key"/> is found in the OrderedDictionary&lt;TKey,TValue&gt;; otherwise, -1</returns>
 		/// <remarks>This method performs a linear search; therefore it has a cost of O(n) at worst.</remarks>
 		int IndexOfKey(TKey key);
 	}
@@ -105,7 +105,7 @@ namespace Peach.Core.Dom
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see> class.
+		/// Initializes a new instance of the OrderedDictionary&lt;TKey,TValue&gt; class.
 		/// </summary>
 		public OrderedDictionary()
 		{
@@ -113,10 +113,10 @@ namespace Peach.Core.Dom
 
 		#region IOrderedDictionary<TKey,TValue> Members
 		/// <summary>
-		/// Returns the zero-based index of the specified key in the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see>
+		/// Returns the zero-based index of the specified key in the OrderedDictionary&lt;TKey,TValue&gt;
 		/// </summary>
-		/// <param name="key">The key to locate in the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see></param>
-		/// <returns>The zero-based index of <paramref name="key"/>, if <paramref name="key"/> is found in the <see cref="T:OrderedDictionary`2">OrderedDictionary&lt;TKey,TValue&gt;</see>; otherwise, -1</returns>
+		/// <param name="key">The key to locate in the OrderedDictionary&lt;TKey,TValue&gt;</param>
+		/// <returns>The zero-based index of <paramref name="key"/>, if <paramref name="key"/> is found in the OrderedDictionary&lt;TKey,TValue&gt;; otherwise, -1</returns>
 		/// <remarks>This method performs a linear search; therefore it has a cost of O(n) at worst.</remarks>
 		public int IndexOfKey(TKey key)
 		{
