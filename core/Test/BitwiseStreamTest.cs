@@ -114,6 +114,26 @@ namespace Peach.Core.Test
 		}
 
 		[Test]
+		public void CopyToPadBits()
+		{
+			var bs1 = new BitStream();
+			bs1.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);
+			bs1.WriteBits(0x2, 4);
+			bs1.SeekBits(0, SeekOrigin.Begin);
+
+			Assert.AreEqual(5, bs1.Length);
+			Assert.AreEqual(44, bs1.LengthBits);
+			Assert.AreEqual(0, bs1.Position);
+			Assert.AreEqual(0, bs1.PositionBits);
+
+			var dst = new MemoryStream();
+			bs1.PadBits().CopyTo(dst);
+
+			Assert.AreEqual(6, dst.Length);
+			Assert.AreEqual(6, dst.Position);
+		}
+
+		[Test]
 		public void CopyToBufferSize()
 		{
 			var bs1 = new BitStream();

@@ -608,11 +608,16 @@ namespace Peach.Pro.Core.Loggers
 			{
 				Logger.Debug("Saving data from action: " + item.Key);
 
+				// Genrating an aligned Stream here to make sure all
+				// data is saved correctly.  For BitwiseStream, if
+				// .LengthBits % 8 != 0, then .Length will not include
+				// the trailing bits.  Padding will be required in this case.
+
 				ret.Assets.Add(new MergedFault.Asset
 				{
 					DisplayName = item.Name,
 					FileName = item.Key,
-					Value = item.Value,
+					Value = item.Value.PadBits(),
 					Type = item.IsInput ? FaultFileType.Input : FaultFileType.Ouput
 				});
 			}

@@ -15,6 +15,7 @@ namespace Peach.Core.IO
 		private IList<BitwiseStream> _streams;
 		private long _position;
 		private long _length;
+		private bool _disposed;
 
 		#endregion
 
@@ -44,6 +45,8 @@ namespace Peach.Core.IO
 		{
 			base.Dispose(disposing);
 
+			_disposed = true;
+
 			foreach (var item in _streams)
 				item.Dispose();
 
@@ -56,23 +59,31 @@ namespace Peach.Core.IO
 
 		public override long LengthBits
 		{
-			get { return _length; }
+			get
+			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
+				return _length;
+			}
 		}
 
 		public override long PositionBits
 		{
 			get
 			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
 				return _position;
 			}
 			set
 			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
 				_position = value;
 			}
 		}
 
 		public override long SeekBits(long offset, SeekOrigin origin)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			long pos = 0;
 
 			switch (origin)
@@ -98,6 +109,8 @@ namespace Peach.Core.IO
 
 		public override int ReadBit()
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			long pos = 0;
 
 			foreach (var item in this)
@@ -122,6 +135,8 @@ namespace Peach.Core.IO
 
 		public override int ReadBits(out ulong bits, int count)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			if (count > 64 || count < 0)
 				throw new ArgumentOutOfRangeException("count");
 
@@ -174,6 +189,8 @@ namespace Peach.Core.IO
 
 		IEnumerable<BitStream> Walk()
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			var toVisit = new Stack<BitwiseStream>();
 			toVisit.Push(null);
 
@@ -199,6 +216,8 @@ namespace Peach.Core.IO
 
 		public override BitwiseStream SliceBits(long length)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			if (length < 0)
 				throw new ArgumentOutOfRangeException("length");
 
@@ -262,12 +281,16 @@ namespace Peach.Core.IO
 
 		public override bool TryGetPosition(string name, out long position)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			position = 0;
 			return ScanUntilName(name, ref position);
 		}
 
 		public override bool TryGetName(long find, out string name)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			name = "";
 			long offset = 0;
 			return ScanUntilPos(find, ref offset, ref name);
@@ -323,42 +346,63 @@ namespace Peach.Core.IO
 
 		public override bool CanRead
 		{
-			get { return true; }
+			get
+			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList"); 
+				return true;
+			}
 		}
 
 		public override bool CanSeek
 		{
-			get { return true; }
+			get
+			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
+				return true;
+			}
 		}
 
 		public override bool CanWrite
 		{
-			get { return false; }
+			get
+			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
+				return false;
+			}
 		}
 
 		public override void Flush()
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 		}
 
 		public override long Length
 		{
-			get { return LengthBits / 8; }
+			get
+			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
+				return LengthBits / 8;
+			}
 		}
 
 		public override long Position
 		{
 			get
 			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
 				return PositionBits / 8;
 			}
 			set
 			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
 				PositionBits = value * 8;
 			}
 		}
 
 		public override int Read(byte[] buffer, int offset, int count)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			if (offset < 0)
 				throw new ArgumentOutOfRangeException("offset");
 
@@ -438,6 +482,7 @@ namespace Peach.Core.IO
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			return SeekBits(offset * 8, origin) / 8;
 		}
 
@@ -457,17 +502,20 @@ namespace Peach.Core.IO
 
 		public int IndexOf(BitwiseStream item)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			return _streams.IndexOf(item);
 		}
 
 		public void Insert(int index, BitwiseStream item)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			_streams.Insert(index, item);
 			_length += item.LengthBits;
 		}
 
 		public void RemoveAt(int index)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			_length -= _streams[index].LengthBits;
 			Debug.Assert(_length >= 0);
 			_streams.RemoveAt(index);
@@ -477,10 +525,12 @@ namespace Peach.Core.IO
 		{
 			get
 			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
 				return _streams[index];
 			}
 			set
 			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
 				_length -= _streams[index].LengthBits;
 				Debug.Assert(_length >= 0);
 
@@ -491,38 +541,52 @@ namespace Peach.Core.IO
 
 		public void Add(BitwiseStream item)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			_streams.Add(item);
 			_length += item.LengthBits;
 		}
 
 		public void Clear()
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			_streams.Clear();
 			_length = 0;
 		}
 
 		public bool Contains(BitwiseStream item)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			return _streams.Contains(item);
 		}
 
 		public void CopyTo(BitwiseStream[] array, int arrayIndex)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			_streams.CopyTo(array, arrayIndex);
 		}
 
 		public int Count
 		{
-			get { return _streams.Count; }
+			get 
+			{ 
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
+				return _streams.Count;
+			}
 		}
 
 		public bool IsReadOnly
 		{
-			get { return _streams.IsReadOnly; }
+			get
+			{
+				if (_disposed) throw new ObjectDisposedException("BitStreamList");
+				return _streams.IsReadOnly;
+			}
 		}
 
 		public bool Remove(BitwiseStream item)
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
+
 			if (!_streams.Remove(item))
 				return false;
 
@@ -533,11 +597,13 @@ namespace Peach.Core.IO
 
 		public IEnumerator<BitwiseStream> GetEnumerator()
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			return _streams.GetEnumerator();
 		}
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
+			if (_disposed) throw new ObjectDisposedException("BitStreamList");
 			return _streams.GetEnumerator();
 		}
 
