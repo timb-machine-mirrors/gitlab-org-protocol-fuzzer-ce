@@ -21,6 +21,7 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_ApcPower[APC Power]               |    |    |X   |
 |xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |Windows
 |xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |
+|xref:Monitors_CanSendFrame[CAN Send Frame]      |    |    |X   |
 |xref:Monitors_CleanupFolder[Cleanup Folder]     |    |    |X   |
 |xref:Monitors_CleanupRegistry[Cleanup Registry] |    |    |X   |Windows
 |xref:Monitors_CrashReporter[Crash Reporter]     |X   |X   |    |OS X

@@ -741,6 +741,39 @@ namespace Peach.Core
 				return (bytes / 1024.0).ToString("0.###") + " Kbytes";
 			return bytes + " Bytes";
 		}
+
+		private static readonly Regex ReHexWhiteSpace = new Regex(@"[h{},\s\r\n:-]+", RegexOptions.Singleline);
+		public static byte[] HexStringToByteArray(string name, string value)
+		{
+			// Handle hex data.
+
+			// 1. Remove white space
+			value = ReHexWhiteSpace.Replace(value, "");
+
+			// 3. Remove 0x
+			value = value.Replace("0x", "");
+
+			// 4. remove \x
+			value = value.Replace("\\x", "");
+
+			if (value.Length % 2 != 0)
+				throw new PeachException(
+					"Error, the hex value of {0} must contain an even number of characters: {1}".Fmt(
+						name,
+						value)
+				);
+
+			var array = HexString.ToArray(value);
+			if (array == null)
+				throw new PeachException(
+					"Error, the value of {0} contains invalid hex characters: {1}".Fmt(
+						name,
+						value
+					));
+
+			return array;
+		}
+
 	}
 
 	public class ToggleEventArgs : EventArgs
