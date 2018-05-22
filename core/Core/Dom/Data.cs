@@ -140,9 +140,6 @@ namespace Peach.Core.Dom
 					}
 
 					model.ApplyDataFile(model, new BitStream(strm));
-
-					// Apply field values
-					base.Apply(action, model);
 				}
 			}
 			catch (CrackingFailure ex)
@@ -151,6 +148,9 @@ namespace Peach.Core.Dom
 					FileName, model.fullName, ex.Message
 				), ex);
 			}
+			
+			// Apply field values
+			base.Apply(action, model);
 		}
 
 		public string FileName { get; private set; }
