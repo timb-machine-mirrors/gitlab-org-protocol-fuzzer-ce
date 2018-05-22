@@ -1002,5 +1002,76 @@ SGVsbG8=
 				ThePitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
 			}
 		}
+
+		[Test]
+		public void TestRunMultipleTestDefinitions()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='TheState' initialState='Initial'>
+		<State name='Initial'>
+			<Action name='In' type='input'>
+				<DataModel name='In'>
+					<Number name='Byte' size='8'/>
+				</DataModel>
+			</Action>
+			<Action type='slurp' valueXpath='//In//Byte' setXpath='//Out//Byte'/>
+			<Action name='Out' type='output'>
+				<DataModel name='Out'>
+					<Number name='Byte' size='8'/>
+				</DataModel>
+			</Action>
+		</State>
+	</StateModel>
+
+	<Test name='Default'>
+		<StateModel ref='TheState'/>
+		<Publisher name='Pub' class='Null'/>
+	</Test>
+</Peach>
+";
+
+			const string test = @"
+<TestData pit='test.xml'>
+	<Test name='Default'>
+		<Open   action='TheState.Initial.In' publisher='Pub'/>
+		<Input  action='TheState.Initial.In' publisher='Pub'>
+<![CDATA[
+0000   66                                                f               
+]]>
+		</Input>
+		<Output action='TheState.Initial.Out' publisher='Pub'>
+<![CDATA[
+0000   66                                                f               
+]]>
+		</Output>
+	</Test>
+<Test name='Default'>
+		<Open   action='TheState.Initial.In' publisher='Pub'/>
+		<Input  action='TheState.Initial.In' publisher='Pub'>
+<![CDATA[
+0000   65                                                e               
+]]>
+		</Input>
+		<Output action='TheState.Initial.Out' publisher='Pub'>
+<![CDATA[
+0000   65                                                e               
+]]>
+		</Output>
+	</Test>
+</TestData>
+";
+			using (var tmpDir = new TempDirectory())
+			{
+
+				var pitFile = Path.Combine(tmpDir.Path, "test.xml");
+				var pitTest = pitFile + ".test";
+
+				File.WriteAllText(pitFile, xml);
+				File.WriteAllText(pitTest, test);
+
+				ThePitTester.TestPit(tmpDir.Path, pitTest, null, false, 1);
+			}
+		}
 	}
 }

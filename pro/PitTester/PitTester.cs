@@ -171,28 +171,34 @@ namespace Peach.Pro.PitTester
 			var cleanme = new List<IDisposable>();
 			var pitFile = Path.Combine(libraryPath, testData.Pit);
 			Console.WriteLine("PitFile: {0}", pitFile);
-
-			try
+			for (var i = 0; i < testData.Tests.Count; ++i)
 			{
-				foreach (var tmp in testData.Defines.OfType<TestData.TempFileDefine>())
+				if (testData.Tests[i].Skip)
+					continue;
+
+				try
 				{
-					cleanme.Add(tmp);
-					tmp.Populate();
-				}
+					foreach (var tmp in testData.Defines.OfType<TestData.TempFileDefine>())
+					{
+						cleanme.Add(tmp);
+						tmp.Populate();
+					}
 
-				DoTestPit(
-					testData,
-					libraryPath,
-					pitFile,
-					seed,
-					keepGoing,
-					stop
-				);
-			}
-			finally
-			{
-				foreach (var item in cleanme)
-					item.Dispose();
+					DoTestPit(
+						testData,
+						libraryPath,
+						pitFile,
+						seed,
+						keepGoing,
+						stop,
+						i
+					);
+				}
+				finally
+				{
+					foreach (var item in cleanme)
+						item.Dispose();
+				}
 			}
 		}
 
@@ -202,13 +208,15 @@ namespace Peach.Pro.PitTester
 			string pitFile,
 			uint? seed,
 			bool keepGoing,
-			uint stop)
+			uint stop,
+			int testIndex)
 		{
-			if (testData.Tests.Any(x => x.SingleIteration))
+			if (testData.Tests[testIndex].SingleIteration)
 				stop = 1;
 
 			var defs = PitDefines.ParseFile(pitFile + ".config", libraryPath).Evaluate();
 
+			// separate Defines for each test is not supported at this time
 			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
 
 			for (var i = 0; i < defs.Count; ++i)
@@ -244,6 +252,7 @@ namespace Peach.Pro.PitTester
 			var errors = new List<Exception>();
 			var fixupOverrides = new Dictionary<string, Variant>();
 
+			bool foundMatchingPitTest = false;
 			foreach (var test in dom.tests)
 			{
 				// Don't run extra control iterations...
@@ -251,7 +260,17 @@ namespace Peach.Pro.PitTester
 
 				test.agents.Clear();
 
-				var data = testData.Tests.FirstOrDefault(t => t.Name == test.Name);
+				TestData.Test data = null;
+				if (testData.Tests[testIndex].Name != test.Name)
+				{
+					continue;
+				}
+				else
+				{
+					foundMatchingPitTest = true;
+					data = testData.Tests[testIndex];
+				}
+
 				if (data == null)
 					throw new PeachException("Error, no test definition found for pit test named '{0}'.".Fmt(test.Name));
 
@@ -287,6 +306,9 @@ namespace Peach.Pro.PitTester
 				}
 			}
 
+			if(!foundMatchingPitTest)
+				throw new PeachException("Error, no test definition found for pit test named '{0}'.".Fmt(testData.Tests[testIndex].Name));
+
 			// See #214
 			// If there are is any action that has more than one data set
 			// that use <Field> and the random strategy is
@@ -315,14 +337,14 @@ namespace Peach.Pro.PitTester
 				rangeStart = 0,
 				rangeStop = stop,
 				pitFile = Path.GetFileName(pitFile),
-				runName = "Default",
+				runName = testData.Tests[testIndex].Name,
 				singleIteration = (stop == 1)
 			};
 
 			if (seed.HasValue)
 				config.randomSeed = seed.Value;
 
-			var q = testData.Tests.First(i => i.Name == config.runName);
+			var q = testData.Tests[testIndex];
 			if (!string.IsNullOrEmpty(q.Seed))
 			{
 				uint s;
@@ -466,9 +488,9 @@ namespace Peach.Pro.PitTester
 
 		public static void VerifyDataSets(string pitLibraryPath, string pitTestPath)
 		{
-			var testData = TestData.Parse(pitTestPath);
 			if (!File.Exists(pitTestPath))
 				throw new FileNotFoundException("Invalid PitTestPath", pitTestPath);
+			var testData = TestData.Parse(pitTestPath);
 
 			var cleanme = new List<IDisposable>();
 			var pitFile = Path.Combine(pitLibraryPath, testData.Pit);
@@ -515,23 +537,28 @@ namespace Peach.Pro.PitTester
 			dom.context = new RunContext();
 
 			var sb = new StringBuilder();
-
-			foreach (var test in dom.tests)
+			foreach (var pitTest in testData.Tests)
 			{
-				dom.context.test = test;
-
-				var testTest = testData.Tests.FirstOrDefault(t => t.Name == test.Name);
-
-				foreach (var state in test.stateModel.states)
+				foreach (var test in dom.tests)
 				{
-					foreach (var action in state.actions)
+					dom.context.test = test;
+					TestData.Test testTest = null;
+					if (pitTest.Name == test.Name)
 					{
-						foreach (var actionData in action.allData)
+						testTest = pitTest;
+					}
+
+					foreach (var state in test.stateModel.states)
+					{
+						foreach (var action in state.actions)
 						{
-							foreach (var data in actionData.allData)
+							foreach (var actionData in action.allData)
 							{
-								var verify = testTest == null || testTest.VerifyDataSets;
-								VerifyDataSet(verify, data, actionData, test, state, action, sb);
+								foreach (var data in actionData.allData)
+								{
+									var verify = testTest == null || testTest.VerifyDataSets;
+									VerifyDataSet(verify, data, actionData, test, state, action, sb);
+								}
 							}
 						}
 					}
