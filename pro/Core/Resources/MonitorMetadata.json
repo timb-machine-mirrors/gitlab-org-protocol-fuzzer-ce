@@ -3,6 +3,7 @@
     {
       "Name": "Fault Detection",
       "Items": [
+        "CanTiming",
         "CrashReporter",
         "CrashWrangler",
         "Gdb",
@@ -46,6 +47,7 @@
         "ApcPower",
         "ButtonClicker",
         "CanaKitRelay",
+        "CanSendFrame",
         "CleanupFolder",
         "CleanupRegistry",
         "IpPower9258",
@@ -190,6 +192,55 @@
           "RelayNumber",
           "Action",
           "ToggleDelay"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "When",
+          "StartOnCall"
+        ]
+      }
+    ],
+    "CanSendFrame": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      },
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Id",
+          "Data",
+          "SendEvery"
+        ]
+      },
+      {
+        "Name": "When To Trigger",
+        "Items": [
+          "When",
+          "StartOnCall"
+        ]
+      }
+    ],
+    "CanTiming": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      },
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Id",
+          "Window"
         ]
       },
       {

@@ -105,6 +105,13 @@ namespace Peach.Core.Publishers.Can
 	}
 
 	/// <summary>
+	/// Deligate for handling received CAN frames
+	/// </summary>
+	/// <param name="sender">Instance of ICanInterface receiving frame</param>
+	/// <param name="frame">Frame received</param>
+	public delegate void CanRxEventHandler(ICanInterface sender, CanFrame frame);
+
+	/// <summary>
 	/// CAN interface
 	/// </summary>
 	public interface ICanInterface
@@ -132,10 +139,15 @@ namespace Peach.Core.Publishers.Can
 		void Close();
 
 		/// <summary>
-		/// Read CAN frame
+		/// Read single CAN frame
 		/// </summary>
 		/// <returns>Frame or null if no frames are available.</returns>
 		CanFrame ReadMessage();
+
+		/// <summary>
+		/// All received frames sent to this event
+		/// </summary>
+		event CanRxEventHandler CanFrameReceived;
 
 		/// <summary>
 		/// Write CAN frame to bus
