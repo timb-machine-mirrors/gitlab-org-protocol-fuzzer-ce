@@ -55,6 +55,7 @@ namespace Peach.Pro.Core.Publishers
 		protected HttpWebResponse Response { get; set; }
 		protected string Query { get; set; }
 		protected X509Certificate _clientCertificate = null;
+		protected WebProxy _proxy = null;
 
 		// Allow access from scripting
 		public Dictionary<string, string> Headers = new Dictionary<string, string>();
@@ -120,6 +121,11 @@ namespace Peach.Pro.Core.Publishers
 			if (IgnoreCertErrors)
 			{
 				ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+			}
+
+			if (!string.IsNullOrEmpty(Proxy))
+			{
+				_proxy = new WebProxy(Proxy);
 			}
 		}
 
@@ -340,6 +346,7 @@ namespace Peach.Pro.Core.Publishers
 		{
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = Method;
+			request.Proxy = _proxy;
 
 			if (_clientCertificate != null)
 				request.ClientCertificates.Add(_clientCertificate);
@@ -409,9 +416,6 @@ namespace Peach.Pro.Core.Publishers
 
 			request.Timeout = Timeout;
 			request.ServicePoint.Expect100Continue = false;
-
-			if (!string.IsNullOrEmpty(Proxy))
-				request.Proxy = new WebProxy(new Uri(Proxy), false);
 
 			if (Cookies)
 				request.CookieContainer = CookieJar;

@@ -72,6 +72,9 @@ IgnoreCertErrors:: Allow HTTPS regardless of cert status. The default value is t
 Proxy::
     To use HTTP proxy, set the URL. Default is none. Example: +http://192.168.1.1:8080+. +
      +
+    The publisher will not use the default system proxy.
+    If a proxy is required it must be explicitly set via the publisher parameter. +
+     +
     Please note that the host +localhost+ and IP 127.0.0.1 will bypass the provided proxy. This is a behavior hardcoded into the underlying http networking code. For a discussion of options to deal with this limitation see the following article: link:http://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/MonitorLocalTraffic[Fiddler - Monitoring Local Traffic].
 
 
