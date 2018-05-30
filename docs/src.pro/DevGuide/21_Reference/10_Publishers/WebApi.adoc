@@ -54,7 +54,9 @@ There are no required parameters.
 
 _Optional:_
 
-BaseUrl:: Base URL is used by some authentication types. Only used as part of authentication.
+BaseUrl:: The base URL to use for authentication. +
+    Example: +http://myservice.domainname.example+. +
+    This parameter is required if the +Username+ and +Password+ parameters are specified.
 Username:: Username for authentication
 Password:: Optional password associated with the Username in authentication
 Domain:: Domain for authentication

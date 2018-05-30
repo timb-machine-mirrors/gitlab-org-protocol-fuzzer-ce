@@ -66,10 +66,36 @@ namespace Peach.Pro.Core.Publishers
 		{
 			if (!string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password))
 			{
-				var baseUrl = new Uri(Url);
+				Uri baseUrl = null;
+
+				// ParameterParser.Parse() will throw if not set on the HttpPublisher
+				// But we need to guard for null since it is not set in the WebApiPublisher
+				if (!string.IsNullOrEmpty(Url))
+				{
+					try
+					{
+						baseUrl = new Uri(Url);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException("The value of parameter 'Url' is not a valid URI.", ex);
+					}
+				}
 
 				if (!string.IsNullOrWhiteSpace(BaseUrl))
-					baseUrl = new Uri(BaseUrl);
+				{
+					try
+					{
+						baseUrl = new Uri(BaseUrl);
+					}
+					catch (Exception ex)
+					{
+						throw new PeachException("The value of parameter 'BaseUrl' is not a valid URI.", ex);
+					}
+				}
+
+				if (baseUrl == null)
+					throw new PeachException("The parameter 'BaseUrl' is required when using Username/Password authentication.");
 
 				Credentials = new CredentialCache
 				{
