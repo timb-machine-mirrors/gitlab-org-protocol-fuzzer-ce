@@ -58,11 +58,8 @@ BaseUrl:: The base URL to use for authentication. +
     Example: +http://myservice.domainname.example+. +
     This parameter is required if the +Username+ and +Password+ parameters are specified.
 Username:: Username for authentication
-Password:: Optional password associated with the Username in authentication
+Password:: Password for for authentication
 Domain:: Domain for authentication
-
-Cookies:: Enable cookie support. The default value is true.
-CookiesAcrossIterations:: Track cookies across iterations. The default value is false.
 
 FailureStatusCodes:: 
     Comma separated list of status codes that are failures causing current test case to stop.
