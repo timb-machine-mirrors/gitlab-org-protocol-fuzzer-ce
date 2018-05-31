@@ -24,6 +24,7 @@ If frame with `Id` is not received in this window of time, a fault will be raise
 
 _Optional:_
 
+///////////////////////////////
 When::
 Specify one of the following values to determine when a CAN frame should be sent (defaults to `OnStart`):
 +
@@ -58,6 +59,7 @@ image::{images}/Common/Monitors/Timings_SSH.png[scalewidth="75%"]
 StartOnCall::
 Start receiving when the specified event is received from the state model.
 This value is used only when the 'When' parameter is set to `OnCall`.
+///////////////////////////////
 
 === Examples
 
@@ -77,8 +79,8 @@ to fault if a specific CAN frame is not received every half second.
 | CanBitrate  | (default)
 | Id          | `0x07DC`
 | Window      | `500`
-| When        | (default)
-| StartOnCall | (default)
+// | When        | (default)
+// | StartOnCall | (default)
 |==========================================================
 
 ==============================

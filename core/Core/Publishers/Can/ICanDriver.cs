@@ -124,7 +124,7 @@ namespace Peach.Core.Publishers.Can
 		IEnumerable<ICanChannel> Channels { get; }
 
 		/// <summary>
-		/// Is interface in open state
+		/// Is interface in open state?  
 		/// </summary>
 		bool IsOpen { get; }
 
@@ -139,15 +139,38 @@ namespace Peach.Core.Publishers.Can
 		void Close();
 
 		/// <summary>
+		/// Register a CAN Frame Received handler with an CAN Frame ID filter.
+		/// </summary>
+		/// <param name="id">CAN Frame IDs</param>
+		/// <param name="handler">Handler method</param>
+		void RegisterCanFrameReceiveHandler(uint id, CanRxEventHandler handler);
+
+		/// <summary>
+		/// Register a CAN Frame Received handler with an CAN Frame ID filter.
+		/// </summary>
+		/// <param name="ids">One or more CAN Frame IDs</param>
+		/// <param name="handler">Handler method</param>
+		void RegisterCanFrameReceiveHandler(uint[] ids, CanRxEventHandler handler);
+
+		/// <summary>
+		/// Un-register a CAN Frame Received handler with an CAN Frame ID filter.
+		/// </summary>
+		/// <param name="id">CAN Frame IDs</param>
+		/// <param name="handler">Handler method</param>
+		void UnRegisterCanFrameReceiveHandler(uint id, CanRxEventHandler handler);
+
+		/// <summary>
+		/// Unregister a CAN Frame Received handler with an CAN Frame ID filter.
+		/// </summary>
+		/// <param name="ids">One or more CAN Frame IDs</param>
+		/// <param name="handler">Handler method</param>
+		void UnRegisterCanFrameReceiveHandler(uint[] ids, CanRxEventHandler handler);
+
+		/// <summary>
 		/// Read single CAN frame
 		/// </summary>
 		/// <returns>Frame or null if no frames are available.</returns>
 		CanFrame ReadMessage();
-
-		/// <summary>
-		/// All received frames sent to this event
-		/// </summary>
-		event CanRxEventHandler CanFrameReceived;
 
 		/// <summary>
 		/// Write CAN frame to bus
