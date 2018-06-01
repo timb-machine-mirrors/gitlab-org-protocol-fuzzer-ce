@@ -227,6 +227,27 @@
         ]
       }
     ],
+    "CanThreshold": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      },
+      {
+        "Name": "Core Parameters",
+        "Items": [
+          "Id",
+          "SignalOffset",
+          "SignalSize",
+          "SignalType",
+          "SignalEndian",
+          "Expression"
+        ]
+      }
+    ],
     "CanTiming": [
       {
         "Name": "Interface Parameters",
