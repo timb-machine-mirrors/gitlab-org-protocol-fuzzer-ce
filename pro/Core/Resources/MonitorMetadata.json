@@ -4,6 +4,7 @@
       "Name": "Fault Detection",
       "Items": [
         "CanTiming",
+        "CanThreshold",
         "CrashReporter",
         "CrashWrangler",
         "Gdb",
