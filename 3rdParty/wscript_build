@@ -47,6 +47,7 @@ else:
 		'Google.CityHash',
 		'libusbdotnet',
 		'Managed.AndroidDebugBridge',
+		'PeakPcan',
 		'pin',
 		'Portable.Licensing',
 		'Renci.SshNet',

@@ -137,6 +137,7 @@ if bld.env.BASENAME != 'web':
 	if 'win' in bld.env['supported_features']:
 		asm.source += bld.path.ant_glob('Publishers/Can/*.cs')
 		deps.extend([
+			'PCANBasic_NET.dll',
 			'UIAutomationClient.dll',
 			'UIAutomationTypes.dll',
 			'vxlapi_NET.dll',
