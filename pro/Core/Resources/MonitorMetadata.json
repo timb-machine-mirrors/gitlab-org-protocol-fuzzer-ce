@@ -856,7 +856,8 @@
           "IgnoreFirstChanceGuardPage",
           "IgnoreSecondChanceGuardPage",
           "ServiceStartTimeout",
-          "CpuPollInterval"
+          "CpuPollInterval",
+          "DebuggerMode"
         ]
       }
     ],

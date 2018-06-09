@@ -34,8 +34,15 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
 	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("ServiceStartTimeout", typeof(int), "How many seconds to wait for target windows service to start", "60")]
+	[Parameter("DebuggerMode", typeof(HybridMode), "What mode the debugger should run in.  ForceWinDbg will cause fuzzing speeds to drop significantly.", "Fast")]
 	public class WindowsDebuggerHybrid : Monitor2
 	{
+		public enum HybridMode
+		{
+			Fast,
+			ForceWinDbg
+		}
+
 		private static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();
 
 		public string CommandLine { get; set; }
@@ -57,6 +64,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		public bool RestartOnEachTest { get; set; }
 		public bool RestartAfterFault { get; set; }
 		public int ServiceStartTimeout { get; set; }
+		public HybridMode DebuggerMode { get; set; }
 
 		private IDebuggerInstance _debugger;
 		private bool _replay;
@@ -208,7 +216,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		{
 			Debug.Assert(_debugger == null);
 
-			_debugger = _replay
+			_debugger = _replay || DebuggerMode == HybridMode.ForceWinDbg
 				? GetDebuggerInstance<DebuggerProxy<DebugEngineInstance>>()
 				//? GetDebuggerInstance<DebugEngineInstance>()
 				//: GetDebuggerInstance<DebuggerProxy<SystemDebuggerInstance>>();
