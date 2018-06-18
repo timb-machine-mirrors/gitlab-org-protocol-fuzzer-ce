@@ -82,6 +82,7 @@ peach_pro = common + [
 
 	# CAN Recorder
 	'PeachCanRecorder.exe',
+	'PeachCanDbViewer.exe',
 
 	# UI Web Recorder tool
 	'PeachWebRecorder.exe',
