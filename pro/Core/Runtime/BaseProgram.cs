@@ -149,7 +149,7 @@ namespace Peach.Pro.Core.Runtime
 
 			// Mono 5.X doesn't yet work with IronPython
 			// https://bugzilla.xamarin.com/show_bug.cgi?id=57962
-			var maxVer = new Version(5, 0, 0);
+			var maxVer = new Version(6, 0, 0);
 			var minVer = new Version(4, 0, 0);
 			var badVer = new Version(4, 4);
 
