@@ -55,6 +55,6 @@ are sometimes false positives or anti-debugging faults, defaults to false.
 
 RestartAfterFault:: If "true", restarts the target when any monitor detects a fault.
 If "false", restarts the target if the process exits or crashes. +
-This argument defaults to false.
+This argument defaults to true.
 
 ConnectionTimeout:: Duration, in milliseconds, to wait to receive a kernel connection. The default value is 3000 ms.

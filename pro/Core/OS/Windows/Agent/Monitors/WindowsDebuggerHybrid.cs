@@ -32,7 +32,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart the process if a different monitor detects a fault", "true")]
 	[Parameter("ServiceStartTimeout", typeof(int), "How many seconds to wait for target windows service to start", "60")]
 	[Parameter("DebuggerMode", typeof(HybridMode), "What mode the debugger should run in.  ForceWinDbg will cause fuzzing speeds to drop significantly.", "Fast")]
 	public class WindowsDebuggerHybrid : Monitor2

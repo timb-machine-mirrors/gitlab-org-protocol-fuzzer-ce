@@ -25,7 +25,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart the process if a different monitor detects a fault", "true")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
