@@ -52,12 +52,15 @@ namespace Peach.Pro.Test.Core
 
 		private readonly List<TimeSpan> _waitTimes = new List<TimeSpan>();
 		private readonly List<string> _faults = new List<string>();
+		private readonly List<string> history = new List<string>();
+
 
 		[SetUp]
 		public void SetUp()
 		{
 			_waitTimes.Clear();
 			_faults.Clear();
+			history.Clear();
 		}
 
 
@@ -108,7 +111,6 @@ namespace Peach.Pro.Test.Core
 				rangeStop = args.RangeStop,
 			};
 
-			var history = new List<string>();
 
 			var e = new Engine(null);
 
@@ -169,6 +171,12 @@ namespace Peach.Pro.Test.Core
 				{
 					sw.Restart();
 				};
+
+				ctx.IterationStarting += (c, agent) =>
+				{
+					if (c.FaultOnPreviousIteration)
+						history.Add("LastWasFault");
+				};
 			};
 
 			e.Fault += (ctx, it, sm, fault) =>
@@ -222,7 +230,8 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "8", Repro = "8" });
 
-			const string exp = "R1 1 2 3 4 5 6 7 8 ReproFault C8 8 Fault C9 9 10";
+			const string exp = "R1 1 2 3 4 5 6 7 8 ReproFault LastWasFault " +
+			                   "C8 8 Fault LastWasFault C9 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -240,7 +249,10 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { RangeStop = 15, Fault = "12", Repro = "11" });
 
-			const string exp = "R1 1 2 3 4 5 6 7 8 9 10 11 12 ReproFault C12 12 2 3 4 5 6 7 8 9 10 11 Fault C13 13 14 15";
+			const string exp = "R1 1 2 3 4 5 6 7 8 9 10 11 12 ReproFault " +
+			                   "LastWasFault C12 12 " +
+			                   "LastWasFault C2 2 3 4 5 6 7 8 9 10 11 Fault "+
+			                   "LastWasFault C13 13 14 15";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -258,7 +270,10 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "6", Repro = "5" });
 
-			const string exp = "R1 1 2 3 4 5 6 ReproFault C6 6 1 2 3 4 5 Fault C7 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 6 ReproFault " +
+			                   "LastWasFault C6 6 "+
+			                   "LastWasFault C1 1 2 3 4 5 Fault "+
+			                   "LastWasFault C7 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -277,8 +292,13 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { RangeStop = 20, Fault = "18", Repro = "7", Initial = "4", InitialRepro = "4" });
 
-			const string exp = "R1 1 2 3 4 ReproFault C4 4 Fault C5 5 6 7 8 9 10 11 12 13 14 15 16 17 18 " +
-				"ReproFault C18 18 8 9 10 11 12 13 14 15 16 17 18 5 6 7 Fault C19 19 20";
+			const string exp = "R1 1 2 3 4 ReproFault " +
+			                   "LastWasFault C4 4 Fault " +
+			                   "LastWasFault C5 5 6 7 8 9 10 11 12 13 14 15 16 17 18 ReproFault "+
+			                   "LastWasFault C18 18 "+
+			                   "LastWasFault C8 8 9 10 11 12 13 14 15 16 17 18 " +
+			                   "LastWasFault C5 5 6 7 Fault " +
+			                   "LastWasFault C19 19 20";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -297,7 +317,10 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "6" });
 
-			const string exp = "R1 1 2 3 4 5 6 ReproFault C6 6 1 2 3 4 5 6 ReproFailed 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 6 ReproFault " +
+			                   "LastWasFault C6 6 " +
+			                   "LastWasFault C1 1 2 3 4 5 6 ReproFailed " +
+			                   "7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -320,15 +343,17 @@ namespace Peach.Pro.Test.Core
 			for (var i = 1; i <= 23; ++i)
 				exp += " " + i;
 
-			exp += " ReproFault C23 23";
+			exp += " ReproFault LastWasFault C23 23";
 
+			exp += " LastWasFault C13";
 			for (var i = 13; i <= 23; ++i)
 				exp += " " + i;
 
+			exp += " LastWasFault C3";
 			for (var i = 3; i <= 10; ++i)
 				exp += " " + i;
 
-			exp += " Fault C24 24 25";
+			exp += " Fault LastWasFault C24 24 25";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -349,11 +374,16 @@ namespace Peach.Pro.Test.Core
 			for (var i = 1; i <= 540; ++i)
 				sb.AppendFormat(" {0}", i);
 
-			sb.Append(" ReproFault C540 540");
+			sb.Append(" ReproFault LastWasFault C540 540");
 
 			for (var i = 10; i <= 640; i *= 2)
-				for (var j = 540 - Math.Min(i, 500); j <= 540; ++j)
+			{
+				var start = 540 - Math.Min(i, 500);
+				sb.AppendFormat(" LastWasFault C{0}", start);
+
+				for (var j = start; j <= 540; ++j)
 					sb.AppendFormat(" {0}", j);
+			}
 
 			sb.Append(" ReproFailed");
 
@@ -380,11 +410,16 @@ namespace Peach.Pro.Test.Core
 			for (var i = 1; i <= 540; ++i)
 				sb.AppendFormat(" {0}", i);
 
-			sb.Append(" ReproFault C540 540");
+			sb.Append(" ReproFault LastWasFault C540 540");
 
 			for (var i = 10; i <= 80; i *= 2)
-				for (var j = 540 - i; j <= 540; ++j)
+			{
+				var start = 540 - i;
+				sb.AppendFormat(" LastWasFault C{0}", start);
+
+				for (var j = start; j <= 540; ++j)
 					sb.AppendFormat(" {0}", j);
+			}
 
 			sb.Append(" ReproFailed");
 
@@ -413,14 +448,17 @@ namespace Peach.Pro.Test.Core
 			for (var i = 1; i <= 23; ++i)
 				exp += " " + i;
 
-			exp += " ReproFault C23 23";
+			exp += " ReproFault LastWasFault C23 23";
 
+			exp += " LastWasFault C13";
 			for (var i = 13; i <= 23; ++i)
 				exp += " " + i;
 
+			exp += " LastWasFault C3";
 			for (var i = 3; i <= 23; ++i)
 				exp += " " + i;
 
+			exp += " LastWasFault C1";
 			for (var i = 1; i <= 23; ++i)
 				exp += " " + i;
 
@@ -428,8 +466,8 @@ namespace Peach.Pro.Test.Core
 
 			Assert.AreEqual(exp, act);
 
-			// R1, 1..23, C23, 23, 13..23, 3..23, 1..25
-			const int iterations = 1 + 23 + 2 + 11 + 21 + 25;
+			// R1, 1..23, C23, 23, C23, 13..23, C3, 3..23, C1, 1..25
+			const int iterations = 1 + 23 + 2 + 1 + 11 + 1 + 21 + 1 + 25;
 			Assert.AreEqual(iterations, _waitTimes.Count);
 
 			foreach (var ts in _waitTimes)
@@ -462,15 +500,21 @@ namespace Peach.Pro.Test.Core
 				times.Add(0);
 			}
 
-			exp += " ReproFault C23 23";
+			exp += " ReproFault LastWasFault C23 23";
 			times.Add(100); // Waits FaultWaitTime after control
 			times.Add(100); // Waits FaultWaitTime after 1st repro
+
+			exp += " LastWasFault C13";
+			times.Add(100);
 
 			for (var i = 13; i <= 23; ++i)
 			{
 				exp += " " + i;
 				times.Add(100); // Waits FaultWaitTime after each of 1st 10 repros
 			}
+
+			exp += " LastWasFault C3";
+			times.Add(0);
 
 			for (var i = 3; i <= 23; ++i)
 			{
@@ -479,6 +523,9 @@ namespace Peach.Pro.Test.Core
 			}
 
 			times[times.Count - 1] = 100; // Waits FaultWaitTime after full sequence
+
+			exp += " LastWasFault C1";
+			times.Add(0);
 
 			for (var i = 1; i <= 23; ++i)
 			{
@@ -523,15 +570,15 @@ namespace Peach.Pro.Test.Core
 
 			const string exp = "R1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 " +
 			                   // R16 -> switches to data set 2
-			                   "R16 16 17 18 19 20 21 22 23 ReproFault C23 23 " +
+			                   "R16 16 17 18 19 20 21 22 23 ReproFault LastWasFault C23 23 " +
 			                   // R13 -> switches back to data set initially used
-			                   "R13 13 14 15 " +
+			                   "LastWasFault R13 13 14 15 " +
 			                   // R16 -> switches to data set 2
 			                   "R16 16 17 18 19 20 21 22 23 " +
 			                   // R3 -> switches back to data set initially used
-			                   "R3 3 4 5 6 7 Fault " +
+			                   "LastWasFault R3 3 4 5 6 7 Fault " +
 			                   // R24 -> switches back to data set 2
-			                   "R24 24 25";
+			                   "LastWasFault R24 24 25";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -548,7 +595,7 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "C6", Repro = "C6", ControlIterations = 5, FaultOnControl = true });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 Fault";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault LastWasFault C6 Fault";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -566,7 +613,9 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "C6,1", Repro = "C6,3", ControlIterations = 5 });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 Fault C6 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault " +
+			                   "LastWasFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 Fault " +
+			                   "LastWasFault C6 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -585,7 +634,9 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "C6,1", Repro = "3", ControlIterations = 5 });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 Fault C6 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault " +
+			                   "LastWasFault C6 1 C2 2 C3 3 Fault " +
+			                   "LastWasFault C6 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -604,7 +655,9 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "C6,1", Repro = "C4", ControlIterations = 5 });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 Fault C6 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault " +
+			                   "LastWasFault C6 1 C2 2 C3 3 C4 Fault " +
+			                   "LastWasFault C6 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -623,7 +676,9 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "C6,1", ControlIterations = 5 });
 
-			const string exp = "R1 1 2 3 4 5 C6 ReproFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 ReproFailed 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 ReproFault " +
+			                   "LastWasFault C6 1 C2 2 C3 3 C4 4 C5 5 C6 ReproFailed " +
+			                   "6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -642,7 +697,9 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "6", ControlIterations = 5 });
 
-			const string exp = "R1 1 2 3 4 5 C6 6 ReproFault C6 6 C6 1 C2 2 C3 3 C4 4 C5 5 C6 6 C6 ReproFailed 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 C6 6 ReproFault " +
+			                   "LastWasFault C6 6 C6 " +
+			                   "LastWasFault C1 1 C2 2 C3 3 C4 4 C5 5 C6 6 C6 ReproFailed 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -691,12 +748,15 @@ namespace Peach.Pro.Test.Core
 
 			var exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 21 ReproFault " +
-				"C21 21 C21 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 21 C21 ";
+				"LastWasFault C21 21 C21 " +
+				"LastWasFault C11 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 21 C21 ";
+
+			exp += "LastWasFault C1 ";
 
 			for (var i = 1; i <= 13; ++i)
 				exp += "{0} ".Fmt(i);
 
-			exp += "Fault C22 22 23 24 25";
+			exp += "Fault LastWasFault C22 22 23 24 25";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -718,10 +778,10 @@ namespace Peach.Pro.Test.Core
 
 			const string exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 " +
-				"C21 21 22 23 24 25 C26 ReproFault C26 " +
+				"C21 21 22 23 24 25 C26 ReproFault LastWasFault C26 " +
 				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
-				"6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
-				"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 " +
+				"LastWasFault C6 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
+				"LastWasFault C1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 " +
 				"C26 ReproFailed 26 27 28 29 30";
 
 			Assert.AreEqual(exp, act);
@@ -745,10 +805,10 @@ namespace Peach.Pro.Test.Core
 
 			const string exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 " +
-				"C21 21 22 23 24 25 C26 26 ReproFault C26 26 C26 " +
-				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 26 C26 " +
-				"6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C26 " +
-				"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C26 " +
+				"C21 21 22 23 24 25 C26 26 ReproFault LastWasFault C26 26 C26 " +
+				"LastWasFault C16 16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 26 C26 " +
+				"LastWasFault C6 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C26 " +
+				"LastWasFault C1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 C26 " +
 				"ReproFailed 27 28 29 30";
 
 			Assert.AreEqual(exp, act);
@@ -771,11 +831,11 @@ namespace Peach.Pro.Test.Core
 			var act = Run(new Args { RangeStop = 30, Initial = "C11,1", InitialRepro = "C11,3", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
-				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault C11 " +
-				"1 C2 2 C3 3 C4 4 C5 5 C6 6 C7 7 C8 8 C9 9 C10 10 C11 Fault C11 " +
-				"11 12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault C26 " +
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 ReproFault LastWasFault C11 " +
+				"1 C2 2 C3 3 C4 4 C5 5 C6 6 C7 7 C8 8 C9 9 C10 10 C11 Fault LastWasFault C11 " +
+				"11 12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault LastWasFault C26 " +
 				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
-				"11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
+				"LastWasFault C11 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
 				"ReproFailed 26 27 28 29 30";
 
 			Assert.AreEqual(exp, act);
@@ -798,10 +858,10 @@ namespace Peach.Pro.Test.Core
 			var act = Run(new Args { RangeStop = 30, Initial = "11", InitialRepro = "11", Fault = "C26", ControlIterations = 5 });
 
 			const string exp =
-				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 ReproFault C11 11 Fault C12 " +
-				"12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault C26 " +
-				"16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
-				"12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
+				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 ReproFault LastWasFault C11 11 Fault LastWasFault C12 " +
+				"12 13 14 15 C16 16 17 18 19 20 C21 21 22 23 24 25 C26 ReproFault " +
+				"LastWasFault C26 16 C17 17 C18 18 C19 19 C20 20 C21 21 C22 22 C23 23 C24 24 C25 25 C26 " +
+				"LastWasFault C12 12 13 14 15 16 17 18 19 20 21 22 23 24 25 C26 " +
 				"ReproFailed 26 27 28 29 30";
 
 			Assert.AreEqual(exp, act);
@@ -821,8 +881,12 @@ namespace Peach.Pro.Test.Core
 			var act = Run(new Args { Initial = "2", Fault = "6", Repro = "5" });
 
 			const string exp = 
-				"R1 1 2 ReproFault C2 2 1 2 ReproFailed 3 4 5 6 ReproFault " +
-				"C6 6 3 4 5 Fault C7 7 8 9 10";
+				"R1 1 2 ReproFault " +
+				"LastWasFault C2 2 " +
+				"LastWasFault C1 1 2 ReproFailed 3 4 5 6 ReproFault " +
+				"LastWasFault C6 6 " +
+				"LastWasFault C3 3 4 5 Fault " +
+				"LastWasFault C7 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -841,8 +905,12 @@ namespace Peach.Pro.Test.Core
 			var act = Run(new Args { Initial = "3", InitialRepro = "2", Fault = "6", Repro = "5" });
 
 			const string exp =
-				"R1 1 2 3 ReproFault C3 3 1 2 Fault C4 4 5 6 ReproFault " +
-				"C6 6 4 5 Fault C7 7 8 9 10";
+				"R1 1 2 3 ReproFault LastWasFault C3 3 " +
+				"LastWasFault C1 1 2 Fault " +
+				"LastWasFault C4 4 5 6 ReproFault " +
+				"LastWasFault C6 6 " +
+				"LastWasFault C4 4 5 Fault " +
+				"LastWasFault C7 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -856,7 +924,7 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Initial = "R6", SwitchCount = 5 });
 
-			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault LastWasFault R6 " +
 				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 ReproFailed 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
@@ -875,6 +943,10 @@ namespace Peach.Pro.Test.Core
 			const string exp = "Fault detected on control recording iteration.";
 
 			Assert.AreEqual(exp, ex.Message);
+
+			var evts = string.Join(" ", history);
+
+			Assert.AreEqual("R1 1 2 3 4 5 R6 ReproFault LastWasFault R6 Fault", evts);
 		}
 
 		[Test]
@@ -890,6 +962,10 @@ namespace Peach.Pro.Test.Core
 			const string exp = "Fault detected on control iteration.";
 
 			Assert.AreEqual(exp, ex.Message);
+
+			var evts = string.Join(" ", history);
+
+			Assert.AreEqual("R1 1 2 3 4 5 6 ReproFault LastWasFault C6 Fault", evts);
 		}
 
 		[Test]
@@ -911,8 +987,9 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "R6,1", Repro = "R6,3", SwitchCount = 5 });
 
-			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
-				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault R6 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault " +
+			                   "LastWasFault R6 R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault " +
+			                   "LastWasFault R6 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 		}
@@ -950,8 +1027,10 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "R6,1", Repro = "R6,3", SwitchCount = 5, InjectFault = false, SoftException = true });
 
-			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
-				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault R6 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault " +
+			                   "LastWasFault R6 " +
+			                   "R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault " +
+			                   "LastWasFault R6 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 
@@ -976,8 +1055,10 @@ namespace Peach.Pro.Test.Core
 
 			var act = Run(new Args { Fault = "R6,1", Repro = "R6,3", SwitchCount = 5, SoftException = true });
 
-			const string exp = "R1 1 2 3 4 5 R6 ReproFault R6 " +
-				"R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault R6 6 7 8 9 10";
+			const string exp = "R1 1 2 3 4 5 R6 ReproFault " +
+			                   "LastWasFault R6 " +
+			                   "R1 1 C2 2 C3 3 C4 4 C5 5 R6 Fault " +
+			                   "LastWasFault R6 6 7 8 9 10";
 
 			Assert.AreEqual(exp, act);
 
