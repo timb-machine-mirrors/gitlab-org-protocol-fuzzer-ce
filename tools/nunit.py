@@ -92,6 +92,7 @@ def run_nunit(args, asm, fixture, outdir):
 
 	cmd = dotnet([
 		nunit,
+		'--workers=1',
 		'--labels=All',
 		"--where:%s" % category_filter(args.include),
 		'--result=%s' % result,
