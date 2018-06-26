@@ -25,7 +25,7 @@ The workflow for this configuration follows:
    host machine enters a waiting state because the target machine will initiate and
    secure the connection for the debugging session.
 2. On the target machine, open Windbg, and choose "Connect to Remote Session" from the File menu.
-   * For the "Connection String", specify the "transport:port" and the server for the debugging session, as in this example:  `tcp:Port=5005, Server=_YourHostComputer_`. +
+   * For the "Connection String", specify the "transport:port" and the server for the debugging session, as in this example: `net:port=5000,key=1.2.3.4`. +
    * Click OK.
 
 The debug session starts on the target machine. The target machine initiates contact
@@ -38,23 +38,13 @@ IMPORTANT: Instrumenting this configuration requires additional monitors externa
 === Parameters
 
 KernelConnectionString:: Connection string for attaching the debugger to a kernel-mode process
-(e.g. a driver). The connection string `.server tcp:port=5005` indicates this is the debug server and uses the tcp transport on port 5005. The Windows debugger offers a choice of transports; and, the port is arbitrary. For more information on using other values, see MSDN articles on live kernel mode, debugging, remote debugging, and kernel connection strings.
+(e.g. a driver). The connection string `net:port=5000,key=1.2.3.4` indicates this is the debug server and uses the tcp transport on port 5000. The Windows debugger offers a choice of transports; and, the port is arbitrary. For more information on using other values, see MSDN articles on live kernel mode, debugging, remote debugging, and kernel connection strings.
 
 _Optional:_
 
 SymbolsPath:: Path to the debugging symbol files. The default value is Microsoft public
-symbols server,`SRV*http://msdl.microsoft.com/download/symbols`.
+symbols server `SRV*http://msdl.microsoft.com/download/symbols`.
 
 WinDbgPath:: Path to the windbg installation. If undeclared, Peach attempts to locate a local installation of the debugger.
 
-IgnoreFirstChanceGuardPage:: Ignores faults from the first chance guard page. These faults
-are sometimes false positives or anti-debugging faults, defaults to false.
-
-IgnoreSecondChanceGuardPage:: Ignores faults from the second chance guard page. These faults
-are sometimes false positives or anti-debugging faults, defaults to false.
-
-RestartAfterFault:: If "true", restarts the target when any monitor detects a fault.
-If "false", restarts the target if the process exits or crashes. +
-This argument defaults to true.
-
-ConnectionTimeout:: Duration, in milliseconds, to wait to receive a kernel connection. The default value is 3000 ms.
+ConnectTimeout:: Duration, in milliseconds, to wait to receive a kernel connection. The default value is 3000 ms.
