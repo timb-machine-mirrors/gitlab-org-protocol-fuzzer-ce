@@ -168,7 +168,7 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 
 		public override bool DetectedFault()
 		{
-			Logger.Debug("DetectedFault()");
+			Logger.Trace("DetectedFault()");
 
 			_fault = null;
 
@@ -193,9 +193,6 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 				Logger.Debug("DetectedFault() - Fault detected, timed out waiting for process to exit");
 				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms.");
 			}
-
-			if (_replay && _debugger != null)
-				_StopDebugger();
 
 			if (_fault != null)
 				return true;
