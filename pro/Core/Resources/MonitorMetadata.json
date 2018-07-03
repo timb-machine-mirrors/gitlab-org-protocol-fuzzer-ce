@@ -264,13 +264,6 @@
           "Id",
           "Window"
         ]
-      },
-      {
-        "Name": "When To Trigger",
-        "Items": [
-          "When",
-          "StartOnCall"
-        ]
       }
     ],
     "CleanupFolder": [
