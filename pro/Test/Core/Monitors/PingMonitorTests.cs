@@ -189,11 +189,14 @@ namespace Peach.Pro.Test.Core.Monitors
 			StringAssert.IsMatch("(Could not resolve host)|(No such host is known)", ex.Message);
 		}
 
-		[TestCase(1000)]
-		[TestCase(2000)]
-		[TestCase(3000)]
-		public void TestTimeout(long timeout)
+
+		// NOTE: Running this test multiple times can have side
+		//       affects.
+		[Test]  
+		public void TestTimeout()
 		{
+			long timeout = 3000;
+
 			var runner = new MonitorRunner("Ping", new Dictionary<string, string>
 			{
 				{ "Host", InvalidAddress },
@@ -210,8 +213,8 @@ namespace Peach.Pro.Test.Core.Monitors
 
 					var elapsed = sw.ElapsedMilliseconds;
 
-					Assert.Greater(elapsed, timeout - 250);
-					Assert.Less(elapsed, timeout + 250);
+					Assert.Greater(elapsed, 1000);
+					Assert.Less(elapsed, 5000);
 
 					return true;
 				}
