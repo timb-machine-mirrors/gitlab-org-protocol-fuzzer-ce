@@ -214,10 +214,19 @@ namespace Peach.Pro.PitTester
 			if (testData.Tests[testIndex].SingleIteration)
 				stop = 1;
 
+			// separate Defines for each test is not supported at this time
+
 			var defs = PitDefines.ParseFile(pitFile + ".config", libraryPath).Evaluate();
 
-			// separate Defines for each test is not supported at this time
-			var testDefs = testData.Defines.ToDictionary(x => x.Key, x => x.Value);
+			// Add internal defines
+			testData.Defines
+				.Where(x => x.Internal)
+				.ForEach(x => defs.Add(new KeyValuePair<string, string>(x.Key, x.Value)));
+			
+			// Verify non-internal defines
+			var testDefs = testData.Defines
+				.Where(x => !x.Internal)
+				.ToDictionary(x => x.Key, x => x.Value);
 
 			for (var i = 0; i < defs.Count; ++i)
 			{

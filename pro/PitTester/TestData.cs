@@ -32,6 +32,9 @@ namespace Peach.Pro.PitTester
 
 			[XmlIgnore]
 			public string Value { get; set; }
+
+			[XmlIgnore]
+			public bool Internal { get; set; }
 		}
 
 		public class ValueDefine : Define
@@ -48,6 +51,14 @@ namespace Peach.Pro.PitTester
 			{
 				get { return Value; }
 				set { Value = value; }
+			}
+
+			[XmlAttribute("internal")]
+			[DefaultValue(false)]
+			public bool InternalAttr
+			{
+				get { return Internal; }
+				set { Internal = value; }
 			}
 		}
 
