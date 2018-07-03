@@ -920,9 +920,9 @@ Field'/>
 			var actual = compiler.Run().ToArray();
 
 			var expected = new[] {
-				"Element has value attribute with embedded newline: <String name=\"str1\" value=\"new&#xD;&#xA;line\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
-				"Element has value attribute with embedded newline: <String name=\"str2\" value=\"another&#xD;&#xA;new&#xD;&#xA;line\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
-				"Element has value attribute with embedded newline: <Field name=\"str1\" value=\"Bad&#xD;&#xA;Field\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
+				"TestNewlineInValue.xml: Element has value attribute with embedded newline: <String name=\"str1\" value=\"new&#xD;&#xA;line\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
+				"TestNewlineInValue.xml: Element has value attribute with embedded newline: <String name=\"str2\" value=\"another&#xD;&#xA;new&#xD;&#xA;line\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
+				"TestNewlineInValue.xml: Element has value attribute with embedded newline: <Field name=\"str1\" value=\"Bad&#xD;&#xA;Field\" xmlns=\"http://peachfuzzer.com/2012/Peach\" />",
 			};
 
 			actual.ForEach(Console.WriteLine);
@@ -1046,7 +1046,7 @@ PEACH PIT COPYRIGHT NOTICE AND LEGAL DISCLAIMER
 			var actual = compiler.Run().ToArray();
 
 			Assert.AreEqual(1, actual.Length);
-			StringAssert.StartsWith("Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true'", actual[0]);
+			StringAssert.StartsWith("TestPitLintNonDeterministic.xml: Action has when attribute but <Test> doesn't have 'nonDeterministicActions' attribute set to 'true'", actual[0]);
 		}
 
 		[Test]
