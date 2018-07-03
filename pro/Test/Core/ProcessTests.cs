@@ -179,15 +179,18 @@ namespace Peach.Pro.Test.Core
 
 				using (var p2 = ProcessHelper.GetProcessById(p1.Id))
 				{
+					Assert.True(p1.IsRunning, "Process p1 should be running before we stop it");
+					Assert.True(p2.IsRunning, "Process p2 should be running before we stop it");
+
 					var sw = Stopwatch.StartNew();
 					p2.Stop(1000);
 					var elapsed = sw.Elapsed;
 
-					// Stop should have returned after 1 second
-					Assert.Greater(elapsed, TimeSpan.FromSeconds(1));
-
 					// Process gets killed regardless
 					Assert.False(p2.IsRunning, "Process p2 should not be running");
+
+					// Stop should have returned after 1 second
+					Assert.Greater(elapsed, TimeSpan.FromSeconds(1));
 				}
 
 				Assert.False(p1.IsRunning, "Process p1 should not be running");
