@@ -320,8 +320,8 @@ namespace Peach.Pro.Test.Core.Monitors
 				const string pattern = "heap-use-after-free on address 0x61400000fe44 at pc 0x000100001b8f";
 				StringAssert.StartsWith(pattern, data.Title);
 				StringAssert.Contains(pattern, data.Fault.Description);
-				Assert.AreEqual("02133A7E", data.Fault.MajorHash);
-				Assert.AreEqual("9DD19897", data.Fault.MinorHash);
+				Assert.AreEqual(Monitor2.Hash("heap-use-after-free0x61400000fe44"), data.Fault.MajorHash);
+				Assert.AreEqual(Monitor2.Hash("0x61400000fe44"), data.Fault.MinorHash);
 			}
 			else if (Platform.GetOS() == Platform.OS.Linux)
 			{
@@ -330,15 +330,15 @@ namespace Peach.Pro.Test.Core.Monitors
 				{
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					CollectionAssert.Contains(new[] { Monitor2.Hash("0x0000004008b2"), Monitor2.Hash("0x4008b9") }, data.Fault.MajorHash);
-					CollectionAssert.Contains(new[] { Monitor2.Hash("0x61400000fe44"), Monitor2.Hash("0x602e0001fc64") }, data.Fault.MinorHash);
+					Assert.AreEqual(Monitor2.Hash("heap-use-after-free0x61400000fe44"), data.Fault.MajorHash);
+					Assert.AreEqual(Monitor2.Hash("0x61400000fe44"), data.Fault.MinorHash);
 				}
 				else
 				{
 					StringAssert.StartsWith(pattern, data.Title);
 					StringAssert.Contains(pattern, data.Fault.Description);
-					CollectionAssert.Contains(new[] { Monitor2.Hash("0x80486de") }, data.Fault.MajorHash);
-					CollectionAssert.Contains(new[] { Monitor2.Hash("0xb5e03e24") }, data.Fault.MinorHash);
+					Assert.AreEqual(Monitor2.Hash("heap-use-after-free0xb5e03e24"), data.Fault.MajorHash);
+					Assert.AreEqual(Monitor2.Hash("0xb5e03e24"), data.Fault.MinorHash);
 				}
 			}
 		}

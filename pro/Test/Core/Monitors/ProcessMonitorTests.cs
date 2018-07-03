@@ -366,15 +366,15 @@ namespace Peach.Pro.Test.Core.Monitors
 					{
 						StringAssert.StartsWith(pattern, data.Title);
 						StringAssert.Contains(pattern, data.Fault.Description);
-						CollectionAssert.Contains(new[] { Monitor2.Hash("0x0000004008b2"), Monitor2.Hash("0x4008b9") }, data.Fault.MajorHash);
-						CollectionAssert.Contains(new[] { Monitor2.Hash("0x61400000fe44"), Monitor2.Hash("0x602e0001fc64") }, data.Fault.MinorHash);
+						Assert.AreEqual("95B1C204", data.Fault.MajorHash);
+						Assert.AreEqual(Monitor2.Hash("0x61400000fe44"), data.Fault.MinorHash);
 					}
 					else
 					{
 						StringAssert.StartsWith(pattern, data.Title);
 						StringAssert.Contains(pattern, data.Fault.Description);
-						CollectionAssert.Contains(new[] { Monitor2.Hash("0x80486de") }, data.Fault.MajorHash);
-						CollectionAssert.Contains(new[] { Monitor2.Hash("0xb5e03e24") }, data.Fault.MinorHash);
+						Assert.AreEqual(Monitor2.Hash("heap-use-after-free0xb5e03e24"), data.Fault.MajorHash);
+						Assert.AreEqual(Monitor2.Hash("0xb5e03e24"), data.Fault.MinorHash);
 					}
 				}
 			}
@@ -405,7 +405,7 @@ SUMMARY: AddressSanitizer: SEGV /home/peach/bacnet-stack-0.8.3/lib/../src/bacdco
 			Assert.AreEqual("SEGV on unknown address 0x00002f10b7d6 (pc 0x0000004ee255 bp 0x7ffc0abb72d0 sp 0x7ffc0abb72d0 T0)", data.Title);
 			Assert.AreEqual("SEGV", data.Fault.Risk);
 			Assert.AreEqual(example, data.Fault.Description);
-			Assert.AreEqual("EB7CE44C", data.Fault.MajorHash);
+			Assert.AreEqual("A8C2B5C2", data.Fault.MajorHash);
 			Assert.AreEqual("2E409A3D", data.Fault.MinorHash);
 
 		}
