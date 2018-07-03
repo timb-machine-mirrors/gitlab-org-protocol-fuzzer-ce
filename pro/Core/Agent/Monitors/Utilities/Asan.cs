@@ -80,7 +80,7 @@ namespace Peach.Pro.Core.Agent.Monitors.Utilities
 			data.Fault = new MonitorData.Info
 			{
 				Description = stderr.Substring(desc.Index, desc.Length),
-				MajorHash = Monitor2.Hash(bucket.Groups[3].Value),
+				MajorHash = Monitor2.Hash(bucket.Groups[1].Value+ bucket.Groups[2].Value),
 				MinorHash = Monitor2.Hash(bucket.Groups[2].Value),
 				Risk = bucket.Groups[1].Value,
 			};
