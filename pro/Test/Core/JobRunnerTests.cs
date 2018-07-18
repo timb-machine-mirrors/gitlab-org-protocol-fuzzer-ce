@@ -184,7 +184,15 @@ namespace Peach.Pro.Test.Core
 				PitDatabase.SavePitConfig(pitPath, pitConfig);
 
 				if (license == null)
+				{
+					var jobLicense = new Mock<IJobLicense>();
+					jobLicense.Setup(x => x.CanExecuteTestCase())
+						.Returns(true);
+
 					license = new Mock<ILicense>();
+					license.Setup(x => x.NewJob(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+						.Returns(jobLicense.Object);
+				}
 
 				_job = new Job(jobRequest, pitPath);
 				JobRunner = new JobRunner(license.Object, _job, pitLibraryPath, pitPath);
