@@ -54,6 +54,8 @@ namespace Peach.Pro.Test.Core.Agent.Http
 			_routes.Add(HttpServer.PublisherPath + "/stop", "GET", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/Set_Iteration", "POST", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/Set_IsControlIteration", "POST", OnHandler);
+			_routes.Add(HttpServer.PublisherPath + "/Set_IsControlRecordingIteration", "POST", OnHandler);
+			_routes.Add(HttpServer.PublisherPath + "/Set_IsIterationAfterFault", "POST", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/open", "GET", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/close", "GET", OnHandler);
 			_routes.Add(HttpServer.PublisherPath + "/accept", "GET", OnHandler);
