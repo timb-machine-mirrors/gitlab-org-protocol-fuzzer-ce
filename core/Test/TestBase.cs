@@ -20,6 +20,7 @@ namespace Peach.Core.Test
 	public class PeachAttribute : CategoryAttribute { }
 	public class QuickAttribute : CategoryAttribute { }
 	public class SlowAttribute : CategoryAttribute { }
+	public class UnstableAttribute : CategoryAttribute { }
 
 	public class SetUpFixture
 	{
@@ -156,7 +157,7 @@ namespace Peach.Core.Test
 
 				foreach (var attr in type.GetCustomAttributes(true))
 				{
-					if (attr is QuickAttribute || attr is SlowAttribute)
+					if (attr is QuickAttribute || attr is SlowAttribute || attr is UnstableAttribute)
 						goto Found;
 				}
 
