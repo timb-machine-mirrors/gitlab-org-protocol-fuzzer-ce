@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -27,7 +28,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		{
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Ping", faults[0].DetectionSource);
-			Assert.True(titles.Any(x => x == faults[0].Title), "Check fault title");
+			Assert.True(titles.Any(x => Regex.IsMatch(faults[0].Title, x)), "Check fault title was '{0}'",
+				faults[0].Title);
 
 			if (!isFault)
 			{
