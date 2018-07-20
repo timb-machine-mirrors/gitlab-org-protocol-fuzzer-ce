@@ -210,6 +210,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		// NOTE: Running this test multiple times can have side
 		//       affects.
 		[Test]  
+		[Ignore("Unstable")]
 		public void TestTimeout()
 		{
 			long timeout = 3000;

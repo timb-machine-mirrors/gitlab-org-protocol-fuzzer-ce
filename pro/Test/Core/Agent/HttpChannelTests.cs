@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Threading;
 using NUnit.Framework;
@@ -88,6 +89,8 @@ namespace Peach.Pro.Test.Core.Agent
 
 			agentThread.Start();
 			Assert.IsTrue(started.WaitOne(60000));
+
+			Thread.Sleep(5); // Pause to let Agent spin up
 
 			var dom = ParsePit(xml);
 			dom.tests[0].agents[0].location = "http://127.0.0.1:" + server.Uri.Port + "/";
