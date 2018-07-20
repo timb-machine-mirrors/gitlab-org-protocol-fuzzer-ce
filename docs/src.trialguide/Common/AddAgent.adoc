@@ -1,0 +1,14 @@
+===== Configuring Agents
+An Agent runs either in-process of {product} or can be installed and run on a remote machine.
+For this configuration, only a single local agent is required.
+
+. Click *Monitoring*.
+. Click *Add Agent*.
+. Enter a name.  Leave the *Location* setting to the default *local://*.
+. Click *Save*.
+
+image::{images}/local-agent.png[]
+
+For more detailed instructions, see <<AddLocalAgent,Adding a local agent>>.
+
+// end

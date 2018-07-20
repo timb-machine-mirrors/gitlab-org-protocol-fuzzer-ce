@@ -14,67 +14,76 @@ if 'webhelp' in bld.env.supported_features:
 # The following 2 entires generate the Peach Pro doc using outline of v3Q4 update
 # Commnented out while I work on User Guide structuring.
 
-devGuide = bld(
+trialGuide = bld(
 	features = 'asciidoctor-pdf',
-	source = 'src.pro/DevGuide/DevGuide.adoc',
-	images = 'src.pro/images',
-	name = 'Peach_Pro_Developer_Guide.pdf',
-	install_path = '${BINDIR}/sdk/docs',
+	source = 'src.trialguide/TrialGuide/TrialGuide.adoc',
+	images = 'src.trialguide/images',
+	name = 'Peach_Trial_Guide.pdf',
+	install_path = '${BINDIR}/docs',
 	require = '../build/assets/asciidoctor-pdf-extensions.rb',
 )
 
+devGuide = bld(
+ 	features = 'asciidoctor-pdf',
+ 	source = 'src.pro/DevGuide/DevGuide.adoc',
+ 	images = 'src.pro/images',
+ 	name = 'Peach_Pro_Developer_Guide.pdf',
+ 	install_path = '${BINDIR}/sdk/docs',
+ 	require = '../build/assets/asciidoctor-pdf-extensions.rb',
+)
+
 bld(
-	features = 'webhelp',
-	source = 'src.pro/DevGuide/DevGuide.adoc',
-	images = 'src.pro/images',
-	name = 'webhelpDevGuide',
-	install_path = '${BINDIR}/sdk/docs/webhelp',
+ 	features = 'webhelp',
+ 	source = 'src.pro/DevGuide/DevGuide.adoc',
+ 	images = 'src.pro/images',
+ 	name = 'webhelpDevGuide',
+ 	install_path = '${BINDIR}/sdk/docs/webhelp',
 )
 
 # The following 2 entires generate the Peach Pro User Guide doc using (new in 2015)
 userGuide = bld(
 	features = 'asciidoctor-pdf',
 	source = 'src.pro/UserGuide/UserGuide.adoc',
-	images = 'src.pro/images',
-	name = 'Peach_Pro_User_Guide.pdf',
-	install_path = '${BINDIR}/docs',
-	require = '../build/assets/asciidoctor-pdf-extensions.rb',
-	extra_install = '${BINDIR}/docs/publish',
+ 	images = 'src.pro/images',
+ 	name = 'Peach_Pro_User_Guide.pdf',
+ 	install_path = '${BINDIR}/docs',
+ 	require = '../build/assets/asciidoctor-pdf-extensions.rb',
+ 	extra_install = '${BINDIR}/docs/publish',
 )
 
 bld(
-	features = 'webhelp',
-	source = 'src.pro/UserGuide/UserGuide.adoc',
-	images = 'src.pro/images',
-	name = 'webhelpUserGuide',
-	install_path = '${BINDIR}/docs/webhelp',
-)
-
+  	features = 'webhelp',
+  	source = 'src.pro/UserGuide/UserGuide.adoc',
+  	images = 'src.pro/images',
+  	name = 'webhelpUserGuide',
+  	install_path = '${BINDIR}/docs/webhelp',
+  )
+  
 bld(
-	features = 'doxygen',
-	doxyfile = 'apidocs/apidocs.conf',
-	name = 'apidocs',
-	install_path = '${BINDIR}/sdk',
-)
+  	features = 'doxygen',
+  	doxyfile = 'apidocs/apidocs.conf',
+  	name = 'apidocs',
+  	install_path = '${BINDIR}/sdk',
+  )
 
 installGuide = bld(
-	features = 'asciidoctor-pdf',
-	source = 'src.pro/UserGuide/InstallationGuide.adoc',
-	images = 'src.pro/images',
-	name = 'Peach_Pro_Installation_Guide.pdf',
-	install_path = '${BINDIR}/docs',
-	require = '../build/assets/asciidoctor-pdf-extensions.rb',
-	extra_install = '${BINDIR}/docs/publish'
+ 	features = 'asciidoctor-pdf',
+ 	source = 'src.pro/UserGuide/InstallationGuide.adoc',
+ 	images = 'src.pro/images',
+ 	name = 'Peach_Pro_Installation_Guide.pdf',
+ 	install_path = '${BINDIR}/docs',
+ 	require = '../build/assets/asciidoctor-pdf-extensions.rb',
+ 	extra_install = '${BINDIR}/docs/publish'
 )
-
+ 
 whatsNew = bld(
-	features = 'asciidoctor-pdf',
-	source = 'src.pro/UserGuide/WhatsNew.adoc',
-	images = 'src.pro/images',
-	name = 'Peach_Pro_Changes.pdf',
-	install_path = '${BINDIR}/docs',
-	require = '../build/assets/asciidoctor-pdf-extensions.rb',
-	extra_install = '${BINDIR}/docs/publish',
+ 	features = 'asciidoctor-pdf',
+ 	source = 'src.pro/UserGuide/WhatsNew.adoc',
+ 	images = 'src.pro/images',
+ 	name = 'Peach_Pro_Changes.pdf',
+ 	install_path = '${BINDIR}/docs',
+ 	require = '../build/assets/asciidoctor-pdf-extensions.rb',
+ 	extra_install = '${BINDIR}/docs/publish',
 )
 
 check_sources_list = [
@@ -82,6 +91,7 @@ check_sources_list = [
 	userGuide,
 	installGuide,
 	whatsNew,
+    trialGuide,
 ]
 
 def check_sources(ctx, tgs):
