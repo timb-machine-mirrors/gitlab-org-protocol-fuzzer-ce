@@ -33,7 +33,8 @@ def kill(pid):
 
 def dotnet(cmd, newpg=True):
 	if sys.platform != 'win32':
-		cmd.insert(0, 'mono --debug')
+		cmd.insert(0, 'mono')
+		cmd.insert(1, '--debug')
 		if newpg:
 			cmd.insert(0, trampoline)
 			cmd.insert(0, 'python')
