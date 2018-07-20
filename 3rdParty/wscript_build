@@ -23,7 +23,7 @@ bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
 if bld.env.CS_NAME != 'csc':
 	bld.read_csshlib('System.Data.SQLite.dll', paths=['System.Data.SQLite.Mono.1.0.98.1'])
 
-nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.2.1/tools')
+nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.8.0/tools')
 
 bld(
 	name='nunit-console',
