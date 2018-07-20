@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Agent;
@@ -18,9 +21,15 @@ namespace Peach.Pro.Test.Core.Monitors
 
 		private static void Verify(MonitorData[] faults, string title, bool isFault)
 		{
+			Verify(faults, new[] {title}, isFault);
+		}
+
+		private static void Verify(MonitorData[] faults, string[] titles, bool isFault)
+		{
 			Assert.AreEqual(1, faults.Length);
 			Assert.AreEqual("Ping", faults[0].DetectionSource);
-			StringAssert.IsMatch(title, faults[0].Title);
+			Assert.True(titles.Any(x => Regex.IsMatch(faults[0].Title, x)), "Check fault title was '{0}'",
+				faults[0].Title);
 
 			if (!isFault)
 			{
@@ -86,7 +95,11 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
-			Verify(faults, "The ICMP echo reply was not received within the allotted time.", true);
+			Verify(faults, new []
+			{
+				"The ICMP echo reply was not received within the allotted time.",
+				"The ICMP echo request failed because the network that contains the destination computer is not reachable."
+			}, true);
 		}
 
 		[Test]
@@ -159,7 +172,11 @@ namespace Peach.Pro.Test.Core.Monitors
 
 			var faults = runner.Run();
 
-			Verify(faults, "The ICMP echo reply was not received within the allotted time.", false);
+			Verify(faults, new []
+			{
+				"The ICMP echo reply was not received within the allotted time.",
+				"The ICMP echo request failed because the network that contains the destination computer is not reachable."
+			}, false);
 		}
 
 		[Test]
