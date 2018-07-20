@@ -137,7 +137,7 @@ namespace Peach.Pro.Test.Core.Agent
 			Assert.AreEqual("Fault detected on control recording iteration.", pe.Message);
 			Assert.AreEqual(1, faults.Count);
 			Assert.AreEqual(FaultType.Fault, faults[0].type);
-			Assert.That(faults[0].title, Is.StringStarting("Process output matched FaulOnRegex"));
+			Assert.That(faults[0].title, Does.StartWith("Process output matched FaulOnRegex"));
 			Assert.AreEqual(2, faults[0].collectedData.Count);
 
 			var d0 = faults[0].collectedData[0];
