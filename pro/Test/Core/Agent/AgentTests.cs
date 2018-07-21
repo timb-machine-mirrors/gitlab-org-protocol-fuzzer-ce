@@ -19,7 +19,7 @@ using SysProcess = System.Diagnostics.Process;
 namespace Peach.Pro.Test.Core.Agent
 {
 	[TestFixture]
-	[Quick]
+	[Unstable]
 	[Peach]
 	public class AgentTests
 	{
