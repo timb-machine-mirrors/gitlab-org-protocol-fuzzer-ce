@@ -689,6 +689,7 @@ namespace Peach.Pro.Test.Core.Publishers
 		}
 
 		[Test]
+		[Retry(10)]
 		public void TestSendTimeout()
 		{
 			var listener = new TcpListener(IPAddress.Loopback, 0);
