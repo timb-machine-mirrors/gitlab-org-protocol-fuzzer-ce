@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NLog;
 
 namespace Peach.Core.Publishers.Can
@@ -30,6 +27,10 @@ namespace Peach.Core.Publishers.Can
 		private Thread _notifyThread;
 		private readonly Object _lock = new Object();
 
+		private bool _isCapturing = false;
+		private readonly Object _lockCapturing = new Object();
+		private readonly List<CanFrame> _capture = new List<CanFrame>();
+
 		#region ICanDriver
 
 		public abstract string Name { get; }
@@ -44,10 +45,24 @@ namespace Peach.Core.Publishers.Can
 		public abstract IEnumerable<ICanChannel> Channels { get; }
 		public abstract bool IsOpen { get; protected set; }
 
+		public IEnumerable<CanFrame> Capture
+		{
+			get
+			{
+				lock (_lockCapturing)
+				{
+					return _capture.ToArray();
+				}
+			}
+		}
+
 		public void Open()
 		{
 			lock (_lock)
 			{
+				StopCapture();
+				ClearCapture();
+
 				if (_notifyThread == null)
 				{
 					_notifyThread = new Thread(() =>
@@ -64,6 +79,14 @@ namespace Peach.Core.Publishers.Can
 							lock (handlers)
 							{
 								handlers.ForEach(x => x(this, msg));
+							}
+
+							if (_isCapturing && msg.Channel.Capturing)
+							{
+								lock (_lockCapturing)
+								{
+									_capture.Add(msg);
+								}
 							}
 						}
 					});
@@ -118,6 +141,9 @@ namespace Peach.Core.Publishers.Can
 					Logger.Trace("Not closing can driver, open count is {0}", _openCount);
 				}
 			}
+
+			StopCapture();
+			ClearCapture();
 		}
 
 		/// <summary>
@@ -146,6 +172,24 @@ namespace Peach.Core.Publishers.Can
 			return null;
 		}
 
+		public void StartCapture()
+		{
+			_isCapturing = true;
+		}
+
+		public void StopCapture()
+		{
+			_isCapturing = false;
+		}
+
+		public void ClearCapture()
+		{
+			lock (_lockCapturing)
+			{
+				_capture.Clear();
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -168,6 +212,13 @@ namespace Peach.Core.Publishers.Can
 		{
 			_notifyQueue.Add(msg);
 			_rxFrameQueue.Enqueue(msg);
+			if (_isCapturing)
+			{
+				lock (_lockCapturing)
+				{
+					_capture.Add(msg);
+				}
+			}
 		}
 
 		/// <inheritdoc />

@@ -30,6 +30,7 @@
     {
       "Name": "Data Collection",
       "Items": [
+        "CanCapture",
         "Memory",
         "NetworkCapture",
         "RunCommand",
@@ -200,6 +201,16 @@
         "Items": [
           "When",
           "StartOnCall"
+        ]
+      }
+    ],
+    "CanCapture": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
         ]
       }
     ],
