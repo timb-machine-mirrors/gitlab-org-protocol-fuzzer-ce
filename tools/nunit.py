@@ -208,10 +208,14 @@ def main():
 
 	xml_root = ET.parse(tmp.name).getroot()
 
+	print "--- running tests ---"
 	for asm in xml_root.findall('test-suite[@type="Assembly"]'):
 		path = asm.attrib['fullname']
 
+		print "Assembly:", path
+
 		for fixture in asm.findall('.//test-suite[@type="TestFixture"]'):
+			print "   Fixure:", fixture
 			run_nunit(args, path, fixture, outdir)
 
 if __name__ == "__main__":
