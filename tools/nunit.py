@@ -34,7 +34,7 @@ def kill(pid):
 def dotnet(cmd, newpg=True):
 	if sys.platform != 'win32':
 		cmd.insert(0, 'mono')
-		#cmd.insert(1, '--debug')
+		cmd.insert(1, '--debug')
 		if newpg:
 			cmd.insert(0, trampoline)
 			cmd.insert(0, 'python')
@@ -95,7 +95,8 @@ def run_nunit(args, asm, fixture, outdir):
 		nunit,
 		'--workers=1',
 		'--labels=All',
-		"--where:%s" % category_filter(args.include),
+		'--where',
+		"%s" % category_filter(args.include),
 		'--result=%s' % result,
 		asm,
 		'--test=%s' % test,
@@ -106,6 +107,7 @@ def run_nunit(args, asm, fixture, outdir):
 
 	start = time.time()
 	status = dict(aborted=None)
+	print "cmd:",cmd
 	proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
 	def on_inactive():
@@ -197,9 +199,11 @@ def main():
 		explore = dotnet([
 			nunit,
 			'--explore=%s' % tmp.name,
-			"--where:%s" % category_filter(args.include),
+			"--where",
+			"%s" % category_filter(args.include),
 		], newpg=False) + args.input
 
+	print "explore:",explore
 	subprocess.check_call(explore)
 
 	xml_root = ET.parse(tmp.name).getroot()
