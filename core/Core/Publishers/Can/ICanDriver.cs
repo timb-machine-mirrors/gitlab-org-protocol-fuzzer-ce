@@ -136,6 +136,22 @@ namespace Peach.Core.Publishers.Can
 		IEnumerable<CanFrame> Capture { get; }
 
 		/// <summary>
+		/// Monitors register frame id's being monitored.
+		/// </summary>
+		/// <remarks>
+		/// This allows validation that we are not fuzzing the same id's
+		/// causing the monitors themselves to be fuzzed.
+		/// </remarks>
+		Dictionary<uint,string> MonitorFrameIds { get; }
+
+		/// <summary>
+		/// Validate a transmit frame id hasn't been registered by a monitor.
+		/// Throws an exception if it has been.
+		/// </summary>
+		/// <param name="id">Frame ID to check</param>
+		void ValidateTxId(uint id);
+
+		/// <summary>
 		/// Is interface in open state?  
 		/// </summary>
 		bool IsOpen { get; }

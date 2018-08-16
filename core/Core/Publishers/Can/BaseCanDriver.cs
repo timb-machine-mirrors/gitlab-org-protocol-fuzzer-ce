@@ -44,6 +44,24 @@ namespace Peach.Core.Publishers.Can
 		public abstract ICanDriver Driver { get; }
 		public abstract IEnumerable<ICanChannel> Channels { get; }
 		public abstract bool IsOpen { get; protected set; }
+		public Dictionary<uint,string> MonitorFrameIds { get; }
+
+		protected BaseCanDriver()
+		{
+			MonitorFrameIds = new Dictionary<uint, string>();
+		}
+
+		public void ValidateTxId(uint id)
+		{
+			if (!MonitorFrameIds.ContainsKey(id))
+				return;
+
+			var msg = string.Format("Error, monitor '{0}' configured with frame ID matching fuzzed frame ID '0x{1:X}'.",
+				MonitorFrameIds[id], id);
+
+			Logger.Error(msg);
+			throw new SoftException(msg);
+		}
 
 		public IEnumerable<CanFrame> Capture
 		{
@@ -131,6 +149,8 @@ namespace Peach.Core.Publishers.Can
 					_notifyThread = null;
 
 					_canFrameReceivedHandlers.Clear();
+
+					MonitorFrameIds.Clear();
 				}
 				else if (_openCount < 0)
 				{
