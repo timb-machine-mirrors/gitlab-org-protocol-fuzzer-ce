@@ -3,6 +3,7 @@
     {
       "Name": "Fault Detection",
       "Items": [
+        "CanErrorFrame",
         "CanTiming",
         "CanThreshold",
         "CrashReporter",
@@ -205,6 +206,16 @@
       }
     ],
     "CanCapture": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      }
+    ],
+    "CanErrorFrame": [
       {
         "Name": "Interface Parameters",
         "Items": [

@@ -167,6 +167,18 @@ namespace Peach.Core.Publishers.Can
 		void Close();
 
 		/// <summary>
+		/// Register a handler to receive CAN frame with error flag set
+		/// </summary>
+		/// <param name="handler">Handler method</param>
+		void RegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler);
+
+		/// <summary>
+		/// Un-register a CAN Frame Error Received handler
+		/// </summary>
+		/// <param name="handler">Handler method</param>
+		void UnRegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler);
+
+		/// <summary>
 		/// Register a CAN Frame Received handler with an CAN Frame ID filter.
 		/// </summary>
 		/// <param name="id">CAN Frame IDs</param>

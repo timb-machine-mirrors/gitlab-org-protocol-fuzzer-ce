@@ -19,6 +19,8 @@ namespace Peach.Core.Publishers.Can
 		/// </summary>
 		private readonly ConcurrentDictionary<uint, HashSet<CanRxEventHandler>> _canFrameReceivedHandlers = new ConcurrentDictionary<uint, HashSet<CanRxEventHandler>>();
 
+		private readonly HashSet<CanRxEventHandler> _canFrameErrorReceivedHandlers = new HashSet<CanRxEventHandler>();
+
 		private readonly BlockingCollection<CanFrame> _notifyQueue = new BlockingCollection<CanFrame>(new ConcurrentQueue<CanFrame>());
 		private readonly ConcurrentQueue<CanFrame> _rxFrameQueue = new ConcurrentQueue<CanFrame>();
 		private readonly ConcurrentQueue<Tuple<DateTime, string, Exception>> _rxLogQueue = new ConcurrentQueue<Tuple<DateTime,string, Exception>>();
@@ -91,6 +93,8 @@ namespace Peach.Core.Publishers.Can
 						{
 							var msg = _notifyQueue.Take();
 
+							// Notify interested parties based on id filter
+
 							if (!_canFrameReceivedHandlers.TryGetValue(msg.Identifier, out handlers))
 								continue;
 
@@ -98,6 +102,18 @@ namespace Peach.Core.Publishers.Can
 							{
 								handlers.ForEach(x => x(this, msg));
 							}
+
+							// If frame has error flag set, notify interested parties
+
+							if (msg.IsError)
+							{
+								lock (_canFrameErrorReceivedHandlers)
+								{
+									_canFrameErrorReceivedHandlers.ForEach(x => x(this, msg));
+								}
+							}
+
+							// If we are capturing, add to captured frames
 
 							if (_isCapturing && msg.Channel.Capturing)
 							{
@@ -238,6 +254,24 @@ namespace Peach.Core.Publishers.Can
 				{
 					_capture.Add(msg);
 				}
+			}
+		}
+
+		/// <inheritdoc />
+		public void RegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler)
+		{
+			lock (_canFrameErrorReceivedHandlers)
+			{
+				_canFrameErrorReceivedHandlers.Add(handler);
+			}
+		}
+
+		/// <inheritdoc />
+		public void UnRegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler)
+		{
+			lock (_canFrameErrorReceivedHandlers)
+			{
+				_canFrameErrorReceivedHandlers.Remove(handler);
 			}
 		}
 
