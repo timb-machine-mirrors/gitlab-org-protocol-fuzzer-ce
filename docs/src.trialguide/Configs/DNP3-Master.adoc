@@ -18,8 +18,15 @@ The basic configuration is compiled only with the Debug option.
 The advanced configuration is compiled with Address Sanitizer, Debug, and Optimization Level 1.
 endif::[]
 
+ifndef::hosted[]
+NOTE: This pit configuration requires that {targetapp} be able to communicate from the target VM back to the host operating system where {product} is running.  
+As a result, the GDB or Process monitor will be configured to pass your host operating system's IP address as an argument.
+endif::[]
+
+ifdef::hosted[]
 [[DNP3-Master-RunTest]]
 include::../Common/RunTest.adoc[]
+endif::[]
 
 include::../Common/ConfigTest.adoc[]
 
@@ -29,7 +36,7 @@ The first thing you need to configure are the variables that control how {produc
 ifdef::advnacedconfigname[]
 Both the Basic and Advanced configuration will use the same variables with the same values.
 endif::[]
-Follow these steps to create a working configuration on your trial insance:
+Follow these steps to create a working configuration on your trial instance:
 
 . Click *Configure Variables*.
 . Configure your variables as appropriate for your application.  The following
@@ -48,6 +55,9 @@ include::../Common/AddAgent.adoc[]
 
 :configtype: basic
 :compileroptions: Debug enabled
+ifndef::hosted[]
+:args: the IP address of the Host operating system, e.g. 10.0.1.127
+endif::[]
 :gdb:
 :pcap: port ##TargetPort##
 
@@ -67,9 +77,15 @@ include::../Common/ConfigMonitors.adoc[]
 :configtype!:
 :asanwarn!:
 :compileroptions!:
+:args!:
 
 include::../Common/TestConfig.adoc[]
 Follow the steps under <<DNP3-Master, Running the test>> to start testing the application.
+
+ifndef::hosted[]
+[[DNP3-Master-RunTest]]
+include::../Common/RunTest.adoc[]
+endif::[]
 
 :targetapp!: 
 :protocol!: 

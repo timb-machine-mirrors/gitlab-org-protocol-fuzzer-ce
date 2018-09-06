@@ -17,8 +17,11 @@ NOTE: {targetapp} is a Java application, so testing this is slightly
 different than what might be done for an application written in a non-managed 
 language in terms of the monitors that are used.
 
+ifdef::hosted[]
 [[DICOM-run]]
 include::../Common/RunTest.adoc[]
+
+endif::[]
 
 include::../Common/ConfigTest.adoc[]
 
@@ -30,7 +33,12 @@ Follow these steps to create a working configuration on your trial instance:
 . Click *Configure Variables*.
 . Configure your variables as appropriate for your application.  The following
 should be used for {targetapp} running on the trial instance:
+ifdef::hosted[]
 .. Target IPv4 Address: set to *127.0.0.1* since that is what {targetapp} is configured to listen on
+endif::[]
+ifndef::hosted[]
+.. Target IPv4 Address: set to the IP address of the target VM, since that is what {targetapp} is configured to listen on
+endif::[]
 .. Target Port: set to *6662*.  {targetapp} has a {protocol} configuration already present that uses this port
 .. Source Application Entity Title: Leave the default *FUZZERSCU*.  {targetapp} is configured to allow connections that use this application entity title.
 .. Target Application Entity Title: Leave the default *TARGET*.  {targetapp} is configured to have this Application Entity Title
@@ -78,7 +86,12 @@ This is the best way to detect faults for this particular Java application
 +
 image:{images}/DICOM-syslog-monitor.png[]
 . Click *Add Monitor*.  In the pop-up, scroll down and select *Network Capture* under the *Data Collection* section.  Click *Ok*.
+ifdef::hosted[]
 . Under *Device*, enter *lo* (for loopback, since {targetapp} is listening on the loopback interface)
+endif::[]
+ifndef::hosted[]
+. Under *Device*, enter *eth0* (on the target vm, {targetapp} is listening on the eth0 interface)
+endif::[]
 . Under *Filter*, enter *port ##TargetPort##* to capture all traffic going to or from the port you specified when you configured the variables in the previous section.
 . Click *Save*.
 +
@@ -87,6 +100,11 @@ image:{images}/DICOM-network-capture-monitor.png[]
 include::../Common/TestConfig.adoc[]
 Follow the steps under <<DICOM-run, Running the test>> to start testing the application.
 
+ifndef::hosted[]
+[[DICOM-run]]
+include::../Common/RunTest.adoc[]
+
+endif::[]
 :startcase!:
 
 // end

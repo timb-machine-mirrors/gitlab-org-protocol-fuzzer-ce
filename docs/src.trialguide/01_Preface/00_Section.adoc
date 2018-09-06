@@ -16,12 +16,19 @@ This should give the user an overview of the capabilities of
 
 After reading this document, you should be able to accomplish the following:
 
+ifdef::hosted[]
 . Access your trial instance of {product}
+endif::[]
+ifndef::hosted[]
+. Create configurations for each pit in your trial for the applications on the target VM.
+endif::[]
 . Run tests against several target applications with {product}
 . View the results of a test run to see the vulnerabilities that were found and the data was gathered
 . Understand how {product} is configured to test various applications based on the nature of the application
 . Understand why the configurations have the specific settings and Monitors that they do and how those settings relate to the specifics of the application they are testing
+ifdef::hosted[]
 . (Optional) Create a new configuration to test one of the existing applications that exist on your trial instance
+endif::[]
 
 [[Non-Goals]]
 === Non-Goals
@@ -79,6 +86,12 @@ the debugger will detect.  The Process Monitor is therefore used instead, as it
 will recognize that ASan has terminated the process for some reason and can gather
 information from the ASan output in the report for the fault on that particular iteration.
 
+ifdef::hosted[]
 include::01_Access.adoc[]
+endif::[]
+
+ifndef::hosted[]
+include::02_TargetVM.adoc[]
+endif::[]
 
 // end

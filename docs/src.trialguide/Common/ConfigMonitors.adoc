@@ -130,11 +130,21 @@ image:{images}/runcommand-oniterationstart.png[]
 endif::[]
 ifdef::pcap[]
 . Click *Add Monitor*.  In the pop-up, scroll down and select *Network Capture* under the *Data Collection* section.  Click *Ok*.
+ifdef::hosted[]
 . Under *Device*, enter *lo* (for loopback, since {targetapp} is listening on the loopback interface)
+endif::[]
+ifndef::hosted[]
+. Under *Device*, enter *eth0* ({targetapp} is listening on the target VM's eth0 interface)
+endif::[]
 . Under *Filter*, enter *{pcap}* to capture all traffic going to or from the port you specified when you configured the variables in the previous section.
 . Click *Save*.
 +
+ifdef::hosted[]
 image:{images}/{pitname}/network-capture-monitor.png[]
+endif::[]
+ifndef::hosted[]
+image:{images}/{pitname}/network-capture-monitor-client.png[]
+endif::[]
 endif::[]
 ifdef::syslog[]
 . Click *Add Monitor*.  In the pop-up, scroll down and select *Syslog*.  Click *Ok*.

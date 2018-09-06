@@ -1,8 +1,16 @@
 :product: Peach Fuzzer
 
-= {product}: Trial Guide
+ifdef::hosted[]
+= {product}: Hosted Trial Guide
+endif::[]
+
+ifndef::hosted[]
+= {product}: Client-led Trial Guide
+endif::[]
+
 Peach Tech
 v{BUILDTAG}
+
 :company: Peach Tech
 :doctype: book
 :compat-mode:
