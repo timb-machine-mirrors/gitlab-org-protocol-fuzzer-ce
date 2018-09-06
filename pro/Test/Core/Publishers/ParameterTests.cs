@@ -416,6 +416,17 @@ namespace Peach.Pro.Test.Core.Publishers
 			public string _ref { get; set; }
 		}
 
+		[Test]
+		public void TestHexInts()
+		{
+			var obj = new NullTest();
+			var args = new Dictionary<string, Variant>();
+			args["num"] = new Variant("0x1ff");
+
+			ParameterParser.Parse(obj, args);
+
+			Assert.AreEqual(0x1ff, obj.num);
+		}
 
 		[Test]
 		public void TestUnderscore()
