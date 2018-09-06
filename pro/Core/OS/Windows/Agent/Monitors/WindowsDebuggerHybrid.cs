@@ -130,24 +130,6 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 
 		public override void IterationFinished()
 		{
-			if (_debugger == null)
-				return;
-
-			if (!_stopMessage && FaultOnEarlyExit && !_debugger.IsRunning)
-			{
-				_exitEarly = true;
-			}
-			else if (StartOnCall != null)
-			{
-				if (NoCpuKill)
-					_exitTimeout = !_debugger.WaitForExit(WaitForExitTimeout);
-				else
-					_debugger.WaitForIdle(WaitForExitTimeout, CpuPollInterval);
-			}
-			else if (RestartOnEachTest)
-			{
-				_debugger.WaitForExit(0);
-			}
 		}
 
 		public override void Message(string msg)
@@ -170,34 +152,55 @@ namespace Peach.Pro.Core.OS.Windows.Agent.Monitors
 		{
 			Logger.Trace("DetectedFault()");
 
+			// Moved from Iteration finished to push exit
+			// check into detected fault.
+			if (_debugger != null)
+			{
+				if (!_stopMessage && FaultOnEarlyExit && !_debugger.IsRunning)
+				{
+					_exitEarly = true;
+				}
+				else if (StartOnCall != null)
+				{
+					if (NoCpuKill)
+						_exitTimeout = !_debugger.WaitForExit(WaitForExitTimeout);
+					else
+						_debugger.WaitForIdle(WaitForExitTimeout, CpuPollInterval);
+				}
+				else if (RestartOnEachTest)
+				{
+					_debugger.WaitForExit(0);
+				}
+			}
+
 			_fault = null;
 
 			if (_debugger != null)
 			{
-				Logger.Debug("DetectedFault - Using {0}, checking for fault", _debugger.Name);
+				Logger.Debug("Using {0}, checking for fault", _debugger.Name);
 
 				if (_debugger.DetectedFault)
 				{
-					Logger.Debug("DetectedFault - Caught fault with {0}", _debugger.Name);
+					Logger.Info("Caught fault with {0}", _debugger.Name);
 					return true;
 				}
 			}
 
 			if (_exitEarly)
 			{
-				Logger.Debug("DetectedFault() - Fault detected, process exited early");
+				Logger.Info("Fault detected, process exited early");
 				_fault = GetGeneralFault("ExitedEarly", "Process exited early.");
 			}
 			else if (_exitTimeout)
 			{
-				Logger.Debug("DetectedFault() - Fault detected, timed out waiting for process to exit");
+				Logger.Info("Fault detected, timed out waiting for process to exit");
 				_fault = GetGeneralFault("FailedToExit", "Process did not exit in " + WaitForExitTimeout + "ms.");
 			}
 
 			if (_fault != null)
 				return true;
 
-			Logger.Debug("DetectedFault() - No fault detected");
+			Logger.Trace("No fault detected");
 			return false;
 		}
 

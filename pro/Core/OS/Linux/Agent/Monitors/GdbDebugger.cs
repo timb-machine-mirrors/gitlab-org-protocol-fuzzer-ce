@@ -247,10 +247,28 @@ quit
 
 		public override bool DetectedFault()
 		{
+			if (!_messageExit && FaultOnEarlyExit && !_gdb.IsRunning)
+			{
+				_Stop(); // Stop 1st so stdout/stderr logs are closed
+				_fault = MakeFault("ExitedEarly", "Process exited early.");
+			}
+			else if (StartOnCall != null)
+			{
+				if (!NoCpuKill)
+					_inferior.WaitForIdle(WaitForExitTimeout);
+				else
+					_inferior.WaitForExit(WaitForExitTimeout);
+				_gdb.Stop(WaitForExitTimeout);
+			}
+			else if (RestartOnEachTest)
+			{
+				_Stop();
+			}
+
 			if (!File.Exists(_gdbLog))
 				return _fault != null;
 
-			logger.Info("DetectedFault - Caught fault with gdb");
+			logger.Info("Caught fault with gdb");
 
 			_Stop();
 
@@ -351,23 +369,6 @@ quit
 
 		public override void IterationFinished()
 		{
-			if (!_messageExit && FaultOnEarlyExit && !_gdb.IsRunning)
-			{
-				_Stop(); // Stop 1st so stdout/stderr logs are closed
-				_fault = MakeFault("ExitedEarly", "Process exited early.");
-			}
-			else if (StartOnCall != null)
-			{
-				if (!NoCpuKill)
-					_inferior.WaitForIdle(WaitForExitTimeout);
-				else
-					_inferior.WaitForExit(WaitForExitTimeout);
-				_gdb.Stop(WaitForExitTimeout);
-			}
-			else if (RestartOnEachTest)
-			{
-				_Stop();
-			}
 		}
 
 		public override void Message(string msg)
