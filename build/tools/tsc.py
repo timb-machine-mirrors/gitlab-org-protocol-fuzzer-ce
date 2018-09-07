@@ -10,6 +10,10 @@ def configure(conf):
 	v['TSC_FLAGS'] = [ '--target', 'ES5', '--module', 'amd', '--removeComments', '--sourcemap' ]
 
 	conf.find_program('tsc')
+	
+	# Hack for mike
+	if os.path.isfile('c:/Users/mike/AppData/Roaming/npm/tsc.cmd'):
+		v['TSC'][0] = 'c:/Users/mike/AppData/Roaming/npm/tsc.cmd'
 
 	cmd = v['TSC'] + ['--version']
 	out, err = conf.cmd_and_log(cmd, output=0)
@@ -19,7 +23,7 @@ def configure(conf):
 	if match:
 		kw = match.groupdict()
 		if int(kw['major']) < 1 or (int(kw['major']) == 1 and int(kw['minor']) < 6):
-			raise Errors.WafError('Wrong version for tsc. Expecting 1.6+, got: %(major)s.%(minor)s.%(patch)s' % kw) 
+			raise Errors.WafError('Wrong version for tsc. Expecting 1.6+, got: %(major)s.%(minor)s.%(patch)s' % kw)
 	else:
 		raise Errors.WafError('Could not determine version for tsc.')
 
@@ -56,7 +60,7 @@ def parse_tsc(self):
 
 	seen = []
 	to_see = [self.inputs[0]]
-	basedir = self.inputs[0].get_src().parent;
+	basedir = self.inputs[0].get_src().parent
 
 	# Find dependencies
 	while to_see:

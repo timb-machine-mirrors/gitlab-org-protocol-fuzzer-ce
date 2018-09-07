@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Linq;
@@ -465,6 +466,7 @@ namespace Peach.Core
 			bool firstRun = true;
 			bool controlAfterRepro = false;
 			bool reproducedFault = false;
+			bool isReplayJump = false;
 
 			// First iteration is always a control/recording iteration
 			context.controlIteration = true;
@@ -520,10 +522,20 @@ namespace Peach.Core
 					}
 
 					// Record if the last iteration had a fault
-					context.FaultOnPreviousIteration = context.faults.Count > 0;
+					// Or if we are starting a new replay window and we want the
+					// monitors to restart the target environment
+					context.FaultOnPreviousIteration = context.faults.Count > 0 || isReplayJump;
 
 					// Make sure we are not hanging on to old faults.
 					context.faults.Clear();
+
+					isReplayJump = false;
+
+					// For session lifetime targets, if we faulted on the previous
+					// iteration we expect to be running a control iteration to
+					// verify the monitors properly restarted the target
+					if (context.test.TargetLifetime == Test.Lifetime.Session && context.FaultOnPreviousIteration)
+						Debug.Assert(context.controlIteration);
 
 					try
 					{
@@ -775,7 +787,11 @@ namespace Peach.Core
 							}
 							else
 							if ((context.test.controlIteration == 0 && iterationCount == context.reproducingInitialIteration) ||
-								(context.controlIteration && iterationCount == context.reproducingInitialIteration && (context.reproducingControlIteration ^ controlAfterRepro)))
+								(
+									context.controlIteration && iterationCount == context.reproducingInitialIteration && 
+								    (context.reproducingControlIteration ^ controlAfterRepro)
+								 )
+							    )
 							{
 								var maxJump = Math.Min(test.MaxBackSearch, context.reproducingInitialIteration - lastReproFault - 1);
 
@@ -807,16 +823,25 @@ namespace Peach.Core
 								else
 								{
 									if (context.reproducingIterationJumpCount == 0)
+									{
 										context.reproducingIterationJumpCount = 10;
+										isReplayJump = !context.reproducingControlIteration;
+									}
 									else
+									{
 										context.reproducingIterationJumpCount *= 2;
+										isReplayJump = true;
+									}
 
 									var delta = Math.Min(maxJump, context.reproducingIterationJumpCount);
 									context.reproducingIterationJumpCount = delta;
 									iterationCount = context.reproducingInitialIteration - delta - 1;
 									controlAfterRepro = false;
 
-									context.controlIteration = false;
+									if (isReplayJump)
+										++iterationCount;
+
+									context.controlIteration = isReplayJump;
 									context.controlRecordingIteration = false;
 
 									logger.Debug("runTest: Moving backwards {0} iterations to reproduce fault.", delta);
@@ -854,6 +879,11 @@ namespace Peach.Core
 								{
 									context.controlIteration = true;
 									controlAfterRepro = true;
+								}
+								else if (context.controlIteration)
+								{
+									context.controlIteration = false;
+									--iterationCount;
 								}
 							}
 							else
