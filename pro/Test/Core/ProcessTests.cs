@@ -54,6 +54,7 @@ namespace Peach.Pro.Test.Core
 		}
 
 		[Test]
+		[Ignore("Not reliable")]
 		public void AttachedDispose()
 		{
 			// Attached processes (non-owned) should not be stopped during Dispose()

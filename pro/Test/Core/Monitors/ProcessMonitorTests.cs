@@ -377,9 +377,15 @@ namespace Peach.Pro.Test.Core.Monitors
 					{
 						StringAssert.StartsWith(pattern, data.Title);
 						StringAssert.Contains(pattern, data.Fault.Description);
-						Assert.AreEqual(Monitor2.Hash("heap-use-after-free0xb5e03e24"), data.Fault.MajorHash,
+
+						CollectionAssert.Contains(
+							new [] { Monitor2.Hash("heap-use-after-free0xb5d03e24"), Monitor2.Hash("heap-use-after-free0xb5e03e24")},
+							data.Fault.MajorHash,
 							"MajorHash: "+data.Fault.Description);
-						Assert.AreEqual(Monitor2.Hash("0xb5e03e24"), data.Fault.MinorHash,
+
+						CollectionAssert.Contains(
+							new [] { Monitor2.Hash("0xb5d03e24"), Monitor2.Hash("0xb5e03e24")},
+							 data.Fault.MinorHash,
 							"MinorHash: "+data.Fault.Description);
 					}
 				}
