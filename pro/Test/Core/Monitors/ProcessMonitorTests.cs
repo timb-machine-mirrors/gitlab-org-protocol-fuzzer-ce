@@ -58,7 +58,7 @@ namespace Peach.Pro.Test.Core.Monitors
 			Assert.AreEqual(0, faults.Length);
 
 			Assert.GreaterOrEqual(sw.Elapsed.TotalSeconds, 1.9);
-			Assert.LessOrEqual(sw.Elapsed.TotalSeconds, 2.1);
+			Assert.LessOrEqual(sw.Elapsed.TotalSeconds, 5);
 		}
 
 		[Test]

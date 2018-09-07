@@ -743,6 +743,7 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
+		[Retry(5)]
 		public void TestFaultFile()
 		{
 			const string xml = @"

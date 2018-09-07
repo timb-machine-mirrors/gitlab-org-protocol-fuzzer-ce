@@ -547,7 +547,7 @@ namespace Peach.Pro.Test.Core
 			for (var i = 0; i < times.Count; ++i)
 			{
 				Assert.GreaterOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] - 20));
-				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] + 50));
+				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] * 2));
 			}
 		}
 
