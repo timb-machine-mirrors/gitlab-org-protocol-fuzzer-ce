@@ -95,7 +95,8 @@ def run_nunit(args, asm, fixture, outdir):
 		nunit,
 		'--workers=1',
 		'--labels=All',
-		"--where:%s" % category_filter(args.include),
+		'--where',
+		"%s" % category_filter(args.include),
 		'--result=%s' % result,
 		asm,
 		'--test=%s' % test,
@@ -106,6 +107,7 @@ def run_nunit(args, asm, fixture, outdir):
 
 	start = time.time()
 	status = dict(aborted=None)
+	print "cmd:",cmd
 	proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
 	def on_inactive():
@@ -197,17 +199,23 @@ def main():
 		explore = dotnet([
 			nunit,
 			'--explore=%s' % tmp.name,
-			"--where:%s" % category_filter(args.include),
+			"--where",
+			"%s" % category_filter(args.include),
 		], newpg=False) + args.input
 
+	print "explore:",explore
 	subprocess.check_call(explore)
 
 	xml_root = ET.parse(tmp.name).getroot()
 
+	print "--- running tests ---"
 	for asm in xml_root.findall('test-suite[@type="Assembly"]'):
 		path = asm.attrib['fullname']
 
+		print "Assembly:", path
+
 		for fixture in asm.findall('.//test-suite[@type="TestFixture"]'):
+			print "   Fixure:", fixture
 			run_nunit(args, path, fixture, outdir)
 
 if __name__ == "__main__":

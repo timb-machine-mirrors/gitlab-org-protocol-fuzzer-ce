@@ -121,6 +121,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 		}
 
 		[Test]
+		[Ignore("Not reliable")]
 		public void TestCpuKill()
 		{
 			var args = new Dictionary<string, string>() {
