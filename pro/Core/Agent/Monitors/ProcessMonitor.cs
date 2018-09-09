@@ -20,7 +20,7 @@ namespace Peach.Pro.Core.Agent.Monitors
 	[Parameter("Executable", typeof(string), "Executable to launch")]
 	[Parameter("Arguments", typeof(string), "Optional command line arguments", "")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart the process if a different monitor detects a fault", "true")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exits", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]
@@ -143,20 +143,9 @@ namespace Peach.Pro.Core.Agent.Monitors
 		public override bool DetectedFault()
 		{
 			// NOTE: Always check ASAN first.
-
-			return _CheckAsan() || _data != null;
-		}
-
-		public override MonitorData GetMonitorData()
-		{
-			return _data;
-		}
-
-		public override void IterationFinished()
-		{
 			// ASAN faults trump all other early-exit faults
 			if (_CheckAsan())
-				return;
+				return true;
 
 			if (!_messageExit && FaultOnEarlyExit && !_process.IsRunning)
 			{
@@ -165,7 +154,6 @@ namespace Peach.Pro.Core.Agent.Monitors
 			}
 			else  if (StartOnCall != null)
 			{
-				Logger.Debug("IterationFinished");
 				if (!NoCpuKill)
 					_process.WaitForIdle(WaitForExitTimeout);
 				else
@@ -175,6 +163,17 @@ namespace Peach.Pro.Core.Agent.Monitors
 			{
 				_process.Stop(WaitForExitTimeout);
 			}
+
+			return _data != null;
+		}
+
+		public override MonitorData GetMonitorData()
+		{
+			return _data;
+		}
+
+		public override void IterationFinished()
+		{
 		}
 
 		public override void Message(string msg)

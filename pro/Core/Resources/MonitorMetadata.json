@@ -3,6 +3,7 @@
     {
       "Name": "Fault Detection",
       "Items": [
+        "CanErrorFrame",
         "CanTiming",
         "CanThreshold",
         "CrashReporter",
@@ -30,6 +31,7 @@
     {
       "Name": "Data Collection",
       "Items": [
+        "CanCapture",
         "Memory",
         "NetworkCapture",
         "RunCommand",
@@ -203,6 +205,26 @@
         ]
       }
     ],
+    "CanCapture": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      }
+    ],
+    "CanErrorFrame": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      }
+    ],
     "CanSendFrame": [
       {
         "Name": "Interface Parameters",
@@ -263,13 +285,6 @@
         "Items": [
           "Id",
           "Window"
-        ]
-      },
-      {
-        "Name": "When To Trigger",
-        "Items": [
-          "When",
-          "StartOnCall"
         ]
       }
     ],

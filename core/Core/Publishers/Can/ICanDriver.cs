@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Peach.Core.IO;
 
 namespace Peach.Core.Publishers.Can
 {
@@ -100,6 +101,12 @@ namespace Peach.Core.Publishers.Can
 		int Samples { get; set; }
 		int Clock { get; set; }
 
+		/// <summary>
+		/// Capture all frames received on this channel.
+		/// Used by CanCaptureMonitor
+		/// </summary>
+		bool Capturing { get; set; }
+
 		ICanInterface Interface { get; }
 		ICanDriver Driver { get; }
 	}
@@ -124,6 +131,27 @@ namespace Peach.Core.Publishers.Can
 		IEnumerable<ICanChannel> Channels { get; }
 
 		/// <summary>
+		/// Return all captured frames
+		/// </summary>
+		IEnumerable<CanFrame> Capture { get; }
+
+		/// <summary>
+		/// Monitors register frame id's being monitored.
+		/// </summary>
+		/// <remarks>
+		/// This allows validation that we are not fuzzing the same id's
+		/// causing the monitors themselves to be fuzzed.
+		/// </remarks>
+		Dictionary<uint,string> MonitorFrameIds { get; }
+
+		/// <summary>
+		/// Validate a transmit frame id hasn't been registered by a monitor.
+		/// Throws an exception if it has been.
+		/// </summary>
+		/// <param name="id">Frame ID to check</param>
+		void ValidateTxId(uint id);
+
+		/// <summary>
 		/// Is interface in open state?  
 		/// </summary>
 		bool IsOpen { get; }
@@ -137,6 +165,18 @@ namespace Peach.Core.Publishers.Can
 		/// Close interface
 		/// </summary>
 		void Close();
+
+		/// <summary>
+		/// Register a handler to receive CAN frame with error flag set
+		/// </summary>
+		/// <param name="handler">Handler method</param>
+		void RegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler);
+
+		/// <summary>
+		/// Un-register a CAN Frame Error Received handler
+		/// </summary>
+		/// <param name="handler">Handler method</param>
+		void UnRegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler);
 
 		/// <summary>
 		/// Register a CAN Frame Received handler with an CAN Frame ID filter.
@@ -187,6 +227,21 @@ namespace Peach.Core.Publishers.Can
 		/// </remarks>
 		/// <returns></returns>
 		Tuple<DateTime, string, Exception> GetLogMessage();
+
+		/// <summary>
+		/// Start capturing can frames on channels marked for capture
+		/// </summary>
+		void StartCapture();
+
+		/// <summary>
+		/// Stop capturing can frame. (captured frames are kept)
+		/// </summary>
+		void StopCapture();
+
+		/// <summary>
+		/// Clear all captured frames, does not stop capturing
+		/// </summary>
+		void ClearCapture();
 	}
 
 	/// <summary>
@@ -225,6 +280,22 @@ namespace Peach.Core.Publishers.Can
 		public bool IsError;
 
 		/// <summary>
+		/// Is extended frame
+		/// </summary>
+		public bool IsExtended
+		{
+			get { return Identifier > 0x7FF; }
+		}
+
+		/// <summary>
+		/// Is frame FD
+		/// </summary>
+		public bool IsFd
+		{
+			get { return Data.Length > 8; }
+		}
+
+		/// <summary>
 		/// Data portion of can frame.  Excludes ID, flags, etc.
 		/// </summary>
 		public byte[] Data;
@@ -237,6 +308,44 @@ namespace Peach.Core.Publishers.Can
 			Identifier = identifier;
 			IsRemote = isRemote;
 			Data = data;
+		}
+
+		/// <summary>
+		/// Convert to binary frame format
+		/// </summary>
+		/// <returns></returns>
+		public BitwiseStream ToPcapBitwiseStream()
+		{
+			var bs = new BitStream();
+			var bw = new BitWriter(bs);
+
+			bw.BigEndian();
+			bw.WriteBit(IsExtended ? 1 : 0); // Extended flag
+			bw.WriteBit(IsRemote ? 1 : 0); // RTR?
+			bw.WriteBit(IsError ? 1 : 0); // RTR?
+			bw.WriteBits(Identifier, 29); //ID
+			bw.WriteByte((byte) Data.Length); // DLC
+			bw.WriteBytes(new byte[] {0, 0, 0}); // reserved
+			bw.WriteBytes(Data);
+			bw.WriteBytes(new byte[] {0, 0, 0}); // reserved
+			bs.Position = 0;
+			
+			// PCAP Frame Header
+
+			var span = Timestamp.ToUniversalTime() - DateTime.Parse("01/01/1970");
+
+			var pcapFrame = new BitStream();
+			var pcapWriter = new BitWriter(pcapFrame);
+
+			pcapWriter.WriteUInt32((uint)span.TotalSeconds);
+			pcapWriter.WriteUInt32((uint)(span.TotalMilliseconds - (span.TotalSeconds*1000)));
+			pcapWriter.WriteUInt32((uint)bs.Length);
+			pcapWriter.WriteUInt32((uint)bs.Length);
+
+			bs.CopyTo(pcapFrame);
+
+			pcapFrame.Position = 0;
+			return pcapFrame;
 		}
 	}
 }

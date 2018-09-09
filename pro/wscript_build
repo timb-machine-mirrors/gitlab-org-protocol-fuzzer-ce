@@ -5,7 +5,6 @@ subdirs = [
 	'Core',
 	'FlexNet/Library',
 	'FlexNet/Tool',
-	'NetworkFuzzer',
 	'OS/UnixTrampoline',
 	'Peach',
 	'PeachAgent',

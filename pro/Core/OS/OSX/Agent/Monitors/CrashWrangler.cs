@@ -39,7 +39,7 @@ namespace Peach.Pro.OS.OSX.Agent.Monitors
 	[Parameter("WaitForExitOnCall", typeof(string), "Wait for process to exit on state model call and fault if timeout is reached", "")]
 	[Parameter("WaitForExitTimeout", typeof(int), "Wait for exit timeout value in milliseconds (-1 is infinite)", "10000")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart the process if a different monitor detects a fault", "true")]
 	public class CrashWrangler : Monitor
 	{
 		static readonly NLog.Logger Logger = LogManager.GetCurrentClassLogger();

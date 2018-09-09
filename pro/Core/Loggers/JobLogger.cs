@@ -159,9 +159,18 @@ namespace Peach.Pro.Core.Loggers
 					var url = new Uri(agent.Url);
 					if (url.Scheme == "local" || url.Scheme == "tcp")
 					{
+						// Note: don't use user supplied monitor name as it could
+						//   reference an older name for the monitor.
+						//   Instead lookup the attribute marked as IsDefault and use
+						//   that name.
+
 						var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
+						var monitorName = type.GetAttributes<MonitorAttribute>()
+							.First(x => x.IsDefault)
+							.Name;
+
 						if (type.Assembly == Assembly.GetExecutingAssembly() &&
-						   !_license.CanUseMonitor(cls))
+						   !_license.CanUseMonitor(monitorName))
 						{
 							throw new PeachException(
 								"The {0} monitor is not supported with your current license. ".Fmt(cls) +

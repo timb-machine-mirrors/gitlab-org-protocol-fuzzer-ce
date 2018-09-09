@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Net;
 using System.Collections;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -207,10 +208,46 @@ namespace Peach.Core
 			prop.SetValue(obj, val, null);
 		}
 
+		private static T ParseInteger<T>(string value, Func<string, NumberStyles, T> conv)
+		{
+			var style = NumberStyles.Integer;
+
+			if (value.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
+			{
+				value = value.Substring(2);
+				style = NumberStyles.HexNumber;
+			}
+
+			return conv(value, style);
+		}
+
 		private static object ChangeType(Type ownerType, string value, Type destType)
 		{
-			if (Type.GetTypeCode(destType) != TypeCode.Object)
-				return Convert.ChangeType(value, destType);
+			var typeCode = Type.GetTypeCode(destType);
+
+			switch (typeCode)
+			{
+				case TypeCode.Object:
+					break;
+				case TypeCode.Byte:
+					return ParseInteger(value, byte.Parse);
+				case TypeCode.SByte:
+					return ParseInteger(value, sbyte.Parse);
+				case TypeCode.Int16:
+					return ParseInteger(value, short.Parse);
+				case TypeCode.UInt16:
+					return ParseInteger(value, ushort.Parse);
+				case TypeCode.Int32:
+					return ParseInteger(value, int.Parse);
+				case TypeCode.UInt32:
+					return ParseInteger(value, uint.Parse);
+				case TypeCode.Int64:
+					return ParseInteger(value, long.Parse);
+				case TypeCode.UInt64:
+					return ParseInteger(value, ulong.Parse);
+				default:
+					return Convert.ChangeType(value, destType);
+			}
 
 			// Look for a static Parse(string) on destType
 			var method = destType.GetMethod(

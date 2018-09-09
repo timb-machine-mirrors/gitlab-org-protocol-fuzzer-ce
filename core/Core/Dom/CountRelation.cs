@@ -103,7 +103,7 @@ namespace Peach.Core.Dom
 			{
 				_isRecursing = true;
 
-				var OfArray = Of as Array;
+				var OfArray = Of as Sequence;
 
 				if (OfArray == null)
 				{
