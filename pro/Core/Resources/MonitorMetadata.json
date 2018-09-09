@@ -889,8 +889,6 @@
         "Name": "Advanced",
         "Collapsed": true,
         "Items": [
-          "RestartAfterFault",
-          "",
           "ConnectTimeout",
           "",
           "SymbolsPath"

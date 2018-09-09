@@ -547,7 +547,7 @@ namespace Peach.Pro.Test.Core
 			for (var i = 0; i < times.Count; ++i)
 			{
 				Assert.GreaterOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] - 20));
-				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] * 2));
+				Assert.LessOrEqual(_waitTimes[i], TimeSpan.FromMilliseconds(times[i] + 1000));
 			}
 		}
 
@@ -721,12 +721,12 @@ namespace Peach.Pro.Test.Core
 
 			var exp =
 				"R1 1 2 3 4 5 C6 6 7 8 9 10 C11 11 12 13 14 15 C16 16 17 18 19 20 C21 ReproFault " +
-				"C21 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 ";
+				"LastWasFault C21 11 C12 12 C13 13 C14 14 C15 15 C16 16 C17 17 C18 18 C19 19 C20 20 C21 LastWasFault C1 ";
 
 			for (var i = 1; i <= 13; ++i)
 				exp += "{0} ".Fmt(i);
 
-			exp += "Fault C21 21 22 23 24 25";
+			exp += "Fault LastWasFault C21 21 22 23 24 25";
 
 			Assert.AreEqual(exp, act);
 		}

@@ -21,8 +21,8 @@ nuget nHapi 2.5.0.6
 nuget NUnit 3.10.1
 nuget NUnit.ConsoleRunner 3.8.0
 nuget Nustache 1.16.0.1
-nuget PacketDotNet 0.13.0
-nuget SharpPcap 4.2.0
+nuget PacketDotNet 0.16.0
+nuget SharpPcap 4.4.0
 nuget SocketHttpListener 1.0.0.30
 nuget Swashbuckle.Core.Net45 5.2.1
 nuget TreeViewAdv 1.7.0.0

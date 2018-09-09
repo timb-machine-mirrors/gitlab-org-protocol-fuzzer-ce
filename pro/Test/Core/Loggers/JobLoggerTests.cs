@@ -288,6 +288,7 @@ namespace Peach.Pro.Test.Core.Loggers
 				"* C 3",
 				"*   3",
 				"* C 3",
+				"* C 1",
 				"*   1",
 				"* C 2",
 				"*   2",
