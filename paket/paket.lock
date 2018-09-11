@@ -62,7 +62,7 @@ NUGET
       System.Runtime.InteropServices.RuntimeInformation (>= 4.3)
     Newtonsoft.Json (6.0.8)
     nHapi (2.5.0.6)
-    NLog (4.3.2)
+    NLog (4.5.9)
     NUnit (3.10.1)
     NUnit.ConsoleRunner (3.8)
     Nustache (1.16.0.1)
