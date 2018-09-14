@@ -8,7 +8,6 @@ using String = Peach.Core.Dom.String;
 
 namespace Peach.Pro.Core.Mutators
 {
-	//Hide this mutator as its not fully tested
 	[Mutator("DoubleVariance")]
 	[Description("Produce random number in range of underlying element.")]
 	public class DoubleVariance : Mutator

@@ -191,12 +191,38 @@ namespace Peach.Pro.Core
 	/// </summary>
 	public class CustomJsonWriter : JsonTextWriter, IRawWriter
 	{
+		private static readonly byte[] NegZeroDouble = BitConverter.IsLittleEndian
+			? new byte[] { 0, 0, 0, 0, 0, 0, 0, 0x80 }
+			: new byte[] { 0x80, 0, 0, 0, 0, 0, 0, 0 };
+
+		private static readonly byte[] NegZeroFloat = BitConverter.IsLittleEndian
+			? new byte[] { 0, 0, 0, 0x80 }
+			: new byte[] { 0x80, 0, 0, 0 };
+
 		private readonly StreamWriter _writer;
 
 		public CustomJsonWriter(StreamWriter writer)
 			: base(writer)
 		{
 			_writer = writer;
+		}
+
+		public override void WriteValue(double value)
+		{
+			// Workaround C# outputting "0.0" even if the backing bytes are "-0.0"
+			if (IsNegativeZero(value))
+				WriteRawValue("-0.0");
+			else
+				base.WriteValue(value);
+		}
+
+		public override void WriteValue(float value)
+		{
+			// Workaround C# outputting "0.0" even if the backing bytes are "-0.0"
+			if (IsNegativeZero(value))
+				WriteRawValue("-0.0");
+			else
+				base.WriteValue(value);
 		}
 
 		public void WriteTypeTransformValue(Stream bs)
@@ -219,6 +245,28 @@ namespace Peach.Pro.Core
 
 			_writer.BaseStream.Write(buf, 0, buf.Length);
 
+		}
+
+		private static bool IsNegativeZero(double d)
+		{
+			var b = BitConverter.GetBytes(d);
+
+			for (var i = 0; i < b.Length; ++i)
+				if (b[i] != NegZeroDouble[i])
+					return false;
+
+			return true;
+		}
+
+		private static bool IsNegativeZero(float f)
+		{
+			var b = BitConverter.GetBytes(f);
+
+			for (var i = 0; i < b.Length; ++i)
+				if (b[i] != NegZeroFloat[i])
+					return false;
+
+			return true;
 		}
 	}
 }
