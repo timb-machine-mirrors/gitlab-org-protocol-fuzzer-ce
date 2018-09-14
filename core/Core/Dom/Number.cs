@@ -384,12 +384,12 @@ namespace Peach.Core.Dom
 			}
 		}
 
-		public ulong MaxValue
+		public virtual ulong MaxValue
 		{
 			get { return _max; }
 		}
 
-		public long MinValue
+		public virtual long MinValue
 		{
 			get { return _min; }
 		}

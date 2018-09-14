@@ -27,11 +27,18 @@ namespace Peach.Core.Dom
 		protected double Max = double.MaxValue;
 		protected double Min = double.MinValue;
 
+		// Precision limit on integer values for exact representation
+		private const long DoublePrecision = 4_503_599_627_370_496;
+		private const long FloatPrecision = 16_777_216;
+
+		protected long Precision = DoublePrecision;
+
 		public Double()
 			: base(false)
 		{
 			lengthType = LengthType.Bits;
 			length = 64;
+			Signed = true;
 			DefaultValue = new Variant(0.0);
 		}
 
@@ -40,6 +47,7 @@ namespace Peach.Core.Dom
 		{
 			lengthType = LengthType.Bits;
 			length = 64;
+			Signed = true;
 			DefaultValue = new Variant(0.0);
 		}
 
@@ -134,13 +142,14 @@ namespace Peach.Core.Dom
 				{
 					Min = float.MinValue;
 					Max = float.MaxValue;
+					Precision = FloatPrecision;
 				}
 				else
 				{
 					Min = double.MinValue;
 					Max = double.MaxValue;
+					Precision = DoublePrecision;
 				}
-
 
 				base.length = value;
 
@@ -214,9 +223,9 @@ namespace Peach.Core.Dom
 		{
 			var value = GetNumber(variant);
 
-			if (value < MinValue && !double.IsNegativeInfinity(value))
+			if (value < Min && !double.IsNegativeInfinity(value))
 				throw new PeachException(string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit double.", debugName, value, lengthAsBits));
-			if (value > MaxValue && !double.IsPositiveInfinity(value))
+			if (value > Max && !double.IsPositiveInfinity(value))
 				throw new PeachException(string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit double.", debugName, value, lengthAsBits));
 
 			return new Variant(value);
@@ -256,28 +265,36 @@ namespace Peach.Core.Dom
 
 		#endregion
 
-		public new double MaxValue
+		public override ulong MaxValue
 		{
-			get { return Max; }
+			get
+			{
+				// Maximum integer we can exactly represent
+				return (ulong)Precision;
+			}
 		}
 
-		public new double MinValue
+		public override long MinValue
 		{
-			get { return Min; }
+			get
+			{
+				// Minimum integer we can exactly represent
+				return -Precision;
+			}
 		}
 
 		protected override BitwiseStream InternalValueToBitStream()
 		{
 			var value = GetNumber(InternalValue);
 
-			if (value > 0 && value > MaxValue && !double.IsPositiveInfinity(value))
+			if (value > 0 && value > Max && !double.IsPositiveInfinity(value))
 			{
 				var msg = string.Format("Error, {0} value '{1}' is greater than the maximum {2}-bit number.", debugName, value, lengthAsBits);
 				var inner = new OverflowException(msg);
 				throw new SoftException(inner);
 			}
 
-			if (value < 0 && value < MinValue && !double.IsNegativeInfinity(value))
+			if (value < 0 && value < Min && !double.IsNegativeInfinity(value))
 			{
 				var msg = string.Format("Error, {0} value '{1}' is less than the minimum {2}-bit number.", debugName, value, lengthAsBits);
 				var inner = new OverflowException(msg);
