@@ -2,7 +2,7 @@
 framework: net451
 source https://www.nuget.org/api/v2
 
-nuget Aspose.Words 15.3.0
+nuget Aspose.Words 18.9.0
 nuget Autofac.WebApi2.Owin 3.3.0
 nuget Dapper 1.42
 nuget DiffPlex 1.4.1
