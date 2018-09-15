@@ -60,7 +60,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 			Thread.Sleep(1000);
 			w.IterationFinished();
 			Assert.IsFalse(w.DetectedFault());
@@ -81,7 +81,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 			Thread.Sleep(1000);
 			w.IterationFinished();
 			Assert.IsFalse(w.DetectedFault());
@@ -229,7 +229,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 
 			var before = DateTime.Now;
 			w.IterationFinished();
@@ -259,7 +259,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 
 			Thread.Sleep(1000);
 
@@ -294,7 +294,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.Message("foo");
 			w.Message("bar");
@@ -324,7 +324,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.Message("foo");
 
@@ -360,7 +360,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.Message("foo");
 
@@ -389,7 +389,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 
 			w.IterationFinished();
 
@@ -413,7 +413,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			var w = new CrashWrangler(null);
 			w.StartMonitor(args);
 			w.SessionStarting();
-			w.IterationStarting(null);
+			w.IterationStarting(new IterationStartingArgs());
 			Thread.Sleep(1000);
 			w.IterationFinished();
 			Assert.IsTrue(w.DetectedFault());
