@@ -28,8 +28,8 @@ namespace Peach.Core.Dom
 		protected double Min = double.MinValue;
 
 		// Precision limit on integer values for exact representation
-		private const long DoublePrecision = 4_503_599_627_370_496;
-		private const long FloatPrecision = 16_777_216;
+		private const long DoublePrecision = 4503599627370496;
+		private const long FloatPrecision = 16777216;
 
 		protected long Precision = DoublePrecision;
 
