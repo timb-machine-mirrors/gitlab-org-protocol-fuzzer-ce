@@ -127,9 +127,17 @@ class zip(Task.Task):
 
 		zip = zipfile.ZipFile(output.abspath(), 'w', compression=zipfile.ZIP_DEFLATED)
 
+                items = {}
+
 		for src, dest, attr in self.generator.zip_inputs:
 			dest = os.path.normpath(dest).replace('\\', '/')
 			src_abspath = src.abspath()
+
+                        prev = items.get(dest, None)
+                        if prev:
+                            raise Errors.WafError("Target '%s' has duplicate entries for '%s': %s and %s" % (output, dest, prev, src_abspath))
+
+                        items[dest] = src_abspath
 
 			if os.path.islink(src_abspath):
 				zi = zipfile.ZipInfo(dest)

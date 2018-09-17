@@ -41,6 +41,7 @@ pkgs = [
 frameworks = [
 	'net45', 
 	'net3.5-client',
+	'net40', 
 	'net20', 
 	'net', 
 	'portable-net45+dnxcore50+sl4+wp71+win8+wpa81'
