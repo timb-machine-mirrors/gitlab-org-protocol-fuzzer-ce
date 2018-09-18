@@ -14,6 +14,7 @@ using Peach.Core.IO;
 using Peach.Core.Test;
 using Peach.Pro.Core.Agent.Channels.Rest;
 using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using Peach.Pro.Core;
@@ -91,12 +92,14 @@ namespace Peach.Pro.Test.Core.Agent
 		public void SetUp()
 		{
 			_collector = new LogCollector { Name = "Collector" };
-			_rule = new LoggingRule("Agent.*", LogLevel.Debug, _collector);
+			_rule = new LoggingRule("*", LogLevel.Debug, _collector);
+			//_rule = new LoggingRule("Agent.*", LogLevel.Debug, _collector);
 
 			var config = LogManager.Configuration = new LoggingConfiguration();
 			config.AddTarget(_collector.Name, _collector);
 			config.LoggingRules.Add(_rule);
 			LogManager.Configuration = config;
+			LogManager.ReconfigExistingLoggers();
 		}
 
 		[TearDown]
@@ -752,13 +755,13 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var expected = new List<string>
 			{
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
-				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|start()",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Debug|Peach.Pro.Core.Publishers.NullPublisher|start()",
 			};
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -773,9 +776,9 @@ namespace Peach.Pro.Test.Core.Agent
 
 			expected.AddRange(new[]
 			{
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
-				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|stop()"
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+				"Debug|Peach.Pro.Core.Publishers.NullPublisher|stop()"
 			});
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -803,19 +806,19 @@ namespace Peach.Pro.Test.Core.Agent
 
 			expected.AddRange(new[]
 			{
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
-				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|start()",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.DetectedFault",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.DetectedFault",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.GetMonitorData",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.GetMonitorData",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Debug|Peach.Pro.Core.Publishers.NullPublisher|start()",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.DetectedFault",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.DetectedFault",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.GetMonitorData",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.GetMonitorData",
 			});
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -829,9 +832,9 @@ namespace Peach.Pro.Test.Core.Agent
 
 			expected.AddRange(new[]
 			{
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
-				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|stop()"
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+				"Debug|Peach.Pro.Core.Publishers.NullPublisher|stop()"
 			});
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -848,20 +851,20 @@ namespace Peach.Pro.Test.Core.Agent
 
 			expected.AddRange(new[]
 			{
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
-				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|start()",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
-				"Debug|[Agent1] Peach.Pro.Core.Publishers.NullPublisher|stop()",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationStarting False False",
+				"Debug|Peach.Pro.Core.Publishers.NullPublisher|start()",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.IterationFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Debug|Peach.Pro.Core.Publishers.NullPublisher|stop()",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.SessionFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon2.StopMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor"
 			});
 
 			Thread.Sleep(500); // allow time for logs to collect
@@ -1032,17 +1035,21 @@ namespace Peach.Pro.Test.Core.Agent
 
 			var expected = new[]
 			{
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
-				"Info|[Agent1] Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StartMonitor",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionStarting",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationStarting False False",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.IterationFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.SessionFinished",
+				"Info|Peach.Pro.Core.Agent.Monitors.NullMonitor|mon1.StopMonitor",
 			};
+
+			LogManager.Flush();
+
 			Assert.That(_collector.Messages, Is.EqualTo(expected));
 		}
 
-		class LogCollector : TargetWithLayout
+		[Target("LogCollector")]
+		sealed class LogCollector : TargetWithLayout
 		{
 			public List<string> Messages { get; private set; }
 

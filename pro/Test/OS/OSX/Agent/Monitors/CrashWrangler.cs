@@ -109,12 +109,14 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			Thread.Sleep(1000);
 
 			var before = DateTime.Now;
-			w.DetectedFault();
+			w.IterationStarting(new IterationStartingArgs());
+			w.IterationFinished();
+			var ret = w.DetectedFault();
 			var after = DateTime.Now;
 
 			var span = (after - before);
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.IsFalse(ret);
 
 			w.SessionFinished();
 			w.StopMonitor();
@@ -141,12 +143,14 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			Thread.Sleep(1000);
 
 			var before = DateTime.Now;
+			w.IterationStarting(new IterationStartingArgs());
 			w.IterationFinished();
+			var ret = w.DetectedFault();
 			var after = DateTime.Now;
 
 			var span = (after - before);
 
-			Assert.IsFalse(w.DetectedFault());
+			Assert.IsFalse(ret);
 
 			w.SessionFinished();
 			w.StopMonitor();
