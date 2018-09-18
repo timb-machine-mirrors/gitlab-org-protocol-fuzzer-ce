@@ -109,7 +109,7 @@ namespace Peach.Pro.Test.OS.OSX.Agent.Monitors
 			Thread.Sleep(1000);
 
 			var before = DateTime.Now;
-			w.IterationFinished();
+			w.DetectedFault();
 			var after = DateTime.Now;
 
 			var span = (after - before);

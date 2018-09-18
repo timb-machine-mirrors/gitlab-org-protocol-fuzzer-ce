@@ -9,6 +9,7 @@ using Peach.Pro.OS.Linux.Agent.Monitors;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Peach.Core.Agent;
 
 namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 {
@@ -64,7 +65,7 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 			var m = new GdbDebugger(null);
 			m.StartMonitor(args);
 			m.SessionStarting();
-			m.IterationStarting(null);
+			m.IterationStarting(new IterationStartingArgs());
 			Thread.Sleep(5000);
 			m.IterationFinished();
 			Assert.IsFalse(m.DetectedFault());
@@ -173,12 +174,12 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			var sw = new System.Diagnostics.Stopwatch();
 			sw.Start();
-			m.IterationFinished();
+			var ret = m.DetectedFault();
 			sw.Stop();
 
 			var span = sw.Elapsed;
 
-			Assert.IsFalse(m.DetectedFault());
+			Assert.IsFalse(ret);
 			m.SessionFinished();
 			m.StopMonitor();
 
@@ -207,12 +208,12 @@ namespace Peach.Pro.Test.OS.Linux.Agent.Monitors
 
 			var sw = new System.Diagnostics.Stopwatch();
 			sw.Start();
-			m.IterationFinished();
+			var ret = m.DetectedFault();
 			sw.Stop();
 
 			var span = sw.Elapsed;
 
-			Assert.IsFalse(m.DetectedFault());
+			Assert.IsFalse(ret);
 			m.SessionFinished();
 			m.StopMonitor();
 

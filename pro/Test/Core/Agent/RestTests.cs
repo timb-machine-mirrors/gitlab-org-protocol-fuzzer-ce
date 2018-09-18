@@ -93,7 +93,7 @@ namespace Peach.Pro.Test.Core.Agent
 			_collector = new LogCollector { Name = "Collector" };
 			_rule = new LoggingRule("Agent.*", LogLevel.Debug, _collector);
 
-			var config = LogManager.Configuration;
+			var config = LogManager.Configuration = new LoggingConfiguration();
 			config.AddTarget(_collector.Name, _collector);
 			config.LoggingRules.Add(_rule);
 			LogManager.Configuration = config;

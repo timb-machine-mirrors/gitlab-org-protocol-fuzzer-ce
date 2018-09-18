@@ -46,11 +46,13 @@ namespace Peach.Pro.Test.Core.Monitors
 					m.Message("foo");
 					Thread.Sleep(500);
 				},
-				IterationFinished = m =>
+				DetectedFault = m =>
 				{
 					sw.Start();
-					m.IterationFinished();
+					var ret = m.DetectedFault();
 					sw.Stop();
+
+					return ret;
 				}
 			};
 

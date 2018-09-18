@@ -347,8 +347,7 @@ namespace Peach.Pro.Test.OS.Windows.Agent.Monitors
 			var f = runner.Run(5);
 
 			Assert.AreEqual(0, f.Length);
-
-			Assert.AreEqual(!replay ? 2 : 5, startCount);
+			Assert.AreEqual(2, startCount);
 		}
 
 		[Test]
