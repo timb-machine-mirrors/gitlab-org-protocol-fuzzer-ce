@@ -52,9 +52,9 @@ NoCpuKill::
 Disable process killing when the CPU usage nears zero, defaults to `false`.
 
 RestartAfterFault::
-If `true`, restarts the target when any monitor detects a fault.
-If `false`, restarts the target if the process exits or crashes.
-This argument defaults to `false`.
+If `true`, restarts the debugger when any monitor detects a fault.
+If `false`, restarts the debugger only if the process exits or crashes.
+This argument defaults to `true`.
 
 RestartOnEachTest::
 Restarts the process for each iteration, defaults to `false`.

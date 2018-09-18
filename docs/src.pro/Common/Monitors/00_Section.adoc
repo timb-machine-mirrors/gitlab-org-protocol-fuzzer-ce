@@ -21,6 +21,8 @@ that monitor is available in all supported operating systems.
 |xref:Monitors_ApcPower[APC Power]               |    |    |X   |
 |xref:Monitors_ButtonClicker[ButtonClicker]      |    |    |X   |Windows
 |xref:Monitors_CanaKitRelay[CanaKit Relay]       |    |    |X   |
+|xref:Monitors_CanCapture[CAN Capture]           |    |X   |    |
+|xref:Monitors_CanErrorFrame[CAN Error Frame]    |X   |    |    |
 |xref:Monitors_CanSendFrame[CAN Send Frame]      |    |    |X   |
 |xref:Monitors_CanTiming[CAN Timing]             |X   |    |    |
 |xref:Monitors_CanThreshold[CAN Threshold]       |X   |    |    |

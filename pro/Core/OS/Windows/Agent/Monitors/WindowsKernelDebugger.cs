@@ -14,14 +14,12 @@ namespace Peach.Pro.OS.Windows.Agent.Monitors
 	[Parameter("KernelConnectionString", typeof(string), "Connection string for kernel debugging.")]
 	[Parameter("SymbolsPath", typeof(string), "Optional Symbol path.  Default is Microsoft public symbols server.", "SRV*http://msdl.microsoft.com/download/symbols")]
 	[Parameter("WinDbgPath", typeof(string), "Path to WinDbg install.  If not provided we will try and locate it.", "")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
 	[Parameter("ConnectTimeout", typeof(uint), "How long to wait for kernel connection.", "3000")]
 	public class WindowsKernelDebugger : Monitor2
 	{
 		public string KernelConnectionString { get; set; }
 		public string SymbolsPath { get; set; }
 		public string WinDbgPath { get; set; }
-		public bool RestartAfterFault { get; set; }
 		public uint ConnectTimeout { get; set; }
 
 		IKernelDebugger _debugger;

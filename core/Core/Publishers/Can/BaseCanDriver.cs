@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NLog;
 
 namespace Peach.Core.Publishers.Can
@@ -22,6 +19,8 @@ namespace Peach.Core.Publishers.Can
 		/// </summary>
 		private readonly ConcurrentDictionary<uint, HashSet<CanRxEventHandler>> _canFrameReceivedHandlers = new ConcurrentDictionary<uint, HashSet<CanRxEventHandler>>();
 
+		private readonly HashSet<CanRxEventHandler> _canFrameErrorReceivedHandlers = new HashSet<CanRxEventHandler>();
+
 		private readonly BlockingCollection<CanFrame> _notifyQueue = new BlockingCollection<CanFrame>(new ConcurrentQueue<CanFrame>());
 		private readonly ConcurrentQueue<CanFrame> _rxFrameQueue = new ConcurrentQueue<CanFrame>();
 		private readonly ConcurrentQueue<Tuple<DateTime, string, Exception>> _rxLogQueue = new ConcurrentQueue<Tuple<DateTime,string, Exception>>();
@@ -29,6 +28,10 @@ namespace Peach.Core.Publishers.Can
 		private int _openCount = 0;
 		private Thread _notifyThread;
 		private readonly Object _lock = new Object();
+
+		private bool _isCapturing = false;
+		private readonly Object _lockCapturing = new Object();
+		private readonly List<CanFrame> _capture = new List<CanFrame>();
 
 		#region ICanDriver
 
@@ -43,11 +46,43 @@ namespace Peach.Core.Publishers.Can
 		public abstract ICanDriver Driver { get; }
 		public abstract IEnumerable<ICanChannel> Channels { get; }
 		public abstract bool IsOpen { get; protected set; }
+		public Dictionary<uint,string> MonitorFrameIds { get; }
+
+		protected BaseCanDriver()
+		{
+			MonitorFrameIds = new Dictionary<uint, string>();
+		}
+
+		public void ValidateTxId(uint id)
+		{
+			if (!MonitorFrameIds.ContainsKey(id))
+				return;
+
+			var msg = string.Format("Error, monitor '{0}' configured with frame ID matching fuzzed frame ID '0x{1:X}'.",
+				MonitorFrameIds[id], id);
+
+			Logger.Error(msg);
+			throw new SoftException(msg);
+		}
+
+		public IEnumerable<CanFrame> Capture
+		{
+			get
+			{
+				lock (_lockCapturing)
+				{
+					return _capture.ToArray();
+				}
+			}
+		}
 
 		public void Open()
 		{
 			lock (_lock)
 			{
+				StopCapture();
+				ClearCapture();
+
 				if (_notifyThread == null)
 				{
 					_notifyThread = new Thread(() =>
@@ -58,12 +93,34 @@ namespace Peach.Core.Publishers.Can
 						{
 							var msg = _notifyQueue.Take();
 
+							// Notify interested parties based on id filter
+
 							if (!_canFrameReceivedHandlers.TryGetValue(msg.Identifier, out handlers))
 								continue;
 
 							lock (handlers)
 							{
 								handlers.ForEach(x => x(this, msg));
+							}
+
+							// If frame has error flag set, notify interested parties
+
+							if (msg.IsError)
+							{
+								lock (_canFrameErrorReceivedHandlers)
+								{
+									_canFrameErrorReceivedHandlers.ForEach(x => x(this, msg));
+								}
+							}
+
+							// If we are capturing, add to captured frames
+
+							if (_isCapturing && msg.Channel.Capturing)
+							{
+								lock (_lockCapturing)
+								{
+									_capture.Add(msg);
+								}
 							}
 						}
 					});
@@ -108,6 +165,8 @@ namespace Peach.Core.Publishers.Can
 					_notifyThread = null;
 
 					_canFrameReceivedHandlers.Clear();
+
+					MonitorFrameIds.Clear();
 				}
 				else if (_openCount < 0)
 				{
@@ -118,6 +177,9 @@ namespace Peach.Core.Publishers.Can
 					Logger.Trace("Not closing can driver, open count is {0}", _openCount);
 				}
 			}
+
+			StopCapture();
+			ClearCapture();
 		}
 
 		/// <summary>
@@ -146,6 +208,24 @@ namespace Peach.Core.Publishers.Can
 			return null;
 		}
 
+		public void StartCapture()
+		{
+			_isCapturing = true;
+		}
+
+		public void StopCapture()
+		{
+			_isCapturing = false;
+		}
+
+		public void ClearCapture()
+		{
+			lock (_lockCapturing)
+			{
+				_capture.Clear();
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -168,6 +248,31 @@ namespace Peach.Core.Publishers.Can
 		{
 			_notifyQueue.Add(msg);
 			_rxFrameQueue.Enqueue(msg);
+			if (_isCapturing)
+			{
+				lock (_lockCapturing)
+				{
+					_capture.Add(msg);
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public void RegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler)
+		{
+			lock (_canFrameErrorReceivedHandlers)
+			{
+				_canFrameErrorReceivedHandlers.Add(handler);
+			}
+		}
+
+		/// <inheritdoc />
+		public void UnRegisterCanFrameErrorReceiveHandler(CanRxEventHandler handler)
+		{
+			lock (_canFrameErrorReceivedHandlers)
+			{
+				_canFrameErrorReceivedHandlers.Remove(handler);
+			}
 		}
 
 		/// <inheritdoc />

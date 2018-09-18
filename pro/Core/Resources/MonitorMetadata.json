@@ -3,6 +3,7 @@
     {
       "Name": "Fault Detection",
       "Items": [
+        "CanErrorFrame",
         "CanTiming",
         "CanThreshold",
         "CrashReporter",
@@ -30,6 +31,7 @@
     {
       "Name": "Data Collection",
       "Items": [
+        "CanCapture",
         "Memory",
         "NetworkCapture",
         "RunCommand",
@@ -200,6 +202,26 @@
         "Items": [
           "When",
           "StartOnCall"
+        ]
+      }
+    ],
+    "CanCapture": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
+        ]
+      }
+    ],
+    "CanErrorFrame": [
+      {
+        "Name": "Interface Parameters",
+        "Items": [
+          "CanDriver",
+          "CanChannel",
+          "CanBitrate"
         ]
       }
     ],
@@ -867,8 +889,6 @@
         "Name": "Advanced",
         "Collapsed": true,
         "Items": [
-          "RestartAfterFault",
-          "",
           "ConnectTimeout",
           "",
           "SymbolsPath"

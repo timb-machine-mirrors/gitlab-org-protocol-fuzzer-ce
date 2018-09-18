@@ -288,6 +288,7 @@ namespace Peach.Pro.Test.Core.Loggers
 				"* C 3",
 				"*   3",
 				"* C 3",
+				"* C 1",
 				"*   1",
 				"* C 2",
 				"*   2",
@@ -743,6 +744,7 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
+		[Retry(5)]
 		public void TestFaultFile()
 		{
 			const string xml = @"

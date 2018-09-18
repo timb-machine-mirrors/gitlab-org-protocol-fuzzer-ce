@@ -23,7 +23,7 @@ namespace Peach.Pro.OS.Linux.Agent.Monitors
 
 	[Parameter("GdbPath", typeof(string), "Path to gdb", "/usr/bin/gdb")]
 	[Parameter("RestartOnEachTest", typeof(bool), "Restart process for each interation", "false")]
-	[Parameter("RestartAfterFault", typeof(bool), "Restart process after any fault occurs", "false")]
+	[Parameter("RestartAfterFault", typeof(bool), "Restart the debugger if a different monitor detects a fault", "true")]
 	[Parameter("FaultOnEarlyExit", typeof(bool), "Trigger fault if process exists", "false")]
 	[Parameter("NoCpuKill", typeof(bool), "Disable process killing when CPU usage nears zero", "false")]
 	[Parameter("StartOnCall", typeof(string), "Start command on state model call", "")]

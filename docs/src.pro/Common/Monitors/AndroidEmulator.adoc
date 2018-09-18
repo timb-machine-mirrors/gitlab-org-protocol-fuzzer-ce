@@ -41,7 +41,11 @@ _Optional:_
 EmulatorPath:: Directory containing the Android emulator.
 If not provided, Peach searches the directories in the PATH variable for the installed emulator.
 Headless:: If true, runs the emulator *without a display*. Defaults to false.
-RestartAfterFault:: Restart emulator after a fault. Defaults to true.
+RestartAfterFault::
+If `true`, restarts the emulator when any monitor detects a fault.
+If `false`, restarts the emulator only if the emulator exits or crashes.
+This argument defaults to `true`.
+
 RestartEveryIteration:: Restart emulator on every iteration. Defaults to false.
 StartOnCall:: Start the emulator when notified by the state machine.
 StartTimeout:: How many seconds to wait for emulator to start running. Defaults to 30.
