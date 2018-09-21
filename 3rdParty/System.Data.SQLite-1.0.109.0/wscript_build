@@ -18,7 +18,7 @@ if bld.env.DEST_OS == 'win32':
 elif bld.env.DEST_OS == 'win64':
 	install_644 = {
 		bld.path : bld.path.ant_glob('System.Data.SQLite.dll.config'),
-		bld.path.find_dir('x64') : bld.path.ant_glob('x86/sqlite3.dll'),
+		bld.path.find_dir('x64') : bld.path.ant_glob('x64/sqlite3.dll'),
 	}
 else:
 	install_644 = {
@@ -47,6 +47,7 @@ bld(
 		'/define:INTEROP_VIRTUAL_TABLE',
 		'/define:INTEROP_SESSION_EXTENSION',
 		'/define:NET_451',
+		'/define:NET_STANDARD_20',
 	],
 	version = False,
 	csdoc = False,
