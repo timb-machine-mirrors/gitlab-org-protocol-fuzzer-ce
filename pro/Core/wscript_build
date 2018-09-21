@@ -43,6 +43,7 @@ if bld.env.BASENAME != 'web':
 		'Microsoft.Dynamic.dll',
 		'Microsoft.Scripting.dll',
 		'Microsoft.Scripting.Metadata.dll',
+		'PCANBasic_NET.dll',
 		'Peach.Core.dll',
 		'Portable.Licensing.dll',
 		'Renci.SshNet.dll',
@@ -114,7 +115,7 @@ if bld.env.BASENAME != 'web':
 			frameworks = frameworks,
 		),
 		source = bld.path.ant_glob('**/*.cs', excl=[
-			'Publishers/Can/*.cs'
+			'Publishers/Can/VectorCanDriver.cs'
 			]),
 		resource = bld.path.ant_glob('Resources/**/* WebServices/Views/**/*'),
 		embed = embed,
@@ -136,9 +137,8 @@ if bld.env.BASENAME != 'web':
 	)
 
 	if 'win' in bld.env['supported_features']:
-		asm.source += bld.path.ant_glob('Publishers/Can/*.cs')
+		asm.source += bld.path.ant_glob('Publishers/Can/VectorCanDriver.cs')
 		deps.extend([
-			'PCANBasic_NET.dll',
 			'UIAutomationClient.dll',
 			'UIAutomationTypes.dll',
 			'vxlapi_NET.dll',
