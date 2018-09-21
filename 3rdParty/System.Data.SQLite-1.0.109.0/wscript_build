@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+deps = [
+	'System.dll',
+	'System.Core.dll',
+	'System.Data.dll',
+	'System.Transactions.dll',
+	'System.Xml.dll',
+	'Microsoft.CSharp.dll',
+]
+
+
+if bld.env.DEST_OS == 'win32':
+	install_644 = {
+		bld.path : bld.path.ant_glob('System.Data.SQLite.dll.config'),
+		bld.path.find_dir('x86') : bld.path.ant_glob('x86/sqlite3.dll'),
+	}
+else:
+	install_644 = {
+		bld.path : bld.path.ant_glob('System.Data.SQLite.dll.config'),
+		bld.path.find_dir('x64') : bld.path.ant_glob('x86/sqlite3.dll'),
+	}
+
+bld(
+	name = 'System.Data.SQLite.dll',
+	features = 'cs',
+	use = deps,
+	install_644 = install_644,
+	platform = 'AnyCPU',
+	source = bld.path.ant_glob('System.Data.SQLite/**/*.cs'),
+	namespace = 'System.Data.SQLite',
+	csflags = [
+		'/nowarn:0168', # Variable declared but never used
+		'/nowarn:0169', # Field is never used
+		'/nowarn:0169', # Field is never used
+		'/nowarn:0649', # Field is never assigned to
+		'/nowarn:0414', # Field assigned but never used
+		'/nowarn:0219', # Variable assigned but never used
+		'/nowarn:0618', # Calling obsolete function
+		'/nowarn:0672', # Member overrides obsolete member
+		'/define:SQLITE_STANDARD', # Use sqlite3.dll
+		'/define:THROW_ON_DISPOSED', # Throw an exception when somebody tries to access a disposed object?
+		'/define:INTEROP_VIRTUAL_TABLE',
+		'/define:INTEROP_SESSION_EXTENSION',
+		'/define:NET_451',
+	],
+	version = False,
+	csdoc = False,
+)
+
+if bld.env.BASENAME == 'win':
+	# Enable the use of native Windows APIs, when available?
+	bld.csflags.append('/define:WINDOWS')
+
+# end
