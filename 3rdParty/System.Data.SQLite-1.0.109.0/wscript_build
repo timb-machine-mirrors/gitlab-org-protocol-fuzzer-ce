@@ -42,7 +42,6 @@ bld(
 		'/nowarn:0219', # Variable assigned but never used
 		'/nowarn:0618', # Calling obsolete function
 		'/nowarn:0672', # Member overrides obsolete member
-		'/nowarm:1635', # Warning cannot re-enable warning
 		'/define:SQLITE_STANDARD', # Use sqlite3.dll
 		'/define:THROW_ON_DISPOSED', # Throw an exception when somebody tries to access a disposed object?
 		'/define:INTEROP_VIRTUAL_TABLE',

@@ -41,13 +41,13 @@ namespace System.Data.SQLite
     protected static readonly DateTime UnixEpoch =
         new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-    #pragma warning disable 414
+    //#pragma warning disable 414
     /// <summary>
     /// The value of the OLE Automation epoch represented as a Julian day.  This
     /// field cannot be removed as the test suite relies upon it.
     /// </summary>
     private static readonly double OleAutomationEpochAsJulianDay = 2415018.5;
-    #pragma warning restore 414
+    //#pragma warning restore 414
 
     /// <summary>
     /// The format string for DateTime values when using the InvariantCulture or CurrentCulture formats.
