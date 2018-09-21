@@ -21,7 +21,7 @@ bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
 bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
 
 #if bld.env.CS_NAME != 'csc':
-#	bld.read_csshlib('System.Data.SQLite.dll', paths=['System.Data.SQLite.Mono.1.0.109.0'])
+#	bld.read_csshlib('System.Data.SQLite.dll', paths=#['System.Data.SQLite.Mono.1.0.109.0'])
 
 nunit_tools = bld.path.find_node('NUnit.ConsoleRunner.3.8.0/tools')
 
@@ -51,13 +51,15 @@ else:
 		'pin',
 		'Portable.Licensing',
 		'Renci.SshNet',
-		'System.Data.SQLite-1.0.109.0',
 		'Titanium-Web-Proxy/Titanium.Web.Proxy',
 		'TotalPhase/aardvark',
 		'TotalPhase/komodo',
 		'VectorXL',
 		'VMware-VIX-1.13.0-1295980',
 	]
+
+	if bld.env.CS_NAME != 'csc':
+		subdirs.append('System.Data.SQLite-1.0.109.0')
 
 	if bld.env.BASENAME == 'osx':
 		bld(
