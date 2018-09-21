@@ -15,11 +15,15 @@ if bld.env.DEST_OS == 'win32':
 		bld.path : bld.path.ant_glob('System.Data.SQLite.dll.config'),
 		bld.path.find_dir('x86') : bld.path.ant_glob('x86/sqlite3.dll'),
 	}
-else:
+elif bld.env.DEST_OS == 'win64':
 	install_644 = {
 		bld.path : bld.path.ant_glob('System.Data.SQLite.dll.config'),
 		bld.path.find_dir('x64') : bld.path.ant_glob('x86/sqlite3.dll'),
 	}
+else:
+	install_644 = {
+			bld.path : bld.path.ant_glob('System.Data.SQLite.dll.config'),
+		}
 
 bld(
 	name = 'System.Data.SQLite.dll',
@@ -34,7 +38,6 @@ bld(
 		'/nowarn:0169', # Field is never used
 		'/nowarn:0169', # Field is never used
 		'/nowarn:0649', # Field is never assigned to
-		'/nowarn:0414', # Field assigned but never used
 		'/nowarn:0219', # Variable assigned but never used
 		'/nowarn:0618', # Calling obsolete function
 		'/nowarn:0672', # Member overrides obsolete member
