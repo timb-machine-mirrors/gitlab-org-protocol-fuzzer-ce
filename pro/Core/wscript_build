@@ -130,7 +130,8 @@ if bld.env.BASENAME != 'web':
 			top.ant_glob('3rdParty/IronPython.2.7.5/lib/Net45/IronPython.Modules.dll'),
 			top.find_or_declare('/'.join(['3rdParty', flexnet, bld.env.BASENAME])) :
 			top.ant_glob('/'.join(['3rdParty', flexnet, bld.env.BASENAME, '**'])),
-			bld.path : bld.path.ant_glob('Scripts/**/*')
+			bld.path : bld.path.ant_glob('Scripts/**/*'),
+			bld.path.find_dir('Install') : bld.path.ant_glob('Install/**/*'),
 		}
 	)
 
