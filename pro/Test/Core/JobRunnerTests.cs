@@ -460,6 +460,7 @@ namespace Peach.Pro.Test.Core
 		}
 
 		[Test]
+		[Retry(5)]
 		public void TestWithMonitors()
 		{
 			var license = new Mock<ILicense>();
