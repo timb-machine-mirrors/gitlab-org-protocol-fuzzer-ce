@@ -120,6 +120,7 @@ web/packer/tmp
 packer/tmp
 packer/output-vmware-iso
 packer/packer_cache
+paket/.paket/Paket.Restore.targets
 
 # vim swapfiles
 *.swp
