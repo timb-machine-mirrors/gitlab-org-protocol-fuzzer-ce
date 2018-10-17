@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Peach.Core.Dom;
@@ -841,7 +842,7 @@ namespace Peach.Core
 			{
 				try
 				{
-					ret = ushort.Parse((string)value);
+					ret = ushort.Parse((string)value, CultureInfo.InvariantCulture);
 				}
 				catch
 				{

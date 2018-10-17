@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Xml;
 using NLog;
@@ -175,7 +176,7 @@ namespace Peach.Core.Dom
 			//pit.WriteAttributeString("name", Name);
 
 			pit.WriteAttributeString("class", Class);
-			pit.WriteAttributeString("fragLength", FragLength.ToString());
+			pit.WriteAttributeString("fragLength", FragLength.ToString(CultureInfo.InvariantCulture));
 
 			if (!string.IsNullOrEmpty(TotalLengthField))
 				pit.WriteAttributeString("totalLengthField", TotalLengthField);

@@ -208,17 +208,17 @@ namespace Peach.Core
 			prop.SetValue(obj, val, null);
 		}
 
-		private static T ParseInteger<T>(string value, Func<string, NumberStyles, T> conv)
+		private static T ParseInteger<T>(string value, Func<string, NumberStyles, IFormatProvider, T> conv)
 		{
 			var style = NumberStyles.Integer;
 
-			if (value.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
+			if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
 				value = value.Substring(2);
 				style = NumberStyles.HexNumber;
 			}
 
-			return conv(value, style);
+			return conv(value, style, CultureInfo.InvariantCulture);
 		}
 
 		private static object ChangeType(Type ownerType, string value, Type destType)
@@ -246,7 +246,7 @@ namespace Peach.Core
 				case TypeCode.UInt64:
 					return ParseInteger(value, ulong.Parse);
 				default:
-					return Convert.ChangeType(value, destType);
+					return Convert.ChangeType(value, destType, CultureInfo.InvariantCulture);
 			}
 
 			// Look for a static Parse(string) on destType

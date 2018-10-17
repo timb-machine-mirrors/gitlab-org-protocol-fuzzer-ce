@@ -7,6 +7,7 @@
 // $Id$
 
 using System;
+using System.Globalization;
 using System.Text;
 using System.IO;
 
@@ -37,7 +38,7 @@ namespace Peach.Core
 			}
 
 			sb.Append("_");
-			sb.Append(context.config.runDateTime.ToString("yyyyMMddHHmmss"));
+			sb.Append(context.config.runDateTime.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
 
 			return sb.ToString();
 		}

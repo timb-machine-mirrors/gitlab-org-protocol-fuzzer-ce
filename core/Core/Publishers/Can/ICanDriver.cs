@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Peach.Core.IO;
 
@@ -332,7 +333,7 @@ namespace Peach.Core.Publishers.Can
 			
 			// PCAP Frame Header
 
-			var span = Timestamp.ToUniversalTime() - DateTime.Parse("01/01/1970");
+			var span = Timestamp.ToUniversalTime() - DateTime.Parse("01/01/1970", CultureInfo.InvariantCulture);
 
 			var pcapFrame = new BitStream();
 			var pcapWriter = new BitWriter(pcapFrame);

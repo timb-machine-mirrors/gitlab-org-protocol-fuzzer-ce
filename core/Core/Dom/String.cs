@@ -7,6 +7,7 @@
 // $Id$
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -527,7 +528,7 @@ namespace Peach.Core.Dom
 			{
 				// Subtract one for the '-' sign
 				long fmtLen = 0 > num ? lenInChars - 1 : lenInChars;
-				ret = num.ToString("D" + fmtLen.ToString());
+				ret = num.ToString("D" + fmtLen.ToString(CultureInfo.InvariantCulture));
 			}
 
 			if (ret.Length == lenInChars)

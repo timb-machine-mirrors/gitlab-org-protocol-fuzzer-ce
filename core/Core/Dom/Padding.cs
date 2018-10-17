@@ -7,6 +7,7 @@
 // $Id$
 
 using System;
+using System.Globalization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
@@ -89,13 +90,13 @@ namespace Peach.Core.Dom
 			pit.WriteStartElement("Padding");
 
 			if (alignment != 8)
-				pit.WriteAttributeString("alignment", alignment.ToString());
+				pit.WriteAttributeString("alignment", alignment.ToString(CultureInfo.InvariantCulture));
 
 			if (alignedTo != null)
 				pit.WriteAttributeString("alignedTo", alignedTo.fullName);
 
 			if (minSize != 0)
-				pit.WriteAttributeString("minSize", minSize.ToString());
+				pit.WriteAttributeString("minSize", minSize.ToString(CultureInfo.InvariantCulture));
 
 			WritePitCommonAttributes(pit);
 			WritePitCommonChildren(pit);

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Xml;
 using Peach.Core.Dom.XPath;
@@ -417,25 +418,25 @@ namespace Peach.Core.Dom
 				pit.WriteAttributeString("description", description);
 
 			if(waitTime != 0.0)
-				pit.WriteAttributeString("waitTime", waitTime.ToString());
+				pit.WriteAttributeString("waitTime", waitTime.ToString(CultureInfo.InvariantCulture));
 
 			if(faultWaitTime != 2.0)
-				pit.WriteAttributeString("faultWaitTime", faultWaitTime.ToString());
+				pit.WriteAttributeString("faultWaitTime", faultWaitTime.ToString(CultureInfo.InvariantCulture));
 
 			if(controlIteration != 0)
-				pit.WriteAttributeString("controlIteration", controlIteration.ToString());
+				pit.WriteAttributeString("controlIteration", controlIteration.ToString(CultureInfo.InvariantCulture));
 
 			if(nonDeterministicActions)
 				pit.WriteAttributeString("nonDeterministicActions", nonDeterministicActions.ToString().ToLower());
 
 			if (maxOutputSize != 500000000)
-				pit.WriteAttributeString("maxOutputSize", maxOutputSize.ToString());
+				pit.WriteAttributeString("maxOutputSize", maxOutputSize.ToString(CultureInfo.InvariantCulture));
 
 			if(TargetLifetime != Lifetime.Session)
 				pit.WriteAttributeString("targetLifetime", TargetLifetime.ToString());
 
 			if(MaxBackSearch != 80)
-				pit.WriteAttributeString("maxBackSearch", MaxBackSearch.ToString());
+				pit.WriteAttributeString("maxBackSearch", MaxBackSearch.ToString(CultureInfo.InvariantCulture));
 
 			// TODO - Make this work for real
 			// Quick hack to make Swagger/Postman analyzers work better

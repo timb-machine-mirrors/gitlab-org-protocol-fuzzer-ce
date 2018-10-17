@@ -143,7 +143,7 @@ namespace Peach.Core.Dom
 		{
 			pit.WriteStartElement("Number");
 
-			pit.WriteAttributeString("size", lengthAsBits.ToString());
+			pit.WriteAttributeString("size", lengthAsBits.ToString(CultureInfo.InvariantCulture));
 			pit.WriteAttributeString("signed", Signed.ToString().ToLower());
 
 			if (!LittleEndian)
@@ -223,7 +223,7 @@ namespace Peach.Core.Dom
 			string conv = str;
 			NumberStyles style = NumberStyles.AllowLeadingSign;
 
-			if (str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
+			if (str.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
 				conv = str.Substring(2);
 				style = NumberStyles.AllowHexSpecifier;

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -166,7 +167,7 @@ namespace Peach.Core.Agent
 				var sb = new StringBuilder(hashLen * 2);
 
 				for (var i = 0; i < hashLen; i++)
-					sb.Append(data[i].ToString("X2"));
+					sb.Append(data[i].ToString("X2", CultureInfo.InvariantCulture));
 
 				return sb.ToString();
 			}

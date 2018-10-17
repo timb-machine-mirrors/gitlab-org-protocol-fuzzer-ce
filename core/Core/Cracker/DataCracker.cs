@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Peach.Core.Dom;
@@ -79,7 +80,7 @@ namespace Peach.Core.Cracker
 			{
 				return "Begin: {0}, Size: {1}, End: {2}".Fmt(
 					begin,
-					size.HasValue ? size.Value.ToString() : "<null>",
+					size.HasValue ? size.Value.ToString(CultureInfo.InvariantCulture) : "<null>",
 					end);
 			}
 		}

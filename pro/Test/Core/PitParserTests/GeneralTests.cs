@@ -1,8 +1,10 @@
 ﻿
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NUnit.Framework;
 using Peach.Core;
 using Peach.Core.Analyzers;
@@ -801,5 +803,38 @@ namespace Peach.Pro.Test.Core.PitParserTests
 			var ex = Assert.Throws<PeachException>(() => DataModelCollector.ParsePit(xml));
 			StringAssert.StartsWith("Error, Pit file failed to validate", ex.Message);
 		}
+
+		[Test]
+		public void TestGlobalization()
+		{
+			const string xml = @"
+<Peach>
+	<StateModel name='SM' initialState='Initial'>
+		<State name='Initial' />
+	</StateModel>
+
+	<Test name='Default' waitTime='0.2' faultWaitTime='5.1'>
+		<StateModel ref='SM' />
+		<Publisher class='Null' />
+	</Test>
+</Peach>";
+			var culture = Thread.CurrentThread.CurrentCulture;
+			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+
+			Peach.Core.Dom.Dom pit;
+
+			try
+			{
+				pit = DataModelCollector.ParsePit(xml);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = culture;
+			}
+
+			Assert.AreEqual(0.2, pit.tests[0].waitTime);
+			Assert.AreEqual(5.1, pit.tests[0].faultWaitTime);
+		}
+
 	}
 }

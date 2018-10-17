@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Xml;
 using NLog;
 
@@ -169,7 +170,7 @@ namespace Peach.Core.Dom
 
 				var value = From.EvalExpression(_expressionGet, state);
 
-				return Convert.ToInt64(value);
+				return Convert.ToInt64(value, CultureInfo.InvariantCulture);
 			}
 			finally
 			{

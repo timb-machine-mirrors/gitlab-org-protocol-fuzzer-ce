@@ -17,6 +17,7 @@ using System.Xml;
 using Peach.Core.IO;
 using Peach.Core.Cracker;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 
 using NLog;
@@ -813,7 +814,7 @@ namespace Peach.Core.Dom
 			{
 				var sb = new StringBuilder();
 				foreach (var b in (byte[])DefaultValue)
-					sb.Append(b.ToString("x2"));
+					sb.Append(b.ToString("x2", CultureInfo.InvariantCulture));
 
 				pit.WriteAttributeString("valueType", "hex");
 				pit.WriteAttributeString("value", sb.ToString());
@@ -827,7 +828,7 @@ namespace Peach.Core.Dom
 				stream.Seek(0, SeekOrigin.Begin);
 
 				for (var i = 0; i < stream.Length; i++)
-					sb.Append(stream.ReadByte().ToString("x2"));
+					sb.Append(stream.ReadByte().ToString("x2", CultureInfo.InvariantCulture));
 
 				stream.Position = pos;
 				pit.WriteAttributeString("valueType", "hex");
@@ -894,20 +895,20 @@ namespace Peach.Core.Dom
 			if (hasLength && !(this is Number) && !(this is Padding) && !(this is Flags) && !(this is Flag) && !(this is Double))
 			{
 				pit.WriteAttributeString("lengthType", lengthType.ToString().ToLower());
-				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString() : length.ToString());
+				pit.WriteAttributeString("length", lengthType == LengthType.Bits ? lengthAsBits.ToString(CultureInfo.InvariantCulture) : length.ToString(CultureInfo.InvariantCulture));
 			}
 
 			var array = parent as Array;
 			if (array != null)
 			{
 				if (array.occurs != 1)
-					pit.WriteAttributeString("occurs", array.occurs.ToString());
+					pit.WriteAttributeString("occurs", array.occurs.ToString(CultureInfo.InvariantCulture));
 				else
 				{
 					if (array.minOccurs != 1)
-						pit.WriteAttributeString("minOccurs", array.minOccurs.ToString());
+						pit.WriteAttributeString("minOccurs", array.minOccurs.ToString(CultureInfo.InvariantCulture));
 					if (array.maxOccurs != 1)
-						pit.WriteAttributeString("maxOccurs", array.maxOccurs.ToString());
+						pit.WriteAttributeString("maxOccurs", array.maxOccurs.ToString(CultureInfo.InvariantCulture));
 				}
 			}
 		}
@@ -957,7 +958,7 @@ namespace Peach.Core.Dom
 		protected static uint _uniqueName = 0;
 
 		public DataElement()
-			: this("DataElement_" + (_uniqueName++).ToString())
+			: this("DataElement_" + (_uniqueName++).ToString(CultureInfo.InvariantCulture))
 		{
 		}
 

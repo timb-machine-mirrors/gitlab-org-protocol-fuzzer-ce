@@ -7,6 +7,7 @@
 // $Id$
 
 using System;
+using System.Globalization;
 using System.Text;
 using System.Xml.Serialization;
 using Peach.Core.IO;
@@ -87,10 +88,10 @@ namespace Peach.Core
 			switch (type.ToLower())
 			{
 				case "system.int32":
-					SetValue(Int32.Parse(v));
+					SetValue(Int32.Parse(v, CultureInfo.InvariantCulture));
 					break;
 				case "system.double":
-					SetValue(Double.Parse(v));
+					SetValue(Double.Parse(v, CultureInfo.InvariantCulture));
 					break;
 				case "system.string":
 					SetValue(v);
@@ -220,7 +221,7 @@ namespace Peach.Core
 						if (v._valueString == string.Empty)
 							return 0;
 
-						return Convert.ToInt32(v._valueString);
+						return Convert.ToInt32(v._valueString, CultureInfo.InvariantCulture);
 					case VariantType.ByteString:
 						throw new NotSupportedException("Unable to convert byte[] to int type.");
 					case VariantType.BitStream:
@@ -268,7 +269,7 @@ namespace Peach.Core
 						if (v._valueString == string.Empty)
 							return 0;
 
-						return Convert.ToUInt32(v._valueString);
+						return Convert.ToUInt32(v._valueString, CultureInfo.InvariantCulture);
 					case VariantType.ByteString:
 						throw new NotSupportedException("Unable to convert byte[] to int type.");
 					case VariantType.BitStream:
@@ -318,7 +319,7 @@ namespace Peach.Core
 						if (v._valueString == string.Empty)
 							return 0;
 
-						return Convert.ToInt64(v._valueString);
+						return Convert.ToInt64(v._valueString, CultureInfo.InvariantCulture);
 					case VariantType.ByteString:
 						throw new NotSupportedException("Unable to convert byte[] to int type.");
 					case VariantType.BitStream:
@@ -353,7 +354,7 @@ namespace Peach.Core
 						if (v._valueString == string.Empty)
 							return 0;
 
-						return Convert.ToUInt64(v._valueString);
+						return Convert.ToUInt64(v._valueString, CultureInfo.InvariantCulture);
 					case VariantType.ByteString:
 						throw new NotSupportedException("Unable to convert byte[] to int type.");
 					case VariantType.BitStream:
@@ -395,7 +396,7 @@ namespace Peach.Core
 						if (v._valueString == string.Empty)
 							return 0.0;
 
-						return Convert.ToDouble(v._valueString);
+						return Convert.ToDouble(v._valueString, CultureInfo.InvariantCulture);
 					case VariantType.ByteString:
 						throw new NotSupportedException("Unable to convert byte[] to int type.");
 					case VariantType.BitStream:
@@ -419,17 +420,17 @@ namespace Peach.Core
 			switch (v._type)
 			{
 				case VariantType.Int:
-					return Convert.ToString(v._valueInt);
+					return Convert.ToString(v._valueInt, CultureInfo.InvariantCulture);
 				case VariantType.Long:
-					return Convert.ToString(v._valueLong);
+					return Convert.ToString(v._valueLong, CultureInfo.InvariantCulture);
 				case VariantType.ULong:
-					return Convert.ToString(v._valueULong);
+					return Convert.ToString(v._valueULong, CultureInfo.InvariantCulture);
 				case VariantType.Double:
-					return Convert.ToString(v._valueDouble);
+					return Convert.ToString(v._valueDouble, CultureInfo.InvariantCulture);
 				case VariantType.String:
 					return v._valueString;
 				case VariantType.Boolean:
-					return Convert.ToString(v._valueBool);
+					return Convert.ToString(v._valueBool, CultureInfo.InvariantCulture);
 				case VariantType.ByteString:
 					throw new NotSupportedException("Unable to convert byte[] to string type.");
 				case VariantType.BitStream:
@@ -665,13 +666,13 @@ namespace Peach.Core
 			switch (_type)
 			{
 				case VariantType.Int:
-					return this._valueInt.ToString();
+					return this._valueInt.Value.ToString(CultureInfo.InvariantCulture);
 				case VariantType.Long:
-					return this._valueLong.ToString();
+					return this._valueLong.Value.ToString(CultureInfo.InvariantCulture);
 				case VariantType.ULong:
-					return this._valueULong.ToString();
+					return this._valueULong.Value.ToString(CultureInfo.InvariantCulture);
 				case VariantType.Double:
-					return this._valueDouble.ToString();
+					return this._valueDouble.Value.ToString(CultureInfo.InvariantCulture);
 				case VariantType.String:
 					if (this._valueString.Length <= 80)
 						return this._valueString.ToString();

@@ -10,6 +10,7 @@ using System;
 using System.Xml;
 using System.Xml.Schema;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
@@ -1727,13 +1728,13 @@ namespace Peach.Core.Analyzers
 			test.Name = node.getAttrString("name");
 
 			if (node.hasAttr("waitTime"))
-				test.waitTime = double.Parse(node.getAttrString("waitTime"));
+				test.waitTime = double.Parse(node.getAttrString("waitTime"), CultureInfo.InvariantCulture);
 
 			if (node.hasAttr("faultWaitTime"))
-				test.faultWaitTime = double.Parse(node.getAttrString("faultWaitTime"));
+				test.faultWaitTime = double.Parse(node.getAttrString("faultWaitTime"), CultureInfo.InvariantCulture);
 
 			if (node.hasAttr("controlIteration"))
-				test.controlIteration = int.Parse(node.getAttrString("controlIteration"));
+				test.controlIteration = int.Parse(node.getAttrString("controlIteration"), CultureInfo.InvariantCulture);
 
 			if (node.hasAttr("nonDeterministicActions"))
 				test.nonDeterministicActions = node.getAttrBool("nonDeterministicActions");

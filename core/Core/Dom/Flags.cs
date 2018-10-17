@@ -7,6 +7,7 @@
 // $Id$
 
 using System;
+using System.Globalization;
 using System.Xml;
 
 using Peach.Core.Analyzers;
@@ -148,7 +149,7 @@ namespace Peach.Core.Dom
 			if (referenceName != null)
 				pit.WriteAttributeString("ref", referenceName);
 
-			pit.WriteAttributeString("size", lengthAsBits.ToString());
+			pit.WriteAttributeString("size", lengthAsBits.ToString(CultureInfo.InvariantCulture));
 
 			if (!LittleEndian)
 				pit.WriteAttributeString("endian", "big");

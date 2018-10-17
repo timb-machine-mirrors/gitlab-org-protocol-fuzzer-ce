@@ -173,7 +173,7 @@ namespace Peach.Core.Dom
 			var conv = str;
 			var style = NumberStyles.AllowLeadingSign;
 
-			if (str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
+			if (str.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
 				conv = str.Substring(2);
 				style = NumberStyles.AllowHexSpecifier;

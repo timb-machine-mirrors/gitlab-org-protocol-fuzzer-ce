@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -437,7 +438,7 @@ namespace Peach.Core
 			{
 				b = data[i];
 
-				sb.Append(b.ToString("X2"));
+				sb.Append(b.ToString("X2", CultureInfo.InvariantCulture));
 
 				if (b >= 32 && b < 127)
 					rightSb.Append(Encoding.ASCII.GetString(new byte[] { b }));
@@ -714,11 +715,11 @@ namespace Peach.Core
 				throw new ArgumentOutOfRangeException("bytes");
 
 			if (bytes > (1024 * 1024 * 1024))
-				return (bytes / (1024 * 1024 * 1024.0)).ToString("0.###") + " Gbytes";
+				return (bytes / (1024 * 1024 * 1024.0)).ToString("0.###", CultureInfo.CurrentCulture) + " Gbytes";
 			if (bytes > (1024 * 1024))
-				return (bytes / (1024 * 1024.0)).ToString("0.###") + " Mbytes";
+				return (bytes / (1024 * 1024.0)).ToString("0.###", CultureInfo.CurrentCulture) + " Mbytes";
 			if (bytes > 1024)
-				return (bytes / 1024.0).ToString("0.###") + " Kbytes";
+				return (bytes / 1024.0).ToString("0.###", CultureInfo.CurrentCulture) + " Kbytes";
 			return bytes + " Bytes";
 		}
 
