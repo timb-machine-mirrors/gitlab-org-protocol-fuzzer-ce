@@ -410,6 +410,11 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void Engine_IterationFinished(RunContext context, uint currentIteration)
 		{
+			// If the job was aborted there is no guarantee that
+			// this iteration completed so don't log it to the db
+			if (context.Aborted)
+				return;
+
 			if (!context.reproducingFault &&
 				!context.controlIteration &&
 				!context.controlRecordingIteration)
@@ -459,6 +464,11 @@ namespace Peach.Pro.Core.Loggers
 
 		protected override void ActionFinished(RunContext context, Action action)
 		{
+			// If the job was aborted there is no guarantee that
+			// ActionStarting was called so just ignore the callback
+			if (context.Aborted)
+				return;
+
 			var msg = action as Message;
 			if (msg != null && context.controlRecordingIteration)
 			{

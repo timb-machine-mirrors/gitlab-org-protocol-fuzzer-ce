@@ -613,6 +613,11 @@ namespace Peach.Core
 
 						throw new SoftException("Out of memory", ex);
 					}
+					catch (ThreadAbortException)
+					{
+						context.Aborted = true;
+						throw;
+					}
 					finally
 					{
 						context.agentManager.IterationFinished();

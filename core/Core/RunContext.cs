@@ -312,6 +312,11 @@ namespace Peach.Core
 		/// </summary>
 		public uint currentIteration = 0;
 
+		/// <summary>
+		/// Was the execution aborted
+		/// </summary>
+		public bool Aborted = false;
+
 		#region Control Iterations
 
 		/// <summary>

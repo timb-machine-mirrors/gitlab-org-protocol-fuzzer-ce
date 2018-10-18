@@ -12,6 +12,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using System.Xml;
 using NLog;
 using Peach.Core.IO;
@@ -382,6 +383,11 @@ namespace Peach.Core.Dom
 			catch (ActionChangeStateException)
 			{
 				// this is not an error
+				throw;
+			}
+			catch (ThreadAbortException)
+			{
+				context.Aborted = true;
 				throw;
 			}
 			catch

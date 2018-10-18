@@ -14,6 +14,7 @@ using Peach.Core.IO;
 
 using NLog;
 using System.ComponentModel;
+using System.Threading;
 using System.Xml;
 
 namespace Peach.Core.Dom
@@ -205,6 +206,11 @@ namespace Peach.Core.Dom
 			catch (ActionException)
 			{
 				// Exit state model!
+			}
+			catch (ThreadAbortException)
+			{
+				context.Aborted = true;
+				throw;
 			}
 			finally
 			{

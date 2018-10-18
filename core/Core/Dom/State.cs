@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using System.Threading;
 using System.Xml;
 
 namespace Peach.Core.Dom
@@ -210,6 +211,11 @@ namespace Peach.Core.Dom
 			catch(ActionChangeStateException)
 			{
 				// this is not an error
+				throw;
+			}
+			catch (ThreadAbortException)
+			{
+				context.Aborted = true;
 				throw;
 			}
 			catch
