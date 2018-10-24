@@ -519,7 +519,7 @@ namespace Peach.Pro.Test.Core.WebServices
 				base.TestBasic();
 			}
 
-			[Test]
+			[Test, Timeout(300000)]
 			[Repeat(10)]
 			public override void TestStop()
 			{
