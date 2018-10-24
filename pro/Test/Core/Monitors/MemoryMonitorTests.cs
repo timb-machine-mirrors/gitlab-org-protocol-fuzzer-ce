@@ -193,8 +193,8 @@ namespace Peach.Pro.Test.Core.Monitors
 		[Test]
 		public void TestFaultProcessName()
 		{
-			if (Platform.GetOS() == Platform.OS.OSX)
-				SetUpFixture.EnableTrace();
+			//if (Platform.GetOS() == Platform.OS.OSX)
+			//	SetUpFixture.EnableTrace();
 
 			// Verify can generate faults using process name
 

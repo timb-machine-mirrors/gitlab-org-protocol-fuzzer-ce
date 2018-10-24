@@ -509,7 +509,7 @@ namespace Peach.Pro.Test.Core.WebServices
 			[OneTimeSetUp]
 			public void EnableTrace()
 			{
-				SetUpFixture.EnableTrace();
+				//SetUpFixture.EnableTrace();
 			}
 
 			[Test]
