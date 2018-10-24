@@ -4,6 +4,44 @@
         <name>nunit.engine.api</name>
     </assembly>
     <members>
+        <member name="T:NUnit.Engine.NUnitEngineException">
+            <summary>
+            NUnitEngineException is thrown when the engine has been
+            called with improper values or when a particular facility
+            is not available.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.NUnitEngineException.#ctor(System.String)">
+            <summary>
+            Construct with a message
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.NUnitEngineException.#ctor(System.String,System.Exception)">
+            <summary>
+            Construct with a message and inner exception
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.NUnitEngineException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Serialization constructor
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.NUnitEngineNotFoundException">
+            <summary>
+            The exception that is thrown if a valid test engine is not found
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.NUnitEngineNotFoundException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:NUnit.Engine.NUnitEngineNotFoundException"/> class.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.NUnitEngineNotFoundException.#ctor(System.Version)">
+            <summary>
+            Initializes a new instance of the <see cref="T:NUnit.Engine.NUnitEngineNotFoundException"/> class.
+            </summary>
+            <param name="minVersion">The minimum version.</param>
+        </member>
         <member name="T:NUnit.Engine.NUnitEngineUnloadException">
             <summary>
             NUnitEngineUnloadException is thrown when a test run has completed successfully
@@ -34,59 +72,6 @@
         <member name="P:NUnit.Engine.NUnitEngineUnloadException.AggregatedExceptions">
             <summary>
             Gets the collection of exceptions .
-            </summary>
-        </member>
-        <member name="T:NUnit.Engine.Extensibility.TypeExtensionPointAttribute">
-            <summary>
-            TypeExtensionPointAttribute is used to bind an extension point
-            to a class or interface.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.#ctor(System.String)">
-            <summary>
-            Construct a TypeExtensionPointAttribute, specifying the path.
-            </summary>
-            <param name="path">A unique string identifying the extension point.</param>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.#ctor">
-            <summary>
-            Construct an TypeExtensionPointAttribute, without specifying the path.
-            The extension point will use a path constructed based on the interface
-            or class to which the attribute is applied.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.Path">
-            <summary>
-            The unique string identifying this ExtensionPoint. This identifier
-            is typically formatted as a path using '/' and the set of extension 
-            points is sometimes viewed as forming a tree.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.Description">
-            <summary>
-            An optional description of the purpose of the ExtensionPoint
-            </summary>
-        </member>
-        <member name="T:NUnit.Engine.Extensibility.ExtensionPropertyAttribute">
-            <summary>
-            The ExtensionPropertyAttribute is used to specify named properties for an extension.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.#ctor(System.String,System.String)">
-            <summary>
-            Construct an ExtensionPropertyAttribute
-            </summary>
-            <param name="name">The name of the property</param>
-            <param name="value">The property value</param>
-        </member>
-        <member name="P:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.Name">
-            <summary>
-            The name of the property.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.Value">
-            <summary>
-            The property value
             </summary>
         </member>
         <member name="T:NUnit.Engine.Extensibility.ExtensionAttribute">
@@ -154,6 +139,28 @@
             An optional description of the purpose of the ExtensionPoint
             </summary>
         </member>
+        <member name="T:NUnit.Engine.Extensibility.ExtensionPropertyAttribute">
+            <summary>
+            The ExtensionPropertyAttribute is used to specify named properties for an extension.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.#ctor(System.String,System.String)">
+            <summary>
+            Construct an ExtensionPropertyAttribute
+            </summary>
+            <param name="name">The name of the property</param>
+            <param name="value">The property value</param>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.Name">
+            <summary>
+            The name of the property.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.ExtensionPropertyAttribute.Value">
+            <summary>
+            The property value
+            </summary>
+        </member>
         <member name="T:NUnit.Engine.Extensibility.IDriverFactory">
             <summary>
             Interface implemented by a Type that knows how to create a driver for a test assembly.
@@ -174,6 +181,126 @@
             <param name="domain">The domain in which the assembly will be loaded</param>
             <param name="reference">An AssemblyName referring to the test framework.</param>
             <returns></returns>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.IExtensionNode">
+            <summary>
+            The IExtensionNode interface is implemented by a class that represents a 
+            single extension being installed on a particular extension point.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.TypeName">
+            <summary>
+            Gets the full name of the Type of the extension object.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.Enabled">
+            <summary>
+            Gets a value indicating whether this <see cref="T:NUnit.Engine.Extensibility.IExtensionNode"/> is enabled.
+            </summary>
+            <value><c>true</c> if enabled; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.Path">
+            <summary>
+            Gets the unique string identifying the ExtensionPoint for which 
+            this Extension is intended. This identifier may be supplied by the attribute
+            marking the extension or deduced by NUnit from the Type of the extension class.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.Description">
+            <summary>
+            Gets an optional description of what the extension does.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.TargetFramework">
+            <summary>
+            The TargetFramework of the extension assembly.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.PropertyNames">
+            <summary>
+            Gets a collection of the names of all this extension's properties
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.IExtensionNode.GetValues(System.String)">
+            <summary>
+            Gets a collection of the values of a particular named property
+            If none are present, returns an empty enumerator.
+            </summary>
+            <param name="name">The property name</param>
+            <returns>A collection of values</returns>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.IExtensionPoint">
+            <summary>
+            An ExtensionPoint represents a single point in the TestEngine
+            that may be extended by user addins and extensions.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.Path">
+            <summary>
+            Gets the unique path identifying this extension point.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.Description">
+            <summary>
+            Gets the description of this extension point. May be null.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.TypeName">
+            <summary>
+            Gets the FullName of the Type required for any extension to be installed at this extension point.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.Extensions">
+            <summary>
+            Gets an enumeration of IExtensionNodes for extensions installed on this extension point.
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.Extensibility.IFrameworkDriver">
+            <summary>
+            The IFrameworkDriver interface is implemented by a class that
+            is able to use an external framework to explore or run tests
+            under the engine.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.Extensibility.IFrameworkDriver.ID">
+            <summary>
+            Gets and sets the unique identifier for this driver,
+            used to ensure that test ids are unique across drivers.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.Load(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Loads the tests in an assembly.
+            </summary>
+            <returns>An Xml string representing the loaded test</returns>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.CountTestCases(System.String)">
+            <summary>
+            Count the test cases that would be executed.
+            </summary>
+            <param name="filter">An XML string representing the TestFilter to use in counting the tests</param>
+            <returns>The number of test cases counted</returns>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.Run(NUnit.Engine.ITestEventListener,System.String)">
+            <summary>
+            Executes the tests in an assembly.
+            </summary>
+            <param name="listener">An ITestEventHandler that receives progress notices</param>
+            <param name="filter">A XML string representing the filter that controls which tests are executed</param>
+            <returns>An Xml string representing the result</returns>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.Explore(System.String)">
+            <summary>
+            Returns information about the tests in an assembly.
+            </summary>
+            <param name="filter">An XML string representing the filter that controls which tests are included</param>
+            <returns>An Xml string representing the tests</returns>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.StopRun(System.Boolean)">
+            <summary>
+            Cancel the ongoing test run. If no  test is running, the call is ignored.
+            </summary>
+            <param name="force">If true, cancel any ongoing test threads, otherwise wait for them to complete.</param>
         </member>
         <member name="T:NUnit.Engine.Extensibility.IProject">
             <summary>
@@ -263,120 +390,78 @@
             <param name="resultNode">XmlNode for the result</param>
             <param name="writer">TextWriter to which it should be written</param>
         </member>
-        <member name="T:NUnit.Engine.Extensibility.IFrameworkDriver">
+        <member name="T:NUnit.Engine.Extensibility.TypeExtensionPointAttribute">
             <summary>
-            The IFrameworkDriver interface is implemented by a class that
-            is able to use an external framework to explore or run tests
-            under the engine.
+            TypeExtensionPointAttribute is used to bind an extension point
+            to a class or interface.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IFrameworkDriver.ID">
+        <member name="M:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.#ctor(System.String)">
             <summary>
-            Gets and sets the unique identifier for this driver,
-            used to ensure that test ids are unique across drivers.
+            Construct a TypeExtensionPointAttribute, specifying the path.
+            </summary>
+            <param name="path">A unique string identifying the extension point.</param>
+        </member>
+        <member name="M:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.#ctor">
+            <summary>
+            Construct an TypeExtensionPointAttribute, without specifying the path.
+            The extension point will use a path constructed based on the interface
+            or class to which the attribute is applied.
             </summary>
         </member>
-        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.Load(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+        <member name="P:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.Path">
             <summary>
-            Loads the tests in an assembly.
-            </summary>
-            <returns>An Xml string representing the loaded test</returns>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.CountTestCases(System.String)">
-            <summary>
-            Count the test cases that would be executed.
-            </summary>
-            <param name="filter">An XML string representing the TestFilter to use in counting the tests</param>
-            <returns>The number of test cases counted</returns>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.Run(NUnit.Engine.ITestEventListener,System.String)">
-            <summary>
-            Executes the tests in an assembly.
-            </summary>
-            <param name="listener">An ITestEventHandler that receives progress notices</param>
-            <param name="filter">A XML string representing the filter that controls which tests are executed</param>
-            <returns>An Xml string representing the result</returns>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.Explore(System.String)">
-            <summary>
-            Returns information about the tests in an assembly.
-            </summary>
-            <param name="filter">An XML string representing the filter that controls which tests are included</param>
-            <returns>An Xml string representing the tests</returns>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.IFrameworkDriver.StopRun(System.Boolean)">
-            <summary>
-            Cancel the ongoing test run. If no  test is running, the call is ignored.
-            </summary>
-            <param name="force">If true, cancel any ongoing test threads, otherwise wait for them to complete.</param>
-        </member>
-        <member name="T:NUnit.Engine.Extensibility.IExtensionPoint">
-            <summary>
-            An ExtensionPoint represents a single point in the TestEngine
-            that may be extended by user addins and extensions.
+            The unique string identifying this ExtensionPoint. This identifier
+            is typically formatted as a path using '/' and the set of extension 
+            points is sometimes viewed as forming a tree.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.Path">
+        <member name="P:NUnit.Engine.Extensibility.TypeExtensionPointAttribute.Description">
             <summary>
-            Gets the unique path identifying this extension point.
+            An optional description of the purpose of the ExtensionPoint
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.Description">
+        <member name="T:NUnit.Engine.IAvailableRuntimes">
             <summary>
-            Gets the description of this extension point. May be null.
+            Interface that returns a list of available runtime frameworks.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.TypeName">
+        <member name="P:NUnit.Engine.IAvailableRuntimes.AvailableRuntimes">
             <summary>
-            Gets the FullName of the Type required for any extension to be installed at this extension point.
+            Gets a list of available runtime frameworks.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionPoint.Extensions">
+        <member name="T:NUnit.Engine.IExtensionService">
             <summary>
-            Gets an enumeration of IExtensionNodes for extensions installed on this extension point.
+            The IExtensionService interface allows a runner to manage extensions.
             </summary>
         </member>
-        <member name="T:NUnit.Engine.Extensibility.IExtensionNode">
+        <member name="P:NUnit.Engine.IExtensionService.ExtensionPoints">
             <summary>
-            The IExtensionNode interface is implemented by a class that represents a 
-            single extension being installed on a particular extension point.
+            Gets an enumeration of all ExtensionPoints in the engine.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.TypeName">
+        <member name="P:NUnit.Engine.IExtensionService.Extensions">
             <summary>
-            Gets the full name of the Type of the extension object.
+            Gets an enumeration of all installed Extensions.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.Enabled">
+        <member name="M:NUnit.Engine.IExtensionService.GetExtensionPoint(System.String)">
             <summary>
-            Gets a value indicating whether this <see cref="T:NUnit.Engine.Extensibility.IExtensionNode"/> is enabled.
-            </summary>
-            <value><c>true</c> if enabled; otherwise, <c>false</c>.</value>
-        </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.Path">
-            <summary>
-            Gets the unique string identifying the ExtensionPoint for which 
-            this Extension is intended. This identifier may be supplied by the attribute
-            marking the extension or deduced by NUnit from the Type of the extension class.
+            Get an ExtensionPoint based on its unique identifying path.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.Description">
+        <member name="M:NUnit.Engine.IExtensionService.GetExtensionNodes(System.String)">
             <summary>
-            Gets an optional description of what the extension does.
+            Get an enumeration of ExtensionNodes based on their identifying path.
             </summary>
         </member>
-        <member name="P:NUnit.Engine.Extensibility.IExtensionNode.PropertyNames">
+        <member name="M:NUnit.Engine.IExtensionService.EnableExtension(System.String,System.Boolean)">
             <summary>
-            Gets a collection of the names of all this extension's properties
+            Enable or disable an extension
             </summary>
-        </member>
-        <member name="M:NUnit.Engine.Extensibility.IExtensionNode.GetValues(System.String)">
-            <summary>
-            Gets a collection of the values of a particular named property
-            If none are present, returns an empty enumerator.
-            </summary>
-            <param name="name">The property name</param>
-            <returns>A collection of values</returns>
+            <param name="typeName"></param>
+            <param name="enabled"></param>
         </member>
         <member name="T:NUnit.Engine.ILogger">
             <summary>
@@ -435,6 +520,18 @@
             <param name="message">The message.</param>
             <param name="args">The arguments.</param>
         </member>
+        <member name="T:NUnit.Engine.ILogging">
+            <summary>
+            Interface to abstract getting loggers
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.ILogging.GetLogger(System.String)">
+            <summary>
+            Gets the logger.
+            </summary>
+            <param name="name">The name of the logger to get.</param>
+            <returns></returns>
+        </member>
         <member name="T:NUnit.Engine.InternalTraceLevel">
             <summary>
             InternalTraceLevel is an enumeration controlling the
@@ -476,6 +573,56 @@
             Display debug messages and higher - i.e. all messages
             </summary>
         </member>
+        <member name="T:NUnit.Engine.IRecentFiles">
+            <summary>
+            The IRecentFiles interface is used to isolate the app
+            from various implementations of recent files.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.IRecentFiles.MaxFiles">
+            <summary>
+            The max number of files saved
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.IRecentFiles.Entries">
+            <summary>
+            Get a list of all the file entries
+            </summary>
+            <returns>The most recent file list</returns>
+        </member>
+        <member name="M:NUnit.Engine.IRecentFiles.SetMostRecent(System.String)">
+            <summary>
+            Set the most recent file name, reordering
+            the saved names as needed and removing the oldest
+            if the max number of files would be exceeded.
+            The current CLR version is used to create the entry.
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.IRecentFiles.Remove(System.String)">
+            <summary>
+            Remove a file from the list
+            </summary>
+            <param name="fileName">The name of the file to remove</param>
+        </member>
+        <member name="T:NUnit.Engine.IResultService">
+            <summary>
+            IResultWriterService provides result writers for a specified
+            well-known format.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.IResultService.Formats">
+            <summary>
+            Gets an array of the available formats
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.IResultService.GetResultWriter(System.String,System.Object[])">
+            <summary>
+            Gets a ResultWriter for a given format and set of arguments.
+            </summary>
+            <param name="format">The name of the format to be used</param>
+            <param name="args">A set of arguments to be used in constructing the writer or null if non arguments are needed</param>
+            <returns>An IResultWriter</returns>
+        </member>
         <member name="T:NUnit.Engine.IRuntimeFramework">
             <summary>
             Interface implemented by objects representing a runtime framework.
@@ -508,35 +655,6 @@
             or null if there is no profile. Currently. the only defined 
             values are Full and Client.
             </summary>
-        </member>
-        <member name="T:NUnit.Engine.IAvailableRuntimes">
-            <summary>
-            Interface that returns a list of available runtime frameworks.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.IAvailableRuntimes.AvailableRuntimes">
-            <summary>
-            Gets a list of available runtime frameworks.
-            </summary>
-        </member>
-        <member name="T:NUnit.Engine.IResultService">
-            <summary>
-            IResultWriterService provides result writers for a specified
-            well-known format.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.IResultService.Formats">
-            <summary>
-            Gets an array of the available formats
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.IResultService.GetResultWriter(System.String,System.Object[])">
-            <summary>
-            Gets a ResultWriter for a given format and set of arguments.
-            </summary>
-            <param name="format">The name of the format to be used</param>
-            <param name="args">A set of arguments to be used in constructing the writer or null if non arguments are needed</param>
-            <returns>An IResultWriter</returns>
         </member>
         <member name="T:NUnit.Engine.IRuntimeFrameworkService">
             <summary>
@@ -602,67 +720,6 @@
             <summary>
             Do any cleanup needed before terminating the service
             </summary>
-        </member>
-        <member name="T:NUnit.Engine.ITestFilterBuilder">
-            <summary>
-            Interface to a TestFilterBuilder, which is used to create TestFilters
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.ITestFilterBuilder.AddTest(System.String)">
-            <summary>
-            Add a test to be selected
-            </summary>
-            <param name="fullName">The full name of the test, as created by NUnit</param>
-        </member>
-        <member name="M:NUnit.Engine.ITestFilterBuilder.SelectWhere(System.String)">
-            <summary>
-            Specify what is to be included by the filter using a where clause.
-            </summary>
-            <param name="whereClause">A where clause that will be parsed by NUnit to create the filter.</param>
-        </member>
-        <member name="M:NUnit.Engine.ITestFilterBuilder.GetFilter">
-            <summary>
-            Get a TestFilter constructed according to the criteria specified by the other calls.
-            </summary>
-            <returns>A TestFilter.</returns>
-        </member>
-        <member name="T:NUnit.Engine.ITestFilterService">
-            <summary>
-            The TestFilterService provides builders that can create TestFilters
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.ITestFilterService.GetTestFilterBuilder">
-            <summary>
-            Get an uninitialized TestFilterBuilder
-            </summary>
-        </member>
-        <member name="T:NUnit.Engine.NUnitEngineNotFoundException">
-            <summary>
-            The exception that is thrown if a valid test engine is not found
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.NUnitEngineNotFoundException.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:NUnit.Engine.NUnitEngineNotFoundException"/> class.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.NUnitEngineNotFoundException.#ctor(System.Version)">
-            <summary>
-            Initializes a new instance of the <see cref="T:NUnit.Engine.NUnitEngineNotFoundException"/> class.
-            </summary>
-            <param name="minVersion">The minimum version.</param>
-        </member>
-        <member name="T:NUnit.Engine.ILogging">
-            <summary>
-            Interface to abstract getting loggers
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.ILogging.GetLogger(System.String)">
-            <summary>
-            Gets the logger.
-            </summary>
-            <param name="name">The name of the logger to get.</param>
-            <returns></returns>
         </member>
         <member name="T:NUnit.Engine.IServiceLocator">
             <summary>
@@ -802,7 +859,7 @@
         <member name="T:NUnit.Engine.ITestEventListener">
             <summary>
             The ITestListener interface is used to receive notices of significant
-            events while a test is running. It's single method accepts an Xml string, 
+            events while a test is running. Its single method accepts an Xml string,
             which may represent any event generated by the test framework, the driver
             or any of the runners internal to the engine. Use of Xml means that
             any driver and framework may add additional events and the engine will
@@ -814,6 +871,58 @@
             Handle a progress report or other event.
             </summary>
             <param name="report">An XML progress report.</param>
+        </member>
+        <member name="T:NUnit.Engine.ITestFilterBuilder">
+            <summary>
+            Interface to a TestFilterBuilder, which is used to create TestFilters
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterBuilder.AddTest(System.String)">
+            <summary>
+            Add a test to be selected
+            </summary>
+            <param name="fullName">The full name of the test, as created by NUnit</param>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterBuilder.SelectWhere(System.String)">
+            <summary>
+            Specify what is to be included by the filter using a where clause.
+            </summary>
+            <param name="whereClause">A where clause that will be parsed by NUnit to create the filter.</param>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterBuilder.GetFilter">
+            <summary>
+            Get a TestFilter constructed according to the criteria specified by the other calls.
+            </summary>
+            <returns>A TestFilter.</returns>
+        </member>
+        <member name="T:NUnit.Engine.ITestFilterService">
+            <summary>
+            The TestFilterService provides builders that can create TestFilters
+            </summary>
+        </member>
+        <member name="M:NUnit.Engine.ITestFilterService.GetTestFilterBuilder">
+            <summary>
+            Get an uninitialized TestFilterBuilder
+            </summary>
+        </member>
+        <member name="T:NUnit.Engine.ITestRun">
+            <summary>
+            The ITestRun class represents an ongoing test run.
+            </summary>
+        </member>
+        <member name="P:NUnit.Engine.ITestRun.Result">
+            <summary>
+            Get the result of the test.
+            </summary>
+            <returns>An XmlNode representing the test run result</returns>
+        </member>
+        <member name="M:NUnit.Engine.ITestRun.Wait(System.Int32)">
+            <summary>
+            Blocks the current thread until the current test run completes
+            or the timeout is reached
+            </summary>
+            <param name="timeout">A <see cref="T:System.Int32"/> that represents the number of milliseconds to wait or -1 milliseconds to wait indefinitely. </param>
+            <returns>True if the run completed</returns>
         </member>
         <member name="T:NUnit.Engine.ITestRunner">
             <summary>
@@ -887,59 +996,6 @@
             <param name="filter">The TestFilter to be used in selecting tests to explore.</param>
             <returns>An XmlNode representing the tests found.</returns>
         </member>
-        <member name="T:NUnit.Engine.NUnitEngineException">
-            <summary>
-            NUnitEngineException is thrown when the engine has been
-            called with improper values or when a particular facility
-            is not available.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.NUnitEngineException.#ctor(System.String)">
-            <summary>
-            Construct with a message
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.NUnitEngineException.#ctor(System.String,System.Exception)">
-            <summary>
-            Construct with a message and inner exception
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.NUnitEngineException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Serialization constructor
-            </summary>
-        </member>
-        <member name="T:NUnit.Engine.IRecentFiles">
-            <summary>
-            The IRecentFiles interface is used to isolate the app
-            from various implementations of recent files.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.IRecentFiles.MaxFiles">
-            <summary>
-            The max number of files saved
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.IRecentFiles.Entries">
-            <summary>
-            Get a list of all the file entries
-            </summary>
-            <returns>The most recent file list</returns>
-        </member>
-        <member name="M:NUnit.Engine.IRecentFiles.SetMostRecent(System.String)">
-            <summary>
-            Set the most recent file name, reordering
-            the saved names as needed and removing the oldest
-            if the max number of files would be exceeded.
-            The current CLR version is used to create the entry.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.IRecentFiles.Remove(System.String)">
-            <summary>
-            Remove a file from the list
-            </summary>
-            <param name="fileName">The name of the file to remove</param>
-        </member>
         <member name="T:NUnit.Engine.TestEngineActivator">
             <summary>
             TestEngineActivator creates an instance of the test engine and returns an ITestEngine interface.
@@ -965,7 +1021,7 @@
         <member name="T:NUnit.Engine.TestFilter">
             <summary>
             Abstract base for all test filters. A filter is represented
-            by an XmlNode with &lt;filter&gt; as it's topmost element.
+            by an XmlNode with &lt;filter&gt; as its topmost element.
             In the console runner, filters serve only to carry this
             XML representation, as all filtering is done by the engine.
             </summary>
@@ -1064,57 +1120,6 @@
             <param name="name">The name of the setting</param>
             <param name="defaultSetting">The default value</param>
             <returns></returns>
-        </member>
-        <member name="T:NUnit.Engine.ITestRun">
-            <summary>
-            The ITestRun class represents an ongoing test run.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.ITestRun.Result">
-            <summary>
-            Get the result of the test.
-            </summary>
-            <returns>An XmlNode representing the test run result</returns>
-        </member>
-        <member name="M:NUnit.Engine.ITestRun.Wait(System.Int32)">
-            <summary>
-            Blocks the current thread until the current test run completes
-            or the timeout is reached
-            </summary>
-            <param name="timeout">A <see cref="T:System.Int32"/> that represents the number of milliseconds to wait or -1 milliseconds to wait indefinitely. </param>
-            <returns>True if the run completed</returns>
-        </member>
-        <member name="T:NUnit.Engine.IExtensionService">
-            <summary>
-            The IExtensionService interface allows a runner to manage extensions.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.IExtensionService.ExtensionPoints">
-            <summary>
-            Gets an enumeration of all ExtensionPoints in the engine.
-            </summary>
-        </member>
-        <member name="P:NUnit.Engine.IExtensionService.Extensions">
-            <summary>
-            Gets an enumeration of all installed Extensions.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.IExtensionService.GetExtensionPoint(System.String)">
-            <summary>
-            Get an ExtensionPoint based on it's unique identifying path.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.IExtensionService.GetExtensionNodes(System.String)">
-            <summary>
-            Get an enumeration of ExtensionNodes based on their identifying path.
-            </summary>
-        </member>
-        <member name="M:NUnit.Engine.IExtensionService.EnableExtension(System.String,System.Boolean)">
-            <summary>
-            Enable or disable an extension
-            </summary>
-            <param name="typeName"></param>
-            <param name="enabled"></param>
         </member>
         <member name="T:NUnit.Engine.TestSelectionParserException">
             <summary>
