@@ -115,6 +115,7 @@ namespace Peach.Pro.Test.Core.Monitors
 		}
 
 		[Test]
+		[Retry(10)]
 		public void DataCollection()
 		{
 			const int max = 10;
@@ -129,6 +130,8 @@ namespace Peach.Pro.Test.Core.Monitors
 					// Capture starts in IterationStarting, and stops in IterationFinished
 					for (var i = 0; i < max; ++i)
 						_socket.SendTo("Hello World", _remoteEp);
+
+					Thread.Sleep(1000);
 
 					m.IterationFinished();
 				},
