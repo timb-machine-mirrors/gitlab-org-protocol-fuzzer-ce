@@ -212,26 +212,37 @@ namespace Peach.Pro.Test.Core.WebServices
 
 		public virtual void TestStop()
 		{
+			Logger.Debug(">>TestStop()");
+
 			var jobRequest = new JobRequest();
 
+			Logger.Debug("_monitor.start");
 			var job = _monitor.Start(_tmpDir.Path, _pitConfigPath, jobRequest);
 			Assert.IsNotNull(job);
 
+			Logger.Debug("_monitor.getjob");
 			job = _monitor.GetJob();
 			Assert.IsNotNull(job);
 
 			var duration = new Random().Next(1000);
+			Logger.Debug("Sleep: {0}ms", duration);
 			Logger.Trace("Sleep: {0}ms", duration);
 			Thread.Sleep(duration);
 
+			Logger.Debug("_monitor.stop");
 			_monitor.Stop();
 
+			Logger.Debug("WaitForFinish");
 			WaitForFinish();
 
+			Logger.Debug("_monitor.getjob");
 			job = _monitor.GetJob();
 			Assert.AreEqual(JobStatus.Stopped, job.Status);
 
+			Logger.Debug("VerifyDatabase");
 			VerifyDatabase(job, false);
+
+			Logger.Debug("<<TestStop()");
 		}
 
 		[Test]

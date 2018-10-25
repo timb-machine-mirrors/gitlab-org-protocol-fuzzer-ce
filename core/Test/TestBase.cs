@@ -84,7 +84,7 @@ namespace Peach.Core.Test
 		{
 			Debug.Listeners.Insert(0, new AssertTestFail());
 
-			var logLevel = 0;
+			var logLevel = 1; // should be 0
 
 			var peachDebug = Environment.GetEnvironmentVariable("PEACH_DEBUG");
 			if (peachDebug == "1")
