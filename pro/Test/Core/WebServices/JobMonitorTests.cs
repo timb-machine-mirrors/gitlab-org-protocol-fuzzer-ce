@@ -212,6 +212,8 @@ namespace Peach.Pro.Test.Core.WebServices
 
 		public virtual void TestStop()
 		{
+			SetUpFixture.EnableTrace();
+
 			Logger.Debug(">>TestStop()");
 
 			var jobRequest = new JobRequest();
