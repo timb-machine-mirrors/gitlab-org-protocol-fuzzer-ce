@@ -655,7 +655,7 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
-		[Retry(5)]
+		[Retry(10)]
 		public void TestTwoCoreFaults()
 		{
 			const string pit = @"
@@ -744,7 +744,7 @@ namespace Peach.Pro.Test.Core.Loggers
 		}
 
 		[Test]
-		[Retry(5)]
+		[Retry(10)]
 		public void TestFaultFile()
 		{
 			const string xml = @"
