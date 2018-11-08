@@ -23,6 +23,7 @@ def configure(conf):
 	gemfile.write('''
 source 'https://rubygems.org'
 
+gem 'concurrent-ruby'
 gem 'coderay', '~> 1.1.0'
 gem 'prawn', '~> 2.1.0'
 gem 'asciidoctor', '~> 1.5.0'
