@@ -25,7 +25,7 @@ namespace Peach {
 		}
 
 		private LoadLicense(): ng.IPromise<ILicense> {
-			const promise = this.$http.get(C.Api.License);
+			const promise = this.$http.get<ILicense>(C.Api.License);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
 			});
@@ -77,7 +77,7 @@ namespace Peach {
 		}
 
 		private AcceptEula(): ng.IPromise<ILicense> {
-			const promise = this.$http.post(C.Api.License, {});
+			const promise = this.$http.post<ILicense>(C.Api.License, {});
 			promise.then(() => {
 				this.$state.reload();
 			});

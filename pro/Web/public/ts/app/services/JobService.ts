@@ -136,7 +136,7 @@ namespace Peach {
 
 		public GetJobs(): ng.IPromise<IJob[]> {
 			const params = { dryrun: false };
-			const promise = this.$http.get(C.Api.Jobs, { params: params });
+			const promise = this.$http.get<IJob[]>(C.Api.Jobs, { params: params });
 			promise.success((jobs: IJob[]) => this.jobs = jobs);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				if (reason.status !== 401 && reason.status !== 402) {
@@ -147,7 +147,7 @@ namespace Peach {
 		}
 
 		public Start(job: IJobRequest): ng.IPromise<IJob> {
-			const promise = this.$http.post(C.Api.Jobs, job);
+			const promise = this.$http.post<IJob>(C.Api.Jobs, job);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				const options: IAlertOptions = {
 					Title: 'Error Starting Job',
@@ -265,7 +265,7 @@ namespace Peach {
 		}
 
 		private reloadFaults(): ng.IHttpPromise<IFaultSummary[]> {
-			const promise = this.$http.get(this.job.faultsUrl);
+			const promise = this.$http.get<IFaultSummary[]>(this.job.faultsUrl);
 			promise.success((faults: IFaultSummary[]) => {
 				this.faults = faults;
 			});

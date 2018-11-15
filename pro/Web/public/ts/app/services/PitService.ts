@@ -33,7 +33,7 @@ namespace Peach {
 		}
 
 		public LoadLibrary(): ng.IPromise<ILibrary[]> {
-			const promise = this.$http.get(C.Api.Libraries);
+			const promise = this.$http.get<ILibrary[]>(C.Api.Libraries);
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
 			});
@@ -42,7 +42,7 @@ namespace Peach {
 
 		public LoadPit(): ng.IPromise<IPit> {
 			const url = C.Api.PitUrl.replace(':id', this.CurrentPitId);
-			const promise = this.$http.get(url);
+			const promise = this.$http.get<IPit>(url);
 			promise.success((pit: IPit) => this.OnSuccess(pit, false));
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
@@ -106,7 +106,7 @@ namespace Peach {
 				webProxy: this.pit.webProxy
 			};
 
-			const promise = this.$http.post(this.pit.pitUrl, dto);
+			const promise = this.$http.post<IPit>(this.pit.pitUrl, dto);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				this.$state.go(C.States.MainError, { message: reason.data.errorMessage });
@@ -169,7 +169,7 @@ namespace Peach {
 		}
 
 		private DoNewPit(request: IPitCopy): ng.IHttpPromise<IPit> {
-			const promise = this.$http.post(C.Api.Pits, request);
+			const promise = this.$http.post<IPit>(C.Api.Pits, request);
 			promise.success((pit: IPit) => this.OnSuccess(pit, true));
 			promise.catch((reason: ng.IHttpPromiseCallbackArg<IError>) => {
 				if (reason.status >= 500) {
