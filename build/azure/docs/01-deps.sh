@@ -17,7 +17,6 @@ sudo DEBIAN_FRONTEND=noninteractive \
   purge libmono* mono-complete mono-runtime
 sudo rm -rf usr/lib/mono /usr/local/bin/mono /usr/local/etc/mono /usr/local/lib/mono
 
-
 ############################
 echo *** Remove old mono apt respository *************************************************
 

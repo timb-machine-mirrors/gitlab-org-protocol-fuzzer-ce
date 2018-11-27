@@ -27,7 +27,6 @@ sudo DEBIAN_FRONTEND=noninteractive \
 
 sudo rm -f /etc/apt/sources.list.d/mono-official-stable*
 
-
 ############################
 echo *** Install Mono *************************************************
 
@@ -45,25 +44,8 @@ echo *** Install typescript *************************************************
 sudo npm install -g typescript@1.7
 
 ############################
-echo *** Install asciidoctor-pdf *************************************************
+echo *** Install GCC Multilib *************************************************
 
-sudo DEBIAN_FRONTEND=noninteractive apt --yes --force-yes install ruby-dev bundler
-sudo gem install prawn --version 1.3.0
-sudo gem install addressable --version 2.4.0
-sudo gem install prawn-svg --version 0.21.0
-sudo gem install prawn-templates --version 0.0.3
-sudo gem install rouge
-sudo gem install pygments.rb
-sudo gem install coderay
-sudo gem install asciidoctor-pdf --pre
-
-# Install doxygen
-sudo DEBIAN_FRONTEND=noninteractive apt --yes --force-yes install \
-  doxygen \
-  libxml2-utils \
-  xsltproc
-
-# Install gcc multilib for 32bit support
 sudo DEBIAN_FRONTEND=noninteractive apt --yes --force-yes install \
   gcc-multilib \
   g++-multilib
