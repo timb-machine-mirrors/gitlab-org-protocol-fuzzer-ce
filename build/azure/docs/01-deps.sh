@@ -2,7 +2,7 @@
 
 # Linux
 
-set -e
+set -ev
 
 sudo apt -y update
 

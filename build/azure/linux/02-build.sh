@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ev
 
 export PATH=$PATH:/usr/local/bin
 
