@@ -2,7 +2,8 @@
 
 # Linux
 
-set -ev
+#set -ev
+set -v
 
 echo "*** Running tests ***"
 
@@ -13,10 +14,13 @@ include=Quick
 
 declare -a TESTDLLS=(
     "Peach.Core.Test.dll"
-    "Peach.Pro.Test.OS.Linux.dll"
-    "Peach.Pro.Test.WebApi.exe"
-    "Peach.Pro.Test.dll"
 )
+#declare -a TESTDLLS=(
+#    "Peach.Core.Test.dll"
+#    "Peach.Pro.Test.OS.Linux.dll"
+#    "Peach.Pro.Test.WebApi.exe"
+#    "Peach.Pro.Test.dll"
+#)
 
 for it in "${TESTDLLS[@]}"
 do
@@ -30,7 +34,7 @@ do
         --result "${result}_${it}.xml" \
         ${bin_folder}${it}
     
-    $ret=$_
+    $ret=$?
 
     echo "Nunit exit code: $ret"
 
@@ -41,7 +45,7 @@ do
 
     if ["$ret" != "0"] 
     then
-        nunit_error = true
+        nunit_error=true
     fi
 
     sed -i -e 's/name=\"/name=\"${target}./g' ${result}_${it}.xml
