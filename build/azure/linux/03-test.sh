@@ -34,7 +34,7 @@ do
         --result "${result}_${it}.xml" \
         ${bin_folder}${it}
     
-    $ret=$?
+    ret=$?
 
     echo "Nunit exit code: $ret"
 
@@ -43,10 +43,10 @@ do
     #    error("nunit test runner failed") 
     #}
 
-    if ["$ret" != "0"] 
-    then
-        nunit_error=true
-    fi
+    #if ["$ret" != "0"] 
+    #then
+    #    nunit_error=true
+    #fi
 
     sed -i -e 's/name=\"/name=\"${target}./g' ${result}_${it}.xml
 
