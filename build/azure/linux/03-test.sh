@@ -12,15 +12,15 @@ result="output/nunit-linux_x86_64_debug"
 nunit_error=false
 include=Quick
 
-#declare -a TESTDLLS=(
-#    "Peach.Core.Test.dll"
-#)
 declare -a TESTDLLS=(
     "Peach.Core.Test.dll"
-    "Peach.Pro.Test.OS.Linux.dll"
-    "Peach.Pro.Test.WebApi.exe"
-    "Peach.Pro.Test.dll"
 )
+#declare -a TESTDLLS=(
+#    "Peach.Core.Test.dll"
+#    "Peach.Pro.Test.OS.Linux.dll"
+#    "Peach.Pro.Test.WebApi.exe"
+#    "Peach.Pro.Test.dll"
+#)
 
 for it in "${TESTDLLS[@]}"
 do
