@@ -48,7 +48,7 @@ do
     #    nunit_error=true
     #fi
 
-    sed -i -e "s/name=\"/name=\"$target./g" ${result}_${it}.xml
+    #sed -i -e "s/name=\"/name=\"$target./g" ${result}_${it}.xml
 
 done
 
