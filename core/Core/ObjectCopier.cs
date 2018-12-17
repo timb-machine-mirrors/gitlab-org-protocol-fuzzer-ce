@@ -256,7 +256,17 @@ namespace Peach.Core
 
 			// Only operate on classes that are explicitly marked as Serializable
 			if (!type.GetAttributes<SerializableAttribute>(null).Any())
-				throw new NotSupportedException("Can not clone '{0}', it is not marked as serializable.".Fmt(type.FullName));
+			{
+				switch (type.FullName)
+				{
+					// https://github.com/mono/mono/issues/10289
+					case "System.Text.InternalEncoderBestFitFallback":
+					case "System.Text.InternalDecoderBestFitFallback":
+						break;
+					default:
+						throw new NotSupportedException("Can not clone '{0}', it is not marked as serializable.".Fmt(type.FullName));
+				}
+			}
 
 			// Get functions decorated with callback attributes
 			var shouldClone = GetMethodsWithAttribute(typeof(ShouldCloneAttribute), type);
@@ -695,7 +705,7 @@ namespace Peach.Core
 			var setValue = typeof(FieldInfo).GetMethod("SetValue", new [] { typeof(object), typeof(object) });
 
 			/*
-			 * clone.GetType().GetField(fieldInfo.Name).SetValue(value)
+			 * clone.GetType().GetField(fieldInfo.Name).SetValue((object)value)
 			 */
 
 			var expr = Expression.Call(
@@ -707,7 +717,7 @@ namespace Peach.Core
 				),
 				setValue,
 				clone,
-				value
+				Expression.Convert(value, typeof(object))
 			);
 
 			return expr;
