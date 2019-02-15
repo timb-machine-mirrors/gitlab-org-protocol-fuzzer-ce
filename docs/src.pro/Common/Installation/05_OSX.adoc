@@ -1,7 +1,7 @@
 [[InstallOnOSX]]
-=== OS X
+=== macOS
 
-To install on OS X, follow the installation steps provided below.  Installation will require installing the Mono .NET runtime, then Peach.
+To install on macOS, follow the installation steps provided below.  Installation will require installing the Mono .NET runtime, then Peach.
 To enable support for the xref:Monitors_CrashWrangler[CrashWrangler] monitor,
 install CrashWrangler and Xcode.
 Note that installing CrashWrangler is optional;
@@ -29,7 +29,7 @@ such as +peach-pro-{BUILDTAG}-osx_release.zip+.
 
 . Install CrashWrangler.
 +
-CrashWrangler *MUST* be compiled on each OS X machine.
+CrashWrangler *MUST* be compiled on each macOS machine.
 Peach includes the CrashWrangler source files in the peach distribution.
 Here are instructions to install and compile CrashWrangler from the peach zip.
 

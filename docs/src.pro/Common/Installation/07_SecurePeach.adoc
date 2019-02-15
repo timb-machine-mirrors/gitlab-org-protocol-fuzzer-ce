@@ -1,14 +1,9 @@
 [[InstallSecureInstall]]
-=== Secure Peach Install
+=== Enabling HTTPS And Authentication
 
-By default, Peach exposes a web interface that is accessible with no encryption (SSL/TLS) and no authentication.
-Peach will natively support this in the future, but currently there is a work around by configuring nginx or
-other web server (apache, thttp, etc.) as a reverse proxy.
-This will place the configured web server in front of Peach wrapping requests in TLS and
-optionally providing authentication.
-
-This configuration is well supported on Linux and OS X.  Performing this configuration on Windows can be done,
-but this guide will not provide the steps.
+{product} uses a web interface for configuration and control of the fuzzing engine.
+By default, the web interface is accessible with no encryption (SSL/TLS) and no authentication.
+If the use of HTTPS or authentication is required, a reverse proxy (apache/nginx/traefik) can be used to provide both SSL/TLS and authentication.
 
 ==== Reverse Proxy with NGINX
 
@@ -20,13 +15,12 @@ link:http://www.selfsignedcertificate.com/[online self-signed certificate genera
 . Install the included NGINX configuration file to /etc/nginx/sites-available/peach
 . Install certificate and key and update configuration file if needed
 . Create .htpasswd with username/passwords replacing +USERNAME+ with your username
-
++
 ----
 sudo sh -c "echo -n 'USERNAME:' >> /etc/nginx/.htpasswd"
 sudo sh -c "openssl passwd -apr1 >> /etc/nginx/.htpasswd"
 ----
 
-[start=6]
 . Add a firewall rule to block external access to Peach's port 8888.  Make sure this rule is enabled on bootup.
 . Link /etc/nginx/sites-available/peach to /etc/nginx/sites-enabled/peach
 . Restart NGINX and verify configuration is working

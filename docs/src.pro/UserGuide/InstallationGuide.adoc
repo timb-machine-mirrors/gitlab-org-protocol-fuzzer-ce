@@ -45,8 +45,4 @@ This guide is provided for convenience and does not contain any additional infor
 <<<
 include::../Common/Installation/00_Section.adoc[]
 
-:leveloffset: 0
-<<<
-include::11_Appendixes/00_Section.adoc[]
-
 // end
