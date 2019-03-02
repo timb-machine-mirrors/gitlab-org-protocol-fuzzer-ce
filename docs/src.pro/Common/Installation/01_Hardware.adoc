@@ -1,4 +1,4 @@
-[[Instalation_Hardware]]
+[[Installation_Hardware]]
 === Hardware Requirements
 
 The following are generic hardware recommendations. Adjust based on your needs.
