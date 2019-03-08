@@ -84,6 +84,12 @@ namespace Peach.Core.Dom
 		/// </summary>
 		public DataElement Ack { get; set; }
 
+		/// <summary>
+		/// Negative acknowledgement to use for fragments.
+		/// Recieving a nack will trigger retransmission of last fragment a max of 3 times.
+		/// </summary>
+		public DataElement Nack { get; set; }
+
 		public bool ReassembleDataSet { get; set; }
 
 		public bool InputModel { get; set; }
@@ -134,7 +140,7 @@ namespace Peach.Core.Dom
 					"Error: Frag '{0}' missing child element named 'Payload'.",
 					block.Name));
 
-			var validNames = new List<string> { "Template", "Rendering", "Payload", "Ack" };
+			var validNames = new List<string> { "Template", "Rendering", "Payload", "Ack", "Nack" };
 			var badNames = block._childrenDict.Keys.Where(x => !validNames.Contains(x)).ToList();
 
 			if (badNames.Count != 0)
@@ -203,6 +209,12 @@ namespace Peach.Core.Dom
 
 			if (!TryGetValue("Ack", out elem))
 				elem = Ack;
+
+			if (elem != null)
+				elem.WritePit(pit);
+
+			if (!TryGetValue("Nack", out elem))
+				elem = Nack;
 
 			if (elem != null)
 				elem.WritePit(pit);
@@ -304,6 +316,14 @@ namespace Peach.Core.Dom
 					Ack = elem;
 					Remove(elem, false);
 					Ack.parent = this;
+				}
+
+				// Also relocate our nack
+				if (TryGetValue("Nack", out elem))
+				{
+					Nack = elem;
+					Remove(elem, false);
+					Nack.parent = this;
 				}
 			}
 
