@@ -85,6 +85,13 @@ namespace Peach.Core.Dom
 		public DataElement Ack { get; set; }
 
 		/// <summary>
+		/// Acknowledgement to use for final fragment.
+		/// LastAck allows sending a different value for final fragments.
+		/// If not provided the Ack model is used.
+		/// </summary>
+		public DataElement LastAck { get; set; }
+
+		/// <summary>
 		/// Negative acknowledgement to use for fragments.
 		/// Recieving a nack will trigger retransmission of last fragment a max of 3 times.
 		/// </summary>
@@ -140,7 +147,7 @@ namespace Peach.Core.Dom
 					"Error: Frag '{0}' missing child element named 'Payload'.",
 					block.Name));
 
-			var validNames = new List<string> { "Template", "Rendering", "Payload", "Ack", "Nack" };
+			var validNames = new List<string> { "Template", "Rendering", "Payload", "Ack", "LastAck", "Nack" };
 			var badNames = block._childrenDict.Keys.Where(x => !validNames.Contains(x)).ToList();
 
 			if (badNames.Count != 0)
@@ -209,6 +216,12 @@ namespace Peach.Core.Dom
 
 			if (!TryGetValue("Ack", out elem))
 				elem = Ack;
+
+			if (elem != null)
+				elem.WritePit(pit);
+
+			if (!TryGetValue("LastAck", out elem))
+				elem = LastAck;
 
 			if (elem != null)
 				elem.WritePit(pit);
@@ -316,6 +329,14 @@ namespace Peach.Core.Dom
 					Ack = elem;
 					Remove(elem, false);
 					Ack.parent = this;
+				}
+
+				// Also relocate our LastAck
+				if (TryGetValue("LastAck", out elem))
+				{
+					LastAck = elem;
+					Remove(elem, false);
+					LastAck.parent = this;
 				}
 
 				// Also relocate our nack
