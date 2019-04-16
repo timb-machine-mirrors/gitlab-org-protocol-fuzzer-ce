@@ -53,7 +53,7 @@ namespace Peach.Pro.Core.Runtime
 
 				config.Manifest = PitResourceLoader.LoadManifest(root);
 				
-				_license = new FlexeraLicense(config, new FlexeraLicense.FlexeraOptions()
+				_license = new FlexeraLicense(config, new LicenseOptions()
 				{
 					ForceActivation = forceActivation,
 					Deactivate = deactivate,
@@ -63,7 +63,7 @@ namespace Peach.Pro.Core.Runtime
 				if (!_license.IsValid())
 					throw new ApplicationException(deactivate
 						? "Deactivation was successful."
-						: "The licence is invalid.");
+						: "The license is invalid.");
 			}
 			else
 			{

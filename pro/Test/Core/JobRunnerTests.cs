@@ -455,7 +455,7 @@ namespace Peach.Pro.Test.Core
 		public void TestWithMonitors()
 		{
 			var license = new Mock<ILicense>();
-			license.Setup(x => x.CanUseMonitor("你好RandoFaulter")).Returns(true);
+			license.Setup(x => x.CanUseMonitor("你好RandoFaulter", "Core")).Returns(true);
 
 			var jobRequest = new JobRequest
 			{

@@ -30,6 +30,14 @@ namespace Peach.Pro.Core.License
 		public bool IsValid { get; set; }
 	}
 
+	public static class Bundle
+	{
+		public const string Android = "Android";
+		public const string CAN = "CAN";
+		public const string Core = "Core";
+		public const string IoT = "IoT";
+	}
+
 	public interface ILicense : IDisposable
 	{
 		LicenseStatus Status { get; }
@@ -41,7 +49,7 @@ namespace Peach.Pro.Core.License
 		EulaType Eula { get; }
 
 		PitFeature CanUsePit(string path);
-		bool CanUseMonitor(string name);
+		bool CanUseMonitor(string name, string category);
 
 		IJobLicense NewJob(string pit, string config, string job);
 	}

@@ -68,7 +68,7 @@ namespace Peach.Pro.Test.Core.Loggers
 		void InitializeLicense(Peach.Core.Dom.Dom dom, RunConfiguration cfg)
 		{
 			var license = new Mock<ILicense>();
-			license.Setup(x => x.CanUseMonitor("你好RandoFaulter")).Returns(true);
+			license.Setup(x => x.CanUseMonitor("你好RandoFaulter", "Core")).Returns(true);
 			var jobLicense = new Mock<IJobLicense>();
 
 			var test = dom.tests["Default"];

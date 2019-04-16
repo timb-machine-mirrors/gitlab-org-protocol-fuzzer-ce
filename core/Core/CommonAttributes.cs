@@ -123,6 +123,11 @@ namespace Peach.Core
 		public PluginScope Scope { get; set; }
 
 		/// <summary>
+		/// The category of the plugin.
+		/// </summary>
+		public string Category { get; set; }
+
+		/// <summary>
 		/// The operating systems that support this plugin.
 		/// </summary>
 		public Platform.OS OS { get; set; }

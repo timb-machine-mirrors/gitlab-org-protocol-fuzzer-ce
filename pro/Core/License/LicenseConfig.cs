@@ -5,6 +5,21 @@ using Peach.Core;
 
 namespace Peach.Pro.Core.License
 {
+	public class LicenseOptions
+	{
+		/// <summary>
+		/// Force activation, --activate
+		/// </summary>
+		public bool ForceActivation = false;
+
+		public bool Deactivate = false;
+
+		/// <summary>
+		/// Retry license actions
+		/// </summary>
+		public bool Retry = true;
+	}
+
 	public interface ILicenseConfig
 	{
 		string ActivationId { get; set; }

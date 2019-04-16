@@ -165,12 +165,12 @@ namespace Peach.Pro.Core.Loggers
 						//   that name.
 
 						var type = ClassLoader.FindPluginByName<MonitorAttribute>(cls);
-						var monitorName = type.GetAttributes<MonitorAttribute>()
-							.First(x => x.IsDefault)
-							.Name;
+						var monitor = type.GetAttributes<MonitorAttribute>()
+							.First(x => x.IsDefault);
+						var category = string.IsNullOrEmpty(monitor.Category) ? Bundle.Core : monitor.Category;
 
 						if (type.Assembly == Assembly.GetExecutingAssembly() &&
-						   !_license.CanUseMonitor(monitorName))
+						   !_license.CanUseMonitor(monitor.Name, category))
 						{
 							throw new PeachException(
 								"The {0} monitor is not supported with your current license. ".Fmt(cls) +
