@@ -53,7 +53,7 @@ namespace Peach.Pro.Core.Runtime
 
 				config.Manifest = PitResourceLoader.LoadManifest(root);
 				
-				_license = new FlexeraLicense(config, new LicenseOptions()
+				_license = new PeachLicense(config, new LicenseOptions()
 				{
 					ForceActivation = forceActivation,
 					Deactivate = deactivate,
