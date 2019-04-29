@@ -1,25 +1,362 @@
-= Peach Professional Development
+:toc:
 
-This is the current bleeding edge repo for Peach Professional.
+= Peach Fuzzer Professional
 
-== Current Repo's:
+== Repo Layout
 
-peach-pro:: Peach Professional Master
-peach-core::
-  INVISIBLE DO NOT DIRECTLY MODIFY.
-  This repo is mapped into peach-pro/core. All edits and changes should be made to the peach-pro repo.
-  Only Seth is allowed to migrate changes to peach-core.
-pits:: 
-  This repo is for all pit related work.  Contains Peach Pro Pits, internal pits and client pits.
+build::
+  Build scripts for compiling the repo.
+  This includes waf (the build system used by peach),
+  asciidoctor templates, and various scripts used by jenkins
+  for integration builds.
+core::
+  Common classes and interfaces between OSS and closed source Peach.
+docs::
+  All documentation for the user's guide, developer guide and trial guides.
+flexnetls::
+  The artifacts needed to create the local license server installation zips.
+packer::
+  The template and scripts used by packer (https://packer.io) to generate
+  the hosted trial AMI and on-prem trial OVA.
+pro::
+  The source code for Peach Professional and the assiciated applications and tests.
+tools::
+  Scripts needed by the build (nunit launcher and `*.exe.config` generator).
+
+== Git Workflow
+
+The build scripts expect all commit messages to follow a set of rules.
+Messages MUST start with one of the following prefixes:
+`new:` `chg:` `fix:` `dev:`.
+No merge commits are allowed, and it is recommended that all PRs
+are squashed into a single commit.
+
+The first line of the commit message is used to automatically genertate the customer facing changelog.
+The subsequent lines of the commit message can contain anything and are ignored during changelog generation.
+If the commit message starts with `dev:` the commit will be omitted from the changelog.
+The other commits are catogorized as either new, changed or fixed.
+
+== Local Build Instructions
+
+Peach supports compilation on Windows, Linux and OSX computers.
+Peach uses waf (https://waf.io/) as its build system.
+Waf supports the idea of 'build variants' which is used for compiling
+Peach for various platforms and architectures.
+
+Peach uses 11 different build variants:
+
+Windows::
+  `win_x86_debug` `win_x86_release` `win_x64_debug` `win_x64_release`
+Linux::
+  `linux_x86_debug` `linux_x86_release` `linux_x86_64_debug` `linux_x86_64_release`
+OSX::
+  `osx_debug` `osx_release`
+Documentation::
+  `doc`
+
+Waf builds out of tree, meaning the intermediate files and output
+binaries are placed in a different directory than the source code.
+For the peach build, intermediate files are placed in the `slag/{variant}` directory
+and are installed in the `output/{variant}` directory.
+
+Waf looks for `wscript_build` files in all sub directories of the root
+and runs whatever is in them.  For most top-level `wscript_build` files,
+they typically just contain the next list of sub directories to recurse into.
+
+=== Windows Build Prerequisites:
+
+ * Python 2.7
+ * Ruby 2.3
+ * doxygen, java, xmllint, xsltprocx
+ * .NET Framework 4.6.1
+ * Visual Studio 2015 or 2017 with C++ compilers
+ * TypeScript Compiler (tsc)
+ 
+=== Linux Build Prerequisites:
+
+ * Ubuntu 16.04 recommended
+ * gcc and g++
+ * g++-multilib (for x86 cross compiling)
+ * python 2.7
+ * ruby 2.3
+ * doxygen, java, xmllint, xsltproc
+ * mono-complete v4.8.1
+ * nodejs and tsc
+
+=== Build Commands
+
+The minimum commands needed to compile peach are shown below:
+
+----
+waf configure
+waf build
+waf install
+----
+
+waf configure::
+  This is the first step that must be run in order to compile peach.
+  This step is analogous to the autoconf phase of linux library compilation. +
+   +
+  Waf will try to locate all build dependencies and will save their paths.
+  If a build dependency can not be located for a specific variant,
+  the build variant will be marked as not supported.
+  This can be useful if you only want to build for linux_x86_64 but do not want to build docs. +
+   +
+  The configure phase will run the program packt (https://fsprojects.github.io/Paket/) and fetch
+  all the 3rd Party dependencies from nuget using the requirements listed in `paket/paket.depenencies`. +
+   +
+  NOTE: waf configure only needs to be run once.
+  For the normal developer workflow of modifying Peach sources, you will not
+  need to run this command.  However, if you make changes to the build scripts
+  (located in the `build` directory, or you changed the installed set of build tools,
+  you will need to re-run this command so updated tool path can be resolved. +
+   +
+  TIP: If an error occurs because a required tool can not be located, try
+  re-running with increased verbosity.  `waf configure -v` will display
+  every dependency that being located as well as the full path where it is detected. +
+   +
+  The configuration phase is also how the integration build sets the version number.
+  By running `waf configure --buildtag=4.3.100`, all built artifacts will be 
+  stamped with the specified buildtag.  If no option is specified, the buildtag
+  defaults to `0.0.0`.
+
+waf build::
+  This is the command that will compile all the bits in the repository.
+  Compilation includes generating version stamped files,
+  running any source code transpilation,
+  compiling the source and linking the results. +
+   +
+  This command is analogous to running `make` on linux. +
+   +
+  All artifacts from the build phase will end up in the `slag/{variant}` directory.
+
+waf install::
+  This command installs the program outputs, as well as all library depenedencies, into the `output/{variant}` directory. +
+   +
+  This command is analogous to running `make install` on linux. +
+   +
+  The usual developer workflow for linux is to run `waf install --variant=linux_x86_64_debug`
+  and then run `./output/linux_x86_64_debug/bin/peach`.
+
+=== Optional Build Commands
+
+waf pkg::
+  This generates the installer zips.
+  For peach, there are two zips, one for internal usage (running unit tests/integration tests)
+  and one for external usage (uploading to the download site).
+  The two zips land in the `output/{variant}/pkg` folder.
+  Lastly, this waf command will create the local license server zip.
+
+waf test::
+  Runs all the unit tests.  To run unit tests for a the windows x64 debug variant, you can run
+  `waf test --variant=win_x64_debug`.
+
+waf msvs2017::
+  Creates all the `.csproj` files and `Peach.sln` file for use with Visual Studio 2017.
   
-epeach::
-  DEPRECATED. End of life with feature-14Q2 release.
-  Starting with feature-14Q3, make use of peach-pro repo.
+waf zip::
+  Zips all the outputs from the install phase into a single artifact.
 
-peach::
-  master -- new repo layout with peach-core mapped to master/core
-  v3.1 -- sub-module of epeach. DEPRECATED.
+=== Waf Notes
 
+Waf usage follows the syntax: `waf [command] [options]`
+For all commands, the verbosity can be increased by adding one or more `-v` arguments.
+For all commands except configure, the following options are supported:
+
+ * `--variant=xxx` will filter the command to variants that contain 'xxx' in their name.
+   This means `--variant=4_d` will match the variants `linux_x86_64_debug` and `win_x64_debug`.
+ * `-j1` will control the task parallelization of waf so only 1 task can run at a time.
+   By default, waf will run N tasks simultaneously where N corresponds to the number opf CPU cores on the host.
+   Only running a single task at a time can sometimes help with troubleshooting build errors.
+ * `waf --help` will display the full list of supported commands and options.
+
+== Integration Build
+
+=== Overview
+
+The integration build is performed via jenkins at http://jenkins.int.dejavusecurity.com
+The rules for the integration are codified in the `jenkins.groovy` file located in the root of the repository.
+The jenkins job `seeders/peach-pro` is configured to execute the groovy file,
+which will cause jenkins to generate the integration build project for peach-pro.
+
+If changes need to be made to the integration build steps, first modify `jenkins.groovy`
+then navigate to http://jenkins.int.dejavusecurity.com/job/seeders/job/peach-pro/ and click the 'Scan Project Now'.
+The integration build steps will be re-created with the corresponding changes.
+
+=== Release Artifacts
+
+Upon successful completion of the integration build, a set of release artifacts will be generated.
+These artifacts are saved on the nas, and if the build is to be published,
+all of the artifacts are rsynced to the Peach download site.
+
+The directory structure for the nas is the same as for the download site.
+Builds should will be stored in the folder `{major}.{minor}/v{major}.{minor}.{build}`.
+For example, build `4.3.200` will be saved to the folder `4.3/v4.3.200`.
+A description of the various build artifacts is described below.
+
+Release Manifest::
+  The release manifest is stored in `release.json`.  This file is used by the download site
+  to enable downloading of the release.  It contains the list of all pits, their corresponding zips, as well as the various peach release zips.
+
+Peach Zips::
+  These zips contain the actual peach fuzzer binaries.  There are 5 zips and they are named according to tbe buildtag and the architecture they support.
+  For build `4.3.200` the 5 files will be:
+  * peach-pro-4.3.200-linux_x86_64_release.zip
+  * peach-pro-4.3.200-linux_x86_release.zip
+  * peach-pro-4.3.200-osx_release.zip
+  * peach-pro-4.3.200-win_x64_release.zip
+  * peach-pro-4.3.200-win_x86_release.zip
+
+Peach PITs::
+  The `pits/` subfolder contains a zip for each pit.  The `pits/datasheets/` subfolder contains the PDF datasheets for all the pits.
+
+Peach SDK::
+  A single zip containing the sdk.  This zip supports all platforms and is an ancellary download to the binary.
+  For example, if the build is `v4.3.200`, the SDK zip will be named `peach-pro-4.3.200-sdk.zip`.
+
+Documentation::
+  While the documentation is included inside the release zips, a copy is included outside so users can easily download the files w/o having to get the entire release.
+  The pieces of documentation include:
+  * Client led trial (OVA) for ICS and network pits
+  * Hosted trial (AMI) for FileFormat, ICS, HealthCare and Network pits.
+  * User's Guide, Installation Guide and ChangeLog
+
+Trial OVA::
+  The target OVA for Peach trials that contains pre-instaled software intended to be used as the target of peach fuzzer.
+  This virtual machine contains target software, and the Peach Agent, but not Peach Fuzzer.
+
+Local License Server::
+  The local license server for linux and windows.
+
+=== Build Triggers
+
+There are three different build triggers used by peach-pro.
+The details are described below.
+
+ci_peach & ci_pits::
+  The continuous integration build is triggered with each commit to the peach-pro or pits repository.
+  When this build runs, the code is compiled with a buildtag of 0.0.0 and the Quick unit tests are run.
+  Release artifacts are not created with the CI build, and the compiled binaries are not preserved.
+
+nightly::
+  Every night the repository is checked for changes.
+  If changes are found, a complete integration is run.
+  The nightly integration build increments the version number, and compiles all the code.
+  After compilation, the Quick & Slow tests are run.
+  Finally, the release artifacts are generated (OVAs, Release Zips, etc).
+  The complete output of the build is preserved on the nas at `\\nas\builds\peach-pro\\{major}.{minor}\v{major}.{minor}.{build}`.
+ 
+manual::
+  The integration build can be manually run.
+  This is the *only* way to publish a build to the download site.
+  A manually triggered build works exactly as a nightly build with one small difference.
+  If no changes to the repository are detected, a manual build will still run.
+  A description of how to manually launch a build is described in the following section.
+
+=== Manually Launching
+
+To manually launch a build, navigate to
+http://jenkins.int.dejavusecurity.com/job/peach-pro/job/master/job/release/
+and click the "Build With Parameters" link.
+Modify any build parameters as desired and click the 'Build' button.
+The complete description of the build parameters are described below.
+
+config::
+  Default: `release` +
+   +
+  This parameter controls which build configuration (`debug` or `release`) to use when running the unit tests. +
+   +
+  If the `release` configuration is specified, the release artifacts will be generated.
+
+include_tests::
+  Default: `Quick,Slow` +
+   +
+  This parameter controls which unit tests to execute when running the build.
+  Available options are: +
+  * `Quick,Slow` to run the quick and slow unit tests
+  * `Quick` to run only the quick unit tests
+  * `__NONE__` to not run any unit tests
+
+publish::
+  Default: `un-checked` +
+   +
+  This parameter controls if the build will be published to the download site.
+
+clean::
+  Default: `checked` +
+   +
+  This parameter is used to determine if the workspace should be cleaned on the build servers
+  prior to running the build.
+
+=== Project Layout
+
+All builders are located in the `peach-pro/{branch}` folder on Jenkins.
+For the latest v4.3 releases, the `peach-pro/master` folder is to be used.
+
+build_docs::
+  This job compiles the documentation via the waf doc variant.
+
+build_peach::
+  This job compiles the Peach source code.
+  There are three configurations: windows, linux and OSX.
+  Each job configuration compiles the 32bit and 64bit builds for both debug and release.
+  
+build_pits::
+  After the `build_peach` job completes, this job uses the resulting artifacts to compile the pits repository.
+  
+ci_peach::
+  This job monitors for changes to the peach-pro repository and triggers the integration build after each commit.
+  The integration build is triggered in the `debug` configuration with buildtag `0.0.0`.
+
+ci_pits::
+  This job monitors for changes to the pits repository and triggers the integration build after each commit.
+  The integration build is triggered in the `debug` configuration with buildtag `0.0.0`.
+
+gump::
+  Gump is the integration test environment for the pits.
+  The gump job triggers the downstream jobs: gump-prepare and gump-ruin. +
+   +
+  NOTE: This builder is disabled in the current jenkins configuration.
+  
+gump-prepare::
+  This job performs all the preperation for running the actual gump tests. +
+   +
+  NOTE: This builder is disabled in the current jenkins configuration.
+
+gump-run::
+  This job has a configuration for each pit.
+  The integration tests are run in parallel across all gump build nodes. +
+   +
+  NOTE: This builder is disabled in the current jenkins configuration.
+
+integration::
+  This job performs the main integration build.
+  It compiles all the code and runs all the tests.
+  If run in the release configuration, it will produce the release artifacts.
+  The release artifacts include the trial OVA and AMI, as well as the
+  zips of Peach and the SDK that get published to the download site. +
+   +
+  To generate the release zips, a script is run to inject the documentation into
+  the zips for each peach build variant.  This allows the docs to be built once
+  while being added to the windows,linux and osx release zips.
+  The release phase also produces the SDK zip, which is just everything contained in the `sdk` folder of the repo. +
+   +
+  If the publish parameter is true, all the artifacts are rsynced to the builds folder on the download site.
+  
+release::
+  This is the main nightly build as well as the job that is manually started when a published build should be made.
+
+test_peach_fast::
+  This job runs the Quick unit tests.  The job has 5 configurations: osx, win-x86, win-64, linux-x86 and linux-x86_64.
+
+test_peach_slow::
+  This job runs the Quick & Slow unit tests.  The job has 5 configurations: osx, win-x86, win-64, linux-x86 and linux-x86_64.
+
+test_pits_fast::
+  This job runs the fast pit tests.  There is only a single configuration for the pit tests.
+
+test_pits_slow::
+  This job runs the fast and slow pit tests.  There is only a single configuration for the pit tests.
 
 == Submitting Pull Requests
 
@@ -40,18 +377,22 @@ accepted otherwise.
 
 Peach uses NLog for logging of debug/trace messages.
 
-Debug:: Debug messages should be used sparringly. Customers make use of --debug to identify issues in their pits. It's critical to keep this output sussinct, with only information needed by the end user displaying.
-Trace:: This is the log level that should be used for output mostly wanted by Peach developers or when diagnosing a possible problem, but not something the customer would want to always see.
+Debug::
+ Debug messages should be used sparringly.
+ Customers make use of --debug to identify issues in their pits.
+ It's critical to keep this output sussinct, with only information needed by the end user displaying.
+
+Trace::
+ This is the log level that should be used for output mostly wanted by Peach developers or when diagnosing a possible problem,
+ but not something the customer would want to always see.
 
 === Unit Tests
 
-All pull requests are required to have unit tests that provide reasonable coverage of all features.  NUnit is our unit testing
-framework.  Prior to submitting a pull request verify all Peach unit tests are passing.  If you have a question about a 
-unit test failure (is it expected or not) contact Seth or Frank on the Peach development team.
+All pull requests are required to have unit tests that provide reasonable coverage of all features.
+NUnit is our unit testing framework.
+Prior to submitting a pull request verify all Peach unit tests are passing. 
 
 === Documentation
 
-All shipping code features require product documentation. This could be new documentation for a fixup or similar being added
-or an update to existing documentation.  This should be co-ordinated with Mike and Richard.
-
-
+All shipping code features require product documentation.
+This could be new documentation for a fixup or similar being added or an update to existing documentation.
