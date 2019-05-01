@@ -358,6 +358,12 @@ test_pits_fast::
 test_pits_slow::
   This job runs the fast and slow pit tests.  There is only a single configuration for the pit tests.
 
+== Licensing
+
+The documentation for creating Peach Fuzzer licenses can be found in the file linked below.
+
+link:Licensing.adoc[Licensing]
+
 == Submitting Pull Requests
 
 *Guide Lines*
