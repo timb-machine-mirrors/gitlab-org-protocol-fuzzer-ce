@@ -6,7 +6,6 @@ using DomObject = Peach.Core.Dom.Dom;
 using WebAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Pro.Core.WebServices.Models;
 using System.Text;
-using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core
 {

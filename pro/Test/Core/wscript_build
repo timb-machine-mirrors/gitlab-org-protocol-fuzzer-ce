@@ -2,17 +2,10 @@
 
 deps = [
 	'BouncyCastle.Crypto.dll',
-	'FlexNet.Library.dll',
-	'FlexNet.Operations.dll',
-	'FlxClientCommon.dll',
-	'FlxLicensingClient.dll',
-	'komodo_net.dll',
-	'Managed.Adb.dll',
 	'Peach.Core.dll',
 	'Peach.Core.Test.dll',
 	'Peach.Pro.dll',
 	'Peach.Pro.PitTester.dll',
-	'Portable.Licensing.dll',
 	'Renci.SshNet.dll',
 	'System.dll',
 	'System.Configuration.dll',
@@ -26,7 +19,6 @@ deps = [
 ]
 
 pkgs = [
-	'Aspose.Words',
 	'Dapper',
 	'DotNetZip',
 	'Mono.Posix-4.5',

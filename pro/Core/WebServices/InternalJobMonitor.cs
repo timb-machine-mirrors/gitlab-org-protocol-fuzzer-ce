@@ -4,7 +4,6 @@ using Peach.Core;
 using Peach.Pro.Core.License;
 using Peach.Pro.Core.Runtime;
 using Peach.Pro.Core.Storage;
-using Peach.Pro.Core.WebApi;
 using Peach.Pro.Core.WebServices.Models;
 
 namespace Peach.Pro.Core.WebServices

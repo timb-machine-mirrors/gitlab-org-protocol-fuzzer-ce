@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Lextm.SharpSnmpLib.Messaging;
 using NLog;
 using Peach.Core;
 using Peach.Core.IO;

@@ -15,11 +15,6 @@ bld.read_nuget('packages.config', excl=excludes, mapping=mapping)
 # Be.HexBox is not nugetable yet
 bld.read_csshlib('Be.Windows.Forms.HexBox.dll', paths=['Be.HexEditor.150/bin'])
 
-flexnet = 'flexnet_client-2016.08'
-
-bld.read_csshlib('FlxClientCommon.dll', paths=[ flexnet ])
-bld.read_csshlib('FlxLicensingClient.dll', paths=[ flexnet ])
-
 if bld.env.CS_NAME != 'csc':
 	bld.read_csshlib('System.Data.SQLite.dll', paths=['System.Data.SQLite.Mono.1.0.98.1'])
 
@@ -43,20 +38,10 @@ else:
 	subdirs = [
 		'BouncyCastle/crypto',
 		'BouncyCastle/crypto/test',
-		'FlexNet.Operations-2016.R2',
 		'Google.CityHash',
-		'libusbdotnet',
-		'Managed.AndroidDebugBridge',
-		'PeakPcan',
 		'pin',
-		'Portable.Licensing',
 		'Renci.SshNet',
 		'sqlite-3.8.11.1',
-		'Titanium-Web-Proxy/Titanium.Web.Proxy',
-		'TotalPhase/aardvark',
-		'TotalPhase/komodo',
-		'VectorXL',
-		'VMware-VIX-1.13.0-1295980',
 	]
 
 	if bld.env.BASENAME == 'osx':

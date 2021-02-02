@@ -21,11 +21,6 @@ pp_parts = pp_props['RELEASE_VERSION'].split('.')
 pp_major = pp_parts[0]
 pp_minor = pp_parts[1]
 
-pw_props = load_properties('../peach-web.properties')
-pw_parts = pp_props['RELEASE_VERSION'].split('.')
-pw_major = pp_parts[0]
-pw_minor = pp_parts[1]
-
 guard :bundler do
 	watch('Gemfile')
 end
@@ -41,20 +36,6 @@ guard :shell do
 				-a BUILDTAG=#{pp_major}.#{pp_minor}.0.0 \
 				-a VER_MAJOR=#{pp_major} \
 				-a VER_MINOR=#{pp_minor} \
-				-a VER_BUILD=0 \
-				-a VER_BRANCH=0
-		)
-	}
-
-	watch(/^src.web\/.+\.adoc$/) {|m|
-		puts m[0] + " has changed."
-		%x(
-			asciidoctor \
-				src.web/UserGuide/UserGuide.adoc \
-				-a images=#{Dir.pwd}/src.web/images \
-				-a BUILDTAG=#{pw_major}.#{pw_minor}.0.0 \
-				-a VER_MAJOR=#{pw_major} \
-				-a VER_MINOR=#{pw_minor} \
 				-a VER_BUILD=0 \
 				-a VER_BRANCH=0
 		)

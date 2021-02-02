@@ -42,34 +42,8 @@ namespace Peach.Pro.Core.Runtime
 		protected void PrepareLicensing(string pitLibraryPath, bool forceActivation, bool deactivate = false)
 		{
 			var config = new LicenseConfig();
-			if (config.DetectConfig)
-			{
-				_logger.Trace("Using FlexeraLicense");
-				config.Validate();
-
-				var root = ResourceRoot.GetDefault(Path.GetFullPath(pitLibraryPath));
-				if (root == null)
-					throw new ApplicationException("Peach.Pro.Pits.dll could not be found.");
-
-				config.Manifest = PitResourceLoader.LoadManifest(root);
-				
-				_license = new FlexeraLicense(config, new FlexeraLicense.FlexeraOptions()
-				{
-					ForceActivation = forceActivation,
-					Deactivate = deactivate,
-					Retry = false
-				});
-
-				if (!_license.IsValid())
-					throw new ApplicationException(deactivate
-						? "Deactivation was successful."
-						: "The licence is invalid.");
-			}
-			else
-			{
-				_logger.Trace("Using PortableLicense");
-				_license = new PortableLicense();
-			}
+			_logger.Trace("Using NullLicense");
+			_license = new NullLicense();
 		}
 
 		public void LoadAssemblies()

@@ -17,7 +17,11 @@
 
 #undef _UNICODE                 // Use multibyte encoding on Windows
 #define _MBCS                   // Use multibyte encoding on Windows
+
+#ifndef _WIN32
 #define _INTEGRAL_MAX_BITS 64   // Enable _stati64() on Windows
+#endif
+
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS // Disable deprecation warning in VS2005+
 #endif

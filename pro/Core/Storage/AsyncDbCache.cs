@@ -407,8 +407,6 @@ namespace Peach.Pro.Core.Storage
 					{
 						Debug.Assert(Job.StopDate == now);
 						Job.Status = JobStatus.Stopped;
-						var report = db.GetReport(Job);
-						Reporting.SaveReportPdf(report);
 					}
 				}
 				catch (Exception ex)

@@ -40,9 +40,6 @@ namespace Peach.Pro.Core.Mutators
 
 		public new static bool supportedDataElement(DataElement obj)
 		{
-			if (obj is IJsonElement && obj.parent is JsonObject)
-					return false;
-
 			if (obj.isMutable && obj.parent != null && !(obj.parent is Choice) && !(obj is Flag) && !(obj is XmlAttribute) && obj.Value.LengthBits > 0)
 				return true;
 

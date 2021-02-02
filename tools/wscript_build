@@ -17,8 +17,3 @@ bld(
 	install_644 = files,
 )
 
-subdirs = [
-	'AsmVersion',
-]
-
-bld.recurse(subdirs)

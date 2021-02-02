@@ -6,12 +6,8 @@ using NLog;
 using Peach.Core;
 using Peach.Core.Analyzers;
 using Peach.Core.Dom;
-using Peach.Pro.Core.Dom.Actions;
-using Peach.Pro.Core.Dom.Actions.Web;
 using Peach.Pro.Core.Godel;
 using Peach.Pro.Core.License;
-using Peach.Pro.Core.WebApi;
-using Action = Peach.Core.Dom.Action;
 using Logger = NLog.Logger;
 using StateModel = Peach.Pro.Core.Godel.StateModel;
 
@@ -206,40 +202,9 @@ namespace Peach.Pro.Core
 			}
 		}
 
-		protected override Action handleAction(XmlNode node, State parent)
+		protected override Peach.Core.Dom.Action handleAction(XmlNode node, State parent)
 		{
 			var action = base.handleAction(node, parent);
-
-			if (action.type == "web")
-			{
-				if (!node.hasAttr("url"))
-					throw new PeachException("Error, Action of type 'web' must have a 'url' attribute.");
-				if (!node.hasAttr("method"))
-					throw new PeachException("Error, Action of type 'web' must have a 'method' attribute.");
-
-				var webAction = (WebAction) action;
-				webAction.Url = node.getAttrString("url");
-				webAction.Method = node.getAttrString("method");
-
-				foreach (XmlNode child in node)
-				{
-					if (child.Name == "Part")
-						handleActionPart(child, webAction);
-					else if (child.Name == "Response")
-						handleActionResponse(child, webAction);
-					else if (child.Name == "Path")
-						webAction.Paths.Add(ActionWebParameter.PitParser(this, child, webAction));
-					else if (child.Name == "Query")
-						webAction.Queries.Add(ActionWebParameter.PitParser(this, child, webAction));
-					else if (child.Name == "Header")
-						webAction.Headers.Add(ActionWebParameter.PitParser(this, child, webAction));
-					else if (child.Name == "FormData")
-						webAction.FormDatas.Add(ActionWebParameter.PitParser(this, child, webAction));
-					else if (child.Name == "Body")
-						webAction.Body = ActionWebParameter.PitParser(this, child, webAction);
-
-				}
-			}
 
 			foreach (XmlNode child in node)
 			{
@@ -250,68 +215,8 @@ namespace Peach.Pro.Core
 				}
 			}
 
-			var msg = action as Message;
-			if (msg != null)
-			{
-				msg.Status = node.getAttrString("status");
-				msg.Error = node.getAttrString("error");
-			}
-
 			return action;
 		}
-
-		protected void handleActionPart(XmlNode node, WebAction action)
-		{
-			var name = node.getAttrString("name");
-			var param = new ActionWebPart(name)
-			{
-				action = action
-			};
-
-			foreach (XmlNode child in node)
-			{
-				switch (child.Name)
-				{
-					case "Header":
-						var header = ActionWebParameter.PitParser(this, child, action);
-						header.PartName = name;
-						param.Headers.Add(header);
-						param.Parameter.Parameters.Add(header.Parameter);
-						break;
-					case "FormData":
-						var formData = ActionWebParameter.PitParser(this, child, action);
-						formData.PartName = name;
-						param.FormDatas.Add(formData);
-						param.Parameter.Parameters.Add(formData.Parameter);
-						break;
-					case "Body":
-						var body = ActionWebParameter.PitParser(this, child, action);
-						body.PartName = name;
-						param.Body = body;
-						param.Parameter.Parameters.Add(body.Parameter);
-						break;
-				}
-			}
-
-			action.Parts.Add(param);
-		}
-		protected void handleActionResponse(XmlNode node, WebAction action)
-		{
-			action.Response = new ActionWebResponse()
-			{
-				action = action
-			};
-
-			// Data model is not required.
-			if (node.ChildNodes.Count > 0)
-			{
-				action.Response.dataModel = null;
-				handleActionData(node, action.Response, "<Response> child of ", false);
-			}
-			else
-				action.Response.dataModel = new DataModel("NULL");
-		}
-
 
 		protected override State handleState(XmlNode node, Peach.Core.Dom.StateModel parent)
 		{

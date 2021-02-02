@@ -328,21 +328,7 @@ namespace Peach.Pro.WebApi2.Controllers
 		[SwaggerResponse(HttpStatusCode.NotFound, Description = "Specified job does not exist")]
 		public IHttpActionResult GetReport(Guid id)
 		{
-			return WithJobDatabase(id, (job, db) =>
-			{
-				if (job.Status != JobStatus.Stopped)
-					return NotFound();
-
-				var file = new FileInfo(job.ReportPath);
-				if (!file.Exists)
-				{
-					var report = db.GetReport(job);
-					Reporting.SaveReportPdf(report);
-					file = new FileInfo(job.ReportPath);
-				}
-
-				return new FileResult(file);
-			});
+			throw new NotImplementedException("Reporting is not available in the CE version");
 		}
 
 		#endregion

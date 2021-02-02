@@ -16,7 +16,6 @@ using MAgent = Peach.Pro.Core.WebServices.Models.Agent;
 using Peach.Core.Test;
 using Peach.Pro.Core.License;
 using Moq;
-using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Test.Core.WebServices
 {

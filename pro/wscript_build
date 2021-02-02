@@ -3,16 +3,9 @@
 subdirs = [
 	'ComContainer',
 	'Core',
-	'FlexNet/Library',
-	'FlexNet/Tool',
 	'OS/UnixTrampoline',
 	'Peach',
 	'PeachAgent',
-	'PeachCanInfo',
-	'PeachCanTool',
-	'PeachCanDbViewer',
-	'PeachPcapTool',
-	'PeachWebRecorder',
 	'PitTester',
 	'PitTool',
 	'Service',
@@ -37,9 +30,6 @@ subdirs = [
 	'Worker',
 	'XmlGenerator',
 ]
-
-if bld.env.BASENAME == 'web':
-	subdirs = [ 'Core' ]
 
 bld.recurse(subdirs)
 

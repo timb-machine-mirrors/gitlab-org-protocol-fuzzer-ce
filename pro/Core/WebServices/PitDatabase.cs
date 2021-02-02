@@ -15,7 +15,6 @@ using Encoding = System.Text.Encoding;
 using File = System.IO.File;
 using Newtonsoft.Json;
 using Peach.Pro.Core.License;
-using Peach.Pro.Core.WebApi;
 
 namespace Peach.Pro.Core.WebServices
 {

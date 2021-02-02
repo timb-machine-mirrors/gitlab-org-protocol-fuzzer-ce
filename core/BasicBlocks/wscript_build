@@ -10,6 +10,7 @@ def make_bld(tgt, variant):
 	clone['DEFINES_debug'] = []
 
 	if bld.env.DEST_OS is 'win32':
+		clone['CPPFLAGS'].append("/Wv:18")
 		clone['LINKFLAGS'].append('/ignore:4281')
 
 	bld(
