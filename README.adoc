@@ -1,6 +1,11 @@
 :toc:
 
-= Peach Fuzzer Professional
+= GitLab Protocol Fuzzer Community Edition
+
+This project is based on Peach Fuzzer Professional v4 which was aquired by GitLab in 2020. Some features of Peach Fuzzer Profession were removed and will be made available to GitLab Ultimate users in the future. This project replaces the Peach Fuzzer Community projects hosted on GitLab and also Source Forge.
+
+Please follow the local build instructions until binaries are made available.
+
 
 == Repo Layout
 
@@ -13,8 +18,6 @@ core::
   Common classes and interfaces between OSS and closed source Peach.
 docs::
   All documentation for the user's guide, developer guide and trial guides.
-flexnetls::
-  The artifacts needed to create the local license server installation zips.
 packer::
   The template and scripts used by packer (https://packer.io) to generate
   the hosted trial AMI and on-prem trial OVA.
@@ -366,11 +369,6 @@ test_pits_fast::
 test_pits_slow::
   This job runs the fast and slow pit tests.  There is only a single configuration for the pit tests.
 
-== Licensing
-
-The documentation for creating Peach Fuzzer licenses can be found in the file linked below.
-
-link:Licensing.adoc[Licensing]
 
 == Submitting Pull Requests
 
