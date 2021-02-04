@@ -2,7 +2,7 @@
 
 = GitLab Protocol Fuzzer Community Edition
 
-This project is based on Peach Fuzzer Professional v4 which was aquired by GitLab in 2020. Some features of Peach Fuzzer Profession were removed and will be made available to GitLab Ultimate users in the future. This project replaces the Peach Fuzzer Community projects hosted on GitLab and also Source Forge.
+This project is based on Peach Fuzzer Professional v4 which was https://about.gitlab.com/press/releases/2020-06-11-gitlab-acquires-peach-tech-and-fuzzit-to-expand-devsecops-offering.html[aquired by GitLab] in 2020. Some features of Peach Fuzzer Profession were removed and will be made available as part of GitLab in the future. This project replaces the Peach Fuzzer Community projects hosted on GitLab and also Source Forge.
 
 Please follow the local build instructions until binaries are made available.
 
