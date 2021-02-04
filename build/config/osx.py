@@ -13,7 +13,7 @@ tools = [
 	'resx',
 	'tools.utils',
 	'tools.externals',
-	'tools.tsc',
+	#'tools.tsc',
 	'tools.version',
 	'tools.paket',
 ]
@@ -47,6 +47,11 @@ def prepare(conf):
 	env['MCS']  = 'mcs'
 
 	env['SYSROOT'] = find_directory([ 
+		'MacOSX11.1.sdk', # Big Sur
+		'MacOSX10.16.sdk', 
+		'MacOSX10.15.sdk', 
+		'MacOSX10.14.sdk', 
+		'MacOSX10.13.sdk', 
 		'MacOSX10.12.sdk', 
 		'MacOSX10.11.sdk', 
 		'MacOSX10.10.sdk', 
@@ -63,10 +68,10 @@ def prepare(conf):
 	# Reported issues compiling pin using XCode 4.0 on 10.6
 	# Figure out a better check for clang version on 10.6
 	# For now, just skip all pin tools
-	if '10.6' in env['SYSROOT']:
+        if '10.6' in env['SYSROOT']:
 		return
 
-	env['PIN_VER'] = 'pin-3.2-81205-clang-mac'
+	env['PIN_VER'] = 'pin-3.17-98314-g0c048d619-clang-mac'
 
 	pin = j(conf.get_third_party(), 'pin', env['PIN_VER'])
 
@@ -88,36 +93,25 @@ def prepare(conf):
 				'-isystem', j(pin, 'extras', 'libstdc++', 'include'),
 				'-isystem', j(pin, 'extras', 'crt', 'include'),
 
-				'-Xarch_i386',   '-isystem %s' % j(pin, 'extras', 'crt', 'include', 'arch-x86'),
-				'-Xarch_x86_64', '-isystem %s' % j(pin, 'extras', 'crt', 'include', 'arch-x86_64'),
+				'-isystem %s' % j(pin, 'extras', 'crt', 'include', 'arch-x86_64'),
 
 				'-isystem', j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi'),
 				'-isystem', j(pin, 'extras', 'crt', 'include', 'kernel', 'uapi', 'asm-x86'),
 
-				'-Xarch_i386',   '-DTARGET_IA32',
-				'-Xarch_i386',   '-DHOST_IA32',
-				'-Xarch_i386',   '-I%s' % j(pin, 'extras', 'xed-ia32', 'include', 'xed'),
-
-				'-Xarch_x86_64', '-DTARGET_IA32E',
-				'-Xarch_x86_64', '-DHOST_IA32E',
-				'-Xarch_x86_64', '-I%s' % j(pin, 'extras', 'xed-intel64', 'include', 'xed'),
+				'-DTARGET_IA32E',
+				'-DHOST_IA32E',
+				'-I%s' % j(pin, 'extras', 'xed-intel64', 'include', 'xed'),
 			],
 			'LINKFLAGS' : [
-				'-Xarch_i386',   j(pin, 'ia32', 'runtime', 'pincrt', 'crtbeginS.o'),
-				'-Xarch_x86_64', j(pin, 'intel64', 'runtime', 'pincrt', 'crtbeginS.o'),
+				j(pin, 'intel64', 'runtime', 'pincrt', 'crtbeginS.o'),
 
 				'-w',
 				'-Wl,-exported_symbols_list,%s/source/include/pin/pintool.exp' % pin,
 
-				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'runtime', 'pincrt'),
-				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'lib'),
-				'-Xarch_i386',   '-L%s' % j(pin, 'ia32', 'lib-ext'),
-				'-Xarch_i386',   '-L%s' % j(pin, 'extras', 'xed-ia32', 'lib'),
-
-				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'runtime', 'pincrt'),
-				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'lib'),
-				'-Xarch_x86_64', '-L%s' % j(pin, 'intel64', 'lib-ext'),
-				'-Xarch_x86_64', '-L%s' % j(pin, 'extras', 'xed-intel64', 'lib'),
+				'-L%s' % j(pin, 'intel64', 'runtime', 'pincrt'),
+				'-L%s' % j(pin, 'intel64', 'lib'),
+				'-L%s' % j(pin, 'intel64', 'lib-ext'),
+				'-L%s' % j(pin, 'extras', 'xed-intel64', 'lib'),
 
 				'-lpin',       '-lxed',             '-lpin3dwarf',
 				'-nostdlib',   '-lstlport-dynamic', '-lm-dynamic',
@@ -133,8 +127,8 @@ def prepare(conf):
 	env['ASAN_CC'] = 'clang-3.6'
 	env['ASAN_CXX'] = 'clang++-3.6'
 
-	env['MKBUNDLE_AS'] = 'as -arch i386'
-	env['MKBUNDLE_CC'] = 'cc -arch i386 -framework CoreFoundation -lobjc -liconv'
+	env['MKBUNDLE_AS'] = 'as -arch x86_64'
+	env['MKBUNDLE_CC'] = 'cc -arch x86_64_-framework CoreFoundation -lobjc -liconv'
 	env['MKBUNDLE_PKG_CONFIG_PATH'] = '/Library/Frameworks/Mono.framework/Versions/Current/lib/pkgconfig'
 
 	env['RUN_NETFX'] = 'mono'
@@ -189,19 +183,17 @@ def configure(conf):
 	env['CSDOC'] = True
 
 	arch_flags = [
-		'-mmacosx-version-min=10.6',
+		'-mmacosx-version-min=10.7',
 		'-isysroot',
 		env.SYSROOT,
-		'-arch',
-		'i386',
 		'-arch',
 		'x86_64',
 	]
 
 	cppflags = [
 		'-pipe',
-		'-Werror',
-		'-Wno-unused',
+		#'-Werror',
+		#'-Wno-unused',
 	]
 
 	cppflags_debug = [
