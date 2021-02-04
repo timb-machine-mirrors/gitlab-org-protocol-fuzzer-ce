@@ -73,7 +73,8 @@ they typically just contain the next list of sub directories to recurse into.
  * doxygen, java, xmllint, xsltprocx
  * .NET Framework 4.6.1
  * Visual Studio 2015 or 2017 with C++ compilers
- * TypeScript Compiler (tsc)
+ * TypeScript Compiler (tsc) v2.8
+ * Download Intel Pin (see 3rdParty/pin/README.md)
  
 Add the following two registry entries via PowerShell:
 
@@ -92,7 +93,8 @@ new-itemproperty -path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.
  * ruby 2.3
  * doxygen, java, xmllint, xsltproc
  * mono-complete v4.8.1
- * nodejs and tsc
+ * nodejs and tsc v2.8
+ * Download Intel Pin (see 3rdParty/pin/README.md)
 
 === Build Commands
 
