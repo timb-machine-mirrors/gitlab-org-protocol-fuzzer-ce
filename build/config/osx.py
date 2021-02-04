@@ -166,7 +166,7 @@ def configure(conf):
 		'/sdk:4.5',
 		'/warn:4',
 		'/define:PEACH,UNIX,MONO',
-		'/warnaserror',
+		#'/warnaserror',
 		'/nowarn:1591', # Missing XML comment for publicly visible type
 	])
 
@@ -183,7 +183,7 @@ def configure(conf):
 	env['CSDOC'] = True
 
 	arch_flags = [
-		'-mmacosx-version-min=10.7',
+		'-mmacosx-version-min=10.9',
 		'-isysroot',
 		env.SYSROOT,
 		'-arch',

@@ -45,7 +45,7 @@ struct StaticAssert {};
 template <>
 struct StaticAssert<true>
 {
-	static void assert() {}
+	static void asserter();
 };
 
 class NonCopyable
@@ -523,8 +523,10 @@ VOID ThreadProc(VOID *v)
 int main(int argc, char* argv[])
 {
 	// Expect size_t and ADDRINT to be the same
-	StaticAssert<sizeof(size_t) == sizeof(ADDRINT)>::assert();
+//	StaticAssert<sizeof(size_t) == sizeof(ADDRINT)>::asserter();
 
+    std::cout << "sizeof(size_t)" << sizeof(size_t) << std::endl;
+    std::cout << "sizeof(ADDRINT)" << sizeof(ADDRINT) << std::endl;
 	// Ensure library initializes correctly
 	if (PIN_Init(argc, argv))
 		return Usage();
