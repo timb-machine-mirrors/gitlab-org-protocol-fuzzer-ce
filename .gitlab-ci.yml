@@ -22,7 +22,7 @@ builder:
         
         - apt-get install -y -qq default-jdk
         - apt-get install -y -qq doxygen
-        - apt-get install -y -qq xmllint
+        - apt-get install -y -qq libxml2-utils
         - apt-get install -y -qq xsltproc
 
         
