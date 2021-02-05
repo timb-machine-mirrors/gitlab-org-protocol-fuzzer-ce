@@ -4,6 +4,10 @@
 
 This project is based on Peach Fuzzer Professional v4 which was https://about.gitlab.com/press/releases/2020-06-11-gitlab-acquires-peach-tech-and-fuzzit-to-expand-devsecops-offering.html[aquired by GitLab] in 2020. Some features of Peach Fuzzer Profession were removed and will be made available as part of GitLab in the future. This project replaces the Peach Fuzzer Community projects hosted on GitLab and also Source Forge.
 
+As this code was originally developed by Peach Tech, there may be references throughout the repo to personnel, email addresses, 
+websites, or capabilities specific to Peach Tech. These will be updated over time to refer to GitLab. If you find one, feel free to 
+open an MR to ask for clarification and/or update it.
+
 Please follow the local build instructions until binaries are made available.
 
 
@@ -183,208 +187,16 @@ For all commands except configure, the following options are supported:
    Only running a single task at a time can sometimes help with troubleshooting build errors.
  * `waf --help` will display the full list of supported commands and options.
 
-== Integration Build
-
-=== Overview
-
-The integration build is performed via jenkins at http://jenkins.int.dejavusecurity.com
-The rules for the integration are codified in the `jenkins.groovy` file located in the root of the repository.
-The jenkins job `seeders/peach-pro` is configured to execute the groovy file,
-which will cause jenkins to generate the integration build project for peach-pro.
-
-If changes need to be made to the integration build steps, first modify `jenkins.groovy`
-then navigate to http://jenkins.int.dejavusecurity.com/job/seeders/job/peach-pro/ and click the 'Scan Project Now'.
-The integration build steps will be re-created with the corresponding changes.
-
-=== Release Artifacts
-
-Upon successful completion of the integration build, a set of release artifacts will be generated.
-These artifacts are saved on the nas, and if the build is to be published,
-all of the artifacts are rsynced to the Peach download site.
-
-The directory structure for the nas is the same as for the download site.
-Builds should will be stored in the folder `{major}.{minor}/v{major}.{minor}.{build}`.
-For example, build `4.3.200` will be saved to the folder `4.3/v4.3.200`.
-A description of the various build artifacts is described below.
-
-Release Manifest::
-  The release manifest is stored in `release.json`.  This file is used by the download site
-  to enable downloading of the release.  It contains the list of all pits, their corresponding zips, as well as the various peach release zips.
-
-Peach Zips::
-  These zips contain the actual peach fuzzer binaries.  There are 5 zips and they are named according to tbe buildtag and the architecture they support.
-  For build `4.3.200` the 5 files will be:
-  * peach-pro-4.3.200-linux_x86_64_release.zip
-  * peach-pro-4.3.200-linux_x86_release.zip
-  * peach-pro-4.3.200-osx_release.zip
-  * peach-pro-4.3.200-win_x64_release.zip
-  * peach-pro-4.3.200-win_x86_release.zip
-
-Peach PITs::
-  The `pits/` subfolder contains a zip for each pit.  The `pits/datasheets/` subfolder contains the PDF datasheets for all the pits.
-
-Peach SDK::
-  A single zip containing the sdk.  This zip supports all platforms and is an ancellary download to the binary.
-  For example, if the build is `v4.3.200`, the SDK zip will be named `peach-pro-4.3.200-sdk.zip`.
-
-Documentation::
-  While the documentation is included inside the release zips, a copy is included outside so users can easily download the files w/o having to get the entire release.
-  The pieces of documentation include:
-  * Client led trial (OVA) for ICS and network pits
-  * Hosted trial (AMI) for FileFormat, ICS, HealthCare and Network pits.
-  * User's Guide, Installation Guide and ChangeLog
-
-Trial OVA::
-  The target OVA for Peach trials that contains pre-instaled software intended to be used as the target of peach fuzzer.
-  This virtual machine contains target software, and the Peach Agent, but not Peach Fuzzer.
-
-Local License Server::
-  The local license server for linux and windows.
-
-=== Build Triggers
-
-There are three different build triggers used by peach-pro.
-The details are described below.
-
-ci_peach & ci_pits::
-  The continuous integration build is triggered with each commit to the peach-pro or pits repository.
-  When this build runs, the code is compiled with a buildtag of 0.0.0 and the Quick unit tests are run.
-  Release artifacts are not created with the CI build, and the compiled binaries are not preserved.
-
-nightly::
-  Every night the repository is checked for changes.
-  If changes are found, a complete integration is run.
-  The nightly integration build increments the version number, and compiles all the code.
-  After compilation, the Quick & Slow tests are run.
-  Finally, the release artifacts are generated (OVAs, Release Zips, etc).
-  The complete output of the build is preserved on the nas at `\\nas\builds\peach-pro\\{major}.{minor}\v{major}.{minor}.{build}`.
- 
-manual::
-  The integration build can be manually run.
-  This is the *only* way to publish a build to the download site.
-  A manually triggered build works exactly as a nightly build with one small difference.
-  If no changes to the repository are detected, a manual build will still run.
-  A description of how to manually launch a build is described in the following section.
-
-=== Manually Launching
-
-To manually launch a build, navigate to
-http://jenkins.int.dejavusecurity.com/job/peach-pro/job/master/job/release/
-and click the "Build With Parameters" link.
-Modify any build parameters as desired and click the 'Build' button.
-The complete description of the build parameters are described below.
-
-config::
-  Default: `release` +
-   +
-  This parameter controls which build configuration (`debug` or `release`) to use when running the unit tests. +
-   +
-  If the `release` configuration is specified, the release artifacts will be generated.
-
-include_tests::
-  Default: `Quick,Slow` +
-   +
-  This parameter controls which unit tests to execute when running the build.
-  Available options are: +
-  * `Quick,Slow` to run the quick and slow unit tests
-  * `Quick` to run only the quick unit tests
-  * `__NONE__` to not run any unit tests
-
-publish::
-  Default: `un-checked` +
-   +
-  This parameter controls if the build will be published to the download site.
-
-clean::
-  Default: `checked` +
-   +
-  This parameter is used to determine if the workspace should be cleaned on the build servers
-  prior to running the build.
-
-=== Project Layout
-
-All builders are located in the `peach-pro/{branch}` folder on Jenkins.
-For the latest v4.3 releases, the `peach-pro/master` folder is to be used.
-
-build_docs::
-  This job compiles the documentation via the waf doc variant.
-
-build_peach::
-  This job compiles the Peach source code.
-  There are three configurations: windows, linux and OSX.
-  Each job configuration compiles the 32bit and 64bit builds for both debug and release.
-  
-build_pits::
-  After the `build_peach` job completes, this job uses the resulting artifacts to compile the pits repository.
-  
-ci_peach::
-  This job monitors for changes to the peach-pro repository and triggers the integration build after each commit.
-  The integration build is triggered in the `debug` configuration with buildtag `0.0.0`.
-
-ci_pits::
-  This job monitors for changes to the pits repository and triggers the integration build after each commit.
-  The integration build is triggered in the `debug` configuration with buildtag `0.0.0`.
-
-gump::
-  Gump is the integration test environment for the pits.
-  The gump job triggers the downstream jobs: gump-prepare and gump-ruin. +
-   +
-  NOTE: This builder is disabled in the current jenkins configuration.
-  
-gump-prepare::
-  This job performs all the preperation for running the actual gump tests. +
-   +
-  NOTE: This builder is disabled in the current jenkins configuration.
-
-gump-run::
-  This job has a configuration for each pit.
-  The integration tests are run in parallel across all gump build nodes. +
-   +
-  NOTE: This builder is disabled in the current jenkins configuration.
-
-integration::
-  This job performs the main integration build.
-  It compiles all the code and runs all the tests.
-  If run in the release configuration, it will produce the release artifacts.
-  The release artifacts include the trial OVA and AMI, as well as the
-  zips of Peach and the SDK that get published to the download site. +
-   +
-  To generate the release zips, a script is run to inject the documentation into
-  the zips for each peach build variant.  This allows the docs to be built once
-  while being added to the windows,linux and osx release zips.
-  The release phase also produces the SDK zip, which is just everything contained in the `sdk` folder of the repo. +
-   +
-  If the publish parameter is true, all the artifacts are rsynced to the builds folder on the download site.
-  
-release::
-  This is the main nightly build as well as the job that is manually started when a published build should be made.
-
-test_peach_fast::
-  This job runs the Quick unit tests.  The job has 5 configurations: osx, win-x86, win-64, linux-x86 and linux-x86_64.
-
-test_peach_slow::
-  This job runs the Quick & Slow unit tests.  The job has 5 configurations: osx, win-x86, win-64, linux-x86 and linux-x86_64.
-
-test_pits_fast::
-  This job runs the fast pit tests.  There is only a single configuration for the pit tests.
-
-test_pits_slow::
-  This job runs the fast and slow pit tests.  There is only a single configuration for the pit tests.
-
-
-== Submitting Pull Requests
+== Submitting Merge Requests
 
 *Guide Lines*
 
-. Code must be owned by Deja vu Security or Peach Fuzzer, LLC. In the case of work for hire contract this may not be possible.
-. Copyright must be granted to Peach Fuzzer, LLC
 . Unit tests must be provided with pull request
 . Correct use of logging
-. All pull requests will go through a source code review
+. All merge requests will go through a source code review
 
-Make sure the Peach Team and specifically Michael Eddington is aware of any deadlines for getting 
-pull requests accepted. For instance, if delivery of the fuzzers to an end client requires the pull request 
-being accepted and a new build pushed.  It's not uncommon for pull requests to take several months to be 
+Make sure the Peach Team and specifically @mikeeddington is aware of any deadlines for getting 
+merge requests accepted. It's not uncommon for merge requests to take several months to be 
 accepted otherwise.
 
 === Logging
