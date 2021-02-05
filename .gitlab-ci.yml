@@ -1,0 +1,18 @@
+image: ubuntu:14.04
+
+stages:
+    - build
+
+builder:
+    stage:
+        build
+    script:
+        - apt-get update -qq && apt-get install -y -qq gcc g++ g++-multilib python ruby mono-complete nodejs tsc
+        - ./waf configure
+        - ./waf build
+        - ./waf install
+    artifacts:
+        untracked: false
+        expire_in: 30 days
+        paths:
+            - output/
