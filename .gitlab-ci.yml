@@ -1,4 +1,4 @@
-image: ubuntu:14.04
+image: ubuntu:16.04
 
 stages:
     - build
@@ -7,7 +7,32 @@ builder:
     stage:
         build
     script:
-        - apt-get update -qq && apt-get install -y -qq gcc g++ g++-multilib python ruby mono-complete nodejs tsc
+        - apt-get update -qq
+        - apt-get install -y -qq gcc
+        - apt-get install -y -qq g++
+        - apt-get install -y -qq g++-multilib
+
+        - apt-get install -y -qq python
+        - apt-get install -y -qq ruby
+
+        - apt-get install -y -qq nodejs
+        - npm install -g typescript@2.8
+        
+        - apt-get install -y -qq default-jdk
+        - apt-get install -y -qq doxygen
+        - apt-get install -y -qq xmllint
+        - apt-get install -y -qq xsltproc
+
+        
+        - apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+        - apt install apt-transport-https ca-certificates
+        - echo "deb https://download.mono-project.com/repo/ubuntu stable-xenial/snapshots/4.8.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+        - apt update -qq
+        - apt-get install -y -qq mono-complete
+
+        - curl https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.17-98314-g0c048d619-gcc-linux.tar.gz > 3rdParty/pin/pin.zip
+        - cd 3rdParty/pin && unzip pin.zip
+        
         - ./waf configure
         - ./waf build
         - ./waf install
