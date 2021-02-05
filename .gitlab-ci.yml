@@ -35,7 +35,7 @@ builder:
         - curl https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.17-98314-g0c048d619-gcc-linux.tar.gz > 3rdParty/pin/pin.zip
         - cd 3rdParty/pin && tar xf pin.zip && cd ../..
         
-        - ./waf configure
+        - ./waf configure -v
         - ./waf build
         - ./waf install
     artifacts:
