@@ -88,7 +88,7 @@ VOID Instruction(INS ins, void *v)
 {
 	v;
 
-	if (INS_IsBranchOrCall(ins)) 
+	if (INS_IsBranch(ins) || INS_IsCall(ins)) 
 	{
 		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) handleInsertCall,
 			IARG_INST_PTR,
